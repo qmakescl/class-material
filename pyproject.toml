@@ -1,0 +1,7 @@
+[project]
+name = "class-material"
+version = "0.1.0"
+description = "Static class materials published with GitHub Pages"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []

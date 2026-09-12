@@ -1,0 +1,1877 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>확률에 대하여</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&amp;family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bench:#ECEFE9;
+  --card:#F7F8F5;
+  --ink:#16201C;
+  --soft:#5A6862;
+  --line:#CBD2CA;
+  --violet:#4A3A7A;
+  --safranin:#BF3450;
+  --amber:#B8791F;
+  --blue:#2A6F8E;
+  --rail:250px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bench); color:var(--ink);
+  font-family:"IBM Plex Sans KR",-apple-system,BlinkMacSystemFont,sans-serif;
+  font-weight:350; line-height:1.75; letter-spacing:-0.01em;
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ── 좌측 레일 ───────────────────────────── */
+.rail{
+  position:fixed; left:0; top:0; bottom:0; width:var(--rail);
+  background:var(--ink); color:#DDE4DE; padding:34px 0 20px;
+  display:flex; flex-direction:column; z-index:50; overflow-y:auto;
+}
+.rail h1{
+  font-family:"Gowun Batang",serif; font-size:23px; font-weight:700;
+  margin:0 26px 30px; line-height:1.4; color:#F4F7F2; letter-spacing:-0.01em;
+}
+.rail nav{display:flex; flex-direction:column}
+.rail a{
+  display:grid; grid-template-columns:28px 1fr; gap:10px; align-items:baseline;
+  padding:11px 24px; color:#B6C3BB; text-decoration:none; font-size:13.5px;
+  border-left:3px solid transparent; transition:.16s; cursor:pointer;
+}
+.rail a b{font-variant-numeric:tabular-nums; font-weight:600; color:#6E8077; font-size:12px}
+.rail a:hover{background:#1F2B26; color:#fff}
+.rail a.on{background:#1F2B26; color:#fff; border-left-color:var(--amber)}
+.rail a.on b{color:var(--amber)}
+.rail .mins{display:block; font-size:11px; color:#6E8077; font-weight:300}
+.rail footer{margin-top:auto; padding:20px 24px 0; font-size:11.5px; color:#6E8077; line-height:1.6}
+
+main{margin-left:var(--rail); padding:0 46px 120px; max-width:1060px}
+
+/* ── 히어로 ───────────────────────────── */
+.hero{padding:76px 0 52px; border-bottom:1px solid var(--line)}
+.hero h2{
+  font-family:"Gowun Batang",serif; font-weight:700; font-size:clamp(30px,4vw,46px);
+  line-height:1.32; margin:0 0 20px; letter-spacing:-0.02em; max-width:17em;
+}
+.hero p{max-width:46em; font-size:15.5px; color:var(--soft); margin:0 0 8px}
+.heroplate{display:flex; gap:30px; align-items:center; flex-wrap:wrap; margin-top:34px}
+.heroplate canvas{border-radius:4px; background:var(--card); border:1px solid var(--line)}
+.heroplate .legend{font-size:13px; line-height:2}
+.hero-answer{margin:24px 0 0; border-left:0; padding-left:0}
+.hero-answer summary{display:inline-block; color:var(--ink); border:1px solid var(--line); border-radius:4px; padding:8px 13px}
+.hero-answer[open] summary{margin-bottom:4px}
+.swatch{display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:8px; vertical-align:-1px}
+
+/* ── 섹션 ───────────────────────────── */
+section{padding:66px 0 10px; border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+.tag{
+  display:inline-block; font-size:12px; font-weight:600; color:var(--amber);
+  font-variant-numeric:tabular-nums; margin-bottom:10px;
+}
+section h3{
+  font-family:"Gowun Batang",serif; font-size:29px; font-weight:700;
+  margin:0 0 6px; letter-spacing:-0.02em; line-height:1.4;
+}
+section .goal{font-size:14px; color:var(--soft); margin:0 0 26px; max-width:44em}
+p{max-width:44em}
+
+/* ── 패널 ───────────────────────────── */
+.panel{
+  background:var(--card); border:1px solid var(--line); border-radius:5px;
+  padding:26px 28px; margin:22px 0;
+}
+.panel > h4{margin:0 0 4px; font-size:15.5px; font-weight:600; letter-spacing:-0.01em}
+.panel > .hint{margin:0 0 20px; font-size:13px; color:var(--soft); max-width:46em}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:28px}
+.grid-ctrl{display:grid; grid-template-columns:300px 1fr; gap:32px; align-items:start}
+@media(max-width:900px){.grid2,.grid-ctrl{grid-template-columns:1fr}}
+
+/* ── 수식 ───────────────────────────── */
+.math{
+  font-family:"Gowun Batang",serif; font-size:16px; text-align:center;
+  background:#E9EDE7; border-radius:4px; padding:14px 16px; margin:14px 0;
+  line-height:1.9; letter-spacing:0;
+}
+.math .note{display:block; font-family:"IBM Plex Sans KR"; font-size:12px; color:var(--soft); margin-top:4px}
+.defs{font-size:13.5px; margin:0; padding:0; list-style:none}
+.defs li{padding:10px 0; border-bottom:1px dashed var(--line)}
+.defs li:last-child{border-bottom:0}
+.defs b{font-family:"Gowun Batang",serif; font-size:16px; margin-right:9px; color:var(--violet)}
+
+/* ── 컨트롤 ───────────────────────────── */
+.ctl{margin-bottom:17px}
+.ctl label{display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px; gap:12px}
+.ctl label span{color:var(--soft)}
+.ctl label var{
+  font-style:normal; font-weight:600; font-variant-numeric:tabular-nums;
+  color:var(--ink); background:#E3E8E1; padding:1px 8px; border-radius:3px; font-size:12.5px;
+}
+input[type=range]{width:100%; accent-color:var(--violet); height:22px; cursor:pointer}
+input[type=range]:focus-visible{outline:2px solid var(--blue); outline-offset:3px}
+button{
+  font-family:inherit; font-size:13.5px; font-weight:500; cursor:pointer;
+  background:var(--ink); color:#F2F5F0; border:0; border-radius:4px;
+  padding:9px 17px; transition:.15s;
+}
+button:hover{background:var(--violet)}
+button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
+button.ghost{background:transparent; color:var(--ink); border:1px solid var(--line)}
+button.ghost:hover{background:#E3E8E1; color:var(--ink)}
+button.ghost.on{background:var(--ink); color:#F2F5F0; border-color:var(--ink)}
+.btnrow{display:flex; gap:9px; flex-wrap:wrap; margin-top:6px}
+.opsrow{display:flex; gap:7px; flex-wrap:wrap; margin-bottom:16px}
+.opsrow button{font-family:"Gowun Batang",serif; font-size:15px; padding:7px 14px}
+
+canvas{display:block; max-width:100%}
+
+/* ── 결과 판 ───────────────────────────── */
+.readout{
+  background:#E9EDE7; border-radius:4px; padding:16px 18px; margin-top:16px;
+  font-size:13.5px; line-height:1.85;
+}
+.readout .big{
+  font-family:"Gowun Batang",serif; font-size:34px; font-weight:700;
+  font-variant-numeric:tabular-nums; display:block; line-height:1.2; margin-bottom:2px;
+}
+.readout em{font-style:normal; color:var(--safranin); font-weight:600}
+table{border-collapse:collapse; width:100%; font-size:13.5px; margin-top:8px}
+th,td{text-align:left; padding:7px 10px; border-bottom:1px solid var(--line)}
+th{font-weight:600; color:var(--soft); font-size:12.5px}
+td.n{text-align:right; font-variant-numeric:tabular-nums; font-weight:500}
+td.f{font-family:"Gowun Batang",serif; font-size:15px}
+.ok{color:#3D7A4E; font-weight:600}
+.bad{color:var(--safranin); font-weight:600}
+
+/* ── 멱집합 칩 ───────────────────────────── */
+.chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px}
+.chip{
+  font-family:"Gowun Batang",serif; font-size:14px; background:#fff;
+  border:1px solid var(--line); border-radius:3px; padding:5px 10px;
+  cursor:pointer; color:var(--ink); transition:.12s; white-space:nowrap;
+}
+.chip:hover{border-color:var(--violet)}
+.chip.selA{background:var(--violet); color:#fff; border-color:var(--violet)}
+.chip.selB{background:var(--blue); color:#fff; border-color:var(--blue)}
+.chip.res{box-shadow:0 0 0 2px var(--amber); border-color:var(--amber)}
+
+/* ── 퀴즈 ───────────────────────────── */
+.q{border-top:1px solid var(--line); padding:20px 0}
+.q:first-of-type{border-top:0; padding-top:4px}
+.q .stem{font-weight:500; margin:0 0 12px; font-size:14.5px; max-width:44em}
+.q .stem b{color:var(--amber); font-weight:600; margin-right:7px; font-variant-numeric:tabular-nums}
+.opt{
+  display:block; width:100%; text-align:left; background:#fff; border:1px solid var(--line);
+  border-radius:4px; padding:10px 14px; margin-bottom:7px; font-size:13.5px;
+  cursor:pointer; color:var(--ink); font-family:inherit; line-height:1.6; transition:.13s;
+}
+.opt:hover:not(:disabled){border-color:var(--violet); background:#F0EDF6}
+.opt:disabled{cursor:default}
+.opt.right{background:#E4EFE6; border-color:#4C8A5C; font-weight:500}
+.opt.wrong{background:#F7E6E9; border-color:var(--safranin); text-decoration:line-through; color:var(--soft)}
+.exp{
+  display:none; font-size:13px; color:var(--soft); background:#E9EDE7;
+  border-left:3px solid var(--amber); padding:12px 15px; border-radius:0 4px 4px 0; margin-top:10px;
+}
+.exp.show{display:block}
+.exp b{color:var(--ink)}
+.score{font-size:14px; margin-top:20px; padding-top:18px; border-top:1px solid var(--line)}
+.score strong{font-family:"Gowun Batang",serif; font-size:22px}
+
+/* ── 강의 노트 ───────────────────────────── */
+details{margin:20px 0 6px; border-left:3px solid var(--blue); padding-left:16px}
+summary{cursor:pointer; font-size:13.5px; font-weight:500; color:var(--blue); list-style:none; padding:3px 0}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ "; font-size:11px}
+details[open] summary::before{content:"▾ "}
+details .body{font-size:13.5px; color:var(--soft); padding:8px 0 4px; max-width:44em}
+details .body p{margin:0 0 10px}
+details .body ul{margin:0 0 10px; padding-left:19px}
+details .body li{margin-bottom:6px}
+details .body b{color:var(--ink); font-weight:600}
+
+.mis{
+  background:#F7E6E9; border-radius:4px; padding:14px 18px; margin:18px 0;
+  font-size:13.5px; border-left:3px solid var(--safranin); max-width:46em;
+}
+.mis b{color:var(--safranin)}
+.tabs{display:flex; gap:7px; margin-bottom:20px; flex-wrap:wrap}
+
+@media(max-width:860px){
+  :root{--rail:0px}
+  .rail{position:static; width:auto; height:auto; padding:22px 0 8px}
+  .rail nav{flex-direction:row; overflow-x:auto; padding:0 16px 8px}
+  .rail a{border-left:0; border-bottom:3px solid transparent; white-space:nowrap; padding:8px 14px}
+  .rail a.on{border-left:0; border-bottom-color:var(--amber)}
+  .rail a .mins,.rail footer{display:none}
+  .rail h1{margin:0 16px 16px}
+  main{padding:0 18px 80px}
+}
+</style>
+</head>
+<body>
+
+<aside class="rail">
+  <h1>확률에 대하여</h1>
+  <nav id="nav">
+    <a data-go="s2"><b>01</b><span>사전 진단</span></a>
+    <a data-go="s1"><b>02</b><span>확률의 언어</span></a>
+    <a data-go="s3"><b>03</b><span>조건부확률과 베이즈</span></a>
+    <a data-go="s4"><b>04</b><span>확률변수와 분포</span></a>
+    <a data-go="s5"><b>05</b><span>표집분포와 추론</span></a>
+    <a data-go="s6"><b>06</b><span>다중검정</span></a>
+  </nav>
+  <footer>모든 그림은 실시간 계산·시뮬레이션 결과입니다. 값을 바꾸면 즉시 다시 그려집니다.</footer>
+</aside>
+
+<main>
+
+<div class="hero">
+  <h2>양성이 나왔다. 이 로트는 오염됐을까?</h2>
+  <p>민감도 98%, 특이도 95%인 신속검사에서 양성이 떴습니다. 실제로 오염일 확률은 얼마일까요.</p>
+  <p>먼저 1절의 사전 진단에 답을 남겨 두십시오. 그다음 아래 자연빈도 판을 펼쳐 답을 확인할 수 있습니다.</p>
+  <details class="hero-answer">
+    <summary>사전 진단 후 자연빈도 판 보기</summary>
+    <div class="heroplate">
+    <canvas id="heroCv" width="480" height="200"></canvas>
+    <div class="legend">
+      <div><i class="swatch" style="background:#BF3450"></i>실제 오염 &amp; 양성 &nbsp;<b id="hTP">5</b></div>
+      <div><i class="swatch" style="background:#C98A2B"></i>정상인데 양성 &nbsp;<b id="hFP">50</b></div>
+      <div><i class="swatch" style="background:#D3D9D1"></i>음성 &nbsp;<b id="hTN">945</b></div>
+      <div style="margin-top:12px; font-size:15px; font-weight:600">
+        양성 중 진짜 오염 = <span style="color:var(--safranin)" id="hPPV">9%</span>
+      </div>
+    </div>
+    </div>
+  </details>
+</div>
+
+<!-- ══════════ 01 확률의 언어 ══════════ -->
+<section id="s1">
+  <div class="tag">02</div>
+  <h3>확률의 언어: 공간, 사건, 공리</h3>
+  <p class="goal">확률은 "그럴 것 같은 정도"가 아니라 정확한 수학적 대상입니다. 앞으로 쓸 기호와 규칙을 먼저 세워 둡니다. 여기가 헐거우면 뒤가 전부 흔들립니다.</p>
+
+  <!-- 1-1 확률공간 -->
+  <div class="panel">
+    <h4>확률공간 (Ω, ℱ, P)</h4>
+    <p class="hint">확률을 말하려면 세 가지가 먼저 정해져야 합니다. 무엇이 일어날 수 있는가, 무엇을 '사건'으로 부를 것인가, 각 사건에 어떤 수를 붙일 것인가.</p>
+
+    <div class="grid2">
+      <div>
+        <ul class="defs">
+          <li><b>Ω</b>표본공간 — 일어날 수 있는 모든 결과의 집합. 원소 하나하나를 표본점 ω라 부릅니다. 서로 겹치지 않고(배반), 빠짐없이 전체를 덮어야(포괄) 합니다.</li>
+          <li><b>ℱ</b>사건족 — Ω의 부분집합들의 모임. 그 원소 하나하나가 사건입니다. Ω가 유한하면 보통 멱집합 2<sup>Ω</sup>를 그대로 씁니다.</li>
+          <li><b>P</b>확률측도 — 사건에 0과 1 사이의 수를 붙이는 함수. ℱ의 원소만 입력으로 받습니다. 정의역이 Ω가 아니라 <b>ℱ</b>라는 점이 핵심입니다.</li>
+        </ul>
+        <div class="math">
+          P : ℱ → [0, 1]
+          <span class="note">확률은 '결과'가 아니라 '사건'에 붙는 수입니다</span>
+        </div>
+      </div>
+      <div>
+        <div class="ctl">
+          <label><span>표본공간의 크기 |Ω|</span><var id="v-om">3</var></label>
+          <input type="range" id="om-n" min="2" max="4" step="1" value="3">
+        </div>
+          <div style="font-size:13px;color:var(--soft);margin-bottom:6px">주머니에서 공 하나를 꺼냈을 때의 색 — 결과들은 서로 배반이고 전체를 덮습니다.</div>
+        <div id="om-list" style="font-size:13.5px;margin-bottom:16px"></div>
+        <div style="font-size:13px;color:var(--soft);margin-bottom:4px">
+          사건족 ℱ = 2<sup>Ω</sup> — 전부 <b id="om-card">8</b>개.
+          아무거나 두 개를 눌러 A와 B로 지정해 보십시오.
+        </div>
+        <div class="chips" id="om-chips"></div>
+        <div class="readout" id="om-out"></div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--soft);margin-top:14px">
+      A와 B를 어떻게 고르든 A<sup>c</sup>, A∪B, A∩B가 <b>전부 목록 안에 이미 들어 있습니다</b>. 연산을 해도 밖으로 나가지 않는다 — 이것이 ℱ가 갖춰야 할 닫힘 성질이고, Ω가 무한할 때 σ-대수라는 이름으로 정식화됩니다.
+    </p>
+  </div>
+
+  <!-- 1-2 사건의 연산 -->
+  <div class="panel">
+    <h4>사건의 연산</h4>
+    <p class="hint">사건은 집합이므로 집합 연산이 그대로 적용됩니다. 로트 1,000개를 두 검사에 걸었습니다. A는 대장균군 초과, B는 관능 부적합. 아래 버튼으로 영역을 바꿔 보십시오.</p>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>A만 해당</span><var id="v-na">180</var></label>
+          <input type="range" id="s-na" min="0" max="400" step="10" value="180">
+        </div>
+        <div class="ctl">
+          <label><span>A와 B 둘 다</span><var id="v-nab">90</var></label>
+          <input type="range" id="s-nab" min="0" max="300" step="10" value="90">
+        </div>
+        <div class="ctl">
+          <label><span>B만 해당</span><var id="v-nb">130</var></label>
+          <input type="range" id="s-nb" min="0" max="400" step="10" value="130">
+        </div>
+        <div class="readout" id="venn-out"></div>
+      </div>
+      <div>
+        <div class="opsrow" id="ops"></div>
+        <canvas id="vennCv" width="600" height="290"></canvas>
+      </div>
+    </div>
+    <div class="mis" style="margin-bottom:0">
+      <b>드모르간 법칙을 눈으로</b> — (A∪B)<sup>c</sup>와 A<sup>c</sup>∩B<sup>c</sup>를 번갈아 눌러 보십시오. 칠해지는 영역이 완전히 같습니다. "둘 다 아닌 것"과 "A도 아니고 B도 아닌 것"은 같은 말입니다. 뒤집으면 여집합은 합집합을 교집합으로 바꿉니다.
+    </div>
+  </div>
+
+  <!-- 1-3 공리 -->
+  <div class="panel">
+    <h4>콜모고로프의 세 공리와 거기서 나오는 것들</h4>
+    <p class="hint">확률은 다음 세 조건만 만족하면 됩니다. 나머지 규칙은 전부 여기서 <b>유도</b>됩니다. 위 슬라이더를 움직이면 아래 검사가 실시간으로 다시 돕니다.</p>
+
+    <div class="grid2">
+      <div>
+        <div class="math">
+          ① P(E) ≥ 0 &nbsp; (모든 E ∈ ℱ)<br>
+          ② P(Ω) = 1<br>
+          ③ 서로 배반인 E₁,E₂,…에 대해<br>
+          P(⋃<sub>i=1</sub><sup>∞</sup>Eᵢ) = Σ<sub>i=1</sub><sup>∞</sup>P(Eᵢ)
+          <span class="note">비음수성 · 정규화 · 가산가법성</span>
+        </div>
+        <table id="ax-tab"></table>
+      </div>
+      <div>
+        <div style="font-size:13px;color:var(--soft);margin-bottom:2px">공리에서 유도되는 규칙</div>
+        <table id="rule-tab"></table>
+        <div class="readout" id="add-out"></div>
+      </div>
+    </div>
+
+    <div class="mis" style="margin-bottom:0">
+      <b>배반과 독립은 다릅니다</b> — 배반은 A∩B = ∅, 즉 같이 일어날 수 없다는 뜻이고, 독립은 P(A∩B) = P(A)P(B), 즉 한쪽이 다른 쪽의 정보를 주지 않는다는 뜻입니다. 위에서 교집합을 0으로 내려 보십시오. 배반이 되는 순간 오히려 <b>강하게 종속</b>이 됩니다. A가 일어났다는 것만으로 B가 불가능해지니까요. 확률이 0이 아닌 두 배반 사건은 결코 독립일 수 없습니다.
+    </div>
+  </div>
+
+  <!-- 1-4 빈도 -->
+  <div class="panel">
+    <h4>공리에서 빈도로 — 그 P는 어디서 오는가</h4>
+    <p class="hint">공리는 P가 갖춰야 할 성질만 말할 뿐, 값이 얼마인지는 말해 주지 않습니다. 현실의 값을 어디서 가져올 것인가에서 해석이 갈립니다. 불량률이 정해진 라인에서 로트를 하나씩 검사해 보겠습니다.</p>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>실제 불량률</span><var id="v-lln-p">0.20</var></label>
+          <input type="range" id="lln-p" min="0.02" max="0.6" step="0.01" value="0.2">
+        </div>
+        <div class="ctl">
+          <label><span>검사 개수</span><var id="v-lln-n">500</var></label>
+          <input type="range" id="lln-n" min="30" max="3000" step="10" value="500">
+        </div>
+        <div class="btnrow">
+          <button id="lln-run">다시 돌리기</button>
+          <button class="ghost" id="lln-many">경로 10개 겹쳐 보기</button>
+        </div>
+        <div class="readout" id="lln-out"></div>
+      </div>
+      <canvas id="llnCv" width="620" height="290"></canvas>
+    </div>
+  </div>
+
+  <div class="mis">
+    <b>여기서 짚을 것</b> — 초반 30개에서 비율이 0.4까지 튀는 것을 보고 "라인에 문제가 생겼다"고 판단하는 것이 현장에서 가장 흔한 오류입니다. 표본이 작으면 흔들림이 큽니다. 이 흔들림의 크기를 정량화하는 것이 5섹션입니다.
+  </div>
+
+  <details>
+    <summary>수업 진행 노트</summary>
+    <div class="body">
+      <p><b>이 섹션의 목적은 형식을 세우는 것입니다.</b> 비전공자라고 해서 (Ω, ℱ, P)를 건너뛰면, 뒤에서 "확률이 무엇에 붙는 수인가"가 흐려집니다. 조건부확률이 왜 사건 두 개의 관계인지, <i>p</i>값이 왜 영가설과 모형 아래에서 정의되는 꼬리확률인지도 이 형식 위에서 분명해집니다.</p>
+      <p><b>ℱ를 굳이 말해야 하는가.</b> 유한 표본공간만 다룰 것이라면 ℱ = 2<sup>Ω</sup>로 두고 넘어가도 됩니다. 다만 "확률은 결과가 아니라 사건에 붙는다"는 한 문장은 반드시 남기십시오. 연속 확률변수에서 <i>P</i>(X = 1,000) = 0인데도 밀도가 양수인 상황이 4섹션에 나오는데, 그때 이 문장이 유일한 설명 도구가 됩니다.</p>
+      <p><b>공리 ③의 조건을 강조하십시오.</b> 덧셈이 그냥 되는 게 아니라 <b>배반일 때만</b> 됩니다. 학생들이 P(A∪B) = P(A) + P(B)를 무조건 쓰는 것이 이 단원 최대의 오류이고, 교집합을 두 번 센다는 사실은 벤 다이어그램에서 즉시 보입니다.</p>
+      <p><b>배반과 독립.</b> 두 개념을 한 화면에서 대조하는 것이 효율적입니다. "겹치지 않는다"는 기하학적 성질이고 "정보를 주지 않는다"는 확률적 성질이라는 점을 못 박아 두면, 3섹션의 조건부확률로 자연스럽게 넘어갑니다.</p>
+      <p><b>마지막 패널의 역할.</b> "내일 비 올 확률 70%"가 무슨 뜻이냐고 물어보십시오. ① 같은 조건이 100번 오면 70번 비가 온다 ② 예보관의 확신 정도 ③ 지역의 70%에 비가 온다 — 셋으로 갈립니다. 공리는 셋 모두와 양립합니다. 이 갈림길이 5섹션에서 "<i>p</i>값은 영가설이 참일 확률"이라는 오독이 왜 범주 오류인지 설명할 때 되돌아옵니다.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 02 사전 진단 ══════════ -->
+<section id="s2">
+  <div class="tag">01</div>
+  <h3>사전 진단: 지금 무엇을 잘못 알고 있나</h3>
+  <p class="goal">수업을 시작하며 다섯 문항에 먼저 답합니다. 현재 생각을 기록하는 진단이므로 정답률이 낮아도 괜찮습니다. 이후 단원에서 각 오개념을 고친 뒤 같은 문항을 다시 풉니다.</p>
+
+  <div class="panel">
+    <div id="quiz"></div>
+    <div class="score" id="quizScore">아직 답하지 않았습니다.</div>
+    <div class="btnrow"><button class="ghost" id="quizReset">답 지우고 다시 풀기</button></div>
+  </div>
+
+  <details>
+    <summary>수업 진행 노트</summary>
+    <div class="body">
+      <p>정답을 바로 공개하지 말고, 문항별로 손을 들게 한 뒤 분포를 칠판에 적어 두십시오. 수업 막바지에 같은 문항을 다시 물으면 학습 효과가 눈에 보입니다.</p>
+      <ul>
+        <li><b>1번</b>은 3섹션, <b>2·3번</b>은 5섹션, <b>4번</b>은 5섹션 끝, <b>5번</b>은 3섹션(b)에서 회수됩니다.</li>
+        <li>틀린 것이 부끄러운 게 아니라 <b>전공자도 똑같이 틀린다</b>는 점을 여기서 명확히 해 두면 이후 참여도가 올라갑니다.</li>
+        <li>1번 문항은 다음 섹션에서 세울 형식으로 다시 읽을 수 있습니다. Ω는 로트 1,000개, A는 '오염', B는 '양성'. 묻는 것은 P(A∩B)/P(B)입니다. 여기서는 답을 기록만 하고, 다음 섹션에서 이 표기를 칠판에 적어 두십시오.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 03 조건부확률 ══════════ -->
+<section id="s3">
+  <div class="tag">03</div>
+  <h3>조건부확률과 베이즈 정리</h3>
+  <p class="goal">조건이 붙으면 분모가 바뀝니다. <i>P</i>(양성|오염)과 <i>P</i>(오염|양성)은 분모가 다르므로 다른 수입니다. 이 구분이 검사 결과를 읽는 방식 전체를 바꿉니다.</p>
+
+  <div class="math" style="max-width:46em">
+    P(A | B) = P(A ∩ B) ⁄ P(B), &nbsp; P(B) &gt; 0
+    <span class="note">표본공간을 Ω에서 B로 갈아끼우는 연산입니다. 분자는 B 안에서 A인 부분, 분모는 B 전체</span>
+  </div>
+
+  <!-- (a) 민감도·특이도 -->
+  <div class="panel">
+    <h4>(a) 민감도와 특이도: 분모가 서로 다른 두 조건부확률</h4>
+    <p class="hint">검사 성적서에 늘 붙어 나오는 두 수입니다. 둘 다 조건부확률인데 <b>조건이 서로 다릅니다</b>. 민감도는 오염된 것들만 모아 놓고 센 비율이고, 특이도는 정상인 것들만 모아 놓고 센 비율입니다. 분모가 다르므로 두 수를 더해도 1이 되지 않습니다.</p>
+
+    <table style="margin-bottom:22px">
+      <tr><th style="width:88px"></th><th>민감도 (sensitivity)</th><th>특이도 (specificity)</th></tr>
+      <tr>
+        <td>정의</td>
+        <td class="f">P(양성 | 실제 오염)</td>
+        <td class="f">P(음성 | 실제 정상)</td>
+      </tr>
+      <tr>
+        <td>분모</td>
+        <td>실제로 오염된 것 전부</td>
+        <td>실제로 정상인 것 전부</td>
+      </tr>
+      <tr>
+        <td>묻는 것</td>
+        <td>있는 것을 <b>찾아내는</b> 능력</td>
+        <td>없는 것을 <b>가만두는</b> 능력</td>
+      </tr>
+      <tr>
+        <td>높으면</td>
+        <td>위음성이 줄어 음성 결과가 배제 판단에 <b>도움</b>이 됩니다.</td>
+        <td>위양성이 줄어 양성 결과가 확정 판단에 <b>도움</b>이 됩니다.</td>
+      </tr>
+      <tr>
+        <td>낮으면</td>
+        <td>위음성이 많아집니다. 오염된 로트를 그냥 통과시킵니다.</td>
+        <td>위양성이 많아집니다. 멀쩡한 로트를 붙잡아 재검사 비용이 늘어납니다.</td>
+      </tr>
+      <tr>
+        <td>쓰임</td>
+        <td>1차 선별 — 일단 걸러내고 본다</td>
+        <td>확인검사 — 최종 판정을 내린다</td>
+      </tr>
+    </table>
+
+    <p class="hint" style="margin-bottom:14px">두 수는 왜 같이 올라가지 못할까요. 검사기가 읽는 신호값에는 정상군과 오염군이 겹쳐 있고, 어디서 자를지 정해야 하기 때문입니다. 판정 기준선을 끌어 보십시오.</p>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>판정 기준선 — 이보다 크면 양성</span><var id="v-cut">1.00</var></label>
+          <input type="range" id="ss-cut" min="-200" max="500" step="5" value="100">
+        </div>
+        <div class="ctl">
+          <label><span>검사 자체의 성능 — 두 집단의 분리도</span><var id="v-sep">2.5</var></label>
+          <input type="range" id="ss-sep" min="5" max="50" step="1" value="25">
+        </div>
+        <div class="readout" id="ss-out"></div>
+      </div>
+      <canvas id="ssCv" width="620" height="300"></canvas>
+    </div>
+    <div class="mis" style="margin-bottom:0">
+      <b>기억법에는 조건이 붙습니다</b> — SnNout·SpPin은 민감도가 높은 검사의 음성, 특이도가 높은 검사의 양성이 각각 배제·확정 판단에 유용하다는 경험칙입니다. 그러나 결과 뒤의 실제 확률인 음성·양성예측도는 오염률과 검사 환경에도 달려 있으므로, 민감도나 특이도 하나만으로 배제·확정을 단정할 수 없습니다. 선별–확인 2단계는 이 한계를 보완합니다.
+    </div>
+  </div>
+
+  <!-- (b) 전확률과 베이즈 -->
+  <div class="panel">
+    <h4>(b) 전확률공식과 베이즈 정리</h4>
+    <p class="hint">민감도·특이도는 <b>원인 → 결과</b> 방향의 확률입니다. 그런데 현장에서 우리가 아는 것은 결과(양성)뿐이고 알고 싶은 것은 원인(오염)입니다. 방향을 뒤집는 장치가 베이즈 정리이고, 그 분모를 계산해 주는 것이 전확률공식입니다.</p>
+
+    <div class="math">
+      Ω = B₁ ∪ ⋯ ∪ B<sub>n</sub> &nbsp;(서로 배반, 전체를 덮음) 일 때<br>
+      <b>전확률</b> &nbsp; P(A) = Σ<sub>i</sub> P(A | B<sub>i</sub>) P(B<sub>i</sub>)<br>
+      <b>베이즈</b> &nbsp; P(B<sub>j</sub> | A) = P(A | B<sub>j</sub>) P(B<sub>j</sub>) ⁄ Σ<sub>i</sub> P(A | B<sub>i</sub>) P(B<sub>i</sub>)
+      <span class="note">분할 {오염, 정상}, 결과 A = 양성. 분모는 양성이 나올 <b>모든 경로</b>의 합입니다</span>
+    </div>
+
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>사전확률 — 실제 오염률</span><var id="v-tp2">0.5%</var></label>
+          <input type="range" id="tb-prev" min="1" max="300" step="1" value="5">
+        </div>
+        <div class="ctl">
+          <label><span>민감도</span><var id="v-tse">98%</var></label>
+          <input type="range" id="tb-sens" min="50" max="100" step="1" value="98">
+        </div>
+        <div class="ctl">
+          <label><span>특이도</span><var id="v-tsp">95%</var></label>
+          <input type="range" id="tb-spec" min="50" max="100" step="1" value="95">
+        </div>
+        <div class="readout" id="tb-out"></div>
+      </div>
+      <canvas id="treeCv" width="620" height="300"></canvas>
+    </div>
+    <div class="mis" style="margin-bottom:0">
+      <b>분모를 함께 보아야 합니다</b> — 양성이 나오는 경로는 두 개입니다. 오염인데 걸린 경우와, 정상인데 헛걸린 경우. 오염이 드물면 두 번째 경로의 출발점이 매우 크므로 작은 위양성률도 결과를 크게 바꿀 수 있습니다. 민감도·특이도·오염률을 모두 넣어 나무 그림의 가지를 비교하십시오.
+    </div>
+  </div>
+
+  <div class="panel">
+    <h4>(c) 신속검사 성적서 읽기 — 자연빈도 판</h4>
+    <p class="hint">로트 1,000개를 한 점씩 찍었습니다. 유병률·민감도·특이도를 움직이면 점의 색이 바뀝니다. 수식 없이 세기만 하면 됩니다.</p>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>실제 오염률</span><var id="v-bp">0.5%</var></label>
+          <input type="range" id="b-prev" min="1" max="300" step="1" value="5">
+        </div>
+        <div class="ctl">
+          <label><span>민감도 — 오염을 양성으로</span><var id="v-bse">98%</var></label>
+          <input type="range" id="b-sens" min="50" max="100" step="1" value="98">
+        </div>
+        <div class="ctl">
+          <label><span>특이도 — 정상을 음성으로</span><var id="v-bsp">95%</var></label>
+          <input type="range" id="b-spec" min="50" max="100" step="1" value="95">
+        </div>
+        <div class="btnrow">
+          <button class="ghost" id="b-preset1">식품 신속검사</button>
+          <button class="ghost" id="b-preset2">희귀 유전변이</button>
+          <button class="ghost" id="b-preset3">흔한 오염</button>
+        </div>
+        <div class="readout" id="b-out"></div>
+      </div>
+      <div>
+        <canvas id="bayesCv" width="620" height="270"></canvas>
+        <table id="b-tab"></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="mis">
+    <b>학생이 가장 놀라는 지점</b> — 이 희귀 오염 예시에서는 민감도를 98%에서 100%로 올리는 것보다 특이도를 95%에서 99%로 올릴 때 양성예측도가 더 크게 변합니다. 이는 정상 로트가 매우 많아 작은 위양성률도 누적되기 때문입니다. 일반적으로는 <b>오염률·민감도·특이도 모두</b>가 예측도를 결정합니다.
+  </div>
+
+  <div class="panel">
+    <h4>(d) 18% 증가는 얼마나 증가한 것인가</h4>
+    <p class="hint">영양·건강 기사에서는 상대위험이 강조되고 절대위험이 생략되는 경우가 있습니다. 두 수를 같은 화면에 놓고 봅니다. 아래 계산은 주어진 기저위험에 RR을 곱하는 단순화된 예시입니다.</p>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>기저 위험 — 안 먹는 집단</span><var id="v-rr-b">5.0%</var></label>
+          <input type="range" id="rr-base" min="1" max="300" step="1" value="50">
+        </div>
+        <div class="ctl">
+          <label><span>상대위험 RR</span><var id="v-rr-r">1.18</var></label>
+          <input type="range" id="rr-rr" min="100" max="400" step="1" value="118">
+        </div>
+        <div class="btnrow">
+          <button class="ghost" id="rr-iarc">가공육 50 g/일 (IARC)</button>
+          <button class="ghost" id="rr-smoke">흡연과 폐암</button>
+        </div>
+        <div class="readout" id="rr-out"></div>
+      </div>
+      <canvas id="rrCv" width="620" height="250"></canvas>
+    </div>
+  </div>
+
+  <details>
+    <summary>수업 진행 노트</summary>
+    <div class="body">
+      <p><b>정의부터 그림으로.</b> P(A|B)는 조건 B 안으로 표본공간을 제한하고 확률을 다시 정규화하는 일입니다. 2섹션의 벤 다이어그램을 다시 띄우고 "이제 B 바깥은 제외한다"고 말하면서 B 원만 남기십시오. 분모가 P(B)로 바뀐다는 것이 핵심입니다.</p>
+      <p><b>(a) 이 섹션에서 가장 많이 막히는 지점입니다.</b> 민감도와 특이도를 처음 보는 학생은 둘을 더해 1이 될 것으로 기대합니다. 표의 '분모' 줄을 손으로 짚어 주십시오. 민감도의 분모는 오염된 것들, 특이도의 분모는 정상인 것들 — 애초에 <b>다른 집단을 세고 있습니다</b>. 그래서 합이 1이 되어야 할 이유가 없습니다. 1에서 빼면 나오는 짝은 각각 위음성률과 위양성률입니다.</p>
+      <p><b>(a) 두 번째 오해.</b> 이 단순 모형에서는 같은 검사·기준선·대상군에서 민감도와 특이도를 고정하고 오염률만 바꿉니다. 실제 현장에서는 대상군의 스펙트럼과 표본처리에 따라서도 성능이 달라질 수 있습니다. 반면 예측도는 같은 민감도·특이도에서도 오염률이 바뀌면 달라집니다.</p>
+      <p><b>(a) 기준선 슬라이더를 반드시 끌어 보이십시오.</b> 검사 분포가 고정된 상태에서 기준선을 왼쪽으로 밀면 민감도가 오르고 특이도가 떨어집니다. 두 수를 함께 개선하려면 측정법·표본처리 등 검사 자체를 개선해 두 분포를 더 떼어 놓아야 하며, 그것이 아래쪽 성능 슬라이더입니다. ROC 곡선을 아는 학생에게는 이 그림이 그 곡선의 배후라고 한마디만 덧붙이면 됩니다.</p>
+      <p><b>(b) 전확률공식은 "경우를 나눠 세기"입니다.</b> 양성이 나오는 길이 두 개뿐이므로 각 길의 확률을 더하면 됩니다. 나무를 왼쪽에서 오른쪽으로 읽으며 가지마다 곱하고, 끝에서 같은 결과끼리 더한다 — 이 절차만 익히면 공식을 외울 필요가 없습니다.</p>
+      <p><b>(b) 베이즈는 나무를 거꾸로 읽는 것입니다.</b> 양성이라는 잎에 도착했다는 사실만 알 때, 어느 가지로 왔을 가능성이 큰가. 분자는 그 가지 하나, 분모는 그 잎에 도달하는 모든 가지의 합. 학생이 이 그림을 손으로 그릴 수 있으면 이 섹션은 성공입니다.</p>
+      <p><b>(c) 판서 순서.</b> 슬라이더를 건드리기 전에 자연빈도 문장부터 읽어 주십시오. "1,000개 중 5개가 오염, 그 5개 중 5개가 양성, 나머지 995개 중 50개도 양성. 그래서 양성 55개 중 진짜는 5개." 수식 없이 이 문장만으로 정답률이 올라간다는 것이 Gigerenzer &amp; Hoffrage(1995)의 결과입니다.</p>
+      <p><b>실무로 연결.</b> 이 예시에서 양성예측도가 약 9%라는 것은 신속검사 양성만으로 폐기를 결정하기 어렵다는 뜻입니다. 실제 결정은 검사 지침, 오류 비용, 표본추출과 확인검사 결과를 함께 고려해야 합니다. 희귀한 대상을 검사할 때는 작은 위양성률도 큰 영향을 줍니다.</p>
+      <p><b>같은 구조의 오류.</b> <i>P</i>(양성|오염)을 <i>P</i>(오염|양성)로 읽는 것과, 영가설 아래의 꼬리확률인 <i>p</i>값을 <i>P</i>(H₀|데이터)로 읽는 것은 조건의 방향을 뒤집는 같은 유형의 실수입니다. 이 문장을 5섹션에서 다시 가리키십시오.</p>
+      <p><b>(d) 오즈비 주의.</b> 유병률이 높을수록 OR은 RR을 과장합니다. 단면연구·환자대조군 논문의 OR을 "몇 배 위험"으로 읽는 습관은 여기서 교정해야 합니다.</p>
+      <p><b>시간이 남으면 심슨의 역설 10분.</b> 커피–폐암 연관이 흡연 보정으로 사라지는 사례에서 출발해, 영양역학의 건강한 사용자 효과로 넘어가면 β-카로틴·비타민 E의 관찰연구·RCT 불일치가 자연스럽게 설명됩니다.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 04 분포 ══════════ -->
+<section id="s4">
+  <div class="tag">04</div>
+  <h3>확률변수와 확률분포</h3>
+  <p class="goal">지금까지 확률은 사건에 붙는 수였습니다. 사건은 집합이라 더하거나 평균을 낼 수 없습니다. 결과에 수를 붙여야 비로소 계산이 시작됩니다. 그 수 붙이기가 확률변수이고, 붙인 수마다 확률을 모아 놓은 것이 확률분포입니다.</p>
+
+  <!-- 4-1 확률변수 -->
+  <div class="panel">
+    <h4>확률변수: 결과에 수를 붙이는 함수</h4>
+    <p class="hint">동전을 두 번 던집니다. 표본공간은 {앞앞, 앞뒤, 뒤앞, 뒤뒤} 네 개. 여기에 "앞면이 나온 횟수"라는 규칙으로 수를 붙이면 X는 0, 1, 2 중 하나가 됩니다. 네 개였던 표본점이 세 개의 값으로 접힙니다.</p>
+    <div class="math">
+      X : Ω → ℝ, &nbsp;&nbsp; P<sub>X</sub>(k) = P( { ω ∈ Ω : X(ω) = k } )
+      <span class="note">확률은 여전히 사건에 붙습니다. X는 그 사건을 수로 지목하는 이름표입니다</span>
+    </div>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>던지는 횟수 n</span><var id="v-cn">2</var></label>
+          <input type="range" id="c-n" min="2" max="12" step="1" value="2">
+        </div>
+        <div class="ctl">
+          <label><span>앞면이 나올 확률 p</span><var id="v-cp">0.50</var></label>
+          <input type="range" id="c-p" min="10" max="90" step="1" value="50">
+        </div>
+        <div class="btnrow">
+          <button id="c-toss">1,000회 실제로 던지기</button>
+          <button class="ghost" id="c-reset">지우기</button>
+        </div>
+        <div class="readout" id="c-out"></div>
+      </div>
+      <div>
+        <canvas id="mapCv" width="600" height="152"></canvas>
+        <canvas id="rvCv" width="600" height="236"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="mis">
+    <b>확률변수는 변수가 아니라 함수입니다</b> — 이름이 잘못 붙은 대표적인 용어입니다. X는 "변하는 수"가 아니라 Ω의 각 원소에 실수 하나를 대응시키는 <b>규칙</b>이고, 확률이 그 규칙을 통해 수직선 위로 옮겨 간 것이 분포입니다. 같은 Ω에 다른 규칙을 붙이면 다른 확률변수가 됩니다. 앞면 횟수 대신 "첫 번째가 앞면이면 1"로 붙이면 완전히 다른 분포가 나옵니다.
+  </div>
+
+  <!-- 4-2 기댓값과 분산 -->
+  <div class="panel">
+    <h4>분포 하나를 숫자 두 개로 — 기댓값과 분산</h4>
+    <p class="hint">분포 전체를 그림으로 보여줄 수 없는 상황이 더 많습니다. 대신 분포를 대표하는 숫자 두 개를 씁니다. 어디에 몰려 있는가(기댓값), 얼마나 흩어져 있는가(분산). 위 패널의 동전 분포를 그대로 가져와 직접 계산해 봅니다.</p>
+
+    <div class="math">
+      E[X] = Σ<sub>k</sub> k · P(X = k)
+      <span class="note">각 값에 그 값이 나올 확률을 가중치로 곱해 더한 것 — 무게중심</span>
+    </div>
+    <div class="math">
+      Var(X) = E[(X − E[X])²] = Σ<sub>k</sub> (k − E[X])² · P(X = k)
+      <span class="note">평균에서 얼마나 떨어져 있는지를 제곱해서 가중평균한 것</span>
+    </div>
+
+    <div class="grid-ctrl">
+      <div>
+        <table id="ev-tab"></table>
+        <div class="readout" id="ev-out"></div>
+      </div>
+      <canvas id="evCv" width="620" height="290"></canvas>
+    </div>
+
+    <div class="mis" style="margin-bottom:0">
+      <b>왜 제곱을 하는가</b> — 평균과의 차이를 그냥 더하면 항상 0이 됩니다(양쪽으로 상쇄되도록 평균이 정의되었기 때문입니다). 부호를 없애는 방법은 절댓값과 제곱 둘 다 있지만, 제곱은 미분과 대수적 전개가 편하고 <b>독립이거나 공분산이 0인</b> 확률변수들의 합에서 분산이 더해지는 이점이 있습니다. 제곱한 값은 단위도 제곱(예: g²)이 되므로, 원래 단위로 표현한 것이 <b>표준편차</b> SD = √Var(X)입니다.
+    </div>
+  </div>
+
+  <h4 style="font-family:'Gowun Batang',serif;font-size:21px;margin:44px 0 4px;font-weight:700">잘 알려진 네 가지</h4>
+  <p style="font-size:14px;color:var(--soft);margin:0 0 22px">각 분포에는 적합한 생성 과정과 가정이 있습니다. 이항분포는 조건에 따라 포아송 또는 정규분포로 근사할 수 있습니다. 로그정규분포는 양의 변수의 로그가 정규분포를 따르는 별도의 모형입니다.</p>
+
+  <div class="tabs">
+    <button class="ghost on" data-dist="binom">① 이항 — 삼점검사</button>
+    <button class="ghost" data-dist="pois">② 포아송 — 오염 건수</button>
+    <button class="ghost" data-dist="norm">③ 정규 — 충전 중량</button>
+    <button class="ghost" data-dist="logn">④ 로그정규 — CFU</button>
+  </div>
+
+  <div class="panel" id="p-binom">
+    <h4>삼점검사: 아무도 차이를 못 느껴도 3분의 1은 맞힌다</h4>
+    <p class="hint">시료 3개 중 다른 하나를 고르는 검사입니다. 차이를 전혀 못 느끼면 정답확률은 1/3. 패널이 30명이면 아무 능력 없이도 평균 10명이 맞힙니다. 몇 명부터 "차이가 있다"고 말할 수 있을까요.</p>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>패널 인원</span><var id="v-tn">30</var></label>
+          <input type="range" id="t-n" min="12" max="100" step="1" value="30">
+        </div>
+        <div class="ctl">
+          <label><span>실제 정답확률 — 1/3이면 차이 없음</span><var id="v-tp">0.333</var></label>
+          <input type="range" id="t-p" min="333" max="900" step="1" value="333">
+        </div>
+        <div class="ctl">
+          <label><span>유의수준 α</span><var id="v-ta">0.05</var></label>
+          <input type="range" id="t-a" min="1" max="20" step="1" value="5">
+        </div>
+        <div class="readout" id="t-out"></div>
+      </div>
+      <canvas id="binomCv" width="620" height="320"></canvas>
+    </div>
+    <div class="mis" style="margin-bottom:0">
+      <b>ISO 4120 판정표의 정체</b> — 관능검사 표준에 실린 "n=30이면 15명 이상"이라는 숫자는 권위에서 온 것이 아니라 이 막대그래프에서 나온 것입니다. 표를 외우는 학생과 유도할 줄 아는 학생의 차이가 여기서 갈립니다.
+    </div>
+  </div>
+
+  <div class="panel" id="p-pois" style="display:none">
+    <h4>드물게, 무작위로, 독립적으로 일어나는 일의 건수</h4>
+    <p class="hint">우유 1 mL의 균수, 원료 1톤당 이물 건수, 배양접시의 콜로니 수. 평균이 정해지면 분포 모양까지 정해집니다. 평균과 분산이 같다는 것이 이 분포의 서명입니다.</p>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>평균 건수 λ</span><var id="v-pl">3.0</var></label>
+          <input type="range" id="p-lam" min="2" max="200" step="1" value="30">
+        </div>
+        <div class="ctl">
+          <label><span>군집 오염 정도 — 과대산포</span><var id="v-pk">없음</var></label>
+          <input type="range" id="p-od" min="0" max="100" step="1" value="0">
+        </div>
+        <div class="btnrow"><button id="p-draw">500개 시료 새로 뽑기</button></div>
+        <div class="readout" id="p-out"></div>
+      </div>
+      <canvas id="poisCv" width="620" height="300"></canvas>
+    </div>
+    <div class="mis" style="margin-bottom:0">
+      <b>현장에서 어긋나는 이유</b> — 실제 데이터에서 분산이 평균보다 크면 오염이 <b>독립적으로 흩어져 있지 않고 뭉쳐 있다</b>는 신호입니다. 균질화가 덜 됐거나 특정 배치에서만 사고가 났을 가능성. 포아송이 안 맞는다는 사실 자체가 정보입니다.
+    </div>
+  </div>
+
+  <div class="panel" id="p-norm" style="display:none">
+    <h4>작은 요인들이 겹쳐 쌓인 결과 — 그리고 밀도는 확률이 아니다</h4>
+    <p class="hint">충전기가 제품을 채웁니다. 목표를 정해도 매번 조금씩 다릅니다. 진동, 원료 밀도, 온도, 노즐 마모 — 작은 요인 수십 가지가 더해진 결과라 종 모양이 됩니다. 표시량을 밑도는 제품이 얼마나 나올까요.</p>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>충전 목표 중량 μ</span><var id="v-nm">202.0 g</var></label>
+          <input type="range" id="nm-mu" min="1960" max="2100" step="1" value="2020">
+        </div>
+        <div class="ctl">
+          <label><span>충전기 산포 σ</span><var id="v-ns">1.5 g</var></label>
+          <input type="range" id="nm-sd" min="3" max="50" step="1" value="15">
+        </div>
+        <div class="ctl">
+          <label><span>표시량 — 이 아래면 미달</span><var id="v-nl">200.0 g</var></label>
+          <input type="range" id="nm-lsl" min="1950" max="2060" step="1" value="2000">
+        </div>
+        <div class="btnrow">
+          <button class="ghost" id="nm-band">68 · 95 · 99.7 구간 보기</button>
+        </div>
+        <div class="readout" id="nm-out"></div>
+      </div>
+      <canvas id="normCv" width="620" height="310"></canvas>
+    </div>
+    <div class="mis" style="margin-bottom:0">
+      <b>밀도는 확률이 아닙니다</b> — 곡선의 높이는 확률이 아니라 밀도이고, 단위가 g<sup>-1</sup>이라 1을 넘을 수도 있습니다. 연속모형에서 확률은 구간 아래의 <b>넓이</b>로 계산합니다. 따라서 연속형 순중량 모형에서는 정확히 200.000… g일 확률이 0입니다. 이는 측정값이 반올림되어 200.0 g으로 기록될 확률이 0이라는 뜻은 아닙니다. 2섹션의 "확률은 사건에 붙는 수"가 여기서 회수됩니다.
+    </div>
+  </div>
+
+  <div class="panel" id="p-logn" style="display:none">
+    <h4>왜 미생물 계수에 log를 자주 쓰는가</h4>
+    <p class="hint">여러 독립적인 작은 효과가 더해지면 정규근사가 유용한 경우가 있습니다. 성장률처럼 양의 요인들이 곱셈적으로 작용하면 원자료가 우편향되고, 로그를 취한 값이 정규분포에 가까워질 수 있습니다. 다만 미생물 계수가 언제나 로그정규인 것은 아니므로 자료와 측정과정을 확인해야 합니다. 왼쪽은 로그정규 모형에서 생성한 CFU/g, 오른쪽은 같은 데이터를 log₁₀으로 바꾼 것입니다.</p>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>중앙값 CFU/g</span><var id="v-lm">1,000</var></label>
+          <input type="range" id="l-med" min="10" max="60" step="1" value="30">
+        </div>
+        <div class="ctl">
+          <label><span>로그 표준편차</span><var id="v-ls">0.80</var></label>
+          <input type="range" id="l-sd" min="10" max="150" step="1" value="80">
+        </div>
+        <div class="btnrow"><button id="l-draw">300개 시료 새로 뽑기</button></div>
+        <div class="readout" id="l-out"></div>
+      </div>
+      <canvas id="lognCv" width="620" height="300"></canvas>
+    </div>
+    <div class="mis" style="margin-bottom:0">
+      <b>역변환의 함정</b> — log 값의 평균을 다시 10의 거듭제곱으로 되돌리면 나오는 것은 산술평균이 아니라 <b>기하평균</b>입니다. 논문 표에 적힌 값이 어느 쪽인지 확인하지 않으면 수 배가 틀립니다. 혈청 페리틴, 중성지방, 비타민 D 같은 영양 바이오마커도 대부분 우편향이라 같은 문제가 생깁니다.
+    </div>
+  </div>
+
+  <details>
+    <summary>수업 진행 노트</summary>
+    <div class="body">
+      <p><b>순서를 지키십시오.</b> 확률변수를 먼저, 분포는 그다음입니다. 분포부터 가르치면 학생들이 분포를 외워야 할 공식 목록으로 받아들입니다. 동전 두 번 예시에서 "표본점 네 개가 값 세 개로 접힌다"는 장면을 반드시 손으로 짚어 주십시오. 앞뒤와 뒤앞이 <b>한 값으로 합쳐지기 때문에</b> 가운데가 두 배로 높아진다 — 이항계수가 왜 붙는지가 여기서 한 번에 보입니다.</p>
+      <p><b>n을 천천히 올리십시오.</b> 2 → 3 → 5 → 12로 올리면 표본공간은 4 → 8 → 32 → 4,096으로 폭발하는데 값은 n+1개뿐입니다. 확률변수가 하는 일이 <b>요약</b>이라는 것, 그리고 12쯤에서 이미 종 모양이 보인다는 것 — 5섹션 중심극한정리의 복선이 여기서 깔립니다.</p>
+      <p><b>"실제로 던지기"를 꼭 눌러 보십시오.</b> 이론 막대 위에 실측 막대가 겹칩니다. 2섹션의 빈도 해석이 분포 수준에서 다시 확인되는 장면입니다.</p>
+      <p><b>기댓값·분산 패널은 손으로 더하게 하십시오.</b> n=2, p=0.5로 되돌려 표를 함께 읽으면 E[X] = 0×0.25 + 1×0.5 + 2×0.25 = 1이 "동전 두 개면 평균 한 개는 앞면"이라는 상식과 일치한다는 것이 확인됩니다. 그다음 n을 8 정도로 올려 표가 요약형으로 바뀌는 것을 보이고, 공식 E[X]=np, Var(X)=np(1−p)이 손으로 더한 값과 정확히 일치한다는 것으로 마무리하십시오. 공식은 계산을 대신해 주는 지름길이지, 손으로 더한 것과 다른 별개의 진리가 아니라는 메시지입니다.</p>
+      <p><b>제곱을 쓰는 이유를 반드시 짚으십시오.</b> 편차를 그냥 더하면 0이 된다는 것을 표에서 직접 보여줄 수 있습니다(대칭인 n=2, p=0.5 예시가 가장 선명합니다). 표준편차가 왜 다시 제곱근을 취하는지 — 단위를 원래대로 되돌리기 위해서라는 것 — 도 여기서 마무리해 두면, 이후 SD·SE·CFU 단위 이야기가 전부 매끄러워집니다.</p>
+      <p><b>분포 사이의 근사 조건을 함께 말하십시오.</b> n이 크고 p가 작으며 λ=np가 적절히 유지되면 이항분포를 포아송분포로 근사할 수 있습니다. np와 n(1−p)가 충분히 크면 이항분포의 정규근사가 유용합니다. 로그정규분포는 양의 값에 로그를 취한 변수가 정규분포를 따를 때 얻어지며, 정규분포의 단순한 다음 단계는 아닙니다.</p>
+      <p><b>밀도와 확률의 구분은 정규 탭에서.</b> 연속모형에서 <i>P</i>(X = 200.000…) = 0인데도 밀도는 양수입니다. 실제 측정값은 정밀도에 따라 반올림된 구간을 나타낸다는 점도 함께 구분하십시오.</p>
+      <p><b>정규 탭의 실무 가치.</b> 목표 중량을 표시량보다 왜 높게 잡는지, 산포를 줄이면 왜 원가가 절감되는지가 슬라이더 두 개로 설명됩니다. 식품공학 전공자에게 이 패널의 반응이 가장 좋습니다.</p>
+      <p><b>이항 탭에서 미리 예고할 것.</b> 정답확률 슬라이더를 0.333에 두고 "14명이 맞혔다"를 가리키며 물으십시오. 유의하지 않다는 것이 차이가 없다는 뜻인가? 대답을 유보한 채 5섹션 끝에서 3의 법칙으로 회수합니다.</p>
+      <p><b>생물학 전공자 배려.</b> 이항 탭에서 멘델 분리비(p=0.75), 하디–바인베르크 평형을 독립 가정의 산물로 10분 붙일 수 있습니다. 평형 이탈이 선택·근친교배·유전형 판정오류의 신호라는 점은 확률 개념이 생물학적 해석으로 바로 이어지는 좋은 사례입니다.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 05 표집분포 ══════════ -->
+<section id="s5">
+  <div class="tag">05</div>
+  <h3>표집분포: 논문을 읽기 위해 반드시 넘어야 하는 문턱</h3>
+  <p class="goal">통계 교육 연구가 일관되게 최대 난관으로 보고하는 개념입니다. 말로 설명하지 말고 뽑아서 보여주십시오.</p>
+
+  <div class="panel">
+    <h4>평균 하나가 아니라, 평균들의 분포</h4>
+    <p class="hint">치우친 CFU 모집단에서 n개씩 뽑아 평균을 냅니다. 그 평균들을 모아 히스토그램을 그립니다. 모집단은 저렇게 찌그러졌는데 평균들의 분포는 어떤 모양이 되는지 보십시오.</p>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>표본 크기 n</span><var id="v-sn">5</var></label>
+          <input type="range" id="s-n" min="1" max="100" step="1" value="5">
+        </div>
+        <div class="ctl">
+          <label><span>반복 횟수</span><var id="v-sr">2,000</var></label>
+          <input type="range" id="s-rep" min="100" max="5000" step="100" value="2000">
+        </div>
+        <div class="btnrow"><button id="s-run">다시 뽑기</button></div>
+        <div class="readout" id="s-out"></div>
+      </div>
+      <canvas id="sampCv" width="620" height="330"></canvas>
+    </div>
+  </div>
+
+  <div class="mis">
+    <b>SD와 SE는 다른 것입니다</b> — 표준편차는 개별 시료가 얼마나 흩어져 있는가, 표준오차는 평균이라는 추정값이 얼마나 흔들리는가. 논문 그림의 오차막대가 어느 쪽인지 캡션에 안 적혀 있으면 그 그림은 읽을 수 없습니다. 삼중측정(triplicate) 오차막대에서 특히 자주 문제가 됩니다.
+  </div>
+
+  <div class="panel">
+    <h4>차이가 없는데도 유의하게 나오는 5%</h4>
+    <p class="hint">앞의 삼점검사를 <b>차이가 정말 없는 조건</b>(p = 1/3)에서 반복합니다. 각 점이 한 번의 관능검사입니다. 붉은 점이 "유의한 차이 발견"으로 보고될 검사들입니다.</p>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>패널 인원</span><var id="v-nn">30</var></label>
+          <input type="range" id="n-n" min="12" max="60" step="1" value="30">
+        </div>
+        <div class="ctl">
+          <label><span>가상 반복 검사 수</span><var id="v-nr">300</var></label>
+          <input type="range" id="n-rep" min="50" max="1000" step="50" value="300">
+        </div>
+        <div class="btnrow"><button id="n-run">전부 다시 시행</button></div>
+        <div class="readout" id="n-out"></div>
+      </div>
+      <canvas id="nullCv" width="620" height="300"></canvas>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h4>전부 음성이었다. 그래서 안전한가 — 3의 법칙</h4>
+    <p class="hint">독립적인 무작위 표본, 일정한 오염확률, 완전한 검출을 가정하고 n개에서 하나도 검출되지 않았을 때, 오염률의 단측 95% 신뢰상한은 대략 3/n입니다. 검사 수를 움직여 보십시오.</p>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>검사한 시료 수 n — 전부 음성</span><var id="v-r3">60</var></label>
+          <input type="range" id="r3-n" min="5" max="500" step="1" value="60">
+        </div>
+        <div class="readout" id="r3-out"></div>
+      </div>
+      <canvas id="r3Cv" width="620" height="230"></canvas>
+    </div>
+  </div>
+
+  <details>
+    <summary>수업 진행 노트</summary>
+    <div class="body">
+      <p><b>대수의 법칙 ≠ 중심극한정리.</b> 전자는 표본평균이 <i>어디로</i> 가는가, 후자는 적절히 표준화한 표본평균의 분포가 어떤 모양에 가까워지는가를 말합니다. 독립·동일분포와 유한분산 같은 조건이 필요합니다. 첫 패널에서 n을 1 → 5 → 30 → 100으로 올리며 분포가 좁아지고 점차 대칭에 가까워지는 모습을 보이되, 원자료가 심하게 치우치면 n=30도 충분하지 않을 수 있음을 짚으십시오.</p>
+      <p><b><i>p</i>값의 정의를 그림 위에서 읽으십시오.</b> 두 번째 패널의 붉은 점 비율은 이 이산검정의 실제 제1종 오류확률을 추정하며, 설정한 α 이하입니다. <i>p</i>값은 "영가설과 모형 가정이 맞다고 할 때, 관측된 것만큼 또는 그보다 극단적인 결과가 나올 확률"입니다. 영가설이 맞을 확률이 아닙니다 — 3섹션에서 적어 둔 문장을 손으로 가리키십시오.</p>
+      <p><b>신뢰구간의 정확한 의미.</b> "이 구간 안에 참값이 있을 확률 95%"는 틀린 해석입니다(Hoekstra 등, 2014). 같은 방식으로 구간을 계속 만들면 그중 95%가 참값을 덮는다는 뜻이고, 눈앞의 이 구간 하나에 대해서는 덮었거나 못 덮었거나 둘 중 하나입니다.</p>
+      <p><b>3의 법칙으로 마무리.</b> 독립적인 무작위 표본, 일정한 오염확률, 완전한 검출을 가정하면 60개 전부 음성일 때 이항모형의 단측 95% 상한은 약 4.9%입니다. 불완전한 검사라면 민감도 등을 반영해야 합니다. "검출되지 않음"은 "없음"이 아닙니다. 여기서 4섹션에 유보해 둔 질문을 회수하고 <b>동등성검정</b>의 필요로 넘어가십시오.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ══════════ 06 다중검정 ══════════ -->
+<section id="s6">
+  <div class="tag">06</div>
+  <h3>스무 번 물으면 한 번은 그냥 나온다</h3>
+  <p class="goal">영양역학은 구조적으로 다중비교에 노출되어 있습니다. 식품 성분 하나에 결과변수 여럿, 관능검사 하나에 속성 여럿, 오믹스는 변수가 수천 개입니다.</p>
+
+  <div class="panel">
+    <h4>전부 효과가 없는 재료들로 실험하기</h4>
+    <p class="hint">아래 칸 하나하나가 "이 재료가 암 위험과 관련 있는가"를 묻는 검정입니다. 설정상 <b>모든 재료가 실제로는 아무 효과가 없고</b>, 각 검정의 p값은 서로 독립인 균등분포로 모의합니다. 그런데도 붉게 켜지는 칸이 생깁니다.</p>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>검정 개수 k</span><var id="v-mk">50</var></label>
+          <input type="range" id="m-k" min="5" max="200" step="1" value="50">
+        </div>
+        <div class="ctl">
+          <label><span>유의수준 α</span><var id="v-ma">0.05</var></label>
+          <input type="range" id="m-a" min="1" max="20" step="1" value="5">
+        </div>
+        <div class="btnrow">
+          <button id="m-run">전부 다시 검정</button>
+          <button class="ghost" id="m-bonf">Bonferroni 보정 켜기</button>
+        </div>
+        <div class="readout" id="m-out"></div>
+      </div>
+      <div>
+        <canvas id="multCv" width="620" height="200"></canvas>
+        <canvas id="multCurve" width="620" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <details>
+    <summary>수업 진행 노트 · 마무리</summary>
+    <div class="body">
+      <p><b>2섹션과 연결하십시오.</b> 독립인 k개 검정이 모두 영가설 아래 있고 각각의 제1종 오류확률이 α일 때, "적어도 하나가 유의할 확률"은 P(하나 이상) = 1 − (1−α)<sup>k</sup>입니다. 독립이 아니면 이 등식은 일반적으로 성립하지 않습니다. Bonferroni는 의존성과 무관하게 가족wise 오류율을 α 이하로 보장합니다.</p>
+      <p><b>요리책 연구를 소개하십시오.</b> Schoenfeld &amp; Ioannidis(2013)는 요리책에서 무작위로 고른 재료 50가지 중 40가지에 대해 암 위험과의 연관을 보고한 논문이 존재함을 보였습니다. 대부분의 효과추정치는 약했고 상당수가 이후 메타분석에서 사라졌습니다. 학생들이 자기 분야 이야기라는 것을 알아차리는 순간 집중도가 달라집니다.</p>
+      <p><b>Bonferroni와 FDR의 발상 차이만.</b> 전자는 하나라도 위양성이 생길 가족wise 오류확률을 통제하고, 후자는 발견들 중 위양성이 차지하는 비율의 <b>기댓값</b>을 통제합니다. 탐색적 오믹스 연구에서 FDR을 쓰는 이유가 여기 있습니다. 계산법은 가르치지 마십시오.</p>
+      <p><b>마무리.</b> 1섹션 사전 진단으로 돌아가 ‘답 지우고 다시 풀기’를 눌러 같은 질문에 답하십시오. 수업 초반 자기 답과 비교하는 것이 이 수업의 마침표입니다.</p>
+      <p style="margin-top:16px; padding-top:14px; border-top:1px solid var(--line)"><b>과감히 뺀 것</b> — 순열·조합 계산 연습, 적률생성함수, 분포의 적분 유도, 다변량 정규분포, 측도론적 σ-대수의 정식 구성. 시간이 부족하면 이 순서대로 생략하고, 분량이 넘치면 6섹션을 다음 시간으로 넘기는 것을 권합니다.</p>
+    </div>
+  </details>
+</section>
+
+</main>
+
+<script>
+/* ═══════════ 공통 ═══════════ */
+const C={ink:'#16201C',soft:'#5A6862',line:'#CBD2CA',violet:'#4A3A7A',
+         saf:'#BF3450',amber:'#B8791F',blue:'#2A6F8E',grey:'#D3D9D1'};
+const F='"IBM Plex Sans KR",sans-serif';
+const nf=(x,d=0)=>x.toLocaleString('ko-KR',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+function ctx(id){
+  const cv=document.getElementById(id), r=window.devicePixelRatio||1;
+  const w=cv.width, h=cv.height;
+  if(cv.dataset.hi!=='1'){cv.dataset.hi='1'; cv.style.width=w+'px'; cv.style.height=h+'px';
+    cv.width=w*r; cv.height=h*r;}
+  const g=cv.getContext('2d'); g.setTransform(r,0,0,r,0,0); g.clearRect(0,0,w,h);
+  g.W=w; g.H=h; return g;
+}
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function poisson(l){if(l>30)return Math.max(0,Math.round(l+Math.sqrt(l)*gauss()));
+  let L=Math.exp(-l),k=0,p=1;do{k++;p*=Math.random();}while(p>L);return k-1;}
+function lgam(x){const g=7,c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,
+  771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,
+  9.9843695780195716e-6,1.5056327351493116e-7];
+  if(x<0.5)return Math.log(Math.PI/Math.sin(Math.PI*x))-lgam(1-x);
+  x-=1;let a=c[0];const t=x+g+0.5;for(let i=1;i<g+2;i++)a+=c[i]/(x+i);
+  return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a);}
+function binPmf(k,n,p){if(k<0||k>n)return 0;
+  return Math.exp(lgam(n+1)-lgam(k+1)-lgam(n-k+1)+k*Math.log(p)+(n-k)*Math.log(1-p));}
+function binTail(k,n,p){let s=0;for(let i=k;i<=n;i++)s+=binPmf(i,n,p);return Math.min(1,s);}
+function binDraw(n,p){let c=0;for(let i=0;i<n;i++)if(Math.random()<p)c++;return c;}
+function axes(g,x0,y0,x1,y1){g.strokeStyle=C.line;g.lineWidth=1;g.beginPath();
+  g.moveTo(x0,y0);g.lineTo(x0,y1);g.moveTo(x0,y1);g.lineTo(x1,y1);g.stroke();}
+function lab(g,t,x,y,al='center',col=C.soft,size=11){
+  g.fillStyle=col;g.font=size+'px '+F;g.textAlign=al;g.textBaseline='middle';g.fillText(t,x,y);}
+
+/* ═══════════ 문서 내 이동 ═══════════ */
+// 진단을 실제 첫 활동으로 배치한다. 내부 id는 기존 계산 코드와의 호환을 위해 유지한다.
+const mainEl=document.querySelector('main');
+mainEl.insertBefore(document.getElementById('s2'),document.getElementById('s1'));
+document.querySelectorAll('#nav a').forEach(a=>{
+  a.setAttribute('tabindex','0'); a.setAttribute('role','link');
+  const go=()=>{const t=document.getElementById(a.dataset.go);
+    if(t)t.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'});};
+  a.addEventListener('click',e=>{e.preventDefault();go();});
+  a.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+});
+
+/* ═══════════ 히어로 ═══════════ */
+(function hero(){
+  const g=ctx('heroCv'),cols=50,rows=20,cw=g.W/cols,ch=g.H/rows,r=Math.min(cw,ch)/2-1.6;
+  const N=1000,nD=5,tp=5,fp=50;
+  const arr=new Array(N).fill(0);
+  for(let i=0;i<tp;i++)arr[i]=2;
+  const idx=[];for(let i=tp;i<N;i++)idx.push(i);
+  for(let i=idx.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[idx[i],idx[j]]=[idx[j],idx[i]];}
+  for(let i=0;i<fp;i++)arr[idx[i]]=1;
+  arr.forEach((v,i)=>{const cx=(i%cols)*cw+cw/2, cy=((i/cols)|0)*ch+ch/2;
+    g.fillStyle=v===2?C.saf:v===1?'#C98A2B':C.grey;
+    g.beginPath();g.arc(cx,cy,v?r:r*0.72,0,7);g.fill();});
+  document.getElementById('hTP').textContent=tp;
+  document.getElementById('hFP').textContent=fp;
+  document.getElementById('hTN').textContent=N-tp-fp;
+  document.getElementById('hPPV').textContent=Math.round(tp/(tp+fp)*100)+'%';
+})();
+
+/* ═══════════ 01-1 확률공간 · 멱집합 ═══════════ */
+const OUT=['빨강','파랑','초록','노랑'];
+let selA=null, selB=null;
+function omBuild(){
+  const n=+document.getElementById('om-n').value;
+  document.getElementById('v-om').textContent=n;
+  document.getElementById('om-card').textContent=Math.pow(2,n);
+  document.getElementById('om-list').innerHTML=
+    'Ω = { '+OUT.slice(0,n).map((t,i)=>'ω<sub>'+(i+1)+'</sub> '+t).join(', &nbsp;')+' }';
+  selA=null; selB=null;
+  const box=document.getElementById('om-chips'); box.innerHTML='';
+  for(let m=0;m<Math.pow(2,n);m++){
+    const b=document.createElement('button');
+    b.className='chip'; b.dataset.m=m; b.innerHTML=setName(m,n);
+    b.onclick=()=>{
+      if(selA===m){selA=null;}
+      else if(selB===m){selB=null;}
+      else if(selA===null){selA=m;}
+      else if(selB===null){selB=m;}
+      else {selA=m; selB=null;}
+      omRender(n);
+    };
+    box.appendChild(b);
+  }
+  omRender(n);
+}
+function setName(m,n){
+  if(m===0)return '∅';
+  if(m===Math.pow(2,n)-1)return 'Ω';
+  const e=[];for(let i=0;i<n;i++)if(m&(1<<i))e.push('ω<sub>'+(i+1)+'</sub>');
+  return '{'+e.join(',')+'}';
+}
+function omRender(n){
+  const full=Math.pow(2,n)-1;
+  document.querySelectorAll('#om-chips .chip').forEach(c=>{
+    const m=+c.dataset.m; c.className='chip';
+    if(m===selA)c.classList.add('selA');
+    if(m===selB)c.classList.add('selB');
+  });
+  const out=document.getElementById('om-out');
+  if(selA===null){out.innerHTML='사건을 하나 눌러 <b style="color:'+C.violet+'">A</b>로 지정하십시오.';return;}
+  const rows=[['A<sup>c</sup>',(~selA)&full]];
+  if(selB!==null){
+    rows.push(['A ∪ B',selA|selB],['A ∩ B',selA&selB],['A ∖ B',selA&(~selB)&full]);
+  }
+  const marks=new Set(rows.map(r=>r[1]));
+  document.querySelectorAll('#om-chips .chip').forEach(c=>{
+    if(marks.has(+c.dataset.m)&&+c.dataset.m!==selA&&+c.dataset.m!==selB)c.classList.add('res');
+  });
+  out.innerHTML=
+    '<span style="font-family:Gowun Batang,serif;font-size:15px">'+
+    'A = '+setName(selA,n)+(selB!==null?' &nbsp;·&nbsp; B = '+setName(selB,n):'')+'</span><br><br>'+
+    rows.map(r=>'<span style="font-family:Gowun Batang,serif;font-size:15px">'+r[0]+' = '+setName(r[1],n)+'</span>').join('<br>')+
+    '<br><br>'+(selB===null?'하나 더 누르면 B가 지정됩니다.':
+    '결과가 전부 위 목록 안에 있습니다 — 노란 테두리가 그것입니다.');
+}
+
+/* ═══════════ 01-2·3 벤 다이어그램과 공리 ═══════════ */
+const OPS=[
+  ['A',['a','ab']],['B',['b','ab']],['A<sup>c</sup>',['b','none']],
+  ['A ∪ B',['a','b','ab']],['A ∩ B',['ab']],['A ∖ B',['a']],
+  ['A △ B',['a','b']],['(A∪B)<sup>c</sup>',['none']],['A<sup>c</sup>∩B<sup>c</sup>',['none']]
+];
+let curOp=3;
+function mkTmp(W,H,s){const t=document.createElement('canvas');t.width=W*s;t.height=H*s;
+  const c=t.getContext('2d');c.scale(s,s);return{t,c};}
+function atomLayer(W,H,gm,name,s){
+  const {t,c}=mkTmp(W,H,s);
+  const A=()=>{c.beginPath();c.arc(gm.ax,gm.cy,gm.r,0,7);};
+  const B=()=>{c.beginPath();c.arc(gm.bx,gm.cy,gm.r,0,7);};
+  c.fillStyle='#000';
+  if(name==='ab'){c.save();A();c.clip();B();c.fill();c.restore();}
+  else if(name==='a'){A();c.fill();c.globalCompositeOperation='destination-out';B();c.fill();}
+  else if(name==='b'){B();c.fill();c.globalCompositeOperation='destination-out';A();c.fill();}
+  else{c.fillRect(0,0,W,H);c.globalCompositeOperation='destination-out';A();c.fill();B();c.fill();}
+  return t;
+}
+function paintRegion(g,gm,atoms,color,W,H){
+  const {t,c}=mkTmp(W,H,2);
+  atoms.forEach(nm=>c.drawImage(atomLayer(W,H,gm,nm,2),0,0,W,H));
+  c.globalCompositeOperation='source-in';c.fillStyle=color;c.fillRect(0,0,W,H);
+  g.drawImage(t,0,0,W,H);
+}
+function counts(){
+  let na=+document.getElementById('s-na').value,
+      nab=+document.getElementById('s-nab').value,
+      nb=+document.getElementById('s-nb').value;
+  let none=1000-na-nab-nb;
+  if(none<0){const ex=-none; const tot=na+nab+nb;
+    na=Math.round(na-ex*na/tot); nab=Math.round(nab-ex*nab/tot); nb=1000-na-nab; none=0;}
+  return {na,nab,nb,none};
+}
+function vennDraw(){
+  const k=counts();
+  document.getElementById('v-na').textContent=k.na;
+  document.getElementById('v-nab').textContent=k.nab;
+  document.getElementById('v-nb').textContent=k.nb;
+  const g=ctx('vennCv'),W=g.W,H=g.H;
+  const gm={ax:W/2-64,bx:W/2+64,cy:H/2-8,r:104};
+  g.fillStyle='#EFF1ED';g.fillRect(0,0,W,H);
+  paintRegion(g,gm,OPS[curOp][1],'rgba(74,58,122,0.40)',W,H);
+  g.strokeStyle=C.ink;g.lineWidth=1.6;
+  g.strokeRect(0.8,0.8,W-1.6,H-1.6);
+  g.beginPath();g.arc(gm.ax,gm.cy,gm.r,0,7);g.stroke();
+  g.beginPath();g.arc(gm.bx,gm.cy,gm.r,0,7);g.stroke();
+  lab(g,'A',gm.ax-66,gm.cy-76,'center',C.ink,19);
+  lab(g,'B',gm.bx+66,gm.cy-76,'center',C.ink,19);
+  lab(g,'Ω',14,14,'center',C.soft,15);
+  lab(g,k.na,gm.ax-54,gm.cy,'center',C.ink,15);
+  lab(g,k.nab,(gm.ax+gm.bx)/2,gm.cy,'center',C.ink,15);
+  lab(g,k.nb,gm.bx+54,gm.cy,'center',C.ink,15);
+  lab(g,k.none,W-34,H-24,'center',C.soft,14);
+  const map={a:k.na,b:k.nb,ab:k.nab,none:k.none};
+  const cnt=OPS[curOp][1].reduce((s,nm)=>s+map[nm],0);
+  document.getElementById('venn-out').innerHTML=
+    '<span class="big">'+(cnt/1000).toFixed(3)+'</span>'+
+    '<span style="font-family:Gowun Batang,serif;font-size:16px">P( '+OPS[curOp][0].replace(/<[^>]+>/g,m=>m)+' )</span>'+
+    ' = '+cnt+' / 1,000';
+  axiomDraw(k);
+}
+function axiomDraw(k){
+  const pA=(k.na+k.nab)/1000, pB=(k.nb+k.nab)/1000, pAB=k.nab/1000, pU=(k.na+k.nb+k.nab)/1000;
+  const sum=(k.na+k.nab+k.nb+k.none)/1000;
+  const disj=k.nab===0;
+  document.getElementById('ax-tab').innerHTML=
+   '<tr><th>공리</th><th>지금 값</th><th style="text-align:right">확인</th></tr>'+
+   '<tr><td class="f">P(E) ≥ 0</td><td>모든 영역이 0 이상</td><td class="n ok">성립</td></tr>'+
+   '<tr><td class="f">P(Ω) = 1</td><td>'+sum.toFixed(3)+'</td><td class="n '+(Math.abs(sum-1)<1e-9?'ok':'bad')+'">'+(Math.abs(sum-1)<1e-9?'성립':'위배')+'</td></tr>'+
+   '<tr><td class="f">배반 시 가법</td><td>'+(disj?'A∩B = ∅ 이므로 적용 가능':'A∩B ≠ ∅ 이므로 <b>적용 불가</b>')+'</td>'+
+   '<td class="n '+(disj?'ok':'bad')+'">'+(disj?'적용':'주의')+'</td></tr>';
+  document.getElementById('rule-tab').innerHTML=
+   '<tr><th>규칙</th><th style="text-align:right">값</th></tr>'+
+   '<tr><td class="f">P(∅) = 0</td><td class="n">0.000</td></tr>'+
+   '<tr><td class="f">P(A<sup>c</sup>) = 1 − P(A)</td><td class="n">'+(1-pA).toFixed(3)+'</td></tr>'+
+   '<tr><td class="f">P(A∩B) ≤ P(A)</td><td class="n">'+pAB.toFixed(3)+' ≤ '+pA.toFixed(3)+'</td></tr>'+
+   '<tr><td class="f">P(A)P(B)</td><td class="n">'+(pA*pB).toFixed(3)+'</td></tr>';
+  const naive=pA+pB;
+  document.getElementById('add-out').innerHTML=
+   '<span style="font-family:Gowun Batang,serif;font-size:16px">P(A∪B) = P(A) + P(B) − P(A∩B)</span><br>'+
+   '<span style="font-variant-numeric:tabular-nums">'+
+   pU.toFixed(3)+' = '+pA.toFixed(3)+' + '+pB.toFixed(3)+' − '+pAB.toFixed(3)+'</span><br><br>'+
+   '그냥 더하면 <em>'+naive.toFixed(3)+'</em> — 교집합 '+k.nab+'개를 두 번 세어 '+
+   (naive-pU).toFixed(3)+'만큼 부풀려집니다.<br><br>'+
+   (pAB===0
+     ? '지금은 <b>배반</b>입니다. 그런데 P(A)P(B) = '+(pA*pB).toFixed(3)+' ≠ 0 = P(A∩B) — 배반인데 <em>독립이 아닙니다</em>.'
+     : (Math.abs(pAB-pA*pB)<0.004
+        ? '지금은 P(A∩B) ≈ P(A)P(B) — 거의 <b>독립</b>입니다.'
+        : 'P(A∩B) = '+pAB.toFixed(3)+' vs P(A)P(B) = '+(pA*pB).toFixed(3)+' — 독립이 아닙니다.'));
+}
+(function buildOps(){
+  const box=document.getElementById('ops');
+  OPS.forEach((o,i)=>{const b=document.createElement('button');
+    b.className='ghost'+(i===curOp?' on':'');b.innerHTML=o[0];
+    b.onclick=()=>{curOp=i;
+      document.querySelectorAll('#ops button').forEach((x,j)=>x.classList.toggle('on',j===i));
+      vennDraw();};
+    box.appendChild(b);});
+})();
+
+/* ═══════════ 01-4 대수의 법칙 ═══════════ */
+let llnPaths=[];
+function llnDraw(multi){
+  const p=+document.getElementById('lln-p').value, n=+document.getElementById('lln-n').value;
+  document.getElementById('v-lln-p').textContent=p.toFixed(2);
+  document.getElementById('v-lln-n').textContent=nf(n);
+  const K=multi?10:1; llnPaths=[];
+  for(let k=0;k<K;k++){const path=[];let c=0;
+    for(let i=1;i<=n;i++){if(Math.random()<p)c++; path.push(c/i);} llnPaths.push(path);}
+  llnRender(p,n);
+}
+function llnRender(p,n){
+  const g=ctx('llnCv'),L=52,R=14,T=16,B=34,x0=L,x1=g.W-R,y0=T,y1=g.H-B;
+  const ymax=Math.min(1,Math.max(p*2.6,p+0.25));
+  const Y=v=>y1-(v/ymax)*(y1-y0), X=i=>x0+(i/n)*(x1-x0);
+  for(let t=0;t<=4;t++){const v=ymax*t/4;
+    g.strokeStyle='#E1E6E0';g.beginPath();g.moveTo(x0,Y(v));g.lineTo(x1,Y(v));g.stroke();
+    lab(g,v.toFixed(2),x0-8,Y(v),'right');}
+  g.setLineDash([5,4]);g.strokeStyle=C.saf;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(x0,Y(p));g.lineTo(x1,Y(p));g.stroke();g.setLineDash([]);
+  llnPaths.forEach(path=>{
+    g.strokeStyle=llnPaths.length>1?'rgba(74,58,122,0.42)':C.violet;
+    g.lineWidth=llnPaths.length>1?1.2:1.9;g.beginPath();
+    path.forEach((v,i)=>{const xx=X(i+1),yy=Y(Math.min(v,ymax));i?g.lineTo(xx,yy):g.moveTo(xx,yy);});
+    g.stroke();});
+  axes(g,x0,y0,x1,y1);
+  lab(g,'참값 '+p.toFixed(2),x1-4,Y(p)-11,'right',C.saf);
+  lab(g,'검사한 로트 수 →',(x0+x1)/2,y1+22,'center');
+  const fin=llnPaths.map(pp=>pp[pp.length-1]);
+  const e30=llnPaths.map(pp=>pp[Math.min(29,pp.length-1)]);
+  document.getElementById('lln-out').innerHTML=
+    '<span class="big">'+fin[0].toFixed(3)+'</span>'+nf(n)+'개 시점의 누적 비율<br>'+
+    '30개 시점에서는 <em>'+e30[0].toFixed(3)+'</em> — 초반의 흔들림이 이만큼입니다.'+
+    (fin.length>1?'<br>경로 10개의 최종값 범위: '+Math.min(...fin).toFixed(3)+' ~ '+Math.max(...fin).toFixed(3):'');
+}
+
+/* ═══════════ 02 퀴즈 ═══════════ */
+const QZ=[
+ {q:'실제 오염률 0.5%인 로트를 민감도 98%, 특이도 95%인 신속검사로 검사했더니 <b>양성</b>이 떴다. 이 로트가 정말 오염됐을 확률에 가장 가까운 것은?',
+  o:['약 98%','약 90%','약 50%','약 9%'],a:3,
+  e:'정상 로트가 995개나 되기 때문에 위양성만 약 50개 나옵니다. 진짜 양성 5개와 합쳐 55개, 그중 진짜는 5개입니다. 희귀한 것을 찾을 때 양성예측도는 민감도가 아니라 <b>유병률과 특이도</b>가 지배합니다. → 3섹션'},
+ {q:'논문에 <i>p</i> = 0.03이라고 적혀 있다. 올바른 해석은?',
+  o:['영가설이 참일 확률이 3%다','대립가설이 참일 확률이 97%다','영가설이 참이라면 이만큼 극단적인 결과가 나올 확률이 3%다','실험을 반복하면 97%에서 같은 결과가 나온다'],a:2,
+  e:'<i>p</i>값은 영가설과 모형 가정 아래에서 관측값만큼 또는 더 극단적인 검정통계량이 나올 꼬리확률입니다. <i>P</i>(H₀ | 데이터)가 아니며, 1번 문항처럼 조건의 방향을 뒤집어서는 안 됩니다. → 5섹션'},
+ {q:'평균 차이의 95% 신뢰구간이 [1.2, 4.8]로 보고되었다. 올바른 해석은?',
+  o:['참값이 이 구간에 있을 확률이 95%다','같은 방법으로 구간을 반복 생성하면 95%가 참값을 포함한다','표본의 95%가 이 구간에 들어간다','1.2와 4.8 사이 값들이 모두 95% 신뢰된다'],a:1,
+  e:'구간이 확률변수이고 모수는 고정된 값입니다. 눈앞의 이 구간 하나는 참값을 덮었거나 못 덮었거나 둘 중 하나입니다. Hoekstra 등(2014)에서 연구자·박사과정생 모두 높은 비율로 틀린 문항입니다. → 5섹션'},
+ {q:'시료 60개를 검사해 병원균이 <b>한 건도</b> 검출되지 않았다. 가장 타당한 결론은?',
+  o:['이 로트의 오염률은 0이다','오염률의 95% 상한이 약 5%라고 말할 수 있다','검사가 실패했을 가능성이 높다','오염률이 1/60보다 작다고 확정할 수 있다'],a:1,
+  e:'독립적인 무작위 표본과 완전한 검출을 가정한 이항모형의 3의 법칙입니다. 단측 95% 상한은 대략 3/n = 3/60 = 5%입니다. <b>검출되지 않음은 없음이 아닙니다.</b> → 5섹션'},
+ {q:'가공육 50 g/일과 대장암의 상대위험이 1.18로 보고되었다. 이를 기저위험 5%에 단순 적용하면 위험은 얼마인가?',
+  o:['위험이 5%에서 23%가 된다','위험이 5%에서 약 5.9%가 된다','100명 중 18명이 더 걸린다','1,000명 중 180명이 더 걸린다'],a:1,
+  e:'18%는 <b>상대</b>위험 증가입니다. 단순 적용하면 5% × 1.18 ≈ 5.9%이므로 1,000명당 50명 → 59명, 즉 9명 차이입니다. 관찰연구의 연관성을 개인의 인과적 평생위험으로 그대로 옮길 수 있다는 뜻은 아닙니다. → 3섹션(d)'}
+];
+let qAns=0,qRight=0;
+(function buildQuiz(){
+  const box=document.getElementById('quiz');
+  QZ.forEach((it,i)=>{
+    const d=document.createElement('div');d.className='q';
+    d.innerHTML='<p class="stem"><b>'+(i+1)+'</b>'+it.q+'</p>';
+    it.o.forEach((t,j)=>{
+      const b=document.createElement('button');b.className='opt';b.textContent=t;
+      b.onclick=()=>{
+        [...d.querySelectorAll('.opt')].forEach((x,k)=>{x.disabled=true;
+          if(k===it.a)x.classList.add('right'); else if(k===j)x.classList.add('wrong');});
+        d.querySelector('.exp').classList.add('show');
+        qAns++; if(j===it.a)qRight++;
+        document.getElementById('quizScore').innerHTML=
+          '<strong>'+qRight+' / '+qAns+'</strong> &nbsp;'+
+          (qAns===QZ.length?'— 수업 막바지에 이 화면으로 돌아와 다시 풀어 보십시오.':'답한 문항 기준');
+      };
+      d.appendChild(b);
+    });
+    const e=document.createElement('div');e.className='exp';e.innerHTML=it.e;d.appendChild(e);
+    box.appendChild(d);
+  });
+})();
+document.getElementById('quizReset').addEventListener('click',()=>{
+  document.querySelectorAll('#quiz .opt').forEach(b=>{
+    b.disabled=false;b.classList.remove('right','wrong');
+  });
+  document.querySelectorAll('#quiz .exp').forEach(e=>e.classList.remove('show'));
+  qAns=0;qRight=0;
+  document.getElementById('quizScore').textContent='답을 지웠습니다. 다시 풀어 보십시오.';
+});
+
+/* ═══════════ 03a 민감도·특이도 ═══════════ */
+function ssDraw(){
+  const c=+document.getElementById('ss-cut').value/100;
+  const d=+document.getElementById('ss-sep').value/10;
+  document.getElementById('v-cut').textContent=c.toFixed(2);
+  document.getElementById('v-sep').textContent=d.toFixed(1);
+  const g=ctx('ssCv'),L=16,R=16,T=26,B=46,x0=L,x1=g.W-R,y0=T,y1=g.H-B;
+  const lo=-4, hi=d+4, X=v=>x0+(v-lo)/(hi-lo)*(x1-x0);
+  const dn=(v,m)=>Math.exp(-0.5*(v-m)**2)/Math.sqrt(2*Math.PI);
+  const dmax=dn(0,0), Y=p=>y1-(p/dmax)*(y1-y0-12);
+  function shade(m,side,col){
+    g.fillStyle=col;g.beginPath();
+    const a=side==='r'?Math.max(c,lo):lo, b=side==='r'?hi:Math.min(c,hi);
+    if(b<=a)return;
+    g.moveTo(X(a),y1);
+    for(let v=a;v<=b;v+=(hi-lo)/400)g.lineTo(X(v),Y(dn(v,m)));
+    g.lineTo(X(b),y1);g.closePath();g.fill();
+  }
+  shade(0,'r','rgba(184,121,31,0.40)');
+  shade(d,'l','rgba(74,58,122,0.32)');
+  [[0,C.amber,'정상군'],[d,C.violet,'오염군']].forEach(([m,col,nm])=>{
+    g.strokeStyle=col;g.lineWidth=2.2;g.beginPath();
+    for(let i=0;i<=400;i++){const v=lo+(hi-lo)*i/400;const xx=X(v),yy=Y(dn(v,m));
+      i?g.lineTo(xx,yy):g.moveTo(xx,yy);}
+    g.stroke();
+    lab(g,nm,X(m),Y(dmax)-11,'center',col,12.5);
+  });
+  g.strokeStyle=C.saf;g.lineWidth=2;g.beginPath();
+  g.moveTo(X(c),y0-6);g.lineTo(X(c),y1);g.stroke();
+  lab(g,'판정 기준',X(c),y0-1,'center',C.saf,11.5);
+  lab(g,'← 음성 판정',X(c)-8,y0+16,'right',C.soft,11);
+  lab(g,'양성 판정 →',X(c)+8,y0+16,'left',C.soft,11);
+  axes(g,x0,y0,x1,y1);
+  lab(g,'검사기가 읽는 신호값',(x0+x1)/2,y1+30,'center');
+  lab(g,'보라 영역 = 놓친 오염(위음성)',x0+4,y1+14,'left',C.violet,11);
+  lab(g,'주황 영역 = 헛경보(위양성)',x1-4,y1+14,'right',C.amber,11);
+  const se=1-Phi(c-d), sp=Phi(c);
+  const judge=(se>=0.95&&sp>=0.95)?'민감도와 특이도가 모두 높습니다. 그래도 예측도와 최종 판단에는 오염률과 검사 맥락이 필요합니다.'
+    :(se>sp+0.12?'선별 쪽에 유리한 설정입니다 — 놓침을 줄이는 대신 헛경보를 더 감수합니다.'
+    :(sp>se+0.12?'확인 쪽에 유리한 설정입니다 — 헛경보를 줄이는 대신 일부 오염을 놓칩니다.'
+    :'선별과 확인 사이 어중간한 설정입니다.'));
+  document.getElementById('ss-out').innerHTML=
+   '<span class="big">'+(se*100).toFixed(1)+' / '+(sp*100).toFixed(1)+'</span>민감도 / 특이도 (%)<br><br>'+
+   '오염 100개 중 <b>'+(se*100).toFixed(0)+'개</b>를 잡아내고 '+((1-se)*100).toFixed(0)+'개를 놓칩니다.<br>'+
+   '정상 100개 중 <b>'+(sp*100).toFixed(0)+'개</b>를 통과시키고 '+((1-sp)*100).toFixed(0)+'개를 헛되이 붙잡습니다.<br><br>'+
+   judge;
+}
+
+/* ═══════════ 03b 전확률·베이즈 나무 ═══════════ */
+function treeDraw(){
+  const prev=+document.getElementById('tb-prev').value/1000;
+  const se=+document.getElementById('tb-sens').value/100;
+  const sp=+document.getElementById('tb-spec').value/100;
+  document.getElementById('v-tp2').textContent=(prev*100).toFixed(1)+'%';
+  document.getElementById('v-tse').textContent=(se*100).toFixed(0)+'%';
+  document.getElementById('v-tsp').textContent=(sp*100).toFixed(0)+'%';
+  const g=ctx('treeCv'),W=g.W,H=g.H;
+  const rx=30, mx=W*0.40, lx=W*0.70, cy=H/2;
+  const y1=cy-70, y2=cy+70;
+  const yy=[y1-38,y1+38,y2-38,y2+38];
+  const joint=[prev*se, prev*(1-se), (1-prev)*(1-sp), (1-prev)*sp];
+  const pos=joint[0]+joint[2];
+  function edge(x1,y1,x2,y2,w,col){g.strokeStyle=col;g.lineWidth=w;
+    g.beginPath();g.moveTo(x1,y1);
+    g.bezierCurveTo((x1+x2)/2,y1,(x1+x2)/2,y2,x2,y2);g.stroke();}
+  const wid=v=>Math.max(1.2,Math.min(16,v*20));
+  edge(rx+8,cy,mx-6,y1,wid(prev),C.saf);
+  edge(rx+8,cy,mx-6,y2,wid(1-prev),C.blue);
+  edge(mx+6,y1,lx-6,yy[0],wid(joint[0]),C.saf);
+  edge(mx+6,y1,lx-6,yy[1],wid(joint[1]),'#C8B8D8');
+  edge(mx+6,y2,lx-6,yy[2],wid(joint[2]),C.amber);
+  edge(mx+6,y2,lx-6,yy[3],wid(joint[3]),'#C6D2CC');
+  g.fillStyle=C.ink;g.beginPath();g.arc(rx,cy,7,0,7);g.fill();
+  lab(g,'Ω',rx,cy-17,'center',C.soft,12);
+  lab(g,'오염 '+(prev*100).toFixed(1)+'%',mx,y1-16,'center',C.saf,12.5);
+  lab(g,'정상 '+((1-prev)*100).toFixed(1)+'%',mx,y2+18,'center',C.blue,12.5);
+  lab(g,'민감도 '+(se*100).toFixed(0)+'%',(mx+lx)/2,yy[0]-13,'center',C.soft,10.5);
+  lab(g,'1−특이도 '+((1-sp)*100).toFixed(0)+'%',(mx+lx)/2,yy[2]-13,'center',C.soft,10.5);
+  const names=['오염 & 양성','오염 & 음성','정상 & 양성','정상 & 음성'];
+  const cols=[C.saf,C.soft,C.amber,C.soft];
+  yy.forEach((y,i)=>{
+    lab(g,names[i],lx+8,y-8,'left',cols[i],12);
+    lab(g,(joint[i]*1000).toFixed(1)+' / 1,000',lx+8,y+9,'left',C.soft,11.5);
+  });
+  g.strokeStyle=C.saf;g.setLineDash([3,3]);g.lineWidth=1.2;
+  g.strokeRect(lx+2,yy[0]-19,W-lx-6,26);g.strokeRect(lx+2,yy[2]-19,W-lx-6,26);
+  g.setLineDash([]);
+  lab(g,'양성이 나오는 두 경로',W-6,H-10,'right',C.saf,11.5);
+  document.getElementById('tb-out').innerHTML=
+   '<span class="big" style="color:'+C.saf+'">'+(joint[0]/pos*100).toFixed(1)+'%</span>사후확률 P(오염 | 양성)<br><br>'+
+   '<b>전확률</b> P(양성)<br>= '+se.toFixed(2)+'×'+prev.toFixed(3)+' + '+(1-sp).toFixed(2)+'×'+(1-prev).toFixed(3)+
+   ' = <b>'+pos.toFixed(4)+'</b><br><br>'+
+   '<b>베이즈</b> P(오염|양성)<br>= '+joint[0].toFixed(4)+' ⁄ '+pos.toFixed(4)+' = <em>'+(joint[0]/pos).toFixed(3)+'</em><br><br>'+
+   '사전 '+(prev*100).toFixed(1)+'% → 사후 <b>'+(joint[0]/pos*100).toFixed(1)+'%</b>. '+
+   '양성이라는 정보가 확률을 '+(joint[0]/pos/prev).toFixed(1)+'배 끌어올렸지만, 출발점이 낮아 여전히 낮습니다.';
+}
+
+/* ═══════════ 03 베이즈 ═══════════ */
+function bayes(){
+  const prev=+document.getElementById('b-prev').value/1000;
+  const se=+document.getElementById('b-sens').value/100;
+  const sp=+document.getElementById('b-spec').value/100;
+  document.getElementById('v-bp').textContent=(prev*100).toFixed(1)+'%';
+  document.getElementById('v-bse').textContent=(se*100).toFixed(0)+'%';
+  document.getElementById('v-bsp').textContent=(sp*100).toFixed(0)+'%';
+  const N=1000,nD=Math.round(N*prev),nH=N-nD;
+  const tp=Math.round(nD*se),fn=nD-tp,fp=Math.round(nH*(1-sp)),tn=nH-fp;
+  const ppv=tp+fp?tp/(tp+fp):0, npv=tn+fn?tn/(tn+fn):0;
+  const g=ctx('bayesCv'),cols=50,rows=20,cw=g.W/cols,ch=g.H/rows,r=Math.min(cw,ch)/2-1.6;
+  const arr=new Array(N).fill(0);let i=0;
+  for(let k=0;k<tp;k++)arr[i++]=3;
+  for(let k=0;k<fn;k++)arr[i++]=2;
+  const rest=[];for(let k=i;k<N;k++)rest.push(k);
+  for(let k=rest.length-1;k>0;k--){const j=(Math.random()*(k+1))|0;[rest[k],rest[j]]=[rest[j],rest[k]];}
+  for(let k=0;k<fp;k++)arr[rest[k]]=1;
+  arr.forEach((v,k)=>{const cx=(k%cols)*cw+cw/2, cy=((k/cols)|0)*ch+ch/2;
+    g.fillStyle=v===3?C.saf:v===2?C.violet:v===1?'#C98A2B':C.grey;
+    g.beginPath();g.arc(cx,cy,v?r:r*0.7,0,7);g.fill();});
+  document.getElementById('b-tab').innerHTML=
+   '<tr><th></th><th style="text-align:right">양성</th><th style="text-align:right">음성</th><th style="text-align:right">합</th></tr>'+
+   '<tr><td>실제 오염</td><td class="n" style="color:'+C.saf+'">'+tp+'</td><td class="n" style="color:'+C.violet+'">'+fn+'</td><td class="n">'+nD+'</td></tr>'+
+   '<tr><td>정상</td><td class="n" style="color:#B8791F">'+fp+'</td><td class="n">'+tn+'</td><td class="n">'+nH+'</td></tr>'+
+   '<tr><td>합</td><td class="n">'+(tp+fp)+'</td><td class="n">'+(tn+fn)+'</td><td class="n">1,000</td></tr>';
+  document.getElementById('b-out').innerHTML=
+   '<span class="big" style="color:'+C.saf+'">'+(ppv*100).toFixed(1)+'%</span>'+
+   '양성일 때 실제 오염일 확률 (양성예측도)<br><br>'+
+   '양성 <b>'+(tp+fp)+'</b>건 중 진짜는 <b>'+tp+'</b>건. 나머지 <em>'+fp+'</em>건은 헛걸음입니다.<br>'+
+   '음성예측도는 '+(npv*100).toFixed(1)+'%, 놓친 오염이 <em>'+fn+'</em>건.';
+}
+function rrDraw(){
+  const base=+document.getElementById('rr-base').value/1000;
+  const rr=+document.getElementById('rr-rr').value/100;
+  document.getElementById('v-rr-b').textContent=(base*100).toFixed(1)+'%';
+  document.getElementById('v-rr-r').textContent=rr.toFixed(2);
+  const a=Math.round(base*1000), b=Math.round(base*rr*1000), add=b-a;
+  const g=ctx('rrCv'),cols=40,rows=25,cw=g.W/2/cols,ch=(g.H-42)/rows,r=Math.min(cw,ch)/2-1.1;
+  [[0,a,'비섭취군'],[g.W/2+10,b,'섭취군']].forEach(([ox,cnt,nm])=>{
+    lab(g,nm+' — 1,000명 중 '+cnt+'명',ox+2,14,'left',C.ink,12.5);
+    for(let k=0;k<1000;k++){const cx=ox+(k%cols)*cw+cw/2+2, cy=30+((k/cols)|0)*ch+ch/2;
+      g.fillStyle=k<a?C.saf:(k<cnt?C.amber:C.grey);
+      g.beginPath();g.arc(cx,cy,k<cnt?r:r*0.68,0,7);g.fill();}
+  });
+  document.getElementById('rr-out').innerHTML=
+   '<span class="big">+'+add+'명</span>1,000명당 추가 발생<br><br>'+
+   '상대위험으로 말하면 <b>'+((rr-1)*100).toFixed(0)+'% 증가</b>.<br>'+
+   '절대위험으로 말하면 '+(base*100).toFixed(1)+'% → <em>'+(base*rr*100).toFixed(1)+'%</em>.<br>'+
+   '같은 사실인데 인상이 이만큼 다릅니다.';
+}
+
+/* ═══════════ 04-1 확률변수 — 동전 ═══════════ */
+function nCk(n,k){return Math.round(Math.exp(lgam(n+1)-lgam(k+1)-lgam(n-k+1)));}
+let coinEmp=null;
+function coinDraw(){
+  const n=+document.getElementById('c-n').value, p=+document.getElementById('c-p').value/100;
+  document.getElementById('v-cn').textContent=n;
+  document.getElementById('v-cp').textContent=p.toFixed(2);
+  mapDraw(n,p); rvDraw(n,p);
+}
+function mapDraw(n,p){
+  const g=ctx('mapCv'),W=g.W,H=g.H, yT=34, yB=H-30;
+  const cols=n+1, cw=W/cols;
+  lab(g,'표본공간 Ω  (2^'+n+' = '+nf(Math.pow(2,n))+'개의 표본점)',10,12,'left',C.soft,11.5);
+  lab(g,'확률변수 X = 앞면이 나온 횟수',10,H-10,'left',C.soft,11.5);
+  for(let k=0;k<=n;k++){
+    const cx=k*cw+cw/2, c=nCk(n,k);
+    if(n<=3){
+      const strs=[];
+      for(let m=0;m<Math.pow(2,n);m++){
+        let bits=0,s='';
+        for(let i=0;i<n;i++){const b=(m>>i)&1;bits+=b;s+=b?'앞':'뒤';}
+        if(bits===k)strs.push(s);
+      }
+      strs.forEach((s,j)=>{
+        const y=yT+j*17;
+        g.fillStyle='#fff';g.strokeStyle=C.line;
+        g.fillRect(cx-25,y-7.5,50,15);g.strokeRect(cx-25,y-7.5,50,15);
+        lab(g,s,cx,y,'center',C.ink,11.5);
+      });
+      g.strokeStyle=C.violet;g.lineWidth=1;g.globalAlpha=.55;
+      strs.forEach((s,j)=>{g.beginPath();g.moveTo(cx,yT+j*17+8);g.lineTo(cx,yB-11);g.stroke();});
+      g.globalAlpha=1;
+    } else {
+      const h=Math.max(4,(c/nCk(n,Math.floor(n/2)))*42);
+      g.fillStyle=C.violet;g.globalAlpha=.34;
+      g.fillRect(cx-cw*0.36,yB-16-h,cw*0.72,h);g.globalAlpha=1;
+      lab(g,nf(c),cx,yB-22-h,'center',C.soft,10);
+      g.strokeStyle=C.violet;g.lineWidth=1;g.globalAlpha=.5;
+      g.beginPath();g.moveTo(cx,yB-14);g.lineTo(cx,yB-11);g.stroke();g.globalAlpha=1;
+    }
+    g.fillStyle=C.ink;
+    g.beginPath();g.arc(cx,yB,10,0,7);g.fill();
+    lab(g,k,cx,yB,'center','#F2F5F0',12.5);
+  }
+  if(n>3)lab(g,'같은 값으로 접히는 표본점 수 = ₙCₖ',W-10,12,'right',C.soft,11);
+}
+function rvDraw(n,p){
+  const g=ctx('rvCv'),L=48,R=16,T=26,B=42,x0=L,x1=g.W-R,y0=T,y1=g.H-B;
+  const pm=[];for(let k=0;k<=n;k++)pm.push(binPmf(k,n,p));
+  let mx=Math.max(...pm); if(coinEmp)mx=Math.max(mx,...coinEmp);
+  const bw=(x1-x0)/(n+1);
+  for(let t=0;t<=4;t++){const v=mx*t/4;g.strokeStyle='#E1E6E0';g.beginPath();
+    g.moveTo(x0,y1-(v/mx)*(y1-y0));g.lineTo(x1,y1-(v/mx)*(y1-y0));g.stroke();
+    lab(g,v.toFixed(2),x0-8,y1-(v/mx)*(y1-y0),'right');}
+  for(let k=0;k<=n;k++){
+    const h=(pm[k]/mx)*(y1-y0-4), xx=x0+k*bw;
+    g.fillStyle=C.violet;g.globalAlpha=.55;
+    g.fillRect(xx+bw*0.14,y1-h,bw*0.72,h);g.globalAlpha=1;
+    if(coinEmp){const he=(coinEmp[k]/mx)*(y1-y0-4);
+      g.strokeStyle=C.saf;g.lineWidth=2;
+      g.beginPath();g.moveTo(xx+bw*0.08,y1-he);g.lineTo(xx+bw*0.92,y1-he);g.stroke();}
+    if(n<=8)lab(g,pm[k].toFixed(3),xx+bw/2,y1-h-9,'center',C.soft,10);
+  }
+  axes(g,x0,y0,x1,y1);
+  const st=n>12?2:1;
+  for(let k=0;k<=n;k+=st)lab(g,k,x0+k*bw+bw/2,y1+15);
+  lab(g,'X = 앞면이 나온 횟수',(x0+x1)/2,y1+32,'center');
+  lab(g,'확률분포  P(X = k)',x0-40,y0-14,'left',C.ink,12.5);
+  if(coinEmp)lab(g,'붉은 선 = 1,000회 실측',x1,y0-14,'right',C.saf,11.5);
+  const mean=n*p, sd=Math.sqrt(n*p*(1-p));
+  document.getElementById('c-out').innerHTML=
+   '<span class="big">'+nf(Math.pow(2,n))+' → '+(n+1)+'</span>표본점의 수 → X가 가질 수 있는 값의 수<br><br>'+
+   'E[X] = np = <b>'+nf(mean,2)+'</b> · SD = √(npq) = '+nf(sd,2)+'<br>'+
+   (n===2?'가운데 값이 두 배 높은 이유는 앞뒤와 뒤앞이 <em>같은 값 1로 접히기</em> 때문입니다.'
+        :'값 k로 접히는 표본점이 ₙCₖ개라서 <em>C(n,k) p<sup>k</sup>(1−p)<sup>n−k</sup></em> — 이것이 이항분포입니다.')+
+   (coinEmp?'<br><br>실측 최대 오차: '+
+     (Math.max(...coinEmp.map((v,k)=>Math.abs(v-binPmf(k,n,p))))).toFixed(3):'');
+}
+function coinToss(){
+  const n=+document.getElementById('c-n').value, p=+document.getElementById('c-p').value/100;
+  const c=new Array(n+1).fill(0);
+  for(let i=0;i<1000;i++)c[binDraw(n,p)]++;
+  coinEmp=c.map(v=>v/1000); coinDraw();
+}
+
+/* ═══════════ 04-2 기댓값·분산 ═══════════ */
+function evDraw(){
+  const n=+document.getElementById('c-n').value, p=+document.getElementById('c-p').value/100;
+  const pm=[];for(let k=0;k<=n;k++)pm.push(binPmf(k,n,p));
+  const mean=pm.reduce((s,v,k)=>s+k*v,0);
+  const rows=pm.map((v,k)=>[k,v,k*v]);
+  let tabH='<tr><th>k</th><th style="text-align:right">P(X=k)</th><th style="text-align:right">k·P(X=k)</th></tr>';
+  const show = n<=8 ? rows : [rows[0],rows[1],['⋯','⋯','⋯'],rows[Math.floor(n/2)],['⋯','⋯','⋯'],rows[n-1],rows[n]];
+  show.forEach(r=>{tabH+='<tr><td class="n">'+r[0]+'</td><td class="n">'+
+    (typeof r[1]==='number'?r[1].toFixed(3):r[1])+'</td><td class="n">'+
+    (typeof r[2]==='number'?r[2].toFixed(3):r[2])+'</td></tr>';});
+  tabH+='<tr><td><b>합</b></td><td></td><td class="n"><b>'+mean.toFixed(3)+'</b> = E[X]</td></tr>';
+  document.getElementById('ev-tab').innerHTML=tabH;
+
+  const varr=pm.reduce((s,v,k)=>s+(k-mean)**2*v,0);
+  const sd=Math.sqrt(varr);
+  const g=ctx('evCv'),L=46,R=14,T=22,B=40,x0=L,x1=g.W-R,y0=T,y1=g.H-B;
+  const mx=Math.max(...pm), bw=(x1-x0)/(n+1);
+  for(let k=0;k<=n;k++){const h=(pm[k]/mx)*(y1-y0-6), xx=x0+k*bw;
+    g.fillStyle=Math.abs(k-mean)<0.5?C.violet:'#B9AFCF';g.globalAlpha=0.62;
+    g.fillRect(xx+bw*0.14,y1-h,bw*0.72,h);g.globalAlpha=1;}
+  axes(g,x0,y0,x1,y1);
+  const st=n>12?2:1;
+  for(let k=0;k<=n;k+=st)lab(g,k,x0+k*bw+bw/2,y1+15);
+  lab(g,'X',(x0+x1)/2,y1+31,'center');
+  const mxp=x0+mean/n*(x1-x0);
+  g.strokeStyle=C.saf;g.lineWidth=2.2;g.beginPath();g.moveTo(mxp,y0-4);g.lineTo(mxp,y1);g.stroke();
+  lab(g,'E[X] = '+mean.toFixed(2),mxp,y0-10,'center',C.saf,12.5);
+  g.strokeStyle=C.amber;g.setLineDash([4,3]);g.lineWidth=1.6;
+  [mxp-sd/n*(x1-x0),mxp+sd/n*(x1-x0)].forEach(xx=>{
+    g.beginPath();g.moveTo(xx,y0+14);g.lineTo(xx,y1);g.stroke();});
+  g.setLineDash([]);
+  lab(g,'±SD ('+sd.toFixed(2)+')',mxp,y0+8,'center',C.amber,11);
+
+  document.getElementById('ev-out').innerHTML=
+   '<span class="big">'+mean.toFixed(3)+'</span>E[X] — 분포의 무게중심<br><br>'+
+   'Var(X) = '+varr.toFixed(3)+' &nbsp;→&nbsp; SD(X) = √'+varr.toFixed(3)+' = <em>'+sd.toFixed(3)+'</em><br><br>'+
+   '이항분포는 공식이 따로 있어 매번 이렇게 손으로 더하지 않아도 됩니다.<br>'+
+   'E[X] = np = '+(n*p).toFixed(3)+' &nbsp;·&nbsp; Var(X) = np(1−p) = '+(n*p*(1-p)).toFixed(3)+
+   ' &nbsp;— 표의 결과와 <b>정확히 일치</b>합니다.';
+}
+
+/* ═══════════ 04-3 정규분포 ═══════════ */
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,pp=0.3275911;
+  const t=1/(1+pp*x);
+  return s*(1-((((a5*t+a4)*t+a3)*t+a2)*t+a1)*t*Math.exp(-x*x));}
+function Phi(z){return 0.5*(1+erf(z/Math.SQRT2));}
+let showBand=false;
+function normDraw(){
+  const mu=+document.getElementById('nm-mu').value/10;
+  const sd=+document.getElementById('nm-sd').value/10;
+  const lsl=+document.getElementById('nm-lsl').value/10;
+  document.getElementById('v-nm').textContent=mu.toFixed(1)+' g';
+  document.getElementById('v-ns').textContent=sd.toFixed(1)+' g';
+  document.getElementById('v-nl').textContent=lsl.toFixed(1)+' g';
+  const g=ctx('normCv'),L=54,R=16,T=24,B=44,x0=L,x1=g.W-R,y0=T,y1=g.H-B;
+  const lo=mu-4.2*sd, hi=mu+4.2*sd;
+  const X=v=>x0+(v-lo)/(hi-lo)*(x1-x0);
+  const dens=v=>Math.exp(-0.5*((v-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI));
+  const dmax=dens(mu), Y=d=>y1-(d/dmax)*(y1-y0-10);
+  for(let t=0;t<=4;t++){const d=dmax*t/4;g.strokeStyle='#E1E6E0';g.beginPath();
+    g.moveTo(x0,Y(d));g.lineTo(x1,Y(d));g.stroke();lab(g,d.toFixed(2),x0-8,Y(d),'right');}
+  if(showBand){
+    [[3,'rgba(74,58,122,0.08)'],[2,'rgba(74,58,122,0.10)'],[1,'rgba(74,58,122,0.14)']]
+    .forEach(([k,col])=>{g.fillStyle=col;
+      g.fillRect(X(mu-k*sd),y0,X(mu+k*sd)-X(mu-k*sd),y1-y0);});
+    [[1,'68.3%'],[2,'95.4%'],[3,'99.7%']].forEach(([k,t])=>{
+      g.strokeStyle='rgba(74,58,122,0.5)';g.setLineDash([3,3]);
+      [mu-k*sd,mu+k*sd].forEach(v=>{g.beginPath();g.moveTo(X(v),y0);g.lineTo(X(v),y1);g.stroke();});
+      g.setLineDash([]);lab(g,'±'+k+'σ '+t,X(mu+k*sd)-4,y0+10+((k-1)*15),'right',C.violet,10.5);});
+  }
+  g.fillStyle='rgba(191,52,80,0.34)';g.beginPath();g.moveTo(X(lo),y1);
+  for(let v=lo;v<=Math.min(lsl,hi);v+=(hi-lo)/400)g.lineTo(X(v),Y(dens(v)));
+  g.lineTo(X(Math.min(lsl,hi)),y1);g.closePath();g.fill();
+  g.strokeStyle=C.violet;g.lineWidth=2.2;g.beginPath();
+  for(let i=0;i<=400;i++){const v=lo+(hi-lo)*i/400;const xx=X(v),yy=Y(dens(v));
+    i?g.lineTo(xx,yy):g.moveTo(xx,yy);}
+  g.stroke();
+  g.strokeStyle=C.saf;g.lineWidth=1.8;g.beginPath();
+  g.moveTo(X(lsl),y0-4);g.lineTo(X(lsl),y1);g.stroke();
+  lab(g,'표시량 '+lsl.toFixed(1)+' g',X(lsl)-6,y0+4,'right',C.saf,11.5);
+  g.strokeStyle=C.ink;g.setLineDash([4,3]);g.lineWidth=1.2;
+  g.beginPath();g.moveTo(X(mu),Y(dmax));g.lineTo(X(mu),y1);g.stroke();g.setLineDash([]);
+  lab(g,'μ',X(mu),y0+6,'center',C.ink,13);
+  axes(g,x0,y0,x1,y1);
+  for(let k=-4;k<=4;k+=2)lab(g,(mu+k*sd).toFixed(1),X(mu+k*sd),y1+15);
+  lab(g,'제품 순중량 (g)',(x0+x1)/2,y1+32,'center');
+  lab(g,'밀도 f(x)   단위: g⁻¹',x0-46,y0-12,'left',C.soft,11);
+  const z=(lsl-mu)/sd, pr=Phi(z);
+  document.getElementById('nm-out').innerHTML=
+   '<span class="big" style="color:'+C.saf+'">'+(pr*100).toFixed(2)+'%</span>표시량 미달 제품의 비율<br><br>'+
+   'z = (표시량 − μ)/σ = <b>'+z.toFixed(2)+'</b><br>'+
+   '10,000개 생산하면 <em>'+nf(Math.round(pr*10000))+'개</em>가 미달.<br><br>'+
+   '목표를 1 g 올리면 미달률은 '+(Phi((lsl-mu-1)/sd)*100).toFixed(2)+'%로 내려가지만 그만큼 원료를 더 씁니다.<br>'+
+   '산포를 σ = '+(sd/2).toFixed(1)+' g로 줄이면 목표를 올리지 않고도 '+
+   (Phi((lsl-mu)/(sd/2))*100).toFixed(2)+'%가 됩니다.';
+}
+
+/* ═══════════ 04 분포 ═══════════ */
+function binomDraw(){
+  const n=+document.getElementById('t-n').value;
+  const p=+document.getElementById('t-p').value/1000;
+  const al=+document.getElementById('t-a').value/100;
+  document.getElementById('v-tn').textContent=n;
+  document.getElementById('v-tp').textContent=p.toFixed(3)+(Math.abs(p-1/3)<0.002?' (차이 없음)':'');
+  document.getElementById('v-ta').textContent=al.toFixed(2);
+  let crit=n+1;for(let k=0;k<=n;k++){if(binTail(k,n,1/3)<=al){crit=k;break;}}
+  const pm=[];let mx=0;for(let k=0;k<=n;k++){const v=binPmf(k,n,p);pm.push(v);if(v>mx)mx=v;}
+  const g=ctx('binomCv'),L=46,R=14,T=22,B=40,x0=L,x1=g.W-R,y0=T,y1=g.H-B;
+  const bw=(x1-x0)/(n+1);
+  for(let k=0;k<=n;k++){const h=(pm[k]/mx)*(y1-y0-6), xx=x0+k*bw;
+    g.fillStyle=k>=crit?C.saf:C.violet; g.globalAlpha=k>=crit?0.92:0.55;
+    g.fillRect(xx+bw*0.12,y1-h,bw*0.76,h); g.globalAlpha=1;}
+  axes(g,x0,y0,x1,y1);
+  const step=n>50?10:5;
+  for(let k=0;k<=n;k+=step)lab(g,k,x0+k*bw+bw/2,y1+15);
+  lab(g,'정답을 맞힌 패널 수 (전체 '+n+'명)',(x0+x1)/2,y1+31,'center');
+  const cx=x0+crit*bw;
+  g.strokeStyle=C.ink;g.setLineDash([4,3]);g.beginPath();g.moveTo(cx,y0-6);g.lineTo(cx,y1);g.stroke();g.setLineDash([]);
+  lab(g,'유의 판정 시작: '+crit+'명',cx+6,y0+2,'left',C.ink,12);
+  const pw=binTail(crit,n,p);
+  document.getElementById('t-out').innerHTML=
+   '<span class="big">'+crit+'명</span>이 인원부터 "차이 있음"으로 판정<br><br>'+
+   '차이가 없을 때 기대 정답자 '+nf(n/3,1)+'명, 표준편차 '+nf(Math.sqrt(n*(1/3)*(2/3)),1)+'명.<br>'+
+   (Math.abs(p-1/3)<0.002
+     ? '지금은 <em>차이가 없는 상태</em>입니다. 그런데도 '+crit+'명 이상이 나올 확률이 '+(binTail(crit,n,1/3)*100).toFixed(1)+'% 있습니다.'
+     : '실제 정답확률 '+p.toFixed(2)+'에서 이 검사가 차이를 잡아낼 확률(검정력)은 <em>'+(pw*100).toFixed(0)+'%</em>입니다.');
+}
+let poisData=[];
+function poisGen(){
+  const lam=+document.getElementById('p-lam').value/10;
+  const od=+document.getElementById('p-od').value/100;
+  poisData=[];
+  for(let i=0;i<500;i++){
+    const l=od>0?lam*Math.exp(od*1.6*gauss()-od*od*1.28):lam;
+    poisData.push(poisson(Math.max(0.01,l)));}
+  poisRender();
+}
+function poisRender(){
+  const lam=+document.getElementById('p-lam').value/10;
+  const od=+document.getElementById('p-od').value/100;
+  document.getElementById('v-pl').textContent=lam.toFixed(1);
+  document.getElementById('v-pk').textContent=od===0?'없음':(od<0.35?'약함':od<0.7?'중간':'강함');
+  const mx=Math.max(...poisData,1),cnt=new Array(mx+1).fill(0);
+  poisData.forEach(v=>cnt[v]++);
+  const g=ctx('poisCv'),L=44,R=14,T=18,B=38,x0=L,x1=g.W-R,y0=T,y1=g.H-B;
+  const bw=(x1-x0)/(mx+1),hm=Math.max(...cnt);
+  for(let k=0;k<=mx;k++){const h=(cnt[k]/hm)*(y1-y0-6);
+    g.fillStyle=C.blue;g.globalAlpha=0.62;
+    g.fillRect(x0+k*bw+bw*0.1,y1-h,bw*0.8,h);g.globalAlpha=1;}
+  g.strokeStyle=C.saf;g.lineWidth=2;g.beginPath();
+  for(let k=0;k<=mx;k++){const v=Math.exp(-lam+k*Math.log(Math.max(lam,1e-9))-lgam(k+1))*500;
+    const xx=x0+k*bw+bw/2,yy=y1-(v/hm)*(y1-y0-6);k?g.lineTo(xx,yy):g.moveTo(xx,yy);}
+  g.stroke();
+  axes(g,x0,y0,x1,y1);
+  const st=Math.max(1,Math.round(mx/10));
+  for(let k=0;k<=mx;k+=st)lab(g,k,x0+k*bw+bw/2,y1+14);
+  lab(g,'시료 하나에서 센 건수',(x0+x1)/2,y1+30,'center');
+  lab(g,'붉은 선 = 이론적 포아송',x1-4,y0+2,'right',C.saf);
+  const m=poisData.reduce((a,b)=>a+b,0)/poisData.length;
+  const v=poisData.reduce((a,b)=>a+(b-m)**2,0)/(poisData.length-1);
+  document.getElementById('p-out').innerHTML=
+   '<span class="big">'+(v/m).toFixed(2)+'</span>분산 ÷ 평균 (포아송이면 1)<br><br>'+
+   '표본평균 '+m.toFixed(2)+' · 표본분산 '+v.toFixed(2)+'<br>'+
+   (v/m>1.3?'<em>과대산포</em> — 포아송 가정에서 벗어날 가능성을 점검하십시오.'
+    :v/m<0.7?'<em>과소산포</em> — 포아송 가정에서 벗어날 가능성을 점검하십시오.'
+    :'산포는 포아송 모형과 대체로 양립합니다. 적합성 판단에는 분포 모양과 생성과정도 필요합니다.');
+}
+let lognData=[];
+function lognGen(){
+  const ml=+document.getElementById('l-med').value/10, sd=+document.getElementById('l-sd').value/100;
+  lognData=[];for(let i=0;i<300;i++)lognData.push(Math.pow(10,ml+sd*gauss()));
+  lognRender();
+}
+function lognRender(){
+  const ml=+document.getElementById('l-med').value/10, sd=+document.getElementById('l-sd').value/100;
+  document.getElementById('v-lm').textContent=nf(Math.pow(10,ml));
+  document.getElementById('v-ls').textContent=sd.toFixed(2);
+  const g=ctx('lognCv'),halfW=g.W/2-12,T=24,B=38;
+  function hist(ox,data,nb,col,title,fmt){
+    const lo=Math.min(...data),hi=Math.max(...data),cnt=new Array(nb).fill(0);
+    data.forEach(v=>{let b=Math.floor((v-lo)/(hi-lo+1e-9)*nb);if(b>=nb)b=nb-1;cnt[b]++;});
+    const hm=Math.max(...cnt),x0=ox+34,x1=ox+halfW,y0=T,y1=g.H-B,bw=(x1-x0)/nb;
+    cnt.forEach((c,i)=>{const h=(c/hm)*(y1-y0-4);g.fillStyle=col;g.globalAlpha=0.62;
+      g.fillRect(x0+i*bw,y1-h,bw*0.88,h);g.globalAlpha=1;});
+    axes(g,x0,y0,x1,y1);
+    lab(g,title,ox+34,10,'left',C.ink,12.5);
+    lab(g,fmt(lo),x0,y1+14,'left');lab(g,fmt(hi),x1,y1+14,'right');
+    return {x0,x1,y0,y1,lo,hi};
+  }
+  const A=hist(0,lognData,26,C.amber,'원래 단위 CFU/g',v=>nf(v));
+  const logs=lognData.map(v=>Math.log10(v));
+  hist(g.W/2+4,logs,26,C.blue,'log₁₀ 변환 후',v=>v.toFixed(1));
+  const am=lognData.reduce((a,b)=>a+b,0)/lognData.length;
+  const gm=Math.pow(10,logs.reduce((a,b)=>a+b,0)/logs.length);
+  [[am,C.saf],[gm,C.violet]].forEach(([v,c])=>{
+    const xx=A.x0+(v-A.lo)/(A.hi-A.lo)*(A.x1-A.x0);
+    if(xx>=A.x0&&xx<=A.x1){g.strokeStyle=c;g.lineWidth=2;g.setLineDash([4,3]);
+      g.beginPath();g.moveTo(xx,A.y0);g.lineTo(xx,A.y1);g.stroke();g.setLineDash([]);}});
+  lab(g,'산술평균',A.x0+(am-A.lo)/(A.hi-A.lo)*(A.x1-A.x0)+4,A.y0+6,'left',C.saf,10.5);
+  lab(g,'기하평균',A.x0+(gm-A.lo)/(A.hi-A.lo)*(A.x1-A.x0)+4,A.y0+20,'left',C.violet,10.5);
+  document.getElementById('l-out').innerHTML=
+   '<span class="big">'+(am/gm).toFixed(2)+'배</span>산술평균 ÷ 기하평균<br><br>'+
+   '산술평균 '+nf(am)+' CFU/g<br>기하평균 <em>'+nf(gm)+'</em> CFU/g<br>'+
+   '보고할 때 어느 쪽인지 밝히지 않으면 이만큼 차이가 납니다.';
+}
+
+/* ═══════════ 05 표집분포 ═══════════ */
+let popul=[];
+(function makePop(){for(let i=0;i<40000;i++)popul.push(Math.pow(10,3+0.75*gauss()));})();
+function sampRun(){
+  const n=+document.getElementById('s-n').value, rep=+document.getElementById('s-rep').value;
+  document.getElementById('v-sn').textContent=n;
+  document.getElementById('v-sr').textContent=nf(rep);
+  const means=[];
+  for(let r=0;r<rep;r++){let s=0;for(let i=0;i<n;i++)s+=popul[(Math.random()*popul.length)|0];means.push(s/n);}
+  const pm=popul.reduce((a,b)=>a+b,0)/popul.length;
+  const psd=Math.sqrt(popul.reduce((a,b)=>a+(b-pm)**2,0)/popul.length);
+  const mm=means.reduce((a,b)=>a+b,0)/means.length;
+  const msd=Math.sqrt(means.reduce((a,b)=>a+(b-mm)**2,0)/(means.length-1));
+  const g=ctx('sampCv'),T=24,B=40,gap=18,hh=(g.H-T-B-gap)/2;
+  function draw(y0,data,col,title,lo,hi){
+    const nb=42,cnt=new Array(nb).fill(0);
+    data.forEach(v=>{let b=Math.floor((v-lo)/(hi-lo+1e-9)*nb);if(b<0)b=0;if(b>=nb)b=nb-1;cnt[b]++;});
+    const hm=Math.max(...cnt),x0=48,x1=g.W-14,bw=(x1-x0)/nb,y1=y0+hh;
+    cnt.forEach((c,i)=>{const h=(c/hm)*(hh-6);g.fillStyle=col;g.globalAlpha=0.65;
+      g.fillRect(x0+i*bw,y1-h,bw*0.9,h);g.globalAlpha=1;});
+    axes(g,x0,y0,x1,y1);
+    lab(g,title,x0,y0-9,'left',C.ink,12.5);
+    lab(g,nf(lo),x0,y1+13,'left');lab(g,nf(hi),x1,y1+13,'right');
+    return {x0,x1,y1,lo,hi};
+  }
+  const lo=0,hi=pm*3.4;
+  draw(T,popul.slice(0,6000),C.amber,'모집단 — 개별 시료의 CFU/g (치우쳐 있음)',lo,hi);
+  const D=draw(T+hh+gap+12,means,C.violet,'표본평균의 분포 — n = '+n+'로 '+nf(rep)+'번 반복',lo,hi);
+  const mx=D.x0+(pm-D.lo)/(D.hi-D.lo)*(D.x1-D.x0);
+  g.strokeStyle=C.saf;g.lineWidth=1.8;g.setLineDash([4,3]);
+  g.beginPath();g.moveTo(mx,T);g.lineTo(mx,D.y1);g.stroke();g.setLineDash([]);
+  lab(g,'모평균',mx+5,T+6,'left',C.saf,10.5);
+  lab(g,'CFU/g →',(D.x0+D.x1)/2,D.y1+30,'center');
+  document.getElementById('s-out').innerHTML=
+   '<span class="big">'+nf(msd)+'</span>평균들의 표준편차 = 표준오차<br><br>'+
+   '개별 시료의 SD: <b>'+nf(psd)+'</b><br>'+
+   '이론적 SE = SD/√n = <em>'+nf(psd/Math.sqrt(n))+'</em><br>'+
+   '실측 SE = '+nf(msd)+' — 거의 일치합니다.<br><br>'+
+   'n을 4배로 올리면 SE는 절반이 됩니다. 정밀도는 표본수의 <b>제곱근</b>에만 비례합니다.';
+}
+function nullRun(){
+  const n=+document.getElementById('n-n').value, rep=+document.getElementById('n-rep').value;
+  document.getElementById('v-nn').textContent=n;
+  document.getElementById('v-nr').textContent=nf(rep);
+  let crit=n+1;for(let k=0;k<=n;k++){if(binTail(k,n,1/3)<=0.05){crit=k;break;}}
+  const res=[];for(let r=0;r<rep;r++)res.push(binDraw(n,1/3));
+  const hit=res.filter(v=>v>=crit).length;
+  const g=ctx('nullCv'),T=20,B=46,cols=Math.ceil(Math.sqrt(rep*2.6));
+  const cw=(g.W-24)/cols, rows=Math.ceil(rep/cols), ch=Math.min(cw,(g.H-T-B)/rows);
+  const r=Math.max(1.4,Math.min(cw,ch)/2-1.3);
+  res.forEach((v,i)=>{const cx=12+(i%cols)*cw+cw/2, cy=T+((i/cols)|0)*ch+ch/2;
+    g.fillStyle=v>=crit?C.saf:C.grey;g.beginPath();g.arc(cx,cy,v>=crit?r:r*0.8,0,7);g.fill();});
+  lab(g,'점 하나 = 관능검사 한 번 (차이가 정말 없는 조건)',12,10,'left',C.soft,11.5);
+  lab(g,'붉은 점 '+hit+'개 = "유의한 차이를 찾았다"고 보고될 검사',12,g.H-22,'left',C.saf,12.5);
+  document.getElementById('n-out').innerHTML=
+   '<span class="big" style="color:'+C.saf+'">'+(hit/rep*100).toFixed(1)+'%</span>'+
+   '차이가 없는데 유의하게 나온 비율<br><br>'+
+   nf(rep)+'번 중 <em>'+hit+'</em>번. 이 비율은 이산검정의 실제 제1종 오류확률 '+(binTail(crit,n,1/3)*100).toFixed(1)+'%에 수렴하며, 설정한 α = 5% 이하입니다.<br>'+
+   '<b>α는 제1종 오류확률에 두는 상한이며, 유의한 결과 중 위양성인 비율은 아닙니다.</b>';
+}
+function r3Draw(){
+  const n=+document.getElementById('r3-n').value;
+  document.getElementById('v-r3').textContent=n;
+  const ub=1-Math.pow(0.05,1/n);
+  const g=ctx('r3Cv'),L=52,R=16,T=18,B=36,x0=L,x1=g.W-R,y0=T,y1=g.H-B;
+  const nmax=500, ymax=0.35;
+  const X=v=>x0+(v-5)/(nmax-5)*(x1-x0), Y=v=>y1-Math.min(v,ymax)/ymax*(y1-y0);
+  for(let t=0;t<=4;t++){const v=ymax*t/4;g.strokeStyle='#E1E6E0';g.beginPath();
+    g.moveTo(x0,Y(v));g.lineTo(x1,Y(v));g.stroke();lab(g,(v*100).toFixed(0)+'%',x0-8,Y(v),'right');}
+  g.strokeStyle=C.violet;g.lineWidth=2.2;g.beginPath();
+  for(let k=5;k<=nmax;k+=2){const v=1-Math.pow(0.05,1/k);const xx=X(k),yy=Y(v);k===5?g.moveTo(xx,yy):g.lineTo(xx,yy);}
+  g.stroke();
+  g.strokeStyle=C.amber;g.lineWidth=1.4;g.setLineDash([5,4]);g.beginPath();
+  for(let k=5;k<=nmax;k+=2){const v=3/k;const xx=X(k),yy=Y(v);k===5?g.moveTo(xx,yy):g.lineTo(xx,yy);}
+  g.stroke();g.setLineDash([]);
+  g.fillStyle=C.saf;g.beginPath();g.arc(X(n),Y(ub),5,0,7);g.fill();
+  axes(g,x0,y0,x1,y1);
+  [5,100,200,300,400,500].forEach(k=>lab(g,k,X(k),y1+14));
+  lab(g,'검사한 시료 수 n',(x0+x1)/2,y1+29,'center');
+  lab(g,'정확한 상한',x1-4,Y(1-Math.pow(0.05,1/460))-12,'right',C.violet);
+  lab(g,'근사 3/n',x1-4,Y(3/420)+13,'right',C.amber);
+  document.getElementById('r3-out').innerHTML=
+   '<span class="big" style="color:'+C.saf+'">'+(ub*100).toFixed(2)+'%</span>'+
+   '오염률의 단측 95% 신뢰상한<br><br>'+
+   '독립·동일 오염확률·완전 검출의 이항모형에서 얻은 정확한 상한입니다.<br>'+
+   '근사식 3/n = '+(3/n*100).toFixed(2)+'% · 현재 차이 '+Math.abs(3/n-ub).toFixed(4)+'. 큰 n일수록 근사가 좋아집니다.<br><br>'+
+   '<b>정확한 상한을 1% 이하로 만들려면 최소 '+Math.ceil(Math.log(0.05)/Math.log(0.99))+'개가 필요합니다.</b>';
+}
+
+/* ═══════════ 06 다중검정 ═══════════ */
+let bonf=false, multP=[];
+function multRun(){
+  const k=+document.getElementById('m-k').value;
+  multP=[];for(let i=0;i<k;i++)multP.push(Math.random());
+  multRender();
+}
+function multRender(){
+  const k=+document.getElementById('m-k').value, al=+document.getElementById('m-a').value/100;
+  document.getElementById('v-mk').textContent=k;
+  document.getElementById('v-ma').textContent=al.toFixed(2);
+  while(multP.length<k)multP.push(Math.random());
+  const P=multP.slice(0,k), thr=bonf?al/k:al, hit=P.filter(v=>v<thr).length;
+  const g=ctx('multCv'),T=22,B=26,cols=Math.min(20,Math.ceil(Math.sqrt(k*1.8)));
+  const rows=Math.ceil(k/cols), cw=(g.W-24)/cols, ch=Math.min(26,(g.H-T-B)/rows);
+  P.forEach((v,i)=>{const x=12+(i%cols)*cw, y=T+((i/cols)|0)*ch;
+    g.fillStyle=v<thr?C.saf:'#DFE4DD';g.fillRect(x+1.5,y+1.5,cw-3,ch-3);});
+  lab(g,'전부 효과 없는 재료 '+k+'가지 · 유의 기준 '+thr.toFixed(4),12,11,'left',C.soft,11.5);
+  const g2=ctx('multCurve'),L=52,R=16,T2=16,B2=30,x0=L,x1=g2.W-R,y0=T2,y1=g2.H-B2;
+  const X=v=>x0+(v-1)/199*(x1-x0), Y=v=>y1-v*(y1-y0);
+  for(let t=0;t<=4;t++){const v=t/4;g2.strokeStyle='#E1E6E0';g2.beginPath();
+    g2.moveTo(x0,Y(v));g2.lineTo(x1,Y(v));g2.stroke();lab(g2,(v*100).toFixed(0)+'%',x0-8,Y(v),'right');}
+  g2.strokeStyle=C.saf;g2.lineWidth=2.2;g2.beginPath();
+  for(let i=1;i<=200;i++){const perTest=bonf?al/i:al,v=1-Math.pow(1-perTest,i);const xx=X(i),yy=Y(v);i===1?g2.moveTo(xx,yy):g2.lineTo(xx,yy);}
+  g2.stroke();
+  const fw=1-Math.pow(1-thr,k);
+  g2.fillStyle=C.ink;g2.beginPath();g2.arc(X(k),Y(fw),4.5,0,7);g2.fill();
+  axes(g2,x0,y0,x1,y1);
+  [1,50,100,150,200].forEach(v=>lab(g2,v,X(v),y1+13));
+  lab(g2,bonf?'독립 가정: Bonferroni 적용 시 1 − (1−α/k)^k':'독립 가정: 위양성이 한 번이라도 나올 확률 = 1 − (1−α)^k',(x0+x1)/2,y1+26,'center');
+  document.getElementById('m-out').innerHTML=
+   '<span class="big" style="color:'+(hit?C.saf:C.ink)+'">'+hit+'건</span>유의하다고 선언된 재료<br><br>'+
+   '실제로는 <b>전부 효과가 없습니다</b>. 이 '+hit+'건은 전부 위양성입니다.<br>'+
+   '기대 위양성 수: '+(k*thr).toFixed(2)+'건<br>'+
+   '독립 가정에서 하나라도 나올 확률: <em>'+(fw*100).toFixed(1)+'%</em><br>'+
+   (bonf?'<br><b>Bonferroni 적용 중</b> — 기준을 α/k = '+thr.toFixed(4)+'로 낮췄고, 의존성이 있어도 가족wise 오류율은 α 이하입니다.':'');
+}
+
+/* ═══════════ 배선 ═══════════ */
+function on(id,ev,fn){const e=document.getElementById(id);if(e)e.addEventListener(ev,fn);}
+
+on('om-n','input',omBuild); omBuild();
+['s-na','s-nab','s-nb'].forEach(i=>on(i,'input',vennDraw)); vennDraw();
+['lln-p','lln-n'].forEach(i=>on(i,'input',()=>llnDraw(llnPaths.length>1)));
+on('lln-run','click',()=>llnDraw(false));
+on('lln-many','click',()=>llnDraw(true));
+llnDraw(false);
+
+['ss-cut','ss-sep'].forEach(i=>on(i,'input',ssDraw)); ssDraw();
+
+const PAIR=[['tb-prev','b-prev'],['tb-sens','b-sens'],['tb-spec','b-spec']];
+function syncFrom(src){
+  PAIR.forEach(([a,b])=>{const from=src==='tree'?a:b, to=src==='tree'?b:a;
+    document.getElementById(to).value=document.getElementById(from).value;});
+  treeDraw(); bayes();
+}
+PAIR.forEach(([a,b])=>{
+  on(a,'input',()=>syncFrom('tree'));
+  on(b,'input',()=>syncFrom('grid'));
+});
+treeDraw();
+
+function bSet(p,se,sp){document.getElementById('b-prev').value=p;
+  document.getElementById('b-sens').value=se;document.getElementById('b-spec').value=sp;
+  syncFrom('grid');}
+on('b-preset1','click',()=>bSet(5,98,95));
+on('b-preset2','click',()=>bSet(1,99,99));
+on('b-preset3','click',()=>bSet(200,90,90));
+bayes();
+
+['rr-base','rr-rr'].forEach(i=>on(i,'input',rrDraw));
+on('rr-iarc','click',()=>{document.getElementById('rr-base').value=50;
+  document.getElementById('rr-rr').value=118;rrDraw();});
+on('rr-smoke','click',()=>{document.getElementById('rr-base').value=10;
+  document.getElementById('rr-rr').value=400;rrDraw();});
+rrDraw();
+
+['c-n','c-p'].forEach(i=>on(i,'input',()=>{coinEmp=null;coinDraw();evDraw();}));
+on('c-toss','click',()=>{coinToss();evDraw();});
+on('c-reset','click',()=>{coinEmp=null;coinDraw();});
+coinDraw(); evDraw();
+
+document.querySelectorAll('[data-dist]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-dist]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  ['binom','pois','norm','logn'].forEach(d=>
+    document.getElementById('p-'+d).style.display=(d===b.dataset.dist)?'':'none');
+  if(b.dataset.dist==='pois'&&!poisData.length)poisGen();
+  if(b.dataset.dist==='norm')normDraw();
+  if(b.dataset.dist==='logn'&&!lognData.length)lognGen();
+}));
+['t-n','t-p','t-a'].forEach(i=>on(i,'input',binomDraw)); binomDraw();
+['nm-mu','nm-sd','nm-lsl'].forEach(i=>on(i,'input',normDraw));
+on('nm-band','click',e=>{showBand=!showBand;e.target.classList.toggle('on');
+  e.target.textContent=showBand?'68 · 95 · 99.7 구간 숨기기':'68 · 95 · 99.7 구간 보기';normDraw();});
+['p-lam','p-od'].forEach(i=>on(i,'input',poisGen)); on('p-draw','click',poisGen);
+['l-med','l-sd'].forEach(i=>on(i,'input',lognGen)); on('l-draw','click',lognGen);
+
+['s-n','s-rep'].forEach(i=>on(i,'input',sampRun)); on('s-run','click',sampRun); sampRun();
+['n-n','n-rep'].forEach(i=>on(i,'input',nullRun)); on('n-run','click',nullRun); nullRun();
+on('r3-n','input',r3Draw); r3Draw();
+
+['m-k','m-a'].forEach(i=>on(i,'input',multRender));
+on('m-run','click',multRun);
+on('m-bonf','click',e=>{bonf=!bonf;e.target.classList.toggle('on');
+  e.target.textContent=bonf?'Bonferroni 보정 끄기':'Bonferroni 보정 켜기';multRender();});
+multRun();
+
+const links=[...document.querySelectorAll('#nav a')];
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){
+  links.forEach(a=>a.classList.toggle('on',a.dataset.go===e.target.id));}});},
+  {rootMargin:'-25% 0px -65% 0px'});
+document.querySelectorAll('section').forEach(s=>io.observe(s));
+</script>
+</body>
+</html>

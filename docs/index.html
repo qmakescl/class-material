@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Q의 수업자료 페이지입니다."
+    >
+    <title>수업 자료</title>
+    <link rel="stylesheet" href="./assets/styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">본문 바로가기</a>
+
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="수업 자료 홈">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Class Material
+      </a>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span></span><span></span><span></span>
+        <span class="sr-only">메뉴 열기</span>
+      </button>
+
+      <nav id="site-nav" aria-label="주요 메뉴">
+        <a href="#statistics" data-nav-link><span class="dot dot-statistics" aria-hidden="true"></span>통계관련</a>
+        <a href="#data-science" data-nav-link><span class="dot dot-data-science" aria-hidden="true"></span>데이터과학관련</a>
+        <a href="#ai" data-nav-link><span class="dot dot-ai" aria-hidden="true"></span>인공지능관련</a>
+        <a href="#common" data-nav-link><span class="dot dot-common" aria-hidden="true"></span>일반적인것들</a>
+        <a href="#life" data-nav-link><span class="dot dot-life" aria-hidden="true"></span>이것저것</a>
+        <a href="#guide" data-nav-link>이용 안내</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="page-title">
+        <p class="eyebrow">Q의 수업 아카이브</p>
+        <h1 id="page-title">데이터관련 경험을 나눕니다.</h1>
+        <p class="hero-copy">
+          통계, 데이터과학, 인공지능 등 제가 진행하는 수업 자료를 한곳에 모았습니다.
+          수업 중 바로 확인하고, 수업 후에도 다시 찾아보며 어떤 이야기를 나눴는지 확인할 수 있습니다.
+        </p>
+        <div class="hero-actions">
+          <a class="pill pill-statistics" href="#statistics">통계관련</a>
+          <a class="pill pill-data-science" href="#data-science">데이터과학관련</a>
+          <a class="pill pill-ai" href="#ai">인공지능관련</a>
+          <a class="pill pill-common" href="#common">일반적인것들</a>
+          <a class="pill pill-life" href="#life">이것저것</a>
+        </div>
+      </section>
+
+      <section class="subject" id="statistics" data-subject="statistics" aria-labelledby="statistics-title">
+        <div class="section-heading">
+          <p class="eyebrow">STATISTICS</p>
+          <h2 id="statistics-title">통계</h2>
+          <p>자료 분석의 기초가 되는 통계 개념과 실습을 다룹니다.</p>
+        </div>
+
+        <div class="card-grid">
+          <a class="material-card" href="./statistics/grad-probability-lab.html">
+            <span class="card-number">01</span>
+            <div>
+              <p class="card-label">인터랙티브 실습</p>
+              <h3>확률에 대하여</h3>
+              <p>표본공간과 사건, 조건부확률과 베이즈, 확률변수와 분포, 표집분포와 추론, 다중검정까지 시뮬레이션으로 확인합니다.</p>
+            </div>
+            <span class="card-status">바로가기 →</span>
+          </a>
+
+          <article class="material-card">
+            <span class="card-number">02</span>
+            <div>
+              <p class="card-label">강의 노트</p>
+              <h3>추정과 가설검정</h3>
+              <p>표본으로부터 모집단을 추정하고 가설을 검정하는 과정을 정리합니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+
+          <article class="material-card">
+            <span class="card-number">03</span>
+            <div>
+              <p class="card-label">실습</p>
+              <h3>R/Python 통계 실습</h3>
+              <p>직접 따라 할 실습 파일과 과제를 제공합니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="subject" id="data-science" data-subject="data-science" aria-labelledby="data-science-title">
+        <div class="section-heading">
+          <p class="eyebrow">DATA SCIENCE</p>
+          <h2 id="data-science-title">데이터과학</h2>
+          <p>수집부터 분석, 시각화까지 데이터 전 과정을 다룹니다.</p>
+        </div>
+
+        <!-- 실제 자료가 준비되면 아래 card-grid에서 hidden 속성을 지우고,
+             다음 줄의 section-empty 문단을 삭제하세요. -->
+        <div class="card-grid" hidden>
+          <article class="material-card">
+            <span class="card-number">01</span>
+            <div>
+              <p class="card-label">시작하기</p>
+              <h3>데이터 수집과 전처리</h3>
+              <p>실제 데이터를 불러오고 분석 가능한 형태로 정리합니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+
+          <article class="material-card">
+            <span class="card-number">02</span>
+            <div>
+              <p class="card-label">강의 노트</p>
+              <h3>탐색적 데이터 분석과 시각화</h3>
+              <p>패턴을 발견하고 시각화로 전달하는 방법을 학습합니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+
+          <article class="material-card">
+            <span class="card-number">03</span>
+            <div>
+              <p class="card-label">프로젝트</p>
+              <h3>팀 프로젝트 가이드</h3>
+              <p>주제 선정부터 결과 발표까지의 진행 방식을 안내합니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+        </div>
+        <p class="section-empty">채우는 중입니다</p>
+      </section>
+
+      <section class="subject" id="ai" data-subject="ai" aria-labelledby="ai-title">
+        <div class="section-heading">
+          <p class="eyebrow">ARTIFICIAL INTELLIGENCE</p>
+          <h2 id="ai-title">인공지능</h2>
+          <p>머신러닝과 딥러닝의 원리를 이해하고 직접 구현합니다.</p>
+        </div>
+
+        <!-- 실제 자료가 준비되면 아래 card-grid에서 hidden 속성을 지우고,
+             다음 줄의 section-empty 문단을 삭제하세요. -->
+        <div class="card-grid" hidden>
+          <article class="material-card">
+            <span class="card-number">01</span>
+            <div>
+              <p class="card-label">시작하기</p>
+              <h3>머신러닝 개요</h3>
+              <p>지도학습과 비지도학습의 개념과 활용 사례를 살펴봅니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+
+          <article class="material-card">
+            <span class="card-number">02</span>
+            <div>
+              <p class="card-label">강의 노트</p>
+              <h3>신경망과 딥러닝 기초</h3>
+              <p>퍼셉트론부터 신경망 학습 원리까지 단계적으로 다룹니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+
+          <article class="material-card">
+            <span class="card-number">03</span>
+            <div>
+              <p class="card-label">실습</p>
+              <h3>모델 학습과 평가</h3>
+              <p>직접 모델을 학습시키고 성능을 평가하는 실습을 진행합니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+        </div>
+        <p class="section-empty">채우는 중입니다</p>
+      </section>
+
+      <section class="subject" id="common" data-subject="common" aria-labelledby="common-title">
+        <div class="section-heading">
+          <p class="eyebrow">COMMON</p>
+          <h2 id="common-title">일반적인것들</h2>
+          <p>수업과 관련된 일반적인 자료와 참고 문헌을 제공합니다.</p>
+        </div>
+
+        <!-- 실제 자료가 준비되면 아래 card-grid에서 hidden 속성을 지우고,
+             다음 줄의 section-empty 문단을 삭제하세요. -->
+        <div class="card-grid" hidden>
+          <article class="material-card">
+            <span class="card-number">01</span>
+            <div>
+              <p class="card-label">자료</p>
+              <h3>참고 문헌과 링크</h3>
+              <p>수업에서 참고한 자료와 유용한 링크를 정리합니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+
+          <article class="material-card">
+            <span class="card-number">02</span>
+            <div>
+              <p class="card-label">FAQ</p>
+              <h3>자주 묻는 질문</h3>
+              <p>수업과 관련하여 자주 묻는 질문과 답변을 제공합니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+
+          <article class="material-card">
+            <span class="card-number">03</span>
+            <div>
+              <p class="card-label">공지사항</p>
+              <h3>업데이트 및 공지</h3>
+              <p>수업 자료의 업데이트와 공지사항을 확인할 수 있습니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+        </div>
+        <p class="section-empty">채우는 중입니다</p>
+      </section>
+
+      <section class="subject" id="life" data-subject="life" aria-labelledby="life-title">
+        <div class="section-heading">
+          <p class="eyebrow">LIFE</p>
+          <h2 id="life-title">이것저것</h2>
+          <p>수업과 직접적인 관련은 없지만, 흥미로운 자료와 이야기를 공유합니다.</p>
+        </div>
+
+        <!-- 실제 자료가 준비되면 아래 card-grid에서 hidden 속성을 지우고,
+             다음 줄의 section-empty 문단을 삭제하세요. -->
+        <div class="card-grid" hidden>
+          <article class="material-card">
+            <span class="card-number">01</span>
+            <div>
+              <p class="card-label">에세이</p>
+              <h3>데이터와 삶</h3>
+              <p>데이터가 우리의 일상과 사회에 미치는 영향에 대한 에세이를 제공합니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+
+          <article class="material-card">
+            <span class="card-number">02</span>
+            <div>
+              <p class="card-label">인터뷰</p>
+              <h3>전문가 이야기</h3>
+              <p>데이터 과학 분야 전문가들의 경험과 조언을 담은 인터뷰를 제공합니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+
+          <article class="material-card">
+            <span class="card-number">03</span>
+            <div>
+              <p class="card-label">추천 도서</p>
+              <h3>읽을거리</h3>
+              <p>데이터와 관련된 흥미로운 책과 자료를 추천합니다.</p>
+            </div>
+            <span class="card-status">준비 중</span>
+          </article>
+        </div>
+        <p class="section-empty">채우는 중입니다</p>
+      </section>
+
+      <section class="guide" id="guide" aria-labelledby="guide-title">
+        <div>
+          <p class="eyebrow">GUIDE</p>
+          <h2 id="guide-title">자료 이용 안내</h2>
+        </div>
+        <ol>
+          <li><span>01</span>수업 전에 해당 주차의 자료를 확인합니다.</li>
+          <li><span>02</span>실습 파일은 내려받아 개인 작업 폴더에서 사용합니다.</li>
+          <li><span>03</span>자료에 관한 질문은 수업에서 함께 나눕니다.</li>
+        </ol>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-main">
+        <p>Q's Class Material</p>
+        <p>데이터를 다루는 수업 자료실</p>
+      </div>
+
+      <p class="footer-credit">Q가 Claude, Codex, Gemini 및 여러 인공지능을 이용해 만들었습니다.</p>
+
+      <ul class="footer-contact">
+        <li>
+          <span>Email</span>
+          <a href="mailto:yoonani72@gmail.com">yoonani72@gmail.com</a>
+          ·
+          <a href="mailto:yoonani@culture-lab.kr">yoonani@culture-lab.kr</a>
+        </li>
+        <li>
+          <span>GitHub</span>
+          <a href="https://github.com/QmakesCL" target="_blank" rel="noopener noreferrer">QmakesCL</a>
+        </li>
+        <li>
+          <span>Instagram</span>
+          <a href="https://www.instagram.com/yoonani/" target="_blank" rel="noopener noreferrer">@yoonani</a>
+        </li>
+        <li>
+          <span>Facebook</span>
+          <a href="https://www.facebook.com/yoonani72" target="_blank" rel="noopener noreferrer">@yoonani72</a>
+        </li>
+      </ul>
+    </footer>
+
+    <a class="to-top" href="#page-title" aria-label="맨 위로 이동">↑</a>
+
+    <script src="./assets/nav.js"></script>
+  </body>
+</html>
