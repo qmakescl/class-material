@@ -66,8 +66,8 @@
 ## 완료 보고
 
 - 파일 생성·변경 등 `AI_LOGGING.md`에서 정한 주요 작업을 마치면 최종 답변
-  직전에 `ai-logs/YYYY/YYYY-MM-DD.md`에 요청, 응답 요약, 수행 작업 및 검증
-  결과를 기록하고 일일 요약을 갱신한다.
+  직전에 `ai-logs/tasks/YYYY/MM/YYYY-MM-DD-NN.md`에 독립 상세 기록을 만들고
+  `ai-logs/daily/YYYY/MM/YYYY-MM-DD.md`의 요약 표를 갱신한다.
 - 파일 변경 없는 단순 질문·설명·검토는 기록하지 않는다. 세부 판단 기준과
   민감정보 처리에는 `AI_LOGGING.md`를 따른다.
 - 수정한 내용과 검증 결과를 간결하게 요약한다.

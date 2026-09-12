@@ -66,7 +66,8 @@ Key points not already covered above:
   pages and key static assets respond correctly.
 - Before the final response for a material file creation or change, follow
   `AI_LOGGING.md`: append the request, response summary, work performed,
-  changed files, and verification result to `ai-logs/YYYY/YYYY-MM-DD.md`, then
-  refresh that file's daily summary. Do not log read-only questions,
+  changed files, and verification result to an independent
+  `ai-logs/tasks/YYYY/MM/YYYY-MM-DD-NN.md` file, then add one summary row to
+  `ai-logs/daily/YYYY/MM/YYYY-MM-DD.md`. Do not log read-only questions,
   explanations, or reviews without repository changes. Never record secrets,
   private reasoning, or raw tool output.
