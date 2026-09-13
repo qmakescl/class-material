@@ -24,6 +24,10 @@ uv run python main.py
 GitHub Pages의 프로젝트 사이트 경로에서도 동작하도록 내부 링크에는 `/`로
 시작하는 절대 경로 대신 상대 경로를 사용합니다.
 
+공유 미리보기(Open Graph)는 `docs/assets/images/`의 과목별 PNG 아이콘을
+사용합니다. 페이지를 새로 추가할 때는 [DESIGN.md](DESIGN.md)의 과목별
+아이콘 매핑과 절대 URL 규칙을 함께 적용합니다.
+
 ## GitHub Pages 배포
 
 `main` 브랜치에 `docs/` 또는 Pages 워크플로 변경 사항이 푸시되면

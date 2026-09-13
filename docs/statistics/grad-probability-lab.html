@@ -4,6 +4,23 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>확률에 대하여</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/statistics/grad-probability-lab.html">
+<meta name="description" content="확률과 조건부확률을 시뮬레이션으로 탐구하는 통계 수업 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 수업 자료">
+<meta property="og:title" content="확률에 대하여 | Q의 수업 자료">
+<meta property="og:description" content="확률, 조건부확률, 베이즈 정리를 시뮬레이션으로 탐구합니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/statistics/grad-probability-lab.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="통계 수업 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="확률에 대하여 | Q의 수업 자료">
+<meta name="twitter:description" content="확률, 조건부확률, 베이즈 정리를 시뮬레이션으로 탐구합니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
+<meta name="twitter:image:alt" content="통계 수업 자료 아이콘">
 
 <style>
 :root{
@@ -119,6 +136,11 @@ p{max-width:44em}
 }
 input[type=range]{width:100%; accent-color:var(--violet); height:22px; cursor:pointer}
 input[type=range]:focus-visible{outline:2px solid var(--blue); outline-offset:3px}
+select{
+  width:100%; font:inherit; font-size:13.5px; color:var(--ink); background:#fff;
+  border:1px solid var(--line); border-radius:4px; padding:8px 10px; cursor:pointer;
+}
+select:focus-visible{outline:2px solid var(--blue); outline-offset:3px}
 button{
   font-family:inherit; font-size:13.5px; font-weight:500; cursor:pointer;
   background:var(--ink); color:#f4f6fb; border:0; border-radius:4px;
@@ -134,6 +156,8 @@ button.ghost.on{background:var(--ink); color:#f4f6fb; border-color:var(--ink)}
 .opsrow button{font-size:15px; padding:7px 14px}
 
 canvas{display:block; max-width:100%}
+.chart-wrap{margin:0; min-width:0}
+.chart-note{margin:7px 0 0; font-size:11.5px; line-height:1.55; color:var(--soft)}
 
 /* ── 결과 판 ───────────────────────────── */
 .readout{
@@ -145,6 +169,7 @@ canvas{display:block; max-width:100%}
   font-variant-numeric:tabular-nums; display:block; line-height:1.2; margin-bottom:2px;
 }
 .readout em{font-style:normal; color:var(--safranin); font-weight:600}
+.readout .muted{color:var(--soft)}
 table{border-collapse:collapse; width:100%; font-size:13.5px; margin-top:8px}
 th,td{text-align:left; padding:7px 10px; border-bottom:1px solid var(--line)}
 th{font-weight:600; color:var(--soft); font-size:12.5px}
@@ -200,6 +225,26 @@ details .body ul{margin:0 0 10px; padding-left:19px}
 details .body li{margin-bottom:6px}
 details .body b{color:var(--ink); font-weight:600}
 
+/* ── 선택형 사전 진단 ─────────────────────── */
+.optional-diagnostic{padding-top:30px}
+.diagnostic-toggle{
+  margin:0; padding:0; border:1px solid var(--line); border-left:4px solid var(--amber);
+  border-radius:5px; background:var(--card); overflow:hidden;
+}
+.diagnostic-toggle > summary{
+  display:flex; align-items:center; gap:12px; padding:15px 20px;
+  color:var(--ink); font-size:15.5px; font-weight:700;
+}
+.diagnostic-toggle > summary::before{color:var(--amber); font-size:13px}
+.diagnostic-toggle > summary .tag{margin:0; color:var(--amber)}
+.diagnostic-toggle > summary .toggle-label{
+  margin-left:auto; color:var(--soft); font-size:12px; font-weight:500;
+}
+.diagnostic-toggle[open] > summary{border-bottom:1px solid var(--line)}
+.diagnostic-content{padding:26px 24px 20px}
+.diagnostic-content > h3{margin-top:0}
+.diagnostic-content > details{margin-top:26px}
+
 .mis{
   background:#fde7ee; border-radius:4px; padding:14px 18px; margin:18px 0;
   font-size:13.5px; border-left:3px solid var(--safranin); max-width:46em;
@@ -226,12 +271,11 @@ details .body b{color:var(--ink); font-weight:600}
   <a class="rail-back" href="../index.html#statistics">← 처음으로</a>
   <h1>확률에 대하여</h1>
   <nav id="nav">
-    <a data-go="s2"><b>01</b><span>사전 진단</span></a>
-    <a data-go="s1"><b>02</b><span>확률의 언어</span></a>
-    <a data-go="s3"><b>03</b><span>조건부확률과 베이즈</span></a>
-    <a data-go="s4"><b>04</b><span>확률변수와 분포</span></a>
-    <a data-go="s5"><b>05</b><span>표집분포와 추론</span></a>
-    <a data-go="s6"><b>06</b><span>다중검정</span></a>
+    <a data-go="s1"><b>01</b><span>확률의 언어</span></a>
+    <a data-go="s3"><b>02</b><span>조건부확률과 베이즈</span></a>
+    <a data-go="s4"><b>03</b><span>확률변수와 분포</span></a>
+    <a data-go="s5"><b>04</b><span>표집분포와 추론</span></a>
+    <a data-go="s6"><b>05</b><span>다중검정</span></a>
   </nav>
   <footer>모든 그림은 실시간 계산·시뮬레이션 결과입니다. 값을 바꾸면 즉시 다시 그려집니다.</footer>
 </aside>
@@ -240,8 +284,8 @@ details .body b{color:var(--ink); font-weight:600}
 
 <div class="hero">
   <h2>양성이 나왔다. 이 로트는 오염됐을까?</h2>
-  <p>민감도 98%, 특이도 95%인 신속검사에서 양성이 떴습니다. 실제로 오염일 확률은 얼마일까요.</p>
-  <p>먼저 1절의 사전 진단에 답을 남겨 두십시오. 그다음 아래 자연빈도 판을 펼쳐 답을 확인할 수 있습니다.</p>
+  <p>민감도 <i>P</i>(양성 | 실제 오염) = 98%, 특이도 <i>P</i>(음성 | 실제 정상) = 95%인 신속검사에서 양성이 떴습니다. 실제로 오염일 확률은 얼마일까요.</p>
+  <p>원한다면 사전 진단에서 자신의 생각을 먼저 남겨 보십시오. 그다음 아래 자연빈도 판을 펼쳐 답을 확인할 수 있습니다.</p>
   <details class="hero-answer">
     <summary>사전 진단 후 자연빈도 판 보기</summary>
     <div class="heroplate">
@@ -260,7 +304,7 @@ details .body b{color:var(--ink); font-weight:600}
 
 <!-- ══════════ 01 확률의 언어 ══════════ -->
 <section id="s1">
-  <div class="tag">02</div>
+  <div class="tag">01</div>
   <h3>확률의 언어: 공간, 사건, 공리</h3>
   <p class="goal">확률은 "그럴 것 같은 정도"가 아니라 정확한 수학적 대상입니다. 앞으로 쓸 기호와 규칙을 먼저 세워 둡니다. 여기가 헐거우면 뒤가 전부 흔들립니다.</p>
 
@@ -384,49 +428,53 @@ details .body b{color:var(--ink); font-weight:600}
   </div>
 
   <div class="mis">
-    <b>여기서 짚을 것</b> — 초반 30개에서 비율이 0.4까지 튀는 것을 보고 "라인에 문제가 생겼다"고 판단하는 것이 현장에서 가장 흔한 오류입니다. 표본이 작으면 흔들림이 큽니다. 이 흔들림의 크기를 정량화하는 것이 5섹션입니다.
+    <b>여기서 짚을 것</b> — 초반 30개에서 비율이 0.4까지 튀는 것을 보고 "라인에 문제가 생겼다"고 판단하는 것이 현장에서 가장 흔한 오류입니다. 표본이 작으면 흔들림이 큽니다. 이 흔들림의 크기를 정량화하는 것이 4섹션입니다.
   </div>
 
   <details>
     <summary>수업 진행 노트</summary>
     <div class="body">
       <p><b>이 섹션의 목적은 형식을 세우는 것입니다.</b> 비전공자라고 해서 (Ω, ℱ, P)를 건너뛰면, 뒤에서 "확률이 무엇에 붙는 수인가"가 흐려집니다. 조건부확률이 왜 사건 두 개의 관계인지, <i>p</i>값이 왜 영가설과 모형 아래에서 정의되는 꼬리확률인지도 이 형식 위에서 분명해집니다.</p>
-      <p><b>ℱ를 굳이 말해야 하는가.</b> 유한 표본공간만 다룰 것이라면 ℱ = 2<sup>Ω</sup>로 두고 넘어가도 됩니다. 다만 "확률은 결과가 아니라 사건에 붙는다"는 한 문장은 반드시 남기십시오. 연속 확률변수에서 <i>P</i>(X = 1,000) = 0인데도 밀도가 양수인 상황이 4섹션에 나오는데, 그때 이 문장이 유일한 설명 도구가 됩니다.</p>
+      <p><b>ℱ를 굳이 말해야 하는가.</b> 유한 표본공간만 다룰 것이라면 ℱ = 2<sup>Ω</sup>로 두고 넘어가도 됩니다. 다만 "확률은 결과가 아니라 사건에 붙는다"는 한 문장은 반드시 남기십시오. 연속 확률변수에서 <i>P</i>(X = 1,000) = 0인데도 밀도가 양수인 상황이 3섹션에 나오는데, 그때 이 문장이 유일한 설명 도구가 됩니다.</p>
       <p><b>공리 ③의 조건을 강조하십시오.</b> 덧셈이 그냥 되는 게 아니라 <b>배반일 때만</b> 됩니다. 학생들이 P(A∪B) = P(A) + P(B)를 무조건 쓰는 것이 이 단원 최대의 오류이고, 교집합을 두 번 센다는 사실은 벤 다이어그램에서 즉시 보입니다.</p>
-      <p><b>배반과 독립.</b> 두 개념을 한 화면에서 대조하는 것이 효율적입니다. "겹치지 않는다"는 기하학적 성질이고 "정보를 주지 않는다"는 확률적 성질이라는 점을 못 박아 두면, 3섹션의 조건부확률로 자연스럽게 넘어갑니다.</p>
-      <p><b>마지막 패널의 역할.</b> "내일 비 올 확률 70%"가 무슨 뜻이냐고 물어보십시오. ① 같은 조건이 100번 오면 70번 비가 온다 ② 예보관의 확신 정도 ③ 지역의 70%에 비가 온다 — 셋으로 갈립니다. 공리는 셋 모두와 양립합니다. 이 갈림길이 5섹션에서 "<i>p</i>값은 영가설이 참일 확률"이라는 오독이 왜 범주 오류인지 설명할 때 되돌아옵니다.</p>
+      <p><b>배반과 독립.</b> 두 개념을 한 화면에서 대조하는 것이 효율적입니다. "겹치지 않는다"는 기하학적 성질이고 "정보를 주지 않는다"는 확률적 성질이라는 점을 못 박아 두면, 2섹션의 조건부확률로 자연스럽게 넘어갑니다.</p>
+      <p><b>마지막 패널의 역할.</b> "내일 비 올 확률 70%"가 무슨 뜻이냐고 물어보십시오. ① 같은 조건이 100번 오면 70번 비가 온다 ② 예보관의 확신 정도 ③ 지역의 70%에 비가 온다 — 셋으로 갈립니다. 공리는 셋 모두와 양립합니다. 이 갈림길이 4섹션에서 "<i>p</i>값은 영가설이 참일 확률"이라는 오독이 왜 범주 오류인지 설명할 때 되돌아옵니다.</p>
     </div>
   </details>
 </section>
 
-<!-- ══════════ 02 사전 진단 ══════════ -->
-<section id="s2">
-  <div class="tag">01</div>
-  <h3>사전 진단: 지금 무엇을 잘못 알고 있나</h3>
-  <p class="goal">수업을 시작하며 다섯 문항에 먼저 답합니다. 현재 생각을 기록하는 진단이므로 정답률이 낮아도 괜찮습니다. 이후 단원에서 각 오개념을 고친 뒤 같은 문항을 다시 풉니다.</p>
+<!-- ══════════ 사전 진단 (선택) ══════════ -->
+<section id="s2" class="optional-diagnostic">
+  <details class="diagnostic-toggle">
+    <summary><span class="tag">선택</span><span>사전 진단</span><span class="toggle-label">열어보기</span></summary>
+    <div class="diagnostic-content">
+      <h3>사전 진단: 지금 무엇을 잘못 알고 있나</h3>
+      <p class="goal">수업을 시작하며 다섯 문항에 답해 봅니다. 현재 생각을 기록하는 진단이므로 정답률이 낮아도 괜찮습니다. 원할 때만 열어 보고, 이후 단원에서 각 오개념을 고친 뒤 같은 문항을 다시 풀어 보십시오.</p>
 
-  <div class="panel">
-    <div id="quiz"></div>
-    <div class="score" id="quizScore">아직 답하지 않았습니다.</div>
-    <div class="btnrow"><button class="ghost" id="quizReset">답 지우고 다시 풀기</button></div>
-  </div>
+      <div class="panel">
+        <div id="quiz"></div>
+        <div class="score" id="quizScore">아직 답하지 않았습니다.</div>
+        <div class="btnrow"><button class="ghost" id="quizReset">답 지우고 다시 풀기</button></div>
+      </div>
 
-  <details>
-    <summary>수업 진행 노트</summary>
-    <div class="body">
-      <p>정답을 바로 공개하지 말고, 문항별로 손을 들게 한 뒤 분포를 칠판에 적어 두십시오. 수업 막바지에 같은 문항을 다시 물으면 학습 효과가 눈에 보입니다.</p>
-      <ul>
-        <li><b>1번</b>은 3섹션, <b>2·3번</b>은 5섹션, <b>4번</b>은 5섹션 끝, <b>5번</b>은 3섹션(b)에서 회수됩니다.</li>
-        <li>틀린 것이 부끄러운 게 아니라 <b>전공자도 똑같이 틀린다</b>는 점을 여기서 명확히 해 두면 이후 참여도가 올라갑니다.</li>
-        <li>1번 문항은 다음 섹션에서 세울 형식으로 다시 읽을 수 있습니다. Ω는 로트 1,000개, A는 '오염', B는 '양성'. 묻는 것은 P(A∩B)/P(B)입니다. 여기서는 답을 기록만 하고, 다음 섹션에서 이 표기를 칠판에 적어 두십시오.</li>
-      </ul>
+      <details>
+        <summary>수업 진행 노트</summary>
+        <div class="body">
+          <p>정답을 바로 공개하지 말고, 문항별로 손을 들게 한 뒤 분포를 칠판에 적어 두십시오. 수업 막바지에 같은 문항을 다시 물으면 학습 효과가 눈에 보입니다.</p>
+          <ul>
+            <li><b>1번</b>은 2섹션, <b>2·3번</b>은 4섹션, <b>4번</b>은 4섹션 끝, <b>5번</b>은 2섹션(b)에서 회수됩니다.</li>
+            <li>틀린 것이 부끄러운 게 아니라 <b>전공자도 똑같이 틀린다</b>는 점을 여기서 명확히 해 두면 이후 참여도가 올라갑니다.</li>
+            <li>1번 문항은 다음 섹션에서 세울 형식으로 다시 읽을 수 있습니다. Ω는 로트 1,000개, A는 '오염', B는 '양성'. 묻는 것은 P(A∩B)/P(B)입니다. 여기서는 답을 기록만 하고, 다음 섹션에서 이 표기를 칠판에 적어 두십시오.</li>
+          </ul>
+        </div>
+      </details>
     </div>
   </details>
 </section>
 
-<!-- ══════════ 03 조건부확률 ══════════ -->
+<!-- ══════════ 02 조건부확률 ══════════ -->
 <section id="s3">
-  <div class="tag">03</div>
+  <div class="tag">02</div>
   <h3>조건부확률과 베이즈 정리</h3>
   <p class="goal">조건이 붙으면 분모가 바뀝니다. <i>P</i>(양성|오염)과 <i>P</i>(오염|양성)은 분모가 다르므로 다른 수입니다. 이 구분이 검사 결과를 읽는 방식 전체를 바꿉니다.</p>
 
@@ -438,10 +486,10 @@ details .body b{color:var(--ink); font-weight:600}
   <!-- (a) 민감도·특이도 -->
   <div class="panel">
     <h4>(a) 민감도와 특이도: 분모가 서로 다른 두 조건부확률</h4>
-    <p class="hint">검사 성적서에 늘 붙어 나오는 두 수입니다. 둘 다 조건부확률인데 <b>조건이 서로 다릅니다</b>. 민감도는 오염된 것들만 모아 놓고 센 비율이고, 특이도는 정상인 것들만 모아 놓고 센 비율입니다. 분모가 다르므로 두 수를 더해도 1이 되지 않습니다.</p>
+    <p class="hint">검사 성적서에 늘 붙어 나오는 두 수입니다. 민감도는 <b>P(양성 | 실제 오염)</b>, 특이도는 <b>P(음성 | 실제 정상)</b>입니다. 둘 다 조건부확률인데 <b>조건이 서로 다릅니다</b>. 분모가 다르므로 두 수를 더해도 1이 되지 않습니다.</p>
 
     <table style="margin-bottom:22px">
-      <tr><th style="width:88px"></th><th>민감도 (sensitivity)</th><th>특이도 (specificity)</th></tr>
+      <tr><th style="width:88px"></th><th>민감도<br>P(양성 | 실제 오염)</th><th>특이도<br>P(음성 | 실제 정상)</th></tr>
       <tr>
         <td>정의</td>
         <td class="f">P(양성 | 실제 오염)</td>
@@ -490,14 +538,14 @@ details .body b{color:var(--ink); font-weight:600}
       <canvas id="ssCv" width="620" height="300"></canvas>
     </div>
     <div class="mis" style="margin-bottom:0">
-      <b>기억법에는 조건이 붙습니다</b> — SnNout·SpPin은 민감도가 높은 검사의 음성, 특이도가 높은 검사의 양성이 각각 배제·확정 판단에 유용하다는 경험칙입니다. 그러나 결과 뒤의 실제 확률인 음성·양성예측도는 오염률과 검사 환경에도 달려 있으므로, 민감도나 특이도 하나만으로 배제·확정을 단정할 수 없습니다. 선별–확인 2단계는 이 한계를 보완합니다.
+      <b>기억법에는 조건이 붙습니다</b> — SnNout·SpPin은 민감도 <i>P</i>(양성 | 실제 오염)가 높은 검사의 음성, 특이도 <i>P</i>(음성 | 실제 정상)가 높은 검사의 양성이 각각 배제·확정 판단에 유용하다는 경험칙입니다. 그러나 결과 뒤의 실제 확률인 음성·양성예측도는 오염률과 검사 환경에도 달려 있으므로, 민감도나 특이도 하나만으로 배제·확정을 단정할 수 없습니다. 선별–확인 2단계는 이 한계를 보완합니다.
     </div>
   </div>
 
   <!-- (b) 전확률과 베이즈 -->
   <div class="panel">
     <h4>(b) 전확률공식과 베이즈 정리</h4>
-    <p class="hint">민감도·특이도는 <b>원인 → 결과</b> 방향의 확률입니다. 그런데 현장에서 우리가 아는 것은 결과(양성)뿐이고 알고 싶은 것은 원인(오염)입니다. 방향을 뒤집는 장치가 베이즈 정리이고, 그 분모를 계산해 주는 것이 전확률공식입니다.</p>
+    <p class="hint">민감도 <b>P(양성 | 실제 오염)</b>와 특이도 <b>P(음성 | 실제 정상)</b>는 <b>원인 → 결과</b> 방향의 확률입니다. 그런데 현장에서 우리가 아는 것은 결과(양성)뿐이고 알고 싶은 것은 원인(오염)입니다. 방향을 뒤집는 장치가 베이즈 정리이고, 그 분모를 계산해 주는 것이 전확률공식입니다.</p>
 
     <div class="math">
       Ω = B₁ ∪ ⋯ ∪ B<sub>n</sub> &nbsp;(서로 배반, 전체를 덮음) 일 때<br>
@@ -513,11 +561,11 @@ details .body b{color:var(--ink); font-weight:600}
           <input type="range" id="tb-prev" min="1" max="300" step="1" value="5">
         </div>
         <div class="ctl">
-          <label><span>민감도</span><var id="v-tse">98%</var></label>
+          <label><span>민감도 P(양성 | 실제 오염)</span><var id="v-tse">98%</var></label>
           <input type="range" id="tb-sens" min="50" max="100" step="1" value="98">
         </div>
         <div class="ctl">
-          <label><span>특이도</span><var id="v-tsp">95%</var></label>
+          <label><span>특이도 P(음성 | 실제 정상)</span><var id="v-tsp">95%</var></label>
           <input type="range" id="tb-spec" min="50" max="100" step="1" value="95">
         </div>
         <div class="readout" id="tb-out"></div>
@@ -525,13 +573,13 @@ details .body b{color:var(--ink); font-weight:600}
       <canvas id="treeCv" width="620" height="300"></canvas>
     </div>
     <div class="mis" style="margin-bottom:0">
-      <b>분모를 함께 보아야 합니다</b> — 양성이 나오는 경로는 두 개입니다. 오염인데 걸린 경우와, 정상인데 헛걸린 경우. 오염이 드물면 두 번째 경로의 출발점이 매우 크므로 작은 위양성률도 결과를 크게 바꿀 수 있습니다. 민감도·특이도·오염률을 모두 넣어 나무 그림의 가지를 비교하십시오.
+      <b>분모를 함께 보아야 합니다</b> — 양성이 나오는 경로는 두 개입니다. <i>P</i>(양성 | 실제 오염)과 <i>P</i>(양성 | 실제 정상)입니다. 오염이 드물면 두 번째 경로의 출발점이 매우 크므로 작은 위양성률도 결과를 크게 바꿀 수 있습니다. 민감도·특이도·오염률을 모두 넣어 나무 그림의 가지를 비교하십시오.
     </div>
   </div>
 
   <div class="panel">
     <h4>(c) 신속검사 성적서 읽기 — 자연빈도 판</h4>
-    <p class="hint">로트 1,000개를 한 점씩 찍었습니다. 유병률·민감도·특이도를 움직이면 점의 색이 바뀝니다. 수식 없이 세기만 하면 됩니다.</p>
+    <p class="hint">로트 1,000개를 한 점씩 찍었습니다. 유병률과 민감도 <b>P(양성 | 실제 오염)</b>, 특이도 <b>P(음성 | 실제 정상)</b>를 움직이면 점의 색이 바뀝니다. 수식 없이 세기만 하면 됩니다.</p>
     <div class="grid-ctrl">
       <div>
         <div class="ctl">
@@ -539,11 +587,11 @@ details .body b{color:var(--ink); font-weight:600}
           <input type="range" id="b-prev" min="1" max="300" step="1" value="5">
         </div>
         <div class="ctl">
-          <label><span>민감도 — 오염을 양성으로</span><var id="v-bse">98%</var></label>
+          <label><span>민감도 P(양성 | 실제 오염)</span><var id="v-bse">98%</var></label>
           <input type="range" id="b-sens" min="50" max="100" step="1" value="98">
         </div>
         <div class="ctl">
-          <label><span>특이도 — 정상을 음성으로</span><var id="v-bsp">95%</var></label>
+          <label><span>특이도 P(음성 | 실제 정상)</span><var id="v-bsp">95%</var></label>
           <input type="range" id="b-spec" min="50" max="100" step="1" value="95">
         </div>
         <div class="btnrow">
@@ -561,7 +609,7 @@ details .body b{color:var(--ink); font-weight:600}
   </div>
 
   <div class="mis">
-    <b>학생이 가장 놀라는 지점</b> — 이 희귀 오염 예시에서는 민감도를 98%에서 100%로 올리는 것보다 특이도를 95%에서 99%로 올릴 때 양성예측도가 더 크게 변합니다. 이는 정상 로트가 매우 많아 작은 위양성률도 누적되기 때문입니다. 일반적으로는 <b>오염률·민감도·특이도 모두</b>가 예측도를 결정합니다.
+    <b>학생이 가장 놀라는 지점</b> — 이 희귀 오염 예시에서는 민감도 <i>P</i>(양성 | 실제 오염)를 98%에서 100%로 올리는 것보다 특이도 <i>P</i>(음성 | 실제 정상)를 95%에서 99%로 올릴 때 양성예측도가 더 크게 변합니다. 이는 정상 로트가 매우 많아 작은 위양성률 <i>P</i>(양성 | 실제 정상)도 누적되기 때문입니다. 일반적으로는 <b>오염률·민감도·특이도 모두</b>가 예측도를 결정합니다.
   </div>
 
   <div class="panel">
@@ -590,24 +638,24 @@ details .body b{color:var(--ink); font-weight:600}
   <details>
     <summary>수업 진행 노트</summary>
     <div class="body">
-      <p><b>정의부터 그림으로.</b> P(A|B)는 조건 B 안으로 표본공간을 제한하고 확률을 다시 정규화하는 일입니다. 2섹션의 벤 다이어그램을 다시 띄우고 "이제 B 바깥은 제외한다"고 말하면서 B 원만 남기십시오. 분모가 P(B)로 바뀐다는 것이 핵심입니다.</p>
-      <p><b>(a) 이 섹션에서 가장 많이 막히는 지점입니다.</b> 민감도와 특이도를 처음 보는 학생은 둘을 더해 1이 될 것으로 기대합니다. 표의 '분모' 줄을 손으로 짚어 주십시오. 민감도의 분모는 오염된 것들, 특이도의 분모는 정상인 것들 — 애초에 <b>다른 집단을 세고 있습니다</b>. 그래서 합이 1이 되어야 할 이유가 없습니다. 1에서 빼면 나오는 짝은 각각 위음성률과 위양성률입니다.</p>
-      <p><b>(a) 두 번째 오해.</b> 이 단순 모형에서는 같은 검사·기준선·대상군에서 민감도와 특이도를 고정하고 오염률만 바꿉니다. 실제 현장에서는 대상군의 스펙트럼과 표본처리에 따라서도 성능이 달라질 수 있습니다. 반면 예측도는 같은 민감도·특이도에서도 오염률이 바뀌면 달라집니다.</p>
-      <p><b>(a) 기준선 슬라이더를 반드시 끌어 보이십시오.</b> 검사 분포가 고정된 상태에서 기준선을 왼쪽으로 밀면 민감도가 오르고 특이도가 떨어집니다. 두 수를 함께 개선하려면 측정법·표본처리 등 검사 자체를 개선해 두 분포를 더 떼어 놓아야 하며, 그것이 아래쪽 성능 슬라이더입니다. ROC 곡선을 아는 학생에게는 이 그림이 그 곡선의 배후라고 한마디만 덧붙이면 됩니다.</p>
+      <p><b>정의부터 그림으로.</b> P(A|B)는 조건 B 안으로 표본공간을 제한하고 확률을 다시 정규화하는 일입니다. 1섹션의 벤 다이어그램을 다시 띄우고 "이제 B 바깥은 제외한다"고 말하면서 B 원만 남기십시오. 분모가 P(B)로 바뀐다는 것이 핵심입니다.</p>
+      <p><b>(a) 이 섹션에서 가장 많이 막히는 지점입니다.</b> 민감도 <i>P</i>(양성 | 실제 오염)와 특이도 <i>P</i>(음성 | 실제 정상)를 처음 보는 학생은 둘을 더해 1이 될 것으로 기대합니다. 표의 '분모' 줄을 손으로 짚어 주십시오. 민감도의 분모는 오염된 것들, 특이도의 분모는 정상인 것들 — 애초에 <b>다른 집단을 세고 있습니다</b>. 그래서 합이 1이 되어야 할 이유가 없습니다. 1에서 빼면 나오는 짝은 각각 위음성률 <i>P</i>(음성 | 실제 오염)과 위양성률 <i>P</i>(양성 | 실제 정상)입니다.</p>
+      <p><b>(a) 두 번째 오해.</b> 이 단순 모형에서는 같은 검사·기준선·대상군에서 민감도 <i>P</i>(양성 | 실제 오염)와 특이도 <i>P</i>(음성 | 실제 정상)를 고정하고 오염률만 바꿉니다. 실제 현장에서는 대상군의 스펙트럼과 표본처리에 따라서도 성능이 달라질 수 있습니다. 반면 예측도는 같은 두 조건부확률에서도 오염률이 바뀌면 달라집니다.</p>
+      <p><b>(a) 기준선 슬라이더를 반드시 끌어 보이십시오.</b> 검사 분포가 고정된 상태에서 기준선을 왼쪽으로 밀면 민감도 <i>P</i>(양성 | 실제 오염)가 오르고 특이도 <i>P</i>(음성 | 실제 정상)가 떨어집니다. 두 수를 함께 개선하려면 측정법·표본처리 등 검사 자체를 개선해 두 분포를 더 떼어 놓아야 하며, 그것이 아래쪽 성능 슬라이더입니다. ROC 곡선을 아는 학생에게는 이 그림이 그 곡선의 배후라고 한마디만 덧붙이면 됩니다.</p>
       <p><b>(b) 전확률공식은 "경우를 나눠 세기"입니다.</b> 양성이 나오는 길이 두 개뿐이므로 각 길의 확률을 더하면 됩니다. 나무를 왼쪽에서 오른쪽으로 읽으며 가지마다 곱하고, 끝에서 같은 결과끼리 더한다 — 이 절차만 익히면 공식을 외울 필요가 없습니다.</p>
       <p><b>(b) 베이즈는 나무를 거꾸로 읽는 것입니다.</b> 양성이라는 잎에 도착했다는 사실만 알 때, 어느 가지로 왔을 가능성이 큰가. 분자는 그 가지 하나, 분모는 그 잎에 도달하는 모든 가지의 합. 학생이 이 그림을 손으로 그릴 수 있으면 이 섹션은 성공입니다.</p>
       <p><b>(c) 판서 순서.</b> 슬라이더를 건드리기 전에 자연빈도 문장부터 읽어 주십시오. "1,000개 중 5개가 오염, 그 5개 중 5개가 양성, 나머지 995개 중 50개도 양성. 그래서 양성 55개 중 진짜는 5개." 수식 없이 이 문장만으로 정답률이 올라간다는 것이 Gigerenzer &amp; Hoffrage(1995)의 결과입니다.</p>
       <p><b>실무로 연결.</b> 이 예시에서 양성예측도가 약 9%라는 것은 신속검사 양성만으로 폐기를 결정하기 어렵다는 뜻입니다. 실제 결정은 검사 지침, 오류 비용, 표본추출과 확인검사 결과를 함께 고려해야 합니다. 희귀한 대상을 검사할 때는 작은 위양성률도 큰 영향을 줍니다.</p>
-      <p><b>같은 구조의 오류.</b> <i>P</i>(양성|오염)을 <i>P</i>(오염|양성)로 읽는 것과, 영가설 아래의 꼬리확률인 <i>p</i>값을 <i>P</i>(H₀|데이터)로 읽는 것은 조건의 방향을 뒤집는 같은 유형의 실수입니다. 이 문장을 5섹션에서 다시 가리키십시오.</p>
+      <p><b>같은 구조의 오류.</b> <i>P</i>(양성|오염)을 <i>P</i>(오염|양성)로 읽는 것과, 영가설 아래의 꼬리확률인 <i>p</i>값을 <i>P</i>(H₀|데이터)로 읽는 것은 조건의 방향을 뒤집는 같은 유형의 실수입니다. 이 문장을 4섹션에서 다시 가리키십시오.</p>
       <p><b>(d) 오즈비 주의.</b> 유병률이 높을수록 OR은 RR을 과장합니다. 단면연구·환자대조군 논문의 OR을 "몇 배 위험"으로 읽는 습관은 여기서 교정해야 합니다.</p>
       <p><b>시간이 남으면 심슨의 역설 10분.</b> 커피–폐암 연관이 흡연 보정으로 사라지는 사례에서 출발해, 영양역학의 건강한 사용자 효과로 넘어가면 β-카로틴·비타민 E의 관찰연구·RCT 불일치가 자연스럽게 설명됩니다.</p>
     </div>
   </details>
 </section>
 
-<!-- ══════════ 04 분포 ══════════ -->
+<!-- ══════════ 03 분포 ══════════ -->
 <section id="s4">
-  <div class="tag">04</div>
+  <div class="tag">03</div>
   <h3>확률변수와 확률분포</h3>
   <p class="goal">지금까지 확률은 사건에 붙는 수였습니다. 사건은 집합이라 더하거나 평균을 낼 수 없습니다. 결과에 수를 붙여야 비로소 계산이 시작됩니다. 그 수 붙이기가 확률변수이고, 붙인 수마다 확률을 모아 놓은 것이 확률분포입니다.</p>
 
@@ -673,45 +721,42 @@ details .body b{color:var(--ink); font-weight:600}
     </div>
   </div>
 
-  <h4 style="font-size:21px;margin:44px 0 4px;font-weight:700">잘 알려진 네 가지</h4>
-  <p style="font-size:14px;color:var(--soft);margin:0 0 22px">각 분포에는 적합한 생성 과정과 가정이 있습니다. 이항분포는 조건에 따라 포아송 또는 정규분포로 근사할 수 있습니다. 로그정규분포는 양의 변수의 로그가 정규분포를 따르는 별도의 모형입니다.</p>
+  <h4 style="font-size:21px;margin:44px 0 4px;font-weight:700">잘 알려진 세 가지</h4>
+  <p style="font-size:14px;color:var(--soft);margin:0 0 22px">먼저 각 분포의 모수를 움직이며 모양과 요약값이 함께 어떻게 바뀌는지 확인하십시오. 이항분포는 n과 p, 포아송분포는 λ, 정규분포는 μ와 σ가 모수입니다. 아래 결과 판에는 그때그때의 기대값 E[X]와 분산 Var(X)를 계산해 표시합니다.</p>
 
   <div class="tabs">
-    <button class="ghost on" data-dist="binom">① 이항 — 삼점검사</button>
-    <button class="ghost" data-dist="pois">② 포아송 — 오염 건수</button>
-    <button class="ghost" data-dist="norm">③ 정규 — 충전 중량</button>
-    <button class="ghost" data-dist="logn">④ 로그정규 — CFU</button>
+    <button class="ghost on" data-dist="binom">① 이항</button>
+    <button class="ghost" data-dist="pois">② 포아송</button>
+    <button class="ghost" data-dist="norm">③ 정규</button>
   </div>
 
   <div class="panel" id="p-binom">
-    <h4>삼점검사: 아무도 차이를 못 느껴도 3분의 1은 맞힌다</h4>
-    <p class="hint">시료 3개 중 다른 하나를 고르는 검사입니다. 차이를 전혀 못 느끼면 정답확률은 1/3. 패널이 30명이면 아무 능력 없이도 평균 10명이 맞힙니다. 몇 명부터 "차이가 있다"고 말할 수 있을까요.</p>
+    <h4>이항분포: 성공 횟수의 분포</h4>
+    <p class="hint">같은 시행을 n번 반복하고 각 시행에서 성공할 확률이 p로 일정하다고 가정합니다. n과 p를 바꾸며 성공 횟수의 분포 모양, 기대값, 분산이 어떻게 달라지는지 확인하십시오.</p>
     <div class="grid-ctrl">
       <div>
         <div class="ctl">
-          <label><span>패널 인원</span><var id="v-tn">30</var></label>
+          <label><span>시행 횟수 n</span><var id="v-tn">30</var></label>
           <input type="range" id="t-n" min="12" max="100" step="1" value="30">
         </div>
         <div class="ctl">
-          <label><span>실제 정답확률 — 1/3이면 차이 없음</span><var id="v-tp">0.333</var></label>
-          <input type="range" id="t-p" min="333" max="900" step="1" value="333">
+          <label><span>성공확률 p</span><var id="v-tp">0.333</var></label>
+          <input type="range" id="t-p" min="100" max="900" step="1" value="333">
         </div>
         <div class="ctl">
-          <label><span>유의수준 α</span><var id="v-ta">0.05</var></label>
-          <input type="range" id="t-a" min="1" max="20" step="1" value="5">
         </div>
         <div class="readout" id="t-out"></div>
       </div>
       <canvas id="binomCv" width="620" height="320"></canvas>
     </div>
     <div class="mis" style="margin-bottom:0">
-      <b>ISO 4120 판정표의 정체</b> — 관능검사 표준에 실린 "n=30이면 15명 이상"이라는 숫자는 권위에서 온 것이 아니라 이 막대그래프에서 나온 것입니다. 표를 외우는 학생과 유도할 줄 아는 학생의 차이가 여기서 갈립니다.
+      <b>모수와 요약값을 함께 읽기</b> — n과 p가 바뀌면 막대의 위치와 퍼짐이 함께 달라집니다. E[X] = np는 분포의 중심을, Var(X) = np(1−p)는 퍼짐을 요약합니다.
     </div>
   </div>
 
   <div class="panel" id="p-pois" style="display:none">
     <h4>드물게, 무작위로, 독립적으로 일어나는 일의 건수</h4>
-    <p class="hint">우유 1 mL의 균수, 원료 1톤당 이물 건수, 배양접시의 콜로니 수. 평균이 정해지면 분포 모양까지 정해집니다. 평균과 분산이 같다는 것이 이 분포의 서명입니다.</p>
+    <p class="hint">우유 1 mL의 균수, 원료 1톤당 이물 건수, 배양접시의 콜로니 수처럼 드물게 독립적으로 일어나는 사건의 건수입니다. λ를 바꾸며 분포가 이동하고 퍼지는 모습을 확인하십시오. 포아송분포에서는 기대값과 분산이 모두 λ입니다.</p>
     <div class="grid-ctrl">
       <div>
         <div class="ctl">
@@ -719,8 +764,6 @@ details .body b{color:var(--ink); font-weight:600}
           <input type="range" id="p-lam" min="2" max="200" step="1" value="30">
         </div>
         <div class="ctl">
-          <label><span>군집 오염 정도 — 과대산포</span><var id="v-pk">없음</var></label>
-          <input type="range" id="p-od" min="0" max="100" step="1" value="0">
         </div>
         <div class="btnrow"><button id="p-draw">500개 시료 새로 뽑기</button></div>
         <div class="readout" id="p-out"></div>
@@ -733,8 +776,8 @@ details .body b{color:var(--ink); font-weight:600}
   </div>
 
   <div class="panel" id="p-norm" style="display:none">
-    <h4>작은 요인들이 겹쳐 쌓인 결과 — 그리고 밀도는 확률이 아니다</h4>
-    <p class="hint">충전기가 제품을 채웁니다. 목표를 정해도 매번 조금씩 다릅니다. 진동, 원료 밀도, 온도, 노즐 마모 — 작은 요인 수십 가지가 더해진 결과라 종 모양이 됩니다. 표시량을 밑도는 제품이 얼마나 나올까요.</p>
+    <h4>정규분포: 연속형 측정값</h4>
+    <p class="hint">충전기가 제품을 채웁니다. 목표를 정해도 매번 조금씩 다릅니다. 진동, 원료 밀도, 온도, 노즐 마모처럼 작은 요인 수십 가지가 더해진 결과라 종 모양이 됩니다. μ와 σ를 바꾸며 중심과 퍼짐이 어떻게 달라지는지 확인하십시오.</p>
     <div class="grid-ctrl">
       <div>
         <div class="ctl">
@@ -742,45 +785,12 @@ details .body b{color:var(--ink); font-weight:600}
           <input type="range" id="nm-mu" min="1960" max="2100" step="1" value="2020">
         </div>
         <div class="ctl">
-          <label><span>충전기 산포 σ</span><var id="v-ns">1.5 g</var></label>
+          <label><span>충전기 산포 σ (분산은 σ²)</span><var id="v-ns">1.5 g</var></label>
           <input type="range" id="nm-sd" min="3" max="50" step="1" value="15">
-        </div>
-        <div class="ctl">
-          <label><span>표시량 — 이 아래면 미달</span><var id="v-nl">200.0 g</var></label>
-          <input type="range" id="nm-lsl" min="1950" max="2060" step="1" value="2000">
-        </div>
-        <div class="btnrow">
-          <button class="ghost" id="nm-band">68 · 95 · 99.7 구간 보기</button>
         </div>
         <div class="readout" id="nm-out"></div>
       </div>
       <canvas id="normCv" width="620" height="310"></canvas>
-    </div>
-    <div class="mis" style="margin-bottom:0">
-      <b>밀도는 확률이 아닙니다</b> — 곡선의 높이는 확률이 아니라 밀도이고, 단위가 g<sup>-1</sup>이라 1을 넘을 수도 있습니다. 연속모형에서 확률은 구간 아래의 <b>넓이</b>로 계산합니다. 따라서 연속형 순중량 모형에서는 정확히 200.000… g일 확률이 0입니다. 이는 측정값이 반올림되어 200.0 g으로 기록될 확률이 0이라는 뜻은 아닙니다. 2섹션의 "확률은 사건에 붙는 수"가 여기서 회수됩니다.
-    </div>
-  </div>
-
-  <div class="panel" id="p-logn" style="display:none">
-    <h4>왜 미생물 계수에 log를 자주 쓰는가</h4>
-    <p class="hint">여러 독립적인 작은 효과가 더해지면 정규근사가 유용한 경우가 있습니다. 성장률처럼 양의 요인들이 곱셈적으로 작용하면 원자료가 우편향되고, 로그를 취한 값이 정규분포에 가까워질 수 있습니다. 다만 미생물 계수가 언제나 로그정규인 것은 아니므로 자료와 측정과정을 확인해야 합니다. 왼쪽은 로그정규 모형에서 생성한 CFU/g, 오른쪽은 같은 데이터를 log₁₀으로 바꾼 것입니다.</p>
-    <div class="grid-ctrl">
-      <div>
-        <div class="ctl">
-          <label><span>중앙값 CFU/g</span><var id="v-lm">1,000</var></label>
-          <input type="range" id="l-med" min="10" max="60" step="1" value="30">
-        </div>
-        <div class="ctl">
-          <label><span>로그 표준편차</span><var id="v-ls">0.80</var></label>
-          <input type="range" id="l-sd" min="10" max="150" step="1" value="80">
-        </div>
-        <div class="btnrow"><button id="l-draw">300개 시료 새로 뽑기</button></div>
-        <div class="readout" id="l-out"></div>
-      </div>
-      <canvas id="lognCv" width="620" height="300"></canvas>
-    </div>
-    <div class="mis" style="margin-bottom:0">
-      <b>역변환의 함정</b> — log 값의 평균을 다시 10의 거듭제곱으로 되돌리면 나오는 것은 산술평균이 아니라 <b>기하평균</b>입니다. 논문 표에 적힌 값이 어느 쪽인지 확인하지 않으면 수 배가 틀립니다. 혈청 페리틴, 중성지방, 비타민 D 같은 영양 바이오마커도 대부분 우편향이라 같은 문제가 생깁니다.
     </div>
   </div>
 
@@ -788,42 +798,62 @@ details .body b{color:var(--ink); font-weight:600}
     <summary>수업 진행 노트</summary>
     <div class="body">
       <p><b>순서를 지키십시오.</b> 확률변수를 먼저, 분포는 그다음입니다. 분포부터 가르치면 학생들이 분포를 외워야 할 공식 목록으로 받아들입니다. 동전 두 번 예시에서 "표본점 네 개가 값 세 개로 접힌다"는 장면을 반드시 손으로 짚어 주십시오. 앞뒤와 뒤앞이 <b>한 값으로 합쳐지기 때문에</b> 가운데가 두 배로 높아진다 — 이항계수가 왜 붙는지가 여기서 한 번에 보입니다.</p>
-      <p><b>n을 천천히 올리십시오.</b> 2 → 3 → 5 → 12로 올리면 표본공간은 4 → 8 → 32 → 4,096으로 폭발하는데 값은 n+1개뿐입니다. 확률변수가 하는 일이 <b>요약</b>이라는 것, 그리고 12쯤에서 이미 종 모양이 보인다는 것 — 5섹션 중심극한정리의 복선이 여기서 깔립니다.</p>
-      <p><b>"실제로 던지기"를 꼭 눌러 보십시오.</b> 이론 막대 위에 실측 막대가 겹칩니다. 2섹션의 빈도 해석이 분포 수준에서 다시 확인되는 장면입니다.</p>
+      <p><b>n을 천천히 올리십시오.</b> 2 → 3 → 5 → 12로 올리면 표본공간은 4 → 8 → 32 → 4,096으로 폭발하는데 값은 n+1개뿐입니다. 확률변수가 하는 일이 <b>요약</b>이라는 것, 그리고 12쯤에서 이미 종 모양이 보인다는 것 — 4섹션 중심극한정리의 복선이 여기서 깔립니다.</p>
+      <p><b>"실제로 던지기"를 꼭 눌러 보십시오.</b> 이론 막대 위에 실측 막대가 겹칩니다. 1섹션의 빈도 해석이 분포 수준에서 다시 확인되는 장면입니다.</p>
       <p><b>기댓값·분산 패널은 손으로 더하게 하십시오.</b> n=2, p=0.5로 되돌려 표를 함께 읽으면 E[X] = 0×0.25 + 1×0.5 + 2×0.25 = 1이 "동전 두 개면 평균 한 개는 앞면"이라는 상식과 일치한다는 것이 확인됩니다. 그다음 n을 8 정도로 올려 표가 요약형으로 바뀌는 것을 보이고, 공식 E[X]=np, Var(X)=np(1−p)이 손으로 더한 값과 정확히 일치한다는 것으로 마무리하십시오. 공식은 계산을 대신해 주는 지름길이지, 손으로 더한 것과 다른 별개의 진리가 아니라는 메시지입니다.</p>
       <p><b>제곱을 쓰는 이유를 반드시 짚으십시오.</b> 편차를 그냥 더하면 0이 된다는 것을 표에서 직접 보여줄 수 있습니다(대칭인 n=2, p=0.5 예시가 가장 선명합니다). 표준편차가 왜 다시 제곱근을 취하는지 — 단위를 원래대로 되돌리기 위해서라는 것 — 도 여기서 마무리해 두면, 이후 SD·SE·CFU 단위 이야기가 전부 매끄러워집니다.</p>
-      <p><b>분포 사이의 근사 조건을 함께 말하십시오.</b> n이 크고 p가 작으며 λ=np가 적절히 유지되면 이항분포를 포아송분포로 근사할 수 있습니다. np와 n(1−p)가 충분히 크면 이항분포의 정규근사가 유용합니다. 로그정규분포는 양의 값에 로그를 취한 변수가 정규분포를 따를 때 얻어지며, 정규분포의 단순한 다음 단계는 아닙니다.</p>
+      <p><b>분포 사이의 근사 조건은 다음 단계에서 다룹니다.</b> 지금은 n·p, λ, μ·σ를 각각 움직이며 모양과 E[X], Var(X)의 변화를 먼저 관찰하십시오.</p>
       <p><b>밀도와 확률의 구분은 정규 탭에서.</b> 연속모형에서 <i>P</i>(X = 200.000…) = 0인데도 밀도는 양수입니다. 실제 측정값은 정밀도에 따라 반올림된 구간을 나타낸다는 점도 함께 구분하십시오.</p>
-      <p><b>정규 탭의 실무 가치.</b> 목표 중량을 표시량보다 왜 높게 잡는지, 산포를 줄이면 왜 원가가 절감되는지가 슬라이더 두 개로 설명됩니다. 식품공학 전공자에게 이 패널의 반응이 가장 좋습니다.</p>
-      <p><b>이항 탭에서 미리 예고할 것.</b> 정답확률 슬라이더를 0.333에 두고 "14명이 맞혔다"를 가리키며 물으십시오. 유의하지 않다는 것이 차이가 없다는 뜻인가? 대답을 유보한 채 5섹션 끝에서 3의 법칙으로 회수합니다.</p>
+      <p><b>정규 탭에서 모수 효과를 읽으십시오.</b> μ를 바꾸면 곡선의 중심이 이동하고, σ를 바꾸면 곡선이 넓어지거나 좁아집니다. 결과 판의 E[X] = μ, Var(X) = σ²와 그래프를 함께 확인하십시오.</p>
+      <p><b>이항 탭에서 모수 효과를 확인하십시오.</b> 성공확률 p 슬라이더를 0.1에서 0.9까지 움직이며 분포의 중심 E[X] = np가 이동하고 분산 Var(X) = np(1−p)가 어떻게 달라지는지 관찰하십시오.</p>
       <p><b>생물학 전공자 배려.</b> 이항 탭에서 멘델 분리비(p=0.75), 하디–바인베르크 평형을 독립 가정의 산물로 10분 붙일 수 있습니다. 평형 이탈이 선택·근친교배·유전형 판정오류의 신호라는 점은 확률 개념이 생물학적 해석으로 바로 이어지는 좋은 사례입니다.</p>
     </div>
   </details>
 </section>
 
-<!-- ══════════ 05 표집분포 ══════════ -->
+<!-- ══════════ 04 표집분포 ══════════ -->
 <section id="s5">
-  <div class="tag">05</div>
+  <div class="tag">04</div>
   <h3>표집분포: 논문을 읽기 위해 반드시 넘어야 하는 문턱</h3>
   <p class="goal">통계 교육 연구가 일관되게 최대 난관으로 보고하는 개념입니다. 말로 설명하지 말고 뽑아서 보여주십시오.</p>
 
   <div class="panel">
-    <h4>평균 하나가 아니라, 평균들의 분포</h4>
-    <p class="hint">치우친 CFU 모집단에서 n개씩 뽑아 평균을 냅니다. 그 평균들을 모아 히스토그램을 그립니다. 모집단은 저렇게 찌그러졌는데 평균들의 분포는 어떤 모양이 되는지 보십시오.</p>
+    <h4>중심극한정리: 평균들의 분포를 눈으로 보기</h4>
+    <p class="hint">평균이 모두 1인 두 모집단에서 같은 크기의 표본을 반복해서 뽑고 매번 평균을 기록합니다. 정규 모집단에서는 표본평균도 처음부터 정규형이고 폭이 줄어듭니다. 이항 모집단에서는 이산적이고 오른쪽으로 치우친 원래 모양과 달리, 표본 크기가 커질수록 표본평균이 대칭적인 종 모양에 가까워지는지 확인해 보십시오.</p>
     <div class="grid-ctrl">
       <div>
         <div class="ctl">
-          <label><span>표본 크기 n</span><var id="v-sn">5</var></label>
-          <input type="range" id="s-n" min="1" max="100" step="1" value="5">
+          <label><span>모집단 분포</span></label>
+          <div class="tabs" id="samp-dist-tabs">
+            <button class="ghost on" type="button" data-samp-dist="normal">정규 N(1, 1²)</button>
+            <button class="ghost" type="button" data-samp-dist="binomial">이항 Bin(10, 0.1)</button>
+          </div>
         </div>
         <div class="ctl">
-          <label><span>반복 횟수</span><var id="v-sr">2,000</var></label>
-          <input type="range" id="s-rep" min="100" max="5000" step="100" value="2000">
+          <label><span>표본 크기 n</span><var id="v-sn">2</var></label>
+          <select id="s-n" aria-label="표본 크기">
+            <option value="2" selected>2개</option>
+            <option value="4">4개</option>
+            <option value="16">16개</option>
+            <option value="32">32개</option>
+            <option value="64">64개</option>
+          </select>
+        </div>
+        <div class="ctl">
+          <label><span>실행 횟수</span><var id="v-sr">100</var></label>
+          <select id="s-rep" aria-label="실행 횟수">
+            <option value="100" selected>100회</option>
+            <option value="1000">1,000회</option>
+            <option value="10000">10,000회</option>
+          </select>
         </div>
         <div class="btnrow"><button id="s-run">다시 뽑기</button></div>
         <div class="readout" id="s-out"></div>
       </div>
-      <canvas id="sampCv" width="620" height="330"></canvas>
+      <figure class="chart-wrap">
+        <canvas id="sampCv" width="620" height="360"></canvas>
+        <figcaption class="chart-note">분포의 모양을 선명하게 비교하기 위해 위·아래 그래프의 가로축 범위는 서로 다릅니다. 축의 최솟값과 최댓값을 함께 확인하십시오.</figcaption>
+      </figure>
     </div>
   </div>
 
@@ -869,17 +899,17 @@ details .body b{color:var(--ink); font-weight:600}
   <details>
     <summary>수업 진행 노트</summary>
     <div class="body">
-      <p><b>대수의 법칙 ≠ 중심극한정리.</b> 전자는 표본평균이 <i>어디로</i> 가는가, 후자는 적절히 표준화한 표본평균의 분포가 어떤 모양에 가까워지는가를 말합니다. 독립·동일분포와 유한분산 같은 조건이 필요합니다. 첫 패널에서 n을 1 → 5 → 30 → 100으로 올리며 분포가 좁아지고 점차 대칭에 가까워지는 모습을 보이되, 원자료가 심하게 치우치면 n=30도 충분하지 않을 수 있음을 짚으십시오.</p>
-      <p><b><i>p</i>값의 정의를 그림 위에서 읽으십시오.</b> 두 번째 패널의 붉은 점 비율은 이 이산검정의 실제 제1종 오류확률을 추정하며, 설정한 α 이하입니다. <i>p</i>값은 "영가설과 모형 가정이 맞다고 할 때, 관측된 것만큼 또는 그보다 극단적인 결과가 나올 확률"입니다. 영가설이 맞을 확률이 아닙니다 — 3섹션에서 적어 둔 문장을 손으로 가리키십시오.</p>
+      <p><b>대수의 법칙 ≠ 중심극한정리.</b> 전자는 표본평균이 <i>어디로</i> 가는가, 후자는 적절히 표준화한 표본평균의 분포가 어떤 모양에 가까워지는가를 말합니다. 첫 패널에서 n을 2 → 4 → 16 → 32 → 64로 올리십시오. 정규 모집단에서는 평균 분포가 처음부터 정규형인 채 μ = 1 주변으로 <b>좁아집니다</b>. 이항 모집단에서는 이산적·비대칭인 원래 분포와 달리 평균 분포가 <b>더 대칭적인 종 모양</b>에 가까워집니다. 100회에서는 우연한 들쭉날쭉함이, 10,000회에서는 더 안정된 모양이 보입니다.</p>
+      <p><b><i>p</i>값의 정의를 그림 위에서 읽으십시오.</b> 두 번째 패널의 붉은 점 비율은 이 이산검정의 실제 제1종 오류확률을 추정하며, 설정한 α 이하입니다. <i>p</i>값은 "영가설과 모형 가정이 맞다고 할 때, 관측된 것만큼 또는 그보다 극단적인 결과가 나올 확률"입니다. 영가설이 맞을 확률이 아닙니다 — 2섹션에서 적어 둔 문장을 손으로 가리키십시오.</p>
       <p><b>신뢰구간의 정확한 의미.</b> "이 구간 안에 참값이 있을 확률 95%"는 틀린 해석입니다(Hoekstra 등, 2014). 같은 방식으로 구간을 계속 만들면 그중 95%가 참값을 덮는다는 뜻이고, 눈앞의 이 구간 하나에 대해서는 덮었거나 못 덮었거나 둘 중 하나입니다.</p>
-      <p><b>3의 법칙으로 마무리.</b> 독립적인 무작위 표본, 일정한 오염확률, 완전한 검출을 가정하면 60개 전부 음성일 때 이항모형의 단측 95% 상한은 약 4.9%입니다. 불완전한 검사라면 민감도 등을 반영해야 합니다. "검출되지 않음"은 "없음"이 아닙니다. 여기서 4섹션에 유보해 둔 질문을 회수하고 <b>동등성검정</b>의 필요로 넘어가십시오.</p>
+      <p><b>3의 법칙으로 마무리.</b> 독립적인 무작위 표본, 일정한 오염확률, 완전한 검출을 가정하면 60개 전부 음성일 때 이항모형의 단측 95% 상한은 약 4.9%입니다. 불완전한 검사라면 민감도 <i>P</i>(양성 | 실제 오염)와 특이도 <i>P</i>(음성 | 실제 정상)를 반영해야 합니다. "검출되지 않음"은 "없음"이 아닙니다. 여기서 3섹션에 유보해 둔 질문을 회수하고 <b>동등성검정</b>의 필요로 넘어가십시오.</p>
     </div>
   </details>
 </section>
 
-<!-- ══════════ 06 다중검정 ══════════ -->
+<!-- ══════════ 05 다중검정 ══════════ -->
 <section id="s6">
-  <div class="tag">06</div>
+  <div class="tag">05</div>
   <h3>스무 번 물으면 한 번은 그냥 나온다</h3>
   <p class="goal">영양역학은 구조적으로 다중비교에 노출되어 있습니다. 식품 성분 하나에 결과변수 여럿, 관능검사 하나에 속성 여럿, 오믹스는 변수가 수천 개입니다.</p>
 
@@ -912,11 +942,11 @@ details .body b{color:var(--ink); font-weight:600}
   <details>
     <summary>수업 진행 노트 · 마무리</summary>
     <div class="body">
-      <p><b>2섹션과 연결하십시오.</b> 독립인 k개 검정이 모두 영가설 아래 있고 각각의 제1종 오류확률이 α일 때, "적어도 하나가 유의할 확률"은 P(하나 이상) = 1 − (1−α)<sup>k</sup>입니다. 독립이 아니면 이 등식은 일반적으로 성립하지 않습니다. Bonferroni는 의존성과 무관하게 가족wise 오류율을 α 이하로 보장합니다.</p>
+      <p><b>1섹션과 연결하십시오.</b> 독립인 k개 검정이 모두 영가설 아래 있고 각각의 제1종 오류확률이 α일 때, "적어도 하나가 유의할 확률"은 P(하나 이상) = 1 − (1−α)<sup>k</sup>입니다. 독립이 아니면 이 등식은 일반적으로 성립하지 않습니다. Bonferroni는 의존성과 무관하게 가족wise 오류율을 α 이하로 보장합니다.</p>
       <p><b>요리책 연구를 소개하십시오.</b> Schoenfeld &amp; Ioannidis(2013)는 요리책에서 무작위로 고른 재료 50가지 중 40가지에 대해 암 위험과의 연관을 보고한 논문이 존재함을 보였습니다. 대부분의 효과추정치는 약했고 상당수가 이후 메타분석에서 사라졌습니다. 학생들이 자기 분야 이야기라는 것을 알아차리는 순간 집중도가 달라집니다.</p>
       <p><b>Bonferroni와 FDR의 발상 차이만.</b> 전자는 하나라도 위양성이 생길 가족wise 오류확률을 통제하고, 후자는 발견들 중 위양성이 차지하는 비율의 <b>기댓값</b>을 통제합니다. 탐색적 오믹스 연구에서 FDR을 쓰는 이유가 여기 있습니다. 계산법은 가르치지 마십시오.</p>
-      <p><b>마무리.</b> 1섹션 사전 진단으로 돌아가 ‘답 지우고 다시 풀기’를 눌러 같은 질문에 답하십시오. 수업 초반 자기 답과 비교하는 것이 이 수업의 마침표입니다.</p>
-      <p style="margin-top:16px; padding-top:14px; border-top:1px solid var(--line)"><b>과감히 뺀 것</b> — 순열·조합 계산 연습, 적률생성함수, 분포의 적분 유도, 다변량 정규분포, 측도론적 σ-대수의 정식 구성. 시간이 부족하면 이 순서대로 생략하고, 분량이 넘치면 6섹션을 다음 시간으로 넘기는 것을 권합니다.</p>
+      <p><b>마무리.</b> 사전 진단 토글로 돌아가 ‘답 지우고 다시 풀기’를 눌러 같은 질문에 답하십시오. 수업 초반 자기 답과 비교하는 것이 이 수업의 마침표입니다.</p>
+      <p style="margin-top:16px; padding-top:14px; border-top:1px solid var(--line)"><b>과감히 뺀 것</b> — 순열·조합 계산 연습, 적률생성함수, 분포의 적분 유도, 다변량 정규분포, 측도론적 σ-대수의 정식 구성. 시간이 부족하면 이 순서대로 생략하고, 분량이 넘치면 5섹션을 다음 시간으로 넘기는 것을 권합니다.</p>
     </div>
   </details>
 </section>
@@ -958,7 +988,7 @@ function lab(g,t,x,y,al='center',col=C.soft,size=11){
   g.fillStyle=col;g.font=size+'px '+F;g.textAlign=al;g.textBaseline='middle';g.fillText(t,x,y);}
 
 /* ═══════════ 문서 내 이동 ═══════════ */
-// 진단을 실제 첫 활동으로 배치한다. 내부 id는 기존 계산 코드와의 호환을 위해 유지한다.
+// 선택형 진단을 본문 첫 활동으로 배치한다. 내부 id는 기존 계산 코드와의 호환을 위해 유지한다.
 const mainEl=document.querySelector('main');
 mainEl.insertBefore(document.getElementById('s2'),document.getElementById('s1'));
 document.querySelectorAll('#nav a').forEach(a=>{
@@ -1182,23 +1212,23 @@ function llnRender(p,n){
     (fin.length>1?'<br>경로 10개의 최종값 범위: '+Math.min(...fin).toFixed(3)+' ~ '+Math.max(...fin).toFixed(3):'');
 }
 
-/* ═══════════ 02 퀴즈 ═══════════ */
+/* ═══════════ 선택 진단 퀴즈 ═══════════ */
 const QZ=[
- {q:'실제 오염률 0.5%인 로트를 민감도 98%, 특이도 95%인 신속검사로 검사했더니 <b>양성</b>이 떴다. 이 로트가 정말 오염됐을 확률에 가장 가까운 것은?',
+ {q:'실제 오염률 0.5%인 로트를 민감도 <i>P</i>(양성 | 실제 오염) = 98%, 특이도 <i>P</i>(음성 | 실제 정상) = 95%인 신속검사로 검사했더니 <b>양성</b>이 떴다. 이 로트가 정말 오염됐을 확률에 가장 가까운 것은?',
   o:['약 98%','약 90%','약 50%','약 9%'],a:3,
-  e:'정상 로트가 995개나 되기 때문에 위양성만 약 50개 나옵니다. 진짜 양성 5개와 합쳐 55개, 그중 진짜는 5개입니다. 희귀한 것을 찾을 때 양성예측도는 민감도가 아니라 <b>유병률과 특이도</b>가 지배합니다. → 3섹션'},
+  e:'정상 로트가 995개나 되기 때문에 위양성 P(양성 | 실제 정상)만 약 50개 나옵니다. 진짜 양성 5개와 합쳐 55개, 그중 진짜는 5개입니다. 희귀한 것을 찾을 때 양성예측도는 민감도 P(양성 | 실제 오염)가 아니라 <b>유병률과 특이도 P(음성 | 실제 정상)</b>가 지배합니다. → 2섹션'},
  {q:'논문에 <i>p</i> = 0.03이라고 적혀 있다. 올바른 해석은?',
   o:['영가설이 참일 확률이 3%다','대립가설이 참일 확률이 97%다','영가설이 참이라면 이만큼 극단적인 결과가 나올 확률이 3%다','실험을 반복하면 97%에서 같은 결과가 나온다'],a:2,
-  e:'<i>p</i>값은 영가설과 모형 가정 아래에서 관측값만큼 또는 더 극단적인 검정통계량이 나올 꼬리확률입니다. <i>P</i>(H₀ | 데이터)가 아니며, 1번 문항처럼 조건의 방향을 뒤집어서는 안 됩니다. → 5섹션'},
+  e:'<i>p</i>값은 영가설과 모형 가정 아래에서 관측값만큼 또는 더 극단적인 검정통계량이 나올 꼬리확률입니다. <i>P</i>(H₀ | 데이터)가 아니며, 1번 문항처럼 조건의 방향을 뒤집어서는 안 됩니다. → 4섹션'},
  {q:'평균 차이의 95% 신뢰구간이 [1.2, 4.8]로 보고되었다. 올바른 해석은?',
   o:['참값이 이 구간에 있을 확률이 95%다','같은 방법으로 구간을 반복 생성하면 95%가 참값을 포함한다','표본의 95%가 이 구간에 들어간다','1.2와 4.8 사이 값들이 모두 95% 신뢰된다'],a:1,
-  e:'구간이 확률변수이고 모수는 고정된 값입니다. 눈앞의 이 구간 하나는 참값을 덮었거나 못 덮었거나 둘 중 하나입니다. Hoekstra 등(2014)에서 연구자·박사과정생 모두 높은 비율로 틀린 문항입니다. → 5섹션'},
+  e:'구간이 확률변수이고 모수는 고정된 값입니다. 눈앞의 이 구간 하나는 참값을 덮었거나 못 덮었거나 둘 중 하나입니다. Hoekstra 등(2014)에서 연구자·박사과정생 모두 높은 비율로 틀린 문항입니다. → 4섹션'},
  {q:'시료 60개를 검사해 병원균이 <b>한 건도</b> 검출되지 않았다. 가장 타당한 결론은?',
   o:['이 로트의 오염률은 0이다','오염률의 95% 상한이 약 5%라고 말할 수 있다','검사가 실패했을 가능성이 높다','오염률이 1/60보다 작다고 확정할 수 있다'],a:1,
-  e:'독립적인 무작위 표본과 완전한 검출을 가정한 이항모형의 3의 법칙입니다. 단측 95% 상한은 대략 3/n = 3/60 = 5%입니다. <b>검출되지 않음은 없음이 아닙니다.</b> → 5섹션'},
+  e:'독립적인 무작위 표본과 완전한 검출을 가정한 이항모형의 3의 법칙입니다. 단측 95% 상한은 대략 3/n = 3/60 = 5%입니다. <b>검출되지 않음은 없음이 아닙니다.</b> → 4섹션'},
  {q:'가공육 50 g/일과 대장암의 상대위험이 1.18로 보고되었다. 이를 기저위험 5%에 단순 적용하면 위험은 얼마인가?',
   o:['위험이 5%에서 23%가 된다','위험이 5%에서 약 5.9%가 된다','100명 중 18명이 더 걸린다','1,000명 중 180명이 더 걸린다'],a:1,
-  e:'18%는 <b>상대</b>위험 증가입니다. 단순 적용하면 5% × 1.18 ≈ 5.9%이므로 1,000명당 50명 → 59명, 즉 9명 차이입니다. 관찰연구의 연관성을 개인의 인과적 평생위험으로 그대로 옮길 수 있다는 뜻은 아닙니다. → 3섹션(d)'}
+  e:'18%는 <b>상대</b>위험 증가입니다. 단순 적용하면 5% × 1.18 ≈ 5.9%이므로 1,000명당 50명 → 59명, 즉 9명 차이입니다. 관찰연구의 연관성을 개인의 인과적 평생위험으로 그대로 옮길 수 있다는 뜻은 아닙니다. → 2섹션(d)'}
 ];
 let qAns=0,qRight=0;
 (function buildQuiz(){
@@ -1269,12 +1299,12 @@ function ssDraw(){
   lab(g,'보라 영역 = 놓친 오염(위음성)',x0+4,y1+14,'left',C.violet,11);
   lab(g,'주황 영역 = 헛경보(위양성)',x1-4,y1+14,'right',C.amber,11);
   const se=1-Phi(c-d), sp=Phi(c);
-  const judge=(se>=0.95&&sp>=0.95)?'민감도와 특이도가 모두 높습니다. 그래도 예측도와 최종 판단에는 오염률과 검사 맥락이 필요합니다.'
+  const judge=(se>=0.95&&sp>=0.95)?'민감도 P(양성 | 실제 오염)와 특이도 P(음성 | 실제 정상)가 모두 높습니다. 그래도 예측도와 최종 판단에는 오염률과 검사 맥락이 필요합니다.'
     :(se>sp+0.12?'선별 쪽에 유리한 설정입니다 — 놓침을 줄이는 대신 헛경보를 더 감수합니다.'
     :(sp>se+0.12?'확인 쪽에 유리한 설정입니다 — 헛경보를 줄이는 대신 일부 오염을 놓칩니다.'
     :'선별과 확인 사이 어중간한 설정입니다.'));
   document.getElementById('ss-out').innerHTML=
-   '<span class="big">'+(se*100).toFixed(1)+' / '+(sp*100).toFixed(1)+'</span>민감도 / 특이도 (%)<br><br>'+
+   '<span class="big">'+(se*100).toFixed(1)+' / '+(sp*100).toFixed(1)+'</span><i>P</i>(양성 | 실제 오염) / <i>P</i>(음성 | 실제 정상) (%)<br><br>'+
    '오염 100개 중 <b>'+(se*100).toFixed(0)+'개</b>를 잡아내고 '+((1-se)*100).toFixed(0)+'개를 놓칩니다.<br>'+
    '정상 100개 중 <b>'+(sp*100).toFixed(0)+'개</b>를 통과시키고 '+((1-sp)*100).toFixed(0)+'개를 헛되이 붙잡습니다.<br><br>'+
    judge;
@@ -1308,8 +1338,8 @@ function treeDraw(){
   lab(g,'Ω',rx,cy-17,'center',C.soft,12);
   lab(g,'오염 '+(prev*100).toFixed(1)+'%',mx,y1-16,'center',C.saf,12.5);
   lab(g,'정상 '+((1-prev)*100).toFixed(1)+'%',mx,y2+18,'center',C.blue,12.5);
-  lab(g,'민감도 '+(se*100).toFixed(0)+'%',(mx+lx)/2,yy[0]-13,'center',C.soft,10.5);
-  lab(g,'1−특이도 '+((1-sp)*100).toFixed(0)+'%',(mx+lx)/2,yy[2]-13,'center',C.soft,10.5);
+  lab(g,'P(양성 | 오염) '+(se*100).toFixed(0)+'%',(mx+lx)/2,yy[0]-13,'center',C.soft,10.5);
+  lab(g,'P(양성 | 정상) '+((1-sp)*100).toFixed(0)+'%',(mx+lx)/2,yy[2]-13,'center',C.soft,10.5);
   const names=['오염 & 양성','오염 & 음성','정상 & 양성','정상 & 음성'];
   const cols=[C.saf,C.soft,C.amber,C.soft];
   yy.forEach((y,i)=>{
@@ -1514,102 +1544,74 @@ function erf(x){const s=x<0?-1:1;x=Math.abs(x);
   const t=1/(1+pp*x);
   return s*(1-((((a5*t+a4)*t+a3)*t+a2)*t+a1)*t*Math.exp(-x*x));}
 function Phi(z){return 0.5*(1+erf(z/Math.SQRT2));}
-let showBand=false;
 function normDraw(){
   const mu=+document.getElementById('nm-mu').value/10;
   const sd=+document.getElementById('nm-sd').value/10;
-  const lsl=+document.getElementById('nm-lsl').value/10;
   document.getElementById('v-nm').textContent=mu.toFixed(1)+' g';
   document.getElementById('v-ns').textContent=sd.toFixed(1)+' g';
-  document.getElementById('v-nl').textContent=lsl.toFixed(1)+' g';
   const g=ctx('normCv'),L=54,R=16,T=24,B=44,x0=L,x1=g.W-R,y0=T,y1=g.H-B;
-  const lo=mu-4.2*sd, hi=mu+4.2*sd;
+  // 모수 변화가 화면에서 보이도록 모든 설정에서 동일한 가로축을 사용한다.
+  const lo=175, hi=231;
   const X=v=>x0+(v-lo)/(hi-lo)*(x1-x0);
   const dens=v=>Math.exp(-0.5*((v-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI));
   const dmax=dens(mu), Y=d=>y1-(d/dmax)*(y1-y0-10);
   for(let t=0;t<=4;t++){const d=dmax*t/4;g.strokeStyle='#e7ebf5';g.beginPath();
     g.moveTo(x0,Y(d));g.lineTo(x1,Y(d));g.stroke();lab(g,d.toFixed(2),x0-8,Y(d),'right');}
-  if(showBand){
-    [[3,'rgba(74,58,122,0.08)'],[2,'rgba(74,58,122,0.10)'],[1,'rgba(74,58,122,0.14)']]
-    .forEach(([k,col])=>{g.fillStyle=col;
-      g.fillRect(X(mu-k*sd),y0,X(mu+k*sd)-X(mu-k*sd),y1-y0);});
-    [[1,'68.3%'],[2,'95.4%'],[3,'99.7%']].forEach(([k,t])=>{
-      g.strokeStyle='rgba(74,58,122,0.5)';g.setLineDash([3,3]);
-      [mu-k*sd,mu+k*sd].forEach(v=>{g.beginPath();g.moveTo(X(v),y0);g.lineTo(X(v),y1);g.stroke();});
-      g.setLineDash([]);lab(g,'±'+k+'σ '+t,X(mu+k*sd)-4,y0+10+((k-1)*15),'right',C.violet,10.5);});
-  }
-  g.fillStyle='rgba(191,52,80,0.34)';g.beginPath();g.moveTo(X(lo),y1);
-  for(let v=lo;v<=Math.min(lsl,hi);v+=(hi-lo)/400)g.lineTo(X(v),Y(dens(v)));
-  g.lineTo(X(Math.min(lsl,hi)),y1);g.closePath();g.fill();
   g.strokeStyle=C.violet;g.lineWidth=2.2;g.beginPath();
   for(let i=0;i<=400;i++){const v=lo+(hi-lo)*i/400;const xx=X(v),yy=Y(dens(v));
     i?g.lineTo(xx,yy):g.moveTo(xx,yy);}
   g.stroke();
-  g.strokeStyle=C.saf;g.lineWidth=1.8;g.beginPath();
-  g.moveTo(X(lsl),y0-4);g.lineTo(X(lsl),y1);g.stroke();
-  lab(g,'표시량 '+lsl.toFixed(1)+' g',X(lsl)-6,y0+4,'right',C.saf,11.5);
   g.strokeStyle=C.ink;g.setLineDash([4,3]);g.lineWidth=1.2;
   g.beginPath();g.moveTo(X(mu),Y(dmax));g.lineTo(X(mu),y1);g.stroke();g.setLineDash([]);
   lab(g,'μ',X(mu),y0+6,'center',C.ink,13);
   axes(g,x0,y0,x1,y1);
-  for(let k=-4;k<=4;k+=2)lab(g,(mu+k*sd).toFixed(1),X(mu+k*sd),y1+15);
+  [180,190,200,210,220,230].forEach(v=>lab(g,v.toFixed(0),X(v),y1+15));
   lab(g,'제품 순중량 (g)',(x0+x1)/2,y1+32,'center');
   lab(g,'밀도 f(x)   단위: g⁻¹',x0-46,y0-12,'left',C.soft,11);
-  const z=(lsl-mu)/sd, pr=Phi(z);
+  const variance=sd*sd;
   document.getElementById('nm-out').innerHTML=
-   '<span class="big" style="color:'+C.saf+'">'+(pr*100).toFixed(2)+'%</span>표시량 미달 제품의 비율<br><br>'+
-   'z = (표시량 − μ)/σ = <b>'+z.toFixed(2)+'</b><br>'+
-   '10,000개 생산하면 <em>'+nf(Math.round(pr*10000))+'개</em>가 미달.<br><br>'+
-   '목표를 1 g 올리면 미달률은 '+(Phi((lsl-mu-1)/sd)*100).toFixed(2)+'%로 내려가지만 그만큼 원료를 더 씁니다.<br>'+
-   '산포를 σ = '+(sd/2).toFixed(1)+' g로 줄이면 목표를 올리지 않고도 '+
-   (Phi((lsl-mu)/(sd/2))*100).toFixed(2)+'%가 됩니다.';
+   '<span class="big">E[X] = '+mu.toFixed(2)+' g</span>기대값<br><br>'+
+   '모수: μ = '+mu.toFixed(2)+' g · σ = '+sd.toFixed(2)+' g<br>'+
+   'Var(X) = σ² = <em>'+variance.toFixed(3)+' g²</em><br>'+
+   'SD(X) = σ = '+sd.toFixed(3)+' g';
 }
 
 /* ═══════════ 04 분포 ═══════════ */
 function binomDraw(){
   const n=+document.getElementById('t-n').value;
   const p=+document.getElementById('t-p').value/1000;
-  const al=+document.getElementById('t-a').value/100;
   document.getElementById('v-tn').textContent=n;
   document.getElementById('v-tp').textContent=p.toFixed(3)+(Math.abs(p-1/3)<0.002?' (차이 없음)':'');
-  document.getElementById('v-ta').textContent=al.toFixed(2);
-  let crit=n+1;for(let k=0;k<=n;k++){if(binTail(k,n,1/3)<=al){crit=k;break;}}
   const pm=[];let mx=0;for(let k=0;k<=n;k++){const v=binPmf(k,n,p);pm.push(v);if(v>mx)mx=v;}
   const g=ctx('binomCv'),L=46,R=14,T=22,B=40,x0=L,x1=g.W-R,y0=T,y1=g.H-B;
   const bw=(x1-x0)/(n+1);
   for(let k=0;k<=n;k++){const h=(pm[k]/mx)*(y1-y0-6), xx=x0+k*bw;
-    g.fillStyle=k>=crit?C.saf:C.violet; g.globalAlpha=k>=crit?0.92:0.55;
+    g.fillStyle=C.violet; g.globalAlpha=0.62;
     g.fillRect(xx+bw*0.12,y1-h,bw*0.76,h); g.globalAlpha=1;}
   axes(g,x0,y0,x1,y1);
   const step=n>50?10:5;
   for(let k=0;k<=n;k+=step)lab(g,k,x0+k*bw+bw/2,y1+15);
   lab(g,'정답을 맞힌 패널 수 (전체 '+n+'명)',(x0+x1)/2,y1+31,'center');
-  const cx=x0+crit*bw;
-  g.strokeStyle=C.ink;g.setLineDash([4,3]);g.beginPath();g.moveTo(cx,y0-6);g.lineTo(cx,y1);g.stroke();g.setLineDash([]);
-  lab(g,'유의 판정 시작: '+crit+'명',cx+6,y0+2,'left',C.ink,12);
-  const pw=binTail(crit,n,p);
+  const mean=n*p, variance=n*p*(1-p);
+  const cx=x0+mean*bw;
+  g.strokeStyle=C.saf;g.setLineDash([4,3]);g.beginPath();g.moveTo(cx,y0-6);g.lineTo(cx,y1);g.stroke();g.setLineDash([]);
+  lab(g,'E[X] = np = '+mean.toFixed(2),cx+6,y0+2,'left',C.saf,12);
   document.getElementById('t-out').innerHTML=
-   '<span class="big">'+crit+'명</span>이 인원부터 "차이 있음"으로 판정<br><br>'+
-   '차이가 없을 때 기대 정답자 '+nf(n/3,1)+'명, 표준편차 '+nf(Math.sqrt(n*(1/3)*(2/3)),1)+'명.<br>'+
-   (Math.abs(p-1/3)<0.002
-     ? '지금은 <em>차이가 없는 상태</em>입니다. 그런데도 '+crit+'명 이상이 나올 확률이 '+(binTail(crit,n,1/3)*100).toFixed(1)+'% 있습니다.'
-     : '실제 정답확률 '+p.toFixed(2)+'에서 이 검사가 차이를 잡아낼 확률(검정력)은 <em>'+(pw*100).toFixed(0)+'%</em>입니다.');
+   '<span class="big">E[X] = '+mean.toFixed(2)+'</span>기대 정답자 수<br><br>'+
+   '모수: n = '+n+' · p = '+p.toFixed(3)+'<br>'+
+   'Var(X) = np(1−p) = <em>'+variance.toFixed(3)+'</em><br>'+
+   'SD(X) = √Var(X) = '+Math.sqrt(variance).toFixed(3);
 }
 let poisData=[];
 function poisGen(){
   const lam=+document.getElementById('p-lam').value/10;
-  const od=+document.getElementById('p-od').value/100;
   poisData=[];
-  for(let i=0;i<500;i++){
-    const l=od>0?lam*Math.exp(od*1.6*gauss()-od*od*1.28):lam;
-    poisData.push(poisson(Math.max(0.01,l)));}
+  for(let i=0;i<500;i++)poisData.push(poisson(lam));
   poisRender();
 }
 function poisRender(){
   const lam=+document.getElementById('p-lam').value/10;
-  const od=+document.getElementById('p-od').value/100;
   document.getElementById('v-pl').textContent=lam.toFixed(1);
-  document.getElementById('v-pk').textContent=od===0?'없음':(od<0.35?'약함':od<0.7?'중간':'강함');
   const mx=Math.max(...poisData,1),cnt=new Array(mx+1).fill(0);
   poisData.forEach(v=>cnt[v]++);
   const g=ctx('poisCv'),L=44,R=14,T=18,B=38,x0=L,x1=g.W-R,y0=T,y1=g.H-B;
@@ -1629,90 +1631,76 @@ function poisRender(){
   const m=poisData.reduce((a,b)=>a+b,0)/poisData.length;
   const v=poisData.reduce((a,b)=>a+(b-m)**2,0)/(poisData.length-1);
   document.getElementById('p-out').innerHTML=
-   '<span class="big">'+(v/m).toFixed(2)+'</span>분산 ÷ 평균 (포아송이면 1)<br><br>'+
-   '표본평균 '+m.toFixed(2)+' · 표본분산 '+v.toFixed(2)+'<br>'+
-   (v/m>1.3?'<em>과대산포</em> — 포아송 가정에서 벗어날 가능성을 점검하십시오.'
-    :v/m<0.7?'<em>과소산포</em> — 포아송 가정에서 벗어날 가능성을 점검하십시오.'
-    :'산포는 포아송 모형과 대체로 양립합니다. 적합성 판단에는 분포 모양과 생성과정도 필요합니다.');
-}
-let lognData=[];
-function lognGen(){
-  const ml=+document.getElementById('l-med').value/10, sd=+document.getElementById('l-sd').value/100;
-  lognData=[];for(let i=0;i<300;i++)lognData.push(Math.pow(10,ml+sd*gauss()));
-  lognRender();
-}
-function lognRender(){
-  const ml=+document.getElementById('l-med').value/10, sd=+document.getElementById('l-sd').value/100;
-  document.getElementById('v-lm').textContent=nf(Math.pow(10,ml));
-  document.getElementById('v-ls').textContent=sd.toFixed(2);
-  const g=ctx('lognCv'),halfW=g.W/2-12,T=24,B=38;
-  function hist(ox,data,nb,col,title,fmt){
-    const lo=Math.min(...data),hi=Math.max(...data),cnt=new Array(nb).fill(0);
-    data.forEach(v=>{let b=Math.floor((v-lo)/(hi-lo+1e-9)*nb);if(b>=nb)b=nb-1;cnt[b]++;});
-    const hm=Math.max(...cnt),x0=ox+34,x1=ox+halfW,y0=T,y1=g.H-B,bw=(x1-x0)/nb;
-    cnt.forEach((c,i)=>{const h=(c/hm)*(y1-y0-4);g.fillStyle=col;g.globalAlpha=0.62;
-      g.fillRect(x0+i*bw,y1-h,bw*0.88,h);g.globalAlpha=1;});
-    axes(g,x0,y0,x1,y1);
-    lab(g,title,ox+34,10,'left',C.ink,12.5);
-    lab(g,fmt(lo),x0,y1+14,'left');lab(g,fmt(hi),x1,y1+14,'right');
-    return {x0,x1,y0,y1,lo,hi};
-  }
-  const A=hist(0,lognData,26,C.amber,'원래 단위 CFU/g',v=>nf(v));
-  const logs=lognData.map(v=>Math.log10(v));
-  hist(g.W/2+4,logs,26,C.blue,'log₁₀ 변환 후',v=>v.toFixed(1));
-  const am=lognData.reduce((a,b)=>a+b,0)/lognData.length;
-  const gm=Math.pow(10,logs.reduce((a,b)=>a+b,0)/logs.length);
-  [[am,C.saf],[gm,C.violet]].forEach(([v,c])=>{
-    const xx=A.x0+(v-A.lo)/(A.hi-A.lo)*(A.x1-A.x0);
-    if(xx>=A.x0&&xx<=A.x1){g.strokeStyle=c;g.lineWidth=2;g.setLineDash([4,3]);
-      g.beginPath();g.moveTo(xx,A.y0);g.lineTo(xx,A.y1);g.stroke();g.setLineDash([]);}});
-  lab(g,'산술평균',A.x0+(am-A.lo)/(A.hi-A.lo)*(A.x1-A.x0)+4,A.y0+6,'left',C.saf,10.5);
-  lab(g,'기하평균',A.x0+(gm-A.lo)/(A.hi-A.lo)*(A.x1-A.x0)+4,A.y0+20,'left',C.violet,10.5);
-  document.getElementById('l-out').innerHTML=
-   '<span class="big">'+(am/gm).toFixed(2)+'배</span>산술평균 ÷ 기하평균<br><br>'+
-   '산술평균 '+nf(am)+' CFU/g<br>기하평균 <em>'+nf(gm)+'</em> CFU/g<br>'+
-   '보고할 때 어느 쪽인지 밝히지 않으면 이만큼 차이가 납니다.';
+   '<span class="big">E[X] = '+lam.toFixed(2)+'</span>기대 건수<br><br>'+
+   '모수: λ = '+lam.toFixed(2)+'<br>'+
+   'Var(X) = λ = <em>'+lam.toFixed(2)+'</em><br>'+
+   '실측 평균 '+m.toFixed(2)+' · 실측 분산 '+v.toFixed(2);
 }
 
-/* ═══════════ 05 표집분포 ═══════════ */
-let popul=[];
-(function makePop(){for(let i=0;i<40000;i++)popul.push(Math.pow(10,3+0.75*gauss()));})();
+/* ═══════════ 04 표집분포 ═══════════ */
+let sampleDist='normal';
 function sampRun(){
   const n=+document.getElementById('s-n').value, rep=+document.getElementById('s-rep').value;
   document.getElementById('v-sn').textContent=n;
   document.getElementById('v-sr').textContent=nf(rep);
+  const isNormal=sampleDist==='normal';
+  const sourceLabel=isNormal?'정규 모집단 N(1, 1²)':'이항 모집단 Bin(10, 0.1)';
+  const sourceSd=isNormal?1:Math.sqrt(0.9), drawSource=isNormal?()=>1+gauss():()=>binDraw(10,0.1);
+  const source=Array.from({length:5000},drawSource);
   const means=[];
-  for(let r=0;r<rep;r++){let s=0;for(let i=0;i<n;i++)s+=popul[(Math.random()*popul.length)|0];means.push(s/n);}
-  const pm=popul.reduce((a,b)=>a+b,0)/popul.length;
-  const psd=Math.sqrt(popul.reduce((a,b)=>a+(b-pm)**2,0)/popul.length);
+  for(let r=0;r<rep;r++){let s=0;for(let i=0;i<n;i++)s+=drawSource();means.push(s/n);}
+  const pm=1;
   const mm=means.reduce((a,b)=>a+b,0)/means.length;
-  const msd=Math.sqrt(means.reduce((a,b)=>a+(b-mm)**2,0)/(means.length-1));
-  const g=ctx('sampCv'),T=24,B=40,gap=18,hh=(g.H-T-B-gap)/2;
-  function draw(y0,data,col,title,lo,hi){
-    const nb=42,cnt=new Array(nb).fill(0);
-    data.forEach(v=>{let b=Math.floor((v-lo)/(hi-lo+1e-9)*nb);if(b<0)b=0;if(b>=nb)b=nb-1;cnt[b]++;});
+  const m2=means.reduce((a,b)=>a+(b-mm)**2,0)/means.length;
+  const msd=Math.sqrt(m2*means.length/(means.length-1));
+  const skew=m2?means.reduce((a,b)=>a+(b-mm)**3,0)/means.length/Math.pow(m2,1.5):0;
+  const se=sourceSd/Math.sqrt(n);
+  const expectedSkew=isNormal?0:0.8/Math.sqrt(0.9*n);
+  const g=ctx('sampCv'),T=24,B=40,gap=32,hh=(g.H-T-B-gap)/2;
+  function draw(y0,data,col,title,lo,hi,nb=42,digits=1){
+    const cnt=new Array(nb).fill(0);
+    data.forEach(v=>{if(v<lo||v>hi)return;
+      let b=Math.floor((v-lo)/(hi-lo)*nb);if(b===nb)b=nb-1;cnt[b]++;});
     const hm=Math.max(...cnt),x0=48,x1=g.W-14,bw=(x1-x0)/nb,y1=y0+hh;
     cnt.forEach((c,i)=>{const h=(c/hm)*(hh-6);g.fillStyle=col;g.globalAlpha=0.65;
       g.fillRect(x0+i*bw,y1-h,bw*0.9,h);g.globalAlpha=1;});
     axes(g,x0,y0,x1,y1);
     lab(g,title,x0,y0-9,'left',C.ink,12.5);
-    lab(g,nf(lo),x0,y1+13,'left');lab(g,nf(hi),x1,y1+13,'right');
-    return {x0,x1,y1,lo,hi};
+    lab(g,lo.toFixed(digits),x0,y1+13,'left');lab(g,hi.toFixed(digits),x1,y1+13,'right');
+    return {x0,x1,y0,y1,lo,hi,hm,bw,valueBw:(hi-lo)/nb};
   }
-  const lo=0,hi=pm*3.4;
-  draw(T,popul.slice(0,6000),C.amber,'모집단 — 개별 시료의 CFU/g (치우쳐 있음)',lo,hi);
-  const D=draw(T+hh+gap+12,means,C.violet,'표본평균의 분포 — n = '+n+'로 '+nf(rep)+'번 반복',lo,hi);
+  const sourceLo=isNormal?-3.5:-0.5,sourceHi=isNormal?5.5:10.5,sourceBins=isNormal?44:11;
+  draw(T,source,C.amber,'모집단의 개별 관측값 X — '+sourceLabel,sourceLo,sourceHi,sourceBins,1);
+  const span=4.2*se,meanLo=isNormal?pm-span:Math.max(0,pm-span);
+  const meanHi=isNormal?pm+span:Math.min(10,pm+span);
+  const D=draw(T+hh+gap,means,C.violet,'표본평균 x̄ — n = '+n+' · '+nf(rep)+'회',meanLo,meanHi,44,2);
   const mx=D.x0+(pm-D.lo)/(D.hi-D.lo)*(D.x1-D.x0);
   g.strokeStyle=C.saf;g.lineWidth=1.8;g.setLineDash([4,3]);
-  g.beginPath();g.moveTo(mx,T);g.lineTo(mx,D.y1);g.stroke();g.setLineDash([]);
-  lab(g,'모평균',mx+5,T+6,'left',C.saf,10.5);
-  lab(g,'CFU/g →',(D.x0+D.x1)/2,D.y1+30,'center');
+  g.beginPath();g.moveTo(mx,D.y0);g.lineTo(mx,D.y1);g.stroke();g.setLineDash([]);
+  lab(g,'모평균 μ = 1',mx+5,D.y0+6,'left',C.saf,10.5);
+  // 히스토그램과 같은 표본 수·구간 폭으로 환산한 정규 근사를 겹친다.
+  g.strokeStyle=C.amber;g.lineWidth=1.4;g.setLineDash([3,3]);g.beginPath();
+  for(let i=0;i<=80;i++){
+    const x=D.lo+(D.hi-D.lo)*i/80;
+    const density=Math.exp(-0.5*((x-pm)/se)**2)/(se*Math.sqrt(2*Math.PI));
+    const expected=means.length*D.valueBw*density;
+    const xx=D.x0+(x-D.lo)/(D.hi-D.lo)*(D.x1-D.x0);
+    const yy=Math.max(D.y0,D.y1-(expected/D.hm)*(hh-6));
+    i?g.lineTo(xx,yy):g.moveTo(xx,yy);
+  }
+  g.stroke();g.setLineDash([]);
+  lab(g,'노란 점선 = 평균의 정규 근사',D.x1-4,D.y0+6,'right',C.amber,10.5);
+  lab(g,'표본평균 x̄ →',(D.x0+D.x1)/2,D.y1+30,'center');
+  const observation=isNormal
+    ?'정규 모집단에서는 n이 작아도 평균이 정규형입니다. n을 키울 때 종 모양보다 <b>폭이 줄어드는 현상</b>에 주목하십시오.'
+    :'이항 모집단의 뾰족한 이산 형태와 비교하십시오. n을 키우면 평균의 분포가 <b>덜 치우치고 더 매끄러운 종 모양</b>에 가까워집니다.';
   document.getElementById('s-out').innerHTML=
-   '<span class="big">'+nf(msd)+'</span>평균들의 표준편차 = 표준오차<br><br>'+
-   '개별 시료의 SD: <b>'+nf(psd)+'</b><br>'+
-   '이론적 SE = SD/√n = <em>'+nf(psd/Math.sqrt(n))+'</em><br>'+
-   '실측 SE = '+nf(msd)+' — 거의 일치합니다.<br><br>'+
-   'n을 4배로 올리면 SE는 절반이 됩니다. 정밀도는 표본수의 <b>제곱근</b>에만 비례합니다.';
+   '<span class="big">'+nf(msd,3)+'</span>표본평균들의 표준편차 (실측 SE)<br><br>'+
+   '모집단: <b>'+sourceLabel+'</b><br>'+
+   '이론적 SE = σ/√n = <em>'+nf(se,3)+'</em><br>'+
+   '실측 평균 = '+nf(mm,3)+' · 실측 SE = '+nf(msd,3)+'<br>'+
+   '비대칭도: 실측 '+nf(skew,3)+' · 이론 '+nf(expectedSkew,3)+' <span class="muted">(0에 가까울수록 대칭)</span><br><br>'+
+   observation+' 반복 횟수는 이론을 바꾸지 않고, 히스토그램을 더 안정적으로 보이게 합니다.';
 }
 function nullRun(){
   const n=+document.getElementById('n-n').value, rep=+document.getElementById('n-rep').value;
@@ -1848,20 +1836,20 @@ coinDraw(); evDraw();
 document.querySelectorAll('[data-dist]').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('[data-dist]').forEach(x=>x.classList.remove('on'));
   b.classList.add('on');
-  ['binom','pois','norm','logn'].forEach(d=>
+  ['binom','pois','norm'].forEach(d=>
     document.getElementById('p-'+d).style.display=(d===b.dataset.dist)?'':'none');
   if(b.dataset.dist==='pois'&&!poisData.length)poisGen();
   if(b.dataset.dist==='norm')normDraw();
-  if(b.dataset.dist==='logn'&&!lognData.length)lognGen();
 }));
-['t-n','t-p','t-a'].forEach(i=>on(i,'input',binomDraw)); binomDraw();
-['nm-mu','nm-sd','nm-lsl'].forEach(i=>on(i,'input',normDraw));
-on('nm-band','click',e=>{showBand=!showBand;e.target.classList.toggle('on');
-  e.target.textContent=showBand?'68 · 95 · 99.7 구간 숨기기':'68 · 95 · 99.7 구간 보기';normDraw();});
-['p-lam','p-od'].forEach(i=>on(i,'input',poisGen)); on('p-draw','click',poisGen);
-['l-med','l-sd'].forEach(i=>on(i,'input',lognGen)); on('l-draw','click',lognGen);
+['t-n','t-p'].forEach(i=>on(i,'input',binomDraw)); binomDraw();
+['nm-mu','nm-sd'].forEach(i=>on(i,'input',normDraw));
+['p-lam'].forEach(i=>on(i,'input',poisGen)); on('p-draw','click',poisGen);
 
-['s-n','s-rep'].forEach(i=>on(i,'input',sampRun)); on('s-run','click',sampRun); sampRun();
+document.querySelectorAll('[data-samp-dist]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-samp-dist]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); sampleDist=b.dataset.sampDist; sampRun();
+}));
+['s-n','s-rep'].forEach(i=>on(i,'change',sampRun)); on('s-run','click',sampRun); sampRun();
 ['n-n','n-rep'].forEach(i=>on(i,'input',nullRun)); on('n-run','click',nullRun); nullRun();
 on('r3-n','input',r3Draw); r3Draw();
 

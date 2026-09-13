@@ -51,6 +51,33 @@
   타이트하게.
 - `h1`은 `clamp(2.8rem, 7vw, 6rem)`처럼 뷰포트에 비례해 큼직하게 유지한다.
 
+## Open Graph 미리보기 이미지
+
+공유 링크의 Open Graph/Twitter 미리보기에는 과목별 512×512 PNG 아이콘을
+사용한다. 아이콘은 `docs/assets/images/`에 보관한다.
+
+| 콘텐츠 | 이미지 | `og:image:alt` |
+| --- | --- | --- |
+| 사이트 홈 및 통계 | `stat.png` | 통계 수업 자료 아이콘 |
+| 데이터과학 | `data.png` | 데이터과학 수업 자료 아이콘 |
+| 인공지능 | `ai.png` | 인공지능 수업 자료 아이콘 |
+
+- 각 HTML 문서의 `<head>`에 `og:title`, `og:description`, `og:url`,
+  `og:image`, `og:image:type`, `og:image:width`, `og:image:height`,
+  `og:image:alt`를 함께 선언한다.
+- Twitter/X 미리보기에도 같은 이미지를 사용하도록 `twitter:card`와
+  `twitter:image` 계열 메타데이터를 함께 선언한다.
+- `og:image`와 `og:url`은 크롤러가 접근할 수 있는 완전한 HTTPS URL을
+  사용한다. 이 저장소의 기본 주소는
+  `https://qmakescl.github.io/class-material/`이다.
+- 프로젝트 하위 경로(`/class-material/`)를 포함해야 하므로 루트 상대 경로를
+  사용하지 않는다. 커스텀 도메인을 추가하면 모든 절대 URL을 함께 갱신한다.
+- 새 과목 페이지를 만들 때는 해당 과목 아이콘을 매핑하고 `og:image:alt`를
+  과목명에 맞게 작성한다. 홈페이지는 사이트를 대표하는 `stat.png`를
+  기본 이미지로 사용한다.
+- 아이콘은 정사각형 원본을 유지한다. 미리보기 서비스가 자르거나 축소할 수
+  있으므로 중요한 시각 정보는 가장자리에 배치하지 않는다.
+
 ## 내비게이션 패턴
 
 - `.site-header`는 `position: sticky; top: 0;`로 항상 보이게 한다.
