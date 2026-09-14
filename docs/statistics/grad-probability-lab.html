@@ -796,6 +796,49 @@ details .body b{color:var(--ink); font-weight:600}
     </div>
   </div>
 
+  <div class="panel" id="p-standardize">
+    <h4>표준화: 서로 다른 정규분포를 같은 Z 척도로 읽기</h4>
+    <p class="hint">임의의 정규분포에서 평균을 빼면 중심이 0으로 이동하고, 이어서 표준편차로 나누면 한 칸이 표준편차 1개인 공통 척도가 됩니다. 관측값을 움직이며 세 줄의 점이 같은 위치 관계를 어떻게 다른 단위로 표현하는지 보십시오.</p>
+    <div class="math">
+      X ∼ N(μ, σ²) &nbsp;→&nbsp; X − μ ∼ N(0, σ²) &nbsp;→&nbsp; Z = (X − μ) ⁄ σ ∼ N(0, 1)
+      <span class="note">Z는 관측값이 평균에서 몇 개의 표준편차만큼 떨어졌는지 나타내는 단위 없는 위치 계수입니다</span>
+    </div>
+    <div class="btnrow" aria-label="표준화 변환 애니메이션">
+      <button class="ghost on" type="button" data-z-animation="overview">원래 X와 표준 Z 비교</button>
+      <button type="button" data-z-animation="full">X → Z 전체 변환 재생</button>
+      <button class="ghost" type="button" data-z-animation="shift">① X − μ: 평균만큼 이동</button>
+      <button class="ghost" type="button" data-z-animation="scale">② ÷ σ: 퍼짐을 1로 맞춤</button>
+    </div>
+    <figure class="chart-wrap" style="margin-top:16px">
+      <canvas id="zAnimCv" width="620" height="235"></canvas>
+      <figcaption class="chart-note">버튼을 누르면 각 변환이 다시 재생됩니다. 첫 단계에서는 평균이 원점으로 이동하지만 퍼짐은 그대로이고, 둘째 단계에서만 표준편차가 σ에서 1로 바뀝니다.</figcaption>
+    </figure>
+    <div class="grid-ctrl">
+      <div>
+        <div class="ctl">
+          <label><span>원래 분포의 평균 μ</span><var id="v-z-mu">202.0 g</var></label>
+          <input type="range" id="z-mu" min="1950" max="2050" step="1" value="2020">
+        </div>
+        <div class="ctl">
+          <label><span>원래 분포의 표준편차 σ</span><var id="v-z-sd">1.5 g</var></label>
+          <input type="range" id="z-sd" min="5" max="50" step="1" value="15">
+        </div>
+        <div class="ctl">
+          <label><span>관측값 x</span><var id="v-z-x">205.0 g</var></label>
+          <input type="range" id="z-x" min="1960" max="2080" step="1" value="2050">
+        </div>
+        <div class="readout" id="z-out"></div>
+      </div>
+      <figure class="chart-wrap">
+        <canvas id="zCv" width="620" height="470"></canvas>
+        <figcaption class="chart-note">붉은 점선은 선택한 관측값입니다. 각 줄에서 점의 가로 위치는 같지만, 눈금의 단위가 g → 평균으로부터의 편차(g) → 표준편차 개수(Z)로 바뀝니다.</figcaption>
+      </figure>
+    </div>
+    <div class="mis" style="margin-bottom:0">
+      <b>Z값은 순위를 새로 만드는 공식이 아닙니다</b> — 평균에서의 거리를 원래 단위 대신 표준편차 단위로 다시 표현한 값입니다. 그래서 서로 평균·산포가 다른 시험 점수나 측정값도 같은 척도에서 비교할 수 있습니다. 예를 들어 Z = 2는 평균보다 표준편차 두 개만큼 큰 값입니다.
+    </div>
+  </div>
+
   <details>
     <summary>수업 진행 노트</summary>
     <div class="body">
@@ -1595,6 +1638,171 @@ function normDraw(){
    'SD(X) = σ = '+sd.toFixed(3)+' g';
 }
 
+/* ═══════════ 04-3a 표준화와 Z 변환 ═══════════ */
+let zAnimationFrame=0, zAnimationStage='overview', zAnimationProgress=1;
+function zAnimationDraw(stage=zAnimationStage, progress=zAnimationProgress){
+  if(stage==='full'){
+    if(progress<0.5)zAnimationDraw('shift',progress*2);
+    else zAnimationDraw('scale',(progress-0.5)*2);
+    return;
+  }
+  const mu=+document.getElementById('z-mu').value/10;
+  const sd=+document.getElementById('z-sd').value/10;
+  const x=+document.getElementById('z-x').value/10;
+  const z=(x-mu)/sd;
+  const g=ctx('zAnimCv'),L=48,R=18,T=35,B=46,x0=L,x1=g.W-R,y0=T,y1=g.H-B;
+  if(stage==='overview'){
+    // 공통 개념 축에 변환 전·후 곡선을 겹쳐 중심 이동과 폭 변화를 바로 비교한다.
+    const sourceCenter=3.1,sourceSpread=sd,lo=-Math.max(5,4*sd),hi=Math.max(8,sourceCenter+4*sd);
+    const X=v=>x0+(v-lo)/(hi-lo)*(x1-x0),Y=d=>y1-d*(y1-y0-12);
+    const drawCurve=(center,spread,col,fill)=>{
+      const density=v=>Math.exp(-0.5*((v-center)/spread)**2);
+      if(fill){g.fillStyle=fill;g.beginPath();g.moveTo(x0,y1);
+        for(let i=0;i<=240;i++){const v=lo+(hi-lo)*i/240;g.lineTo(X(v),Y(density(v)));}
+        g.lineTo(x1,y1);g.closePath();g.fill();}
+      g.strokeStyle=col;g.lineWidth=2.3;g.beginPath();
+      for(let i=0;i<=240;i++){const v=lo+(hi-lo)*i/240,yy=Y(density(v));i?g.lineTo(X(v),yy):g.moveTo(X(v),yy);}
+      g.stroke();
+      return density;
+    };
+    for(let t=0;t<=4;t++){const yy=y1-(t/4)*(y1-y0);g.strokeStyle='#e7ebf5';g.lineWidth=1;
+      g.beginPath();g.moveTo(x0,yy);g.lineTo(x1,yy);g.stroke();}
+    const sourceDensity=drawCurve(sourceCenter,sourceSpread,C.violet,'rgba(139,63,240,0.12)');
+    const standardDensity=drawCurve(0,1,C.blue,'rgba(47,111,237,0.10)');
+    [[sourceCenter,C.violet,'μ (원래 평균)'],[0,C.blue,'0 (Z 평균)']].forEach(([center,col,label])=>{
+      g.strokeStyle=col;g.lineWidth=1.2;g.setLineDash([4,3]);g.beginPath();g.moveTo(X(center),y0);g.lineTo(X(center),y1);g.stroke();g.setLineDash([]);
+      lab(g,label,X(center),y0+10,'center',col,11.5);
+    });
+    const sourceObservation=sourceCenter+(x-mu),standardObservation=z;
+    [[sourceObservation,sourceDensity,C.violet,'x'],[standardObservation,standardDensity,C.blue,'Z']].forEach(([value,density,col,label])=>{
+      g.strokeStyle=col;g.lineWidth=1.7;g.setLineDash([5,3]);g.beginPath();g.moveTo(X(value),y0);g.lineTo(X(value),y1);g.stroke();g.setLineDash([]);
+      g.fillStyle=col;g.beginPath();g.arc(X(value),Y(density(value)),4.2,0,7);g.fill();
+      lab(g,label+' 관측점',X(value),y1-9,'center',col,10.5);
+    });
+    axes(g,x0,y0,x1,y1);
+    lab(g,'같은 공통 축에서 보는 표준화 전·후',x0,y0-18,'left',C.ink,13);
+    lab(g,'보라: X ∼ N('+mu.toFixed(1)+', '+(sd*sd).toFixed(2)+')',x0,y0-2,'left',C.violet,11.5);
+    lab(g,'파랑: Z ∼ N(0, 1)  ·  Z = (X − μ) / σ',x1,y0-2,'right',C.blue,11.5);
+    lab(g,'공통 변환 축 — 보라 곡선이 평균 0으로 이동하고 폭 1이 되면 파랑 곡선과 겹칩니다',g.W/2,y1+29,'center',C.amber,10.8);
+    return;
+  }
+  const eased=1-Math.pow(1-progress,3);
+  let center, spread, observation, lo, hi, title, detail;
+  if(stage==='shift'){
+    // 원래 단위를 그대로 옮기면 μ가 너무 커 곡선이 점처럼 보인다.
+    // 여기서는 평균 위치를 강조한 개념 축에서 중심 이동만 보여 준다.
+    center=3.1*(1-eased); spread=sd; observation=center+(x-mu);
+    lo=-Math.max(5,4*sd);hi=Math.max(8,3.1+4*sd);
+    title='① 평균만큼 이동:  X  →  X − μ';
+    detail='중심: μ → 0  ·  표준편차: σ 그대로';
+  }else{
+    center=0; spread=sd/Math.pow(sd,eased); observation=(x-mu)/Math.pow(sd,eased);
+    // 평균 이동 단계와 동일한 변환 축을 유지한다. 따라서 이 단계에서는
+    // 중심을 다시 옮기지 않고, 이미 0에 놓인 보라 곡선의 폭만 줄어든다.
+    lo=-Math.max(5,4*sd);hi=Math.max(8,3.1+4*sd);
+    title='② 표준편차로 나누기:  (X − μ)  →  Z';
+    detail='중심: 0 유지  ·  표준편차: σ = '+sd.toFixed(2)+' → 1';
+  }
+  const X=v=>x0+(v-lo)/(hi-lo)*(x1-x0);
+  const Y=d=>y1-d*(y1-y0-12);
+  const density=v=>Math.exp(-0.5*((v-center)/spread)**2);
+  const targetDensity=v=>Math.exp(-0.5*v*v);
+  for(let t=0;t<=4;t++){const yy=y1-(t/4)*(y1-y0);g.strokeStyle='#e7ebf5';g.lineWidth=1;
+    g.beginPath();g.moveTo(x0,yy);g.lineTo(x1,yy);g.stroke();}
+  // 목표인 표준정규분포는 항상 남겨 두어, 보라 곡선이 어디로 가는지 비교한다.
+  g.fillStyle='rgba(47,111,237,0.10)';g.beginPath();g.moveTo(x0,y1);
+  for(let i=0;i<=240;i++){const v=lo+(hi-lo)*i/240;g.lineTo(X(v),Y(targetDensity(v)));}
+  g.lineTo(x1,y1);g.closePath();g.fill();
+  g.strokeStyle=C.blue;g.lineWidth=2.1;g.beginPath();
+  for(let i=0;i<=240;i++){const v=lo+(hi-lo)*i/240,yy=Y(targetDensity(v));i?g.lineTo(X(v),yy):g.moveTo(X(v),yy);}
+  g.stroke();
+  g.fillStyle='rgba(139,63,240,0.12)';g.beginPath();g.moveTo(x0,y1);
+  for(let i=0;i<=240;i++){const v=lo+(hi-lo)*i/240;g.lineTo(X(v),Y(density(v)));}
+  g.lineTo(x1,y1);g.closePath();g.fill();
+  g.strokeStyle=C.violet;g.lineWidth=2.4;g.beginPath();
+  for(let i=0;i<=240;i++){const v=lo+(hi-lo)*i/240,yy=Y(density(v));i?g.lineTo(X(v),yy):g.moveTo(X(v),yy);}
+  g.stroke();
+  g.strokeStyle=C.blue;g.lineWidth=1.2;g.setLineDash([4,3]);g.beginPath();g.moveTo(X(0),y0);g.lineTo(X(0),y1);g.stroke();g.setLineDash([]);
+  g.strokeStyle=C.ink;g.lineWidth=1.2;g.setLineDash([4,3]);g.beginPath();g.moveTo(X(center),y0);g.lineTo(X(center),y1);g.stroke();g.setLineDash([]);
+  g.strokeStyle=C.saf;g.lineWidth=1.8;g.setLineDash([5,3]);g.beginPath();g.moveTo(X(observation),y0);g.lineTo(X(observation),y1);g.stroke();g.setLineDash([]);
+  g.fillStyle=C.saf;g.beginPath();g.arc(X(observation),Y(density(observation)),4.4,0,7);g.fill();
+  axes(g,x0,y0,x1,y1);
+  lab(g,title,x0,y0-18,'left',C.ink,13);
+  lab(g,detail,x0,y0-2,'left',C.soft,11.5);
+  lab(g,'파랑 = 목표 Z ∼ N(0, 1)',x1,y0-18,'right',C.blue,11);
+  lab(g,stage==='shift'?'중심이 0으로 이동':'곡선 폭이 σ에서 1로 압축',x1,y1+28,'right',C.amber,11.5);
+  const currentZ=stage==='shift'?z:(x-mu)/Math.pow(sd,eased);
+  lab(g,'관측점: '+currentZ.toFixed(2),Math.min(x1-4,Math.max(x0+4,X(observation))),y0+11,'center',C.saf,11.5);
+}
+function runZAnimation(stage){
+  cancelAnimationFrame(zAnimationFrame);
+  zAnimationStage=stage;zAnimationProgress=0;
+  document.querySelectorAll('[data-z-animation]').forEach(button=>
+    button.classList.toggle('on',button.dataset.zAnimation===stage));
+  if(stage==='overview'){
+    zAnimationProgress=1;zAnimationDraw();return;
+  }
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches){
+    zAnimationProgress=1;zAnimationDraw();return;
+  }
+  const started=performance.now(),duration=stage==='full'?1640:820;
+  const frame=now=>{zAnimationProgress=Math.min(1,(now-started)/duration);zAnimationDraw();
+    if(zAnimationProgress<1)zAnimationFrame=requestAnimationFrame(frame);};
+  zAnimationFrame=requestAnimationFrame(frame);
+}
+function stdDraw(){
+  const mu=+document.getElementById('z-mu').value/10;
+  const sd=+document.getElementById('z-sd').value/10;
+  const xInput=document.getElementById('z-x');
+  // 관측값 슬라이더는 현재 분포의 중심 ±4σ 안에서 움직인다.
+  const xMin=Math.round((mu-4*sd)*10), xMax=Math.round((mu+4*sd)*10);
+  xInput.min=xMin; xInput.max=xMax;
+  let x=+xInput.value/10;
+  if(x<xMin/10||x>xMax/10){x=Math.min(xMax/10,Math.max(xMin/10,x));xInput.value=Math.round(x*10);}
+  const z=(x-mu)/sd, shifted=x-mu;
+  document.getElementById('v-z-mu').textContent=mu.toFixed(1)+' g';
+  document.getElementById('v-z-sd').textContent=sd.toFixed(1)+' g';
+  document.getElementById('v-z-x').textContent=x.toFixed(1)+' g';
+
+  const g=ctx('zCv'),L=56,R=18,rowHeight=100,top=32,gap=46,x0=L,x1=g.W-R;
+  function drawRow(index,title,center,scale,observation,unit){
+    const y0=top+index*(rowHeight+gap), y1=y0+rowHeight;
+    const X=m=>x0+(m+4.5)/9*(x1-x0);
+    const Y=d=>y1-d*(y1-y0-8);
+    g.strokeStyle='#e7ebf5';g.lineWidth=1;
+    [-2,0,2].forEach(m=>{g.beginPath();g.moveTo(X(m),y0);g.lineTo(X(m),y1);g.stroke();});
+    g.fillStyle='rgba(139,63,240,0.12)';g.beginPath();g.moveTo(X(-4.5),y1);
+    for(let i=0;i<=180;i++){const m=-4.5+9*i/180;g.lineTo(X(m),Y(Math.exp(-m*m/2)));}
+    g.lineTo(X(4.5),y1);g.closePath();g.fill();
+    g.strokeStyle=C.violet;g.lineWidth=2.1;g.beginPath();
+    for(let i=0;i<=180;i++){const m=-4.5+9*i/180, yy=Y(Math.exp(-m*m/2));i?g.lineTo(X(m),yy):g.moveTo(X(m),yy);}
+    g.stroke();
+    g.strokeStyle=C.ink;g.setLineDash([4,3]);g.lineWidth=1.1;g.beginPath();g.moveTo(X(0),y0);g.lineTo(X(0),y1);g.stroke();g.setLineDash([]);
+    const obsM=(observation-center)/scale, obsX=X(obsM);
+    g.strokeStyle=C.saf;g.lineWidth=1.7;g.setLineDash([4,3]);g.beginPath();g.moveTo(obsX,y0);g.lineTo(obsX,y1);g.stroke();g.setLineDash([]);
+    g.fillStyle=C.saf;g.beginPath();g.arc(obsX,Y(Math.exp(-obsM*obsM/2)),4.2,0,7);g.fill();
+    axes(g,x0,y0,x1,y1);
+    [-4,-2,0,2,4].forEach(m=>lab(g,(center+m*scale).toFixed(1),X(m),y1+14,'center'));
+    lab(g,title,x0,y0-13,'left',C.ink,12.5);
+    lab(g,unit,x1,y1+29,'right',C.soft,10.5);
+  }
+  drawRow(0,'① 원래 분포  X ∼ N('+mu.toFixed(1)+', '+(sd*sd).toFixed(2)+')',mu,sd,x,'측정값 X (g)');
+  lab(g,'− μ  (평균만큼 왼쪽으로 이동)',x1,top+rowHeight+gap/2,'right',C.amber,11.5);
+  drawRow(1,'② 이동 후  X − μ ∼ N(0, '+(sd*sd).toFixed(2)+')',0,sd,shifted,'평균으로부터의 편차 (g)');
+  lab(g,'÷ σ  (표준편차를 한 칸으로)',x1,top+2*rowHeight+gap*1.5,'right',C.amber,11.5);
+  drawRow(2,'③ 표준화  Z ∼ N(0, 1)',0,1,z,'Z값 (표준편차 개수)');
+
+  const direction=z>0?'위':z<0?'아래':'같은';
+  document.getElementById('z-out').innerHTML=
+    '<span class="big">Z = '+z.toFixed(2)+'</span>'+
+    'Z 변환계수<br><br>'+
+    '① x − μ = '+x.toFixed(1)+' − '+mu.toFixed(1)+' = <b>'+shifted.toFixed(1)+' g</b><br>'+
+    '② Z = '+shifted.toFixed(1)+' ⁄ '+sd.toFixed(1)+' = <em>'+z.toFixed(2)+'</em><br><br>'+
+    '관측값은 평균보다 표준편차 <b>'+Math.abs(z).toFixed(2)+'개</b> '+direction+'에 있습니다.<br>'+
+    '따라서 P(X ≤ x) = P(Z ≤ '+z.toFixed(2)+') = Φ('+z.toFixed(2)+') ≈ '+(Phi(z)*100).toFixed(1)+'%입니다.';
+  zAnimationDraw();
+}
+
 /* ═══════════ 04 분포 ═══════════ */
 function binomDraw(){
   const n=+document.getElementById('t-n').value;
@@ -1862,6 +2070,13 @@ document.querySelectorAll('[data-dist]').forEach(b=>b.addEventListener('click',(
 }));
 ['t-n','t-p'].forEach(i=>on(i,'input',binomDraw)); binomDraw();
 ['nm-mu','nm-sd'].forEach(i=>on(i,'input',normDraw));
+['z-mu','z-sd','z-x'].forEach(i=>on(i,'input',()=>{
+  cancelAnimationFrame(zAnimationFrame);
+  zAnimationStage='overview';zAnimationProgress=1;stdDraw();
+}));
+document.querySelectorAll('[data-z-animation]').forEach(button=>
+  button.addEventListener('click',()=>runZAnimation(button.dataset.zAnimation)));
+stdDraw();
 ['p-lam'].forEach(i=>on(i,'input',poisGen)); on('p-draw','click',poisGen);
 
 document.querySelectorAll('[data-samp-dist]').forEach(b=>b.addEventListener('click',()=>{
