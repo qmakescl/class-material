@@ -962,9 +962,16 @@ const nf=(x,d=0)=>x.toLocaleString('ko-KR',{minimumFractionDigits:d,maximumFract
 
 function ctx(id){
   const cv=document.getElementById(id), r=window.devicePixelRatio||1;
-  const w=cv.width, h=cv.height;
-  if(cv.dataset.hi!=='1'){cv.dataset.hi='1'; cv.style.width=w+'px'; cv.style.height=h+'px';
-    cv.width=w*r; cv.height=h*r;}
+  // 캔버스의 내부 픽셀 크기는 한 번 확대되면 cv.width 자체가 바뀐다.
+  // 따라서 이후 다시 그릴 때도 처음의 CSS 논리 크기를 보존해야 좌표계가
+  // devicePixelRatio만큼 반복 확대되어 그림이 잘리지 않는다.
+  const w=+(cv.dataset.chartWidth ||=cv.width);
+  const h=+(cv.dataset.chartHeight ||=cv.height);
+  const pixelWidth=Math.round(w*r), pixelHeight=Math.round(h*r);
+  if(cv.width!==pixelWidth||cv.height!==pixelHeight){
+    cv.style.width=w+'px'; cv.style.height=h+'px';
+    cv.width=pixelWidth; cv.height=pixelHeight;
+  }
   const g=cv.getContext('2d'); g.setTransform(r,0,0,r,0,0); g.clearRect(0,0,w,h);
   g.W=w; g.H=h; return g;
 }
@@ -1397,8 +1404,11 @@ function rrDraw(){
   document.getElementById('v-rr-b').textContent=(base*100).toFixed(1)+'%';
   document.getElementById('v-rr-r').textContent=rr.toFixed(2);
   const a=Math.round(base*1000), b=Math.round(base*rr*1000), add=b-a;
+  // RR이 큰 설정에서는 위험이 100%를 넘을 수 있다. 확률 그림에서는
+  // 1,000명이라는 축을 벗어나는 대신, 모형의 적용 한계를 명확히 표시한다.
+  const shownA=Math.min(1000,a), shownB=Math.min(1000,b);
   const g=ctx('rrCv'),cols=40,rows=25,cw=g.W/2/cols,ch=(g.H-42)/rows,r=Math.min(cw,ch)/2-1.1;
-  [[0,a,'비섭취군'],[g.W/2+10,b,'섭취군']].forEach(([ox,cnt,nm])=>{
+  [[0,shownA,'비섭취군'],[g.W/2+10,shownB,'섭취군']].forEach(([ox,cnt,nm])=>{
     lab(g,nm+' — 1,000명 중 '+cnt+'명',ox+2,14,'left',C.ink,12.5);
     for(let k=0;k<1000;k++){const cx=ox+(k%cols)*cw+cw/2+2, cy=30+((k/cols)|0)*ch+ch/2;
       g.fillStyle=k<a?C.saf:(k<cnt?C.amber:C.grey);
@@ -1408,7 +1418,7 @@ function rrDraw(){
    '<span class="big">+'+add+'명</span>1,000명당 추가 발생<br><br>'+
    '상대위험으로 말하면 <b>'+((rr-1)*100).toFixed(0)+'% 증가</b>.<br>'+
    '절대위험으로 말하면 '+(base*100).toFixed(1)+'% → <em>'+(base*rr*100).toFixed(1)+'%</em>.<br>'+
-   '같은 사실인데 인상이 이만큼 다릅니다.';
+   (b>1000?'<em>100%를 넘는 설정은 확률로 성립하지 않으므로 그림은 1,000명에서 멈춥니다. RR을 해석할 때 기저위험과 적용 범위를 함께 확인하십시오.</em>':'같은 사실인데 인상이 이만큼 다릅니다.');
 }
 
 /* ═══════════ 04-1 확률변수 — 동전 ═══════════ */
@@ -1550,8 +1560,9 @@ function normDraw(){
   document.getElementById('v-nm').textContent=mu.toFixed(1)+' g';
   document.getElementById('v-ns').textContent=sd.toFixed(1)+' g';
   const g=ctx('normCv'),L=54,R=16,T=24,B=44,x0=L,x1=g.W-R,y0=T,y1=g.H-B;
-  // 모수 변화가 화면에서 보이도록 모든 설정에서 동일한 가로축을 사용한다.
-  const lo=175, hi=231;
+  // 평균과 표준편차가 바뀌면 중심과 꼬리를 모두 담도록 가로축도 다시 잡는다.
+  // 1 g 눈금의 바깥쪽 여백을 더해 축 라벨이 안정적으로 읽히게 한다.
+  const lo=Math.floor((mu-4*sd-1)/2)*2, hi=Math.ceil((mu+4*sd+1)/2)*2;
   const X=v=>x0+(v-lo)/(hi-lo)*(x1-x0);
   const dens=v=>Math.exp(-0.5*((v-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI));
   const dmax=dens(mu), Y=d=>y1-(d/dmax)*(y1-y0-10);
@@ -1565,7 +1576,8 @@ function normDraw(){
   g.beginPath();g.moveTo(X(mu),Y(dmax));g.lineTo(X(mu),y1);g.stroke();g.setLineDash([]);
   lab(g,'μ',X(mu),y0+6,'center',C.ink,13);
   axes(g,x0,y0,x1,y1);
-  [180,190,200,210,220,230].forEach(v=>lab(g,v.toFixed(0),X(v),y1+15));
+  const tickStep=hi-lo<=20?2:5;
+  for(let v=Math.ceil(lo/tickStep)*tickStep;v<=hi;v+=tickStep)lab(g,v.toFixed(0),X(v),y1+15);
   lab(g,'제품 순중량 (g)',(x0+x1)/2,y1+32,'center');
   lab(g,'밀도 f(x)   단위: g⁻¹',x0-46,y0-12,'left',C.soft,11);
   const variance=sd*sd;
