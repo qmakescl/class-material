@@ -112,7 +112,8 @@ p{max-width:44em}
 .panel > .hint{margin:0 0 20px; font-size:13px; color:var(--soft); max-width:46em}
 .grid2{display:grid; grid-template-columns:1fr 1fr; gap:28px}
 .grid-ctrl{display:grid; grid-template-columns:300px 1fr; gap:32px; align-items:start}
-@media(max-width:900px){.grid2,.grid-ctrl{grid-template-columns:1fr}}
+@media(max-width:1120px){.grid-ctrl{grid-template-columns:1fr}}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
 
 /* ── 수식 ───────────────────────────── */
 .math{
@@ -156,6 +157,7 @@ button.ghost.on{background:var(--ink); color:#f4f6fb; border-color:var(--ink)}
 .opsrow button{font-size:15px; padding:7px 14px}
 
 canvas{display:block; max-width:100%}
+#vennCv{width:min(100%,480px); height:auto}
 .chart-wrap{margin:0; min-width:0}
 .chart-note{margin:7px 0 0; font-size:11.5px; line-height:1.55; color:var(--soft)}
 
@@ -367,7 +369,7 @@ details .body b{color:var(--ink); font-weight:600}
       </div>
       <div>
         <div class="opsrow" id="ops"></div>
-        <canvas id="vennCv" width="600" height="290"></canvas>
+        <canvas id="vennCv" width="480" height="250"></canvas>
       </div>
     </div>
     <div class="mis" style="margin-bottom:0">
@@ -969,7 +971,9 @@ function ctx(id){
   const h=+(cv.dataset.chartHeight ||=cv.height);
   const pixelWidth=Math.round(w*r), pixelHeight=Math.round(h*r);
   if(cv.width!==pixelWidth||cv.height!==pixelHeight){
-    cv.style.width=w+'px'; cv.style.height=h+'px';
+    // 내부 해상도는 늘리되, 화면상의 크기는 논리 크기를 유지한다.
+    // 높이를 auto로 두어 좁은 컨테이너에서는 가로·세로 비율도 함께 줄어든다.
+    cv.style.width=w+'px'; cv.style.height='auto';
     cv.width=pixelWidth; cv.height=pixelHeight;
   }
   const g=cv.getContext('2d'); g.setTransform(r,0,0,r,0,0); g.clearRect(0,0,w,h);
@@ -1122,19 +1126,22 @@ function vennDraw(){
   document.getElementById('v-nab').textContent=k.nab;
   document.getElementById('v-nb').textContent=k.nb;
   const g=ctx('vennCv'),W=g.W,H=g.H;
-  const gm={ax:W/2-64,bx:W/2+64,cy:H/2-8,r:104};
+  // 작은 화면에서도 원과 레이블이 캔버스 안에 남도록 그림 크기를
+  // 논리 캔버스의 폭·높이에서 계산한다.
+  const r=Math.min(W*0.215,H*0.39), offset=r*0.62;
+  const gm={ax:W/2-offset,bx:W/2+offset,cy:H/2-2,r};
   g.fillStyle='#f2f5fb';g.fillRect(0,0,W,H);
   paintRegion(g,gm,OPS[curOp][1],'rgba(74,58,122,0.40)',W,H);
   g.strokeStyle=C.ink;g.lineWidth=1.6;
   g.strokeRect(0.8,0.8,W-1.6,H-1.6);
   g.beginPath();g.arc(gm.ax,gm.cy,gm.r,0,7);g.stroke();
   g.beginPath();g.arc(gm.bx,gm.cy,gm.r,0,7);g.stroke();
-  lab(g,'A',gm.ax-66,gm.cy-76,'center',C.ink,19);
-  lab(g,'B',gm.bx+66,gm.cy-76,'center',C.ink,19);
+  lab(g,'A',gm.ax-r*0.63,gm.cy-r*0.73,'center',C.ink,19);
+  lab(g,'B',gm.bx+r*0.63,gm.cy-r*0.73,'center',C.ink,19);
   lab(g,'Ω',14,14,'center',C.soft,15);
-  lab(g,k.na,gm.ax-54,gm.cy,'center',C.ink,15);
+  lab(g,k.na,gm.ax-r*0.52,gm.cy,'center',C.ink,15);
   lab(g,k.nab,(gm.ax+gm.bx)/2,gm.cy,'center',C.ink,15);
-  lab(g,k.nb,gm.bx+54,gm.cy,'center',C.ink,15);
+  lab(g,k.nb,gm.bx+r*0.52,gm.cy,'center',C.ink,15);
   lab(g,k.none,W-34,H-24,'center',C.soft,14);
   const map={a:k.na,b:k.nb,ab:k.nab,none:k.none};
   const cnt=OPS[curOp][1].reduce((s,nm)=>s+map[nm],0);
