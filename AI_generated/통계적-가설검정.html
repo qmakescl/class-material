@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>통계적 가설검정</title>
+<style>
+  :root {
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --surface-2: #f2f1ec;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --blue: #2a78d6;
+    --blue-soft: rgba(42,120,214,0.13);
+    --red: #e34948;
+    --red-soft: rgba(227,73,72,0.13);
+    --aqua: #1baf7a;
+    --yellow: #eda100;
+    --violet: #4a3aa7;
+    --shadow: 0 1px 2px rgba(11,11,11,0.06), 0 8px 24px -10px rgba(11,11,11,0.14);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page:#0d0d0d; --surface:#1a1a19; --surface-2:#212120; --ink:#ffffff; --ink-2:#c3c2b7;
+      --muted:#8f8d87; --grid:#2c2c2a; --axis:#3a3a37; --border: rgba(255,255,255,0.12);
+      --blue:#3987e5; --blue-soft: rgba(57,135,229,0.20);
+      --red:#e66767; --red-soft: rgba(230,103,103,0.20);
+      --aqua:#199e70; --yellow:#c98500; --violet:#9085e9;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 12px 30px -12px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --page:#0d0d0d; --surface:#1a1a19; --surface-2:#212120; --ink:#ffffff; --ink-2:#c3c2b7;
+    --muted:#8f8d87; --grid:#2c2c2a; --axis:#3a3a37; --border: rgba(255,255,255,0.12);
+    --blue:#3987e5; --blue-soft: rgba(57,135,229,0.20);
+    --red:#e66767; --red-soft: rgba(230,103,103,0.20);
+    --aqua:#199e70; --yellow:#c98500; --violet:#9085e9;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 12px 30px -12px rgba(0,0,0,0.6);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: "IBM Plex Sans KR", "Noto Sans KR", system-ui, -apple-system, sans-serif;
+    line-height: 1.7;
+    padding-inline: 20px;
+  }
+  h1, h2, h3, h4 { font-family: "Gowun Batang", "Noto Serif KR", serif; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+  .eq { font-family: "STIX Two Text", "Cambria Math", "Times New Roman", serif; font-style: italic; font-size: 1.06em; }
+  .eq .op, .eq .kr { font-style: normal; }
+  .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 0.18em; line-height: 1.15; }
+  .frac .num { border-bottom: 1.4px solid currentColor; padding: 0 0.22em 0.06em; }
+  .frac .den { padding: 0.06em 0.22em 0; }
+  .radical { position: relative; display: inline-block; padding: 0 0.1em 0 0.62em; }
+  .radical::before { content: "\221A"; position: absolute; left: 0; top: -0.02em; font-size: 1.12em; }
+  .radical .radicand { border-top: 1.4px solid currentColor; padding: 0 0.14em; }
+  sub, sup { font-size: 0.68em; }
+
+  a { color: var(--blue); }
+  .page { max-width: 1040px; margin: 0 auto; padding-bottom: 64px; }
+
+  .masthead { padding: 56px 0 28px; border-bottom: 1px solid var(--border); }
+  .eyebrow { font-size: 12.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .masthead h1 { font-size: clamp(28px, 5vw, 40px); margin: 10px 0 12px; }
+  .masthead .lede { max-width: 640px; color: var(--ink-2); font-size: 15.5px; }
+
+  .tocbar {
+    position: sticky; top: env(safe-area-inset-top, 0px);
+    z-index: 20; background: color-mix(in srgb, var(--page) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 4px; padding: 10px 0; margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .tocbar a { font-size: 13.5px; font-weight: 600; color: var(--ink-2); text-decoration: none; padding: 6px 12px; border-radius: 999px; border: 1px solid transparent; }
+  .tocbar a:hover { border-color: var(--border); color: var(--ink); }
+
+  main { padding-top: 20px; }
+  section { padding: 40px 0; }
+  section + section { border-top: 1px solid var(--border); }
+
+  .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+  .section-num { font-family: "Gowun Batang", serif; font-size: 15px; color: var(--muted); font-weight: 700; }
+  .section-head h2 { font-size: clamp(22px, 3.4vw, 28px); margin: 0; }
+  .section-sub { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+
+  article.block { max-width: 700px; margin: 0 auto 44px; }
+  article.block.wide { max-width: 900px; }
+  article.block:last-child { margin-bottom: 0; }
+  .block h3 { font-size: 19px; margin: 0 0 4px; }
+  .block .kicker { font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--blue); font-weight: 700; margin-bottom: 6px; }
+  .block p { margin: 12px 0; color: var(--ink); }
+  .block p.dim { color: var(--ink-2); font-size: 14.5px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow); }
+  .formula-card { text-align: center; padding: 22px; font-size: 18px; }
+  .formula-card .note { font-family: "IBM Plex Sans KR", sans-serif; font-style: normal; font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+
+  .callout { border-left: 3px solid var(--blue); background: var(--blue-soft); border-radius: 0 10px 10px 0; padding: 14px 18px; font-size: 14.5px; color: var(--ink); margin: 16px 0; }
+  .callout.warn { border-left-color: var(--red); background: var(--red-soft); }
+  .callout strong { color: var(--ink); }
+
+  .prop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 18px; }
+  .prop-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow); }
+  .prop-card .bar { width: 28px; height: 3px; border-radius: 2px; margin-bottom: 10px; }
+  .prop-card h4 { font-size: 15.5px; margin: 0 0 6px; font-family: "IBM Plex Sans KR", sans-serif; font-weight: 700; }
+  .prop-card p { font-size: 13.5px; color: var(--ink-2); margin: 0 0 10px; }
+  .prop-card .eq { font-size: 14px; display: block; }
+
+  .btn { font-family: "IBM Plex Sans KR", sans-serif; font-size: 13.5px; font-weight: 600; background: var(--ink); color: var(--page); border: none; border-radius: 9px; padding: 9px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .btn:hover { opacity: 0.88; }
+  .btn:focus-visible, .level-btn:focus-visible, .tocbar a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .btn-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+
+  .chip { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; padding: 5px 9px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13.5px; }
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+
+  .level-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 16px 0; }
+  .level-btn { font-family: "IBM Plex Sans KR", sans-serif; font-size: 13.5px; font-weight: 600; background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 14px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .level-btn.active { background: var(--ink); color: var(--page); border-color: var(--ink); }
+  .level-btn.blue-active.active { background: var(--blue); border-color: var(--blue); }
+
+  .curve-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
+  .curve-wrap svg { width: 100%; height: auto; display: block; }
+  .curve-line { fill: none; stroke: var(--ink); stroke-width: 2; }
+  .curve-line-alt { fill: none; stroke: var(--blue); stroke-width: 2; stroke-dasharray: 6 3; }
+  .crit-fill { fill: var(--muted); opacity: 0.18; }
+  .pval-fill { fill: var(--red); opacity: 0.26; }
+  .power-fill { fill: var(--blue); opacity: 0.30; }
+  .obs-line { stroke: var(--ink); stroke-width: 2; }
+  .obs-dot { fill: var(--ink); stroke: var(--surface); stroke-width: 2; }
+  .crit-line { stroke: var(--ink-2); stroke-width: 1.4; stroke-dasharray: 3 3; }
+  .z-label { fill: var(--ink-2); font-size: 11.5px; font-family: "IBM Plex Sans KR", sans-serif; }
+  .tail-label { fill: var(--muted); font-size: 11px; font-family: "IBM Plex Sans KR", sans-serif; }
+  .curve-axis { stroke: var(--axis); stroke-width: 1; }
+
+  .slider-row { display: flex; align-items: center; gap: 14px; margin: 16px 0 4px; }
+  .slider-row input[type="range"] { flex: 1; accent-color: var(--blue); height: 4px; }
+  .slider-row .n-value { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 15px; min-width: 108px; text-align: right; }
+
+  .readout-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+  .readout { background: var(--surface-2); border-radius: 10px; padding: 10px 14px; min-width: 110px; }
+  .readout .k { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .readout .v { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+
+  .sim-legend { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--ink-2); margin: 14px 0; }
+  .sim-legend .sw { display: inline-flex; align-items: center; gap: 6px; }
+  .sim-legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .sim-legend .dot.blue { background: var(--blue); }
+  .sim-legend .swatch { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
+  .sim-legend .swatch.crit { background: var(--muted); opacity: 0.5; }
+  .sim-legend .swatch.pval { background: var(--red); opacity: 0.55; }
+
+  .decision-card { border-radius: 12px; padding: 16px 20px; font-weight: 700; text-align: center; font-size: 15.5px; margin-top: 16px; border: 1.5px solid transparent; }
+  .decision-card.reject { background: var(--red-soft); color: var(--red); border-color: var(--red); }
+  .decision-card.retain { background: var(--blue-soft); color: var(--blue); border-color: var(--blue); }
+
+  .two-col { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+  @media (min-width: 640px) { .two-col { grid-template-columns: 1fr 1fr; } }
+  .info-card h5 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 8px; font-family: "IBM Plex Sans KR", sans-serif; }
+  .info-card ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--ink-2); }
+  .info-card li { margin-bottom: 7px; }
+  .info-card li strong { color: var(--ink); }
+
+  .effect-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+  .effect-chip { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 12.5px; color: var(--ink-2); }
+  .effect-chip b { color: var(--ink); }
+
+  .step-badge { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--page); font-size: 12.5px; font-weight: 700; margin-right: 10px; flex-shrink: 0; font-family: "IBM Plex Sans KR", sans-serif; }
+  .step-head { display: flex; align-items: center; margin-bottom: 4px; }
+  .step-head h3 { margin: 0; }
+
+  .chart-scroll { position: relative; overflow-x: auto; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 8px 4px 2px; }
+  .chart-scroll svg { display: block; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .axis-line { stroke: var(--axis); stroke-width: 1; }
+  .tick-label { fill: var(--muted); font-size: 10.5px; font-family: "IBM Plex Sans KR", sans-serif; font-variant-numeric: tabular-nums; }
+  .ref-line { stroke: var(--ink-2); stroke-width: 1.5; stroke-dasharray: 4 3; }
+  .ref-label { fill: var(--ink-2); font-size: 11px; font-weight: 600; font-family: "IBM Plex Sans KR", sans-serif; }
+  .ref-label-bg { fill: var(--surface); opacity: 0.88; }
+  .sample-dot { fill: var(--blue); opacity: 0.7; }
+
+  footer { border-top: 1px solid var(--border); padding: 32px 0 8px; max-width: 700px; margin: 0 auto; }
+  footer h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-family: "IBM Plex Sans KR", sans-serif; }
+  footer ol { padding-left: 18px; font-size: 13.5px; color: var(--ink-2); }
+  footer li { margin-bottom: 6px; }
+
+  @media (max-width: 560px) {
+    .prop-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=STIX+Two+Text:ital,wght@0,400;1,400;1,500&display=swap">
+
+
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <div class="eyebrow">통계적 추론 · 강의자료</div>
+    <h1>통계적 가설검정</h1>
+    <p class="lede">모집단에 대한 주장을 표본으로 검증하는 절차 — 용어를 정리한 뒤, 평균 170·표준편차 6인 정규모집단에서 뽑은 표본 16개로 "모평균이 172인가"를 직접 검정해봅니다.</p>
+  </header>
+
+  <nav class="tocbar">
+    <a href="#hypotheses">가설</a>
+    <a href="#alpha-power">유의수준과 파워</a>
+    <a href="#test-stat">검정통계량</a>
+    <a href="#p-value">유의확률과 효과크기</a>
+    <a href="#verdict-term">판정</a>
+    <a href="#ex-hypotheses">① 가설수립</a>
+    <a href="#ex-alpha">② 유의수준</a>
+    <a href="#ex-stat">③ 검정통계량</a>
+    <a href="#ex-verdict">④ 판정</a>
+  </nav>
+
+  <main>
+    <section id="terms">
+      <div class="section-head"><span class="section-num">01</span><h2>용어 정리</h2></div>
+      <p class="section-sub">가설검정의 다섯 가지 핵심 용어를 순서대로 정리합니다.</p>
+
+      <article class="block" id="hypotheses">
+        <div class="kicker">Hypotheses</div>
+        <h3>가설 — 영가설과 대립가설</h3>
+        <p><strong>영가설(귀무가설, H₀)</strong>은 "차이가 없다·효과가 없다"처럼 기본적으로 참이라고 가정하고 검증 대상으로 삼는 잠정적 주장입니다. <strong>대립가설(H₁)</strong>은 영가설이 틀렸을 때 대신 받아들이는, 연구자가 실제로 보이고 싶어하는 주장입니다.</p>
+        <div class="card formula-card">
+          <span class="eq">H<sub>0</sub> : μ = μ<sub>0</sub></span>
+          <div class="note">양측: H₁ : μ ≠ μ₀ &nbsp;|&nbsp; 단측: H₁ : μ &lt; μ₀ 또는 H₁ : μ &gt; μ₀</div>
+        </div>
+        <p class="dim">가설검정은 H₁이 맞다는 것을 직접 증명하는 절차가 아니라, "H₀가 맞다면 이런 데이터가 나올 가능성이 얼마나 낮은가"를 따져 H₀를 <em>기각할지 말지</em>를 결정하는 절차입니다.</p>
+      </article>
+
+      <article class="block wide" id="alpha-power">
+        <div class="kicker">Significance Level &amp; Power</div>
+        <h3>유의수준과 파워</h3>
+        <p><strong>유의수준(α)</strong>은 영가설이 실제로 참인데도 잘못 기각할 확률(1종 오류율)의 상한입니다. 반대로 영가설이 실제로 거짓인데 기각하지 못하는 오류를 <strong>2종 오류(β)</strong>라 하고, 그 반대 확률 <span class="eq">1 − β</span>를 <strong>검정력(power)</strong>이라 부릅니다 — 거짓인 영가설을 올바르게 기각할 확률입니다.</p>
+        <div class="two-col">
+          <div class="card info-card">
+            <h5>1종 오류 (α)</h5>
+            <ul><li>H₀가 <strong>참인데</strong> 기각</li><li>연구자가 직접 정하는 값 (보통 .05)</li><li>"거짓 양성"에 해당</li></ul>
+          </div>
+          <div class="card info-card">
+            <h5>2종 오류 (β)</h5>
+            <ul><li>H₀가 <strong>거짓인데</strong> 기각하지 못함</li><li>효과크기·표본크기·α에 따라 달라짐</li><li>"거짓 음성"에 해당</li></ul>
+          </div>
+        </div>
+        <p>아래에서 영가설의 분포(검정 α = 0.05, 양측)와 실제 모평균이 다를 때의 분포를 겹쳐보면, 두 분포가 멀어질수록 검정력이 커지는 것을 볼 수 있습니다. 실제 모평균 슬라이더를 움직여보세요.</p>
+        <div class="slider-row">
+          <input type="range" id="power-slider" min="164" max="180" step="0.5" value="170" aria-label="실제 모평균">
+          <span class="n-value"><span id="power-mean-value">170.0</span></span>
+        </div>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn" id="power-reset" type="button">예제 값(170)으로</button>
+        </div>
+        <div class="curve-wrap" style="margin-top:14px;">
+          <svg id="power-svg" viewBox="0 0 640 230"></svg>
+        </div>
+        <div class="sim-legend">
+          <span class="sw"><span class="dot" style="background:var(--ink)"></span>H₀ 분포 N(172, 1.5²)</span>
+          <span class="sw"><span class="dot blue"></span>실제 분포 N(<span id="power-mean-legend">170</span>, 1.5²)</span>
+          <span class="sw"><span class="swatch" style="background:var(--blue);opacity:.3"></span>검정력(1−β)</span>
+        </div>
+        <div class="readout-row">
+          <div class="readout"><div class="k">실제 모평균과 μ₀의 차이</div><div class="v" id="power-diff">−2.0</div></div>
+          <div class="readout"><div class="k">검정력 (1−β)</div><div class="v" id="power-value">0.266</div></div>
+          <div class="readout"><div class="k">2종 오류 β</div><div class="v" id="beta-value">0.734</div></div>
+        </div>
+        <p class="dim">실제 평균이 μ₀ = 172와 같아지는 지점(슬라이더를 172로)에서는 검정력이 정확히 α와 같아집니다 — H₀가 참이라면 "올바른 기각"이라는 개념 자체가 없기 때문입니다.</p>
+      </article>
+
+      <article class="block" id="test-stat">
+        <div class="kicker">Test Statistic</div>
+        <h3>검정통계량</h3>
+        <p>표본으로부터 계산하는 하나의 숫자로, 관측값이 영가설에서 얼마나 벗어나 있는지를 표준화된 단위로 나타냅니다. 모표준편차 <span class="eq">σ</span>를 아는 경우(z-검정)에는 표본평균을 다음과 같이 표준화합니다.</p>
+        <div class="card formula-card">
+          <span class="eq">Z = <span class="frac"><span class="num">X̄ − μ<sub>0</sub></span><span class="den">σ/<span class="radical"><span class="radicand">n</span></span></span></span></span>
+          <div class="note">σ를 모를 때는 표본표준편차 s로 대체하고 자유도 n−1의 t분포를 사용합니다 (t-검정).</div>
+        </div>
+        <p class="dim">Z가 0에서 멀리 떨어질수록 — 즉 표본평균이 영가설이 예측하는 값 μ₀에서 멀리 떨어질수록 — 영가설에 불리한 증거가 됩니다.</p>
+      </article>
+
+      <article class="block wide" id="p-value">
+        <div class="kicker">P-Value &amp; Effect Size</div>
+        <h3>유의확률(p-value)과 효과크기</h3>
+        <p><strong>유의확률(p-value)</strong>은 영가설이 참이라고 가정했을 때, 지금 관측한 검정통계량만큼 극단적이거나 더 극단적인 값이 나올 확률입니다. p-값이 작을수록 "영가설이 참이라면 일어나기 힘든 일이 일어났다"는 뜻이 되어 영가설에 불리한 증거가 됩니다.</p>
+        <div class="card formula-card">
+          <span class="eq">p = P<span class="op">(</span> |Z| ≥ |z<sub>관측</sub>| <span class="op">∣</span> H<sub>0</sub> <span class="op">)</span></span>
+          <div class="note">양측검정 기준. 단측검정은 한쪽 꼬리의 확률만 계산합니다.</div>
+        </div>
+
+        <h3 style="margin-top:28px;">효과크기 (Effect Size)</h3>
+        <p>p-값은 표본크기가 커지면 아주 작은 차이에도 작아질 수 있어(앞 절의 표본오차와 같은 논리), "통계적으로 유의함"이 "실질적으로 의미 있음"을 보장하지 않습니다. 이를 보완하는 지표가 <strong>효과크기</strong>이며, 표준편차 단위로 차이의 크기를 나타내는 Cohen's d가 대표적입니다.</p>
+        <div class="card formula-card">
+          <span class="eq">d = <span class="frac"><span class="num">X̄ − μ<sub>0</sub></span><span class="den">σ</span></span></span>
+        </div>
+        <div class="effect-row">
+          <span class="effect-chip">d ≈ <b>0.2</b> — 작은 효과</span>
+          <span class="effect-chip">d ≈ <b>0.5</b> — 중간 효과</span>
+          <span class="effect-chip">d ≈ <b>0.8</b> — 큰 효과</span>
+        </div>
+        <p class="dim">Cohen(1988)의 관례적 기준입니다. 절대적 기준이 아니라, p-값과 별개로 "차이가 실제로 얼마나 큰가"를 함께 보고해야 한다는 점이 핵심입니다.</p>
+
+        <div class="card" style="margin-top:24px;">
+          <div class="kicker" style="color:var(--red);">ASA Statement on P-Values (2016)</div>
+          <h3 style="margin-bottom:10px;">p-value 만능주의에 대한 경고</h3>
+          <p style="margin-top:0;">미국통계학회(American Statistical Association)는 2016년 성명에서 p-값이 널리 오용되고 있음을 지적하며, 다음을 명확히 했습니다.</p>
+          <div class="two-col">
+            <div class="info-card">
+              <h5>성명의 핵심 경고</h5>
+              <ul>
+                <li>p-값은 <strong>가설이 참일 확률이나 데이터가 우연히 나왔을 확률이 아닙니다.</strong></li>
+                <li>과학적 결론이나 정책 결정을 p &lt; .05 같은 <strong>단일 임계값 통과 여부만으로</strong> 내려서는 안 됩니다.</li>
+                <li>p-값 하나만으로는 <strong>효과의 크기나 결과의 중요성</strong>을 알 수 없습니다.</li>
+                <li>p-값 그 자체만으로는 가설에 대한 증거의 좋은 척도가 되지 못합니다.</li>
+              </ul>
+            </div>
+            <div class="info-card">
+              <h5>권장되는 대응 방안</h5>
+              <ul>
+                <li>p-값과 함께 <strong>효과크기·신뢰구간</strong>을 항상 함께 보고합니다.</li>
+                <li>분석 계획을 사전에 등록해 <strong>p-해킹</strong>(유의할 때까지 검정을 반복하는 관행)을 피합니다.</li>
+                <li>"유의함/유의하지 않음"의 이분법 대신 <strong>추정과 불확실성</strong> 중심으로 결과를 해석합니다.</li>
+                <li>재현 가능성을 위해 <strong>분석 과정 전체를 투명하게</strong> 보고합니다.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="block" id="verdict-term">
+        <div class="kicker">Verdict</div>
+        <h3>판정</h3>
+        <p>다음 두 기준은 항상 같은 결론을 줍니다.</p>
+        <div class="card formula-card" style="font-size:16px;">
+          <span class="eq">|Z| &gt; z<sub>critical</sub></span> &nbsp;⇔&nbsp; <span class="eq">p &lt; α</span>
+          <div class="note">둘 중 하나를 만족하면 H₀를 기각하고, 그렇지 않으면 기각하지 못합니다.</div>
+        </div>
+        <p class="dim">이때 "영가설을 <strong>채택한다(accept)</strong>"라는 표현은 피하는 것이 정확합니다. 데이터가 H₀를 기각할 만큼 극단적이지 않았을 뿐, H₀가 참이라고 적극적으로 입증된 것은 아니기 때문입니다. 그래서 "기각하지 못했다(fail to reject)" 또는 "기각하지 않았다(retained)"라는 표현을 씁니다.</p>
+      </article>
+    </section>
+
+    <section id="worked-example">
+      <div class="section-head"><span class="section-num">02</span><h2>예제로 직접 해보기</h2></div>
+      <p class="section-sub">평균 170, 표준편차 6인 정규모집단 N(170, 6²)에서 표본 16개를 뽑아, "모평균이 172인가?"를 검정합니다. 실제 모평균(170)과 영가설이 주장하는 값(172)에 일부러 차이를 두어, 검정이 어떻게 작동하는지 살펴봅니다.</p>
+
+      <article class="block wide" id="ex-sample">
+        <div class="kicker">Sample</div>
+        <h3>표본 살펴보기</h3>
+        <p>아래는 N(170, 6²)에서 뽑은 표본 16개입니다. 점 하나가 관측값 하나이고, 실선은 표본평균 <span class="eq">X̄</span>, 점선은 영가설이 주장하는 값 <span class="eq">μ₀ = 172</span>입니다.</p>
+        <div class="curve-wrap">
+          <svg id="sample-strip-svg" viewBox="0 0 640 110"></svg>
+        </div>
+        <div class="chip-row" id="sample-chip-row"></div>
+        <div class="btn-row">
+          <button class="btn" id="resample-btn" type="button">표본 다시 뽑기 (n = 16)</button>
+        </div>
+      </article>
+
+      <article class="block" id="ex-hypotheses">
+        <div class="step-head"><span class="step-badge">1</span><h3>가설수립</h3></div>
+        <p>모평균이 172인지를 검정하므로, 두 경우 모두 영가설은 같습니다.</p>
+        <div class="card formula-card">
+          <span class="eq">H<sub>0</sub> : μ = 172</span>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="kicker">양측검정</div>
+            <span class="eq">H<sub>1</sub> : μ ≠ 172</span>
+            <p class="dim" style="margin-top:10px;">172보다 크든 작든, "다르다"는 것만 검증하고 싶을 때.</p>
+          </div>
+          <div class="card">
+            <div class="kicker">단측검정</div>
+            <span class="eq">H<sub>1</sub> : μ &lt; 172</span>
+            <p class="dim" style="margin-top:10px;">사전에 "172보다 작을 것"이라는 방향을 예상하고 있을 때.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="block" id="ex-alpha">
+        <div class="step-head"><span class="step-badge">2</span><h3>유의수준 설정</h3></div>
+        <p>관례적으로 가장 많이 쓰이는 α = 0.05를 기본으로 사용합니다. 아래에서 유의수준을 바꿔가며 판정이 어떻게 달라지는지도 확인할 수 있습니다.</p>
+        <div class="level-row" role="group" aria-label="유의수준 선택">
+          <button class="level-btn ht-alpha" data-alpha="0.10" type="button">α = .10</button>
+          <button class="level-btn ht-alpha active" data-alpha="0.05" type="button">α = .05</button>
+          <button class="level-btn ht-alpha" data-alpha="0.01" type="button">α = .01</button>
+          <button class="level-btn ht-alpha" data-alpha="0.001" type="button">α = .001</button>
+        </div>
+      </article>
+
+      <article class="block" id="ex-stat">
+        <div class="step-head"><span class="step-badge">3</span><h3>검정통계량 구하기</h3></div>
+        <p>현재 표본의 값을 공식에 대입합니다.</p>
+        <div class="card formula-card">
+          <span class="eq" id="ex-stat-formula">Z = (169.63 − 172) / (6/√16) = −1.578</span>
+        </div>
+        <div class="readout-row">
+          <div class="readout"><div class="k">표본평균 X̄</div><div class="v" id="ex-xbar">169.63</div></div>
+          <div class="readout"><div class="k">표준오차 σ/√n</div><div class="v">1.500</div></div>
+          <div class="readout"><div class="k">검정통계량 Z</div><div class="v" id="ex-z">−1.578</div></div>
+        </div>
+      </article>
+
+      <article class="block wide" id="ex-verdict">
+        <div class="step-head"><span class="step-badge">4</span><h3>판정</h3></div>
+        <p>같은 검정통계량 Z라도 양측검정이냐 단측검정이냐에 따라 p-값과 기각역이 달라집니다. 아래 도표에서 검정통계량(굵은 세로선)과 p-값(붉은 음영), 기각역(회색 음영)의 관계를 직접 비교해보세요.</p>
+        <div class="level-row" role="group" aria-label="검정 방향 선택">
+          <button class="level-btn blue-active ht-tail active" data-tail="two" type="button">양측검정 (μ ≠ 172)</button>
+          <button class="level-btn blue-active ht-tail" data-tail="less" type="button">단측검정 (μ &lt; 172)</button>
+        </div>
+        <div class="curve-wrap">
+          <svg id="verdict-svg" viewBox="0 0 640 230"></svg>
+        </div>
+        <div class="sim-legend">
+          <span class="sw"><span class="swatch crit"></span>기각역 (α)</span>
+          <span class="sw"><span class="swatch pval"></span>p-value 영역</span>
+          <span class="sw"><span class="dot" style="background:var(--ink)"></span>관측된 Z</span>
+        </div>
+        <div class="readout-row">
+          <div class="readout"><div class="k">검정통계량 Z</div><div class="v" id="v-z">−1.578</div></div>
+          <div class="readout"><div class="k">임계값</div><div class="v" id="v-crit">±1.960</div></div>
+          <div class="readout"><div class="k">유의확률 p</div><div class="v" id="v-p">0.1146</div></div>
+          <div class="readout"><div class="k">유의수준 α</div><div class="v" id="v-alpha">0.05</div></div>
+        </div>
+        <div class="decision-card retain" id="verdict-decision">p = 0.1146 ≥ α = 0.05 → 귀무가설을 기각하지 못합니다</div>
+        <p class="dim" style="margin-top:14px;">표본을 다시 뽑으면(위쪽 "표본 다시 뽑기" 버튼) 같은 절차라도 매번 다른 Z와 p-값이 나옵니다 — 실제 모평균(170)이 영가설(172)과 다름에도 이 검정의 검정력이 크지 않다면, 여러 번 중 상당수는 기각에 실패(2종 오류)할 수 있습니다. 위 "유의수준과 파워" 절의 슬라이더를 170에 두면 이 예제의 실제 검정력을 확인할 수 있습니다.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <h3>참고문헌</h3>
+    <ol>
+      <li>Bertsekas, D. P., &amp; Tsitsiklis, J. N. (2008). <em>Introduction to Probability</em> (2nd ed.), Ch. 9, §9.3–9.4 "Binary Hypothesis Testing" &amp; "Significance Testing" — 가설검정의 일반 방법론과 기각역의 구성.</li>
+      <li>Navarro, D. <em>Learning Statistics with R</em>, Ch. 11 "Hypothesis Testing" — 검정통계량, 임계영역, 1·2종 오류, 검정력 함수, 효과크기.</li>
+      <li>Wasserstein, R. L., &amp; Lazar, N. A. (2016). The ASA Statement on p-Values: Context, Process, and Purpose. <em>The American Statistician</em>, 70(2), 129–133.</li>
+      <li>Cohen, J. (1988). <em>Statistical Power Analysis for the Behavioral Sciences</em> (2nd ed.) — 효과크기(Cohen's d) 해석 기준.</li>
+    </ol>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var svgNS = "http://www.w3.org/2000/svg";
+
+  function randNormal(mu, sigma) {
+    var u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return mu + sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  function phi(z) { return Math.exp(-z * z / 2) / Math.sqrt(2 * Math.PI); }
+  function stdNormCdf(x) {
+    var t = 1 / (1 + 0.2316419 * Math.abs(x));
+    var d = 0.3989422804014327 * Math.exp(-x * x / 2);
+    var poly = t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+    var p = 1 - d * poly;
+    return x >= 0 ? p : 1 - p;
+  }
+
+  var alphaTable = {
+    "0.10": { one: 1.282, two: 1.645 },
+    "0.05": { one: 1.645, two: 1.960 },
+    "0.01": { one: 2.326, two: 2.576 },
+    "0.001": { one: 3.090, two: 3.291 }
+  };
+
+  var MU0 = 172, SIGMA = 6, N = 16;
+  var SE = SIGMA / Math.sqrt(N); // 1.5
+
+  var defaultSample = [169.1355, 168.9626, 169.3321, 174.2119, 169.2345, 161.0159, 171.9939, 168.3960, 168.6982, 170.6953, 171.3938, 176.9814, 173.9398, 170.6630, 165.5701, 163.9120];
+  var currentSample = defaultSample.slice();
+  var currentAlpha = "0.05";
+  var currentTail = "two";
+
+  function mean(arr) { return arr.reduce(function (a, b) { return a + b; }, 0) / arr.length; }
+
+  function drawSample() {
+    var arr = [];
+    for (var i = 0; i < N; i++) arr.push(randNormal(170, SIGMA));
+    currentSample = arr;
+    updateAll();
+  }
+
+  /* ---------- sample strip ---------- */
+  function renderSampleStrip() {
+    var svg = document.getElementById("sample-strip-svg");
+    if (!svg) return;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var W = 640, H = 130, padL = 30, padR = 30, midY = 70;
+    var plotW = W - padL - padR;
+    var xMin = 155, xMax = 185;
+    function px(v) { return padL + (v - xMin) / (xMax - xMin) * plotW; }
+
+    var axis = document.createElementNS(svgNS, "line");
+    axis.setAttribute("x1", padL); axis.setAttribute("x2", padL + plotW);
+    axis.setAttribute("y1", midY); axis.setAttribute("y2", midY);
+    axis.setAttribute("class", "axis-line");
+    svg.appendChild(axis);
+
+    for (var t = 160; t <= 180; t += 5) {
+      var x = px(t);
+      var tick = document.createElementNS(svgNS, "line");
+      tick.setAttribute("x1", x); tick.setAttribute("x2", x);
+      tick.setAttribute("y1", midY - 4); tick.setAttribute("y2", midY + 4);
+      tick.setAttribute("class", "axis-line");
+      svg.appendChild(tick);
+      var lbl = document.createElementNS(svgNS, "text");
+      lbl.setAttribute("x", x); lbl.setAttribute("y", midY + 22);
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", "tick-label");
+      lbl.textContent = t;
+      svg.appendChild(lbl);
+    }
+
+    currentSample.forEach(function (v) {
+      var dot = document.createElementNS(svgNS, "circle");
+      dot.setAttribute("cx", px(v)); dot.setAttribute("cy", midY - 18); dot.setAttribute("r", 3.6);
+      dot.setAttribute("class", "sample-dot");
+      svg.appendChild(dot);
+    });
+
+    var mu0Line = document.createElementNS(svgNS, "line");
+    mu0Line.setAttribute("x1", px(MU0)); mu0Line.setAttribute("x2", px(MU0));
+    mu0Line.setAttribute("y1", midY - 34); mu0Line.setAttribute("y2", midY + 4);
+    mu0Line.setAttribute("class", "ref-line");
+    svg.appendChild(mu0Line);
+    var xbar = mean(currentSample);
+    var closeLabels = Math.abs(px(MU0) - px(xbar)) < 66;
+    var mu0LabelY = closeLabels ? midY - 34 : midY - 38;
+    var xbarLabelY = closeLabels ? midY - 52 : midY - 44;
+
+    var mu0Label = document.createElementNS(svgNS, "text");
+    mu0Label.setAttribute("x", px(MU0)); mu0Label.setAttribute("y", mu0LabelY);
+    mu0Label.setAttribute("text-anchor", "middle");
+    mu0Label.setAttribute("class", "ref-label");
+    mu0Label.textContent = "μ₀ = 172";
+    svg.appendChild(mu0Label);
+
+    var xbarLine = document.createElementNS(svgNS, "line");
+    xbarLine.setAttribute("x1", px(xbar)); xbarLine.setAttribute("x2", px(xbar));
+    xbarLine.setAttribute("y1", midY - 34); xbarLine.setAttribute("y2", midY + 4);
+    xbarLine.setAttribute("stroke", "var(--blue)"); xbarLine.setAttribute("stroke-width", "2");
+    svg.appendChild(xbarLine);
+    var xbarLabel = document.createElementNS(svgNS, "text");
+    xbarLabel.setAttribute("x", px(xbar)); xbarLabel.setAttribute("y", xbarLabelY);
+    xbarLabel.setAttribute("text-anchor", "middle");
+    xbarLabel.setAttribute("class", "ref-label");
+    xbarLabel.setAttribute("fill", "var(--blue)");
+    xbarLabel.textContent = "x̄ = " + xbar.toFixed(2);
+    svg.appendChild(xbarLabel);
+  }
+
+  function renderSampleChips() {
+    var row = document.getElementById("sample-chip-row");
+    if (!row) return;
+    row.innerHTML = "";
+    currentSample.forEach(function (v) {
+      var chip = document.createElement("span");
+      chip.className = "chip";
+      chip.textContent = v.toFixed(1);
+      row.appendChild(chip);
+    });
+  }
+
+  /* ---------- power widget ---------- */
+  var powerSvg = document.getElementById("power-svg");
+  function renderPowerWidget() {
+    if (!powerSvg) return;
+    var trueMean = Number(document.getElementById("power-slider").value);
+    document.getElementById("power-mean-value").textContent = trueMean.toFixed(1);
+    document.getElementById("power-mean-legend").textContent = trueMean.toFixed(1);
+    document.getElementById("power-diff").textContent = (trueMean - MU0 >= 0 ? "+" : "") + (trueMean - MU0).toFixed(1);
+
+    var W = 640, H = 230, padL = 40, padR = 20, padT = 20, padB = 34;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var xMin = 164, xMax = 180;
+    var zc = alphaTable["0.05"].two;
+    var lower = MU0 - zc * SE, upper = MU0 + zc * SE;
+    var maxDens = phi(0) / SE;
+
+    function px(x) { return padL + (x - xMin) / (xMax - xMin) * plotW; }
+    function densY(d) { return padT + plotH - (d / maxDens) * plotH; }
+    function h0Dens(x) { return phi((x - MU0) / SE) / SE; }
+    function h1Dens(x) { return phi((x - trueMean) / SE) / SE; }
+
+    while (powerSvg.firstChild) powerSvg.removeChild(powerSvg.firstChild);
+    powerSvg.setAttribute("viewBox", "0 0 " + W + " " + H);
+
+    var baseline = padT + plotH;
+    var axis = document.createElementNS(svgNS, "line");
+    axis.setAttribute("x1", padL); axis.setAttribute("x2", padL + plotW);
+    axis.setAttribute("y1", baseline); axis.setAttribute("y2", baseline);
+    axis.setAttribute("class", "curve-axis");
+    powerSvg.appendChild(axis);
+
+    [166, 169, 172, 175, 178].forEach(function (t) {
+      var x = px(t);
+      var tick = document.createElementNS(svgNS, "line");
+      tick.setAttribute("x1", x); tick.setAttribute("x2", x);
+      tick.setAttribute("y1", baseline); tick.setAttribute("y2", baseline + 5);
+      tick.setAttribute("class", "axis-line");
+      powerSvg.appendChild(tick);
+      var lbl = document.createElementNS(svgNS, "text");
+      lbl.setAttribute("x", x); lbl.setAttribute("y", baseline + 17);
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", "tick-label");
+      lbl.textContent = t;
+      powerSvg.appendChild(lbl);
+    });
+
+    function buildFillPath(densFn, x0, x1) {
+      var pts = [];
+      var step = (x1 - x0) / 60;
+      pts.push("M " + px(x0) + "," + baseline);
+      for (var x = x0; x <= x1 + 1e-9; x += step) pts.push("L " + px(x) + "," + densY(densFn(x)));
+      pts.push("L " + px(x1) + "," + baseline + " Z");
+      return pts.join(" ");
+    }
+    function buildCurvePath(densFn) {
+      var pts = [];
+      var step = (xMax - xMin) / 140;
+      for (var x = xMin; x <= xMax + 1e-9; x += step) pts.push((pts.length === 0 ? "M " : "L ") + px(x) + "," + densY(densFn(x)));
+      return pts.join(" ");
+    }
+
+    var critLeft = document.createElementNS(svgNS, "path");
+    critLeft.setAttribute("d", buildFillPath(h0Dens, xMin, lower));
+    critLeft.setAttribute("class", "crit-fill");
+    powerSvg.appendChild(critLeft);
+    var critRight = document.createElementNS(svgNS, "path");
+    critRight.setAttribute("d", buildFillPath(h0Dens, upper, xMax));
+    critRight.setAttribute("class", "crit-fill");
+    powerSvg.appendChild(critRight);
+
+    var powerLeft = document.createElementNS(svgNS, "path");
+    powerLeft.setAttribute("d", buildFillPath(h1Dens, xMin, lower));
+    powerLeft.setAttribute("class", "power-fill");
+    powerSvg.appendChild(powerLeft);
+    var powerRight = document.createElementNS(svgNS, "path");
+    powerRight.setAttribute("d", buildFillPath(h1Dens, upper, xMax));
+    powerRight.setAttribute("class", "power-fill");
+    powerSvg.appendChild(powerRight);
+
+    var h0Curve = document.createElementNS(svgNS, "path");
+    h0Curve.setAttribute("d", buildCurvePath(h0Dens));
+    h0Curve.setAttribute("class", "curve-line");
+    powerSvg.appendChild(h0Curve);
+    var h1Curve = document.createElementNS(svgNS, "path");
+    h1Curve.setAttribute("d", buildCurvePath(h1Dens));
+    h1Curve.setAttribute("class", "curve-line-alt");
+    powerSvg.appendChild(h1Curve);
+
+    [lower, upper].forEach(function (b) {
+      var l = document.createElementNS(svgNS, "line");
+      l.setAttribute("x1", px(b)); l.setAttribute("x2", px(b));
+      l.setAttribute("y1", padT); l.setAttribute("y2", baseline);
+      l.setAttribute("class", "crit-line");
+      powerSvg.appendChild(l);
+    });
+
+    var power = stdNormCdf((lower - trueMean) / SE) + (1 - stdNormCdf((upper - trueMean) / SE));
+    document.getElementById("power-value").textContent = power.toFixed(3);
+    document.getElementById("beta-value").textContent = (1 - power).toFixed(3);
+  }
+
+  /* ---------- verdict (test-statistic / p-value) widget ---------- */
+  var verdictSvg = document.getElementById("verdict-svg");
+  function computeStats() {
+    var xbar = mean(currentSample);
+    var z = (xbar - MU0) / SE;
+    var pTwo = 2 * (1 - stdNormCdf(Math.abs(z)));
+    var pLess = stdNormCdf(z);
+    return { xbar: xbar, z: z, pTwo: pTwo, pLess: pLess };
+  }
+
+  function renderVerdict() {
+    if (!verdictSvg) return;
+    var s = computeStats();
+    var z = s.z;
+    var alpha = currentAlpha;
+    var isTwo = currentTail === "two";
+    var crit = isTwo ? alphaTable[alpha].two : alphaTable[alpha].one;
+    var pValue = isTwo ? s.pTwo : s.pLess;
+
+    var W = 640, H = 230, padL = 28, padR = 28, padT = 20, padB = 34;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var xMin = -4, xMax = 4;
+    var maxDens = phi(0);
+    function px(x) { return padL + (x - xMin) / (xMax - xMin) * plotW; }
+    function densY(d) { return padT + plotH - (d / maxDens) * plotH; }
+    var baseline = padT + plotH;
+
+    while (verdictSvg.firstChild) verdictSvg.removeChild(verdictSvg.firstChild);
+    verdictSvg.setAttribute("viewBox", "0 0 " + W + " " + H);
+
+    var axis = document.createElementNS(svgNS, "line");
+    axis.setAttribute("x1", padL); axis.setAttribute("x2", padL + plotW);
+    axis.setAttribute("y1", baseline); axis.setAttribute("y2", baseline);
+    axis.setAttribute("class", "curve-axis");
+    verdictSvg.appendChild(axis);
+
+    [-3, -2, -1, 0, 1, 2, 3].forEach(function (t) {
+      var x = px(t);
+      var tick = document.createElementNS(svgNS, "line");
+      tick.setAttribute("x1", x); tick.setAttribute("x2", x);
+      tick.setAttribute("y1", baseline); tick.setAttribute("y2", baseline + 5);
+      tick.setAttribute("class", "axis-line");
+      verdictSvg.appendChild(tick);
+      var lbl = document.createElementNS(svgNS, "text");
+      lbl.setAttribute("x", x); lbl.setAttribute("y", baseline + 17);
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", "tick-label");
+      lbl.textContent = t;
+      verdictSvg.appendChild(lbl);
+    });
+
+    function buildFillPath(x0, x1) {
+      var pts = [];
+      var step = (x1 - x0) / 50;
+      if (step <= 0) return "";
+      pts.push("M " + px(x0) + "," + baseline);
+      for (var x = x0; x <= x1 + 1e-9; x += step) pts.push("L " + px(x) + "," + densY(phi(x)));
+      pts.push("L " + px(x1) + "," + baseline + " Z");
+      return pts.join(" ");
+    }
+
+    /* critical region shading */
+    if (isTwo) {
+      [[xMin, -crit], [crit, xMax]].forEach(function (b) {
+        var p = document.createElementNS(svgNS, "path");
+        p.setAttribute("d", buildFillPath(b[0], b[1]));
+        p.setAttribute("class", "crit-fill");
+        verdictSvg.appendChild(p);
+      });
+    } else {
+      var p1 = document.createElementNS(svgNS, "path");
+      p1.setAttribute("d", buildFillPath(xMin, -crit));
+      p1.setAttribute("class", "crit-fill");
+      verdictSvg.appendChild(p1);
+    }
+
+    /* p-value shading */
+    if (isTwo) {
+      [[xMin, -Math.abs(z)], [Math.abs(z), xMax]].forEach(function (b) {
+        var p = document.createElementNS(svgNS, "path");
+        p.setAttribute("d", buildFillPath(b[0], b[1]));
+        p.setAttribute("class", "pval-fill");
+        verdictSvg.appendChild(p);
+      });
+    } else {
+      var p2 = document.createElementNS(svgNS, "path");
+      p2.setAttribute("d", buildFillPath(xMin, z));
+      p2.setAttribute("class", "pval-fill");
+      verdictSvg.appendChild(p2);
+    }
+
+    /* curve outline */
+    var pts = [];
+    for (var x = xMin; x <= xMax + 1e-9; x += 0.05) pts.push((pts.length === 0 ? "M " : "L ") + px(x) + "," + densY(phi(x)));
+    var curve = document.createElementNS(svgNS, "path");
+    curve.setAttribute("d", pts.join(" "));
+    curve.setAttribute("class", "curve-line");
+    verdictSvg.appendChild(curve);
+
+    /* critical lines */
+    var critXs = isTwo ? [-crit, crit] : [-crit];
+    critXs.forEach(function (c) {
+      var l = document.createElementNS(svgNS, "line");
+      l.setAttribute("x1", px(c)); l.setAttribute("x2", px(c));
+      l.setAttribute("y1", padT); l.setAttribute("y2", baseline);
+      l.setAttribute("class", "crit-line");
+      verdictSvg.appendChild(l);
+      var lbl = document.createElementNS(svgNS, "text");
+      lbl.setAttribute("x", px(c)); lbl.setAttribute("y", baseline + 30);
+      lbl.setAttribute("text-anchor", "middle");
+      lbl.setAttribute("class", "z-label");
+      lbl.textContent = c.toFixed(2);
+      verdictSvg.appendChild(lbl);
+    });
+
+    /* observed z marker */
+    var zx = Math.max(xMin, Math.min(xMax, z));
+    var obsLine = document.createElementNS(svgNS, "line");
+    obsLine.setAttribute("x1", px(zx)); obsLine.setAttribute("x2", px(zx));
+    obsLine.setAttribute("y1", padT); obsLine.setAttribute("y2", baseline);
+    obsLine.setAttribute("class", "obs-line");
+    verdictSvg.appendChild(obsLine);
+    var obsDot = document.createElementNS(svgNS, "circle");
+    obsDot.setAttribute("cx", px(zx)); obsDot.setAttribute("cy", densY(phi(zx))); obsDot.setAttribute("r", 4.5);
+    obsDot.setAttribute("class", "obs-dot");
+    verdictSvg.appendChild(obsDot);
+    var obsLabel = document.createElementNS(svgNS, "text");
+    obsLabel.setAttribute("x", px(zx)); obsLabel.setAttribute("y", padT - 6);
+    obsLabel.setAttribute("text-anchor", "middle");
+    obsLabel.setAttribute("class", "z-label");
+    obsLabel.setAttribute("font-weight", "700");
+    obsLabel.textContent = "Z = " + z.toFixed(2);
+    verdictSvg.appendChild(obsLabel);
+
+    /* readouts */
+    document.getElementById("v-z").textContent = z.toFixed(3);
+    document.getElementById("v-crit").textContent = (isTwo ? "±" : "−") + crit.toFixed(3);
+    document.getElementById("v-p").textContent = pValue.toFixed(4);
+    document.getElementById("v-alpha").textContent = alpha;
+
+    var reject = pValue < Number(alpha);
+    var decisionEl = document.getElementById("verdict-decision");
+    decisionEl.className = "decision-card " + (reject ? "reject" : "retain");
+    decisionEl.textContent = "p = " + pValue.toFixed(4) + (reject ? " < " : " ≥ ") + "α = " + alpha + " → 귀무가설을 " + (reject ? "기각합니다" : "기각하지 못합니다");
+  }
+
+  function updateExampleText() {
+    var s = computeStats();
+    document.getElementById("ex-xbar").textContent = s.xbar.toFixed(2);
+    document.getElementById("ex-z").textContent = s.z.toFixed(3);
+    document.getElementById("ex-stat-formula").textContent = "Z = (" + s.xbar.toFixed(2) + " − 172) / (6/√16) = " + s.z.toFixed(3);
+  }
+
+  function updateAll() {
+    renderSampleStrip();
+    renderSampleChips();
+    updateExampleText();
+    renderVerdict();
+  }
+
+  var resampleBtn = document.getElementById("resample-btn");
+  if (resampleBtn) resampleBtn.addEventListener("click", drawSample);
+
+  document.querySelectorAll(".ht-alpha").forEach(function (b) {
+    b.addEventListener("click", function () {
+      currentAlpha = b.dataset.alpha;
+      document.querySelectorAll(".ht-alpha").forEach(function (x) { x.classList.toggle("active", x === b); });
+      renderVerdict();
+    });
+  });
+  document.querySelectorAll(".ht-tail").forEach(function (b) {
+    b.addEventListener("click", function () {
+      currentTail = b.dataset.tail;
+      document.querySelectorAll(".ht-tail").forEach(function (x) { x.classList.toggle("active", x === b); });
+      renderVerdict();
+    });
+  });
+
+  var powerSlider = document.getElementById("power-slider");
+  if (powerSlider) powerSlider.addEventListener("input", renderPowerWidget);
+  var powerReset = document.getElementById("power-reset");
+  if (powerReset) powerReset.addEventListener("click", function () {
+    powerSlider.value = "170";
+    renderPowerWidget();
+  });
+
+  renderPowerWidget();
+  updateAll();
+})();
+</script>
+
+</body>
+</html>

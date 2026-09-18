@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>점추정과 신뢰구간</title>
+<style>
+  :root {
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --surface-2: #f2f1ec;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --blue: #2a78d6;
+    --blue-soft: rgba(42,120,214,0.13);
+    --red: #e34948;
+    --red-soft: rgba(227,73,72,0.13);
+    --aqua: #1baf7a;
+    --yellow: #eda100;
+    --violet: #4a3aa7;
+    --shadow: 0 1px 2px rgba(11,11,11,0.06), 0 8px 24px -10px rgba(11,11,11,0.14);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page:#0d0d0d; --surface:#1a1a19; --surface-2:#212120; --ink:#ffffff; --ink-2:#c3c2b7;
+      --muted:#8f8d87; --grid:#2c2c2a; --axis:#3a3a37; --border: rgba(255,255,255,0.12);
+      --blue:#3987e5; --blue-soft: rgba(57,135,229,0.20);
+      --red:#e66767; --red-soft: rgba(230,103,103,0.20);
+      --aqua:#199e70; --yellow:#c98500; --violet:#9085e9;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 12px 30px -12px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --page:#0d0d0d; --surface:#1a1a19; --surface-2:#212120; --ink:#ffffff; --ink-2:#c3c2b7;
+    --muted:#8f8d87; --grid:#2c2c2a; --axis:#3a3a37; --border: rgba(255,255,255,0.12);
+    --blue:#3987e5; --blue-soft: rgba(57,135,229,0.20);
+    --red:#e66767; --red-soft: rgba(230,103,103,0.20);
+    --aqua:#199e70; --yellow:#c98500; --violet:#9085e9;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 12px 30px -12px rgba(0,0,0,0.6);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: "IBM Plex Sans KR", "Noto Sans KR", system-ui, -apple-system, sans-serif;
+    line-height: 1.7;
+    padding-inline: 20px;
+  }
+  h1, h2, h3, h4 { font-family: "Gowun Batang", "Noto Serif KR", serif; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+  .eq {
+    font-family: "STIX Two Text", "Cambria Math", "Times New Roman", serif;
+    font-style: italic;
+    font-size: 1.06em;
+  }
+  .eq .op, .eq .kr { font-style: normal; }
+  .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 0.18em; line-height: 1.15; }
+  .frac .num { border-bottom: 1.4px solid currentColor; padding: 0 0.22em 0.06em; }
+  .frac .den { padding: 0.06em 0.22em 0; }
+  .radical { position: relative; display: inline-block; padding: 0 0.1em 0 0.62em; }
+  .radical::before { content: "\221A"; position: absolute; left: 0; top: -0.02em; font-size: 1.12em; }
+  .radical .radicand { border-top: 1.4px solid currentColor; padding: 0 0.14em; }
+  sub, sup { font-size: 0.68em; }
+
+  a { color: var(--blue); }
+
+  .page { max-width: 1040px; margin: 0 auto; padding-bottom: 64px; }
+
+  .masthead { padding: 56px 0 28px; border-bottom: 1px solid var(--border); }
+  .eyebrow { font-size: 12.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .masthead h1 { font-size: clamp(28px, 5vw, 40px); margin: 10px 0 12px; }
+  .masthead .lede { max-width: 640px; color: var(--ink-2); font-size: 15.5px; }
+
+  .tocbar {
+    position: sticky; top: env(safe-area-inset-top, 0px);
+    z-index: 20; background: color-mix(in srgb, var(--page) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 4px; padding: 10px 0; margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .tocbar a {
+    font-size: 13.5px; font-weight: 600; color: var(--ink-2); text-decoration: none;
+    padding: 6px 12px; border-radius: 999px; border: 1px solid transparent;
+  }
+  .tocbar a:hover { border-color: var(--border); color: var(--ink); }
+
+  main { padding-top: 20px; }
+  section { padding: 40px 0; }
+  section + section { border-top: 1px solid var(--border); }
+
+  .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+  .section-num { font-family: "Gowun Batang", serif; font-size: 15px; color: var(--muted); font-weight: 700; }
+  .section-head h2 { font-size: clamp(22px, 3.4vw, 28px); margin: 0; }
+  .section-sub { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+
+  article.block { max-width: 700px; margin: 0 auto 44px; }
+  article.block.wide { max-width: 900px; }
+  article.block:last-child { margin-bottom: 0; }
+  .block h3 { font-size: 19px; margin: 0 0 4px; }
+  .block .kicker { font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--blue); font-weight: 700; margin-bottom: 6px; }
+  .block p { margin: 12px 0; color: var(--ink); }
+  .block p.dim { color: var(--ink-2); font-size: 14.5px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 22px; box-shadow: var(--shadow);
+  }
+  .formula-card { text-align: center; padding: 22px; font-size: 18px; }
+  .formula-card .note { font-family: "IBM Plex Sans KR", sans-serif; font-style: normal; font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+
+  .callout { border-left: 3px solid var(--blue); background: var(--blue-soft); border-radius: 0 10px 10px 0; padding: 14px 18px; font-size: 14.5px; color: var(--ink); margin: 16px 0; }
+  .callout.warn { border-left-color: var(--red); background: var(--red-soft); }
+  .callout strong { color: var(--ink); }
+
+  .prop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 18px; }
+  .prop-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow); }
+  .prop-card .bar { width: 28px; height: 3px; border-radius: 2px; margin-bottom: 10px; }
+  .prop-card h4 { font-size: 15.5px; margin: 0 0 6px; font-family: "IBM Plex Sans KR", sans-serif; font-weight: 700; }
+  .prop-card p { font-size: 13.5px; color: var(--ink-2); margin: 0 0 10px; }
+  .prop-card .eq { font-size: 14px; display: block; }
+
+  .btn {
+    font-family: "IBM Plex Sans KR", sans-serif; font-size: 13.5px; font-weight: 600;
+    background: var(--ink); color: var(--page); border: none; border-radius: 9px;
+    padding: 9px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { opacity: 0.88; }
+  .btn:focus-visible, .level-btn:focus-visible, .tocbar a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .btn-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+
+  .target-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 18px; }
+  .target-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; box-shadow: var(--shadow); }
+  .target-cell svg { width: 100%; height: auto; max-width: 150px; }
+  .target-cell .label { font-size: 13px; font-weight: 600; margin-top: 8px; }
+  .target-cell .label .b { color: var(--blue); }
+  .target-cell .label .r { color: var(--red); }
+
+  .chip { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; padding: 5px 9px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13.5px; }
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+  .estimate-panel { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+  @media (min-width: 620px) { .estimate-panel { grid-template-columns: 1fr 1fr; } }
+  .estimate-panel .card h4 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-family: "IBM Plex Sans KR", sans-serif; }
+  .estimate-panel .value { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .estimate-panel .value.dyn { color: var(--blue); }
+
+  .level-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 16px 0; }
+  .level-btn {
+    font-family: "IBM Plex Sans KR", sans-serif; font-size: 13.5px; font-weight: 600;
+    background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--border);
+    border-radius: 9px; padding: 8px 14px; cursor: pointer; font-variant-numeric: tabular-nums;
+  }
+  .level-btn.active { background: var(--ink); color: var(--page); border-color: var(--ink); }
+
+  .curve-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
+  .curve-wrap svg { width: 100%; height: auto; display: block; }
+  .curve-line { fill: none; stroke: var(--ink); stroke-width: 2; }
+  .curve-fill { fill: var(--blue); opacity: 0.20; }
+  .z-line { stroke: var(--ink-2); stroke-width: 1.4; stroke-dasharray: 3 3; }
+  .z-label { fill: var(--ink-2); font-size: 11.5px; font-family: "IBM Plex Sans KR", sans-serif; }
+  .tail-label { fill: var(--muted); font-size: 11px; font-family: "IBM Plex Sans KR", sans-serif; }
+  .curve-axis { stroke: var(--axis); stroke-width: 1; }
+
+  .moe-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
+  .moe-wrap svg { width: 100%; height: auto; display: block; }
+  .moe-marker { fill: var(--blue); stroke: var(--surface); stroke-width: 2; }
+  .moe-band-svg { margin-top: 6px; }
+  .moe-band-rect { fill: var(--blue-soft); stroke: var(--blue); stroke-width: 1.5; }
+  .moe-center-line { stroke: var(--ink); stroke-width: 2; }
+
+  .slider-row { display: flex; align-items: center; gap: 14px; margin: 16px 0 4px; }
+  .slider-row input[type="range"] { flex: 1; accent-color: var(--blue); height: 4px; }
+  .slider-row .n-value { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 15px; min-width: 84px; text-align: right; }
+  .n-chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0 18px; }
+  .n-chip {
+    font-family: "IBM Plex Sans KR", sans-serif; font-size: 12.5px; font-weight: 600;
+    background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 11px; cursor: pointer; font-variant-numeric: tabular-nums;
+  }
+  .n-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+  .readout-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+  .readout { background: var(--surface-2); border-radius: 10px; padding: 10px 14px; min-width: 120px; }
+  .readout .k { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .readout .v { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+
+  .sim-legend { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--ink-2); margin: 14px 0; }
+  .sim-legend .sw { display: inline-flex; align-items: center; gap: 6px; }
+  .sim-legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .sim-legend .dot.blue { background: var(--blue); }
+  .sim-legend .dot.red { background: var(--red); }
+  .sim-legend .dash { width: 16px; height: 0; border-top: 2px dashed var(--ink-2); display: inline-block; }
+
+  .chart-scroll { position: relative; overflow-x: auto; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 8px 4px 2px; }
+  .chart-scroll svg { display: block; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .axis-line { stroke: var(--axis); stroke-width: 1; }
+  .tick-label { fill: var(--muted); font-size: 10.5px; font-family: "IBM Plex Sans KR", sans-serif; font-variant-numeric: tabular-nums; }
+  .ref-line { stroke: var(--ink-2); stroke-width: 1.5; stroke-dasharray: 4 3; }
+  .ref-label { fill: var(--ink-2); font-size: 11px; font-weight: 600; font-family: "IBM Plex Sans KR", sans-serif; }
+  .ref-label-bg { fill: var(--surface); opacity: 0.88; }
+  .ci-line { stroke-width: 2.4; stroke-linecap: round; }
+  .ci-line.hit { stroke: var(--blue); }
+  .ci-line.miss { stroke: var(--red); }
+  .ci-dot.hit { fill: var(--blue); }
+  .ci-dot.miss { fill: var(--red); }
+
+  #sim-tooltip {
+    position: absolute; pointer-events: none; background: var(--ink); color: var(--page);
+    font-size: 12.5px; line-height: 1.5; padding: 8px 11px; border-radius: 8px; z-index: 5;
+    max-width: 220px; box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  }
+  #sim-summary { margin-top: 14px; font-size: 14.5px; }
+  .compare-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+  @media (min-width: 560px) { .compare-row { grid-template-columns: 1fr 1fr; } }
+  .compare-card { border-radius: 12px; padding: 16px 18px; border: 1px solid var(--border); }
+  .compare-card.point { background: var(--surface-2); }
+  .compare-card.interval { background: var(--blue-soft); }
+  .compare-card .tag { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+  .compare-card p { margin: 8px 0 0; font-size: 14.5px; }
+  .compare-card svg { margin-top: 10px; }
+
+  footer { border-top: 1px solid var(--border); padding: 32px 0 8px; max-width: 700px; margin: 0 auto; }
+  footer h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-family: "IBM Plex Sans KR", sans-serif; }
+  footer ol { padding-left: 18px; font-size: 13.5px; color: var(--ink-2); }
+  footer li { margin-bottom: 6px; }
+
+  @media (max-width: 560px) {
+    .prop-grid, .target-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=STIX+Two+Text:ital,wght@0,400;1,400;1,500&display=swap">
+<style>
+  :root { padding-top: 0; padding-bottom: 0; }
+  html, body { background: var(--page); }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <div class="eyebrow">통계적 추론 · 강의자료</div>
+    <h1>점추정과 신뢰구간</h1>
+    <p class="lede">하나의 숫자로 모수를 짚어내는 점추정에서 출발해, 그 추정이 얼마나 믿을 만한지를 구간으로 말해주는 신뢰구간까지 — 직접 표본을 뽑아보며 확인합니다.</p>
+  </header>
+
+  <nav class="tocbar">
+    <a href="#estimator-estimate">추정량과 추정치</a>
+    <a href="#good-properties">좋은 추정량의 성질</a>
+    <a href="#point-problem">점추정의 문제</a>
+    <a href="#ci-formula">신뢰구간 구하기</a>
+    <a href="#ci-meaning">95% 신뢰구간의 의미</a>
+    <a href="#moe-formula">표본오차 계산</a>
+    <a href="#moe-explorer">표본오차 시뮬레이터</a>
+    <a href="#moe-meaning">표본오차 읽는 법</a>
+  </nav>
+
+  <main>
+    <section id="point-estimation">
+      <div class="section-head"><span class="section-num">01</span><h2>점추정</h2></div>
+      <p class="section-sub">모수 하나를 대표하는 값 하나를 계산하는 가장 단순한 추론 방법입니다.</p>
+
+      <article class="block" id="estimator-estimate">
+        <div class="kicker">Point Estimation</div>
+        <h3>추정량과 추정치</h3>
+        <p>모수 <span class="eq">θ</span>를 추정하기 위해 표본 <span class="eq">X<sub>1</sub>,…,X<sub>n</sub></span>의 함수로 정의한 확률변수를 <strong>추정량(estimator)</strong>이라 하고, 실제로 관측된 표본값 <span class="eq">x<sub>1</sub>,…,x<sub>n</sub></span>을 대입해 얻은 구체적인 숫자를 <strong>추정치(estimate)</strong>라 부릅니다.</p>
+        <div class="card formula-card">
+          <span class="eq">θ̂ = g(X<span class="op">₁</span>, X<span class="op">₂</span>, …, X<span class="op">ₙ</span>)</span>
+          <div class="note">추정량 — 표본을 뽑기 전에는 값이 정해지지 않은 확률변수</div>
+        </div>
+        <p class="dim">가장 흔한 예는 모평균 <span class="eq">μ</span>의 추정량으로 쓰는 표본평균입니다.</p>
+        <div class="card formula-card">
+          <span class="eq">X̄ = <span class="frac"><span class="num">X<span class="op">₁</span> + X<span class="op">₂</span> + ⋯ + X<span class="op">ₙ</span></span><span class="den">n</span></span></span>
+        </div>
+        <p>아래 버튼을 누르면 학생 6명의 통계 시험 점수를 새로 뽑아봅니다. 왼쪽은 언제나 같은 <em>형태</em>를 가진 추정량, 오른쪽은 표본을 뽑을 때마다 달라지는 <em>추정치</em>입니다.</p>
+        <div class="estimate-panel">
+          <div class="card">
+            <h4>추정량 (고정된 식)</h4>
+            <div class="eq" style="font-size:20px;">X̄ = <span class="frac"><span class="num">X<span class="op">₁</span>+⋯+X<span class="op">₆</span></span><span class="den">6</span></span></div>
+          </div>
+          <div class="card">
+            <h4>추정치 (뽑을 때마다 달라짐)</h4>
+            <div class="value dyn" id="estimate-value">–</div>
+          </div>
+        </div>
+        <div class="chip-row" id="score-chips"></div>
+        <div class="btn-row">
+          <button class="btn" id="resample-scores" type="button">학생 6명 새로 뽑기</button>
+        </div>
+      </article>
+
+      <article class="block" id="good-properties">
+        <div class="kicker">Properties of Estimators</div>
+        <h3>좋은 추정량의 성질</h3>
+        <p>같은 모수를 추정하는 방법은 여러 가지일 수 있습니다. 그중 무엇이 더 나은 추정량인지 판단하는 기준은 다음과 같습니다.</p>
+        <div class="prop-grid">
+          <div class="prop-card">
+            <div class="bar" style="background:var(--blue)"></div>
+            <h4>불편성 (Unbiasedness)</h4>
+            <p>추정량의 기댓값이 참값과 정확히 일치하면 불편추정량이라 합니다. 체계적으로 크거나 작게 치우치지 않는다는 뜻입니다.</p>
+            <span class="eq">E[θ̂] = θ</span>
+          </div>
+          <div class="prop-card">
+            <div class="bar" style="background:var(--aqua)"></div>
+            <h4>효율성 (Efficiency)</h4>
+            <p>불편추정량들 중에서는 분산이 가장 작은 추정량이 더 효율적입니다. 편향과 분산을 함께 보려면 평균제곱오차(MSE)를 씁니다.</p>
+            <span class="eq">MSE(θ̂) = Var(θ̂) + [Bias(θ̂)]<span class="op">²</span></span>
+          </div>
+          <div class="prop-card">
+            <div class="bar" style="background:var(--yellow)"></div>
+            <h4>일치성 (Consistency)</h4>
+            <p>표본크기 <span class="eq">n</span>이 커질수록 추정치가 참값에 확률적으로 가까워지는 성질입니다. 자료가 많아질수록 믿을 만해집니다.</p>
+            <span class="eq">θ̂<span class="op">ₙ</span> <span class="op">→</span><span class="op">ᵖ</span> θ  <span class="kr">(n → ∞)</span></span>
+          </div>
+          <div class="prop-card">
+            <div class="bar" style="background:var(--violet)"></div>
+            <h4>충분성 (Sufficiency)</h4>
+            <p>표본이 가진 모수에 대한 정보를 하나도 잃지 않고 요약해 담고 있으면 충분통계량이라 합니다.</p>
+            <p style="font-size:12.5px; color:var(--muted); margin:0;">더 이상의 정보가 표본에 남아있지 않음</p>
+          </div>
+        </div>
+
+        <p style="margin-top:26px;">불편성과 효율성은 양궁 과녁에 비유하면 이해하기 쉽습니다. 빨간 십자가 참값, 파란 점들이 반복해서 얻은 추정치입니다.</p>
+        <div class="target-grid">
+          <div class="target-cell"><svg id="target-ub-lv" viewBox="0 0 120 120"></svg><div class="label"><span class="b">비편향</span> · 저분산</div></div>
+          <div class="target-cell"><svg id="target-b-lv" viewBox="0 0 120 120"></svg><div class="label"><span class="r">편향</span> · 저분산</div></div>
+          <div class="target-cell"><svg id="target-ub-hv" viewBox="0 0 120 120"></svg><div class="label"><span class="b">비편향</span> · 고분산</div></div>
+          <div class="target-cell"><svg id="target-b-hv" viewBox="0 0 120 120"></svg><div class="label"><span class="r">편향</span> · 고분산</div></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="redraw-targets" type="button">다시 뽑아보기</button>
+        </div>
+      </article>
+
+      <article class="block" id="point-problem">
+        <div class="kicker">The Catch</div>
+        <h3>점 추정의 문제</h3>
+        <p>점추정치는 숫자 하나만 내놓습니다. 그 숫자가 참값에 얼마나 가까운지, 표본이 4개였는지 400개였는지에 대한 정보는 그 안에 전혀 담겨 있지 않습니다.</p>
+        <div class="callout warn"><strong>같은 76점이라도 다릅니다.</strong> 표본 4명으로 얻은 평균 76점과 표본 400명으로 얻은 평균 76점은 신뢰도가 전혀 다르지만, 점추정치만 보면 둘을 구분할 방법이 없습니다.</div>
+        <div class="compare-row">
+          <div class="compare-card point">
+            <div class="tag">점추정만 제시</div>
+            <p>“시험 평균은 76점입니다.”</p>
+            <svg width="140" height="40" viewBox="0 0 140 40"><line x1="10" y1="20" x2="130" y2="20" stroke="var(--axis)" stroke-width="1"/><circle cx="70" cy="20" r="4.5" fill="var(--ink-2)"/></svg>
+          </div>
+          <div class="compare-card interval">
+            <div class="tag">구간추정 병행</div>
+            <p>“95% 신뢰수준에서 72~80점 사이입니다.”</p>
+            <svg width="140" height="40" viewBox="0 0 140 40"><line x1="10" y1="20" x2="130" y2="20" stroke="var(--axis)" stroke-width="1"/><line x1="46" y1="20" x2="94" y2="20" stroke="var(--blue)" stroke-width="4" stroke-linecap="round"/><circle cx="70" cy="20" r="4.5" fill="var(--blue)"/></svg>
+          </div>
+        </div>
+        <p class="dim">그래서 통계적 추론은 점추정 하나로 끝나지 않고, 불확실성을 함께 표현하는 구간추정으로 이어집니다.</p>
+      </article>
+    </section>
+
+    <section id="interval-estimation">
+      <div class="section-head"><span class="section-num">02</span><h2>구간추정</h2></div>
+      <p class="section-sub">추정치 하나 대신, 모수를 포함할 가능성이 높은 구간을 제시합니다.</p>
+
+      <article class="block wide" id="ci-formula">
+        <div class="kicker">Confidence Interval</div>
+        <h3>100(1 − α)% 신뢰구간 구하기</h3>
+        <p>모분산 <span class="eq">σ<span class="op">²</span></span>을 알고 있는 정규모집단에서 표본을 뽑으면, 표본평균은 <span class="eq">X̄ ~ N(μ, σ<span class="op">²</span>/n)</span>을 따릅니다. 이를 표준화하면：</p>
+        <div class="card formula-card">
+          <span class="eq">Z = <span class="frac"><span class="num">X̄ − μ</span><span class="den">σ/<span class="radical"><span class="radicand">n</span></span></span></span> ~ N(0, 1)</span>
+        </div>
+        <p>표준정규분포에서 가운데 <span class="eq">1 − α</span>만큼의 확률을 차지하는 구간은 <span class="eq">[−z<sub>α/2</sub>, z<sub>α/2</sub>]</span>입니다.</p>
+        <div class="card formula-card">
+          <span class="eq">P(−z<sub>α/2</sub> ≤ Z ≤ z<sub>α/2</sub>) = 1 − α</span>
+        </div>
+        <p>이 부등식을 <span class="eq">μ</span>에 대해 정리하면 100(1 − α)% 신뢰구간을 얻습니다.</p>
+        <div class="card formula-card" style="font-size:20px;">
+          <span class="eq">X̄ ± z<sub>α/2</sub> · <span class="frac"><span class="num">σ</span><span class="den"><span class="radical"><span class="radicand">n</span></span></span></span></span>
+          <div class="note">모분산 <span class="eq" style="font-size:1em;">σ</span>을 모를 때는 표본표준편차 <span class="eq" style="font-size:1em;">s</span>와 자유도 n−1의 t분포로 대체합니다 (X̄ ± t<sub>α/2, n−1</sub>·s/√n).</div>
+        </div>
+
+        <p>신뢰수준을 바꾸면 <span class="eq">z<sub>α/2</sub></span>와 구간의 폭이 어떻게 달라지는지 직접 눌러보세요. 아래 예시는 <span class="eq">σ = 2</span>, <span class="eq">n = 4</span>일 때입니다.</p>
+        <div class="level-row" role="group" aria-label="신뢰수준 선택">
+          <button class="level-btn" data-level="80" type="button">80%</button>
+          <button class="level-btn" data-level="90" type="button">90%</button>
+          <button class="level-btn active" data-level="95" type="button">95%</button>
+          <button class="level-btn" data-level="98" type="button">98%</button>
+          <button class="level-btn" data-level="99" type="button">99%</button>
+        </div>
+        <div class="curve-wrap">
+          <svg id="curve-svg" viewBox="0 0 640 220"></svg>
+        </div>
+        <div class="readout-row">
+          <div class="readout"><div class="k">z<sub>α/2</sub></div><div class="v" id="z-value">1.960</div></div>
+          <div class="readout"><div class="k">오차범위 (σ/√n = 1)</div><div class="v" id="margin-value">1.960</div></div>
+          <div class="readout"><div class="k">신뢰구간 예시</div><div class="v" id="ci-example" style="font-size:14px;">x̄ ± 1.960</div></div>
+        </div>
+      </article>
+
+      <article class="block wide" id="ci-meaning">
+        <div class="kicker">What 95% Really Means</div>
+        <h3>95% 신뢰구간의 의미</h3>
+        <div class="callout"><strong>흔한 오해:</strong> “이미 계산된 구간이 모평균을 포함할 확률이 95%”가 아닙니다. 모평균은 고정된 상수이므로 이미 정해진 하나의 구간에 대해서는 포함 여부가 확률적이지 않습니다. 정확한 해석은 <strong>“같은 절차를 반복해서 신뢰구간을 100번 만들면, 그중 약 95개가 모평균을 포함한다”</strong>는 것입니다.</div>
+        <p>직접 확인해봅시다. 모평균 <span class="eq">μ = 1</span>, 모표준편차 <span class="eq">σ = 2</span>인 정규분포에서 크기 <span class="eq">n = 4</span>인 표본을 100번 독립적으로 뽑고, 매번 95% 신뢰구간 <span class="eq">x̄ ± 1.96</span>을 계산합니다. 모평균 1을 포함하지 못한 구간은 붉은색으로 표시됩니다.</p>
+
+        <div class="sim-legend">
+          <span class="sw"><span class="dot blue"></span>모평균을 포함</span>
+          <span class="sw"><span class="dot red"></span>모평균을 포함하지 못함</span>
+          <span class="sw"><span class="dash"></span>모평균 μ = 1</span>
+        </div>
+
+        <div class="chart-scroll" id="sim-scroll">
+          <svg id="sim-svg"></svg>
+          <div id="sim-tooltip" hidden></div>
+        </div>
+        <p id="sim-summary"></p>
+        <div class="btn-row">
+          <button class="btn" id="resample-btn" type="button">100번 다시 추출하기</button>
+        </div>
+        <p class="dim">x축은 100번의 추출 각각의 번호, y축은 각 추출의 표본평균과 95% 신뢰구간입니다. 매번 다시 뽑을 때마다 실패하는 구간의 개수는 달라지지만, 평균적으로는 약 5개(5%) 근처에서 흔들립니다 — 이것이 “95% 신뢰수준”이 실제로 의미하는 바입니다.</p>
+      </article>
+    </section>
+
+    <section id="margin-of-error">
+      <div class="section-head"><span class="section-num">03</span><h2>표본오차 읽기</h2></div>
+      <p class="section-sub">여론조사 보고서의 “95% 신뢰수준에서 표본오차는 ±3.1%p” — 이 한 문장을 신뢰구간의 언어로 다시 읽어봅니다.</p>
+
+      <article class="block wide" id="moe-formula">
+        <div class="kicker">Margin of Error</div>
+        <h3>표본오차는 어떻게 계산할까</h3>
+        <p>여론조사는 모집단 중 지지율 같은 <strong>비율(proportion)</strong> <span class="eq">p</span>를 추정합니다. 표본에서 얻은 응답 비율 <span class="eq">p̂</span>은 표본크기 <span class="eq">n</span>이 충분히 크면 근사적으로 정규분포를 따릅니다.</p>
+        <div class="card formula-card">
+          <span class="eq">p̂ ~ N<span class="op">(</span>p, <span class="frac"><span class="num">p(1 − p)</span><span class="den">n</span></span><span class="op">)</span></span>
+        </div>
+        <p>앞서 살펴본 것과 같은 방식으로 <span class="eq">p</span>에 대한 100(1 − α)% 신뢰구간을 만들 수 있습니다.</p>
+        <div class="card formula-card">
+          <span class="eq">p̂ ± z<sub>α/2</sub> · <span class="radical"><span class="radicand"><span class="frac"><span class="num">p̂(1 − p̂)</span><span class="den">n</span></span></span></span></span>
+          <div class="note">± 뒤에 붙는 이 값이 바로 <strong>표본오차(margin of error)</strong>입니다.</div>
+        </div>
+        <p>실제 응답 비율 <span class="eq">p̂</span>은 문항마다 다르지만, 여론조사기관은 보고서에 <em>하나의</em> 표본오차만 표시합니다. <span class="eq">p̂(1 − p̂)</span>은 <span class="eq">p̂ = 0.5</span>일 때 가장 커지므로, 오차가 최대가 되는 이 값을 대입해 <strong>가장 보수적인(넓은) 오차</strong>를 미리 계산해 두기 때문입니다.</p>
+        <div class="card formula-card" style="font-size:20px;">
+          <span class="eq">E = <span class="frac"><span class="num">z<sub>α/2</sub></span><span class="den">2<span class="radical"><span class="radicand">n</span></span></span></span></span>
+          <div class="note">n = 1,000, 95% 신뢰수준일 때: E = 1.96 / (2√1000) ≈ 0.031 → <strong>±3.1%p</strong> — 실제 보고서 표현과 일치합니다.</div>
+        </div>
+      </article>
+
+      <article class="block wide" id="moe-explorer">
+        <div class="kicker">Try It</div>
+        <h3>표본수를 조절해보기</h3>
+        <p>표본수 <span class="eq">n</span>과 신뢰수준을 바꿔가며 표본오차가 어떻게 달라지는지 확인하세요. 실제 여론조사에서 자주 쓰이는 표본수는 칩을 눌러 바로 확인할 수 있습니다.</p>
+
+        <div class="level-row" role="group" aria-label="신뢰수준 선택">
+          <button class="level-btn moe-level" data-level="80" type="button">80%</button>
+          <button class="level-btn moe-level" data-level="90" type="button">90%</button>
+          <button class="level-btn moe-level active" data-level="95" type="button">95%</button>
+          <button class="level-btn moe-level" data-level="98" type="button">98%</button>
+          <button class="level-btn moe-level" data-level="99" type="button">99%</button>
+        </div>
+
+        <div class="slider-row">
+          <input type="range" id="n-slider" min="100" max="4000" step="10" value="1000" aria-label="표본수">
+          <span class="n-value"><span id="n-value">1,000</span>명</span>
+        </div>
+        <div class="n-chip-row" id="n-chip-row">
+          <button class="n-chip" data-n="300" type="button">300명</button>
+          <button class="n-chip" data-n="500" type="button">500명</button>
+          <button class="n-chip active" data-n="1000" type="button">1,000명</button>
+          <button class="n-chip" data-n="1500" type="button">1,500명</button>
+          <button class="n-chip" data-n="2000" type="button">2,000명</button>
+          <button class="n-chip" data-n="3000" type="button">3,000명</button>
+        </div>
+
+        <div class="moe-wrap">
+          <svg id="moe-curve-svg" viewBox="0 0 640 220"></svg>
+        </div>
+
+        <div class="readout-row">
+          <div class="readout"><div class="k">표본수 n</div><div class="v" id="moe-n-readout">1,000</div></div>
+          <div class="readout"><div class="k">표본오차 (±%p)</div><div class="v" id="moe-e-readout">3.10</div></div>
+          <div class="readout"><div class="k">보고서 표현</div><div class="v" id="moe-report" style="font-size:13px;">95% 신뢰수준에 표본오차 ±3.1%p</div></div>
+        </div>
+
+        <p style="margin-top:18px;">아래 눈금은 지지율 50%를 기준으로 한 신뢰구간의 폭입니다. n을 줄이면 밴드가 넓어지고, 늘리면 좁아집니다.</p>
+        <svg id="moe-band-svg" viewBox="0 0 640 70" class="moe-band-svg"></svg>
+      </article>
+
+      <article class="block" id="moe-meaning">
+        <div class="kicker">What It Means</div>
+        <h3>표본오차, 이렇게 읽습니다</h3>
+        <div class="callout">“95% 신뢰수준에서 표본오차 ±3.1%p”란, <strong>같은 방식으로 조사를 100번 반복하면 그중 약 95번은 실제 모집단의 응답률이 “발표된 응답률 ± 3.1%p” 구간 안에 들어온다</strong>는 뜻입니다. 앞서 살펴본 95% 신뢰구간의 해석과 정확히 같은 논리입니다.</div>
+        <p>표본수를 늘리면 오차는 줄어들지만, <span class="eq">1/<span class="radical"><span class="radicand">n</span></span></span>에 비례해 줄어들기 때문에 <strong>오차를 절반으로 줄이려면 표본을 4배로 늘려야</strong> 합니다. 위 슬라이더로 n = 1,000에서 n = 4,000으로 옮겨 직접 확인해보세요.</p>
+        <div class="callout warn"><strong>흔한 오해 — “오차범위 내 접전”.</strong> 두 후보의 지지율 차이가 표본오차보다 작다고 해서 통계적으로 우열이 없다고 단정할 수는 없습니다. 같은 표본에서 얻은 두 비율의 <em>차이</em>에 대한 오차는 단일 비율의 오차보다 크며(약 √2배), n = 1,000 · 95% 기준으로는 약 ±4.4%p가 됩니다.</div>
+        <p class="dim">표본오차는 무작위 표집 과정에서 생기는 오차만을 설명합니다. 무응답·응답 거부에 따른 편향, 질문 문항의 설계, 조사 방식(전화면접·ARS·온라인 패널 등)에서 비롯되는 오차는 표본오차에 포함되지 않습니다.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <h3>참고문헌</h3>
+    <ol>
+      <li>Bertsekas, D. P., & Tsitsiklis, J. N. (2008). <em>Introduction to Probability</em> (2nd ed.), Ch. 9 “Classical Statistical Inference” — 추정량의 성질과 신뢰구간의 정의 및 도출.</li>
+      <li>Navarro, D. <em>Learning Statistics with R</em>, Ch. 10 “Estimating unknown quantities from a sample”, §10.5 “Estimating a confidence interval” — 신뢰구간의 직관적 해석.</li>
+      <li>중앙선거여론조사심의위원회(NESDC), 여론조사 등록 현황 — 보고서에 표기되는 “95% 신뢰수준에서 표본오차 ±%p” 표현의 실제 사례 (nesdc.go.kr).</li>
+    </ol>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var svgNS = "http://www.w3.org/2000/svg";
+
+  function randNormal(mu, sigma) {
+    var u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return mu + sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  function phi(z) { return Math.exp(-z * z / 2) / Math.sqrt(2 * Math.PI); }
+
+  /* ---------- Widget C: estimator vs estimate ---------- */
+  function sampleScores() {
+    var arr = [];
+    for (var i = 0; i < 6; i++) {
+      var s = Math.round(randNormal(75, 8));
+      s = Math.max(40, Math.min(100, s));
+      arr.push(s);
+    }
+    return arr;
+  }
+  function renderEstimateDemo() {
+    var scores = sampleScores();
+    var mean = scores.reduce(function (a, b) { return a + b; }, 0) / scores.length;
+    var chipsEl = document.getElementById("score-chips");
+    chipsEl.innerHTML = "";
+    scores.forEach(function (s) {
+      var chip = document.createElement("span");
+      chip.className = "chip";
+      chip.textContent = s;
+      chipsEl.appendChild(chip);
+    });
+    document.getElementById("estimate-value").textContent = mean.toFixed(2) + "점";
+  }
+  var resampleScoresBtn = document.getElementById("resample-scores");
+  if (resampleScoresBtn) {
+    resampleScoresBtn.addEventListener("click", renderEstimateDemo);
+    renderEstimateDemo();
+  }
+
+  /* ---------- Widget D: bias / variance targets ---------- */
+  function drawTarget(id, biased, highVar) {
+    var svg = document.getElementById(id);
+    if (!svg) return;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.setAttribute("viewBox", "0 0 120 120");
+    var cx = 60, cy = 60;
+    var rings = [46, 31, 16];
+    rings.forEach(function (r) {
+      var c = document.createElementNS(svgNS, "circle");
+      c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("r", r);
+      c.setAttribute("fill", "none");
+      c.setAttribute("stroke", "var(--grid)");
+      c.setAttribute("stroke-width", "1.5");
+      svg.appendChild(c);
+    });
+    var clusterCx = cx + (biased ? 20 : 0);
+    var clusterCy = cy + (biased ? -15 : 0);
+    var spread = highVar ? 30 : 10;
+    for (var i = 0; i < 14; i++) {
+      var angle = Math.random() * 2 * Math.PI;
+      var radius = spread * Math.sqrt(Math.random());
+      var dx = clusterCx + radius * Math.cos(angle);
+      var dy = clusterCy + radius * Math.sin(angle);
+      var dot = document.createElementNS(svgNS, "circle");
+      dot.setAttribute("cx", dx); dot.setAttribute("cy", dy); dot.setAttribute("r", 3.4);
+      dot.setAttribute("fill", "var(--blue)");
+      dot.setAttribute("opacity", "0.85");
+      svg.appendChild(dot);
+    }
+    var g = document.createElementNS(svgNS, "g");
+    g.setAttribute("stroke", "var(--red)");
+    g.setAttribute("stroke-width", "2.4");
+    g.setAttribute("stroke-linecap", "round");
+    var l1 = document.createElementNS(svgNS, "line");
+    l1.setAttribute("x1", cx - 7); l1.setAttribute("x2", cx + 7); l1.setAttribute("y1", cy); l1.setAttribute("y2", cy);
+    var l2 = document.createElementNS(svgNS, "line");
+    l2.setAttribute("x1", cx); l2.setAttribute("x2", cx); l2.setAttribute("y1", cy - 7); l2.setAttribute("y2", cy + 7);
+    g.appendChild(l1); g.appendChild(l2);
+    svg.appendChild(g);
+  }
+  function drawAllTargets() {
+    drawTarget("target-ub-lv", false, false);
+    drawTarget("target-b-lv", true, false);
+    drawTarget("target-ub-hv", false, true);
+    drawTarget("target-b-hv", true, true);
+  }
+  var redrawBtn = document.getElementById("redraw-targets");
+  if (redrawBtn) {
+    redrawBtn.addEventListener("click", drawAllTargets);
+    drawAllTargets();
+  }
+
+  /* ---------- Widget A: confidence-level explorer ---------- */
+  var zTable = { 80: 1.282, 90: 1.645, 95: 1.960, 98: 2.326, 99: 2.576 };
+  var curveSvg = document.getElementById("curve-svg");
+  var curveGeom = null;
+
+  function initCurve() {
+    if (!curveSvg) return;
+    var W = 640, H = 230, padL = 28, padR = 28, padT = 32, padB = 34;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var maxDens = phi(0);
+    function zx(z) { return padL + (z + 4) / 8 * plotW; }
+    function dy(d) { return padT + plotH - (d / maxDens) * plotH; }
+    var baseline = padT + plotH;
+
+    var axis = document.createElementNS(svgNS, "line");
+    axis.setAttribute("x1", padL); axis.setAttribute("x2", padL + plotW);
+    axis.setAttribute("y1", baseline); axis.setAttribute("y2", baseline);
+    axis.setAttribute("class", "curve-axis");
+    curveSvg.appendChild(axis);
+
+    var pts = [];
+    for (var z = -4; z <= 4.0001; z += 0.05) pts.push(zx(z) + "," + dy(phi(z)));
+    var curve = document.createElementNS(svgNS, "path");
+    curve.setAttribute("d", "M " + pts.join(" L "));
+    curve.setAttribute("class", "curve-line");
+    curveSvg.appendChild(curve);
+
+    var fill = document.createElementNS(svgNS, "path");
+    fill.setAttribute("class", "curve-fill");
+    curveSvg.appendChild(fill);
+
+    var lineNeg = document.createElementNS(svgNS, "line");
+    lineNeg.setAttribute("class", "z-line");
+    var linePos = document.createElementNS(svgNS, "line");
+    linePos.setAttribute("class", "z-line");
+    curveSvg.appendChild(lineNeg); curveSvg.appendChild(linePos);
+
+    var labelNeg = document.createElementNS(svgNS, "text");
+    labelNeg.setAttribute("class", "z-label"); labelNeg.setAttribute("text-anchor", "middle");
+    var labelPos = document.createElementNS(svgNS, "text");
+    labelPos.setAttribute("class", "z-label"); labelPos.setAttribute("text-anchor", "middle");
+    curveSvg.appendChild(labelNeg); curveSvg.appendChild(labelPos);
+
+    var tailL = document.createElementNS(svgNS, "text");
+    tailL.setAttribute("class", "tail-label"); tailL.setAttribute("text-anchor", "middle");
+    tailL.setAttribute("y", baseline - 6);
+    var tailR = document.createElementNS(svgNS, "text");
+    tailR.setAttribute("class", "tail-label"); tailR.setAttribute("text-anchor", "middle");
+    tailR.setAttribute("y", baseline - 6);
+    curveSvg.appendChild(tailL); curveSvg.appendChild(tailR);
+
+    var midLabel = document.createElementNS(svgNS, "text");
+    midLabel.setAttribute("class", "tail-label"); midLabel.setAttribute("text-anchor", "middle");
+    midLabel.setAttribute("y", dy(maxDens) - 12);
+    midLabel.setAttribute("x", zx(0));
+    curveSvg.appendChild(midLabel);
+
+    curveSvg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    curveGeom = { zx: zx, dy: dy, maxDens: maxDens, baseline: baseline, fill: fill, lineNeg: lineNeg, linePos: linePos, labelNeg: labelNeg, labelPos: labelPos, tailL: tailL, tailR: tailR, midLabel: midLabel, padL: padL, padR: padR, plotW: plotW };
+  }
+
+  function updateCurve(levelPct) {
+    if (!curveGeom) return;
+    var z = zTable[levelPct];
+    var g = curveGeom;
+    var pts = ["M " + g.zx(-z) + "," + g.baseline];
+    for (var zz = -z; zz <= z + 0.0001; zz += 0.04) pts.push("L " + g.zx(zz) + "," + g.dy(phi(zz)));
+    pts.push("L " + g.zx(z) + "," + g.baseline + " Z");
+    g.fill.setAttribute("d", pts.join(" "));
+
+    g.lineNeg.setAttribute("x1", g.zx(-z)); g.lineNeg.setAttribute("x2", g.zx(-z));
+    g.lineNeg.setAttribute("y1", g.baseline); g.lineNeg.setAttribute("y2", g.dy(phi(-z)));
+    g.linePos.setAttribute("x1", g.zx(z)); g.linePos.setAttribute("x2", g.zx(z));
+    g.linePos.setAttribute("y1", g.baseline); g.linePos.setAttribute("y2", g.dy(phi(z)));
+
+    g.labelNeg.setAttribute("x", g.zx(-z)); g.labelNeg.setAttribute("y", g.baseline + 16);
+    g.labelNeg.textContent = "−" + z.toFixed(3);
+    g.labelPos.setAttribute("x", g.zx(z)); g.labelPos.setAttribute("y", g.baseline + 16);
+    g.labelPos.textContent = z.toFixed(3);
+
+    g.tailL.setAttribute("x", (g.padL + g.zx(-z)) / 2);
+    g.tailL.textContent = "α/2 = " + ((100 - levelPct) / 200).toFixed(3);
+    g.tailR.setAttribute("x", (g.zx(z) + g.padL + g.plotW) / 2);
+    g.tailR.textContent = "α/2 = " + ((100 - levelPct) / 200).toFixed(3);
+    g.midLabel.textContent = "1 − α = " + (levelPct / 100).toFixed(2);
+
+    var se = 1; /* sigma=2, n=4 예시 */
+    var margin = z * se;
+    document.getElementById("z-value").textContent = z.toFixed(3);
+    document.getElementById("margin-value").textContent = margin.toFixed(3);
+    document.getElementById("ci-example").textContent = "x̄ ± " + margin.toFixed(3);
+
+    document.querySelectorAll(".level-btn").forEach(function (b) {
+      b.classList.toggle("active", Number(b.dataset.level) === levelPct);
+    });
+  }
+
+  if (curveSvg) {
+    initCurve();
+    updateCurve(95);
+    document.querySelectorAll(".level-btn").forEach(function (b) {
+      b.addEventListener("click", function () { updateCurve(Number(b.dataset.level)); });
+    });
+  }
+
+  /* ---------- Widget B: 95% CI coverage simulation ---------- */
+  function runSimulation() {
+    var N = 100, n = 4, mu = 1, sigma = 2, z = 1.96;
+    var margin = z * sigma / Math.sqrt(n);
+    var data = [];
+    for (var i = 0; i < N; i++) {
+      var sum = 0;
+      for (var j = 0; j < n; j++) sum += randNormal(mu, sigma);
+      var mean = sum / n;
+      var low = mean - margin, high = mean + margin;
+      var covers = mu >= low && mu <= high;
+      data.push({ idx: i + 1, mean: mean, low: low, high: high, covers: covers });
+    }
+    return data;
+  }
+
+  function renderChart(data) {
+    var svg = document.getElementById("sim-svg");
+    var tooltip = document.getElementById("sim-tooltip");
+    var wrap = document.getElementById("sim-scroll");
+    if (!svg) return;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    var N = data.length, slot = 9;
+    var leftPad = 46, rightPad = 20, topPad = 16, bottomPad = 32;
+    var plotW = N * slot;
+    var width = leftPad + plotW + rightPad;
+    var height = 320;
+    var plotH = height - topPad - bottomPad;
+    svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+
+    var yMin = Infinity, yMax = -Infinity;
+    data.forEach(function (d) { if (d.low < yMin) yMin = d.low; if (d.high > yMax) yMax = d.high; });
+    yMin = Math.min(yMin, 1); yMax = Math.max(yMax, 1);
+    var pad = (yMax - yMin) * 0.08;
+    yMin -= pad; yMax += pad;
+
+    function yScale(v) { return topPad + plotH - (v - yMin) / (yMax - yMin) * plotH; }
+    function xScale(i) { return leftPad + i * slot + slot / 2; }
+
+    var range = yMax - yMin;
+    var step = range <= 6 ? 1 : range <= 14 ? 2 : range <= 30 ? 5 : 10;
+    var tickStart = Math.ceil(yMin / step) * step;
+    for (var t = tickStart; t <= yMax; t += step) {
+      var y = yScale(t);
+      var grid = document.createElementNS(svgNS, "line");
+      grid.setAttribute("x1", leftPad); grid.setAttribute("x2", leftPad + plotW);
+      grid.setAttribute("y1", y); grid.setAttribute("y2", y);
+      grid.setAttribute("class", "grid-line");
+      svg.appendChild(grid);
+      var label = document.createElementNS(svgNS, "text");
+      label.setAttribute("x", leftPad - 8); label.setAttribute("y", y + 3);
+      label.setAttribute("text-anchor", "end");
+      label.setAttribute("class", "tick-label");
+      label.textContent = t;
+      svg.appendChild(label);
+    }
+
+    for (var i = 1; i <= N; i += 10) {
+      var x = xScale(i - 1);
+      var tick = document.createElementNS(svgNS, "line");
+      tick.setAttribute("x1", x); tick.setAttribute("x2", x);
+      tick.setAttribute("y1", topPad + plotH); tick.setAttribute("y2", topPad + plotH + 5);
+      tick.setAttribute("class", "axis-line");
+      svg.appendChild(tick);
+      var tlabel = document.createElementNS(svgNS, "text");
+      tlabel.setAttribute("x", x); tlabel.setAttribute("y", topPad + plotH + 17);
+      tlabel.setAttribute("text-anchor", "middle");
+      tlabel.setAttribute("class", "tick-label");
+      tlabel.textContent = i;
+      svg.appendChild(tlabel);
+    }
+
+    var axisLine = document.createElementNS(svgNS, "line");
+    axisLine.setAttribute("x1", leftPad); axisLine.setAttribute("x2", leftPad + plotW);
+    axisLine.setAttribute("y1", topPad + plotH); axisLine.setAttribute("y2", topPad + plotH);
+    axisLine.setAttribute("class", "axis-line");
+    svg.appendChild(axisLine);
+
+    var refY = yScale(1);
+    var ref = document.createElementNS(svgNS, "line");
+    ref.setAttribute("x1", leftPad); ref.setAttribute("x2", leftPad + plotW);
+    ref.setAttribute("y1", refY); ref.setAttribute("y2", refY);
+    ref.setAttribute("class", "ref-line");
+    svg.appendChild(ref);
+
+    data.forEach(function (d, i) {
+      var x = xScale(i);
+      var cls = d.covers ? "hit" : "miss";
+      var g = document.createElementNS(svgNS, "g");
+
+      var line = document.createElementNS(svgNS, "line");
+      line.setAttribute("x1", x); line.setAttribute("x2", x);
+      line.setAttribute("y1", yScale(d.low)); line.setAttribute("y2", yScale(d.high));
+      line.setAttribute("class", "ci-line " + cls);
+      g.appendChild(line);
+
+      var dot = document.createElementNS(svgNS, "circle");
+      dot.setAttribute("cx", x); dot.setAttribute("cy", yScale(d.mean)); dot.setAttribute("r", 2.3);
+      dot.setAttribute("class", "ci-dot " + cls);
+      g.appendChild(dot);
+
+      var hit = document.createElementNS(svgNS, "rect");
+      hit.setAttribute("x", x - slot / 2); hit.setAttribute("y", topPad);
+      hit.setAttribute("width", slot); hit.setAttribute("height", plotH);
+      hit.setAttribute("fill", "transparent");
+      hit.style.cursor = "pointer";
+      g.appendChild(hit);
+
+      g.addEventListener("pointerenter", function (ev) { showTip(ev, d); });
+      g.addEventListener("pointermove", positionTip);
+      g.addEventListener("pointerleave", function () { tooltip.hidden = true; });
+
+      svg.appendChild(g);
+    });
+
+    var refLabel = document.createElementNS(svgNS, "text");
+    refLabel.setAttribute("x", leftPad + 10);
+    refLabel.setAttribute("y", refY - 7);
+    refLabel.setAttribute("text-anchor", "start");
+    refLabel.setAttribute("class", "ref-label");
+    refLabel.textContent = "μ = 1 (모평균)";
+    svg.appendChild(refLabel);
+    try {
+      var lbb = refLabel.getBBox();
+      var refBg = document.createElementNS(svgNS, "rect");
+      refBg.setAttribute("x", lbb.x - 4);
+      refBg.setAttribute("y", lbb.y - 2);
+      refBg.setAttribute("width", lbb.width + 8);
+      refBg.setAttribute("height", lbb.height + 4);
+      refBg.setAttribute("rx", 4);
+      refBg.setAttribute("class", "ref-label-bg");
+      svg.insertBefore(refBg, refLabel);
+    } catch (e) { /* getBBox unavailable before layout; skip backing rect */ }
+
+    function showTip(ev, d) {
+      tooltip.innerHTML = "<strong>" + d.idx + "번째 추출</strong><br>표본평균 x̄ = " + d.mean.toFixed(2) +
+        "<br>95% 신뢰구간 = [" + d.low.toFixed(2) + ", " + d.high.toFixed(2) + "]<br>" +
+        (d.covers ? "모평균 포함 ✓" : "모평균 미포함 ✕");
+      tooltip.hidden = false;
+      positionTip(ev);
+    }
+    function positionTip(ev) {
+      var rect = wrap.getBoundingClientRect();
+      tooltip.style.left = (ev.clientX - rect.left + wrap.scrollLeft + 12) + "px";
+      tooltip.style.top = (ev.clientY - rect.top + 12) + "px";
+    }
+
+    var misses = data.filter(function (d) { return !d.covers; }).length;
+    var coverage = ((N - misses) / N * 100).toFixed(1);
+    document.getElementById("sim-summary").innerHTML =
+      "100개의 95% 신뢰구간 중 <strong style=\"color:var(--red)\">" + misses + "개</strong>가 모평균(μ = 1)을 포함하지 못했습니다 — 커버리지 " + coverage + "% (이론값 95%에 근접)";
+  }
+
+  var simSvg = document.getElementById("sim-svg");
+  if (simSvg) {
+    var currentData = runSimulation();
+    renderChart(currentData);
+    document.getElementById("resample-btn").addEventListener("click", function () {
+      currentData = runSimulation();
+      renderChart(currentData);
+    });
+  }
+
+  /* ---------- Widget E: margin-of-error explorer ---------- */
+  var moeSvg = document.getElementById("moe-curve-svg");
+  if (moeSvg) {
+    var moeLevel = 95;
+    var moeGeom = null;
+
+    function initMoeCurve() {
+      var W = 640, H = 220, padL = 40, padR = 20, padT = 20, padB = 34;
+      var plotW = W - padL - padR, plotH = H - padT - padB;
+      var nMin = 100, nMax = 4000;
+      function eAt(n, z) { return z / (2 * Math.sqrt(n)) * 100; }
+      var yMax = Math.ceil(eAt(nMin, 2.576) / 2) * 2;
+      function nx(n) { return padL + (n - nMin) / (nMax - nMin) * plotW; }
+      function ey(e) { return padT + plotH - (e / yMax) * plotH; }
+
+      while (moeSvg.firstChild) moeSvg.removeChild(moeSvg.firstChild);
+      moeSvg.setAttribute("viewBox", "0 0 " + W + " " + H);
+
+      var yStep = yMax <= 6 ? 1 : yMax <= 12 ? 2 : 5;
+      for (var t = 0; t <= yMax; t += yStep) {
+        var gy = ey(t);
+        var grid = document.createElementNS(svgNS, "line");
+        grid.setAttribute("x1", padL); grid.setAttribute("x2", padL + plotW);
+        grid.setAttribute("y1", gy); grid.setAttribute("y2", gy);
+        grid.setAttribute("class", "grid-line");
+        moeSvg.appendChild(grid);
+        var gl = document.createElementNS(svgNS, "text");
+        gl.setAttribute("x", padL - 8); gl.setAttribute("y", gy + 3);
+        gl.setAttribute("text-anchor", "end");
+        gl.setAttribute("class", "tick-label");
+        gl.textContent = t + "%p";
+        moeSvg.appendChild(gl);
+      }
+      [100, 1000, 2000, 3000, 4000].forEach(function (n) {
+        var xx = nx(n);
+        var tick = document.createElementNS(svgNS, "line");
+        tick.setAttribute("x1", xx); tick.setAttribute("x2", xx);
+        tick.setAttribute("y1", padT + plotH); tick.setAttribute("y2", padT + plotH + 5);
+        tick.setAttribute("class", "axis-line");
+        moeSvg.appendChild(tick);
+        var tl = document.createElementNS(svgNS, "text");
+        tl.setAttribute("x", xx); tl.setAttribute("y", padT + plotH + 17);
+        tl.setAttribute("text-anchor", "middle");
+        tl.setAttribute("class", "tick-label");
+        tl.textContent = n >= 1000 ? (n / 1000) + "k" : n;
+        moeSvg.appendChild(tl);
+      });
+      var axisLine = document.createElementNS(svgNS, "line");
+      axisLine.setAttribute("x1", padL); axisLine.setAttribute("x2", padL + plotW);
+      axisLine.setAttribute("y1", padT + plotH); axisLine.setAttribute("y2", padT + plotH);
+      axisLine.setAttribute("class", "axis-line");
+      moeSvg.appendChild(axisLine);
+
+      var curve = document.createElementNS(svgNS, "path");
+      curve.setAttribute("class", "curve-line");
+      moeSvg.appendChild(curve);
+
+      var markerLineV = document.createElementNS(svgNS, "line");
+      markerLineV.setAttribute("class", "z-line");
+      moeSvg.appendChild(markerLineV);
+
+      var marker = document.createElementNS(svgNS, "circle");
+      marker.setAttribute("r", 4.5);
+      marker.setAttribute("class", "moe-marker");
+      moeSvg.appendChild(marker);
+
+      moeGeom = { nx: nx, ey: ey, eAt: eAt, nMin: nMin, nMax: nMax, curve: curve, marker: marker, markerLineV: markerLineV, padT: padT, plotH: plotH };
+    }
+
+    function updateMoe() {
+      var n = Number(document.getElementById("n-slider").value);
+      var z = zTable[moeLevel];
+      var e = z / (2 * Math.sqrt(n)) * 100;
+
+      document.getElementById("n-value").textContent = n.toLocaleString("ko-KR");
+      document.getElementById("moe-n-readout").textContent = n.toLocaleString("ko-KR");
+      document.getElementById("moe-e-readout").textContent = e.toFixed(2);
+      document.getElementById("moe-report").textContent = moeLevel + "% 신뢰수준에 표본오차 ±" + e.toFixed(1) + "%p";
+
+      if (moeGeom) {
+        var g = moeGeom;
+        var pts = [];
+        var stepN = (g.nMax - g.nMin) / 120;
+        for (var nn = g.nMin; nn <= g.nMax + 0.001; nn += stepN) {
+          var ee = g.eAt(nn, z);
+          pts.push((pts.length === 0 ? "M " : "L ") + g.nx(nn) + "," + g.ey(ee));
+        }
+        g.curve.setAttribute("d", pts.join(" "));
+        g.marker.setAttribute("cx", g.nx(n));
+        g.marker.setAttribute("cy", g.ey(e));
+        g.markerLineV.setAttribute("x1", g.nx(n)); g.markerLineV.setAttribute("x2", g.nx(n));
+        g.markerLineV.setAttribute("y1", g.padT); g.markerLineV.setAttribute("y2", g.padT + g.plotH);
+      }
+
+      renderMoeBand(n, e);
+
+      document.querySelectorAll(".n-chip").forEach(function (c) {
+        c.classList.toggle("active", Number(c.dataset.n) === n);
+      });
+      document.querySelectorAll(".moe-level").forEach(function (b) {
+        b.classList.toggle("active", Number(b.dataset.level) === moeLevel);
+      });
+    }
+
+    function renderMoeBand(n, e) {
+      var svg = document.getElementById("moe-band-svg");
+      if (!svg) return;
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      var W = 640, H = 70, padL = 40, padR = 40, midY = 38;
+      var plotW = W - padL - padR;
+      function px(pct) { return padL + pct / 100 * plotW; }
+
+      var axis = document.createElementNS(svgNS, "line");
+      axis.setAttribute("x1", padL); axis.setAttribute("x2", padL + plotW);
+      axis.setAttribute("y1", midY); axis.setAttribute("y2", midY);
+      axis.setAttribute("class", "axis-line");
+      svg.appendChild(axis);
+
+      [0, 25, 50, 75, 100].forEach(function (pct) {
+        var tick = document.createElementNS(svgNS, "line");
+        tick.setAttribute("x1", px(pct)); tick.setAttribute("x2", px(pct));
+        tick.setAttribute("y1", midY - 4); tick.setAttribute("y2", midY + 4);
+        tick.setAttribute("class", "axis-line");
+        svg.appendChild(tick);
+        var lbl = document.createElementNS(svgNS, "text");
+        lbl.setAttribute("x", px(pct)); lbl.setAttribute("y", midY + 24);
+        lbl.setAttribute("text-anchor", "middle");
+        lbl.setAttribute("class", "tick-label");
+        lbl.textContent = pct + "%";
+        svg.appendChild(lbl);
+      });
+
+      var lo = Math.max(0, 50 - e), hi = Math.min(100, 50 + e);
+      var band = document.createElementNS(svgNS, "rect");
+      band.setAttribute("x", px(lo)); band.setAttribute("y", midY - 10);
+      band.setAttribute("width", Math.max(1, px(hi) - px(lo))); band.setAttribute("height", 20);
+      band.setAttribute("rx", 4);
+      band.setAttribute("class", "moe-band-rect");
+      svg.appendChild(band);
+
+      var center = document.createElementNS(svgNS, "line");
+      center.setAttribute("x1", px(50)); center.setAttribute("x2", px(50));
+      center.setAttribute("y1", midY - 15); center.setAttribute("y2", midY + 15);
+      center.setAttribute("class", "moe-center-line");
+      svg.appendChild(center);
+
+      var label = document.createElementNS(svgNS, "text");
+      label.setAttribute("x", px(50)); label.setAttribute("y", midY - 20);
+      label.setAttribute("text-anchor", "middle");
+      label.setAttribute("class", "ref-label");
+      label.textContent = "50% ± " + e.toFixed(1) + "%p";
+      svg.appendChild(label);
+    }
+
+    initMoeCurve();
+    updateMoe();
+
+    document.getElementById("n-slider").addEventListener("input", updateMoe);
+    document.querySelectorAll(".n-chip").forEach(function (c) {
+      c.addEventListener("click", function () {
+        document.getElementById("n-slider").value = c.dataset.n;
+        updateMoe();
+      });
+    });
+    document.querySelectorAll(".moe-level").forEach(function (b) {
+      b.addEventListener("click", function () {
+        moeLevel = Number(b.dataset.level);
+        updateMoe();
+      });
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
