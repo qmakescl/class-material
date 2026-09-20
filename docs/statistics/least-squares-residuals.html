@@ -209,6 +209,9 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
 }
 .page > footer{padding-block:40px 0; color:var(--muted); font-size:13.5px}
 .page > footer a{color:var(--accent)}
+.dl-link{display:inline-flex; align-items:center; gap:6px; padding:9px 16px; background:var(--ink); color:var(--surface)!important; border-radius:9px; font-weight:700; font-size:14px; text-decoration:none}
+.dl-link:hover,.dl-link:focus-visible{opacity:.88}
+.page > footer a.dl-link{display:inline; padding:0; background:none; color:var(--accent)!important; border-radius:0; font-weight:inherit; font-size:inherit; text-decoration:underline}
 @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
 
 /* ---------- left rail (site material layout) ---------- */
@@ -277,7 +280,8 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <p>엑셀은 결과만 보여주고 기준은 말해주지 않는다. 이 페이지는 <em>왜 하필 그 직선인가</em>를 되짚는 자료이고, 출발점은 직접 한 번 그려 보는 것이다.</p>
 
     <h3>1단계 · 직접 그려 본다</h3>
-    <p>배포 파일 <code>회귀분석-실습데이터.xlsx</code>의 <strong>데이터</strong> 시트를 연다. 파일이 없으면 아래 표를 그대로 복사해 붙여 넣어도 된다 — 광고비와 매출을 짝지은 시장 8곳이다(설명용으로 만든 예시 데이터).</p>
+    <p>실습 파일 <code>회귀분석-실습데이터.xlsx</code>의 <strong>데이터</strong> 시트를 연다. 아래 버튼으로 내려받을 수 있고, 파일이 없으면 표를 그대로 복사해 붙여 넣어도 된다 — 광고비와 매출을 짝지은 시장 8곳이다(설명용으로 만든 예시 데이터).</p>
+    <p><a class="dl-link" href="../downlodable/%ED%9A%8C%EA%B7%80%EB%B6%84%EC%84%9D-%EC%8B%A4%EC%8A%B5%EB%8D%B0%EC%9D%B4%ED%84%B0.xlsx" download="회귀분석-실습데이터.xlsx">⬇ 회귀분석-실습데이터.xlsx 다운로드</a></p>
   </div>
 
   <div class="fig">
@@ -531,7 +535,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
 </main>
 
 <footer>
-  <p>회귀분석 정리 ① 단순 선형회귀 보조자료 · 실습 파일 <code>회귀분석-실습데이터.xlsx</code>(데이터 / 예측과잔차 / 진단용 A–D 세 시트)와 함께 쓴다. 구성은 ISLR 3.1(최소제곱·계수의 정확도·적합도)과 3.3.3(잔차 진단)을 따랐고, 잔차 그림의 읽는 법은 <em style="background:none;padding:0">Learning Statistics with R</em> 15.8–15.9를 참고했다. 그림과 파일에 쓰인 수치는 설명을 위해 만든 예시 데이터다.</p>
+  <p>회귀분석 정리 ① 단순 선형회귀 보조자료 · 실습 파일 <a class="dl-link" href="../downlodable/%ED%9A%8C%EA%B7%80%EB%B6%84%EC%84%9D-%EC%8B%A4%EC%8A%B5%EB%8D%B0%EC%9D%B4%ED%84%B0.xlsx" download="회귀분석-실습데이터.xlsx">회귀분석-실습데이터.xlsx</a>(데이터 / 예측과잔차 / 진단용 A–D 세 시트)와 함께 쓴다. 구성은 ISLR 3.1(최소제곱·계수의 정확도·적합도)과 3.3.3(잔차 진단)을 따랐고, 잔차 그림의 읽는 법은 <em style="background:none;padding:0">Learning Statistics with R</em> 15.8–15.9를 참고했다. 그림과 파일에 쓰인 수치는 설명을 위해 만든 예시 데이터다.</p>
 </footer>
 
 </div>

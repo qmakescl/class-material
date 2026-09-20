@@ -90,45 +90,43 @@
   `.is-open` 클래스로 펼쳐진다.
 - 우측 하단 `.to-top` 버튼은 스크롤 480px 이상일 때만 보인다.
 
-## 콘텐츠가 아직 없는 섹션(빈 상태) 패턴
+## 자료 목록: 홈(최근 3개)과 과목별 목록 페이지
 
-과목 섹션에 실을 실제 자료가 아직 없을 때는 카드 템플릿을 지우지 않고
-`hidden` 속성으로 숨긴 뒤, 같은 자리에 `.section-empty` 안내 문단
-("채우는 중입니다")을 보여준다.
+카드는 HTML에 직접 쓰지 않고 **`docs/assets/materials.js`** 한 곳의 목록에서
+`docs/assets/cards.js`가 그린다. 새 자료를 발행하면 `materials.js`의
+`window.MATERIALS` 배열 끝에 한 항목만 추가한다.
 
-```html
-<!-- 실제 자료가 준비되면 아래 card-grid에서 hidden 속성을 지우고,
-     다음 줄의 section-empty 문단을 삭제하세요. -->
-<div class="card-grid" hidden>
-  <article class="material-card">...</article>
-  ...
-</div>
-<p class="section-empty">채우는 중입니다</p>
+```js
+{
+  subject: "statistics",            // statistics | data-science | ai | common | life
+  label: "인터랙티브 실습",
+  title: "제목",
+  description: "한 줄 설명",
+  href: "statistics/파일명.html",     // docs/ 기준 상대 경로
+  date: "2026-09-21"                // 같은 날짜면 배열에서 뒤쪽이 더 최신
+}
 ```
 
-자료가 실제로 채워지면 `hidden` 속성을 지우고 `.section-empty` 문단을
-삭제한다. `.section-empty`는 과목별 강조색으로 테두리/텍스트 색이 자동
-지정된다(`.subject[data-subject="..."] .section-empty` 규칙).
+- 항상 **최신순**으로 보여 준다. 카드 번호는 발행 순서(가장 오래된 것이 01)다.
+- **홈** `docs/index.html`: 과목 섹션마다 `data-limit="3"` 컨테이너로 최근
+  3개만 보여 주고, 아래 "○○ 자료 전체 보기 →" 링크가 목록 페이지로 연결된다.
+- **과목별 목록 페이지** `docs/{subject}/index.html`(`statistics/`,
+  `data-science/`, `ai/`, `common/`, `life/`): 해당 과목 전체를 최신순으로
+  보여 주며, `.card-grid-3`로 **한 행에 카드 3개**(1000px 이하 2개, 640px
+  이하 1개)를 세로형 카드로 배치한다. 헤더 내비게이션은 각 목록 페이지로
+  연결되고 현재 과목에 `.is-active`가 붙는다.
+- 자료가 없는 과목은 grid를 `hidden`으로 두고 `.section-empty`("채우는
+  중입니다") 문단을 보여 준다. 자료가 생기면 `cards.js`가 grid를 보이고
+  안내 문단을 지운다. HTML을 고칠 필요는 없다.
+- 목록 페이지의 컨테이너는 `data-base="../"`로 docs 루트까지의 상대 경로를
+  준다. 새 과목을 추가하면 `docs/{subject}/index.html`도 같은 형태로 만든다.
 
-## 실제 자료 페이지 연결 (링크형 카드)
+## 실제 자료 페이지 연결
 
 실제 자료(인터랙티브 실습 HTML 등)는 `docs/{subject}/`(예:
-`docs/statistics/`) 아래에 두고, `docs/index.html`의 해당 과목 카드를
-`<article>` 대신 `<a class="material-card" href="...">`로 바꿔 연결한다.
-카드 전체가 클릭 영역이 되며, `.card-status`는 자동으로 과목 강조색
-배경의 흰 글씨 칩으로 바뀐다("준비 중" 대신 "바로가기 →" 같은 문구 사용).
-
-```html
-<a class="material-card" href="./statistics/grad-probability-lab.html">
-  <span class="card-number">01</span>
-  <div>
-    <p class="card-label">인터랙티브 실습</p>
-    <h3>제목</h3>
-    <p>한 줄 설명</p>
-  </div>
-  <span class="card-status">바로가기 →</span>
-</a>
-```
+`docs/statistics/`) 아래에 두고 `materials.js`에 항목을 추가해 연결한다.
+카드는 `<a class="material-card">`로 그려지며 카드 전체가 클릭 영역이고,
+`.card-status`는 과목 강조색 배경의 흰 글씨 칩("바로가기 →")이 된다.
 
 자료 페이지 자체가 별도 디자인 시스템(자체 `<style>`)을 갖고 있다면,
 다음 기본 레이아웃과 스타일을 따른다.
@@ -193,8 +191,10 @@
    보더/`.section-empty` 규칙 추가.
 4. `docs/index.html`의 `nav`와 히어로 `.hero-actions`에 링크 추가.
 5. 새 `<section class="subject" id="{subject}" data-subject="{subject}">`를
-   만들고, 위의 "빈 상태 패턴"대로 `card-grid`(hidden) + `section-empty`
-   문단을 넣는다.
+   만들고 `card-grid`(`data-subject-list`, `data-limit="3"`, hidden) +
+   `section-empty` + `section-more` 링크를 넣는다.
+6. `docs/{subject}/index.html` 목록 페이지를 만들고 각 목록 페이지의 헤더
+   내비게이션에도 링크를 추가한다.
 
 ## 푸터 패턴
 

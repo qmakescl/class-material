@@ -505,6 +505,103 @@ a.material-card .card-status {
   white-space: nowrap;
 }
 
+/* ---------- subject index pages & "전체 보기" links ---------- */
+
+.section-more {
+  margin: 1.5rem 0 0;
+  font-weight: 800;
+}
+
+.section-more a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 2px solid currentColor;
+}
+
+.section-more a:hover,
+.section-more a:focus-visible {
+  color: var(--brand-dark);
+}
+
+.subject[data-subject="statistics"] .section-more a:hover { color: var(--statistics); }
+.subject[data-subject="data-science"] .section-more a:hover { color: var(--data-science); }
+.subject[data-subject="ai"] .section-more a:hover { color: var(--ai); }
+.subject[data-subject="common"] .section-more a:hover { color: var(--common); }
+.subject[data-subject="life"] .section-more a:hover { color: var(--life); }
+
+.subject-index {
+  min-height: 70vh;
+  padding-top: 4.5rem;
+}
+
+.subject-index .section-heading > .back-link {
+  grid-column: 1 / -1;
+}
+
+.subject-index h1 {
+  margin-bottom: 0.5rem;
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+}
+
+.subject-index .back-link {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.subject-index .back-link:hover,
+.subject-index .back-link:focus-visible {
+  color: var(--ink);
+}
+
+.subject-index .section-count {
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* 목록 페이지: 한 행에 카드 3개 (세로형 카드) */
+.card-grid.card-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.card-grid-3 .material-card {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
+  gap: 1rem;
+  height: 100%;
+  border-left-width: 1px;
+  border-top-width: 6px;
+  border-top-style: solid;
+}
+
+.card-grid-3 .card-status {
+  grid-column: auto;
+  justify-self: start;
+}
+
+.subject[data-subject="statistics"] .card-grid-3 .material-card { border-top-color: var(--statistics); border-left-color: var(--line); }
+.subject[data-subject="data-science"] .card-grid-3 .material-card { border-top-color: var(--data-science); border-left-color: var(--line); }
+.subject[data-subject="ai"] .card-grid-3 .material-card { border-top-color: var(--ai); border-left-color: var(--line); }
+.subject[data-subject="common"] .card-grid-3 .material-card { border-top-color: var(--common); border-left-color: var(--line); }
+.subject[data-subject="life"] .card-grid-3 .material-card { border-top-color: var(--life); border-left-color: var(--line); }
+
+@media (max-width: 1000px) {
+  .card-grid.card-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .card-grid.card-grid-3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* ---------- guide ---------- */
 
 .guide {

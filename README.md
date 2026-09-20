@@ -18,6 +18,9 @@ uv run python main.py
 ## 자료 편집
 
 - 페이지 내용: `docs/index.html`
+- 자료 목록: `docs/assets/materials.js`에 항목을 추가하면 홈(과목별 최근 3개)과
+  과목별 목록 페이지(`docs/statistics/`, `docs/data-science/`, `docs/ai/`,
+  `docs/common/`, `docs/life/`, 최신순 · 한 행 3개)에 자동 반영됩니다.
 - 공통 스타일: `docs/assets/styles.css`
 - 이미지와 첨부 자료: `docs/assets/` 아래에 추가
 
