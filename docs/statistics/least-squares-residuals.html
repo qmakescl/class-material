@@ -1,0 +1,998 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>회귀분석 조금 깊이 보기 - 최소제곱과 잔차 | Q의 수업 자료</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/statistics/least-squares-residuals.html">
+<meta name="description" content="엑셀 추세선에서 출발해 최소제곱, 잔차, R², 잔차 진단까지 단순 선형회귀를 인터랙티브로 탐구하는 통계 수업 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 수업 자료">
+<meta property="og:title" content="회귀분석 조금 깊이 보기 - 최소제곱과 잔차 | Q의 수업 자료">
+<meta property="og:description" content="직선을 직접 움직이며 잔차와 제곱합, R², 잔차 그림의 읽는 법을 확인합니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/statistics/least-squares-residuals.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="통계 수업 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="회귀분석 조금 깊이 보기 - 최소제곱과 잔차 | Q의 수업 자료">
+<meta name="twitter:description" content="직선을 직접 움직이며 잔차와 제곱합, R², 잔차 그림의 읽는 법을 확인합니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
+<meta name="twitter:image:alt" content="통계 수업 자료 아이콘">
+<style>
+:root{
+  --rail:250px;
+  --paper:#f4f6fb;
+  --surface:#ffffff;
+  --surface-2:#eaf1ff;
+  --ink:#0b1220;
+  --muted:#45506b;
+  --line:#dbe1ee;
+  --line-soft:#e6ebf5;
+  --pos:#e2662a;
+  --pos-soft:rgba(226,102,42,.14);
+  --neg:#2f6fed;
+  --neg-soft:rgba(47,111,237,.14);
+  --fit:#0b1220;
+  --accent:#0a8a56;
+  --accent-soft:rgba(14,169,104,.13);
+  --amber:#ffb020;
+  --shadow:0 1px 2px rgb(11 18 32 / 6%), 0 8px 24px -10px rgb(11 18 32 / 14%);
+  --f-body:Pretendard, "Noto Sans KR", Inter, system-ui, -apple-system, sans-serif;
+  --f-mono:ui-monospace, SFMono-Regular, Menlo, "Noto Sans KR", monospace;
+}
+html{background:var(--paper)}
+img{max-width:100%}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--f-body); font-size:16px; line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+.col{max-width:64ch}
+
+/* ---------- masthead ---------- */
+header.masthead{padding-block:76px 34px; border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:var(--f-mono); font-size:12px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--accent); margin:0 0 14px
+}
+h1{
+  font-family:inherit; font-weight:800; letter-spacing:-.03em;
+  font-size:clamp(34px,6.2vw,52px); line-height:1.16; margin:0 0 16px; text-wrap:balance;
+}
+.lede{font-size:clamp(16px,2.4vw,18.5px); color:var(--muted); margin:0; max-width:56ch}
+.mast-meta{
+  display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:24px;
+  font-family:var(--f-mono); font-size:12.5px; color:var(--muted);
+}
+.mast-meta span{display:inline-flex; align-items:center; gap:7px}
+.swatch{width:11px; height:11px; border-radius:2px; display:inline-block}
+
+/* ---------- sections ---------- */
+section{padding-block:56px; border-bottom:1px solid var(--line-soft)}
+section:last-of-type{border-bottom:none}
+.sec-head{display:flex; gap:16px; align-items:baseline; margin-bottom:10px}
+.sec-num{
+  font-family:var(--f-mono); font-size:13px; color:var(--accent);
+  letter-spacing:.08em; flex:none; padding-top:2px;
+}
+h2{
+  font-family:inherit; font-weight:800; letter-spacing:-.03em;
+  font-size:clamp(24px,3.6vw,32px); line-height:1.3; margin:0; text-wrap:balance;
+}
+h3{font-size:17px; font-weight:600; margin:32px 0 8px; letter-spacing:-.005em}
+p{margin:0 0 16px}
+.sec-head + p, .sec-head + .col > p:first-child{margin-top:4px}
+strong{font-weight:600}
+em{font-style:normal; background:var(--accent-soft); padding:1px 5px; border-radius:3px}
+code, .num{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+
+/* ---------- figure shell ---------- */
+.fig{
+  background:var(--surface); border:1px solid var(--line); border-radius:6px;
+  box-shadow:var(--shadow); margin:26px 0 22px; overflow:hidden;
+}
+.fig-bar{
+  display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center;
+  padding:13px 16px; border-bottom:1px solid var(--line-soft);
+  background:var(--surface-2);
+}
+.fig-title{font-size:13px; font-weight:600; letter-spacing:.01em; margin-right:auto}
+.fig-body{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}
+.fig-body.solo{grid-template-columns:minmax(0,1fr)}
+.fig-body.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.fig-plot{padding:10px 8px 4px; min-width:0; display:flex; flex-direction:column; justify-content:center}
+.fig-plot > div{width:100%}
+.fig-side{border-left:1px solid var(--line-soft); padding:16px; min-width:0}
+@media (max-width:760px){
+  .fig-body{grid-template-columns:minmax(0,1fr)}
+  .fig-side{border-left:none; border-top:1px solid var(--line-soft)}
+}
+.fig-note{
+  padding:12px 16px; border-top:1px solid var(--line-soft);
+  font-size:13.5px; color:var(--muted); line-height:1.6;
+}
+svg.plot{display:block; width:100%; height:auto; overflow:visible}
+svg.plot text{font-family:var(--f-mono); fill:var(--muted)}
+
+/* ---------- controls ---------- */
+.ctrl{display:flex; align-items:center; gap:10px; font-size:13px}
+.ctrl label{font-family:var(--f-mono); font-size:12px; color:var(--muted); white-space:nowrap}
+input[type=range]{
+  -webkit-appearance:none; appearance:none; height:22px; background:transparent;
+  width:clamp(96px,20vw,168px); cursor:pointer;
+}
+input[type=range]::-webkit-slider-runnable-track{height:3px; background:var(--line); border-radius:2px}
+input[type=range]::-moz-range-track{height:3px; background:var(--line); border-radius:2px}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:15px; height:15px; border-radius:50%;
+  background:var(--accent); margin-top:-6px; border:2px solid var(--surface);
+}
+input[type=range]::-moz-range-thumb{
+  width:15px; height:15px; border-radius:50%; background:var(--accent);
+  border:2px solid var(--surface);
+}
+input[type=range]:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:4px}
+button{
+  font-family:var(--f-body); font-size:12.5px; font-weight:500; color:var(--ink);
+  background:var(--surface); border:1px solid var(--line); border-radius:4px;
+  padding:6px 12px; cursor:pointer; transition:background .15s, border-color .15s;
+}
+button:hover{border-color:var(--accent); color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--surface)}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:4px; overflow:hidden}
+.seg button{border:none; border-radius:0; border-right:1px solid var(--line)}
+.seg button:last-child{border-right:none}
+.seg button[aria-pressed="true"]{color:var(--surface)}
+
+/* ---------- readouts ---------- */
+.stat-row{display:flex; flex-wrap:wrap; gap:6px 22px; margin-bottom:14px}
+.stat{display:flex; flex-direction:column; gap:1px}
+.stat dt{font-family:var(--f-mono); font-size:11px; letter-spacing:.06em; color:var(--muted); text-transform:uppercase}
+.stat dd{margin:0; font-family:var(--f-mono); font-size:19px; font-weight:500; font-variant-numeric:tabular-nums}
+.stat dd small{font-size:11px; color:var(--muted); font-weight:400; margin-left:3px}
+
+table.dev{width:100%; border-collapse:collapse; font-family:var(--f-mono); font-size:12.5px; font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto}
+table.dev th{
+  text-align:right; font-weight:500; color:var(--muted); font-size:10.5px;
+  letter-spacing:.04em; padding:4px 5px; border-bottom:1px solid var(--line);
+  white-space:nowrap;
+}
+table.dev td{text-align:right; padding:3px 5px; border-bottom:1px solid var(--line-soft); white-space:nowrap}
+table.dev th:first-child, table.dev td:first-child{text-align:left; color:var(--muted)}
+table.dev tbody tr{cursor:pointer}
+table.dev tbody tr:hover, table.dev tbody tr.on{background:var(--accent-soft)}
+table.dev tfoot td{
+  padding:6px 5px; font-weight:500; border-top:1px solid var(--line); border-bottom:none;
+}
+table.dev tfoot td:first-child{color:var(--ink)}
+
+textarea#z-data{
+  width:100%; font-family:var(--f-mono); font-size:12.5px; line-height:1.7;
+  color:var(--ink); background:var(--surface-2); border:1px solid var(--line);
+  border-radius:5px; padding:10px 12px; resize:vertical; tab-size:12;
+  white-space:pre; overflow-x:auto;
+}
+textarea#z-data:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.callout{
+  background:var(--surface-2); border-radius:5px; padding:12px 14px;
+  font-family:var(--f-mono); font-size:13px; line-height:1.85; margin-top:14px;
+}
+.callout .k{color:var(--muted); font-size:11.5px; letter-spacing:.05em}
+.hint{font-size:13px; color:var(--muted); margin:10px 0 0}
+
+/* ---------- prose extras ---------- */
+.aside{
+  border-left:2px solid var(--accent); padding:2px 0 2px 18px; margin:26px 0;
+  color:var(--muted); font-size:15px;
+}
+.aside strong{color:var(--ink)}
+table.info{width:100%; border-collapse:collapse; font-size:14px; margin:20px 0}
+table.info th{
+  text-align:left; font-size:11px; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--muted); font-weight:500; padding:6px 12px 6px 0; border-bottom:1px solid var(--line);
+}
+table.info td{padding:11px 12px 11px 0; border-bottom:1px solid var(--line-soft); vertical-align:top}
+table.info td:first-child{font-weight:500; white-space:nowrap}
+.eq{
+  font-family:var(--f-mono); font-size:15px; background:var(--surface);
+  border:1px solid var(--line-soft); border-radius:5px; padding:14px 16px;
+  margin:18px 0; overflow-x:auto; white-space:nowrap;
+}
+.page > footer{padding-block:40px 0; color:var(--muted); font-size:13.5px}
+.page > footer a{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+
+/* ---------- left rail (site material layout) ---------- */
+.skip-link{position:fixed; top:-3rem; left:1rem; z-index:100; padding:.6rem 1rem; color:#fff; background:#1c3fd6; border-radius:4px; font-weight:700; text-decoration:none}
+.skip-link:focus{top:1rem}
+.rail{position:fixed; top:0; bottom:0; left:0; z-index:50; display:flex; flex-direction:column; width:var(--rail); padding:34px 0 20px; overflow-y:auto; background:var(--ink); color:#e4e9f5}
+.rail .rail-back{display:block; margin:0 26px 18px; padding:0; color:#b7c2de; border:0; font-size:12.5px; font-weight:600; text-decoration:none; white-space:nowrap}
+.rail .rail-back:hover, .rail .rail-back:focus-visible{color:var(--amber)}
+.rail h1{margin:0 26px 30px; color:#f4f6fb; font-size:23px; font-weight:800; line-height:1.4; letter-spacing:-.02em}
+.rail nav{display:flex; flex-direction:column}
+.rail nav a{display:grid; grid-template-columns:28px 1fr; gap:10px; align-items:baseline; padding:11px 24px; color:#b7c2de; border-left:3px solid transparent; font-size:13.5px; line-height:1.5; text-decoration:none; transition:.16s}
+.rail nav a b{color:#7c88a8; font-size:12px; font-variant-numeric:tabular-nums}
+.rail nav a:hover, .rail nav a:focus-visible{background:#16213d; color:#fff}
+.rail nav a.on{background:#16213d; color:#fff; border-left-color:var(--amber)}
+.rail nav a.on b{color:var(--amber)}
+.rail footer{margin-top:auto; padding:20px 24px 0; color:#7c88a8; border:0; font-size:11.5px; line-height:1.6}
+.page{max-width:1060px; margin:0 0 0 var(--rail); padding:0 46px 120px}
+@media (max-width:860px){
+  :root{--rail:0px}
+  .rail{position:static; width:auto; height:auto; padding:22px 0 8px}
+  .rail nav{flex-direction:row; padding:0 16px 8px; overflow-x:auto}
+  .rail nav a{display:inline-grid; grid-template-columns:28px max-content; padding:8px 14px; border-bottom:3px solid transparent; border-left:0; white-space:nowrap}
+  .rail nav a.on{border-bottom-color:var(--amber); border-left:0}
+  .rail footer{display:none}
+  .rail .rail-back{margin:0 16px 10px}
+  .rail h1{margin:0 16px 16px}
+  .page{margin-left:0; padding:0 18px 80px}
+  header.masthead{padding-block:42px 28px}
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../index.html#statistics">← 처음으로</a>
+  <h1>회귀분석<br>조금 깊이 보기<br>최소제곱과 잔차</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#excel-trendline"><b>01</b><span>엑셀이 그려주던 직선</span></a>
+    <a href="#deviation"><b>02</b><span>편차 하나를 들여다본다</span></a>
+    <a href="#why-squares"><b>03</b><span>왜 하필 제곱인가</span></a>
+    <a href="#r-squared"><b>04</b><span>R²의 정체</span></a>
+    <a href="#residual-diagnostics"><b>05</b><span>잔차 진단</span></a>
+    <a href="#next-questions"><b>06</b><span>남는 질문</span></a>
+  </nav>
+  <footer>슬라이더와 버튼으로 직선과 데이터를 바꾸면 그림과 수치가 즉시 갱신됩니다.</footer>
+</aside>
+<div class="page">
+
+<header class="masthead">
+  <p class="eyebrow">회귀분석 ① · 단순 선형회귀</p>
+  <h1>회귀분석 조금 깊이 보기 - 최소제곱과 잔차</h1>
+  <p class="lede">엑셀의 <strong>추세선</strong>에서 출발해 그 직선이 왜 하필 그 자리인지로 들어간다. 직선을 긋는 일은 <strong>실측값과 예측값의 차이</strong>를 어떻게 다룰지 정하는 일이다. 그 차이 하나하나를 눈으로 보고, 제곱해서 더해 보고, 마지막에는 그 차이만 따로 떼어내 그림으로 읽는 데까지 간다.</p>
+  <div class="mast-meta">
+    <span><i class="swatch" style="background:var(--ink)"></i>예측값 ŷ (적합선)</span>
+    <span><i class="swatch" style="background:var(--pos)"></i>e &gt; 0 · 실측이 위</span>
+    <span><i class="swatch" style="background:var(--neg)"></i>e &lt; 0 · 실측이 아래</span>
+  </div>
+</header>
+
+<main id="content">
+<!-- ======================= 0 ======================= -->
+<section id="excel-trendline">
+  <div class="sec-head"><span class="sec-num">01</span><h2>엑셀이 이미 그려주던 그 직선</h2></div>
+  <div class="col">
+    <p>회귀직선을 처음 만나는 자리는 대개 통계 수업이 아니라 엑셀이다. 점을 흩뿌려 놓고 <strong>추세선 추가 &gt; 선형</strong>을 누르면 직선이 하나 생기고, 체크박스를 켜면 수식과 R²까지 딸려 나온다. 그 직선의 이름이 바로 <strong>회귀직선</strong>이다.</p>
+    <p>엑셀은 결과만 보여주고 기준은 말해주지 않는다. 이 페이지는 <em>왜 하필 그 직선인가</em>를 되짚는 자료이고, 출발점은 직접 한 번 그려 보는 것이다.</p>
+
+    <h3>1단계 · 직접 그려 본다</h3>
+    <p>배포 파일 <code>회귀분석-실습데이터.xlsx</code>의 <strong>데이터</strong> 시트를 연다. 파일이 없으면 아래 표를 그대로 복사해 붙여 넣어도 된다 — 광고비와 매출을 짝지은 시장 8곳이다(설명용으로 만든 예시 데이터).</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">실습 데이터 · n = 8</span>
+      <button id="z-copy">표 전체 선택</button>
+    </div>
+    <div class="fig-body solo" style="padding:14px 16px">
+      <textarea id="z-data" readonly rows="9" spellcheck="false" aria-label="실습 데이터 (탭 구분)">시장	광고비 x (만원)	매출 y (백만원)
+1	10	6.1
+2	20	7.4
+3	30	7.6
+4	40	9.3
+5	55	10.0
+6	70	11.9
+7	85	12.3
+8	100	14.4</textarea>
+    </div>
+    <p class="fig-note">엑셀에 붙여 넣은 뒤 <strong>x와 y 두 열만</strong> 선택한다. 시장 번호 열까지 함께 선택하면 엉뚱한 차트가 나온다.</p>
+  </div>
+
+  <div class="col">
+    <table class="info">
+      <tr><td>① 차트</td><td>x·y 두 열 선택 → <strong>삽입 &gt; 분산형(XY)</strong>. 꺾은선이 아니라 분산형이어야 한다. 꺾은선은 x를 이름표로만 취급해 간격을 무시한다.</td></tr>
+      <tr><td>② 추세선</td><td>점 하나를 우클릭 → <strong>추세선 추가 → 선형</strong>.</td></tr>
+      <tr><td>③ 수식 표시</td><td>추세선 서식 아래쪽에서 <strong>수식을 차트에 표시</strong>와 <strong>R-제곱 값을 차트에 표시</strong>를 체크.</td></tr>
+    </table>
+    <p>그러면 차트 안에 이런 두 줄이 뜬다.</p>
+    <div class="eq">y = 0.0881x + 5.3603 &nbsp;&nbsp;·&nbsp;&nbsp; R² = 0.9828</div>
+
+    <h3>2단계 · 이 두 줄을 읽는다</h3>
+  </div>
+
+  <div class="fig" id="figZ">
+    <div class="fig-bar">
+      <span class="fig-title">엑셀이 보여주는 화면</span>
+      <button id="z-reveal" aria-pressed="false">엑셀이 감춘 것 보기</button>
+    </div>
+    <div class="fig-body">
+      <div class="fig-plot"><div id="z-plot"></div></div>
+      <div class="fig-side">
+        <div class="callout" style="margin-top:0">
+          <span class="k">기울기 0.0881</span><br>광고비를 1만원 더 쓰면 매출이 평균 <strong>0.0881백만원</strong>, 즉 8만 8천원쯤 늘어난다.<br><br>
+          <span class="k">절편 5.3603</span><br>광고비가 0일 때의 예측 매출. 데이터에 x=0인 시장이 없다면 이 값은 <strong>외삽</strong>이다.<br><br>
+          <span class="k">R² = 0.9828</span><br>매출 변동의 98.3%가 광고비로 설명된다.
+        </div>
+        <p class="hint" id="z-msg">엑셀 화면에는 여기까지만 나온다. 버튼을 눌러 이 차트가 감추고 있는 것을 보자.</p>
+      </div>
+    </div>
+    <p class="fig-note">엑셀의 <strong>SLOPE</strong>, <strong>INTERCEPT</strong>, <strong>RSQ</strong> 함수도 같은 값을 돌려준다(배포 파일 데이터 시트 아래쪽에 확인용으로 넣어 두었다). 차트의 추세선과 회귀분석은 같은 계산이며, 이름만 다르다.</p>
+  </div>
+
+  <div class="col">
+    <h3>3단계 · 엑셀이 말해주지 않는 것</h3>
+    <p>추세선은 답을 주지만 근거를 주지 않는다. 남는 질문이 셋이고, 이 페이지의 나머지가 각각에 대한 답이다.</p>
+    <table class="info">
+      <tr><td>왜 이 직선인가</td><td>무수히 많은 직선 중 엑셀은 어떤 기준으로 이 하나를 골랐나 → <strong>02·03</strong></td></tr>
+      <tr><td>어느 시장이 빗나갔나</td><td>R² 하나로는 개별 시장이 얼마나 벗어났는지 알 수 없다 → <strong>02·04</strong></td></tr>
+      <tr><td>직선이 맞는 모양인가</td><td>R²가 0.98이어도 직선이 틀린 선택일 수 있다 → <strong>05</strong></td></tr>
+    </table>
+    <div class="aside">
+      <strong>추세선의 함정.</strong> 엑셀은 어떤 데이터에도 군말 없이 직선을 그려준다. 관계가 곡선이든, 이상치가 하나 섞였든, 점이 세 개뿐이든 마찬가지다. <strong>추세선이 그려졌다는 사실 자체는 아무것도 보증하지 않는다.</strong>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 1 ======================= -->
+<section id="deviation">
+  <div class="sec-head"><span class="sec-num">02</span><h2>편차 하나를 들여다본다</h2></div>
+  <div class="col">
+    <p>엑셀이 고른 직선을 잠시 지우고, 직선을 우리 손으로 그어 보자. 같은 8개 시장 데이터다. 직선을 하나 긋는 순간, 각 시장마다 두 개의 숫자가 생긴다.</p>
+    <div class="eq">실측값 y<sub>i</sub> &nbsp;·&nbsp; 예측값 ŷ<sub>i</sub> = β̂<sub>0</sub> + β̂<sub>1</sub>x<sub>i</sub> &nbsp;→&nbsp; <strong>잔차</strong> e<sub>i</sub> = y<sub>i</sub> − ŷ<sub>i</sub></div>
+    <p>잔차는 <strong>세로 거리</strong>다. 점에서 직선까지의 최단거리가 아니라, <em>같은 x에서 위아래로 잰 거리</em>다. 우리가 맞히려는 것이 y이기 때문이다. 아래에서 직선을 움직이며 그 막대들이 어떻게 변하는지 보자.</p>
+  </div>
+
+  <div class="fig" id="figA">
+    <div class="fig-bar">
+      <span class="fig-title">직선을 움직여 본다</span>
+      <span class="ctrl"><label for="a-b0">절편 β₀</label><input type="range" id="a-b0" min="2" max="9" step="0.05" value="7.2"></span>
+      <span class="ctrl"><label for="a-b1">기울기 β₁</label><input type="range" id="a-b1" min="0" max="0.18" step="0.001" value="0.062"></span>
+      <button id="a-squares" aria-pressed="false">제곱을 넓이로</button>
+      <button id="a-solve">최소제곱 해로</button>
+    </div>
+    <div class="fig-body">
+      <div class="fig-plot"><div id="a-plot"></div></div>
+      <div class="fig-side">
+        <div class="stat-row">
+          <div class="stat"><dt>RSS = Σe²</dt><dd id="a-rss">—</dd></div>
+          <div class="stat"><dt>Σ|e|</dt><dd id="a-abs">—</dd></div>
+          <div class="stat"><dt>가장 큰 |e|</dt><dd id="a-max">—</dd></div>
+        </div>
+        <div class="tablewrap">
+          <table class="dev" id="a-table">
+            <thead><tr><th>시장</th><th>x</th><th>y 실측</th><th>ŷ 예측</th><th>e</th><th>e²</th></tr></thead>
+            <tbody></tbody>
+            <tfoot><tr><td colspan="5">합계 RSS</td><td id="a-foot">—</td></tr></tfoot>
+          </table>
+        </div>
+        <div class="callout" id="a-callout"></div>
+      </div>
+    </div>
+    <p class="fig-note">표의 행에 마우스를 올리면 해당 시장의 편차가 그림에서 강조된다. <span class="pos">주황</span>은 실측이 예측보다 높은 시장, <span class="neg">파랑</span>은 낮은 시장이다.</p>
+  </div>
+
+  <div class="col">
+    <p>세 가지를 확인하고 넘어간다.</p>
+    <table class="info">
+      <tr><td>부호가 섞인다</td><td>잔차를 그냥 더하면 +와 −가 상쇄된다. 최소제곱 해에서는 <strong>합이 정확히 0</strong>이 된다 — 그래서 합은 직선의 좋고 나쁨을 재는 기준이 될 수 없다.</td></tr>
+      <tr><td>무게중심을 지난다</td><td>최소제곱선은 언제나 점 (x̄, ȳ)를 통과한다. 직선이 그 점에 박혀 있고 기울기만 돌아간다고 생각하면 된다.</td></tr>
+      <tr><td>큰 편차가 더 아프다</td><td>제곱 때문이다. 0.4짜리 편차 네 개(0.64)보다 1.6짜리 하나(2.56)가 RSS를 훨씬 키운다.</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ======================= 2 ======================= -->
+<section id="why-squares">
+  <div class="sec-head"><span class="sec-num">03</span><h2>왜 하필 제곱인가</h2></div>
+  <div class="col">
+    <p>부호를 없애는 방법은 제곱 말고도 있다. 절댓값을 더해도 된다. 실제로 두 기준은 서로 다른 직선을 고르고, <strong>차이는 데이터에 이상한 점이 하나 섞일 때 드러난다.</strong></p>
+  </div>
+
+  <div class="fig" id="figB">
+    <div class="fig-bar">
+      <span class="fig-title">한 점을 끌어올려 본다</span>
+      <span class="ctrl"><label for="b-out">5번 시장의 매출</label><input type="range" id="b-out" min="10" max="22" step="0.1" value="10"></span>
+      <button id="b-reset">되돌리기</button>
+    </div>
+    <div class="fig-body">
+      <div class="fig-plot"><div id="b-plot"></div></div>
+      <div class="fig-side">
+        <div class="stat-row">
+          <div class="stat"><dt>제곱 기준 기울기</dt><dd id="b-l2">—</dd></div>
+          <div class="stat"><dt>절댓값 기준 기울기</dt><dd id="b-l1">—</dd></div>
+        </div>
+        <p class="hint" id="b-msg"></p>
+        <div class="callout"><span class="k">제곱 기준(최소제곱)</span><br>큰 편차에 제곱만큼의 벌점 → <strong>이상한 점 하나에 직선이 끌려간다</strong><br><br><span class="k">절댓값 기준</span><br>벌점이 거리에 비례 → 잘 버티지만, 손으로 풀리는 공식이 없다</div>
+      </div>
+    </div>
+    <p class="fig-note">최소제곱이 절댓값 기준보다 우월해서 표준이 된 것이 아니다. <strong>미분해서 닫힌 해가 나오고</strong>, 오차가 정규분포라는 가정 아래에서 <strong>최대우도 추정과 일치</strong>하기 때문이다. 대신 이상치에 약하다는 값을 치른다 — 그래서 <strong>05</strong>의 잔차 진단이 선택이 아니라 필수가 된다.</p>
+  </div>
+
+  <div class="col">
+    <h3>RSS는 어떻게 생긴 함수인가</h3>
+    <p>기울기를 조금씩 바꿔가며 RSS를 계산하면 <strong>아래로 볼록한 포물선</strong>이 나온다. 바닥이 하나뿐이라는 것, 그래서 "가장 좋은 직선"이 유일하게 정해진다는 것이 최소제곱의 또 다른 장점이다.</p>
+  </div>
+
+  <div class="fig" id="figC">
+    <div class="fig-bar"><span class="fig-title">RSS(β₁) — 02의 직선이 지금 어디에 있는가</span></div>
+    <div class="fig-body solo"><div class="fig-plot"><div id="c-plot"></div></div></div>
+    <p class="fig-note">위쪽 02의 기울기 슬라이더를 움직이면 이 곡선 위의 점이 함께 움직인다. (현재 절편 β₀를 고정한 채 기울기만 훑은 단면이다.)</p>
+  </div>
+</section>
+
+<!-- ======================= 3 ======================= -->
+<section id="r-squared">
+  <div class="sec-head"><span class="sec-num">04</span><h2>편차를 두 번 잰다 — R²의 정체</h2></div>
+  <div class="col">
+    <p>"이 직선이 잘 맞는가"라는 질문은 <strong>무엇과 비교해서</strong>인지를 정해야 답이 된다. 회귀가 잡은 비교 대상은 <em>x를 전혀 쓰지 않는 모형</em>, 즉 수평선 ȳ이다.</p>
+    <p>같은 점들에 대해 편차를 두 번 잰다. 한 번은 수평선 ȳ까지(<strong>TSS</strong>), 한 번은 적합선까지(<strong>RSS</strong>). 줄어든 몫의 비율이 R²다.</p>
+  </div>
+
+  <div class="fig" id="figD">
+    <div class="fig-bar">
+      <span class="fig-title">무엇과 비교하는가</span>
+      <span class="seg" role="group" aria-label="비교 대상">
+        <button data-mode="tss" aria-pressed="true">ȳ 수평선까지</button>
+        <button data-mode="rss" aria-pressed="false">적합선까지</button>
+        <button data-mode="both" aria-pressed="false">겹쳐 보기</button>
+      </span>
+    </div>
+    <div class="fig-body">
+      <div class="fig-plot"><div id="d-plot"></div></div>
+      <div class="fig-side">
+        <div class="stat-row">
+          <div class="stat"><dt>TSS</dt><dd id="d-tss">—</dd></div>
+          <div class="stat"><dt>RSS</dt><dd id="d-rss">—</dd></div>
+          <div class="stat"><dt>R²</dt><dd id="d-r2">—</dd></div>
+        </div>
+        <div id="d-bar"></div>
+        <div class="callout"><span class="k">읽는 법</span><br>ȳ만 쓸 때 남던 변동의 <strong id="d-pct">—</strong>를 x가 걷어냈다. 나머지는 이 모형이 설명하지 못한 몫이다.</div>
+      </div>
+    </div>
+    <p class="fig-note">RSE = √(RSS/(n−2)) = <span class="num" id="d-rse">—</span> — 같은 정보를 매출의 단위로 말한 것. "예측이 평균적으로 이만큼 빗나간다".</p>
+  </div>
+
+  <div class="aside">
+    <strong>R²가 얼마면 좋은가?</strong> 답이 없다. 물리 실험에서 0.6이면 뭔가 잘못된 것이고, 교육·심리·마케팅에서 0.6이면 훌륭하다. 도메인이 기준을 정한다.
+  </div>
+</section>
+
+<!-- ======================= 4 ======================= -->
+<section id="residual-diagnostics">
+  <div class="sec-head"><span class="sec-num">05</span><h2>잔차만 따로 떼어낸다</h2></div>
+  <div class="col">
+    <p>여기서부터가 잔차 <em>분석</em>이다. 앞에서 잔차는 직선을 고르기 위한 재료였다. 이제는 <strong>고른 직선이 애초에 맞는 모양이었는지 되묻는 증거</strong>가 된다.</p>
+    <p>방법은 단순하다. 잔차 막대를 전부 같은 높이(0)로 끌어내려 눕힌 다음, 가로축을 예측값 ŷ으로 놓고 다시 뿌린다. 직선이 데이터에 맞는다면 이 그림에는 <strong>아무 패턴도 없어야</strong> 한다.</p>
+  </div>
+
+  <div class="fig" id="figE">
+    <div class="fig-bar">
+      <span class="fig-title">데이터 네 종류</span>
+      <span class="seg" role="group" aria-label="데이터셋">
+        <button data-ds="linear" aria-pressed="true">A</button>
+        <button data-ds="curve" aria-pressed="false">B</button>
+        <button data-ds="fan" aria-pressed="false">C</button>
+        <button data-ds="outlier" aria-pressed="false">D</button>
+      </span>
+      <button id="e-reveal" aria-pressed="false">진단 보기</button>
+    </div>
+    <div class="fig-body even">
+      <div class="fig-plot"><div id="e-plot1"></div></div>
+      <div class="fig-plot" style="border-left:1px solid var(--line-soft)"><div id="e-plot2"></div></div>
+    </div>
+    <div class="fig-note">
+      <div class="stat-row" style="margin-bottom:8px">
+        <div class="stat"><dt>R²</dt><dd id="e-r2">—</dd></div>
+        <div class="stat"><dt>RSE</dt><dd id="e-rse">—</dd></div>
+      </div>
+      <p style="margin:0" id="e-diag">네 데이터 모두 R²가 꽤 높다. 왼쪽 산점도만 보고 어느 쪽이 문제인지 가려낼 수 있는가? 오른쪽 잔차 그림을 먼저 읽어보자.</p>
+    </div>
+  </div>
+
+  <div class="col">
+    <h3>잔차 그림에서 무엇을 찾는가</h3>
+    <table class="info">
+      <tr><th>보이는 것</th><th>진단</th><th>대응</th></tr>
+      <tr><td>U자 · 곡선</td><td>관계가 직선이 아니다</td><td>log x, √x, x² 투입</td></tr>
+      <tr><td>부채꼴로 벌어짐</td><td>등분산 가정 위배</td><td>log y, √y 변환</td></tr>
+      <tr><td>한두 점이 멀찍이</td><td>이상치 — 계수와 RSE를 흔든다</td><td>입력 오류 확인 후 재적합</td></tr>
+      <tr><td>시간 순서로 물결침</td><td>오차의 독립성 위배</td><td>시계열 방법이 필요</td></tr>
+    </table>
+    <p>R²는 네 경우 모두 높게 나온다. <strong>적합도 지표는 모형이 틀렸다는 사실을 알려주지 않는다.</strong> 그걸 알려주는 건 잔차 그림 한 장이다.</p>
+  </div>
+</section>
+
+<!-- ======================= 5 ======================= -->
+<section id="next-questions">
+  <div class="sec-head"><span class="sec-num">06</span><h2>여기까지 오면 남는 질문</h2></div>
+  <div class="col">
+    <p>지금까지 다룬 것은 전부 <strong>손에 있는 데이터 안에서의 이야기</strong>다. 직선을 그었고, 편차를 쟀고, 그 편차가 이상한 모양인지 확인했다. 하지만 아직 답하지 않은 질문이 있다.</p>
+    <div class="eq">이 데이터가 아니라 <strong>다른 표본</strong>을 뽑았다면, β̂₁이 얼마나 달라졌을까?</div>
+    <p>표본이 바뀌면 직선도 바뀐다. 그러니 β̂₁ = 0.088은 숫자 하나가 아니라 <strong>분포를 가진 추정값</strong>이다. 그 흔들림의 폭이 표준오차이고, 거기서 신뢰구간과 p값이 나온다.</p>
+    <table class="info">
+      <tr><td>표준오차 SE(β̂₁)</td><td>같은 방식으로 표본을 반복해 뽑았을 때 기울기 추정값이 흩어지는 폭. 분모에 Σ(xᵢ−x̄)²가 있어서 <strong>x가 넓게 퍼져 있을수록 작아진다</strong>.</td></tr>
+      <tr><td>신뢰구간</td><td>β̂₁ ± 2·SE(β̂₁). 위 8개 시장에서는 SE(β̂₁)=0.0048이라 95% 구간이 <strong>[0.077, 0.100]</strong>이 된다 — "기울기는 0.088이다"가 아니라 "0.077에서 0.100 사이다"로 말버릇을 바꾸는 장치. (n=8이므로 2 대신 자유도 6의 t값 2.45를 썼다.)</td></tr>
+      <tr><td>t와 p값</td><td>추정값이 0에서 표준오차 몇 개만큼 떨어져 있는가. <strong>p가 작다는 것은 효과가 크다는 뜻이 아니다</strong> — 표본이 크면 아주 작은 기울기도 유의해진다.</td></tr>
+    </table>
+    <p>그리고 이 페이지에서 계속 미뤄둔 것이 하나 더 있다. 예측변수가 <strong>둘 이상</strong>일 때다. 그때는 "기울기"의 뜻부터 달라진다 — 다른 변수를 고정했을 때의 변화량이 되고, 단독으로 유의하던 변수가 유의성을 잃기도 한다.</p>
+  </div>
+</section>
+</main>
+
+<footer>
+  <p>회귀분석 정리 ① 단순 선형회귀 보조자료 · 실습 파일 <code>회귀분석-실습데이터.xlsx</code>(데이터 / 예측과잔차 / 진단용 A–D 세 시트)와 함께 쓴다. 구성은 ISLR 3.1(최소제곱·계수의 정확도·적합도)과 3.3.3(잔차 진단)을 따랐고, 잔차 그림의 읽는 법은 <em style="background:none;padding:0">Learning Statistics with R</em> 15.8–15.9를 참고했다. 그림과 파일에 쓰인 수치는 설명을 위해 만든 예시 데이터다.</p>
+</footer>
+
+</div>
+
+
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg";
+function E(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function fmt(v,d){return (Math.round(v*Math.pow(10,d))/Math.pow(10,d)).toFixed(d);}
+function sgn(v,d){return (v>=0?"+":"−")+fmt(Math.abs(v),d);}
+
+/* ---------------- data ---------------- */
+var X8=[10,20,30,40,55,70,85,100];
+var Y8=[6.1,7.4,7.6,9.3,10.0,11.9,12.3,14.4];
+var X14=[12,18,25,31,38,44,52,59,66,73,81,88,96,105];
+var DS={
+  linear:{y:[6.31,7.14,7.24,7.21,8.26,8.31,10.04,11.90,10.80,11.33,13.12,13.64,14.13,13.98],
+    label:"A", diag:"<strong>A — 문제 없음.</strong> 잔차가 0선 위아래로 무작위하게 흩어진다. 이것이 기준 그림이다. 나머지 셋은 전부 이 그림에서 벗어난 모습이다."},
+  curve:{y:[8.57,10.13,10.21,11.27,11.24,11.96,12.22,13.33,13.21,14.21,14.47,14.57,13.79,14.95],
+    label:"B", diag:"<strong>B — 관계가 직선이 아니다.</strong> 잔차가 가운데에서 솟았다가 양끝에서 내려가는 곡선을 그린다. 실제 관계가 로그 형태인데 직선을 맞춘 탓이다. R²는 0.91로 멀쩡해 보인다 — 이것이 R²만 보면 안 되는 이유다."},
+  fan:{y:[6.28,6.94,6.08,7.52,7.40,8.03,11.83,9.05,11.20,14.01,11.13,12.98,14.37,15.07],
+    label:"C", diag:"<strong>C — 등분산 위배.</strong> 오른쪽으로 갈수록 잔차가 부채꼴로 벌어진다. 계수 자체는 쓸 만하지만 표준오차가 신뢰할 수 없게 되고, 따라서 신뢰구간과 p값이 전부 어긋난다."},
+  outlier:{y:[6.31,7.14,7.24,7.21,8.26,8.31,10.04,11.90,10.80,18.73,13.12,13.64,14.13,13.98],
+    label:"D", diag:"<strong>D — 이상치 하나.</strong> 한 점이 혼자 멀리 떨어져 있다. 03에서 본 대로 이 점이 직선을 끌어당겨 나머지 점들의 잔차까지 한쪽으로 밀어놓았고, RSE는 A의 세 배 가까이 부풀었다."}
+};
+
+/* ---------------- math ---------------- */
+function fit(x,y){
+  var n=x.length,mx=0,my=0,i;
+  for(i=0;i<n;i++){mx+=x[i];my+=y[i];}
+  mx/=n;my/=n;
+  var sxy=0,sxx=0;
+  for(i=0;i<n;i++){sxy+=(x[i]-mx)*(y[i]-my);sxx+=(x[i]-mx)*(x[i]-mx);}
+  var b1=sxy/sxx,b0=my-b1*mx,rss=0,tss=0,e;
+  for(i=0;i<n;i++){e=y[i]-(b0+b1*x[i]);rss+=e*e;tss+=(y[i]-my)*(y[i]-my);}
+  return {b0:b0,b1:b1,rss:rss,tss:tss,r2:1-rss/tss,rse:Math.sqrt(rss/(n-2)),mx:mx,my:my};
+}
+function rssOf(x,y,b0,b1){var s=0,i,e;for(i=0;i<x.length;i++){e=y[i]-(b0+b1*x[i]);s+=e*e;}return s;}
+function median(a){var b=a.slice().sort(function(p,q){return p-q;}),m=b.length>>1;
+  return b.length%2?b[m]:(b[m-1]+b[m])/2;}
+function fitL1(x,y){ // grid over slope; optimal intercept is the median of y - b x
+  var best=null,b,i,a,s,r;
+  for(b=0.0;b<=0.30001;b+=0.0004){
+    r=[];for(i=0;i<x.length;i++)r.push(y[i]-b*x[i]);
+    a=median(r);s=0;for(i=0;i<r.length;i++)s+=Math.abs(r[i]-a);
+    if(!best||s<best.s)best={s:s,b0:a,b1:b};
+  }
+  return best;
+}
+
+/* ---------------- plot shell ---------------- */
+function Plot(host,opt){
+  this.host=host;this.opt=opt||{};
+  this.svg=E("svg",{});this.svg.setAttribute("class","plot");
+  host.appendChild(this.svg);
+  var self=this;
+  if(window.ResizeObserver){new ResizeObserver(function(){self.render();}).observe(host);}
+  else window.addEventListener("resize",function(){self.render();});
+}
+Plot.prototype.render=function(){
+  var w=Math.max(240,this.host.clientWidth||320);
+  var ratio=this.opt.ratio||0.70;
+  var h=Math.round(Math.min(this.opt.maxH||420,Math.max(this.opt.minH||230,w*ratio)));
+  this.w=w;this.h=h;
+  this.svg.setAttribute("viewBox","0 0 "+w+" "+h);
+  this.svg.setAttribute("width",w);this.svg.setAttribute("height",h);
+  while(this.svg.firstChild)this.svg.removeChild(this.svg.firstChild);
+  var m=this.opt.margin||{t:16,r:16,b:34,l:46};
+  this.m=m;this.iw=w-m.l-m.r;this.ih=h-m.t-m.b;
+  if(this.drawFn)this.drawFn(this);
+};
+Plot.prototype.add=function(el){this.svg.appendChild(el);return el;};
+Plot.prototype.setScales=function(xd,yd){
+  var m=this.m,iw=this.iw,ih=this.ih;
+  this.xd=xd;this.yd=yd;
+  this.sx=function(v){return m.l+(v-xd[0])/(xd[1]-xd[0])*iw;};
+  this.sy=function(v){return m.t+ih-(v-yd[0])/(yd[1]-yd[0])*ih;};
+  this.kx=iw/(xd[1]-xd[0]);this.ky=ih/(yd[1]-yd[0]);
+};
+Plot.prototype.axes=function(xt,yt,xlab,ylab){
+  var m=this.m,i,t,fs=Math.max(9.5,Math.min(12,this.w/40));
+  var line=css("--line"),soft=css("--line-soft"),muted=css("--muted");
+  for(i=0;i<yt.length;i++){
+    t=this.sy(yt[i]);
+    this.add(E("line",{x1:m.l,x2:m.l+this.iw,y1:t,y2:t,stroke:soft,"stroke-width":1}));
+    this.add(E("text",{x:m.l-7,y:t+4,"text-anchor":"end","font-size":fs,fill:muted})).textContent=yt[i];
+  }
+  for(i=0;i<xt.length;i++){
+    t=this.sx(xt[i]);
+    this.add(E("text",{x:t,y:m.t+this.ih+16,"text-anchor":"middle","font-size":fs,fill:muted})).textContent=xt[i];
+  }
+  this.add(E("line",{x1:m.l,x2:m.l+this.iw,y1:m.t+this.ih,y2:m.t+this.ih,stroke:line,"stroke-width":1}));
+  if(xlab)this.add(E("text",{x:m.l+this.iw,y:m.t+this.ih+30,"text-anchor":"end","font-size":fs-.5,fill:muted})).textContent=xlab;
+  if(ylab)this.add(E("text",{x:m.l-7,y:m.t-5,"text-anchor":"end","font-size":fs-.5,fill:muted})).textContent=ylab;
+};
+function ticks(lo,hi,n){
+  var span=hi-lo,step=Math.pow(10,Math.floor(Math.log(span/n)/Math.LN10)),err=span/n/step;
+  if(err>=5)step*=10;else if(err>=2)step*=5;else if(err>=1)step*=2;
+  var out=[],v=Math.ceil(lo/step)*step;
+  for(;v<=hi+1e-9;v+=step)out.push(Math.round(v*1e6)/1e6);
+  return out;
+}
+
+/* =============== FIG Z (Excel trendline) =============== */
+var Z={reveal:false};
+var pZ=new Plot(document.getElementById("z-plot"),{ratio:0.70,minH:240,maxH:380,margin:{t:18,r:18,b:40,l:46}});
+pZ.drawFn=function(p){
+  var f=fit(X8,Y8);
+  p.setScales([0,110],[4,16]);
+  p.axes(ticks(0,110,5),ticks(4,16,5),"광고비 x (만원)","매출 y");
+  var fitc=css("--fit"),acc=css("--accent"),pos=css("--pos"),neg=css("--neg");
+  p.add(E("line",{x1:p.sx(0),y1:p.sy(f.b0),x2:p.sx(110),y2:p.sy(f.b0+f.b1*110),
+    stroke:fitc,"stroke-width":1.8,"stroke-dasharray":Z.reveal?"none":"7 4"}));
+  var i,yh,e;
+  if(Z.reveal){
+    for(i=0;i<X8.length;i++){
+      yh=f.b0+f.b1*X8[i];e=Y8[i]-yh;
+      p.add(E("line",{x1:p.sx(X8[i]),y1:p.sy(Y8[i]),x2:p.sx(X8[i]),y2:p.sy(yh),
+        stroke:e>=0?pos:neg,"stroke-width":2.4,"stroke-linecap":"round"}));
+    }
+  }
+  for(i=0;i<X8.length;i++){
+    yh=f.b0+f.b1*X8[i];e=Y8[i]-yh;
+    p.add(E("circle",{cx:p.sx(X8[i]),cy:p.sy(Y8[i]),r:4.6,
+      fill:Z.reveal?(e>=0?pos:neg):css("--ink"),stroke:css("--surface"),"stroke-width":1.5}));
+  }
+  // equation box, the way Excel drops it on the chart
+  var fs=Math.max(11,Math.min(13,p.w/32));
+  var bx=p.m.l+10,by=p.m.t+8,bw=Math.min(190,p.iw-20),bh=fs*2.9+10;
+  p.add(E("rect",{x:bx,y:by,width:bw,height:bh,fill:css("--surface"),
+    stroke:css("--line"),"stroke-width":1,rx:3}));
+  var t1=p.add(E("text",{x:bx+9,y:by+fs+4,"font-size":fs,fill:css("--ink")}));
+  t1.textContent="y = "+fmt(f.b1,4)+"x + "+fmt(f.b0,4);
+  var t2=p.add(E("text",{x:bx+9,y:by+fs*2.4+4,"font-size":fs,fill:css("--ink")}));
+  t2.textContent="R² = "+fmt(f.r2,4);
+};
+function updateZ(){
+  document.getElementById("z-msg").innerHTML=Z.reveal
+    ? "직선과 각 점 사이의 세로 거리가 보인다. 엑셀은 이 거리들을 <strong>가장 작게 만드는 직선</strong>을 골랐지만, 화면에는 결과만 남겼다. 이 거리에 이름을 붙이는 데서 02가 시작된다."
+    : "엑셀 화면에는 여기까지만 나온다. 버튼을 눌러 이 차트가 감추고 있는 것을 보자.";
+  pZ.render();
+}
+document.getElementById("z-reveal").addEventListener("click",function(){
+  Z.reveal=!Z.reveal;this.setAttribute("aria-pressed",Z.reveal?"true":"false");
+  this.textContent=Z.reveal?"엑셀 화면으로 돌아가기":"엑셀이 감춘 것 보기";updateZ();});
+document.getElementById("z-copy").addEventListener("click",function(){
+  var ta=document.getElementById("z-data");
+  ta.focus();ta.select();
+  try{document.execCommand("copy");this.textContent="복사됨 — 엑셀에 붙여 넣으세요";
+    var b=this;setTimeout(function(){b.textContent="표 전체 선택";},2200);}
+  catch(err){this.textContent="선택됨 — Ctrl/⌘+C";}
+});
+
+/* =============== FIG A =============== */
+var A={b0:7.2,b1:0.062,squares:false,hi:-1};
+var LS8=fit(X8,Y8);
+var pA=new Plot(document.getElementById("a-plot"),{ratio:0.72,minH:250,maxH:400,margin:{t:18,r:18,b:40,l:46}});
+pA.drawFn=function(p){
+  p.setScales([0,110],[4,16]);
+  p.axes(ticks(0,110,5),ticks(4,16,5),"광고비 x (만원)","매출 y");
+  var clip=E("clipPath",{id:"clipA"});
+  clip.appendChild(E("rect",{x:p.m.l,y:p.m.t,width:p.iw,height:p.ih}));
+  p.add(clip);
+  var g=p.add(E("g",{"clip-path":"url(#clipA)"}));
+  var pos=css("--pos"),neg=css("--neg"),fitc=css("--fit"),acc=css("--accent");
+  var i,x,y,yh,e,px,py,pyh,side,c;
+  // squares first (behind)
+  if(A.squares){
+    for(i=0;i<X8.length;i++){
+      x=X8[i];y=Y8[i];yh=A.b0+A.b1*x;e=y-yh;
+      px=p.sx(x);py=p.sy(y);pyh=p.sy(yh);side=Math.abs(py-pyh);c=e>=0?pos:neg;
+      g.appendChild(E("rect",{x:px,y:Math.min(py,pyh),width:side,height:side,
+        fill:c,"fill-opacity":A.hi===i?.30:.16,stroke:c,"stroke-opacity":A.hi===i?.7:.3,"stroke-width":1}));
+    }
+  }
+  // line
+  g.appendChild(E("line",{x1:p.sx(p.xd[0]),y1:p.sy(A.b0+A.b1*p.xd[0]),
+    x2:p.sx(p.xd[1]),y2:p.sy(A.b0+A.b1*p.xd[1]),stroke:fitc,"stroke-width":2}));
+  // residual bars + points
+  for(i=0;i<X8.length;i++){
+    x=X8[i];y=Y8[i];yh=A.b0+A.b1*x;e=y-yh;
+    px=p.sx(x);py=p.sy(y);pyh=p.sy(yh);c=e>=0?pos:neg;
+    g.appendChild(E("line",{x1:px,y1:py,x2:px,y2:pyh,stroke:c,
+      "stroke-width":A.hi===i?3.5:2.2,"stroke-linecap":"round"}));
+    g.appendChild(E("circle",{cx:px,cy:pyh,r:2.6,fill:css("--surface"),stroke:fitc,"stroke-width":1.4}));
+    g.appendChild(E("circle",{cx:px,cy:py,r:A.hi===i?6:4.6,fill:c,stroke:css("--surface"),"stroke-width":1.5}));
+  }
+  // highlight labels
+  if(A.hi>=0){
+    i=A.hi;x=X8[i];y=Y8[i];yh=A.b0+A.b1*x;
+    px=p.sx(x);
+    var lx=px+10,anch="start";
+    if(px>p.m.l+p.iw*0.72){lx=px-10;anch="end";}
+    var t1=E("text",{x:lx,y:p.sy(y)-8,"text-anchor":anch,"font-size":12,fill:css("--ink")});
+    t1.textContent="y = "+fmt(y,2);g.appendChild(t1);
+    var t2=E("text",{x:lx,y:p.sy(yh)+16,"text-anchor":anch,"font-size":12,fill:acc});
+    t2.textContent="ŷ = "+fmt(yh,2);g.appendChild(t2);
+  }
+};
+var aTbody=document.querySelector("#a-table tbody"),aRows=[];
+(function buildRows(){
+  for(var i=0;i<X8.length;i++){
+    var tr=document.createElement("tr");tr.dataset.i=i;
+    var cells=[];
+    for(var j=0;j<6;j++){var td=document.createElement("td");tr.appendChild(td);cells.push(td);}
+    cells[0].textContent=i+1;cells[1].textContent=X8[i];cells[2].textContent=fmt(Y8[i],2);
+    aTbody.appendChild(tr);aRows.push({tr:tr,c:cells});
+  }
+})();
+function markA(){
+  for(var i=0;i<aRows.length;i++)aRows[i].tr.classList.toggle("on",A.hi===i);
+}
+function updateA(){
+  var rss=0,abs=0,mx=0;
+  for(var i=0;i<X8.length;i++){
+    var yh=A.b0+A.b1*X8[i],e=Y8[i]-yh,r=aRows[i];
+    rss+=e*e;abs+=Math.abs(e);if(Math.abs(e)>mx)mx=Math.abs(e);
+    r.c[3].textContent=fmt(yh,2);
+    r.c[4].textContent=sgn(e,2);r.c[4].className=e>=0?"pos":"neg";
+    r.c[5].textContent=fmt(e*e,2);
+  }
+  markA();
+  document.getElementById("a-rss").textContent=fmt(rss,2);
+  document.getElementById("a-abs").textContent=fmt(abs,2);
+  document.getElementById("a-max").textContent=fmt(mx,2);
+  document.getElementById("a-foot").textContent=fmt(rss,2);
+  var near=Math.abs(A.b0-LS8.b0)<0.04&&Math.abs(A.b1-LS8.b1)<0.0015;
+  document.getElementById("a-callout").innerHTML=
+    '<span class="k">현재 직선</span><br>ŷ = '+fmt(A.b0,2)+' + '+fmt(A.b1,4)+' · x<br>'+
+    '<span class="k">최소제곱 해</span><br>ŷ = '+fmt(LS8.b0,2)+' + '+fmt(LS8.b1,4)+' · x'+
+    (near?'<br><br><span style="color:var(--accent)">지금 RSS가 최소다. 어느 쪽으로 움직여도 커진다.</span>':
+          '<br><br>RSS를 '+fmt(rss-LS8.rss,2)+'만큼 더 줄일 수 있다.');
+  pA.render();
+  if(pC)pC.render();
+}
+document.getElementById("a-b0").addEventListener("input",function(){A.b0=+this.value;updateA();});
+document.getElementById("a-b1").addEventListener("input",function(){A.b1=+this.value;updateA();});
+document.getElementById("a-squares").addEventListener("click",function(){
+  A.squares=!A.squares;this.setAttribute("aria-pressed",A.squares?"true":"false");
+  this.textContent=A.squares?"제곱 넓이 끄기":"제곱을 넓이로";updateA();});
+document.getElementById("a-solve").addEventListener("click",function(){
+  var s0=A.b0,s1=A.b1,t0=performance.now(),dur=600;
+  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function step(t){
+    var k=reduce?1:Math.min(1,(t-t0)/dur),ease=1-Math.pow(1-k,3);
+    A.b0=s0+(LS8.b0-s0)*ease;A.b1=s1+(LS8.b1-s1)*ease;
+    document.getElementById("a-b0").value=A.b0;document.getElementById("a-b1").value=A.b1;
+    updateA();if(k<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+});
+aTbody.addEventListener("mouseover",function(ev){
+  var tr=ev.target&&ev.target.closest?ev.target.closest("tr"):null;
+  if(!tr)return;var i=+tr.dataset.i;if(i===A.hi)return;
+  A.hi=i;markA();pA.render();});
+aTbody.addEventListener("mouseleave",function(){A.hi=-1;markA();pA.render();});
+aTbody.addEventListener("focusin",function(ev){
+  var tr=ev.target&&ev.target.closest?ev.target.closest("tr"):null;
+  if(!tr)return;A.hi=+tr.dataset.i;markA();pA.render();});
+
+/* =============== FIG B =============== */
+var B={y:Y8.slice(),idx:4};
+var pB=new Plot(document.getElementById("b-plot"),{ratio:0.72,minH:250,maxH:400,margin:{t:18,r:18,b:40,l:46}});
+pB.drawFn=function(p){
+  p.setScales([0,110],[4,24]);
+  p.axes(ticks(0,110,5),ticks(4,24,5),"광고비 x","매출 y");
+  var l2=fit(X8,B.y),l1=fitL1(X8,B.y);
+  var fitc=css("--fit"),acc=css("--accent"),pos=css("--pos");
+  p.add(E("line",{x1:p.sx(0),y1:p.sy(l2.b0),x2:p.sx(110),y2:p.sy(l2.b0+l2.b1*110),
+    stroke:fitc,"stroke-width":2.2}));
+  p.add(E("line",{x1:p.sx(0),y1:p.sy(l1.b0),x2:p.sx(110),y2:p.sy(l1.b0+l1.b1*110),
+    stroke:acc,"stroke-width":2,"stroke-dasharray":"6 4"}));
+  for(var i=0;i<X8.length;i++){
+    var moved=(i===B.idx&&Math.abs(B.y[i]-Y8[i])>0.05);
+    p.add(E("circle",{cx:p.sx(X8[i]),cy:p.sy(B.y[i]),r:moved?6.5:4.6,
+      fill:moved?pos:css("--muted"),stroke:css("--surface"),"stroke-width":1.5}));
+  }
+  var fs=Math.max(10,Math.min(12,p.w/38));
+  p.add(E("text",{x:p.sx(108),y:p.sy(l2.b0+l2.b1*108)-8,"text-anchor":"end","font-size":fs,fill:fitc})).textContent="제곱";
+  p.add(E("text",{x:p.sx(108),y:p.sy(l1.b0+l1.b1*108)+16,"text-anchor":"end","font-size":fs,fill:acc})).textContent="절댓값";
+};
+function updateB(){
+  var l2=fit(X8,B.y),l1=fitL1(X8,B.y),base=fit(X8,Y8);
+  document.getElementById("b-l2").textContent=fmt(l2.b1,4);
+  document.getElementById("b-l1").textContent=fmt(l1.b1,4);
+  var d2=Math.abs(l2.b1-base.b1),d1=Math.abs(l1.b1-fitL1(X8,Y8).b1);
+  document.getElementById("b-msg").innerHTML=
+    (B.y[B.idx]<=Y8[B.idx]+0.05)
+      ? "두 직선이 거의 겹쳐 있다. 5번 시장의 매출을 끌어올려 보자."
+      : "원래 값에서 기울기가 제곱 기준은 <strong>"+fmt(d2,4)+"</strong>, 절댓값 기준은 <strong>"+fmt(d1,4)+"</strong> 움직였다.";
+  pB.render();
+}
+document.getElementById("b-out").addEventListener("input",function(){B.y[B.idx]=+this.value;updateB();});
+document.getElementById("b-reset").addEventListener("click",function(){
+  B.y[B.idx]=Y8[B.idx];document.getElementById("b-out").value=Y8[B.idx];updateB();});
+
+/* =============== FIG C (RSS curve) =============== */
+var pC=new Plot(document.getElementById("c-plot"),{ratio:0.34,minH:180,maxH:260,margin:{t:18,r:18,b:40,l:56}});
+pC.drawFn=function(p){
+  var lo=0,hi=0.18,n=140,vals=[],i,b,mn=Infinity,mx=-Infinity;
+  for(i=0;i<=n;i++){b=lo+(hi-lo)*i/n;var v=rssOf(X8,Y8,A.b0,b);vals.push([b,v]);
+    if(v<mn)mn=v;if(v>mx)mx=v;}
+  mx=Math.min(mx,mn+Math.max(60,mn*6));
+  p.setScales([lo,hi],[0,mx]);
+  p.axes([0,0.05,0.10,0.15],ticks(0,mx,4),"기울기 β₁","RSS");
+  var d="",px,py;
+  for(i=0;i<vals.length;i++){
+    px=p.sx(vals[i][0]);py=p.sy(Math.min(vals[i][1],mx));
+    d+=(i?"L":"M")+fmt(px,1)+" "+fmt(py,1);
+  }
+  p.add(E("path",{d:d,fill:"none",stroke:css("--accent"),"stroke-width":2}));
+  var cur=rssOf(X8,Y8,A.b0,A.b1);
+  if(cur<=mx){
+    p.add(E("line",{x1:p.sx(A.b1),y1:p.sy(0),x2:p.sx(A.b1),y2:p.sy(cur),
+      stroke:css("--line"),"stroke-width":1,"stroke-dasharray":"3 3"}));
+    p.add(E("circle",{cx:p.sx(A.b1),cy:p.sy(cur),r:6,fill:css("--pos"),
+      stroke:css("--surface"),"stroke-width":2}));
+    var fs=Math.max(10,Math.min(12,p.w/45));
+    p.add(E("text",{x:p.sx(A.b1)+10,y:p.sy(cur)-9,"font-size":fs,fill:css("--ink")}))
+      .textContent="RSS "+fmt(cur,2);
+  }
+};
+
+/* =============== FIG D (TSS / RSS) =============== */
+var D={mode:"tss"};
+var pD=new Plot(document.getElementById("d-plot"),{ratio:0.74,minH:250,maxH:400,margin:{t:18,r:18,b:40,l:46}});
+pD.drawFn=function(p){
+  p.setScales([0,110],[4,16]);
+  p.axes(ticks(0,110,5),ticks(4,16,5),"광고비 x","매출 y");
+  var pos=css("--pos"),neg=css("--neg"),fitc=css("--fit"),muted=css("--muted");
+  var showT=D.mode==="tss"||D.mode==="both",showR=D.mode==="rss"||D.mode==="both";
+  var i,px,py,yh,off=D.mode==="both"?3.5:0;
+  if(showT){
+    p.add(E("line",{x1:p.sx(0),y1:p.sy(LS8.my),x2:p.sx(110),y2:p.sy(LS8.my),
+      stroke:muted,"stroke-width":1.6,"stroke-dasharray":"7 4"}));
+  }
+  if(showR){
+    p.add(E("line",{x1:p.sx(0),y1:p.sy(LS8.b0),x2:p.sx(110),y2:p.sy(LS8.b0+LS8.b1*110),
+      stroke:fitc,"stroke-width":2.2}));
+  }
+  for(i=0;i<X8.length;i++){
+    px=p.sx(X8[i]);py=p.sy(Y8[i]);yh=LS8.b0+LS8.b1*X8[i];
+    if(showT)p.add(E("line",{x1:px-off,y1:py,x2:px-off,y2:p.sy(LS8.my),
+      stroke:muted,"stroke-width":D.mode==="both"?2.6:3,"stroke-linecap":"round","stroke-opacity":.75}));
+    if(showR)p.add(E("line",{x1:px+off,y1:py,x2:px+off,y2:p.sy(yh),
+      stroke:Y8[i]>=yh?pos:neg,"stroke-width":D.mode==="both"?2.6:3,"stroke-linecap":"round"}));
+    p.add(E("circle",{cx:px,cy:py,r:4.4,fill:css("--ink"),stroke:css("--surface"),"stroke-width":1.5}));
+  }
+  var fs=Math.max(10,Math.min(12,p.w/40));
+  if(showT)p.add(E("text",{x:p.sx(4),y:p.sy(LS8.my)-8,"font-size":fs,fill:muted})).textContent="ȳ = "+fmt(LS8.my,2);
+};
+function updateD(){
+  document.getElementById("d-tss").textContent=fmt(LS8.tss,1);
+  document.getElementById("d-rss").textContent=fmt(LS8.rss,2);
+  document.getElementById("d-r2").textContent=fmt(LS8.r2,3);
+  document.getElementById("d-rse").textContent=fmt(LS8.rse,3);
+  document.getElementById("d-pct").textContent=fmt(LS8.r2*100,1)+"%";
+  var w1=LS8.r2*100;
+  document.getElementById("d-bar").innerHTML=
+    '<div style="display:flex;height:26px;border-radius:4px;overflow:hidden;border:1px solid var(--line);font-family:var(--f-mono);font-size:11px;line-height:26px;text-align:center">'+
+    '<div style="width:'+w1+'%;background:var(--accent-soft);color:var(--accent)">설명된 변동</div>'+
+    '<div style="width:'+(100-w1)+'%;background:var(--pos-soft);color:var(--pos)"></div></div>'+
+    '<p class="hint" style="margin-top:6px">전체 변동 TSS 중 왼쪽이 x가 설명한 몫, 오른쪽이 RSS로 남은 몫.</p>';
+  pD.render();
+}
+Array.prototype.forEach.call(document.querySelectorAll('#figD .seg button'),function(b){
+  b.addEventListener("click",function(){
+    D.mode=this.dataset.mode;
+    Array.prototype.forEach.call(document.querySelectorAll('#figD .seg button'),function(o){
+      o.setAttribute("aria-pressed",o===b?"true":"false");});
+    updateD();
+  });
+});
+
+/* =============== FIG E (residual diagnostics) =============== */
+var Est={ds:"linear",reveal:false};
+var pE1=new Plot(document.getElementById("e-plot1"),{ratio:0.82,minH:230,maxH:330,margin:{t:20,r:14,b:38,l:42}});
+var pE2=new Plot(document.getElementById("e-plot2"),{ratio:0.82,minH:230,maxH:330,margin:{t:20,r:14,b:38,l:42}});
+function curE(){var y=DS[Est.ds].y;return {y:y,f:fit(X14,y)};}
+pE1.drawFn=function(p){
+  var c=curE(),y=c.y,f=c.f,lo=5,hi=20;
+  p.setScales([0,115],[lo,hi]);
+  p.axes([0,40,80],ticks(lo,hi,4),"x",null);
+  var fs=Math.max(10,Math.min(12,p.w/34));
+  p.add(E("text",{x:p.m.l,y:p.m.t-7,"font-size":fs,fill:css("--muted")})).textContent="① 산점도와 적합선 — 세로축 y";
+  p.add(E("line",{x1:p.sx(0),y1:p.sy(f.b0),x2:p.sx(115),y2:p.sy(f.b0+f.b1*115),
+    stroke:css("--fit"),"stroke-width":2}));
+  for(var i=0;i<X14.length;i++){
+    var yh=f.b0+f.b1*X14[i],e=y[i]-yh,c2=e>=0?css("--pos"):css("--neg");
+    p.add(E("line",{x1:p.sx(X14[i]),y1:p.sy(y[i]),x2:p.sx(X14[i]),y2:p.sy(yh),
+      stroke:c2,"stroke-width":1.8,"stroke-opacity":.75}));
+    p.add(E("circle",{cx:p.sx(X14[i]),cy:p.sy(y[i]),r:4,fill:c2,stroke:css("--surface"),"stroke-width":1.2}));
+  }
+};
+pE2.drawFn=function(p){
+  var c=curE(),y=c.y,f=c.f,i,e,mx=0,res=[],yh;
+  for(i=0;i<X14.length;i++){yh=f.b0+f.b1*X14[i];e=y[i]-yh;res.push([yh,e]);
+    if(Math.abs(e)>mx)mx=Math.abs(e);}
+  mx=Math.max(1.2,mx*1.25);
+  var xlo=Infinity,xhi=-Infinity;
+  for(i=0;i<res.length;i++){if(res[i][0]<xlo)xlo=res[i][0];if(res[i][0]>xhi)xhi=res[i][0];}
+  var pad=(xhi-xlo)*0.09;
+  p.setScales([xlo-pad,xhi+pad],[-mx,mx]);
+  p.axes(ticks(xlo-pad,xhi+pad,3),ticks(-mx,mx,4),"예측값 ŷ",null);
+  var fs=Math.max(10,Math.min(12,p.w/34));
+  p.add(E("text",{x:p.m.l,y:p.m.t-7,"font-size":fs,fill:css("--muted")})).textContent="② 잔차 그림 — 세로축 e";
+  p.add(E("line",{x1:p.m.l,y1:p.sy(0),x2:p.m.l+p.iw,y2:p.sy(0),
+    stroke:css("--fit"),"stroke-width":1.4,"stroke-dasharray":"5 4"}));
+  for(i=0;i<res.length;i++){
+    var c2=res[i][1]>=0?css("--pos"):css("--neg");
+    p.add(E("line",{x1:p.sx(res[i][0]),y1:p.sy(0),x2:p.sx(res[i][0]),y2:p.sy(res[i][1]),
+      stroke:c2,"stroke-width":1.4,"stroke-opacity":.45}));
+    p.add(E("circle",{cx:p.sx(res[i][0]),cy:p.sy(res[i][1]),r:4.2,fill:c2,
+      stroke:css("--surface"),"stroke-width":1.2}));
+  }
+};
+function updateE(){
+  var c=curE();
+  document.getElementById("e-r2").textContent=fmt(c.f.r2,3);
+  document.getElementById("e-rse").textContent=fmt(c.f.rse,2);
+  document.getElementById("e-diag").innerHTML=Est.reveal?DS[Est.ds].diag:
+    "네 데이터 모두 R²가 높게 나온다. 왼쪽 산점도만 보고 어느 쪽이 문제인지 가려낼 수 있는가? 오른쪽 잔차 그림을 먼저 읽고, 그다음 진단을 열어보자.";
+  pE1.render();pE2.render();
+}
+Array.prototype.forEach.call(document.querySelectorAll('#figE .seg button'),function(b){
+  b.addEventListener("click",function(){
+    Est.ds=this.dataset.ds;
+    Array.prototype.forEach.call(document.querySelectorAll('#figE .seg button'),function(o){
+      o.setAttribute("aria-pressed",o===b?"true":"false");});
+    updateE();
+  });
+});
+document.getElementById("e-reveal").addEventListener("click",function(){
+  Est.reveal=!Est.reveal;this.setAttribute("aria-pressed",Est.reveal?"true":"false");
+  this.textContent=Est.reveal?"진단 숨기기":"진단 보기";updateE();
+});
+
+/* ---------------- boot ---------------- */
+updateZ();updateA();updateB();updateD();updateE();
+
+/* ---------------- rail scroll-spy ---------------- */
+var railLinks=Array.prototype.slice.call(document.querySelectorAll("#rail-nav a"));
+var railObserver=new IntersectionObserver(function(entries){
+  entries.forEach(function(entry){
+    if(entry.isIntersecting){
+      railLinks.forEach(function(link){
+        link.classList.toggle("on",link.getAttribute("href")==="#"+entry.target.id);
+      });
+    }
+  });
+},{rootMargin:"-25% 0px -65% 0px"});
+railLinks.forEach(function(link,index){
+  var target=document.querySelector(link.getAttribute("href"));
+  if(target)railObserver.observe(target);
+  if(index===0)link.classList.add("on");
+});
+})();
+</script>
+
+</body>
+</html>

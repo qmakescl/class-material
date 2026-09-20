@@ -28,6 +28,21 @@ GitHub Pages의 프로젝트 사이트 경로에서도 동작하도록 내부 �
 사용합니다. 페이지를 새로 추가할 때는 [DESIGN.md](DESIGN.md)의 과목별
 아이콘 매핑과 절대 URL 규칙을 함께 적용합니다.
 
+## KBO 2025 타석 탐색 대시보드 (로컬 전용)
+
+`src/python/kbo_dashboard/`에 있는 로컬 전용 도구로, Hugging Face
+[`slothman3878/kbo_playbyplay`](https://huggingface.co/datasets/slothman3878/kbo_playbyplay)
+(CC BY 4.0) 2025시즌 데이터를 sqlite3 DB로 변환해 팀·타자·주자 상황·타석 결과
+(events)·타석당 득점을 필터링해 보여준다. GitHub Pages로 배포되지 않으며,
+원본 데이터를 재배포하지 않는다 (`datasets/*.parquet`, `datasets/*.sqlite3`는
+`.gitignore` 처리됨).
+
+```sh
+uv sync
+uv run python src/python/kbo_dashboard/ingest.py   # datasets/kbo_dashboard.sqlite3 생성
+uv run python src/python/kbo_dashboard/app.py       # http://127.0.0.1:5050
+```
+
 ## GitHub Pages 배포
 
 `main` 브랜치에 `docs/` 또는 Pages 워크플로 변경 사항이 푸시되면

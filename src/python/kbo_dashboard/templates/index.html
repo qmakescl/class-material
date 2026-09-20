@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KBO 2025 타석 탐색 대시보드</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg-1: #dfe9ff;
+    --bg-2: #f3e8ff;
+    --bg-3: #ffe8f0;
+    --text: #1c1c1e;
+    --text-dim: #55555c;
+    --glass-bg: rgba(255, 255, 255, 0.55);
+    --glass-bg-strong: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.65);
+    --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
+    --accent: #0a84ff;
+    --accent-2: #bf5af2;
+    --track-bg: rgba(120, 120, 140, 0.14);
+    --divider: rgba(120, 120, 140, 0.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-1: #1b1030;
+      --bg-2: #0f1c3f;
+      --bg-3: #2a0f2e;
+      --text: #f2f2f7;
+      --text-dim: #b6b6c0;
+      --glass-bg: rgba(40, 40, 55, 0.45);
+      --glass-bg-strong: rgba(45, 45, 62, 0.6);
+      --glass-border: rgba(255, 255, 255, 0.14);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+      --accent: #409cff;
+      --accent-2: #d17aff;
+      --track-bg: rgba(255, 255, 255, 0.08);
+      --divider: rgba(255, 255, 255, 0.12);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    padding: clamp(16px, 4vw, 40px);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Apple SD Gothic Neo",
+      "Malgun Gothic", sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at 15% 10%, var(--bg-1), transparent 55%),
+      radial-gradient(circle at 85% 15%, var(--bg-2), transparent 55%),
+      radial-gradient(circle at 50% 90%, var(--bg-3), transparent 60%),
+      linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    background-attachment: fixed;
+  }
+
+  header { margin-bottom: 20px; }
+  h1 {
+    font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle { color: var(--text-dim); font-size: 0.88rem; margin: 0; }
+
+  .glass {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 22px;
+    box-shadow: var(--glass-shadow);
+  }
+
+  .layout { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+  .filters { flex: 0 0 300px; min-width: 260px; padding: 20px 22px; position: sticky; top: 16px; }
+  .results { flex: 1 1 480px; min-width: 300px; padding: 20px 24px; }
+
+  fieldset {
+    border: none;
+    border-top: 1px solid var(--divider);
+    margin: 0 0 16px;
+    padding: 14px 0 0;
+  }
+  fieldset:first-of-type { border-top: none; padding-top: 0; }
+  legend {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    padding: 0;
+    margin-bottom: 8px;
+  }
+  label { display: block; font-size: 0.87rem; margin: 5px 0; cursor: pointer; }
+  select, input[type="text"] {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--divider);
+    background: var(--glass-bg-strong);
+    color: var(--text);
+    font-size: 0.85rem;
+    -webkit-appearance: none;
+  }
+  select:focus, input[type="text"]:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .event-grid { max-height: 210px; overflow-y: auto; padding-right: 4px; }
+  input[type="checkbox"] { accent-color: var(--accent); margin-right: 6px; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 4px; }
+  button {
+    flex: 1;
+    padding: 10px 0;
+    border-radius: 14px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg-strong);
+    color: var(--text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  button:hover { transform: translateY(-1px); }
+  button:active { transform: translateY(0); }
+  #apply-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    border: none;
+  }
+
+  h3 {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    margin: 22px 0 10px;
+  }
+  h3:first-of-type { margin-top: 4px; }
+
+  .stat-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .stat-card {
+    flex: 1 1 120px;
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 12px 16px;
+  }
+  .stat-card .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .stat-card .label { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
+
+  .bar-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; font-size: 0.8rem; }
+  .bar-label { flex: 0 0 96px; text-align: right; color: var(--text-dim); }
+  .bar-track { flex: 1; background: var(--track-bg); border-radius: 8px; overflow: hidden; height: 12px; position: relative; }
+  .bar-fill {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    height: 100%;
+    border-radius: 8px;
+  }
+  .bar-count { flex: 0 0 46px; color: var(--text-dim); }
+
+  .month-row { display: flex; align-items: center; gap: 10px; margin: 7px 0; font-size: 0.78rem; }
+  .month-label { flex: 0 0 40px; text-align: right; color: var(--text-dim); }
+  .month-track { flex: 1; height: 20px; position: relative; }
+  .month-bar-league {
+    position: absolute; inset: 0;
+    background: var(--track-bg);
+    border-radius: 8px;
+  }
+  .month-bar-filter {
+    position: absolute; top: 4px; bottom: 4px; left: 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: 6px;
+  }
+  .season-marker {
+    position: absolute; top: -3px; bottom: -3px; width: 2px;
+    background: #ffb020;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.6);
+    z-index: 2;
+  }
+  .month-value { flex: 0 0 108px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+  .avg-legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 0.76rem;
+    color: var(--text-dim);
+    margin: 6px 0 14px 50px;
+  }
+  .avg-legend .legend-item { display: flex; align-items: center; gap: 6px; }
+  .avg-legend .swatch { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
+  .avg-legend .swatch.filter { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+  .avg-legend .swatch.league { background: var(--track-bg); border: 1px solid var(--divider); }
+  .avg-legend .swatch.season { width: 2px; height: 14px; border-radius: 0; background: #ffb020; }
+
+  .table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid var(--divider); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  th, td { padding: 7px 10px; text-align: left; white-space: nowrap; }
+  thead th {
+    background: var(--glass-bg-strong);
+    color: var(--text-dim);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+  }
+  tbody tr:not(:last-child) td { border-bottom: 1px solid var(--divider); }
+  tbody tr:hover { background: rgba(10, 132, 255, 0.06); }
+
+  footer {
+    margin-top: 22px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    padding: 14px 20px;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 700px) {
+    .filters { position: static; flex-basis: 100%; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>⚾ KBO 2025시즌 타석 탐색 대시보드</h1>
+    <p class="subtitle">팀 · 타자 · 주자 상황 · 타석 결과(events) · 타석 득점을 선택해 필터링합니다.</p>
+  </header>
+
+  <div class="layout">
+    <div class="glass filters">
+      <fieldset>
+        <legend>팀 / 타자</legend>
+        <label>팀 (타격 기준)
+          <select id="team">
+            <option value="">전체</option>
+            {% for code, label in teams %}
+            <option value="{{ code }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>타자
+          <input type="text" id="batter" list="batter-list" placeholder="이름 입력 또는 선택" autocomplete="off">
+          <datalist id="batter-list"></datalist>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>주자 상황</legend>
+        <label>득점권 (2·3루 주자)
+          <select id="risp"><option value="any">전체</option><option value="yes">득점권</option><option value="no">득점권 아님</option></select>
+        </label>
+        <label>1루 주자
+          <select id="on_1b"><option value="any">전체</option><option value="yes">있음</option><option value="no">없음</option></select>
+        </label>
+        <label>2루 주자
+          <select id="on_2b"><option value="any">전체</option><option value="yes">있음</option><option value="no">없음</option></select>
+        </label>
+        <label>3루 주자
+          <select id="on_3b"><option value="any">전체</option><option value="yes">있음</option><option value="no">없음</option></select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>타석 결과 (events)</legend>
+        <div class="event-grid" id="event-grid">
+          {% for code, label in event_labels.items() %}
+          <label><input type="checkbox" class="event-check" value="{{ code }}"> {{ label }}</label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>해당 타석 득점</legend>
+        {% for r in ["0", "1", "2", "3+"] %}
+        <label><input type="checkbox" class="runs-check" value="{{ r }}"> {{ r }}점</label>
+        {% endfor %}
+      </fieldset>
+
+      <div class="btn-row">
+        <button id="apply-btn">필터 적용</button>
+        <button id="reset-btn" type="button">초기화</button>
+      </div>
+    </div>
+
+    <div class="glass results">
+      <div class="stat-row">
+        <div class="stat-card"><div class="value" id="stat-count">-</div><div class="label">해당 타석 수</div></div>
+        <div class="stat-card"><div class="value" id="stat-avg">-</div><div class="label">타율 (안타/타수)</div></div>
+        <div class="stat-card"><div class="value" id="stat-ab">-</div><div class="label">타수</div></div>
+        <div class="stat-card"><div class="value" id="stat-hit">-</div><div class="label">안타</div></div>
+      </div>
+
+      <h3>월별 타율 비교</h3>
+      <div id="monthly-chart"></div>
+      <div class="avg-legend">
+        <span class="legend-item"><span class="swatch filter"></span> 선택된 필터</span>
+        <span class="legend-item"><span class="swatch league"></span> 리그 전체 (해당 월)</span>
+        <span class="legend-item"><span class="swatch season"></span> 선택된 필터의 시즌 평균 (<span id="season-avg-label">-</span>)</span>
+      </div>
+
+      <h3>이벤트 분포</h3>
+      <div id="events-chart"></div>
+
+      <h3>타석당 득점 분포</h3>
+      <div id="runs-chart"></div>
+
+      <h3>표본 (최신 20건)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>날짜</th><th>팀</th><th>이닝</th><th>타자</th><th>투수</th><th>1루</th><th>2루</th><th>3루</th><th>결과</th><th>득점</th></tr>
+          </thead>
+          <tbody id="sample-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer class="glass">
+    데이터 출처: <a href="{{ meta.source_url }}" target="_blank" rel="noopener">{{ meta.source }}</a>
+    — 이 대시보드는 수업용 로컬 도구이며 원본 데이터를 재배포하지 않습니다.
+    시즌: {{ meta.season }} / 총 타석 수: {{ meta.row_count }}
+  </footer>
+
+<script>
+function selected(cls) {
+  return Array.from(document.querySelectorAll("." + cls + ":checked")).map(el => el.value);
+}
+
+function bar(container, items, keyField, labelField) {
+  container.innerHTML = "";
+  if (items.length === 0) {
+    container.innerHTML = "<p style='font-size:0.8rem;color:var(--text-dim);'>결과 없음</p>";
+    return;
+  }
+  const max = Math.max(...items.map(i => i.count));
+  for (const item of items) {
+    const row = document.createElement("div");
+    row.className = "bar-row";
+    const pct = max ? Math.round((item.count / max) * 100) : 0;
+    row.innerHTML = `
+      <div class="bar-label">${item[labelField] ?? item[keyField]}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div class="bar-count">${item.count.toLocaleString()}</div>
+    `;
+    container.appendChild(row);
+  }
+}
+
+function fmtAvg(v) {
+  return v == null ? "-" : v.toFixed(3).replace(/^0/, "");
+}
+
+function monthlyChart(container, items, seasonAvg) {
+  container.innerHTML = "";
+  if (items.length === 0) {
+    container.innerHTML = "<p style='font-size:0.8rem;color:var(--text-dim);'>결과 없음</p>";
+    return;
+  }
+  const values = items.flatMap(i => [i.avg ?? 0, i.league_avg ?? 0]);
+  const scaleMax = Math.max(...values, seasonAvg ?? 0) * 1.15 || 1;
+  const markerPct = seasonAvg != null ? Math.min(100, (seasonAvg / scaleMax) * 100) : null;
+  for (const item of items) {
+    const row = document.createElement("div");
+    row.className = "month-row";
+    const leaguePct = item.league_avg != null ? (item.league_avg / scaleMax) * 100 : 0;
+    const filterPct = item.avg != null ? (item.avg / scaleMax) * 100 : 0;
+    const marker = markerPct != null ? `<div class="season-marker" style="left:${markerPct}%"></div>` : "";
+    row.innerHTML = `
+      <div class="month-label">${parseInt(item.month, 10)}월</div>
+      <div class="month-track">
+        <div class="month-bar-league" style="width:${leaguePct}%"></div>
+        <div class="month-bar-filter" style="width:${filterPct}%"></div>
+        ${marker}
+      </div>
+      <div class="month-value">필터 ${fmtAvg(item.avg)} · 리그 ${fmtAvg(item.league_avg)}</div>
+    `;
+    container.appendChild(row);
+  }
+}
+
+async function refreshBatterList() {
+  const team = document.getElementById("team").value;
+  const res = await fetch("/api/batters" + (team ? `?team=${encodeURIComponent(team)}` : ""));
+  const names = await res.json();
+  const list = document.getElementById("batter-list");
+  list.innerHTML = names.map(n => `<option value="${n}">`).join("");
+}
+
+async function runQuery() {
+  const params = new URLSearchParams();
+  params.set("risp", document.getElementById("risp").value);
+  params.set("on_1b", document.getElementById("on_1b").value);
+  params.set("on_2b", document.getElementById("on_2b").value);
+  params.set("on_3b", document.getElementById("on_3b").value);
+  const team = document.getElementById("team").value;
+  if (team) params.set("team", team);
+  const batter = document.getElementById("batter").value.trim();
+  if (batter) params.set("batter", batter);
+  for (const e of selected("event-check")) params.append("event", e);
+  for (const r of selected("runs-check")) params.append("runs", r);
+
+  const res = await fetch("/api/query?" + params.toString());
+  const data = await res.json();
+
+  document.getElementById("stat-count").textContent = data.count.toLocaleString();
+  document.getElementById("stat-avg").textContent = fmtAvg(data.batting_avg);
+  document.getElementById("stat-ab").textContent = data.at_bats.toLocaleString();
+  document.getElementById("stat-hit").textContent = data.hits.toLocaleString();
+
+  document.getElementById("season-avg-label").textContent = fmtAvg(data.batting_avg);
+  monthlyChart(document.getElementById("monthly-chart"), data.monthly_avg, data.batting_avg);
+
+  bar(document.getElementById("events-chart"), data.events_breakdown, "event", "label");
+  bar(document.getElementById("runs-chart"), data.runs_breakdown, "runs_scored", "runs_scored");
+
+  const tbody = document.getElementById("sample-body");
+  tbody.innerHTML = "";
+  for (const row of data.sample_rows) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.game_date}</td>
+      <td>${row.batting_team ?? ""}</td>
+      <td>${row.inning}${row.inning_topbot === "top" ? "초" : "말"}</td>
+      <td>${row.batter_name ?? ""}</td>
+      <td>${row.pitcher_name ?? ""}</td>
+      <td>${row.on_1b ? "●" : ""}</td>
+      <td>${row.on_2b ? "●" : ""}</td>
+      <td>${row.on_3b ? "●" : ""}</td>
+      <td>${row.events ?? ""}</td>
+      <td>${row.runs_scored}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+document.getElementById("team").addEventListener("change", () => {
+  document.getElementById("batter").value = "";
+  refreshBatterList();
+});
+document.getElementById("apply-btn").addEventListener("click", runQuery);
+document.getElementById("reset-btn").addEventListener("click", () => {
+  document.getElementById("team").value = "";
+  document.getElementById("batter").value = "";
+  document.getElementById("risp").value = "any";
+  document.getElementById("on_1b").value = "any";
+  document.getElementById("on_2b").value = "any";
+  document.getElementById("on_3b").value = "any";
+  document.querySelectorAll(".event-check, .runs-check").forEach(el => el.checked = false);
+  refreshBatterList();
+  runQuery();
+});
+
+refreshBatterList();
+runQuery();
+</script>
+</body>
+</html>
