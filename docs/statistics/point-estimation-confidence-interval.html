@@ -341,6 +341,62 @@
         <div class="btn-row">
           <button class="btn" id="resample-scores" type="button">학생 6명 새로 뽑기</button>
         </div>
+        <h3 style="margin-top:36px;">추정량의 평균, 분산, 표준편차</h3>
+        <p>위 버튼을 여러 번 눌러 보면 추정치가 매번 달라집니다. 즉 추정량 \(\bar{X}\)는 표본을 뽑기 전에는 값이 정해지지 않은 <strong>확률변수</strong>이고, 따라서 다른 확률변수처럼 <strong>분포</strong>와 그 분포의 <strong>평균·분산·표준편차</strong>를 가집니다. 이 세 값이 추정량이 “어디를 중심으로, 얼마나 흩어져서” 나오는지를 말해 줍니다.</p>
+        <p>모집단의 평균이 \(\mu\), 분산이 \(\sigma^2\)이고 표본 \(X_1, \ldots, X_n\)이 서로 독립이라고 하면 표본평균에 대해 다음이 성립합니다.</p>
+        <div class="card formula-card">
+          \[E[\bar{X}] = \mu, \qquad \mathrm{Var}(\bar{X}) = \frac{\sigma^{2}}{n}, \qquad \mathrm{SD}(\bar{X}) = \sqrt{\mathrm{Var}(\bar{X})} = \frac{\sigma}{\sqrt{n}}\]
+          <div class="note">평균 · 분산 · 표준편차 (추정량 \(\bar{X}\)의 분포에 대한 값)</div>
+        </div>
+
+        <div class="prop-grid" style="margin-top:14px;">
+          <div class="prop-card">
+            <div class="bar" style="background:var(--blue)"></div>
+            <h4>평균 \(E[\bar{X}]\) — 중심</h4>
+            <p>표본을 무수히 반복해서 뽑았을 때 추정치들이 모이는 중심입니다. \(E[\bar{X}] = \mu\)이므로 표본평균은 모평균을 중심으로 나옵니다.</p>
+          </div>
+          <div class="prop-card">
+            <div class="bar" style="background:var(--aqua)"></div>
+            <h4>분산 \(\mathrm{Var}(\bar{X})\) — 흩어짐</h4>
+            <p>추정치들이 그 중심에서 얼마나 멀리 퍼지는지를 제곱 단위로 나타냅니다. 표본이 클수록 \(1/n\)배로 줄어듭니다.</p>
+          </div>
+          <div class="prop-card">
+            <div class="bar" style="background:var(--yellow)"></div>
+            <h4>표준편차 \(\mathrm{SD}(\bar{X})\) — 원래 단위의 흩어짐</h4>
+            <p>분산의 제곱근으로, 점수라면 “점” 단위로 읽습니다. 추정량의 표준편차를 특별히 <strong>표준오차(standard error, SE)</strong>라 부릅니다.</p>
+          </div>
+          <div class="prop-card">
+            <div class="bar" style="background:var(--violet)"></div>
+            <h4>모르는 \(\sigma\)는 \(s\)로 대체</h4>
+            <p>\(\sigma\)를 모를 때는 표본표준편차 \(s\)로 바꾼 <strong>추정된 표준오차</strong> \(\widehat{\mathrm{SE}} = s/\sqrt{n}\)을 씁니다.</p>
+          </div>
+        </div>
+
+        <p style="margin-top:22px;"><strong>왜 이 값들이 나올까?</strong> 기댓값의 선형성과 독립인 변수들의 분산의 덧셈 성질만 쓰면 됩니다.</p>
+        \[E[\bar{X}] = \frac{1}{n}\sum_{i=1}^{n}E[X_i] = \frac{1}{n}\cdot n\mu = \mu\]
+        \[\mathrm{Var}(\bar{X}) = \frac{1}{n^{2}}\sum_{i=1}^{n}\mathrm{Var}(X_i) = \frac{1}{n^{2}}\cdot n\sigma^{2} = \frac{\sigma^{2}}{n}\]
+        <p class="dim">상수 \(1/n\)이 분산에서는 제곱(\(1/n^2\))되어 밖으로 나오는 점에 주의하세요. 이 유도는 아래 “좋은 추정량의 성질”의 펼침 메뉴에서 숫자 예제와 함께 다시 다룹니다.</p>
+
+        <p><strong>숫자로 이해하기.</strong> 위의 통계 시험 점수를 모집단 평균 \(\mu = 75\), 표준편차 \(\sigma = 8\)로 두고, 표본크기 \(n\)을 바꿔 봅니다.</p>
+        <div class="table-scroll">
+          <table class="num-table">
+            <thead><tr><th>표본크기 \(n\)</th><th>\(E[\bar{X}]\)</th><th>\(\mathrm{Var}(\bar{X}) = 64/n\)</th><th>\(\mathrm{SD}(\bar{X}) = 8/\sqrt{n}\)</th></tr></thead>
+            <tbody>
+              <tr><td>1 (한 명)</td><td>75</td><td>64</td><td>8.00점</td></tr>
+              <tr><td>6 (위의 예)</td><td>75</td><td>10.667</td><td>3.27점</td></tr>
+              <tr><td>24</td><td>75</td><td>2.667</td><td>1.63점</td></tr>
+              <tr><td>96</td><td>75</td><td>0.667</td><td>0.82점</td></tr>
+              <tr><td>600</td><td>75</td><td>0.107</td><td>0.33점</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul style="font-size:14.5px;">
+          <li><strong>평균은 그대로 75:</strong> 표본크기를 바꿔도 추정치들이 모이는 중심은 변하지 않습니다.</li>
+          <li><strong>분산은 \(1/n\)배:</strong> \(n=6\)에서 \(n=24\)(4배)로 늘리면 분산은 \(10.667 \to 2.667\), 정확히 \(1/4\)이 됩니다.</li>
+          <li><strong>표준편차는 \(1/\sqrt{n}\)배:</strong> 같은 4배 증가에서 \(3.27 \to 1.63\)점으로 <em>절반</em>만 줄어듭니다. 오차를 절반으로 줄이려면 표본을 4배로 늘려야 합니다.</li>
+          <li><strong>읽는 법:</strong> 점수가 정규분포를 따른다면 \(n=6\)일 때 표본평균의 약 95%는 \(75 \pm 1.96\times 3.27\), 즉 약 68.6~81.4점 안에 들어옵니다.</li>
+        </ul>
+        <div class="callout warn"><strong>\(\sigma\)와 표준오차를 혼동하지 마세요.</strong> \(\sigma = 8\)은 <em>학생 한 명 한 명의 점수</em>가 흩어진 정도이고, 표준오차 \(8/\sqrt{6}\approx 3.27\)은 <em>6명 평균이라는 추정치</em>가 표본마다 흩어지는 정도입니다. 평균을 내면 개인차가 서로 상쇄되어 추정치는 개별 값보다 훨씬 덜 흔들립니다. 표준오차가 작을수록 그 추정량은 더 믿을 만하고, 이것이 뒤에서 나올 효율성과 신뢰구간의 출발점입니다.</div>
       </article>
 
       <article class="block" id="good-properties">
