@@ -417,17 +417,69 @@
               <p>따라서 \(\mathrm{Bias}(\bar{X}) = E[\bar{X}] - \mu = 0\)입니다.</p>
 
               <h5>수식 전개 ② \(n\)으로 나눈 분산은 치우친다</h5>
-              <p>표본평균 \(\bar{X}\) 주변의 흩어짐은 모평균 \(\mu\) 주변보다 항상 작기 때문에 (\(\bar{X}\)는 표본에 맞춰진 중심), 다음 항등식이 성립합니다.</p>
+              <p>표본분산을 만들 때 가장 자연스러운 식은 편차 제곱의 <em>평균</em>, 즉 \(n\)으로 나눈 값입니다. 그런데 이 값의 기댓값이 \(\sigma^2\)이 되는지 확인해 보면 그렇지 않습니다. 아래에서 단계별로 보입니다. 쓰는 사실은 세 가지뿐입니다.</p>
+              <ul>
+                <li>\(E[X_i] = \mu\), \(\mathrm{Var}(X_i) = E[(X_i-\mu)^2] = \sigma^2\) (\(X_i\)는 같은 모집단에서 독립으로 뽑음)</li>
+                <li>\(\displaystyle\sum_{i=1}^{n}(X_i - \mu) = n\bar{X} - n\mu = n(\bar{X}-\mu)\)</li>
+                <li>\(\mathrm{Var}(\bar{X}) = \sigma^2/n\) (독립인 변수들의 합의 분산은 분산의 합: \(\dfrac{1}{n^2}\cdot n\sigma^2\))</li>
+              </ul>
+
+              <p><strong>단계 1. 편차를 \(\mu\) 기준으로 다시 쓰기.</strong> 각 편차에 \(\mu\)를 더하고 빼면 \(\bar{X}\)로부터의 편차를 “\(\mu\)로부터의 편차” 둘의 차로 나타낼 수 있습니다.</p>
+              \[X_i - \bar{X} = (X_i - \mu) - (\bar{X} - \mu)\]
+
+              <p><strong>단계 2. 제곱해서 모두 더하기.</strong> \((a-b)^2 = a^2 - 2ab + b^2\)를 각 항에 적용하고 \(i=1\)부터 \(n\)까지 합합니다. \(\bar{X} - \mu\)는 \(i\)에 관계없는 상수이므로 합 기호 밖으로 나옵니다.</p>
+              \[\sum_{i=1}^{n}(X_i - \bar{X})^2 = \sum_{i=1}^{n}(X_i - \mu)^2 \;-\; 2(\bar{X}-\mu)\sum_{i=1}^{n}(X_i - \mu) \;+\; \sum_{i=1}^{n}(\bar{X}-\mu)^2\]
+
+              <p><strong>단계 3. 가운데 항과 마지막 항 정리.</strong> 위의 두 번째 사실 \(\sum(X_i-\mu) = n(\bar{X}-\mu)\)를 가운데 항에 넣고, 마지막 항은 같은 값을 \(n\)번 더한 것이라 \(n(\bar{X}-\mu)^2\)입니다.</p>
+              \[-2(\bar{X}-\mu)\cdot n(\bar{X}-\mu) + n(\bar{X}-\mu)^2 = -2n(\bar{X}-\mu)^2 + n(\bar{X}-\mu)^2 = -n(\bar{X}-\mu)^2\]
+              <p>따라서 다음 <strong>항등식</strong>이 성립합니다. (이 식은 어떤 표본에서도 항상 맞는, 확률과 무관한 대수 관계입니다.)</p>
               \[\sum_{i=1}^{n}(X_i - \bar{X})^2 = \sum_{i=1}^{n}(X_i - \mu)^2 - n(\bar{X} - \mu)^2\]
-              <p>양변에 기댓값을 취하면, \(E[(X_i-\mu)^2] = \sigma^2\)이고 \(E[(\bar{X}-\mu)^2] = \mathrm{Var}(\bar{X}) = \sigma^2/n\)이므로</p>
-              \[E\!\left[\sum_{i=1}^{n}(X_i - \bar{X})^2\right] = n\sigma^2 - n\cdot\frac{\sigma^2}{n} = (n-1)\,\sigma^2\]
-              <p>즉 \(n\)으로 나누면 \(E[\tilde{S}^2] = \dfrac{n-1}{n}\sigma^2 < \sigma^2\)로 <strong>작게 치우치고</strong>, \(n-1\)로 나눠야 \(E[S^2] = \sigma^2\)이 됩니다.</p>
+              <p>우변의 뜻을 읽어 보면, <em>\(\bar{X}\) 주변의 흩어짐</em>은 <em>\(\mu\) 주변의 흩어짐</em>에서 \(n(\bar{X}-\mu)^2\)만큼을 뺀 값입니다. 뺄셈의 대상이 0 이상이므로 언제나 \(\bar{X}\) 주변의 흩어짐이 더 작거나 같습니다.</p>
+
+              <p><strong>단계 4. 양변에 기댓값 취하기.</strong> 기댓값은 합과 상수배를 그대로 통과합니다(선형성).</p>
+              \[E\!\left[\sum_{i=1}^{n}(X_i - \bar{X})^2\right] = \sum_{i=1}^{n}E\big[(X_i-\mu)^2\big] - n\,E\big[(\bar{X}-\mu)^2\big]\]
+              <p>첫 항: \(E[(X_i-\mu)^2] = \sigma^2\)이 \(n\)개이므로 \(n\sigma^2\).<br>
+              둘째 항: \(E[\bar{X}] = \mu\)이므로 \(E[(\bar{X}-\mu)^2]\)는 \(\bar{X}\)의 분산 \(\mathrm{Var}(\bar{X}) = \sigma^2/n\) 그 자체입니다.</p>
+              \[E\!\left[\sum_{i=1}^{n}(X_i - \bar{X})^2\right] = n\sigma^2 - n\cdot\frac{\sigma^2}{n} = n\sigma^2 - \sigma^2 = (n-1)\,\sigma^2\]
+
+              <p><strong>단계 5. 어느 값으로 나눠야 불편이 되는지 결정.</strong> 위 결과를 어떤 수 \(c\)로 나눈 추정량 \(\dfrac{1}{c}\sum(X_i-\bar{X})^2\)의 기댓값은 \(\dfrac{(n-1)\sigma^2}{c}\)입니다. 이것이 \(\sigma^2\)과 같으려면 \(c = n-1\)이어야 합니다.</p>
+              \[E[\tilde{S}^2] = E\!\left[\frac{1}{n}\sum(X_i-\bar{X})^2\right] = \frac{n-1}{n}\sigma^2 < \sigma^2, \qquad E[S^2] = E\!\left[\frac{1}{n-1}\sum(X_i-\bar{X})^2\right] = \sigma^2\]
+              <p>\(n\)으로 나눈 \(\tilde{S}^2\)의 편향은 \(\mathrm{Bias}(\tilde{S}^2) = \dfrac{n-1}{n}\sigma^2 - \sigma^2 = -\dfrac{\sigma^2}{n}\)로, <strong>항상 작게 치우치고</strong> \(n\)이 커질수록 0에 가까워집니다.</p>
+
+              <div class="callout"><strong>직관적인 이유 두 가지.</strong><br>
+              ① <em>중심이 표본에 맞춰져 있다.</em> \(\bar{X}\)는 \(\sum(X_i-c)^2\)를 가장 작게 만드는 \(c\)입니다. 표본에서 계산한 \(\bar{X}\) 주변으로 편차를 재면, 진짜 중심 \(\mu\) 주변으로 잴 때보다 항상 작게 나옵니다(단계 3의 \(-n(\bar{X}-\mu)^2\)). 이만큼이 체계적으로 모자라는 부분입니다.<br>
+              ② <em>자유도가 \(n-1\)이다.</em> \(\bar{X}\)를 먼저 정하고 나면 편차 \(X_i-\bar{X}\)들의 합은 항상 0이라, \(n\)개 편차 중 \(n-1\)개가 정해지면 마지막 하나는 자동으로 정해집니다. 실제로 자유롭게 움직이는 편차는 \(n-1\)개이므로 \(n-1\)로 나누어야 “편차 한 개당 평균”이 맞습니다.</div>
+
 
               <h5>숫자로 확인 (공통 예제, \(n=2\))</h5>
               <ol>
                 <li>표본평균 9개의 평균: \(\dfrac{2+3+4+3+4+5+4+5+6}{9} = \dfrac{36}{9} = 4 = \mu\) ✓ 불편.</li>
                 <li>\(n-1 = 1\)로 나눈 \(s^2\)의 평균: \(\dfrac{24}{9} \approx 2.667 = \sigma^2\) ✓ 불편.</li>
                 <li>\(n = 2\)로 나눈 \(\tilde{s}^2\)의 평균: \(\dfrac{12}{9} \approx 1.333 = \dfrac{n-1}{n}\sigma^2 = \dfrac{1}{2}\times 2.667\) → 정확히 절반으로 <strong>과소추정</strong>.</li>
+              </ol>
+              <p><strong>항등식과 기댓값 계산을 숫자로 따라가기.</strong> 위 단계 3~4를 9가지 표본에서 직접 확인합니다(\(\mu = 4\), \(n = 2\)).</p>
+              <div class="table-scroll">
+                <table class="num-table">
+                  <thead><tr><th>표본</th><th>\(\bar{x}\)</th><th>\(\sum(x_i-\mu)^2\)</th><th>\(n(\bar{x}-\mu)^2\)</th><th>\(\sum(x_i-\mu)^2 - n(\bar{x}-\mu)^2\)</th><th>\(\sum(x_i-\bar{x})^2\)</th></tr></thead>
+                  <tbody>
+                    <tr><td>(2, 2)</td><td>2</td><td>8</td><td>8</td><td>0</td><td>0</td></tr>
+                    <tr><td>(2, 4)</td><td>3</td><td>4</td><td>2</td><td>2</td><td>2</td></tr>
+                    <tr><td>(2, 6)</td><td>4</td><td>8</td><td>0</td><td>8</td><td>8</td></tr>
+                    <tr><td>(4, 2)</td><td>3</td><td>4</td><td>2</td><td>2</td><td>2</td></tr>
+                    <tr><td>(4, 4)</td><td>4</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+                    <tr><td>(4, 6)</td><td>5</td><td>4</td><td>2</td><td>2</td><td>2</td></tr>
+                    <tr><td>(6, 2)</td><td>4</td><td>8</td><td>0</td><td>8</td><td>8</td></tr>
+                    <tr><td>(6, 4)</td><td>5</td><td>4</td><td>2</td><td>2</td><td>2</td></tr>
+                    <tr><td>(6, 6)</td><td>6</td><td>8</td><td>8</td><td>0</td><td>0</td></tr>
+                    <tr class="sum"><td>9가지의 평균</td><td>4</td><td>48/9 ≈ 5.333</td><td>24/9 ≈ 2.667</td><td>24/9 ≈ 2.667</td><td>24/9 ≈ 2.667</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <ol>
+                <li><strong>항등식 확인:</strong> 모든 행에서 넷째 열의 뺄셈 결과(다섯째 열)가 여섯째 열 \(\sum(x_i-\bar{x})^2\)과 같습니다. 예: (2, 4)는 \(4 - 2 = 2\), 직접 계산하면 \((2-3)^2+(4-3)^2 = 2\).</li>
+                <li><strong>첫 항의 평균:</strong> \(\dfrac{48}{9} \approx 5.333 = n\sigma^2 = 2\times 2.667\).</li>
+                <li><strong>둘째 항의 평균:</strong> \(\dfrac{24}{9} \approx 2.667 = n\cdot\dfrac{\sigma^2}{n} = \sigma^2\).</li>
+                <li><strong>결과:</strong> \(5.333 - 2.667 = 2.667 = (n-1)\sigma^2 = 1\times 2.667\) ✓. 이를 \(n = 2\)로 나누면 1.333, \(n-1 = 1\)로 나누면 2.667(\(=\sigma^2\))입니다.</li>
               </ol>
               <div class="callout">한 번의 표본에서는 \(s^2\)가 \(\sigma^2\)보다 클 수도 작을 수도 있습니다. 불편성은 “<em>반복해서 평균 내면</em> 치우침이 없다”는 뜻입니다.</div>
             </div>
