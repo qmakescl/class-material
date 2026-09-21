@@ -35,5 +35,13 @@ window.MATERIALS = [
     description: "엑셀 추세선에서 출발해 잔차와 제곱합, R², 잔차 진단까지 단순 선형회귀를 직접 조작하며 확인합니다.",
     href: "statistics/least-squares-residuals.html",
     date: "2026-09-21"
+  },
+  {
+    subject: "statistics",
+    label: "인터랙티브 실습",
+    title: "t 분포와 자유도",
+    description: "자유도가 2, 8, 16, 32로 커질 때 t 분포가 표준정규분포에 가까워지는 모습을 겹쳐 확인합니다.",
+    href: "statistics/t-distribution-degrees-of-freedom.html",
+    date: "2026-09-21"
   }
 ];

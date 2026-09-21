@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>t 분포와 자유도 | Q의 수업 자료</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/statistics/t-distribution-degrees-of-freedom.html">
+<meta name="description" content="자유도가 2, 8, 16, 32로 커질 때 t 분포가 표준정규분포에 가까워지는 모습을 시각화한 통계 수업 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 수업 자료">
+<meta property="og:title" content="t 분포와 자유도 | Q의 수업 자료">
+<meta property="og:description" content="자유도에 따라 t 분포의 모양이 어떻게 변하는지 표준정규분포와 겹쳐 확인합니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/statistics/t-distribution-degrees-of-freedom.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="통계 수업 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="t 분포와 자유도 | Q의 수업 자료">
+<meta name="twitter:description" content="자유도에 따라 t 분포의 모양이 어떻게 변하는지 표준정규분포와 겹쳐 확인합니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
+<meta name="twitter:image:alt" content="통계 수업 자료 아이콘">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<style>
+  :root {
+    --rail: 250px;
+    --page: #f4f6fb;
+    --surface: #ffffff;
+    --surface-2: #eaf1ff;
+    --ink: #0b1220;
+    --ink-2: #45506b;
+    --muted: #45506b;
+    --grid: #dbe1ee;
+    --axis: #aab7d0;
+    --border: #dbe1ee;
+    --blue: #2f6fed;
+    --blue-soft: #eaf1ff;
+    --red: #d1264f;
+    --yellow: #ffb020;
+    --shadow: 0 1px 2px rgb(11 18 32 / 6%), 0 8px 24px -10px rgb(11 18 32 / 14%);
+    /* 자유도별 곡선 색 (흰 배경에서 모두 구분되도록 채도·명도를 조정) */
+    --df2: #d1264f;
+    --df8: #e07b00;
+    --df16: #0a9a5e;
+    --df32: #8b3ff0;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--page); }
+  body { margin: 0; color: var(--ink); font-family: Pretendard, "Noto Sans KR", Inter, system-ui, -apple-system, sans-serif; line-height: 1.7; }
+  h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.03em; text-wrap: balance; }
+  a { color: var(--blue); }
+  [hidden] { display: none !important; }
+  .katex-display { margin: 0.4em 0; overflow-x: auto; overflow-y: hidden; }
+  .formula-card .katex-display { margin: 0; }
+
+  .skip-link { position: fixed; top: -3rem; left: 1rem; z-index: 100; padding: .6rem 1rem; color: #fff; background: #1c3fd6; border-radius: 4px; font-weight: 700; text-decoration: none; }
+  .skip-link:focus { top: 1rem; }
+
+  .rail { position: fixed; top: 0; bottom: 0; left: 0; z-index: 50; display: flex; flex-direction: column; width: var(--rail); padding: 34px 0 20px; overflow-y: auto; background: var(--ink); color: #e4e9f5; }
+  .rail .rail-back { display: block; margin: 0 26px 18px; color: #b7c2de; font-size: 12.5px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .rail .rail-back:hover, .rail .rail-back:focus-visible { color: var(--yellow); }
+  .rail h1 { margin: 0 26px 30px; color: #f4f6fb; font-size: 23px; line-height: 1.4; letter-spacing: -.02em; }
+  .rail nav { display: flex; flex-direction: column; }
+  .rail nav a { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: baseline; padding: 11px 24px; color: #b7c2de; border-left: 3px solid transparent; font-size: 13.5px; text-decoration: none; transition: .16s; }
+  .rail nav a b { color: #7c88a8; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .rail nav a:hover, .rail nav a:focus-visible { background: #16213d; color: #fff; }
+  .rail nav a.on { background: #16213d; color: #fff; border-left-color: var(--yellow); }
+  .rail nav a.on b { color: var(--yellow); }
+  .rail footer { margin-top: auto; padding: 20px 24px 0; color: #7c88a8; font-size: 11.5px; line-height: 1.6; }
+
+  .page { max-width: 1060px; margin: 0 0 0 var(--rail); padding: 0 46px 120px; }
+  .masthead { padding: 76px 0 52px; border-bottom: 1px solid var(--border); }
+  .eyebrow { font-size: 12.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .masthead h1 { font-size: clamp(28px, 5vw, 40px); margin: 10px 0 12px; }
+  .masthead .lede { max-width: 640px; color: var(--ink-2); font-size: 15.5px; }
+
+  main { padding-top: 20px; }
+  section { padding: 40px 0; }
+  section + section { border-top: 1px solid var(--border); }
+  .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+  .section-num { font-size: 15px; color: var(--muted); font-weight: 700; }
+  .section-head h2 { font-size: clamp(22px, 3.4vw, 28px); margin: 0; }
+  .section-sub { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+
+  article.block { max-width: 700px; margin: 0 auto 44px; }
+  article.block.wide { max-width: 900px; }
+  article.block:last-child { margin-bottom: 0; }
+  .block h3 { font-size: 19px; margin: 0 0 4px; }
+  .block .kicker { font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--blue); font-weight: 700; margin-bottom: 6px; }
+  .block p { margin: 12px 0; }
+  .block p.dim { color: var(--ink-2); font-size: 14.5px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow); }
+  .formula-card { text-align: center; padding: 22px; font-size: 18px; margin: 14px 0; }
+  .formula-card .note { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+  .callout { border-left: 3px solid var(--blue); background: var(--blue-soft); border-radius: 0 10px 10px 0; padding: 14px 18px; font-size: 14.5px; margin: 16px 0; }
+
+  .df-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 6px; }
+  .df-btn {
+    --c: var(--ink); display: inline-flex; align-items: center; gap: 8px;
+    font: inherit; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums;
+    padding: 8px 14px; border-radius: 10px; cursor: pointer;
+    color: var(--ink-2); background: var(--surface); border: 2px solid var(--border);
+  }
+  .df-btn .sw { width: 22px; height: 0; border-top: 4px solid var(--c); border-radius: 2px; opacity: .35; }
+  .df-btn[aria-pressed="true"] { color: var(--ink); border-color: var(--c); background: color-mix(in srgb, var(--c) 8%, var(--surface)); }
+  .df-btn[aria-pressed="true"] .sw { opacity: 1; }
+  .df-btn:focus-visible, .btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .btn { font: inherit; font-size: 13.5px; font-weight: 600; background: var(--ink); color: var(--page); border: none; border-radius: 9px; padding: 9px 16px; cursor: pointer; }
+  .btn:hover { opacity: .88; }
+  .btn.ghost { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--border); }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0 16px; }
+
+  .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 14px 8px; box-shadow: var(--shadow); }
+  .chart-wrap svg { display: block; width: 100%; height: auto; }
+  .chart-title { font-size: 13px; font-weight: 700; color: var(--ink-2); margin: 0 0 4px 6px; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .axis-line { stroke: var(--axis); stroke-width: 1; }
+  .tick-label { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; font-family: inherit; }
+  .axis-title { fill: var(--muted); font-size: 11.5px; font-family: inherit; }
+  .normal-fill { fill: #cfdcf7; opacity: .75; }
+  .normal-line { fill: none; stroke: #1c3fd6; stroke-width: 1.6; stroke-dasharray: 5 4; }
+  .t-line { fill: none; stroke-width: 2.8; stroke-linejoin: round; stroke-linecap: round; }
+  .zero-line { stroke: var(--axis); stroke-width: 1; stroke-dasharray: 3 3; }
+  .zone-fill { fill: var(--red); opacity: .08; }
+  .zone-line { stroke: var(--red); stroke-width: 1.2; stroke-dasharray: 3 3; }
+  .zone-label { fill: var(--red); font-size: 11px; font-weight: 600; font-family: inherit; }
+
+  .legend { display: flex; gap: 8px 18px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--ink-2); margin: 10px 4px 4px; }
+  .legend .it { display: inline-flex; align-items: center; gap: 7px; }
+  .legend .ln { width: 22px; height: 0; border-top: 3px solid var(--c); border-radius: 2px; }
+  .legend .bg { width: 22px; height: 12px; background: #cfdcf7; border: 1.5px dashed #1c3fd6; border-radius: 3px; }
+
+  .table-scroll { overflow-x: auto; }
+  .num-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 14px; font-variant-numeric: tabular-nums; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+  .num-table th, .num-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+  .num-table th { background: var(--surface-2); font-weight: 700; font-size: 13px; }
+  .num-table td.df { font-weight: 800; }
+  .num-table td.df i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--c); margin-right: 8px; }
+  .num-table tr.norm td { background: var(--blue-soft); font-weight: 700; }
+
+  footer.doc-foot { border-top: 1px solid var(--border); padding: 32px 0 8px; max-width: 700px; margin: 0 auto; }
+  footer.doc-foot h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  footer.doc-foot ol { padding-left: 18px; font-size: 13.5px; color: var(--ink-2); }
+
+  @media (max-width: 860px) {
+    :root { --rail: 0px; }
+    .rail { position: static; width: auto; padding: 22px 0 8px; }
+    .rail nav { flex-direction: row; padding: 0 16px 8px; overflow-x: auto; }
+    .rail nav a { display: inline-grid; grid-template-columns: 28px max-content; padding: 8px 14px; border-bottom: 3px solid transparent; border-left: 0; white-space: nowrap; }
+    .rail nav a.on { border-bottom-color: var(--yellow); border-left: 0; }
+    .rail footer { display: none; }
+    .rail .rail-back { margin: 0 16px 10px; }
+    .rail h1 { margin: 0 16px 16px; }
+    .page { margin-left: 0; padding: 0 18px 80px; }
+    .masthead { padding: 42px 0 32px; }
+  }
+</style>
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../index.html#statistics">← 처음으로</a>
+  <h1>t 분포와<br>자유도</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#why-t"><b>01</b><span>왜 t 분포인가</span></a>
+    <a href="#df-explorer"><b>02</b><span>자유도별 모양 비교</span></a>
+    <a href="#tail-zoom"><b>03</b><span>꼬리 확대해 보기</span></a>
+    <a href="#df-table"><b>04</b><span>숫자로 비교하기</span></a>
+  </nav>
+  <footer>자유도 버튼을 눌러 곡선을 켜고 끌 수 있습니다.</footer>
+</aside>
+<div class="page">
+  <header class="masthead">
+    <div class="eyebrow">통계적 추론 · 강의자료</div>
+    <h1>t 분포와 자유도</h1>
+    <p class="lede">모표준편차를 모를 때 표본평균을 표준화하면 정규분포가 아니라 t 분포를 따릅니다. 자유도가 커질수록 t 분포가 표준정규분포에 어떻게 가까워지는지, 둘을 겹쳐 놓고 확인합니다.</p>
+  </header>
+
+  <main id="content">
+    <section id="why-t">
+      <div class="section-head"><span class="section-num">01</span><h2>왜 t 분포인가</h2></div>
+      <p class="section-sub">\(\sigma\)를 표본표준편차 \(s\)로 바꾸면 분포가 달라집니다.</p>
+      <article class="block">
+        <div class="kicker">Student's t</div>
+        <h3>\(\sigma\) 대신 \(s\)를 쓰면</h3>
+        <p>모분산을 알 때 표본평균의 표준화 값은 표준정규분포를 따릅니다. 하지만 현실에서는 \(\sigma\)를 모르므로 표본에서 계산한 \(s\)로 바꿔 넣는데, \(s\) 역시 표본마다 달라지는 값이라 <strong>불확실성이 한 겹 더</strong> 생깁니다.</p>
+        <div class="card formula-card">
+          \[T = \frac{\bar{X} - \mu}{s/\sqrt{n}} \sim t_{\,n-1}\]
+          <div class="note">자유도 \(\nu = n-1\)인 t 분포</div>
+        </div>
+        <p>이 여분의 불확실성 때문에 t 분포는 표준정규분포보다 <strong>가운데가 낮고 꼬리가 두껍습니다</strong>. 자유도는 표본이 클수록(=\(s\)가 \(\sigma\)에 가까울수록) 커지고, 그러면 t 분포는 표준정규분포로 수렴합니다.</p>
+        <div class="card formula-card">
+          \[f(x) = \frac{\Gamma\!\left(\frac{\nu+1}{2}\right)}{\sqrt{\nu\pi}\;\Gamma\!\left(\frac{\nu}{2}\right)}\left(1 + \frac{x^{2}}{\nu}\right)^{-\frac{\nu+1}{2}} \ \xrightarrow{\ \nu\to\infty\ }\ \frac{1}{\sqrt{2\pi}}\,e^{-x^{2}/2}\]
+          <div class="note">t 분포의 확률밀도함수와 그 극한(표준정규분포)</div>
+        </div>
+      </article>
+    </section>
+
+    <section id="explorer">
+      <div class="section-head"><span class="section-num">02</span><h2>자유도별 모양 비교</h2></div>
+      <p class="section-sub">파란 배경이 표준정규분포이고, 색 곡선이 자유도별 t 분포입니다.</p>
+
+      <article class="block wide" id="df-explorer">
+        <div class="kicker">Try It</div>
+        <h3>자유도 2, 8, 16, 32</h3>
+        <p>버튼으로 곡선을 켜고 꺼 보세요. 자유도가 커질수록 곡선이 배경의 표준정규분포에 겹쳐 들어갑니다.</p>
+        <div class="df-row" role="group" aria-label="자유도 선택">
+          <button class="df-btn" type="button" data-df="2" style="--c:var(--df2)" aria-pressed="true"><span class="sw"></span>자유도 2</button>
+          <button class="df-btn" type="button" data-df="8" style="--c:var(--df8)" aria-pressed="true"><span class="sw"></span>자유도 8</button>
+          <button class="df-btn" type="button" data-df="16" style="--c:var(--df16)" aria-pressed="true"><span class="sw"></span>자유도 16</button>
+          <button class="df-btn" type="button" data-df="32" style="--c:var(--df32)" aria-pressed="true"><span class="sw"></span>자유도 32</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn" type="button" id="show-all">모두 보기</button>
+          <button class="btn ghost" type="button" id="step-play">하나씩 차례로 보기</button>
+        </div>
+        <div class="chart-wrap">
+          <svg id="main-chart" viewBox="0 0 700 340" role="img" aria-label="표준정규분포 위에 자유도 2, 8, 16, 32인 t 분포 곡선을 겹쳐 그린 그래프"></svg>
+          <div class="legend" id="main-legend"></div>
+        </div>
+        <p class="dim">가운데 봉우리는 자유도가 작을수록 낮고, 자유도가 커질수록 표준정규분포의 봉우리(약 0.399)에 가까워집니다. 낮아진 만큼의 확률은 양쪽 꼬리로 옮겨 갑니다.</p>
+      </article>
+
+      <article class="block wide" id="tail-zoom">
+        <div class="kicker">Heavy Tails</div>
+        <h3>꼬리를 확대해 보면</h3>
+        <p>같은 그림에서 \(x \ge 1.5\)인 오른쪽 꼬리만 크게 키웠습니다. 자유도가 작을수록 정규분포보다 <strong>꼬리가 두꺼워</strong>, 극단적인 값이 나올 확률이 더 큽니다. 붉은 점선은 표준정규분포에서 양쪽 합쳐 5%를 자르는 기준값 \(1.96\)이고, 그 오른쪽 붉은 영역에서 t 분포 곡선이 배경보다 위에 있는 만큼이 “더 두꺼운 꼬리”입니다.</p>
+        <div class="chart-wrap">
+          <div class="chart-title">오른쪽 꼬리 확대 (x ≥ 1.5)</div>
+          <svg id="tail-chart" viewBox="0 0 700 300" role="img" aria-label="x가 1.5 이상인 오른쪽 꼬리 구간의 확대 그래프"></svg>
+        </div>
+        <div class="callout">t 분포는 꼬리가 두꺼우므로 <strong>같은 95% 신뢰수준이라도 \(z_{0.025}=1.96\)보다 더 큰 \(t_{0.025,\,\nu}\)를 써야</strong> 구간이 그만큼 넓어져 불확실성을 반영합니다.</div>
+      </article>
+    </section>
+
+    <section id="numbers">
+      <div class="section-head"><span class="section-num">03</span><h2>숫자로 비교하기</h2></div>
+      <p class="section-sub">그림에서 본 차이를 분산, 신뢰구간 계수, 꼬리 확률로 확인합니다.</p>
+      <article class="block wide" id="df-table">
+        <div class="kicker">By The Numbers</div>
+        <h3>자유도가 커질수록 표준정규분포에 수렴</h3>
+        <div class="table-scroll">
+          <table class="num-table">
+            <thead><tr>
+              <th>분포</th><th>봉우리 높이 \(f(0)\)</th><th>분산 \(\dfrac{\nu}{\nu-2}\)</th><th>95% 신뢰구간 계수</th><th>\(P(|T| &gt; 1.96)\)</th>
+            </tr></thead>
+            <tbody id="df-tbody"></tbody>
+          </table>
+        </div>
+        <p class="dim">95% 신뢰구간 계수는 양쪽 꼬리 확률의 합이 5%가 되는 값 \(t_{0.025,\,\nu}\)입니다. 마지막 열은 표준정규분포에서는 5%인 “\(|T| &gt; 1.96\)” 확률이 t 분포에서는 얼마나 커지는지 보여줍니다. 표의 값은 이 페이지에서 확률밀도함수를 수치적분해 계산했습니다.</p>
+        <div class="callout"><strong>읽는 법.</strong> 자유도 2에서는 분산이 정의되지 않을 정도로 꼬리가 두껍고, 32만 되어도 표준정규분포와의 차이는 눈에 띄지 않을 만큼 작아집니다. 보통 자유도가 30 안팎을 넘으면 t 분포 대신 정규분포로 근사해도 무방하다고 말하는 이유입니다.</div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="doc-foot">
+    <h3>참고문헌</h3>
+    <ol>
+      <li>Bertsekas, D. P., &amp; Tsitsiklis, J. N. (2008). <em>Introduction to Probability</em> (2nd ed.), Ch. 9 — 모분산을 모를 때의 신뢰구간과 t 분포.</li>
+      <li>Navarro, D. <em>Learning Statistics with R</em>, Ch. 13 “Estimating unknown quantities from a sample” — t 분포와 자유도의 직관적 설명.</li>
+    </ol>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var svgNS = "http://www.w3.org/2000/svg";
+  var DFS = [2, 8, 16, 32];
+  var COLORS = { 2: "var(--df2)", 8: "var(--df8)", 16: "var(--df16)", 32: "var(--df32)" };
+  var active = { 2: true, 8: true, 16: true, 32: true };
+
+  /* ---------- 분포 함수 ---------- */
+  function lgamma(x) { /* Lanczos 근사 */
+    var g = 7, c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+      -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+    if (x < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * x)) - lgamma(1 - x);
+    x -= 1;
+    var a = c[0], t = x + g + 0.5;
+    for (var i = 1; i < g + 2; i++) a += c[i] / (x + i);
+    return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+  }
+  function tPdf(x, v) {
+    return Math.exp(lgamma((v + 1) / 2) - lgamma(v / 2)) / Math.sqrt(v * Math.PI) * Math.pow(1 + x * x / v, -(v + 1) / 2);
+  }
+  function normPdf(x) { return Math.exp(-x * x / 2) / Math.sqrt(2 * Math.PI); }
+  function simpson(f, a, b, n) {
+    var h = (b - a) / n, s = f(a) + f(b);
+    for (var i = 1; i < n; i++) s += f(a + i * h) * (i % 2 ? 4 : 2);
+    return s * h / 3;
+  }
+  function twoTail(v, c) { return 1 - 2 * simpson(function (x) { return tPdf(x, v); }, 0, c, 400); } /* P(|T|>c) */
+  function critical(v, alpha) { /* 이분법으로 P(|T|>c)=alpha 인 c */
+    var lo = 0, hi = 12;
+    for (var i = 0; i < 40; i++) {
+      var m = (lo + hi) / 2;
+      if (twoTail(v, m) > alpha) lo = m; else hi = m;
+    }
+    return (lo + hi) / 2;
+  }
+
+  /* ---------- SVG 도우미 ---------- */
+  function el(name, attrs, text) {
+    var e = document.createElementNS(svgNS, name);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+
+  /* 축·격자를 그리고 좌표 변환 함수를 돌려준다 */
+  function frame(svg, o) {
+    clear(svg);
+    var W = o.W, H = o.H, L = 52, R = 18, T = 14, B = 42;
+    var pw = W - L - R, ph = H - T - B;
+    var sx = function (x) { return L + (x - o.x0) / (o.x1 - o.x0) * pw; };
+    var sy = function (y) { return T + ph - y / o.ymax * ph; };
+    o.yticks.forEach(function (y) {
+      svg.appendChild(el("line", { x1: L, x2: L + pw, y1: sy(y), y2: sy(y), class: "grid-line" }));
+      svg.appendChild(el("text", { x: L - 8, y: sy(y) + 4, "text-anchor": "end", class: "tick-label" }, y.toFixed(o.yfix)));
+    });
+    o.xticks.forEach(function (x) {
+      svg.appendChild(el("line", { x1: sx(x), x2: sx(x), y1: T + ph, y2: T + ph + 5, class: "axis-line" }));
+      svg.appendChild(el("text", { x: sx(x), y: T + ph + 19, "text-anchor": "middle", class: "tick-label" }, String(x)));
+    });
+    svg.appendChild(el("line", { x1: L, x2: L + pw, y1: T + ph, y2: T + ph, class: "axis-line" }));
+    svg.appendChild(el("text", { x: L + pw / 2, y: H - 6, "text-anchor": "middle", class: "axis-title" }, "t 값 (표준화된 표본평균)"));
+    svg.appendChild(el("text", { x: 14, y: T + ph / 2, "text-anchor": "middle", class: "axis-title", transform: "rotate(-90 14 " + (T + ph / 2) + ")" }, "확률밀도"));
+    return { sx: sx, sy: sy, base: T + ph, L: L, R: L + pw, T: T };
+  }
+  function curvePath(f, x0, x1, step, sx, sy) {
+    var d = [];
+    for (var x = x0; x <= x1 + 1e-9; x += step) d.push((d.length ? "L" : "M") + sx(x).toFixed(1) + "," + sy(f(x)).toFixed(1));
+    return d.join(" ");
+  }
+  function normalBackground(svg, g, x0, x1, step) {
+    var line = curvePath(normPdf, x0, x1, step, g.sx, g.sy);
+    svg.appendChild(el("path", { d: line + " L" + g.sx(x1) + "," + g.base + " L" + g.sx(x0) + "," + g.base + " Z", class: "normal-fill" }));
+    svg.appendChild(el("path", { d: line, class: "normal-line" }));
+  }
+
+  /* ---------- 메인 차트 ---------- */
+  var mainSvg = document.getElementById("main-chart");
+  function drawMain() {
+    var g = frame(mainSvg, { W: 700, H: 340, x0: -5, x1: 5, ymax: 0.45, yfix: 2,
+      xticks: [-4, -3, -2, -1, 0, 1, 2, 3, 4], yticks: [0, 0.1, 0.2, 0.3, 0.4] });
+    normalBackground(mainSvg, g, -5, 5, 0.05);
+    mainSvg.appendChild(el("line", { x1: g.sx(0), x2: g.sx(0), y1: g.T, y2: g.base, class: "zero-line" }));
+    DFS.forEach(function (v) {
+      if (!active[v]) return;
+      mainSvg.appendChild(el("path", { d: curvePath(function (x) { return tPdf(x, v); }, -5, 5, 0.05, g.sx, g.sy), class: "t-line", stroke: COLORS[v] }));
+    });
+  }
+
+  /* ---------- 꼬리 확대 차트 ---------- */
+  var tailSvg = document.getElementById("tail-chart");
+  function drawTail() {
+    var g = frame(tailSvg, { W: 700, H: 300, x0: 1.5, x1: 5, ymax: 0.14, yfix: 2,
+      xticks: [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5], yticks: [0, 0.03, 0.06, 0.09, 0.12] });
+    tailSvg.appendChild(el("rect", { x: g.sx(1.96), y: g.T, width: g.R - g.sx(1.96), height: g.base - g.T, class: "zone-fill" }));
+    tailSvg.appendChild(el("line", { x1: g.sx(1.96), x2: g.sx(1.96), y1: g.T, y2: g.base, class: "zone-line" }));
+    tailSvg.appendChild(el("text", { x: g.sx(1.96) + 6, y: g.T + 14, class: "zone-label" }, "1.96 (정규분포 기준 상위 2.5%)"));
+    normalBackground(tailSvg, g, 1.5, 5, 0.02);
+    DFS.forEach(function (v) {
+      if (!active[v]) return;
+      tailSvg.appendChild(el("path", { d: curvePath(function (x) { return tPdf(x, v); }, 1.5, 5, 0.02, g.sx, g.sy), class: "t-line", stroke: COLORS[v] }));
+    });
+  }
+
+  /* ---------- 범례 ---------- */
+  var legend = document.getElementById("main-legend");
+  (function () {
+    var bg = document.createElement("span"); bg.className = "it";
+    bg.innerHTML = '<span class="bg"></span>표준정규분포 (배경)';
+    legend.appendChild(bg);
+    DFS.forEach(function (v) {
+      var it = document.createElement("span"); it.className = "it"; it.style.setProperty("--c", COLORS[v]);
+      it.innerHTML = '<span class="ln"></span>t 분포, 자유도 ' + v;
+      legend.appendChild(it);
+    });
+  })();
+
+  /* ---------- 버튼 ---------- */
+  var buttons = Array.prototype.slice.call(document.querySelectorAll(".df-btn"));
+  var playTimer = null;
+  function stopPlay() { if (playTimer) { clearInterval(playTimer); playTimer = null; document.getElementById("step-play").textContent = "하나씩 차례로 보기"; } }
+  function refresh() {
+    buttons.forEach(function (b) { b.setAttribute("aria-pressed", active[Number(b.dataset.df)] ? "true" : "false"); });
+    drawMain(); drawTail();
+  }
+  buttons.forEach(function (b) {
+    b.addEventListener("click", function () { stopPlay(); var v = Number(b.dataset.df); active[v] = !active[v]; refresh(); });
+  });
+  document.getElementById("show-all").addEventListener("click", function () {
+    stopPlay(); DFS.forEach(function (v) { active[v] = true; }); refresh();
+  });
+  document.getElementById("step-play").addEventListener("click", function () {
+    if (playTimer) { stopPlay(); return; }
+    var i = 0;
+    this.textContent = "멈추기";
+    function show() {
+      DFS.forEach(function (v) { active[v] = DFS.indexOf(v) === i % DFS.length; });
+      refresh(); i++;
+    }
+    show();
+    playTimer = setInterval(show, 1400);
+  });
+
+  /* ---------- 숫자 표 ---------- */
+  (function () {
+    var tb = document.getElementById("df-tbody");
+    var html = "";
+    DFS.forEach(function (v) {
+      var variance = v > 2 ? (v / (v - 2)).toFixed(3) : "정의되지 않음";
+      html += '<tr style="--c:' + COLORS[v] + '"><td class="df"><i></i>t (자유도 ' + v + ')</td><td>' + tPdf(0, v).toFixed(4) +
+        "</td><td>" + variance + "</td><td>" + critical(v, 0.05).toFixed(3) + "</td><td>" + (twoTail(v, 1.96) * 100).toFixed(1) + "%</td></tr>";
+    });
+    html += '<tr class="norm"><td>표준정규분포 (\\(\\nu \\to \\infty\\))</td><td>' + normPdf(0).toFixed(4) + "</td><td>1.000</td><td>1.960</td><td>5.0%</td></tr>";
+    tb.innerHTML = html;
+  })();
+
+  refresh();
+
+  /* ---------- 목차 scroll-spy ---------- */
+  var links = Array.prototype.slice.call(document.querySelectorAll("#rail-nav a"));
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) links.forEach(function (l) { l.classList.toggle("on", l.getAttribute("href") === "#" + en.target.id); });
+    });
+  }, { rootMargin: "-25% 0px -65% 0px" });
+  links.forEach(function (l, i) {
+    var t = document.querySelector(l.getAttribute("href"));
+    if (t) obs.observe(t);
+    if (i === 0) l.classList.add("on");
+  });
+})();
+</script>
+</body>
+</html>
