@@ -182,6 +182,34 @@
 특이도를 그 선택자보다 높여서 확실히 이기게 하고, `white-space: nowrap`도
 같이 준다. `!important`는 쓰지 않는다.
 
+## 수식 표기 (KaTeX)
+
+수식은 HTML/CSS로 흉내 내지 않고 **KaTeX**로 표기한다. KaTeX는 CDN이 아니라
+`docs/assets/katex/`에 포함되어 있고(폰트는 woff2만), 오프라인·GitHub Pages
+하위 경로에서도 동작한다.
+
+- 자료 페이지 `<head>`에 다음을 넣는다(경로는 페이지 위치에 맞춰 상대 경로로).
+
+  ```html
+  <link rel="stylesheet" href="../assets/katex/katex.min.css">   <!-- 페이지 <style>보다 앞 -->
+  <script defer src="../assets/katex/katex.min.js"></script>
+  <script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+  <script defer src="../assets/math.js"></script>
+  ```
+
+- 인라인 수식은 `\( ... \)`, 블록 수식은 `\[ ... \]`로 쓴다. 예:
+  `\(\hat{\beta}_1 = \dfrac{S_{xy}}{S_{xx}}\)`. 한글은 `\text{...}`로 감싼다.
+- `docs/assets/math.js`가 페이지 로드 시 전체를 렌더링하고, JS가 나중에
+  `innerHTML`/`textContent`로 넣는 문자열도 자동으로 다시 렌더링한다. JS 문자열
+  안에서는 백슬래시를 두 번 쓴다(`'\\(x^{2}\\)'`).
+- **SVG `<text>`와 canvas 글자에는 수식 구분자를 쓰지 않는다.** 축 라벨 등은
+  유니코드 글자(`β₁`, `x̄`)를 그대로 쓴다.
+- `.katex`는 `text-transform: none`이므로 대문자 변환(`uppercase`)되는 라벨
+  안에서도 수식이 깨지지 않는다.
+- KaTeX 버전을 올리려면 `npm pack katex@<버전>`의 `dist/`에서
+  `katex.min.js`, `contrib/auto-render.min.js`, `fonts/*.woff2`를 교체하고
+  `katex.min.css`에서 woff/ttf `src`를 제거한다(woff2만 사용).
+
 ## 새 과목(섹션) 추가 체크리스트
 
 1. `docs/assets/styles.css`의 `:root`에 `--{subject}` / `--{subject}-tint`

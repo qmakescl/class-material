@@ -22,6 +22,7 @@
 <meta name="twitter:description" content="직선을 직접 움직이며 잔차와 제곱합, R², 잔차 그림의 읽는 법을 확인합니다.">
 <meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
 <meta name="twitter:image:alt" content="통계 수업 자료 아이콘">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
 <style>
 :root{
   --rail:250px;
@@ -202,6 +203,7 @@ table.info th{
 }
 table.info td{padding:11px 12px 11px 0; border-bottom:1px solid var(--line-soft); vertical-align:top}
 table.info td:first-child{font-weight:500; white-space:nowrap}
+.eq .katex-display{margin:0; text-align:left}
 .eq{
   font-family:var(--f-mono); font-size:15px; background:var(--surface);
   border:1px solid var(--line-soft); border-radius:5px; padding:14px 16px;
@@ -242,6 +244,9 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
   header.masthead{padding-block:42px 28px}
 }
 </style>
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
 </head>
 <body>
 <a class="skip-link" href="#content">본문으로 건너뛰기</a>
@@ -252,7 +257,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <a href="#excel-trendline"><b>01</b><span>엑셀이 그려주던 직선</span></a>
     <a href="#deviation"><b>02</b><span>편차 하나를 들여다본다</span></a>
     <a href="#why-squares"><b>03</b><span>왜 하필 제곱인가</span></a>
-    <a href="#r-squared"><b>04</b><span>R²의 정체</span></a>
+    <a href="#r-squared"><b>04</b><span>\(R^{2}\)의 정체</span></a>
     <a href="#residual-diagnostics"><b>05</b><span>잔차 진단</span></a>
     <a href="#next-questions"><b>06</b><span>남는 질문</span></a>
   </nav>
@@ -265,7 +270,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
   <h1>회귀분석 조금 깊이 보기 - 최소제곱과 잔차</h1>
   <p class="lede">엑셀의 <strong>추세선</strong>에서 출발해 그 직선이 왜 하필 그 자리인지로 들어간다. 직선을 긋는 일은 <strong>실측값과 예측값의 차이</strong>를 어떻게 다룰지 정하는 일이다. 그 차이 하나하나를 눈으로 보고, 제곱해서 더해 보고, 마지막에는 그 차이만 따로 떼어내 그림으로 읽는 데까지 간다.</p>
   <div class="mast-meta">
-    <span><i class="swatch" style="background:var(--ink)"></i>예측값 ŷ (적합선)</span>
+    <span><i class="swatch" style="background:var(--ink)"></i>예측값 \(\hat{y}\) (적합선)</span>
     <span><i class="swatch" style="background:var(--pos)"></i>e &gt; 0 · 실측이 위</span>
     <span><i class="swatch" style="background:var(--neg)"></i>e &lt; 0 · 실측이 아래</span>
   </div>
@@ -276,7 +281,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
 <section id="excel-trendline">
   <div class="sec-head"><span class="sec-num">01</span><h2>엑셀이 이미 그려주던 그 직선</h2></div>
   <div class="col">
-    <p>회귀직선을 처음 만나는 자리는 대개 통계 수업이 아니라 엑셀이다. 점을 흩뿌려 놓고 <strong>추세선 추가 &gt; 선형</strong>을 누르면 직선이 하나 생기고, 체크박스를 켜면 수식과 R²까지 딸려 나온다. 그 직선의 이름이 바로 <strong>회귀직선</strong>이다.</p>
+    <p>회귀직선을 처음 만나는 자리는 대개 통계 수업이 아니라 엑셀이다. 점을 흩뿌려 놓고 <strong>추세선 추가 &gt; 선형</strong>을 누르면 직선이 하나 생기고, 체크박스를 켜면 수식과 \(R^{2}\)까지 딸려 나온다. 그 직선의 이름이 바로 <strong>회귀직선</strong>이다.</p>
     <p>엑셀은 결과만 보여주고 기준은 말해주지 않는다. 이 페이지는 <em>왜 하필 그 직선인가</em>를 되짚는 자료이고, 출발점은 직접 한 번 그려 보는 것이다.</p>
 
     <h3>1단계 · 직접 그려 본다</h3>
@@ -310,7 +315,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
       <tr><td>③ 수식 표시</td><td>추세선 서식 아래쪽에서 <strong>수식을 차트에 표시</strong>와 <strong>R-제곱 값을 차트에 표시</strong>를 체크.</td></tr>
     </table>
     <p>그러면 차트 안에 이런 두 줄이 뜬다.</p>
-    <div class="eq">y = 0.0881x + 5.3603 &nbsp;&nbsp;·&nbsp;&nbsp; R² = 0.9828</div>
+    <div class="eq">\[y = 0.0881x + 5.3603 \qquad R^{2} = 0.9828\]</div>
 
     <h3>2단계 · 이 두 줄을 읽는다</h3>
   </div>
@@ -326,7 +331,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
         <div class="callout" style="margin-top:0">
           <span class="k">기울기 0.0881</span><br>광고비를 1만원 더 쓰면 매출이 평균 <strong>0.0881백만원</strong>, 즉 8만 8천원쯤 늘어난다.<br><br>
           <span class="k">절편 5.3603</span><br>광고비가 0일 때의 예측 매출. 데이터에 x=0인 시장이 없다면 이 값은 <strong>외삽</strong>이다.<br><br>
-          <span class="k">R² = 0.9828</span><br>매출 변동의 98.3%가 광고비로 설명된다.
+          <span class="k">\(R^{2}\) = 0.9828</span><br>매출 변동의 98.3%가 광고비로 설명된다.
         </div>
         <p class="hint" id="z-msg">엑셀 화면에는 여기까지만 나온다. 버튼을 눌러 이 차트가 감추고 있는 것을 보자.</p>
       </div>
@@ -339,8 +344,8 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <p>추세선은 답을 주지만 근거를 주지 않는다. 남는 질문이 셋이고, 이 페이지의 나머지가 각각에 대한 답이다.</p>
     <table class="info">
       <tr><td>왜 이 직선인가</td><td>무수히 많은 직선 중 엑셀은 어떤 기준으로 이 하나를 골랐나 → <strong>02·03</strong></td></tr>
-      <tr><td>어느 시장이 빗나갔나</td><td>R² 하나로는 개별 시장이 얼마나 벗어났는지 알 수 없다 → <strong>02·04</strong></td></tr>
-      <tr><td>직선이 맞는 모양인가</td><td>R²가 0.98이어도 직선이 틀린 선택일 수 있다 → <strong>05</strong></td></tr>
+      <tr><td>어느 시장이 빗나갔나</td><td>\(R^{2}\) 하나로는 개별 시장이 얼마나 벗어났는지 알 수 없다 → <strong>02·04</strong></td></tr>
+      <tr><td>직선이 맞는 모양인가</td><td>\(R^{2}\)가 0.98이어도 직선이 틀린 선택일 수 있다 → <strong>05</strong></td></tr>
     </table>
     <div class="aside">
       <strong>추세선의 함정.</strong> 엑셀은 어떤 데이터에도 군말 없이 직선을 그려준다. 관계가 곡선이든, 이상치가 하나 섞였든, 점이 세 개뿐이든 마찬가지다. <strong>추세선이 그려졌다는 사실 자체는 아무것도 보증하지 않는다.</strong>
@@ -353,15 +358,15 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
   <div class="sec-head"><span class="sec-num">02</span><h2>편차 하나를 들여다본다</h2></div>
   <div class="col">
     <p>엑셀이 고른 직선을 잠시 지우고, 직선을 우리 손으로 그어 보자. 같은 8개 시장 데이터다. 직선을 하나 긋는 순간, 각 시장마다 두 개의 숫자가 생긴다.</p>
-    <div class="eq">실측값 y<sub>i</sub> &nbsp;·&nbsp; 예측값 ŷ<sub>i</sub> = β̂<sub>0</sub> + β̂<sub>1</sub>x<sub>i</sub> &nbsp;→&nbsp; <strong>잔차</strong> e<sub>i</sub> = y<sub>i</sub> − ŷ<sub>i</sub></div>
+    <div class="eq">\[\text{실측값 } y_{i} \quad\cdot\quad \text{예측값 } \hat{y}_{i} = \hat{\beta}_{0} + \hat{\beta}_{1}x_{i} \quad\to\quad \text{잔차 } e_{i} = y_{i} - \hat{y}_{i}\]</div>
     <p>잔차는 <strong>세로 거리</strong>다. 점에서 직선까지의 최단거리가 아니라, <em>같은 x에서 위아래로 잰 거리</em>다. 우리가 맞히려는 것이 y이기 때문이다. 아래에서 직선을 움직이며 그 막대들이 어떻게 변하는지 보자.</p>
   </div>
 
   <div class="fig" id="figA">
     <div class="fig-bar">
       <span class="fig-title">직선을 움직여 본다</span>
-      <span class="ctrl"><label for="a-b0">절편 β₀</label><input type="range" id="a-b0" min="2" max="9" step="0.05" value="7.2"></span>
-      <span class="ctrl"><label for="a-b1">기울기 β₁</label><input type="range" id="a-b1" min="0" max="0.18" step="0.001" value="0.062"></span>
+      <span class="ctrl"><label for="a-b0">절편 \(\beta_{0}\)</label><input type="range" id="a-b0" min="2" max="9" step="0.05" value="7.2"></span>
+      <span class="ctrl"><label for="a-b1">기울기 \(\beta_{1}\)</label><input type="range" id="a-b1" min="0" max="0.18" step="0.001" value="0.062"></span>
       <button id="a-squares" aria-pressed="false">제곱을 넓이로</button>
       <button id="a-solve">최소제곱 해로</button>
     </div>
@@ -369,13 +374,13 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
       <div class="fig-plot"><div id="a-plot"></div></div>
       <div class="fig-side">
         <div class="stat-row">
-          <div class="stat"><dt>RSS = Σe²</dt><dd id="a-rss">—</dd></div>
-          <div class="stat"><dt>Σ|e|</dt><dd id="a-abs">—</dd></div>
+          <div class="stat"><dt>\(\mathrm{RSS} = \sum e^{2}\)</dt><dd id="a-rss">—</dd></div>
+          <div class="stat"><dt>\(\sum |e|\)</dt><dd id="a-abs">—</dd></div>
           <div class="stat"><dt>가장 큰 |e|</dt><dd id="a-max">—</dd></div>
         </div>
         <div class="tablewrap">
           <table class="dev" id="a-table">
-            <thead><tr><th>시장</th><th>x</th><th>y 실측</th><th>ŷ 예측</th><th>e</th><th>e²</th></tr></thead>
+            <thead><tr><th>시장</th><th>x</th><th>y 실측</th><th>\(\hat{y}\) 예측</th><th>e</th><th>\(e^{2}\)</th></tr></thead>
             <tbody></tbody>
             <tfoot><tr><td colspan="5">합계 RSS</td><td id="a-foot">—</td></tr></tfoot>
           </table>
@@ -390,7 +395,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <p>세 가지를 확인하고 넘어간다.</p>
     <table class="info">
       <tr><td>부호가 섞인다</td><td>잔차를 그냥 더하면 +와 −가 상쇄된다. 최소제곱 해에서는 <strong>합이 정확히 0</strong>이 된다 — 그래서 합은 직선의 좋고 나쁨을 재는 기준이 될 수 없다.</td></tr>
-      <tr><td>무게중심을 지난다</td><td>최소제곱선은 언제나 점 (x̄, ȳ)를 통과한다. 직선이 그 점에 박혀 있고 기울기만 돌아간다고 생각하면 된다.</td></tr>
+      <tr><td>무게중심을 지난다</td><td>최소제곱선은 언제나 점 \((\bar{x}, \bar{y})\)를 통과한다. 직선이 그 점에 박혀 있고 기울기만 돌아간다고 생각하면 된다.</td></tr>
       <tr><td>큰 편차가 더 아프다</td><td>제곱 때문이다. 0.4짜리 편차 네 개(0.64)보다 1.6짜리 하나(2.56)가 RSS를 훨씬 키운다.</td></tr>
     </table>
   </div>
@@ -429,25 +434,25 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
   </div>
 
   <div class="fig" id="figC">
-    <div class="fig-bar"><span class="fig-title">RSS(β₁) — 02의 직선이 지금 어디에 있는가</span></div>
+    <div class="fig-bar"><span class="fig-title">\(\mathrm{RSS}(\beta_{1})\) — 02의 직선이 지금 어디에 있는가</span></div>
     <div class="fig-body solo"><div class="fig-plot"><div id="c-plot"></div></div></div>
-    <p class="fig-note">위쪽 02의 기울기 슬라이더를 움직이면 이 곡선 위의 점이 함께 움직인다. (현재 절편 β₀를 고정한 채 기울기만 훑은 단면이다.)</p>
+    <p class="fig-note">위쪽 02의 기울기 슬라이더를 움직이면 이 곡선 위의 점이 함께 움직인다. (현재 절편 \(\beta_{0}\)를 고정한 채 기울기만 훑은 단면이다.)</p>
   </div>
 </section>
 
 <!-- ======================= 3 ======================= -->
 <section id="r-squared">
-  <div class="sec-head"><span class="sec-num">04</span><h2>편차를 두 번 잰다 — R²의 정체</h2></div>
+  <div class="sec-head"><span class="sec-num">04</span><h2>편차를 두 번 잰다 — \(R^{2}\)의 정체</h2></div>
   <div class="col">
-    <p>"이 직선이 잘 맞는가"라는 질문은 <strong>무엇과 비교해서</strong>인지를 정해야 답이 된다. 회귀가 잡은 비교 대상은 <em>x를 전혀 쓰지 않는 모형</em>, 즉 수평선 ȳ이다.</p>
-    <p>같은 점들에 대해 편차를 두 번 잰다. 한 번은 수평선 ȳ까지(<strong>TSS</strong>), 한 번은 적합선까지(<strong>RSS</strong>). 줄어든 몫의 비율이 R²다.</p>
+    <p>"이 직선이 잘 맞는가"라는 질문은 <strong>무엇과 비교해서</strong>인지를 정해야 답이 된다. 회귀가 잡은 비교 대상은 <em>x를 전혀 쓰지 않는 모형</em>, 즉 수평선 \(\bar{y}\)이다.</p>
+    <p>같은 점들에 대해 편차를 두 번 잰다. 한 번은 수평선 \(\bar{y}\)까지(<strong>TSS</strong>), 한 번은 적합선까지(<strong>RSS</strong>). 줄어든 몫의 비율이 \(R^{2}\)다.</p>
   </div>
 
   <div class="fig" id="figD">
     <div class="fig-bar">
       <span class="fig-title">무엇과 비교하는가</span>
       <span class="seg" role="group" aria-label="비교 대상">
-        <button data-mode="tss" aria-pressed="true">ȳ 수평선까지</button>
+        <button data-mode="tss" aria-pressed="true">\(\bar{y}\) 수평선까지</button>
         <button data-mode="rss" aria-pressed="false">적합선까지</button>
         <button data-mode="both" aria-pressed="false">겹쳐 보기</button>
       </span>
@@ -458,17 +463,17 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
         <div class="stat-row">
           <div class="stat"><dt>TSS</dt><dd id="d-tss">—</dd></div>
           <div class="stat"><dt>RSS</dt><dd id="d-rss">—</dd></div>
-          <div class="stat"><dt>R²</dt><dd id="d-r2">—</dd></div>
+          <div class="stat"><dt>\(R^{2}\)</dt><dd id="d-r2">—</dd></div>
         </div>
         <div id="d-bar"></div>
-        <div class="callout"><span class="k">읽는 법</span><br>ȳ만 쓸 때 남던 변동의 <strong id="d-pct">—</strong>를 x가 걷어냈다. 나머지는 이 모형이 설명하지 못한 몫이다.</div>
+        <div class="callout"><span class="k">읽는 법</span><br>\(\bar{y}\)만 쓸 때 남던 변동의 <strong id="d-pct">—</strong>를 x가 걷어냈다. 나머지는 이 모형이 설명하지 못한 몫이다.</div>
       </div>
     </div>
-    <p class="fig-note">RSE = √(RSS/(n−2)) = <span class="num" id="d-rse">—</span> — 같은 정보를 매출의 단위로 말한 것. "예측이 평균적으로 이만큼 빗나간다".</p>
+    <p class="fig-note">\(\mathrm{RSE} = \sqrt{\mathrm{RSS}/(n-2)} =\) <span class="num" id="d-rse">—</span> — 같은 정보를 매출의 단위로 말한 것. "예측이 평균적으로 이만큼 빗나간다".</p>
   </div>
 
   <div class="aside">
-    <strong>R²가 얼마면 좋은가?</strong> 답이 없다. 물리 실험에서 0.6이면 뭔가 잘못된 것이고, 교육·심리·마케팅에서 0.6이면 훌륭하다. 도메인이 기준을 정한다.
+    <strong>\(R^{2}\)가 얼마면 좋은가?</strong> 답이 없다. 물리 실험에서 0.6이면 뭔가 잘못된 것이고, 교육·심리·마케팅에서 0.6이면 훌륭하다. 도메인이 기준을 정한다.
   </div>
 </section>
 
@@ -477,7 +482,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
   <div class="sec-head"><span class="sec-num">05</span><h2>잔차만 따로 떼어낸다</h2></div>
   <div class="col">
     <p>여기서부터가 잔차 <em>분석</em>이다. 앞에서 잔차는 직선을 고르기 위한 재료였다. 이제는 <strong>고른 직선이 애초에 맞는 모양이었는지 되묻는 증거</strong>가 된다.</p>
-    <p>방법은 단순하다. 잔차 막대를 전부 같은 높이(0)로 끌어내려 눕힌 다음, 가로축을 예측값 ŷ으로 놓고 다시 뿌린다. 직선이 데이터에 맞는다면 이 그림에는 <strong>아무 패턴도 없어야</strong> 한다.</p>
+    <p>방법은 단순하다. 잔차 막대를 전부 같은 높이(0)로 끌어내려 눕힌 다음, 가로축을 예측값 \(\hat{y}\)으로 놓고 다시 뿌린다. 직선이 데이터에 맞는다면 이 그림에는 <strong>아무 패턴도 없어야</strong> 한다.</p>
   </div>
 
   <div class="fig" id="figE">
@@ -497,10 +502,10 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     </div>
     <div class="fig-note">
       <div class="stat-row" style="margin-bottom:8px">
-        <div class="stat"><dt>R²</dt><dd id="e-r2">—</dd></div>
+        <div class="stat"><dt>\(R^{2}\)</dt><dd id="e-r2">—</dd></div>
         <div class="stat"><dt>RSE</dt><dd id="e-rse">—</dd></div>
       </div>
-      <p style="margin:0" id="e-diag">네 데이터 모두 R²가 꽤 높다. 왼쪽 산점도만 보고 어느 쪽이 문제인지 가려낼 수 있는가? 오른쪽 잔차 그림을 먼저 읽어보자.</p>
+      <p style="margin:0" id="e-diag">네 데이터 모두 \(R^{2}\)가 꽤 높다. 왼쪽 산점도만 보고 어느 쪽이 문제인지 가려낼 수 있는가? 오른쪽 잔차 그림을 먼저 읽어보자.</p>
     </div>
   </div>
 
@@ -508,12 +513,12 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <h3>잔차 그림에서 무엇을 찾는가</h3>
     <table class="info">
       <tr><th>보이는 것</th><th>진단</th><th>대응</th></tr>
-      <tr><td>U자 · 곡선</td><td>관계가 직선이 아니다</td><td>log x, √x, x² 투입</td></tr>
-      <tr><td>부채꼴로 벌어짐</td><td>등분산 가정 위배</td><td>log y, √y 변환</td></tr>
+      <tr><td>U자 · 곡선</td><td>관계가 직선이 아니다</td><td>\(\log x\), \(\sqrt{x}\), \(x^{2}\) 투입</td></tr>
+      <tr><td>부채꼴로 벌어짐</td><td>등분산 가정 위배</td><td>\(\log y\), \(\sqrt{y}\) 변환</td></tr>
       <tr><td>한두 점이 멀찍이</td><td>이상치 — 계수와 RSE를 흔든다</td><td>입력 오류 확인 후 재적합</td></tr>
       <tr><td>시간 순서로 물결침</td><td>오차의 독립성 위배</td><td>시계열 방법이 필요</td></tr>
     </table>
-    <p>R²는 네 경우 모두 높게 나온다. <strong>적합도 지표는 모형이 틀렸다는 사실을 알려주지 않는다.</strong> 그걸 알려주는 건 잔차 그림 한 장이다.</p>
+    <p>\(R^{2}\)는 네 경우 모두 높게 나온다. <strong>적합도 지표는 모형이 틀렸다는 사실을 알려주지 않는다.</strong> 그걸 알려주는 건 잔차 그림 한 장이다.</p>
   </div>
 </section>
 
@@ -522,11 +527,11 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
   <div class="sec-head"><span class="sec-num">06</span><h2>여기까지 오면 남는 질문</h2></div>
   <div class="col">
     <p>지금까지 다룬 것은 전부 <strong>손에 있는 데이터 안에서의 이야기</strong>다. 직선을 그었고, 편차를 쟀고, 그 편차가 이상한 모양인지 확인했다. 하지만 아직 답하지 않은 질문이 있다.</p>
-    <div class="eq">이 데이터가 아니라 <strong>다른 표본</strong>을 뽑았다면, β̂₁이 얼마나 달라졌을까?</div>
-    <p>표본이 바뀌면 직선도 바뀐다. 그러니 β̂₁ = 0.088은 숫자 하나가 아니라 <strong>분포를 가진 추정값</strong>이다. 그 흔들림의 폭이 표준오차이고, 거기서 신뢰구간과 p값이 나온다.</p>
+    <div class="eq">이 데이터가 아니라 <strong>다른 표본</strong>을 뽑았다면, \(\hat{\beta}_{1}\)이 얼마나 달라졌을까?</div>
+    <p>표본이 바뀌면 직선도 바뀐다. 그러니 \(\hat{\beta}_{1} = 0.088\)은 숫자 하나가 아니라 <strong>분포를 가진 추정값</strong>이다. 그 흔들림의 폭이 표준오차이고, 거기서 신뢰구간과 p값이 나온다.</p>
     <table class="info">
-      <tr><td>표준오차 SE(β̂₁)</td><td>같은 방식으로 표본을 반복해 뽑았을 때 기울기 추정값이 흩어지는 폭. 분모에 Σ(xᵢ−x̄)²가 있어서 <strong>x가 넓게 퍼져 있을수록 작아진다</strong>.</td></tr>
-      <tr><td>신뢰구간</td><td>β̂₁ ± 2·SE(β̂₁). 위 8개 시장에서는 SE(β̂₁)=0.0048이라 95% 구간이 <strong>[0.077, 0.100]</strong>이 된다 — "기울기는 0.088이다"가 아니라 "0.077에서 0.100 사이다"로 말버릇을 바꾸는 장치. (n=8이므로 2 대신 자유도 6의 t값 2.45를 썼다.)</td></tr>
+      <tr><td>표준오차 \(\mathrm{SE}(\hat{\beta}_{1})\)</td><td>같은 방식으로 표본을 반복해 뽑았을 때 기울기 추정값이 흩어지는 폭. 분모에 \(\sum (x_{i}-\bar{x})^{2}\)가 있어서 <strong>x가 넓게 퍼져 있을수록 작아진다</strong>.</td></tr>
+      <tr><td>신뢰구간</td><td>\(\hat{\beta}_{1} \pm 2 \cdot \mathrm{SE}(\hat{\beta}_{1})\). 위 8개 시장에서는 \(\mathrm{SE}(\hat{\beta}_{1}) = 0.0048\)이라 95% 구간이 <strong>[0.077, 0.100]</strong>이 된다 — "기울기는 0.088이다"가 아니라 "0.077에서 0.100 사이다"로 말버릇을 바꾸는 장치. (\(n=8\)이므로 2 대신 자유도 6의 t값 2.45를 썼다.)</td></tr>
       <tr><td>t와 p값</td><td>추정값이 0에서 표준오차 몇 개만큼 떨어져 있는가. <strong>p가 작다는 것은 효과가 크다는 뜻이 아니다</strong> — 표본이 크면 아주 작은 기울기도 유의해진다.</td></tr>
     </table>
     <p>그리고 이 페이지에서 계속 미뤄둔 것이 하나 더 있다. 예측변수가 <strong>둘 이상</strong>일 때다. 그때는 "기울기"의 뜻부터 달라진다 — 다른 변수를 고정했을 때의 변화량이 되고, 단독으로 유의하던 변수가 유의성을 잃기도 한다.</p>
@@ -558,7 +563,7 @@ var DS={
   linear:{y:[6.31,7.14,7.24,7.21,8.26,8.31,10.04,11.90,10.80,11.33,13.12,13.64,14.13,13.98],
     label:"A", diag:"<strong>A — 문제 없음.</strong> 잔차가 0선 위아래로 무작위하게 흩어진다. 이것이 기준 그림이다. 나머지 셋은 전부 이 그림에서 벗어난 모습이다."},
   curve:{y:[8.57,10.13,10.21,11.27,11.24,11.96,12.22,13.33,13.21,14.21,14.47,14.57,13.79,14.95],
-    label:"B", diag:"<strong>B — 관계가 직선이 아니다.</strong> 잔차가 가운데에서 솟았다가 양끝에서 내려가는 곡선을 그린다. 실제 관계가 로그 형태인데 직선을 맞춘 탓이다. R²는 0.91로 멀쩡해 보인다 — 이것이 R²만 보면 안 되는 이유다."},
+    label:"B", diag:"<strong>B — 관계가 직선이 아니다.</strong> 잔차가 가운데에서 솟았다가 양끝에서 내려가는 곡선을 그린다. 실제 관계가 로그 형태인데 직선을 맞춘 탓이다. \\(R^{2}\\)는 0.91로 멀쩡해 보인다 — 이것이 \\(R^{2}\\)만 보면 안 되는 이유다."},
   fan:{y:[6.28,6.94,6.08,7.52,7.40,8.03,11.83,9.05,11.20,14.01,11.13,12.98,14.37,15.07],
     label:"C", diag:"<strong>C — 등분산 위배.</strong> 오른쪽으로 갈수록 잔차가 부채꼴로 벌어진다. 계수 자체는 쓸 만하지만 표준오차가 신뢰할 수 없게 되고, 따라서 신뢰구간과 p값이 전부 어긋난다."},
   outlier:{y:[6.31,7.14,7.24,7.21,8.26,8.31,10.04,11.90,10.80,18.73,13.12,13.64,14.13,13.98],
@@ -767,8 +772,8 @@ function updateA(){
   document.getElementById("a-foot").textContent=fmt(rss,2);
   var near=Math.abs(A.b0-LS8.b0)<0.04&&Math.abs(A.b1-LS8.b1)<0.0015;
   document.getElementById("a-callout").innerHTML=
-    '<span class="k">현재 직선</span><br>ŷ = '+fmt(A.b0,2)+' + '+fmt(A.b1,4)+' · x<br>'+
-    '<span class="k">최소제곱 해</span><br>ŷ = '+fmt(LS8.b0,2)+' + '+fmt(LS8.b1,4)+' · x'+
+    '<span class="k">현재 직선</span><br>\\(\\hat{y} = '+fmt(A.b0,2)+' + '+fmt(A.b1,4)+' \\cdot x\\)<br>'+
+    '<span class="k">최소제곱 해</span><br>\\(\\hat{y} = '+fmt(LS8.b0,2)+' + '+fmt(LS8.b1,4)+' \\cdot x\\)'+
     (near?'<br><br><span style="color:var(--accent)">지금 RSS가 최소다. 어느 쪽으로 움직여도 커진다.</span>':
           '<br><br>RSS를 '+fmt(rss-LS8.rss,2)+'만큼 더 줄일 수 있다.');
   pA.render();
@@ -960,7 +965,7 @@ function updateE(){
   document.getElementById("e-r2").textContent=fmt(c.f.r2,3);
   document.getElementById("e-rse").textContent=fmt(c.f.rse,2);
   document.getElementById("e-diag").innerHTML=Est.reveal?DS[Est.ds].diag:
-    "네 데이터 모두 R²가 높게 나온다. 왼쪽 산점도만 보고 어느 쪽이 문제인지 가려낼 수 있는가? 오른쪽 잔차 그림을 먼저 읽고, 그다음 진단을 열어보자.";
+    "네 데이터 모두 \\(R^{2}\\)가 높게 나온다. 왼쪽 산점도만 보고 어느 쪽이 문제인지 가려낼 수 있는가? 오른쪽 잔차 그림을 먼저 읽고, 그다음 진단을 열어보자.";
   pE1.render();pE2.render();
 }
 Array.prototype.forEach.call(document.querySelectorAll('#figE .seg button'),function(b){

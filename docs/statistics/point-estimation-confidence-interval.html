@@ -22,6 +22,7 @@
 <meta name="twitter:description" content="점추정과 신뢰구간의 핵심 개념을 표본 추출 시뮬레이션으로 탐구합니다.">
 <meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
 <meta name="twitter:image:alt" content="통계 수업 자료 아이콘">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
 <style>
   :root {
     --page: #f4f6fb;
@@ -53,19 +54,8 @@
     padding-inline: 20px;
   }
   h1, h2, h3, h4 { font-family: inherit; font-weight: 800; letter-spacing: -0.03em; text-wrap: balance; }
-  .eq {
-    font-family: "STIX Two Text", "Cambria Math", "Times New Roman", serif;
-    font-style: italic;
-    font-size: 1.06em;
-  }
-  .eq .op, .eq .kr { font-style: normal; }
-  .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 0.18em; line-height: 1.15; }
-  .frac .num { border-bottom: 1.4px solid currentColor; padding: 0 0.22em 0.06em; }
-  .frac .den { padding: 0.06em 0.22em 0; }
-  .radical { position: relative; display: inline-block; padding: 0 0.1em 0 0.62em; }
-  .radical::before { content: "\221A"; position: absolute; left: 0; top: -0.02em; font-size: 1.12em; }
-  .radical .radicand { border-top: 1.4px solid currentColor; padding: 0 0.14em; }
-  sub, sup { font-size: 0.68em; }
+  .katex-display { margin: 0.4em 0; overflow-x: auto; overflow-y: hidden; }
+  .formula-card .katex-display { margin: 0; }
 
   a { color: var(--blue); }
 
@@ -122,7 +112,27 @@
   .prop-card .bar { width: 28px; height: 3px; border-radius: 2px; margin-bottom: 10px; }
   .prop-card h4 { font-size: 15.5px; margin: 0 0 6px; font-family: inherit; font-weight: 700; }
   .prop-card p { font-size: 13.5px; color: var(--ink-2); margin: 0 0 10px; }
-  .prop-card .eq { font-size: 14px; display: block; }
+
+
+  .deep-list { display: grid; gap: 12px; margin-top: 16px; }
+  details.deep { --c: var(--blue); background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--c); border-radius: 12px; box-shadow: var(--shadow); scroll-margin-top: 20px; }
+  details.deep > summary { cursor: pointer; padding: 14px 18px; font-weight: 700; font-size: 15px; list-style: none; display: flex; align-items: center; gap: 10px; }
+  details.deep > summary::-webkit-details-marker { display: none; }
+  details.deep > summary::before { content: "▸"; color: var(--c); transition: transform .15s; }
+  details.deep[open] > summary::before { transform: rotate(90deg); }
+  details.deep > summary small { margin-left: auto; color: var(--muted); font-weight: 500; font-size: 12.5px; }
+  details.deep > summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 8px; }
+  .deep-body { padding: 2px 20px 18px; border-top: 1px solid var(--border); }
+  .deep-body h5 { margin: 20px 0 6px; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--c); font-weight: 700; }
+  .deep-body p { margin: 8px 0; font-size: 14.5px; }
+  .deep-body ol { margin: 8px 0; padding-left: 20px; font-size: 14.5px; }
+  .deep-body li { margin-bottom: 6px; }
+  .deep-body .katex-display { text-align: left; margin: 0.5em 0; }
+  .num-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+  .num-table th, .num-table td { padding: 6px 10px; text-align: center; border-bottom: 1px solid var(--border); }
+  .num-table th { background: var(--surface-2); font-weight: 700; }
+  .num-table tr.sum td { font-weight: 700; background: var(--blue-soft); }
+  .table-scroll { overflow-x: auto; }
 
   .btn {
     font-family: inherit; font-size: 13.5px; font-weight: 600;
@@ -263,6 +273,9 @@
     .masthead { padding: 42px 0 32px; }
   }
 </style>
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
 </head>
 <body>
 <a class="skip-link" href="#content">본문으로 건너뛰기</a>
@@ -304,20 +317,20 @@
       <article class="block" id="estimator-estimate">
         <div class="kicker">Point Estimation</div>
         <h3>추정량과 추정치</h3>
-        <p>모수 <span class="eq">θ</span>를 추정하기 위해 표본 <span class="eq">X<sub>1</sub>,…,X<sub>n</sub></span>의 함수로 정의한 확률변수를 <strong>추정량(estimator)</strong>이라 하고, 실제로 관측된 표본값 <span class="eq">x<sub>1</sub>,…,x<sub>n</sub></span>을 대입해 얻은 구체적인 숫자를 <strong>추정치(estimate)</strong>라 부릅니다.</p>
+        <p>모수 \(\theta\)를 추정하기 위해 표본 \(X_{1},\ldots ,X_{n}\)의 함수로 정의한 확률변수를 <strong>추정량(estimator)</strong>이라 하고, 실제로 관측된 표본값 \(x_{1},\ldots ,x_{n}\)을 대입해 얻은 구체적인 숫자를 <strong>추정치(estimate)</strong>라 부릅니다.</p>
         <div class="card formula-card">
-          <span class="eq">θ̂ = g(X<span class="op">₁</span>, X<span class="op">₂</span>, …, X<span class="op">ₙ</span>)</span>
+          \[\hat{\theta } = g(X_{1}, X_{2}, \ldots , X_{n})\]
           <div class="note">추정량 — 표본을 뽑기 전에는 값이 정해지지 않은 확률변수</div>
         </div>
-        <p class="dim">가장 흔한 예는 모평균 <span class="eq">μ</span>의 추정량으로 쓰는 표본평균입니다.</p>
+        <p class="dim">가장 흔한 예는 모평균 \(\mu\)의 추정량으로 쓰는 표본평균입니다.</p>
         <div class="card formula-card">
-          <span class="eq">X̄ = <span class="frac"><span class="num">X<span class="op">₁</span> + X<span class="op">₂</span> + ⋯ + X<span class="op">ₙ</span></span><span class="den">n</span></span></span>
+          \[\bar{X} = \frac{X_{1} + X_{2} + \cdots  + X_{n}}{n}\]
         </div>
         <p>아래 버튼을 누르면 학생 6명의 통계 시험 점수를 새로 뽑아봅니다. 왼쪽은 언제나 같은 <em>형태</em>를 가진 추정량, 오른쪽은 표본을 뽑을 때마다 달라지는 <em>추정치</em>입니다.</p>
         <div class="estimate-panel">
           <div class="card">
             <h4>추정량 (고정된 식)</h4>
-            <div class="eq" style="font-size:20px;">X̄ = <span class="frac"><span class="num">X<span class="op">₁</span>+⋯+X<span class="op">₆</span></span><span class="den">6</span></span></div>
+            \[\bar{X} = \frac{X_{1}+\cdots +X_{6}}{6}\]
           </div>
           <div class="card">
             <h4>추정치 (뽑을 때마다 달라짐)</h4>
@@ -339,19 +352,19 @@
             <div class="bar" style="background:var(--blue)"></div>
             <h4>불편성 (Unbiasedness)</h4>
             <p>추정량의 기댓값이 참값과 정확히 일치하면 불편추정량이라 합니다. 체계적으로 크거나 작게 치우치지 않는다는 뜻입니다.</p>
-            <span class="eq">E[θ̂] = θ</span>
+            \(E[\hat{\theta }] = \theta\)
           </div>
           <div class="prop-card">
             <div class="bar" style="background:var(--aqua)"></div>
             <h4>효율성 (Efficiency)</h4>
-            <p>불편추정량들 중에서는 분산이 가장 작은 추정량이 더 효율적입니다. 편향과 분산을 함께 보려면 평균제곱오차(MSE)를 씁니다.</p>
-            <span class="eq">MSE(θ̂) = Var(θ̂) + [Bias(θ̂)]<span class="op">²</span></span>
+            <p>불편추정량들 중에서는 분산이 가장 작은 추정량이 더 효율적입니다. 값이 참값 주변에 더 촘촘히 모인다는 뜻입니다.</p>
+            \(\mathrm{Var}(\hat{\theta }_{1}) < \mathrm{Var}(\hat{\theta }_{2}) \ \Rightarrow\ \hat{\theta }_{1}\text{이 더 효율적}\)
           </div>
           <div class="prop-card">
             <div class="bar" style="background:var(--yellow)"></div>
             <h4>일치성 (Consistency)</h4>
-            <p>표본크기 <span class="eq">n</span>이 커질수록 추정치가 참값에 확률적으로 가까워지는 성질입니다. 자료가 많아질수록 믿을 만해집니다.</p>
-            <span class="eq">θ̂<span class="op">ₙ</span> <span class="op">→</span><span class="op">ᵖ</span> θ  <span class="kr">(n → ∞)</span></span>
+            <p>표본크기 \(n\)이 커질수록 추정치가 참값에 확률적으로 가까워지는 성질입니다. 자료가 많아질수록 믿을 만해집니다.</p>
+            \(\hat{\theta}_{n} \xrightarrow{p} \theta \quad (n \to \infty)\)
           </div>
           <div class="prop-card">
             <div class="bar" style="background:var(--violet)"></div>
@@ -370,6 +383,158 @@
         </div>
         <div class="btn-row">
           <button class="btn" id="redraw-targets" type="button">다시 뽑아보기</button>
+        </div>
+
+        <h3 style="margin-top:44px;">성질별 자세히 보기 — 수식 전개와 숫자 예제</h3>
+        <p>각 성질이 왜 성립하는지 수식을 한 단계씩 전개하고, 아주 작은 예로 직접 계산해 확인합니다. 아래 펼침 메뉴 네 개는 하나의 예제 모집단을 공유합니다.</p>
+        <div class="callout"><strong>공통 예제.</strong> 모집단이 \(\{2, 4, 6\}\)의 세 값이고 각각 같은 확률로 나온다고 합시다. 모평균 \(\mu = 4\), 모분산 \(\sigma^{2} = \dfrac{(2-4)^2 + (4-4)^2 + (6-4)^2}{3} = \dfrac{8}{3} \approx 2.667\)입니다. 여기서 크기 \(n = 2\)인 표본을 복원추출하면 가능한 표본은 \(3 \times 3 = 9\)가지이고, 모두 같은 확률 \(1/9\)입니다. 추정량의 “기댓값”과 “분산”은 이 9가지를 전부 나열해 평균 내면 <em>근사 없이 정확하게</em> 계산됩니다.</div>
+        <div class="table-scroll">
+          <table class="num-table">
+            <thead><tr><th>표본 \((x_1, x_2)\)</th><th>\(x_1\)</th><th>표본평균 \(\bar{x}\)</th><th>\(s^2\) (\(n-1\)로 나눔)</th><th>\(\tilde{s}^2\) (\(n\)으로 나눔)</th></tr></thead>
+            <tbody>
+              <tr><td>(2, 2)</td><td>2</td><td>2</td><td>0</td><td>0</td></tr>
+              <tr><td>(2, 4)</td><td>2</td><td>3</td><td>2</td><td>1</td></tr>
+              <tr><td>(2, 6)</td><td>2</td><td>4</td><td>8</td><td>4</td></tr>
+              <tr><td>(4, 2)</td><td>4</td><td>3</td><td>2</td><td>1</td></tr>
+              <tr><td>(4, 4)</td><td>4</td><td>4</td><td>0</td><td>0</td></tr>
+              <tr><td>(4, 6)</td><td>4</td><td>5</td><td>2</td><td>1</td></tr>
+              <tr><td>(6, 2)</td><td>6</td><td>4</td><td>8</td><td>4</td></tr>
+              <tr><td>(6, 4)</td><td>6</td><td>5</td><td>2</td><td>1</td></tr>
+              <tr><td>(6, 6)</td><td>6</td><td>6</td><td>0</td><td>0</td></tr>
+              <tr class="sum"><td>9가지의 평균</td><td>4</td><td>4</td><td>24/9 ≈ 2.667</td><td>12/9 ≈ 1.333</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="dim">예: 표본 (2, 6)의 \(s^2 = \dfrac{(2-4)^2 + (6-4)^2}{2 - 1} = 8\), \(\tilde{s}^2 = \dfrac{4 + 4}{2} = 4\).</p>
+
+        <div class="deep-list">
+          <details class="deep" id="detail-unbiased" style="--c:var(--blue)">
+            <summary>불편성 — 왜 \(E[\bar{X}] = \mu\)이고, 분산은 왜 \(n-1\)로 나눌까? <small>수식 · 숫자</small></summary>
+            <div class="deep-body">
+              <h5>수식 전개 ① 표본평균은 불편추정량</h5>
+              <p>기댓값의 선형성 \(E[aX + bY] = aE[X] + bE[Y]\)를 쓰면 됩니다. 각 \(X_i\)는 같은 모집단에서 뽑았으므로 \(E[X_i] = \mu\)입니다.</p>
+              \[E[\bar{X}] = E\!\left[\frac{1}{n}\sum_{i=1}^{n} X_i\right] = \frac{1}{n}\sum_{i=1}^{n} E[X_i] = \frac{1}{n}\cdot n\mu = \mu\]
+              <p>따라서 \(\mathrm{Bias}(\bar{X}) = E[\bar{X}] - \mu = 0\)입니다.</p>
+
+              <h5>수식 전개 ② \(n\)으로 나눈 분산은 치우친다</h5>
+              <p>표본평균 \(\bar{X}\) 주변의 흩어짐은 모평균 \(\mu\) 주변보다 항상 작기 때문에 (\(\bar{X}\)는 표본에 맞춰진 중심), 다음 항등식이 성립합니다.</p>
+              \[\sum_{i=1}^{n}(X_i - \bar{X})^2 = \sum_{i=1}^{n}(X_i - \mu)^2 - n(\bar{X} - \mu)^2\]
+              <p>양변에 기댓값을 취하면, \(E[(X_i-\mu)^2] = \sigma^2\)이고 \(E[(\bar{X}-\mu)^2] = \mathrm{Var}(\bar{X}) = \sigma^2/n\)이므로</p>
+              \[E\!\left[\sum_{i=1}^{n}(X_i - \bar{X})^2\right] = n\sigma^2 - n\cdot\frac{\sigma^2}{n} = (n-1)\,\sigma^2\]
+              <p>즉 \(n\)으로 나누면 \(E[\tilde{S}^2] = \dfrac{n-1}{n}\sigma^2 < \sigma^2\)로 <strong>작게 치우치고</strong>, \(n-1\)로 나눠야 \(E[S^2] = \sigma^2\)이 됩니다.</p>
+
+              <h5>숫자로 확인 (공통 예제, \(n=2\))</h5>
+              <ol>
+                <li>표본평균 9개의 평균: \(\dfrac{2+3+4+3+4+5+4+5+6}{9} = \dfrac{36}{9} = 4 = \mu\) ✓ 불편.</li>
+                <li>\(n-1 = 1\)로 나눈 \(s^2\)의 평균: \(\dfrac{24}{9} \approx 2.667 = \sigma^2\) ✓ 불편.</li>
+                <li>\(n = 2\)로 나눈 \(\tilde{s}^2\)의 평균: \(\dfrac{12}{9} \approx 1.333 = \dfrac{n-1}{n}\sigma^2 = \dfrac{1}{2}\times 2.667\) → 정확히 절반으로 <strong>과소추정</strong>.</li>
+              </ol>
+              <div class="callout">한 번의 표본에서는 \(s^2\)가 \(\sigma^2\)보다 클 수도 작을 수도 있습니다. 불편성은 “<em>반복해서 평균 내면</em> 치우침이 없다”는 뜻입니다.</div>
+            </div>
+          </details>
+
+          <details class="deep" id="detail-efficient" style="--c:var(--aqua)">
+            <summary>효율성 — 같은 불편추정량이면 분산이 작은 쪽이 낫다 <small>수식 · 숫자</small></summary>
+            <div class="deep-body">
+              <h5>정의 불편추정량 두 개를 어떻게 비교할까</h5>
+              <p>모평균 \(\mu\)를 추정하는 방법이 둘 이상이고 모두 불편이라면, 평균적으로는 둘 다 참값을 맞힙니다. 차이는 <strong>한 번 뽑았을 때 얼마나 흩어지는가</strong>, 즉 분산입니다. 분산이 작은 쪽이 참값 근처의 값을 더 안정적으로 내므로 더 <strong>효율적(efficient)</strong>이라 하고, 두 추정량 \(\hat{\theta}_1, \hat{\theta}_2\)의 <strong>상대효율</strong>은 분산의 비로 나타냅니다.</p>
+              \[\mathrm{eff}(\hat{\theta}_1,\ \hat{\theta}_2) = \frac{\mathrm{Var}(\hat{\theta}_2)}{\mathrm{Var}(\hat{\theta}_1)} \quad (>1\text{이면 } \hat{\theta}_1 \text{이 더 효율적})\]
+              <p>불편추정량 가운데 분산이 가장 작은 것을 <strong>최소분산 불편추정량(MVUE)</strong>이라 합니다. 정규모집단에서 \(\bar{X}\)가 \(\mu\)의 MVUE입니다.</p>
+
+              <h5>수식 전개 표본평균과 첫 관측값의 비교</h5>
+              <p>\(X_1, \ldots, X_n\)이 독립이면 합의 분산은 분산의 합이고, 상수 \(1/n\)은 제곱되어 밖으로 나옵니다.</p>
+              \[\mathrm{Var}(\bar{X}) = \frac{1}{n^2}\sum_{i=1}^{n}\mathrm{Var}(X_i) = \frac{1}{n^2}\cdot n\sigma^2 = \frac{\sigma^2}{n}\]
+              <p>표본 중 첫 번째 값 하나만 쓰는 추정량 \(X_1\)도 \(E[X_1] = \mu\)인 불편추정량이지만 \(\mathrm{Var}(X_1) = \sigma^2\)입니다. 따라서</p>
+              \[\mathrm{eff}(\bar{X},\ X_1) = \frac{\mathrm{Var}(X_1)}{\mathrm{Var}(\bar{X})} = \frac{\sigma^2}{\sigma^2/n} = n\]
+              <p>표본 전체를 쓰는 \(\bar{X}\)는 \(X_1\)보다 \(n\)배 효율적입니다. \(n\)개의 관측값을 다 쓴 만큼 정보를 알뜰하게 쓴다는 뜻입니다.</p>
+
+              <h5>숫자로 확인 (공통 예제, \(n=2\), \(\mu = 4\))</h5>
+              <ol>
+                <li>\(\bar{X}\)의 9개 값은 2, 3, 4, 3, 4, 5, 4, 5, 6이고 평균 4(불편)입니다. 분산은 \(\dfrac{(-2)^2 + (-1)^2 + 0 + (-1)^2 + 0 + 1^2 + 0 + 1^2 + 2^2}{9} = \dfrac{12}{9} \approx 1.333 = \dfrac{\sigma^2}{n}\).</li>
+                <li>\(X_1\)의 9개 값은 2, 2, 2, 4, 4, 4, 6, 6, 6이고 평균 4(불편)입니다. 분산은 \(\dfrac{4\cdot 3 + 0 + 4\cdot 3}{9} = \dfrac{24}{9} \approx 2.667 = \sigma^2\).</li>
+                <li>둘 다 불편이지만 상대효율 \(= 2.667 / 1.333 = 2 = n\) → \(\bar{X}\)가 <strong>2배 효율적</strong>입니다.</li>
+              </ol>
+              <div class="callout">분산 1.333과 2.667은 <em>추정치가 흩어지는 정도</em>입니다. \(X_1\)은 2, 4, 6 중 어느 값이든 나올 수 있지만, \(\bar{X}\)는 2나 6이 나올 확률이 1/9로 줄고 4 근처(3, 4, 5)에 모입니다.</div>
+
+              <h5>보조 편향이 있는 추정량까지 비교하려면 — MSE</h5>
+              <p>분산 비교는 두 추정량이 <em>모두 불편일 때</em>만 공정합니다. 편향이 있는 추정량까지 한 잣대로 비교하려면 참값에서 벗어난 정도의 제곱의 평균, 즉 평균제곱오차 \(\mathrm{MSE}(\hat{\theta}) = E[(\hat{\theta} - \theta)^2]\)를 씁니다. \(E[\hat{\theta}]\)를 더하고 빼서 묶으면 다음과 같이 분해됩니다.</p>
+              \[\begin{aligned}
+              E[(\hat{\theta} - \theta)^2] &= E\big[\big((\hat{\theta} - E[\hat{\theta}]) + (E[\hat{\theta}] - \theta)\big)^2\big] \\
+              &= \underbrace{E[(\hat{\theta} - E[\hat{\theta}])^2]}_{\mathrm{Var}(\hat{\theta})} + 2\,\underbrace{(E[\hat{\theta}] - \theta)}_{\text{상수}}\underbrace{E[\hat{\theta} - E[\hat{\theta}]]}_{=\,0} + \underbrace{(E[\hat{\theta}] - \theta)^2}_{\mathrm{Bias}^2}
+              \end{aligned}\]
+              <p>가운데 교차항은 \(E[\hat{\theta} - E[\hat{\theta}]] = 0\)이라 사라져 \(\mathrm{MSE} = \mathrm{Var} + \mathrm{Bias}^2\)이 됩니다. 불편추정량이면 편향이 0이라 MSE가 곧 분산이므로, 위 효율성 비교와 정확히 이어집니다.</p>
+              <p><strong>숫자 예.</strong> 일부러 조금 줄인 \(T = 0.9\,\bar{X}\)로 “편향이 있어도 MSE가 작을 수 있는지” 확인해 봅니다. (0.9는 편향과 분산이 맞바뀌는 것을 보이려고 임의로 고른 값이며, 실제 추정에서 쓰는 식이 아닙니다.)</p>
+              <ol>
+                <li>편향: \(E[T] = 0.9 \times 4 = 3.6\)이므로 \(\mathrm{Bias}(T) = -0.4\) — 손해.</li>
+                <li>분산: \(\mathrm{Var}(T) = 0.9^2 \times 1.333 = 1.08\) — \(\bar{X}\)의 1.333보다 줄어드는 이득.</li>
+                <li>\(\mathrm{MSE}(T) = 1.08 + (-0.4)^2 = 1.24\) &lt; \(\mathrm{MSE}(\bar{X}) = 1.333 + 0 = 1.333\). 편향으로 잃은 것(0.16)보다 분산으로 얻은 것(0.253)이 커서 \(T\)의 MSE가 작습니다.</li>
+              </ol>
+              <div class="callout"><strong>정리:</strong> 효율성의 기본은 “불편추정량끼리 분산 비교”이고, MSE는 그 비교를 편향이 있는 추정량까지 넓혀 주는 보조 도구입니다. 편향을 조금 허용해 분산을 크게 줄이는 방법(축소추정 등)이 존재하는 이유이기도 합니다.</div>
+            </div>
+          </details>
+
+          <details class="deep" id="detail-consistent" style="--c:var(--yellow)">
+            <summary>일치성 — \(n\)이 커질 때 왜 참값에 다가갈까? <small>수식 · 숫자</small></summary>
+            <div class="deep-body">
+              <h5>수식 전개 체비쇼프 부등식으로 증명</h5>
+              <p>확률변수 \(Y\)와 \(\varepsilon > 0\)에 대해 체비쇼프 부등식은 \(P(|Y - E[Y]| \ge \varepsilon) \le \dfrac{\mathrm{Var}(Y)}{\varepsilon^2}\)입니다. \(Y = \bar{X}_n\)에 적용하면 \(E[\bar{X}_n] = \mu\), \(\mathrm{Var}(\bar{X}_n) = \sigma^2/n\)이므로</p>
+              \[P\big(|\bar{X}_n - \mu| \ge \varepsilon\big) \le \frac{\sigma^2}{n\,\varepsilon^2} \xrightarrow{\;n\to\infty\;} 0\]
+              <p>어떤 \(\varepsilon\)을 잡아도 오른쪽이 0으로 가므로 \(\bar{X}_n \xrightarrow{p} \mu\)입니다. 이것이 대수의 법칙(약법칙)입니다.</p>
+              <p>일반적으로 <strong>편향 → 0 이고 분산 → 0</strong>이면 (곧 \(\mathrm{MSE} \to 0\)이면) 그 추정량은 일치추정량입니다.</p>
+
+              <h5>숫자로 확인 (\(\sigma^2 = 8/3\), \(\varepsilon = 1\))</h5>
+              <div class="table-scroll">
+                <table class="num-table">
+                  <thead><tr><th>표본크기 \(n\)</th><th>\(\mathrm{Var}(\bar{X}_n) = \sigma^2/n\)</th><th>표준오차 \(\sigma/\sqrt{n}\)</th><th>\(P(|\bar{X}_n - \mu| \ge 1)\)의 상한</th></tr></thead>
+                  <tbody>
+                    <tr><td>2</td><td>1.333</td><td>1.155</td><td>1.333 (1을 넘어 의미 없음)</td></tr>
+                    <tr><td>10</td><td>0.267</td><td>0.516</td><td>0.267</td></tr>
+                    <tr><td>100</td><td>0.0267</td><td>0.163</td><td>0.0267</td></tr>
+                    <tr><td>1,000</td><td>0.00267</td><td>0.0516</td><td>0.00267</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>표본이 10배 늘 때마다 분산은 1/10로 줄고, 표준오차는 \(1/\sqrt{10} \approx 0.316\)배가 됩니다. \(n = 1{,}000\)이면 표본평균이 모평균 4에서 1 이상 벗어날 확률은 0.3%도 되지 않습니다.</p>
+              <div class="callout warn"><strong>불편해도 일치하지 않을 수 있습니다.</strong> 앞의 \(X_1\)은 불편추정량이지만 \(n\)이 아무리 커져도 분산이 \(\sigma^2\)로 그대로여서 참값에 다가가지 않습니다. 반대로 \(\tilde{S}^2\)(\(n\)으로 나눈 분산)은 불편은 아니지만 편향 \(-\sigma^2/n\)이 \(n \to \infty\)에서 0이 되어 일치성은 갖습니다.</div>
+            </div>
+          </details>
+
+          <details class="deep" id="detail-sufficient" style="--c:var(--violet)">
+            <summary>충분성 — 요약해도 정보가 사라지지 않는다는 것의 의미 <small>수식 · 숫자</small></summary>
+            <div class="deep-body">
+              <h5>수식 전개 조건부 확률로 정의</h5>
+              <p>통계량 \(T = T(X_1, \ldots, X_n)\)가 충분하다는 것은, \(T\)의 값이 주어졌을 때 표본의 조건부 분포가 모수 \(\theta\)에 의존하지 않는다는 뜻입니다. 즉 \(T\)를 알고 나면 원자료는 \(\theta\)에 대해 더 알려줄 것이 없습니다.</p>
+              <p>예로 동전을 \(n\)번 던져 앞면이 나오면 \(X_i = 1\)인 베르누이 표본(성공확률 \(p\))에서 \(T = \sum X_i\) (앞면 횟수)를 봅시다. 특정 결과 \(x = (x_1, \ldots, x_n)\)에서 \(\sum x_i = t\)이면</p>
+              \[P(X = x \mid T = t) = \frac{P(X = x)}{P(T = t)} = \frac{p^{t}(1-p)^{n-t}}{\binom{n}{t}\,p^{t}(1-p)^{n-t}} = \frac{1}{\binom{n}{t}}\]
+              <p>\(p\)가 분자·분모에서 모두 약분되어 사라졌습니다. 즉 \(T = t\)일 때 앞면이 나온 <em>위치</em>는 \(p\)와 무관하게 \(\binom{n}{t}\)가지가 똑같이 일어나므로, 순서 정보는 \(p\)에 대해 쓸모가 없습니다.</p>
+
+              <h5>숫자로 확인 (동전 \(n = 3\)번, 앞면 1번 나온 경우 \(T = 1\))</h5>
+              <p>\(T = 1\)이 되는 결과는 (1,0,0), (0,1,0), (0,0,1)의 세 가지입니다.</p>
+              <div class="table-scroll">
+                <table class="num-table">
+                  <thead><tr><th></th><th>\(P(1,0,0)\)</th><th>\(P(T=1)\) = 3가지의 합</th><th>\(P(1,0,0 \mid T=1)\)</th></tr></thead>
+                  <tbody>
+                    <tr><td>\(p = 0.3\)</td><td>\(0.3 \times 0.7 \times 0.7 = 0.147\)</td><td>\(3 \times 0.147 = 0.441\)</td><td>\(0.147 / 0.441 = 1/3\)</td></tr>
+                    <tr><td>\(p = 0.7\)</td><td>\(0.7 \times 0.3 \times 0.3 = 0.063\)</td><td>\(3 \times 0.063 = 0.189\)</td><td>\(0.063 / 0.189 = 1/3\)</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>\(p\)가 0.3이든 0.7이든 조건부 확률이 똑같이 \(1/3\)입니다. 앞면이 <em>몇 번</em> 나왔는지(\(T\))만 기록해도 \(p\)에 관한 정보는 하나도 잃지 않고, 어느 던지기에서 나왔는지는 버려도 됩니다.</p>
+              <div class="callout"><strong>비교:</strong> 첫 번째 던지기 결과 \(X_1\)만 기록하면 나머지 두 번의 정보를 버리게 되어 충분하지 않습니다. 충분성은 “자료를 얼마나 압축해도 정보 손실이 없는가”에 대한 기준입니다.</div>
+
+              <h5>보조 충분통계량을 쉽게 찾는 방법 — 분해정리</h5>
+              <p>충분성을 매번 조건부 확률로 확인하기는 번거롭습니다. <strong>분해정리(Fisher–Neyman)</strong>를 쓰면 표본의 결합확률(밀도)을 다음처럼 두 부분으로 쪼갤 수 있는지만 보면 됩니다.</p>
+              \[f(x;\theta) = g\big(T(x);\ \theta\big)\cdot h(x)\]
+              <p>\(g\)는 모수 \(\theta\)와 통계량 \(T\)의 값만으로 정해지고, \(h\)는 \(\theta\)와 무관한 부분입니다. 이렇게 쪼개지면 \(T\)가 충분통계량입니다. 모수에 관한 정보는 \(T\)에만 실려 있고, 나머지 \(h(x)\)는 모수를 알아내는 데 쓸모가 없다는 뜻입니다.</p>
+              <ol>
+                <li><strong>동전 예:</strong> \(f(x;p) = \underbrace{p^{t}(1-p)^{n-t}}_{g(t;\,p)}\times\underbrace{1}_{h(x)}\), \(t = \sum x_i\). 따라서 \(T = \sum X_i\)가 충분통계량입니다.</li>
+                <li><strong>정규분포 예:</strong> 모평균 \(\mu\)만 모르고 모표준편차 \(\sigma\)는 알려진 \(N(\mu, \sigma^2)\)에서, \(\sum(x_i-\mu)^2 = \sum(x_i-\bar{x})^2 + n(\bar{x}-\mu)^2\)임을 이용하면
+                  \[f(x;\mu) = \underbrace{\exp\!\Big(-\frac{n(\bar{x}-\mu)^2}{2\sigma^2}\Big)}_{g(\bar{x};\,\mu)}\times\underbrace{(2\pi\sigma^2)^{-n/2}\exp\!\Big(-\frac{\sum(x_i-\bar{x})^2}{2\sigma^2}\Big)}_{h(x)}\]
+                  \(\mu\)가 들어 있는 앞부분은 표본을 \(\bar{x}\)로만 쓰므로 \(\bar{X}\)가 \(\mu\)의 충분통계량입니다.</li>
+              </ol>
+              <div class="callout"><strong>왜 “\(\sigma\)를 안다”고 가정할까?</strong> 충분성은 <em>“무엇에 대한 정보인가”</em>, 즉 추정하려는 모수를 기준으로 판단합니다. \(\sigma\)가 알려진 상수이면 위 \(h(x)\)에 있는 \(\sigma\)는 그냥 숫자라서 \(\mu\)와 무관하게 분리됩니다. 반대로 \(\sigma\)도 모르는 모수라면 \(h(x)\)에 미지의 \(\sigma\)가 들어 있어 분리되지 않으므로, \(\bar{X}\) 하나로는 부족하고 \(\big(\bar{X},\ S^2\big)\)를 함께 알아야 충분해집니다.</div>
+            </div>
+          </details>
         </div>
       </article>
 
@@ -400,22 +565,22 @@
 
       <article class="block wide" id="ci-formula">
         <div class="kicker">Confidence Interval</div>
-        <h3>100(1 − α)% 신뢰구간 구하기</h3>
-        <p>모분산 <span class="eq">σ<span class="op">²</span></span>을 알고 있는 정규모집단에서 표본을 뽑으면, 표본평균은 <span class="eq">X̄ ~ N(μ, σ<span class="op">²</span>/n)</span>을 따릅니다. 이를 표준화하면：</p>
+        <h3>100(1 − \(\alpha\))% 신뢰구간 구하기</h3>
+        <p>모분산 \(\sigma ^{2}\)을 알고 있는 정규모집단에서 표본을 뽑으면, 표본평균은 \(\bar{X} \sim  N(\mu , \sigma ^{2}/n)\)을 따릅니다. 이를 표준화하면：</p>
         <div class="card formula-card">
-          <span class="eq">Z = <span class="frac"><span class="num">X̄ − μ</span><span class="den">σ/<span class="radical"><span class="radicand">n</span></span></span></span> ~ N(0, 1)</span>
+          \[Z = \frac{\bar{X} - \mu }{\sigma /\sqrt{n}} \sim  N(0, 1)\]
         </div>
-        <p>표준정규분포에서 가운데 <span class="eq">1 − α</span>만큼의 확률을 차지하는 구간은 <span class="eq">[−z<sub>α/2</sub>, z<sub>α/2</sub>]</span>입니다.</p>
+        <p>표준정규분포에서 가운데 \(1 - \alpha\)만큼의 확률을 차지하는 구간은 \([-z_{\alpha /2}, z_{\alpha /2}]\)입니다.</p>
         <div class="card formula-card">
-          <span class="eq">P(−z<sub>α/2</sub> ≤ Z ≤ z<sub>α/2</sub>) = 1 − α</span>
+          \[P(-z_{\alpha /2} \le  Z \le  z_{\alpha /2}) = 1 - \alpha\]
         </div>
-        <p>이 부등식을 <span class="eq">μ</span>에 대해 정리하면 100(1 − α)% 신뢰구간을 얻습니다.</p>
+        <p>이 부등식을 \(\mu\)에 대해 정리하면 \(100(1-\alpha)\%\) 신뢰구간을 얻습니다.</p>
         <div class="card formula-card" style="font-size:20px;">
-          <span class="eq">X̄ ± z<sub>α/2</sub> · <span class="frac"><span class="num">σ</span><span class="den"><span class="radical"><span class="radicand">n</span></span></span></span></span>
-          <div class="note">모분산 <span class="eq" style="font-size:1em;">σ</span>을 모를 때는 표본표준편차 <span class="eq" style="font-size:1em;">s</span>와 자유도 n−1의 t분포로 대체합니다 (X̄ ± t<sub>α/2, n−1</sub>·s/√n).</div>
+          \[\bar{X} \pm  z_{\alpha /2} \cdot  \frac{\sigma }{\sqrt{n}}\]
+          <div class="note">모분산 \(\sigma\)을 모를 때는 표본표준편차 \(s\)와 자유도 \(n-1\)의 \(t\)분포로 대체합니다 (\(\bar{X} \pm t_{\alpha/2,\,n-1} \cdot s/\sqrt{n}\)).</div>
         </div>
 
-        <p>신뢰수준을 바꾸면 <span class="eq">z<sub>α/2</sub></span>와 구간의 폭이 어떻게 달라지는지 직접 눌러보세요. 아래 예시는 <span class="eq">σ = 2</span>, <span class="eq">n = 4</span>일 때입니다.</p>
+        <p>신뢰수준을 바꾸면 \(z_{\alpha /2}\)와 구간의 폭이 어떻게 달라지는지 직접 눌러보세요. 아래 예시는 \(\sigma  = 2\), \(n = 4\)일 때입니다.</p>
         <div class="level-row" role="group" aria-label="신뢰수준 선택">
           <button class="level-btn" data-level="80" type="button">80%</button>
           <button class="level-btn" data-level="90" type="button">90%</button>
@@ -427,9 +592,9 @@
           <svg id="curve-svg" viewBox="0 0 640 220"></svg>
         </div>
         <div class="readout-row">
-          <div class="readout"><div class="k">z<sub>α/2</sub></div><div class="v" id="z-value">1.960</div></div>
-          <div class="readout"><div class="k">오차범위 (σ/√n = 1)</div><div class="v" id="margin-value">1.960</div></div>
-          <div class="readout"><div class="k">신뢰구간 예시</div><div class="v" id="ci-example" style="font-size:14px;">x̄ ± 1.960</div></div>
+          <div class="readout"><div class="k">\(z_{\alpha/2}\)</div><div class="v" id="z-value">1.960</div></div>
+          <div class="readout"><div class="k">오차범위 (\(\sigma/\sqrt{n}\) = 1)</div><div class="v" id="margin-value">1.960</div></div>
+          <div class="readout"><div class="k">신뢰구간 예시</div><div class="v" id="ci-example" style="font-size:14px;">\(\bar{x} \pm 1.960\)</div></div>
         </div>
       </article>
 
@@ -437,12 +602,12 @@
         <div class="kicker">What 95% Really Means</div>
         <h3>95% 신뢰구간의 의미</h3>
         <div class="callout"><strong>흔한 오해:</strong> “이미 계산된 구간이 모평균을 포함할 확률이 95%”가 아닙니다. 모평균은 고정된 상수이므로 이미 정해진 하나의 구간에 대해서는 포함 여부가 확률적이지 않습니다. 정확한 해석은 <strong>“같은 절차를 반복해서 신뢰구간을 100번 만들면, 그중 약 95개가 모평균을 포함한다”</strong>는 것입니다.</div>
-        <p>직접 확인해봅시다. 모평균 <span class="eq">μ = 1</span>, 모표준편차 <span class="eq">σ = 2</span>인 정규분포에서 크기 <span class="eq">n = 4</span>인 표본을 100번 독립적으로 뽑고, 매번 95% 신뢰구간 <span class="eq">x̄ ± 1.96</span>을 계산합니다. 모평균 1을 포함하지 못한 구간은 붉은색으로 표시됩니다.</p>
+        <p>직접 확인해봅시다. 모평균 \(\mu  = 1\), 모표준편차 \(\sigma  = 2\)인 정규분포에서 크기 \(n = 4\)인 표본을 100번 독립적으로 뽑고, 매번 95% 신뢰구간 \(\bar{x} \pm  1.96\)을 계산합니다. 모평균 1을 포함하지 못한 구간은 붉은색으로 표시됩니다.</p>
 
         <div class="sim-legend">
           <span class="sw"><span class="dot blue"></span>모평균을 포함</span>
           <span class="sw"><span class="dot red"></span>모평균을 포함하지 못함</span>
-          <span class="sw"><span class="dash"></span>모평균 μ = 1</span>
+          <span class="sw"><span class="dash"></span>모평균 \(\mu = 1\)</span>
         </div>
 
         <div class="chart-scroll" id="sim-scroll">
@@ -464,26 +629,26 @@
       <article class="block wide" id="moe-formula">
         <div class="kicker">Margin of Error</div>
         <h3>표본오차는 어떻게 계산할까</h3>
-        <p>여론조사는 모집단 중 지지율 같은 <strong>비율(proportion)</strong> <span class="eq">p</span>를 추정합니다. 표본에서 얻은 응답 비율 <span class="eq">p̂</span>은 표본크기 <span class="eq">n</span>이 충분히 크면 근사적으로 정규분포를 따릅니다.</p>
+        <p>여론조사는 모집단 중 지지율 같은 <strong>비율(proportion)</strong> \(p\)를 추정합니다. 표본에서 얻은 응답 비율 \(\hat{p}\)은 표본크기 \(n\)이 충분히 크면 근사적으로 정규분포를 따릅니다.</p>
         <div class="card formula-card">
-          <span class="eq">p̂ ~ N<span class="op">(</span>p, <span class="frac"><span class="num">p(1 − p)</span><span class="den">n</span></span><span class="op">)</span></span>
+          \[\hat{p} \sim N\!\left(p,\ \frac{p(1 - p)}{n}\right)\]
         </div>
-        <p>앞서 살펴본 것과 같은 방식으로 <span class="eq">p</span>에 대한 100(1 − α)% 신뢰구간을 만들 수 있습니다.</p>
+        <p>앞서 살펴본 것과 같은 방식으로 \(p\)에 대한 \(100(1-\alpha)\%\) 신뢰구간을 만들 수 있습니다.</p>
         <div class="card formula-card">
-          <span class="eq">p̂ ± z<sub>α/2</sub> · <span class="radical"><span class="radicand"><span class="frac"><span class="num">p̂(1 − p̂)</span><span class="den">n</span></span></span></span></span>
+          \[\hat{p} \pm  z_{\alpha /2} \cdot  \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\]
           <div class="note">± 뒤에 붙는 이 값이 바로 <strong>표본오차(margin of error)</strong>입니다.</div>
         </div>
-        <p>실제 응답 비율 <span class="eq">p̂</span>은 문항마다 다르지만, 여론조사기관은 보고서에 <em>하나의</em> 표본오차만 표시합니다. <span class="eq">p̂(1 − p̂)</span>은 <span class="eq">p̂ = 0.5</span>일 때 가장 커지므로, 오차가 최대가 되는 이 값을 대입해 <strong>가장 보수적인(넓은) 오차</strong>를 미리 계산해 두기 때문입니다.</p>
+        <p>실제 응답 비율 \(\hat{p}\)은 문항마다 다르지만, 여론조사기관은 보고서에 <em>하나의</em> 표본오차만 표시합니다. \(\hat{p}(1 - \hat{p})\)은 \(\hat{p} = 0.5\)일 때 가장 커지므로, 오차가 최대가 되는 이 값을 대입해 <strong>가장 보수적인(넓은) 오차</strong>를 미리 계산해 두기 때문입니다.</p>
         <div class="card formula-card" style="font-size:20px;">
-          <span class="eq">E = <span class="frac"><span class="num">z<sub>α/2</sub></span><span class="den">2<span class="radical"><span class="radicand">n</span></span></span></span></span>
-          <div class="note">n = 1,000, 95% 신뢰수준일 때: E = 1.96 / (2√1000) ≈ 0.031 → <strong>±3.1%p</strong> — 실제 보고서 표현과 일치합니다.</div>
+          \[E = \frac{z_{\alpha /2}}{2\sqrt{n}}\]
+          <div class="note">n = 1,000, 95% 신뢰수준일 때: \(E = \dfrac{1.96}{2\sqrt{1000}} \approx 0.031\) → <strong>±3.1%p</strong> — 실제 보고서 표현과 일치합니다.</div>
         </div>
       </article>
 
       <article class="block wide" id="moe-explorer">
         <div class="kicker">Try It</div>
         <h3>표본수를 조절해보기</h3>
-        <p>표본수 <span class="eq">n</span>과 신뢰수준을 바꿔가며 표본오차가 어떻게 달라지는지 확인하세요. 실제 여론조사에서 자주 쓰이는 표본수는 칩을 눌러 바로 확인할 수 있습니다.</p>
+        <p>표본수 \(n\)과 신뢰수준을 바꿔가며 표본오차가 어떻게 달라지는지 확인하세요. 실제 여론조사에서 자주 쓰이는 표본수는 칩을 눌러 바로 확인할 수 있습니다.</p>
         <div class="level-row" role="group" aria-label="표본오차 신뢰수준 선택">
           <button class="level-btn moe-level" data-level="80" type="button">80%</button>
           <button class="level-btn moe-level" data-level="90" type="button">90%</button>
@@ -517,8 +682,8 @@
         <div class="kicker">What It Means</div>
         <h3>표본오차, 이렇게 읽습니다</h3>
         <div class="callout">“95% 신뢰수준에서 표본오차 ±3.1%p”란, <strong>같은 방식으로 조사를 100번 반복하면 그중 약 95번은 실제 모집단의 응답률이 “발표된 응답률 ± 3.1%p” 구간 안에 들어온다</strong>는 뜻입니다. 앞서 살펴본 95% 신뢰구간의 해석과 정확히 같은 논리입니다.</div>
-        <p>표본수를 늘리면 오차는 줄어들지만, <span class="eq">1/<span class="radical"><span class="radicand">n</span></span></span>에 비례해 줄어들기 때문에 <strong>오차를 절반으로 줄이려면 표본을 4배로 늘려야</strong> 합니다. 위 슬라이더로 n = 1,000에서 n = 4,000으로 옮겨 직접 확인해보세요.</p>
-        <div class="callout warn"><strong>흔한 오해 — “오차범위 내 접전”.</strong> 두 후보의 지지율 차이가 표본오차보다 작다고 해서 통계적으로 우열이 없다고 단정할 수는 없습니다. 같은 표본에서 얻은 두 비율의 <em>차이</em>에 대한 오차는 단일 비율의 오차보다 크며(약 √2배), n = 1,000 · 95% 기준으로는 약 ±4.4%p가 됩니다.</div>
+        <p>표본수를 늘리면 오차는 줄어들지만, \(1/\sqrt{n}\)에 비례해 줄어들기 때문에 <strong>오차를 절반으로 줄이려면 표본을 4배로 늘려야</strong> 합니다. 위 슬라이더로 n = 1,000에서 n = 4,000으로 옮겨 직접 확인해보세요.</p>
+        <div class="callout warn"><strong>흔한 오해 — “오차범위 내 접전”.</strong> 두 후보의 지지율 차이가 표본오차보다 작다고 해서 통계적으로 우열이 없다고 단정할 수는 없습니다. 같은 표본에서 얻은 두 비율의 <em>차이</em>에 대한 오차는 단일 비율의 오차보다 크며(약 \(\sqrt{2}\)배), n = 1,000 · 95% 기준으로는 약 ±4.4%p가 됩니다.</div>
         <p class="dim">표본오차는 무작위 표집 과정에서 생기는 오차만을 설명합니다. 무응답·응답 거부에 따른 편향, 질문 문항의 설계, 조사 방식(전화면접·ARS·온라인 패널 등)에서 비롯되는 오차는 표본오차에 포함되지 않습니다.</p>
       </article>
     </section>
@@ -719,7 +884,7 @@
     var margin = z * se;
     document.getElementById("z-value").textContent = z.toFixed(3);
     document.getElementById("margin-value").textContent = margin.toFixed(3);
-    document.getElementById("ci-example").textContent = "x̄ ± " + margin.toFixed(3);
+    document.getElementById("ci-example").textContent = "\\(\\bar{x} \\pm " + margin.toFixed(3) + "\\)";
 
     document.querySelectorAll(".level-btn").forEach(function (b) {
       b.classList.toggle("active", Number(b.dataset.level) === levelPct);
@@ -872,7 +1037,7 @@
     } catch (e) { /* getBBox unavailable before layout; skip backing rect */ }
 
     function showTip(ev, d) {
-      tooltip.innerHTML = "<strong>" + d.idx + "번째 추출</strong><br>표본평균 x̄ = " + d.mean.toFixed(2) +
+      tooltip.innerHTML = "<strong>" + d.idx + "번째 추출</strong><br>표본평균 \\(\\bar{x}\\) = " + d.mean.toFixed(2) +
         "<br>95% 신뢰구간 = [" + d.low.toFixed(2) + ", " + d.high.toFixed(2) + "]<br>" +
         (d.covers ? "모평균 포함 ✓" : "모평균 미포함 ✕");
       tooltip.hidden = false;
@@ -974,6 +1139,14 @@
     document.querySelectorAll(".n-chip").forEach(function (chip) { chip.addEventListener("click", function () { document.getElementById("n-slider").value = chip.dataset.n; updateMoe(); }); });
     document.querySelectorAll(".moe-level").forEach(function (button) { button.addEventListener("click", function () { moeLevel = Number(button.dataset.level); updateMoe(); }); });
   }
+  /* ---------- 카드 링크로 이동하면 해당 펼침 메뉴를 연다 ---------- */
+  function openDeepFromHash() {
+    var t = location.hash ? document.getElementById(location.hash.slice(1)) : null;
+    if (t && t.matches("details.deep")) { t.open = true; t.scrollIntoView({ block: "start" }); }
+  }
+  window.addEventListener("hashchange", openDeepFromHash);
+  openDeepFromHash();
+
   var railLinks = Array.prototype.slice.call(document.querySelectorAll("#rail-nav a"));
   var railObserver = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {

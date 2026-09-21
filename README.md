@@ -24,6 +24,9 @@ uv run python main.py
 - 공통 스타일: `docs/assets/styles.css`
 - 이미지와 첨부 자료: `docs/assets/` 아래에 추가
 
+수식은 `docs/assets/katex/`의 KaTeX로 표기합니다(`\\( ... \\)`, `\\[ ... \\]`).
+사용법은 [DESIGN.md](DESIGN.md)의 "수식 표기"를 참고하세요.
+
 GitHub Pages의 프로젝트 사이트 경로에서도 동작하도록 내부 링크에는 `/`로
 시작하는 절대 경로 대신 상대 경로를 사용합니다.
 

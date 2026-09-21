@@ -21,6 +21,7 @@
 <meta name="twitter:description" content="가설, 유의수준, 검정력, p값과 가설검정 절차를 시뮬레이션으로 탐구합니다.">
 <meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
 <meta name="twitter:image:alt" content="통계 수업 자료 아이콘">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
 <style>
   :root {
     --page: #f9f9f7;
@@ -69,15 +70,8 @@
     padding-inline: 20px;
   }
   h1, h2, h3, h4 { font-family: "Gowun Batang", "Noto Serif KR", serif; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
-  .eq { font-family: "STIX Two Text", "Cambria Math", "Times New Roman", serif; font-style: italic; font-size: 1.06em; }
-  .eq .op, .eq .kr { font-style: normal; }
-  .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 0.18em; line-height: 1.15; }
-  .frac .num { border-bottom: 1.4px solid currentColor; padding: 0 0.22em 0.06em; }
-  .frac .den { padding: 0.06em 0.22em 0; }
-  .radical { position: relative; display: inline-block; padding: 0 0.1em 0 0.62em; }
-  .radical::before { content: "\221A"; position: absolute; left: 0; top: -0.02em; font-size: 1.12em; }
-  .radical .radicand { border-top: 1.4px solid currentColor; padding: 0 0.14em; }
-  sub, sup { font-size: 0.68em; }
+  .katex-display { margin: 0.4em 0; overflow-x: auto; overflow-y: hidden; }
+  .formula-card .katex-display { margin: 0; }
 
   a { color: var(--blue); }
   .page { max-width: 1040px; margin: 0 auto; padding-bottom: 64px; }
@@ -127,7 +121,6 @@
   .prop-card .bar { width: 28px; height: 3px; border-radius: 2px; margin-bottom: 10px; }
   .prop-card h4 { font-size: 15.5px; margin: 0 0 6px; font-family: "IBM Plex Sans KR", sans-serif; font-weight: 700; }
   .prop-card p { font-size: 13.5px; color: var(--ink-2); margin: 0 0 10px; }
-  .prop-card .eq { font-size: 14px; display: block; }
 
   .btn { font-family: "IBM Plex Sans KR", sans-serif; font-size: 13.5px; font-weight: 600; background: var(--ink); color: var(--page); border: none; border-radius: 9px; padding: 9px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
   .btn:hover { opacity: 0.88; }
@@ -235,6 +228,9 @@
   .tocbar { display:none; }
   @media(max-width:860px) { :root { --rail:0px; } .rail { position:static; width:auto; height:auto; padding:22px 0 8px; } .rail nav { flex-direction:row; padding:0 16px 8px; overflow-x:auto; } .rail nav a { display:inline-grid; grid-template-columns:28px max-content; padding:8px 14px; border-bottom:3px solid transparent; border-left:0; white-space:nowrap; } .rail nav a.on { border-bottom-color:var(--yellow); border-left:0; } .rail footer { display:none; } .rail .rail-back { margin:0 16px 10px; } .rail h1 { margin:0 16px 16px; } .page { margin-left:0; padding:0 18px 80px; } .masthead { padding:42px 0 32px; } }
 </style>
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
 </head>
 <body>
 <a class="skip-link" href="#content">본문으로 건너뛰기</a>
@@ -281,29 +277,29 @@
       <article class="block" id="hypotheses">
         <div class="kicker">Hypotheses</div>
         <h3>가설 — 영가설과 대립가설</h3>
-        <p><strong>영가설(귀무가설, H₀)</strong>은 "차이가 없다·효과가 없다"처럼 기본적으로 참이라고 가정하고 검증 대상으로 삼는 잠정적 주장입니다. <strong>대립가설(H₁)</strong>은 영가설이 틀렸을 때 대신 받아들이는, 연구자가 실제로 보이고 싶어하는 주장입니다.</p>
+        <p><strong>영가설(귀무가설, \(H_{0}\))</strong>은 "차이가 없다·효과가 없다"처럼 기본적으로 참이라고 가정하고 검증 대상으로 삼는 잠정적 주장입니다. <strong>대립가설(\(H_{1}\))</strong>은 영가설이 틀렸을 때 대신 받아들이는, 연구자가 실제로 보이고 싶어하는 주장입니다.</p>
         <div class="card formula-card">
-          <span class="eq">H<sub>0</sub> : μ = μ<sub>0</sub></span>
-          <div class="note">양측: H₁ : μ ≠ μ₀ &nbsp;|&nbsp; 단측: H₁ : μ &lt; μ₀ 또는 H₁ : μ &gt; μ₀</div>
+          \[H_{0} : \mu  = \mu _{0}\]
+          <div class="note">양측: \(H_{1} : \mu \ne \mu_{0}\) &nbsp;|&nbsp; 단측: \(H_{1} : \mu < \mu_{0}\) 또는 \(H_{1} : \mu > \mu_{0}\)</div>
         </div>
-        <p class="dim">가설검정은 H₁이 맞다는 것을 직접 증명하는 절차가 아니라, "H₀가 맞다면 이런 데이터가 나올 가능성이 얼마나 낮은가"를 따져 H₀를 <em>기각할지 말지</em>를 결정하는 절차입니다.</p>
+        <p class="dim">가설검정은 \(H_{1}\)이 맞다는 것을 직접 증명하는 절차가 아니라, "\(H_{0}\)가 맞다면 이런 데이터가 나올 가능성이 얼마나 낮은가"를 따져 \(H_{0}\)를 <em>기각할지 말지</em>를 결정하는 절차입니다.</p>
       </article>
 
       <article class="block wide" id="alpha-power">
         <div class="kicker">Significance Level &amp; Power</div>
         <h3>유의수준과 파워</h3>
-        <p><strong>유의수준(α)</strong>은 영가설이 실제로 참인데도 잘못 기각할 확률(1종 오류율)의 상한입니다. 반대로 영가설이 실제로 거짓인데 기각하지 못하는 오류를 <strong>2종 오류(β)</strong>라 하고, 그 반대 확률 <span class="eq">1 − β</span>를 <strong>검정력(power)</strong>이라 부릅니다 — 거짓인 영가설을 올바르게 기각할 확률입니다.</p>
+        <p><strong>유의수준(\(\alpha\))</strong>은 영가설이 실제로 참인데도 잘못 기각할 확률(1종 오류율)의 상한입니다. 반대로 영가설이 실제로 거짓인데 기각하지 못하는 오류를 <strong>2종 오류(\(\beta\))</strong>라 하고, 그 반대 확률 \(1 - \beta\)를 <strong>검정력(power)</strong>이라 부릅니다 — 거짓인 영가설을 올바르게 기각할 확률입니다.</p>
         <div class="two-col">
           <div class="card info-card">
-            <h5>1종 오류 (α)</h5>
-            <ul><li>H₀가 <strong>참인데</strong> 기각</li><li>연구자가 직접 정하는 값 (보통 .05)</li><li>"거짓 양성"에 해당</li></ul>
+            <h5>1종 오류 (\(\alpha\))</h5>
+            <ul><li>\(H_{0}\)가 <strong>참인데</strong> 기각</li><li>연구자가 직접 정하는 값 (보통 .05)</li><li>"거짓 양성"에 해당</li></ul>
           </div>
           <div class="card info-card">
-            <h5>2종 오류 (β)</h5>
-            <ul><li>H₀가 <strong>거짓인데</strong> 기각하지 못함</li><li>효과크기·표본크기·α에 따라 달라짐</li><li>"거짓 음성"에 해당</li></ul>
+            <h5>2종 오류 (\(\beta\))</h5>
+            <ul><li>\(H_{0}\)가 <strong>거짓인데</strong> 기각하지 못함</li><li>효과크기·표본크기·\(\alpha\)에 따라 달라짐</li><li>"거짓 음성"에 해당</li></ul>
           </div>
         </div>
-        <p>아래에서 영가설의 분포(검정 α = 0.05, 양측)와 실제 모평균이 다를 때의 분포를 겹쳐보면, 두 분포가 멀어질수록 검정력이 커지는 것을 볼 수 있습니다. 실제 모평균 슬라이더를 움직여보세요.</p>
+        <p>아래에서 영가설의 분포(검정 \(\alpha = 0.05\), 양측)와 실제 모평균이 다를 때의 분포를 겹쳐보면, 두 분포가 멀어질수록 검정력이 커지는 것을 볼 수 있습니다. 실제 모평균 슬라이더를 움직여보세요.</p>
         <div class="slider-row">
           <input type="range" id="power-slider" min="164" max="180" step="0.5" value="170" aria-label="실제 모평균">
           <span class="n-value"><span id="power-mean-value">170.0</span></span>
@@ -315,27 +311,27 @@
           <svg id="power-svg" viewBox="0 0 640 230"></svg>
         </div>
         <div class="sim-legend">
-          <span class="sw"><span class="dot" style="background:var(--ink)"></span>H₀ 분포 N(172, 1.5²)</span>
-          <span class="sw"><span class="dot blue"></span>실제 분포 N(<span id="power-mean-legend">170</span>, 1.5²)</span>
-          <span class="sw"><span class="swatch" style="background:var(--blue);opacity:.3"></span>검정력(1−β)</span>
+          <span class="sw"><span class="dot" style="background:var(--ink)"></span>\(H_{0}\) 분포 \(N(172,\ 1.5^{2})\)</span>
+          <span class="sw"><span class="dot blue"></span>실제 분포 \(N(\)<span id="power-mean-legend">170</span>\(,\ 1.5^{2})\)</span>
+          <span class="sw"><span class="swatch" style="background:var(--blue);opacity:.3"></span>검정력(\(1-\beta\))</span>
         </div>
         <div class="readout-row">
-          <div class="readout"><div class="k">실제 모평균과 μ₀의 차이</div><div class="v" id="power-diff">−2.0</div></div>
-          <div class="readout"><div class="k">검정력 (1−β)</div><div class="v" id="power-value">0.266</div></div>
-          <div class="readout"><div class="k">2종 오류 β</div><div class="v" id="beta-value">0.734</div></div>
+          <div class="readout"><div class="k">실제 모평균과 \(\mu_{0}\)의 차이</div><div class="v" id="power-diff">−2.0</div></div>
+          <div class="readout"><div class="k">검정력 (\(1-\beta\))</div><div class="v" id="power-value">0.266</div></div>
+          <div class="readout"><div class="k">2종 오류 \(\beta\)</div><div class="v" id="beta-value">0.734</div></div>
         </div>
-        <p class="dim">실제 평균이 μ₀ = 172와 같아지는 지점(슬라이더를 172로)에서는 검정력이 정확히 α와 같아집니다 — H₀가 참이라면 "올바른 기각"이라는 개념 자체가 없기 때문입니다.</p>
+        <p class="dim">실제 평균이 \(\mu_{0} = 172\)와 같아지는 지점(슬라이더를 172로)에서는 검정력이 정확히 \(\alpha\)와 같아집니다 — \(H_{0}\)가 참이라면 "올바른 기각"이라는 개념 자체가 없기 때문입니다.</p>
       </article>
 
       <article class="block" id="test-stat">
         <div class="kicker">Test Statistic</div>
         <h3>검정통계량</h3>
-        <p>표본으로부터 계산하는 하나의 숫자로, 관측값이 영가설에서 얼마나 벗어나 있는지를 표준화된 단위로 나타냅니다. 모표준편차 <span class="eq">σ</span>를 아는 경우(z-검정)에는 표본평균을 다음과 같이 표준화합니다.</p>
+        <p>표본으로부터 계산하는 하나의 숫자로, 관측값이 영가설에서 얼마나 벗어나 있는지를 표준화된 단위로 나타냅니다. 모표준편차 \(\sigma\)를 아는 경우(z-검정)에는 표본평균을 다음과 같이 표준화합니다.</p>
         <div class="card formula-card">
-          <span class="eq">Z = <span class="frac"><span class="num">X̄ − μ<sub>0</sub></span><span class="den">σ/<span class="radical"><span class="radicand">n</span></span></span></span></span>
-          <div class="note">σ를 모를 때는 표본표준편차 s로 대체하고 자유도 n−1의 t분포를 사용합니다 (t-검정).</div>
+          \[Z = \frac{\bar{X} - \mu _{0}}{\sigma /\sqrt{n}}\]
+          <div class="note">\(\sigma\)를 모를 때는 표본표준편차 s로 대체하고 자유도 n−1의 t분포를 사용합니다 (t-검정).</div>
         </div>
-        <p class="dim">Z가 0에서 멀리 떨어질수록 — 즉 표본평균이 영가설이 예측하는 값 μ₀에서 멀리 떨어질수록 — 영가설에 불리한 증거가 됩니다.</p>
+        <p class="dim">Z가 0에서 멀리 떨어질수록 — 즉 표본평균이 영가설이 예측하는 값 \(\mu_{0}\)에서 멀리 떨어질수록 — 영가설에 불리한 증거가 됩니다.</p>
       </article>
 
       <article class="block wide" id="p-value">
@@ -343,14 +339,14 @@
         <h3>유의확률(p-value)과 효과크기</h3>
         <p><strong>유의확률(p-value)</strong>은 영가설이 참이라고 가정했을 때, 지금 관측한 검정통계량만큼 극단적이거나 더 극단적인 값이 나올 확률입니다. p-값이 작을수록 "영가설이 참이라면 일어나기 힘든 일이 일어났다"는 뜻이 되어 영가설에 불리한 증거가 됩니다.</p>
         <div class="card formula-card">
-          <span class="eq">p = P<span class="op">(</span> |Z| ≥ |z<sub>관측</sub>| <span class="op">∣</span> H<sub>0</sub> <span class="op">)</span></span>
+          \[p = P( |Z| \ge  |z_{\text{관측}}| \mid  H_{0} )\]
           <div class="note">양측검정 기준. 단측검정은 한쪽 꼬리의 확률만 계산합니다.</div>
         </div>
 
         <h3 style="margin-top:28px;">효과크기 (Effect Size)</h3>
         <p>p-값은 표본크기가 커지면 아주 작은 차이에도 작아질 수 있어(앞 절의 표본오차와 같은 논리), "통계적으로 유의함"이 "실질적으로 의미 있음"을 보장하지 않습니다. 이를 보완하는 지표가 <strong>효과크기</strong>이며, 표준편차 단위로 차이의 크기를 나타내는 Cohen's d가 대표적입니다.</p>
         <div class="card formula-card">
-          <span class="eq">d = <span class="frac"><span class="num">X̄ − μ<sub>0</sub></span><span class="den">σ</span></span></span>
+          \[d = \frac{\bar{X} - \mu _{0}}{\sigma }\]
         </div>
         <div class="effect-row">
           <span class="effect-chip">d ≈ <b>0.2</b> — 작은 효과</span>
@@ -391,21 +387,21 @@
         <h3>판정</h3>
         <p>다음 두 기준은 항상 같은 결론을 줍니다.</p>
         <div class="card formula-card" style="font-size:16px;">
-          <span class="eq">|Z| &gt; z<sub>critical</sub></span> &nbsp;⇔&nbsp; <span class="eq">p &lt; α</span>
-          <div class="note">둘 중 하나를 만족하면 H₀를 기각하고, 그렇지 않으면 기각하지 못합니다.</div>
+          \(|Z| > z_{\text{critical}} \iff p < \alpha\)
+          <div class="note">둘 중 하나를 만족하면 \(H_{0}\)를 기각하고, 그렇지 않으면 기각하지 못합니다.</div>
         </div>
-        <p class="dim">이때 "영가설을 <strong>채택한다(accept)</strong>"라는 표현은 피하는 것이 정확합니다. 데이터가 H₀를 기각할 만큼 극단적이지 않았을 뿐, H₀가 참이라고 적극적으로 입증된 것은 아니기 때문입니다. 그래서 "기각하지 못했다(fail to reject)" 또는 "기각하지 않았다(retained)"라는 표현을 씁니다.</p>
+        <p class="dim">이때 "영가설을 <strong>채택한다(accept)</strong>"라는 표현은 피하는 것이 정확합니다. 데이터가 \(H_{0}\)를 기각할 만큼 극단적이지 않았을 뿐, \(H_{0}\)가 참이라고 적극적으로 입증된 것은 아니기 때문입니다. 그래서 "기각하지 못했다(fail to reject)" 또는 "기각하지 않았다(retained)"라는 표현을 씁니다.</p>
       </article>
     </section>
 
     <section id="worked-example">
       <div class="section-head"><span class="section-num">02</span><h2>예제로 직접 해보기</h2></div>
-      <p class="section-sub">평균 170, 표준편차 6인 정규모집단 N(170, 6²)에서 표본 16개를 뽑아, "모평균이 172인가?"를 검정합니다. 실제 모평균(170)과 영가설이 주장하는 값(172)에 일부러 차이를 두어, 검정이 어떻게 작동하는지 살펴봅니다.</p>
+      <p class="section-sub">평균 170, 표준편차 6인 정규모집단 \(N(170,\ 6^{2})\)에서 표본 16개를 뽑아, "모평균이 172인가?"를 검정합니다. 실제 모평균(170)과 영가설이 주장하는 값(172)에 일부러 차이를 두어, 검정이 어떻게 작동하는지 살펴봅니다.</p>
 
       <article class="block wide" id="ex-sample">
         <div class="kicker">Sample</div>
         <h3>표본 살펴보기</h3>
-        <p>아래는 N(170, 6²)에서 뽑은 표본 16개입니다. 점 하나가 관측값 하나이고, 실선은 표본평균 <span class="eq">X̄</span>, 점선은 영가설이 주장하는 값 <span class="eq">μ₀ = 172</span>입니다.</p>
+        <p>아래는 \(N(170,\ 6^{2})\)에서 뽑은 표본 16개입니다. 점 하나가 관측값 하나이고, 실선은 표본평균 \(\bar{X}\), 점선은 영가설이 주장하는 값 \(\mu _{0} = 172\)입니다.</p>
         <div class="curve-wrap">
           <svg id="sample-strip-svg" viewBox="0 0 640 110"></svg>
         </div>
@@ -419,17 +415,17 @@
         <div class="step-head"><span class="step-badge">1</span><h3>가설수립</h3></div>
         <p>모평균이 172인지를 검정하므로, 두 경우 모두 영가설은 같습니다.</p>
         <div class="card formula-card">
-          <span class="eq">H<sub>0</sub> : μ = 172</span>
+          \[H_{0} : \mu  = 172\]
         </div>
         <div class="two-col">
           <div class="card">
             <div class="kicker">양측검정</div>
-            <span class="eq">H<sub>1</sub> : μ ≠ 172</span>
+            \(H_{1} : \mu  \ne  172\)
             <p class="dim" style="margin-top:10px;">172보다 크든 작든, "다르다"는 것만 검증하고 싶을 때.</p>
           </div>
           <div class="card">
             <div class="kicker">단측검정</div>
-            <span class="eq">H<sub>1</sub> : μ &lt; 172</span>
+            \(H_{1} : \mu  < 172\)
             <p class="dim" style="margin-top:10px;">사전에 "172보다 작을 것"이라는 방향을 예상하고 있을 때.</p>
           </div>
         </div>
@@ -437,12 +433,12 @@
 
       <article class="block" id="ex-alpha">
         <div class="step-head"><span class="step-badge">2</span><h3>유의수준 설정</h3></div>
-        <p>관례적으로 가장 많이 쓰이는 α = 0.05를 기본으로 사용합니다. 아래에서 유의수준을 바꿔가며 판정이 어떻게 달라지는지도 확인할 수 있습니다.</p>
+        <p>관례적으로 가장 많이 쓰이는 \(\alpha = 0.05\)를 기본으로 사용합니다. 아래에서 유의수준을 바꿔가며 판정이 어떻게 달라지는지도 확인할 수 있습니다.</p>
         <div class="level-row" role="group" aria-label="유의수준 선택">
-          <button class="level-btn ht-alpha" data-alpha="0.10" type="button">α = .10</button>
-          <button class="level-btn ht-alpha active" data-alpha="0.05" type="button">α = .05</button>
-          <button class="level-btn ht-alpha" data-alpha="0.01" type="button">α = .01</button>
-          <button class="level-btn ht-alpha" data-alpha="0.001" type="button">α = .001</button>
+          <button class="level-btn ht-alpha" data-alpha="0.10" type="button">\(\alpha = .10\)</button>
+          <button class="level-btn ht-alpha active" data-alpha="0.05" type="button">\(\alpha = .05\)</button>
+          <button class="level-btn ht-alpha" data-alpha="0.01" type="button">\(\alpha = .01\)</button>
+          <button class="level-btn ht-alpha" data-alpha="0.001" type="button">\(\alpha = .001\)</button>
         </div>
       </article>
 
@@ -450,11 +446,11 @@
         <div class="step-head"><span class="step-badge">3</span><h3>검정통계량 구하기</h3></div>
         <p>현재 표본의 값을 공식에 대입합니다.</p>
         <div class="card formula-card">
-          <span class="eq" id="ex-stat-formula">Z = (169.63 − 172) / (6/√16) = −1.578</span>
+          <div id="ex-stat-formula">\[Z = \dfrac{169.63 - 172}{6/\sqrt{16}} = -1.578\]</div>
         </div>
         <div class="readout-row">
-          <div class="readout"><div class="k">표본평균 X̄</div><div class="v" id="ex-xbar">169.63</div></div>
-          <div class="readout"><div class="k">표준오차 σ/√n</div><div class="v">1.500</div></div>
+          <div class="readout"><div class="k">표본평균 \(\bar{X}\)</div><div class="v" id="ex-xbar">169.63</div></div>
+          <div class="readout"><div class="k">표준오차 \(\sigma/\sqrt{n}\)</div><div class="v">1.500</div></div>
           <div class="readout"><div class="k">검정통계량 Z</div><div class="v" id="ex-z">−1.578</div></div>
         </div>
       </article>
@@ -463,14 +459,14 @@
         <div class="step-head"><span class="step-badge">4</span><h3>판정</h3></div>
         <p>같은 검정통계량 Z라도 양측검정이냐 단측검정이냐에 따라 p-값과 기각역이 달라집니다. 아래 도표에서 검정통계량(굵은 세로선)과 p-값(붉은 음영), 기각역(회색 음영)의 관계를 직접 비교해보세요.</p>
         <div class="level-row" role="group" aria-label="검정 방향 선택">
-          <button class="level-btn blue-active ht-tail active" data-tail="two" type="button">양측검정 (μ ≠ 172)</button>
-          <button class="level-btn blue-active ht-tail" data-tail="less" type="button">단측검정 (μ &lt; 172)</button>
+          <button class="level-btn blue-active ht-tail active" data-tail="two" type="button">양측검정 (\(\mu \ne 172\))</button>
+          <button class="level-btn blue-active ht-tail" data-tail="less" type="button">단측검정 (\(\mu < 172\))</button>
         </div>
         <div class="curve-wrap">
           <svg id="verdict-svg" viewBox="0 0 640 230"></svg>
         </div>
         <div class="sim-legend">
-          <span class="sw"><span class="swatch crit"></span>기각역 (α)</span>
+          <span class="sw"><span class="swatch crit"></span>기각역 (\(\alpha\))</span>
           <span class="sw"><span class="swatch pval"></span>p-value 영역</span>
           <span class="sw"><span class="dot" style="background:var(--ink)"></span>관측된 Z</span>
         </div>
@@ -478,9 +474,9 @@
           <div class="readout"><div class="k">검정통계량 Z</div><div class="v" id="v-z">−1.578</div></div>
           <div class="readout"><div class="k">임계값</div><div class="v" id="v-crit">±1.960</div></div>
           <div class="readout"><div class="k">유의확률 p</div><div class="v" id="v-p">0.1146</div></div>
-          <div class="readout"><div class="k">유의수준 α</div><div class="v" id="v-alpha">0.05</div></div>
+          <div class="readout"><div class="k">유의수준 \(\alpha\)</div><div class="v" id="v-alpha">0.05</div></div>
         </div>
-        <div class="decision-card retain" id="verdict-decision">p = 0.1146 ≥ α = 0.05 → 귀무가설을 기각하지 못합니다</div>
+        <div class="decision-card retain" id="verdict-decision">\(p = 0.1146 \ge \alpha = 0.05\) → 귀무가설을 기각하지 못합니다</div>
         <p class="dim" style="margin-top:14px;">표본을 다시 뽑으면(위쪽 "표본 다시 뽑기" 버튼) 같은 절차라도 매번 다른 Z와 p-값이 나옵니다 — 실제 모평균(170)이 영가설(172)과 다름에도 이 검정의 검정력이 크지 않다면, 여러 번 중 상당수는 기각에 실패(2종 오류)할 수 있습니다. 위 "유의수준과 파워" 절의 슬라이더를 170에 두면 이 예제의 실제 검정력을 확인할 수 있습니다.</p>
       </article>
     </section>
@@ -866,14 +862,14 @@
     var reject = pValue < Number(alpha);
     var decisionEl = document.getElementById("verdict-decision");
     decisionEl.className = "decision-card " + (reject ? "reject" : "retain");
-    decisionEl.textContent = "p = " + pValue.toFixed(4) + (reject ? " < " : " ≥ ") + "α = " + alpha + " → 귀무가설을 " + (reject ? "기각합니다" : "기각하지 못합니다");
+    decisionEl.textContent = "\\(p = " + pValue.toFixed(4) + (reject ? " < " : " \\ge ") + " \\alpha = " + alpha + "\\) → 귀무가설을 " + (reject ? "기각합니다" : "기각하지 못합니다");
   }
 
   function updateExampleText() {
     var s = computeStats();
     document.getElementById("ex-xbar").textContent = s.xbar.toFixed(2);
     document.getElementById("ex-z").textContent = s.z.toFixed(3);
-    document.getElementById("ex-stat-formula").textContent = "Z = (" + s.xbar.toFixed(2) + " − 172) / (6/√16) = " + s.z.toFixed(3);
+    document.getElementById("ex-stat-formula").textContent = "\\[Z = \\dfrac{" + s.xbar.toFixed(2) + " - 172}{6/\\sqrt{16}} = " + s.z.toFixed(3) + "\\]";
   }
 
   function updateAll() {

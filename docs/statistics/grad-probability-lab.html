@@ -22,6 +22,7 @@
 <meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
 <meta name="twitter:image:alt" content="통계 수업 자료 아이콘">
 
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
 <style>
 :root{
   --bench:#f4f6fb;
@@ -166,6 +167,7 @@ canvas{display:block; max-width:100%}
   background:#eef2fb; border-radius:4px; padding:16px 18px; margin-top:16px;
   font-size:13.5px; line-height:1.85;
 }
+.readout .big .katex{font-size:1em}
 .readout .big{
   font-size:34px; font-weight:700;
   font-variant-numeric:tabular-nums; display:block; line-height:1.2; margin-bottom:2px;
@@ -266,6 +268,9 @@ details .body b{color:var(--ink); font-weight:600}
   main{padding:0 18px 80px}
 }
 </style>
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
 </head>
 <body>
 
@@ -286,7 +291,7 @@ details .body b{color:var(--ink); font-weight:600}
 
 <div class="hero">
   <h2>양성이 나왔다. 이 로트는 오염됐을까?</h2>
-  <p>민감도 <i>P</i>(양성 | 실제 오염) = 98%, 특이도 <i>P</i>(음성 | 실제 정상) = 95%인 신속검사에서 양성이 떴습니다. 실제로 오염일 확률은 얼마일까요.</p>
+  <p>민감도 \(P(\text{양성} \mid \text{실제 오염})\) = 98%, 특이도 \(P(\text{음성} \mid \text{실제 정상})\) = 95%인 신속검사에서 양성이 떴습니다. 실제로 오염일 확률은 얼마일까요.</p>
   <p>원한다면 사전 진단에서 자신의 생각을 먼저 남겨 보십시오. 그다음 아래 자연빈도 판을 펼쳐 답을 확인할 수 있습니다.</p>
   <details class="hero-answer">
     <summary>사전 진단 후 자연빈도 판 보기</summary>
@@ -312,30 +317,30 @@ details .body b{color:var(--ink); font-weight:600}
 
   <!-- 1-1 확률공간 -->
   <div class="panel">
-    <h4>확률공간 (Ω, ℱ, P)</h4>
+    <h4>확률공간 \((\Omega, \mathcal{F}, P)\)</h4>
     <p class="hint">확률을 말하려면 세 가지가 먼저 정해져야 합니다. 무엇이 일어날 수 있는가, 무엇을 '사건'으로 부를 것인가, 각 사건에 어떤 수를 붙일 것인가.</p>
 
     <div class="grid2">
       <div>
         <ul class="defs">
-          <li><b>Ω</b>표본공간 — 일어날 수 있는 모든 결과의 집합. 원소 하나하나를 표본점 ω라 부릅니다. 서로 겹치지 않고(배반), 빠짐없이 전체를 덮어야(포괄) 합니다.</li>
-          <li><b>ℱ</b>사건족 — Ω의 부분집합들의 모임. 그 원소 하나하나가 사건입니다. Ω가 유한하면 보통 멱집합 2<sup>Ω</sup>를 그대로 씁니다.</li>
-          <li><b>P</b>확률측도 — 사건에 0과 1 사이의 수를 붙이는 함수. ℱ의 원소만 입력으로 받습니다. 정의역이 Ω가 아니라 <b>ℱ</b>라는 점이 핵심입니다.</li>
+          <li><b>\(\Omega\)</b>표본공간 — 일어날 수 있는 모든 결과의 집합. 원소 하나하나를 표본점 \(\omega\)라 부릅니다. 서로 겹치지 않고(배반), 빠짐없이 전체를 덮어야(포괄) 합니다.</li>
+          <li><b>\(\mathcal{F}\)</b>사건족 — \(\Omega\)의 부분집합들의 모임. 그 원소 하나하나가 사건입니다. \(\Omega\)가 유한하면 보통 멱집합 \(2^{\Omega}\)를 그대로 씁니다.</li>
+          <li><b>P</b>확률측도 — 사건에 0과 1 사이의 수를 붙이는 함수. \(\mathcal{F}\)의 원소만 입력으로 받습니다. 정의역이 \(\Omega\)가 아니라 <b>\(\mathcal{F}\)</b>라는 점이 핵심입니다.</li>
         </ul>
         <div class="math">
-          P : ℱ → [0, 1]
+          \(P : \mathcal{F} \to [0,\,1]\)
           <span class="note">확률은 '결과'가 아니라 '사건'에 붙는 수입니다</span>
         </div>
       </div>
       <div>
         <div class="ctl">
-          <label><span>표본공간의 크기 |Ω|</span><var id="v-om">3</var></label>
+          <label><span>표본공간의 크기 \(|\Omega|\)</span><var id="v-om">3</var></label>
           <input type="range" id="om-n" min="2" max="4" step="1" value="3">
         </div>
           <div style="font-size:13px;color:var(--soft);margin-bottom:6px">주머니에서 공 하나를 꺼냈을 때의 색 — 결과들은 서로 배반이고 전체를 덮습니다.</div>
         <div id="om-list" style="font-size:13.5px;margin-bottom:16px"></div>
         <div style="font-size:13px;color:var(--soft);margin-bottom:4px">
-          사건족 ℱ = 2<sup>Ω</sup> — 전부 <b id="om-card">8</b>개.
+          사건족 \(\mathcal{F} = 2^{\Omega}\) — 전부 <b id="om-card">8</b>개.
           아무거나 두 개를 눌러 A와 B로 지정해 보십시오.
         </div>
         <div class="chips" id="om-chips"></div>
@@ -343,7 +348,7 @@ details .body b{color:var(--ink); font-weight:600}
       </div>
     </div>
     <p style="font-size:13px;color:var(--soft);margin-top:14px">
-      A와 B를 어떻게 고르든 A<sup>c</sup>, A∪B, A∩B가 <b>전부 목록 안에 이미 들어 있습니다</b>. 연산을 해도 밖으로 나가지 않는다 — 이것이 ℱ가 갖춰야 할 닫힘 성질이고, Ω가 무한할 때 σ-대수라는 이름으로 정식화됩니다.
+      A와 B를 어떻게 고르든 \(A^{c}\), \(A \cup B\), \(A \cap B\)가 <b>전부 목록 안에 이미 들어 있습니다</b>. 연산을 해도 밖으로 나가지 않는다 — 이것이 \(\mathcal{F}\)가 갖춰야 할 닫힘 성질이고, \(\Omega\)가 무한할 때 \(\sigma\)-대수라는 이름으로 정식화됩니다.
     </p>
   </div>
 
@@ -373,7 +378,7 @@ details .body b{color:var(--ink); font-weight:600}
       </div>
     </div>
     <div class="mis" style="margin-bottom:0">
-      <b>드모르간 법칙을 눈으로</b> — (A∪B)<sup>c</sup>와 A<sup>c</sup>∩B<sup>c</sup>를 번갈아 눌러 보십시오. 칠해지는 영역이 완전히 같습니다. "둘 다 아닌 것"과 "A도 아니고 B도 아닌 것"은 같은 말입니다. 뒤집으면 여집합은 합집합을 교집합으로 바꿉니다.
+      <b>드모르간 법칙을 눈으로</b> — \((A \cup B)^{c}\)와 \(A^{c} \cap B^{c}\)를 번갈아 눌러 보십시오. 칠해지는 영역이 완전히 같습니다. "둘 다 아닌 것"과 "A도 아니고 B도 아닌 것"은 같은 말입니다. 뒤집으면 여집합은 합집합을 교집합으로 바꿉니다.
     </div>
   </div>
 
@@ -385,10 +390,10 @@ details .body b{color:var(--ink); font-weight:600}
     <div class="grid2">
       <div>
         <div class="math">
-          ① P(E) ≥ 0 &nbsp; (모든 E ∈ ℱ)<br>
-          ② P(Ω) = 1<br>
-          ③ 서로 배반인 E₁,E₂,…에 대해<br>
-          P(⋃<sub>i=1</sub><sup>∞</sup>Eᵢ) = Σ<sub>i=1</sub><sup>∞</sup>P(Eᵢ)
+          ① \(P(E) \ge 0\) &nbsp; (모든 \(E \in \mathcal{F}\))<br>
+          ② \(P(\Omega) = 1\)<br>
+          ③ 서로 배반인 \(E_{1}, E_{2}, \ldots\)에 대해<br>
+          \(\displaystyle P\Big(\bigcup_{i=1}^{\infty} E_{i}\Big) = \sum_{i=1}^{\infty} P(E_{i})\)
           <span class="note">비음수성 · 정규화 · 가산가법성</span>
         </div>
         <table id="ax-tab"></table>
@@ -401,7 +406,7 @@ details .body b{color:var(--ink); font-weight:600}
     </div>
 
     <div class="mis" style="margin-bottom:0">
-      <b>배반과 독립은 다릅니다</b> — 배반은 A∩B = ∅, 즉 같이 일어날 수 없다는 뜻이고, 독립은 P(A∩B) = P(A)P(B), 즉 한쪽이 다른 쪽의 정보를 주지 않는다는 뜻입니다. 위에서 교집합을 0으로 내려 보십시오. 배반이 되는 순간 오히려 <b>강하게 종속</b>이 됩니다. A가 일어났다는 것만으로 B가 불가능해지니까요. 확률이 0이 아닌 두 배반 사건은 결코 독립일 수 없습니다.
+      <b>배반과 독립은 다릅니다</b> — 배반은 \(A \cap B = \varnothing\), 즉 같이 일어날 수 없다는 뜻이고, 독립은 \(P(A \cap B) = P(A)P(B)\), 즉 한쪽이 다른 쪽의 정보를 주지 않는다는 뜻입니다. 위에서 교집합을 0으로 내려 보십시오. 배반이 되는 순간 오히려 <b>강하게 종속</b>이 됩니다. A가 일어났다는 것만으로 B가 불가능해지니까요. 확률이 0이 아닌 두 배반 사건은 결코 독립일 수 없습니다.
     </div>
   </div>
 
@@ -436,11 +441,11 @@ details .body b{color:var(--ink); font-weight:600}
   <details>
     <summary>수업 진행 노트</summary>
     <div class="body">
-      <p><b>이 섹션의 목적은 형식을 세우는 것입니다.</b> 비전공자라고 해서 (Ω, ℱ, P)를 건너뛰면, 뒤에서 "확률이 무엇에 붙는 수인가"가 흐려집니다. 조건부확률이 왜 사건 두 개의 관계인지, <i>p</i>값이 왜 영가설과 모형 아래에서 정의되는 꼬리확률인지도 이 형식 위에서 분명해집니다.</p>
-      <p><b>ℱ를 굳이 말해야 하는가.</b> 유한 표본공간만 다룰 것이라면 ℱ = 2<sup>Ω</sup>로 두고 넘어가도 됩니다. 다만 "확률은 결과가 아니라 사건에 붙는다"는 한 문장은 반드시 남기십시오. 연속 확률변수에서 <i>P</i>(X = 1,000) = 0인데도 밀도가 양수인 상황이 3섹션에 나오는데, 그때 이 문장이 유일한 설명 도구가 됩니다.</p>
-      <p><b>공리 ③의 조건을 강조하십시오.</b> 덧셈이 그냥 되는 게 아니라 <b>배반일 때만</b> 됩니다. 학생들이 P(A∪B) = P(A) + P(B)를 무조건 쓰는 것이 이 단원 최대의 오류이고, 교집합을 두 번 센다는 사실은 벤 다이어그램에서 즉시 보입니다.</p>
+      <p><b>이 섹션의 목적은 형식을 세우는 것입니다.</b> 비전공자라고 해서 \((\Omega, \mathcal{F}, P)\)를 건너뛰면, 뒤에서 "확률이 무엇에 붙는 수인가"가 흐려집니다. 조건부확률이 왜 사건 두 개의 관계인지, \(p\)값이 왜 영가설과 모형 아래에서 정의되는 꼬리확률인지도 이 형식 위에서 분명해집니다.</p>
+      <p><b>\(\mathcal{F}\)를 굳이 말해야 하는가.</b> 유한 표본공간만 다룰 것이라면 \(\mathcal{F} = 2^{\Omega}\)로 두고 넘어가도 됩니다. 다만 "확률은 결과가 아니라 사건에 붙는다"는 한 문장은 반드시 남기십시오. 연속 확률변수에서 \(P(X = 1,000)\) = 0인데도 밀도가 양수인 상황이 3섹션에 나오는데, 그때 이 문장이 유일한 설명 도구가 됩니다.</p>
+      <p><b>공리 ③의 조건을 강조하십시오.</b> 덧셈이 그냥 되는 게 아니라 <b>배반일 때만</b> 됩니다. 학생들이 \(P(A \cup B) = P(A) + P(B)\)를 무조건 쓰는 것이 이 단원 최대의 오류이고, 교집합을 두 번 센다는 사실은 벤 다이어그램에서 즉시 보입니다.</p>
       <p><b>배반과 독립.</b> 두 개념을 한 화면에서 대조하는 것이 효율적입니다. "겹치지 않는다"는 기하학적 성질이고 "정보를 주지 않는다"는 확률적 성질이라는 점을 못 박아 두면, 2섹션의 조건부확률로 자연스럽게 넘어갑니다.</p>
-      <p><b>마지막 패널의 역할.</b> "내일 비 올 확률 70%"가 무슨 뜻이냐고 물어보십시오. ① 같은 조건이 100번 오면 70번 비가 온다 ② 예보관의 확신 정도 ③ 지역의 70%에 비가 온다 — 셋으로 갈립니다. 공리는 셋 모두와 양립합니다. 이 갈림길이 4섹션에서 "<i>p</i>값은 영가설이 참일 확률"이라는 오독이 왜 범주 오류인지 설명할 때 되돌아옵니다.</p>
+      <p><b>마지막 패널의 역할.</b> "내일 비 올 확률 70%"가 무슨 뜻이냐고 물어보십시오. ① 같은 조건이 100번 오면 70번 비가 온다 ② 예보관의 확신 정도 ③ 지역의 70%에 비가 온다 — 셋으로 갈립니다. 공리는 셋 모두와 양립합니다. 이 갈림길이 4섹션에서 "\(p\)값은 영가설이 참일 확률"이라는 오독이 왜 범주 오류인지 설명할 때 되돌아옵니다.</p>
     </div>
   </details>
 </section>
@@ -466,7 +471,7 @@ details .body b{color:var(--ink); font-weight:600}
           <ul>
             <li><b>1번</b>은 2섹션, <b>2·3번</b>은 4섹션, <b>4번</b>은 4섹션 끝, <b>5번</b>은 2섹션(b)에서 회수됩니다.</li>
             <li>틀린 것이 부끄러운 게 아니라 <b>전공자도 똑같이 틀린다</b>는 점을 여기서 명확히 해 두면 이후 참여도가 올라갑니다.</li>
-            <li>1번 문항은 다음 섹션에서 세울 형식으로 다시 읽을 수 있습니다. Ω는 로트 1,000개, A는 '오염', B는 '양성'. 묻는 것은 P(A∩B)/P(B)입니다. 여기서는 답을 기록만 하고, 다음 섹션에서 이 표기를 칠판에 적어 두십시오.</li>
+            <li>1번 문항은 다음 섹션에서 세울 형식으로 다시 읽을 수 있습니다. \(\Omega\)는 로트 1,000개, A는 '오염', B는 '양성'. 묻는 것은 \(P(A \cap B)/P(B)\)입니다. 여기서는 답을 기록만 하고, 다음 섹션에서 이 표기를 칠판에 적어 두십시오.</li>
           </ul>
         </div>
       </details>
@@ -478,11 +483,11 @@ details .body b{color:var(--ink); font-weight:600}
 <section id="s3">
   <div class="tag">02</div>
   <h3>조건부확률과 베이즈 정리</h3>
-  <p class="goal">조건이 붙으면 분모가 바뀝니다. <i>P</i>(양성|오염)과 <i>P</i>(오염|양성)은 분모가 다르므로 다른 수입니다. 이 구분이 검사 결과를 읽는 방식 전체를 바꿉니다.</p>
+  <p class="goal">조건이 붙으면 분모가 바뀝니다. \(P(\text{양성} \mid \text{오염})\)과 \(P(\text{오염} \mid \text{양성})\)은 분모가 다르므로 다른 수입니다. 이 구분이 검사 결과를 읽는 방식 전체를 바꿉니다.</p>
 
   <div class="math" style="max-width:46em">
-    P(A | B) = P(A ∩ B) ⁄ P(B), &nbsp; P(B) &gt; 0
-    <span class="note">표본공간을 Ω에서 B로 갈아끼우는 연산입니다. 분자는 B 안에서 A인 부분, 분모는 B 전체</span>
+    \(\displaystyle P(A \mid B) = \frac{P(A \cap B)}{P(B)}, \quad P(B) > 0\)
+    <span class="note">표본공간을 \(\Omega\)에서 B로 갈아끼우는 연산입니다. 분자는 B 안에서 A인 부분, 분모는 B 전체</span>
   </div>
 
   <!-- (a) 민감도·특이도 -->
@@ -540,7 +545,7 @@ details .body b{color:var(--ink); font-weight:600}
       <canvas id="ssCv" width="620" height="300"></canvas>
     </div>
     <div class="mis" style="margin-bottom:0">
-      <b>기억법에는 조건이 붙습니다</b> — SnNout·SpPin은 민감도 <i>P</i>(양성 | 실제 오염)가 높은 검사의 음성, 특이도 <i>P</i>(음성 | 실제 정상)가 높은 검사의 양성이 각각 배제·확정 판단에 유용하다는 경험칙입니다. 그러나 결과 뒤의 실제 확률인 음성·양성예측도는 오염률과 검사 환경에도 달려 있으므로, 민감도나 특이도 하나만으로 배제·확정을 단정할 수 없습니다. 선별–확인 2단계는 이 한계를 보완합니다.
+      <b>기억법에는 조건이 붙습니다</b> — SnNout·SpPin은 민감도 \(P(\text{양성} \mid \text{실제 오염})\)가 높은 검사의 음성, 특이도 \(P(\text{음성} \mid \text{실제 정상})\)가 높은 검사의 양성이 각각 배제·확정 판단에 유용하다는 경험칙입니다. 그러나 결과 뒤의 실제 확률인 음성·양성예측도는 오염률과 검사 환경에도 달려 있으므로, 민감도나 특이도 하나만으로 배제·확정을 단정할 수 없습니다. 선별–확인 2단계는 이 한계를 보완합니다.
     </div>
   </div>
 
@@ -550,9 +555,9 @@ details .body b{color:var(--ink); font-weight:600}
     <p class="hint">민감도 <b>P(양성 | 실제 오염)</b>와 특이도 <b>P(음성 | 실제 정상)</b>는 <b>원인 → 결과</b> 방향의 확률입니다. 그런데 현장에서 우리가 아는 것은 결과(양성)뿐이고 알고 싶은 것은 원인(오염)입니다. 방향을 뒤집는 장치가 베이즈 정리이고, 그 분모를 계산해 주는 것이 전확률공식입니다.</p>
 
     <div class="math">
-      Ω = B₁ ∪ ⋯ ∪ B<sub>n</sub> &nbsp;(서로 배반, 전체를 덮음) 일 때<br>
-      <b>전확률</b> &nbsp; P(A) = Σ<sub>i</sub> P(A | B<sub>i</sub>) P(B<sub>i</sub>)<br>
-      <b>베이즈</b> &nbsp; P(B<sub>j</sub> | A) = P(A | B<sub>j</sub>) P(B<sub>j</sub>) ⁄ Σ<sub>i</sub> P(A | B<sub>i</sub>) P(B<sub>i</sub>)
+      \(\Omega = B_{1} \cup \cdots \cup B_{n}\) &nbsp;(서로 배반, 전체를 덮음) 일 때<br>
+      <b>전확률</b> &nbsp; \(P(A) = \sum_{i} P(A \mid B_{i})\,P(B_{i})\)<br>
+      <b>베이즈</b> &nbsp; \(\displaystyle P(B_{j} \mid A) = \frac{P(A \mid B_{j})\,P(B_{j})}{\sum_{i} P(A \mid B_{i})\,P(B_{i})}\)
       <span class="note">분할 {오염, 정상}, 결과 A = 양성. 분모는 양성이 나올 <b>모든 경로</b>의 합입니다</span>
     </div>
 
@@ -575,7 +580,7 @@ details .body b{color:var(--ink); font-weight:600}
       <canvas id="treeCv" width="620" height="300"></canvas>
     </div>
     <div class="mis" style="margin-bottom:0">
-      <b>분모를 함께 보아야 합니다</b> — 양성이 나오는 경로는 두 개입니다. <i>P</i>(양성 | 실제 오염)과 <i>P</i>(양성 | 실제 정상)입니다. 오염이 드물면 두 번째 경로의 출발점이 매우 크므로 작은 위양성률도 결과를 크게 바꿀 수 있습니다. 민감도·특이도·오염률을 모두 넣어 나무 그림의 가지를 비교하십시오.
+      <b>분모를 함께 보아야 합니다</b> — 양성이 나오는 경로는 두 개입니다. \(P(\text{양성} \mid \text{실제 오염})\)과 \(P(\text{양성} \mid \text{실제 정상})\)입니다. 오염이 드물면 두 번째 경로의 출발점이 매우 크므로 작은 위양성률도 결과를 크게 바꿀 수 있습니다. 민감도·특이도·오염률을 모두 넣어 나무 그림의 가지를 비교하십시오.
     </div>
   </div>
 
@@ -611,7 +616,7 @@ details .body b{color:var(--ink); font-weight:600}
   </div>
 
   <div class="mis">
-    <b>학생이 가장 놀라는 지점</b> — 이 희귀 오염 예시에서는 민감도 <i>P</i>(양성 | 실제 오염)를 98%에서 100%로 올리는 것보다 특이도 <i>P</i>(음성 | 실제 정상)를 95%에서 99%로 올릴 때 양성예측도가 더 크게 변합니다. 이는 정상 로트가 매우 많아 작은 위양성률 <i>P</i>(양성 | 실제 정상)도 누적되기 때문입니다. 일반적으로는 <b>오염률·민감도·특이도 모두</b>가 예측도를 결정합니다.
+    <b>학생이 가장 놀라는 지점</b> — 이 희귀 오염 예시에서는 민감도 \(P(\text{양성} \mid \text{실제 오염})\)를 98%에서 100%로 올리는 것보다 특이도 \(P(\text{음성} \mid \text{실제 정상})\)를 95%에서 99%로 올릴 때 양성예측도가 더 크게 변합니다. 이는 정상 로트가 매우 많아 작은 위양성률 \(P(\text{양성} \mid \text{실제 정상})\)도 누적되기 때문입니다. 일반적으로는 <b>오염률·민감도·특이도 모두</b>가 예측도를 결정합니다.
   </div>
 
   <div class="panel">
@@ -641,16 +646,16 @@ details .body b{color:var(--ink); font-weight:600}
     <summary>수업 진행 노트</summary>
     <div class="body">
       <p><b>정의부터 그림으로.</b> P(A|B)는 조건 B 안으로 표본공간을 제한하고 확률을 다시 정규화하는 일입니다. 1섹션의 벤 다이어그램을 다시 띄우고 "이제 B 바깥은 제외한다"고 말하면서 B 원만 남기십시오. 분모가 P(B)로 바뀐다는 것이 핵심입니다.</p>
-      <p><b>(a) 이 섹션에서 가장 많이 막히는 지점입니다.</b> 민감도 <i>P</i>(양성 | 실제 오염)와 특이도 <i>P</i>(음성 | 실제 정상)를 처음 보는 학생은 둘을 더해 1이 될 것으로 기대합니다. 표의 '분모' 줄을 손으로 짚어 주십시오. 민감도의 분모는 오염된 것들, 특이도의 분모는 정상인 것들 — 애초에 <b>다른 집단을 세고 있습니다</b>. 그래서 합이 1이 되어야 할 이유가 없습니다. 1에서 빼면 나오는 짝은 각각 위음성률 <i>P</i>(음성 | 실제 오염)과 위양성률 <i>P</i>(양성 | 실제 정상)입니다.</p>
-      <p><b>(a) 두 번째 오해.</b> 이 단순 모형에서는 같은 검사·기준선·대상군에서 민감도 <i>P</i>(양성 | 실제 오염)와 특이도 <i>P</i>(음성 | 실제 정상)를 고정하고 오염률만 바꿉니다. 실제 현장에서는 대상군의 스펙트럼과 표본처리에 따라서도 성능이 달라질 수 있습니다. 반면 예측도는 같은 두 조건부확률에서도 오염률이 바뀌면 달라집니다.</p>
-      <p><b>(a) 기준선 슬라이더를 반드시 끌어 보이십시오.</b> 검사 분포가 고정된 상태에서 기준선을 왼쪽으로 밀면 민감도 <i>P</i>(양성 | 실제 오염)가 오르고 특이도 <i>P</i>(음성 | 실제 정상)가 떨어집니다. 두 수를 함께 개선하려면 측정법·표본처리 등 검사 자체를 개선해 두 분포를 더 떼어 놓아야 하며, 그것이 아래쪽 성능 슬라이더입니다. ROC 곡선을 아는 학생에게는 이 그림이 그 곡선의 배후라고 한마디만 덧붙이면 됩니다.</p>
+      <p><b>(a) 이 섹션에서 가장 많이 막히는 지점입니다.</b> 민감도 \(P(\text{양성} \mid \text{실제 오염})\)와 특이도 \(P(\text{음성} \mid \text{실제 정상})\)를 처음 보는 학생은 둘을 더해 1이 될 것으로 기대합니다. 표의 '분모' 줄을 손으로 짚어 주십시오. 민감도의 분모는 오염된 것들, 특이도의 분모는 정상인 것들 — 애초에 <b>다른 집단을 세고 있습니다</b>. 그래서 합이 1이 되어야 할 이유가 없습니다. 1에서 빼면 나오는 짝은 각각 위음성률 \(P(\text{음성} \mid \text{실제 오염})\)과 위양성률 \(P(\text{양성} \mid \text{실제 정상})\)입니다.</p>
+      <p><b>(a) 두 번째 오해.</b> 이 단순 모형에서는 같은 검사·기준선·대상군에서 민감도 \(P(\text{양성} \mid \text{실제 오염})\)와 특이도 \(P(\text{음성} \mid \text{실제 정상})\)를 고정하고 오염률만 바꿉니다. 실제 현장에서는 대상군의 스펙트럼과 표본처리에 따라서도 성능이 달라질 수 있습니다. 반면 예측도는 같은 두 조건부확률에서도 오염률이 바뀌면 달라집니다.</p>
+      <p><b>(a) 기준선 슬라이더를 반드시 끌어 보이십시오.</b> 검사 분포가 고정된 상태에서 기준선을 왼쪽으로 밀면 민감도 \(P(\text{양성} \mid \text{실제 오염})\)가 오르고 특이도 \(P(\text{음성} \mid \text{실제 정상})\)가 떨어집니다. 두 수를 함께 개선하려면 측정법·표본처리 등 검사 자체를 개선해 두 분포를 더 떼어 놓아야 하며, 그것이 아래쪽 성능 슬라이더입니다. ROC 곡선을 아는 학생에게는 이 그림이 그 곡선의 배후라고 한마디만 덧붙이면 됩니다.</p>
       <p><b>(b) 전확률공식은 "경우를 나눠 세기"입니다.</b> 양성이 나오는 길이 두 개뿐이므로 각 길의 확률을 더하면 됩니다. 나무를 왼쪽에서 오른쪽으로 읽으며 가지마다 곱하고, 끝에서 같은 결과끼리 더한다 — 이 절차만 익히면 공식을 외울 필요가 없습니다.</p>
       <p><b>(b) 베이즈는 나무를 거꾸로 읽는 것입니다.</b> 양성이라는 잎에 도착했다는 사실만 알 때, 어느 가지로 왔을 가능성이 큰가. 분자는 그 가지 하나, 분모는 그 잎에 도달하는 모든 가지의 합. 학생이 이 그림을 손으로 그릴 수 있으면 이 섹션은 성공입니다.</p>
       <p><b>(c) 판서 순서.</b> 슬라이더를 건드리기 전에 자연빈도 문장부터 읽어 주십시오. "1,000개 중 5개가 오염, 그 5개 중 5개가 양성, 나머지 995개 중 50개도 양성. 그래서 양성 55개 중 진짜는 5개." 수식 없이 이 문장만으로 정답률이 올라간다는 것이 Gigerenzer &amp; Hoffrage(1995)의 결과입니다.</p>
       <p><b>실무로 연결.</b> 이 예시에서 양성예측도가 약 9%라는 것은 신속검사 양성만으로 폐기를 결정하기 어렵다는 뜻입니다. 실제 결정은 검사 지침, 오류 비용, 표본추출과 확인검사 결과를 함께 고려해야 합니다. 희귀한 대상을 검사할 때는 작은 위양성률도 큰 영향을 줍니다.</p>
-      <p><b>같은 구조의 오류.</b> <i>P</i>(양성|오염)을 <i>P</i>(오염|양성)로 읽는 것과, 영가설 아래의 꼬리확률인 <i>p</i>값을 <i>P</i>(H₀|데이터)로 읽는 것은 조건의 방향을 뒤집는 같은 유형의 실수입니다. 이 문장을 4섹션에서 다시 가리키십시오.</p>
+      <p><b>같은 구조의 오류.</b> \(P(\text{양성} \mid \text{오염})\)을 \(P(\text{오염} \mid \text{양성})\)로 읽는 것과, 영가설 아래의 꼬리확률인 \(p\)값을 \(P(H_{0} \mid \text{데이터})\)로 읽는 것은 조건의 방향을 뒤집는 같은 유형의 실수입니다. 이 문장을 4섹션에서 다시 가리키십시오.</p>
       <p><b>(d) 오즈비 주의.</b> 유병률이 높을수록 OR은 RR을 과장합니다. 단면연구·환자대조군 논문의 OR을 "몇 배 위험"으로 읽는 습관은 여기서 교정해야 합니다.</p>
-      <p><b>시간이 남으면 심슨의 역설 10분.</b> 커피–폐암 연관이 흡연 보정으로 사라지는 사례에서 출발해, 영양역학의 건강한 사용자 효과로 넘어가면 β-카로틴·비타민 E의 관찰연구·RCT 불일치가 자연스럽게 설명됩니다.</p>
+      <p><b>시간이 남으면 심슨의 역설 10분.</b> 커피–폐암 연관이 흡연 보정으로 사라지는 사례에서 출발해, 영양역학의 건강한 사용자 효과로 넘어가면 \(\beta\)-카로틴·비타민 E의 관찰연구·RCT 불일치가 자연스럽게 설명됩니다.</p>
     </div>
   </details>
 </section>
@@ -666,7 +671,7 @@ details .body b{color:var(--ink); font-weight:600}
     <h4>확률변수: 결과에 수를 붙이는 함수</h4>
     <p class="hint">동전을 두 번 던집니다. 표본공간은 {앞앞, 앞뒤, 뒤앞, 뒤뒤} 네 개. 여기에 "앞면이 나온 횟수"라는 규칙으로 수를 붙이면 X는 0, 1, 2 중 하나가 됩니다. 네 개였던 표본점이 세 개의 값으로 접힙니다.</p>
     <div class="math">
-      X : Ω → ℝ, &nbsp;&nbsp; P<sub>X</sub>(k) = P( { ω ∈ Ω : X(ω) = k } )
+      \(X : \Omega \to \mathbb{R}, \quad P_{X}(k) = P(\{\omega \in \Omega : X(\omega) = k\})\)
       <span class="note">확률은 여전히 사건에 붙습니다. X는 그 사건을 수로 지목하는 이름표입니다</span>
     </div>
     <div class="grid-ctrl">
@@ -693,7 +698,7 @@ details .body b{color:var(--ink); font-weight:600}
   </div>
 
   <div class="mis">
-    <b>확률변수는 변수가 아니라 함수입니다</b> — 이름이 잘못 붙은 대표적인 용어입니다. X는 "변하는 수"가 아니라 Ω의 각 원소에 실수 하나를 대응시키는 <b>규칙</b>이고, 확률이 그 규칙을 통해 수직선 위로 옮겨 간 것이 분포입니다. 같은 Ω에 다른 규칙을 붙이면 다른 확률변수가 됩니다. 앞면 횟수 대신 "첫 번째가 앞면이면 1"로 붙이면 완전히 다른 분포가 나옵니다.
+    <b>확률변수는 변수가 아니라 함수입니다</b> — 이름이 잘못 붙은 대표적인 용어입니다. X는 "변하는 수"가 아니라 \(\Omega\)의 각 원소에 실수 하나를 대응시키는 <b>규칙</b>이고, 확률이 그 규칙을 통해 수직선 위로 옮겨 간 것이 분포입니다. 같은 \(\Omega\)에 다른 규칙을 붙이면 다른 확률변수가 됩니다. 앞면 횟수 대신 "첫 번째가 앞면이면 1"로 붙이면 완전히 다른 분포가 나옵니다.
   </div>
 
   <!-- 4-2 기댓값과 분산 -->
@@ -702,11 +707,11 @@ details .body b{color:var(--ink); font-weight:600}
     <p class="hint">분포 전체를 그림으로 보여줄 수 없는 상황이 더 많습니다. 대신 분포를 대표하는 숫자 두 개를 씁니다. 어디에 몰려 있는가(기댓값), 얼마나 흩어져 있는가(분산). 위 패널의 동전 분포를 그대로 가져와 직접 계산해 봅니다.</p>
 
     <div class="math">
-      E[X] = Σ<sub>k</sub> k · P(X = k)
+      \(E[X] = \sum_{k} k \cdot P(X = k)\)
       <span class="note">각 값에 그 값이 나올 확률을 가중치로 곱해 더한 것 — 무게중심</span>
     </div>
     <div class="math">
-      Var(X) = E[(X − E[X])²] = Σ<sub>k</sub> (k − E[X])² · P(X = k)
+      \(\mathrm{Var}(X) = E[(X - E[X])^{2}] = \sum_{k} (k - E[X])^{2} \cdot P(X = k)\)
       <span class="note">평균에서 얼마나 떨어져 있는지를 제곱해서 가중평균한 것</span>
     </div>
 
@@ -719,12 +724,12 @@ details .body b{color:var(--ink); font-weight:600}
     </div>
 
     <div class="mis" style="margin-bottom:0">
-      <b>왜 제곱을 하는가</b> — 평균과의 차이를 그냥 더하면 항상 0이 됩니다(양쪽으로 상쇄되도록 평균이 정의되었기 때문입니다). 부호를 없애는 방법은 절댓값과 제곱 둘 다 있지만, 제곱은 미분과 대수적 전개가 편하고 <b>독립이거나 공분산이 0인</b> 확률변수들의 합에서 분산이 더해지는 이점이 있습니다. 제곱한 값은 단위도 제곱(예: g²)이 되므로, 원래 단위로 표현한 것이 <b>표준편차</b> SD = √Var(X)입니다.
+      <b>왜 제곱을 하는가</b> — 평균과의 차이를 그냥 더하면 항상 0이 됩니다(양쪽으로 상쇄되도록 평균이 정의되었기 때문입니다). 부호를 없애는 방법은 절댓값과 제곱 둘 다 있지만, 제곱은 미분과 대수적 전개가 편하고 <b>독립이거나 공분산이 0인</b> 확률변수들의 합에서 분산이 더해지는 이점이 있습니다. 제곱한 값은 단위도 제곱(예: \(\mathrm{g}^{2}\))이 되므로, 원래 단위로 표현한 것이 <b>표준편차</b> \(\mathrm{SD} = \sqrt{\mathrm{Var}(X)}\)입니다.
     </div>
   </div>
 
   <h4 style="font-size:21px;margin:44px 0 4px;font-weight:700">잘 알려진 세 가지</h4>
-  <p style="font-size:14px;color:var(--soft);margin:0 0 22px">먼저 각 분포의 모수를 움직이며 모양과 요약값이 함께 어떻게 바뀌는지 확인하십시오. 이항분포는 n과 p, 포아송분포는 λ, 정규분포는 μ와 σ가 모수입니다. 아래 결과 판에는 그때그때의 기대값 E[X]와 분산 Var(X)를 계산해 표시합니다.</p>
+  <p style="font-size:14px;color:var(--soft);margin:0 0 22px">먼저 각 분포의 모수를 움직이며 모양과 요약값이 함께 어떻게 바뀌는지 확인하십시오. 이항분포는 n과 p, 포아송분포는 \(\lambda\), 정규분포는 \(\mu\)와 \(\sigma\)가 모수입니다. 아래 결과 판에는 그때그때의 기대값 \(E[X]\)와 분산 \(\mathrm{Var}(X)\)를 계산해 표시합니다.</p>
 
   <div class="tabs">
     <button class="ghost on" data-dist="binom">① 이항</button>
@@ -752,17 +757,17 @@ details .body b{color:var(--ink); font-weight:600}
       <canvas id="binomCv" width="620" height="320"></canvas>
     </div>
     <div class="mis" style="margin-bottom:0">
-      <b>모수와 요약값을 함께 읽기</b> — n과 p가 바뀌면 막대의 위치와 퍼짐이 함께 달라집니다. E[X] = np는 분포의 중심을, Var(X) = np(1−p)는 퍼짐을 요약합니다.
+      <b>모수와 요약값을 함께 읽기</b> — n과 p가 바뀌면 막대의 위치와 퍼짐이 함께 달라집니다. \(E[X]\) = np는 분포의 중심을, \(\mathrm{Var}(X)\) = np(1−p)는 퍼짐을 요약합니다.
     </div>
   </div>
 
   <div class="panel" id="p-pois" style="display:none">
     <h4>드물게, 무작위로, 독립적으로 일어나는 일의 건수</h4>
-    <p class="hint">우유 1 mL의 균수, 원료 1톤당 이물 건수, 배양접시의 콜로니 수처럼 드물게 독립적으로 일어나는 사건의 건수입니다. λ를 바꾸며 분포가 이동하고 퍼지는 모습을 확인하십시오. 포아송분포에서는 기대값과 분산이 모두 λ입니다.</p>
+    <p class="hint">우유 1 mL의 균수, 원료 1톤당 이물 건수, 배양접시의 콜로니 수처럼 드물게 독립적으로 일어나는 사건의 건수입니다. \(\lambda\)를 바꾸며 분포가 이동하고 퍼지는 모습을 확인하십시오. 포아송분포에서는 기대값과 분산이 모두 \(\lambda\)입니다.</p>
     <div class="grid-ctrl">
       <div>
         <div class="ctl">
-          <label><span>평균 건수 λ</span><var id="v-pl">3.0</var></label>
+          <label><span>평균 건수 \(\lambda\)</span><var id="v-pl">3.0</var></label>
           <input type="range" id="p-lam" min="2" max="200" step="1" value="30">
         </div>
         <div class="ctl">
@@ -779,15 +784,15 @@ details .body b{color:var(--ink); font-weight:600}
 
   <div class="panel" id="p-norm" style="display:none">
     <h4>정규분포: 연속형 측정값</h4>
-    <p class="hint">충전기가 제품을 채웁니다. 목표를 정해도 매번 조금씩 다릅니다. 진동, 원료 밀도, 온도, 노즐 마모처럼 작은 요인 수십 가지가 더해진 결과라 종 모양이 됩니다. μ와 σ를 바꾸며 중심과 퍼짐이 어떻게 달라지는지 확인하십시오.</p>
+    <p class="hint">충전기가 제품을 채웁니다. 목표를 정해도 매번 조금씩 다릅니다. 진동, 원료 밀도, 온도, 노즐 마모처럼 작은 요인 수십 가지가 더해진 결과라 종 모양이 됩니다. \(\mu\)와 \(\sigma\)를 바꾸며 중심과 퍼짐이 어떻게 달라지는지 확인하십시오.</p>
     <div class="grid-ctrl">
       <div>
         <div class="ctl">
-          <label><span>충전 목표 중량 μ</span><var id="v-nm">202.0 g</var></label>
+          <label><span>충전 목표 중량 \(\mu\)</span><var id="v-nm">202.0 g</var></label>
           <input type="range" id="nm-mu" min="1960" max="2100" step="1" value="2020">
         </div>
         <div class="ctl">
-          <label><span>충전기 산포 σ (분산은 σ²)</span><var id="v-ns">1.5 g</var></label>
+          <label><span>충전기 산포 \(\sigma\) (분산은 \(\sigma^{2}\))</span><var id="v-ns">1.5 g</var></label>
           <input type="range" id="nm-sd" min="3" max="50" step="1" value="15">
         </div>
         <div class="readout" id="nm-out"></div>
@@ -800,27 +805,27 @@ details .body b{color:var(--ink); font-weight:600}
     <h4>표준화: 서로 다른 정규분포를 같은 Z 척도로 읽기</h4>
     <p class="hint">임의의 정규분포에서 평균을 빼면 중심이 0으로 이동하고, 이어서 표준편차로 나누면 한 칸이 표준편차 1개인 공통 척도가 됩니다. 관측값을 움직이며 세 줄의 점이 같은 위치 관계를 어떻게 다른 단위로 표현하는지 보십시오.</p>
     <div class="math">
-      X ∼ N(μ, σ²) &nbsp;→&nbsp; X − μ ∼ N(0, σ²) &nbsp;→&nbsp; Z = (X − μ) ⁄ σ ∼ N(0, 1)
+      \(\displaystyle X \sim N(\mu, \sigma^{2}) \;\to\; X - \mu \sim N(0, \sigma^{2}) \;\to\; Z = \frac{X - \mu}{\sigma} \sim N(0, 1)\)
       <span class="note">Z는 관측값이 평균에서 몇 개의 표준편차만큼 떨어졌는지 나타내는 단위 없는 위치 계수입니다</span>
     </div>
     <div class="btnrow" aria-label="표준화 변환 애니메이션">
       <button class="ghost on" type="button" data-z-animation="overview">원래 X와 표준 Z 비교</button>
       <button type="button" data-z-animation="full">X → Z 전체 변환 재생</button>
-      <button class="ghost" type="button" data-z-animation="shift">① X − μ: 평균만큼 이동</button>
-      <button class="ghost" type="button" data-z-animation="scale">② ÷ σ: 퍼짐을 1로 맞춤</button>
+      <button class="ghost" type="button" data-z-animation="shift">① X − \(\mu\): 평균만큼 이동</button>
+      <button class="ghost" type="button" data-z-animation="scale">② ÷ \(\sigma\): 퍼짐을 1로 맞춤</button>
     </div>
     <figure class="chart-wrap" style="margin-top:16px">
       <canvas id="zAnimCv" width="620" height="235"></canvas>
-      <figcaption class="chart-note">버튼을 누르면 각 변환이 다시 재생됩니다. 첫 단계에서는 평균이 원점으로 이동하지만 퍼짐은 그대로이고, 둘째 단계에서만 표준편차가 σ에서 1로 바뀝니다.</figcaption>
+      <figcaption class="chart-note">버튼을 누르면 각 변환이 다시 재생됩니다. 첫 단계에서는 평균이 원점으로 이동하지만 퍼짐은 그대로이고, 둘째 단계에서만 표준편차가 \(\sigma\)에서 1로 바뀝니다.</figcaption>
     </figure>
     <div class="grid-ctrl">
       <div>
         <div class="ctl">
-          <label><span>원래 분포의 평균 μ</span><var id="v-z-mu">202.0 g</var></label>
+          <label><span>원래 분포의 평균 \(\mu\)</span><var id="v-z-mu">202.0 g</var></label>
           <input type="range" id="z-mu" min="1950" max="2050" step="1" value="2020">
         </div>
         <div class="ctl">
-          <label><span>원래 분포의 표준편차 σ</span><var id="v-z-sd">1.5 g</var></label>
+          <label><span>원래 분포의 표준편차 \(\sigma\)</span><var id="v-z-sd">1.5 g</var></label>
           <input type="range" id="z-sd" min="5" max="50" step="1" value="15">
         </div>
         <div class="ctl">
@@ -845,12 +850,12 @@ details .body b{color:var(--ink); font-weight:600}
       <p><b>순서를 지키십시오.</b> 확률변수를 먼저, 분포는 그다음입니다. 분포부터 가르치면 학생들이 분포를 외워야 할 공식 목록으로 받아들입니다. 동전 두 번 예시에서 "표본점 네 개가 값 세 개로 접힌다"는 장면을 반드시 손으로 짚어 주십시오. 앞뒤와 뒤앞이 <b>한 값으로 합쳐지기 때문에</b> 가운데가 두 배로 높아진다 — 이항계수가 왜 붙는지가 여기서 한 번에 보입니다.</p>
       <p><b>n을 천천히 올리십시오.</b> 2 → 3 → 5 → 12로 올리면 표본공간은 4 → 8 → 32 → 4,096으로 폭발하는데 값은 n+1개뿐입니다. 확률변수가 하는 일이 <b>요약</b>이라는 것, 그리고 12쯤에서 이미 종 모양이 보인다는 것 — 4섹션 중심극한정리의 복선이 여기서 깔립니다.</p>
       <p><b>"실제로 던지기"를 꼭 눌러 보십시오.</b> 이론 막대 위에 실측 막대가 겹칩니다. 1섹션의 빈도 해석이 분포 수준에서 다시 확인되는 장면입니다.</p>
-      <p><b>기댓값·분산 패널은 손으로 더하게 하십시오.</b> n=2, p=0.5로 되돌려 표를 함께 읽으면 E[X] = 0×0.25 + 1×0.5 + 2×0.25 = 1이 "동전 두 개면 평균 한 개는 앞면"이라는 상식과 일치한다는 것이 확인됩니다. 그다음 n을 8 정도로 올려 표가 요약형으로 바뀌는 것을 보이고, 공식 E[X]=np, Var(X)=np(1−p)이 손으로 더한 값과 정확히 일치한다는 것으로 마무리하십시오. 공식은 계산을 대신해 주는 지름길이지, 손으로 더한 것과 다른 별개의 진리가 아니라는 메시지입니다.</p>
+      <p><b>기댓값·분산 패널은 손으로 더하게 하십시오.</b> n=2, p=0.5로 되돌려 표를 함께 읽으면 \(E[X]\) = 0×0.25 + 1×0.5 + 2×0.25 = 1이 "동전 두 개면 평균 한 개는 앞면"이라는 상식과 일치한다는 것이 확인됩니다. 그다음 n을 8 정도로 올려 표가 요약형으로 바뀌는 것을 보이고, 공식 \(E[X]\)=np, \(\mathrm{Var}(X)\)=np(1−p)이 손으로 더한 값과 정확히 일치한다는 것으로 마무리하십시오. 공식은 계산을 대신해 주는 지름길이지, 손으로 더한 것과 다른 별개의 진리가 아니라는 메시지입니다.</p>
       <p><b>제곱을 쓰는 이유를 반드시 짚으십시오.</b> 편차를 그냥 더하면 0이 된다는 것을 표에서 직접 보여줄 수 있습니다(대칭인 n=2, p=0.5 예시가 가장 선명합니다). 표준편차가 왜 다시 제곱근을 취하는지 — 단위를 원래대로 되돌리기 위해서라는 것 — 도 여기서 마무리해 두면, 이후 SD·SE·CFU 단위 이야기가 전부 매끄러워집니다.</p>
-      <p><b>분포 사이의 근사 조건은 다음 단계에서 다룹니다.</b> 지금은 n·p, λ, μ·σ를 각각 움직이며 모양과 E[X], Var(X)의 변화를 먼저 관찰하십시오.</p>
-      <p><b>밀도와 확률의 구분은 정규 탭에서.</b> 연속모형에서 <i>P</i>(X = 200.000…) = 0인데도 밀도는 양수입니다. 실제 측정값은 정밀도에 따라 반올림된 구간을 나타낸다는 점도 함께 구분하십시오.</p>
-      <p><b>정규 탭에서 모수 효과를 읽으십시오.</b> μ를 바꾸면 곡선의 중심이 이동하고, σ를 바꾸면 곡선이 넓어지거나 좁아집니다. 결과 판의 E[X] = μ, Var(X) = σ²와 그래프를 함께 확인하십시오.</p>
-      <p><b>이항 탭에서 모수 효과를 확인하십시오.</b> 성공확률 p 슬라이더를 0.1에서 0.9까지 움직이며 분포의 중심 E[X] = np가 이동하고 분산 Var(X) = np(1−p)가 어떻게 달라지는지 관찰하십시오.</p>
+      <p><b>분포 사이의 근사 조건은 다음 단계에서 다룹니다.</b> 지금은 \(n \cdot p\), \(\lambda\), \(\mu\)·\(\sigma\)를 각각 움직이며 모양과 \(E[X]\), \(\mathrm{Var}(X)\)의 변화를 먼저 관찰하십시오.</p>
+      <p><b>밀도와 확률의 구분은 정규 탭에서.</b> 연속모형에서 \(P(X = 200.000\ldots )\) = 0인데도 밀도는 양수입니다. 실제 측정값은 정밀도에 따라 반올림된 구간을 나타낸다는 점도 함께 구분하십시오.</p>
+      <p><b>정규 탭에서 모수 효과를 읽으십시오.</b> \(\mu\)를 바꾸면 곡선의 중심이 이동하고, \(\sigma\)를 바꾸면 곡선이 넓어지거나 좁아집니다. 결과 판의 \(E[X] = \mu\), \(\mathrm{Var}(X) = \sigma^{2}\)와 그래프를 함께 확인하십시오.</p>
+      <p><b>이항 탭에서 모수 효과를 확인하십시오.</b> 성공확률 p 슬라이더를 0.1에서 0.9까지 움직이며 분포의 중심 \(E[X]\) = np가 이동하고 분산 \(\mathrm{Var}(X)\) = np(1−p)가 어떻게 달라지는지 관찰하십시오.</p>
       <p><b>생물학 전공자 배려.</b> 이항 탭에서 멘델 분리비(p=0.75), 하디–바인베르크 평형을 독립 가정의 산물로 10분 붙일 수 있습니다. 평형 이탈이 선택·근친교배·유전형 판정오류의 신호라는 점은 확률 개념이 생물학적 해석으로 바로 이어지는 좋은 사례입니다.</p>
     </div>
   </details>
@@ -870,7 +875,7 @@ details .body b{color:var(--ink); font-weight:600}
         <div class="ctl">
           <label><span>모집단 분포</span></label>
           <div class="tabs" id="samp-dist-tabs">
-            <button class="ghost on" type="button" data-samp-dist="normal">정규 N(1, 1²)</button>
+            <button class="ghost on" type="button" data-samp-dist="normal">정규 \(N(1,\ 1^{2})\)</button>
             <button class="ghost" type="button" data-samp-dist="binomial">이항 Bin(10, 0.1)</button>
           </div>
         </div>
@@ -944,10 +949,10 @@ details .body b{color:var(--ink); font-weight:600}
   <details>
     <summary>수업 진행 노트</summary>
     <div class="body">
-      <p><b>대수의 법칙 ≠ 중심극한정리.</b> 전자는 표본평균이 <i>어디로</i> 가는가, 후자는 적절히 표준화한 표본평균의 분포가 어떤 모양에 가까워지는가를 말합니다. 첫 패널에서 n을 2 → 4 → 16 → 32 → 64로 올리십시오. 정규 모집단에서는 평균 분포가 처음부터 정규형인 채 μ = 1 주변으로 <b>좁아집니다</b>. 이항 모집단에서는 이산적·비대칭인 원래 분포와 달리 평균 분포가 <b>더 대칭적인 종 모양</b>에 가까워집니다. 100회에서는 우연한 들쭉날쭉함이, 10,000회에서는 더 안정된 모양이 보입니다.</p>
-      <p><b><i>p</i>값의 정의를 그림 위에서 읽으십시오.</b> 두 번째 패널의 붉은 점 비율은 이 이산검정의 실제 제1종 오류확률을 추정하며, 설정한 α 이하입니다. <i>p</i>값은 "영가설과 모형 가정이 맞다고 할 때, 관측된 것만큼 또는 그보다 극단적인 결과가 나올 확률"입니다. 영가설이 맞을 확률이 아닙니다 — 2섹션에서 적어 둔 문장을 손으로 가리키십시오.</p>
+      <p><b>대수의 법칙 ≠ 중심극한정리.</b> 전자는 표본평균이 <i>어디로</i> 가는가, 후자는 적절히 표준화한 표본평균의 분포가 어떤 모양에 가까워지는가를 말합니다. 첫 패널에서 n을 2 → 4 → 16 → 32 → 64로 올리십시오. 정규 모집단에서는 평균 분포가 처음부터 정규형인 채 \(\mu = 1\) 주변으로 <b>좁아집니다</b>. 이항 모집단에서는 이산적·비대칭인 원래 분포와 달리 평균 분포가 <b>더 대칭적인 종 모양</b>에 가까워집니다. 100회에서는 우연한 들쭉날쭉함이, 10,000회에서는 더 안정된 모양이 보입니다.</p>
+      <p><b>\(p\)값의 정의를 그림 위에서 읽으십시오.</b> 두 번째 패널의 붉은 점 비율은 이 이산검정의 실제 제1종 오류확률을 추정하며, 설정한 \(\alpha\) 이하입니다. \(p\)값은 "영가설과 모형 가정이 맞다고 할 때, 관측된 것만큼 또는 그보다 극단적인 결과가 나올 확률"입니다. 영가설이 맞을 확률이 아닙니다 — 2섹션에서 적어 둔 문장을 손으로 가리키십시오.</p>
       <p><b>신뢰구간의 정확한 의미.</b> "이 구간 안에 참값이 있을 확률 95%"는 틀린 해석입니다(Hoekstra 등, 2014). 같은 방식으로 구간을 계속 만들면 그중 95%가 참값을 덮는다는 뜻이고, 눈앞의 이 구간 하나에 대해서는 덮었거나 못 덮었거나 둘 중 하나입니다.</p>
-      <p><b>3의 법칙으로 마무리.</b> 독립적인 무작위 표본, 일정한 오염확률, 완전한 검출을 가정하면 60개 전부 음성일 때 이항모형의 단측 95% 상한은 약 4.9%입니다. 불완전한 검사라면 민감도 <i>P</i>(양성 | 실제 오염)와 특이도 <i>P</i>(음성 | 실제 정상)를 반영해야 합니다. "검출되지 않음"은 "없음"이 아닙니다. 여기서 3섹션에 유보해 둔 질문을 회수하고 <b>동등성검정</b>의 필요로 넘어가십시오.</p>
+      <p><b>3의 법칙으로 마무리.</b> 독립적인 무작위 표본, 일정한 오염확률, 완전한 검출을 가정하면 60개 전부 음성일 때 이항모형의 단측 95% 상한은 약 4.9%입니다. 불완전한 검사라면 민감도 \(P(\text{양성} \mid \text{실제 오염})\)와 특이도 \(P(\text{음성} \mid \text{실제 정상})\)를 반영해야 합니다. "검출되지 않음"은 "없음"이 아닙니다. 여기서 3섹션에 유보해 둔 질문을 회수하고 <b>동등성검정</b>의 필요로 넘어가십시오.</p>
     </div>
   </details>
 </section>
@@ -968,7 +973,7 @@ details .body b{color:var(--ink); font-weight:600}
           <input type="range" id="m-k" min="5" max="200" step="1" value="50">
         </div>
         <div class="ctl">
-          <label><span>유의수준 α</span><var id="v-ma">0.05</var></label>
+          <label><span>유의수준 \(\alpha\)</span><var id="v-ma">0.05</var></label>
           <input type="range" id="m-a" min="1" max="20" step="1" value="5">
         </div>
         <div class="btnrow">
@@ -987,11 +992,11 @@ details .body b{color:var(--ink); font-weight:600}
   <details>
     <summary>수업 진행 노트 · 마무리</summary>
     <div class="body">
-      <p><b>1섹션과 연결하십시오.</b> 독립인 k개 검정이 모두 영가설 아래 있고 각각의 제1종 오류확률이 α일 때, "적어도 하나가 유의할 확률"은 P(하나 이상) = 1 − (1−α)<sup>k</sup>입니다. 독립이 아니면 이 등식은 일반적으로 성립하지 않습니다. Bonferroni는 의존성과 무관하게 가족wise 오류율을 α 이하로 보장합니다.</p>
+      <p><b>1섹션과 연결하십시오.</b> 독립인 k개 검정이 모두 영가설 아래 있고 각각의 제1종 오류확률이 \(\alpha\)일 때, "적어도 하나가 유의할 확률"은 \(P(\text{하나 이상}) = 1 - (1-\alpha)^{k}\)입니다. 독립이 아니면 이 등식은 일반적으로 성립하지 않습니다. Bonferroni는 의존성과 무관하게 가족wise 오류율을 \(\alpha\) 이하로 보장합니다.</p>
       <p><b>요리책 연구를 소개하십시오.</b> Schoenfeld &amp; Ioannidis(2013)는 요리책에서 무작위로 고른 재료 50가지 중 40가지에 대해 암 위험과의 연관을 보고한 논문이 존재함을 보였습니다. 대부분의 효과추정치는 약했고 상당수가 이후 메타분석에서 사라졌습니다. 학생들이 자기 분야 이야기라는 것을 알아차리는 순간 집중도가 달라집니다.</p>
       <p><b>Bonferroni와 FDR의 발상 차이만.</b> 전자는 하나라도 위양성이 생길 가족wise 오류확률을 통제하고, 후자는 발견들 중 위양성이 차지하는 비율의 <b>기댓값</b>을 통제합니다. 탐색적 오믹스 연구에서 FDR을 쓰는 이유가 여기 있습니다. 계산법은 가르치지 마십시오.</p>
       <p><b>마무리.</b> 사전 진단 토글로 돌아가 ‘답 지우고 다시 풀기’를 눌러 같은 질문에 답하십시오. 수업 초반 자기 답과 비교하는 것이 이 수업의 마침표입니다.</p>
-      <p style="margin-top:16px; padding-top:14px; border-top:1px solid var(--line)"><b>과감히 뺀 것</b> — 순열·조합 계산 연습, 적률생성함수, 분포의 적분 유도, 다변량 정규분포, 측도론적 σ-대수의 정식 구성. 시간이 부족하면 이 순서대로 생략하고, 분량이 넘치면 5섹션을 다음 시간으로 넘기는 것을 권합니다.</p>
+      <p style="margin-top:16px; padding-top:14px; border-top:1px solid var(--line)"><b>과감히 뺀 것</b> — 순열·조합 계산 연습, 적률생성함수, 분포의 적분 유도, 다변량 정규분포, 측도론적 \(\sigma\)-대수의 정식 구성. 시간이 부족하면 이 순서대로 생략하고, 분량이 넘치면 5섹션을 다음 시간으로 넘기는 것을 권합니다.</p>
     </div>
   </details>
 </section>
@@ -1079,7 +1084,7 @@ function omBuild(){
   document.getElementById('v-om').textContent=n;
   document.getElementById('om-card').textContent=Math.pow(2,n);
   document.getElementById('om-list').innerHTML=
-    'Ω = { '+OUT.slice(0,n).map((t,i)=>'ω<sub>'+(i+1)+'</sub> '+t).join(', &nbsp;')+' }';
+    '\\(\\Omega\\) = { '+OUT.slice(0,n).map((t,i)=>'\\(\\omega_{'+(i+1)+'}\\) '+t).join(', &nbsp;')+' }';
   selA=null; selB=null;
   const box=document.getElementById('om-chips'); box.innerHTML='';
   for(let m=0;m<Math.pow(2,n);m++){
@@ -1098,10 +1103,10 @@ function omBuild(){
   omRender(n);
 }
 function setName(m,n){
-  if(m===0)return '∅';
-  if(m===Math.pow(2,n)-1)return 'Ω';
-  const e=[];for(let i=0;i<n;i++)if(m&(1<<i))e.push('ω<sub>'+(i+1)+'</sub>');
-  return '{'+e.join(',')+'}';
+  if(m===0)return '\\(\\varnothing\\)';
+  if(m===Math.pow(2,n)-1)return '\\(\\Omega\\)';
+  const e=[];for(let i=0;i<n;i++)if(m&(1<<i))e.push('\\omega_{'+(i+1)+'}');
+  return '\\(\\{'+e.join(',')+'\\}\\)';
 }
 function omRender(n){
   const full=Math.pow(2,n)-1;
@@ -1112,9 +1117,9 @@ function omRender(n){
   });
   const out=document.getElementById('om-out');
   if(selA===null){out.innerHTML='사건을 하나 눌러 <b style="color:'+C.violet+'">A</b>로 지정하십시오.';return;}
-  const rows=[['A<sup>c</sup>',(~selA)&full]];
+  const rows=[['\\(A^{c}\\)',(~selA)&full]];
   if(selB!==null){
-    rows.push(['A ∪ B',selA|selB],['A ∩ B',selA&selB],['A ∖ B',selA&(~selB)&full]);
+    rows.push(['\\(A \\cup B\\)',selA|selB],['\\(A \\cap B\\)',selA&selB],['\\(A \\setminus B\\)',selA&(~selB)&full]);
   }
   const marks=new Set(rows.map(r=>r[1]));
   document.querySelectorAll('#om-chips .chip').forEach(c=>{
@@ -1122,7 +1127,7 @@ function omRender(n){
   });
   out.innerHTML=
     '<span style="font-size:15px">'+
-    'A = '+setName(selA,n)+(selB!==null?' &nbsp;·&nbsp; B = '+setName(selB,n):'')+'</span><br><br>'+
+    '\\(A\\) = '+setName(selA,n)+(selB!==null?' &nbsp;·&nbsp; \\(B\\) = '+setName(selB,n):'')+'</span><br><br>'+
     rows.map(r=>'<span style="font-size:15px">'+r[0]+' = '+setName(r[1],n)+'</span>').join('<br>')+
     '<br><br>'+(selB===null?'하나 더 누르면 B가 지정됩니다.':
     '결과가 전부 위 목록 안에 있습니다 — 노란 테두리가 그것입니다.');
@@ -1130,9 +1135,9 @@ function omRender(n){
 
 /* ═══════════ 01-2·3 벤 다이어그램과 공리 ═══════════ */
 const OPS=[
-  ['A',['a','ab']],['B',['b','ab']],['A<sup>c</sup>',['b','none']],
-  ['A ∪ B',['a','b','ab']],['A ∩ B',['ab']],['A ∖ B',['a']],
-  ['A △ B',['a','b']],['(A∪B)<sup>c</sup>',['none']],['A<sup>c</sup>∩B<sup>c</sup>',['none']]
+  ['A',['a','ab']],['B',['b','ab']],['A^{c}',['b','none']],
+  ['A \\cup B',['a','b','ab']],['A \\cap B',['ab']],['A \\setminus B',['a']],
+  ['A \\triangle B',['a','b']],['(A \\cup B)^{c}',['none']],['A^{c} \\cap B^{c}',['none']]
 ];
 let curOp=3;
 function mkTmp(W,H,s){const t=document.createElement('canvas');t.width=W*s;t.height=H*s;
@@ -1190,7 +1195,7 @@ function vennDraw(){
   const cnt=OPS[curOp][1].reduce((s,nm)=>s+map[nm],0);
   document.getElementById('venn-out').innerHTML=
     '<span class="big">'+(cnt/1000).toFixed(3)+'</span>'+
-    '<span style="font-size:16px">P( '+OPS[curOp][0].replace(/<[^>]+>/g,m=>m)+' )</span>'+
+    '<span style=\"font-size:16px\">\\(P('+OPS[curOp][0]+')\\)</span>'+
     ' = '+cnt+' / 1,000';
   axiomDraw(k);
 }
@@ -1200,33 +1205,33 @@ function axiomDraw(k){
   const disj=k.nab===0;
   document.getElementById('ax-tab').innerHTML=
    '<tr><th>공리</th><th>지금 값</th><th style="text-align:right">확인</th></tr>'+
-   '<tr><td class="f">P(E) ≥ 0</td><td>모든 영역이 0 이상</td><td class="n ok">성립</td></tr>'+
-   '<tr><td class="f">P(Ω) = 1</td><td>'+sum.toFixed(3)+'</td><td class="n '+(Math.abs(sum-1)<1e-9?'ok':'bad')+'">'+(Math.abs(sum-1)<1e-9?'성립':'위배')+'</td></tr>'+
-   '<tr><td class="f">배반 시 가법</td><td>'+(disj?'A∩B = ∅ 이므로 적용 가능':'A∩B ≠ ∅ 이므로 <b>적용 불가</b>')+'</td>'+
+   '<tr><td class="f">\\(P(E) \\ge 0\\)</td><td>모든 영역이 0 이상</td><td class="n ok">성립</td></tr>'+
+   '<tr><td class="f">\\(P(\\Omega) = 1\\)</td><td>'+sum.toFixed(3)+'</td><td class="n '+(Math.abs(sum-1)<1e-9?'ok':'bad')+'">'+(Math.abs(sum-1)<1e-9?'성립':'위배')+'</td></tr>'+
+   '<tr><td class="f">배반 시 가법</td><td>'+(disj?'\\(A \\cap B = \\varnothing\\) 이므로 적용 가능':'\\(A \\cap B \\ne \\varnothing\\) 이므로 <b>적용 불가</b>')+'</td>'+
    '<td class="n '+(disj?'ok':'bad')+'">'+(disj?'적용':'주의')+'</td></tr>';
   document.getElementById('rule-tab').innerHTML=
    '<tr><th>규칙</th><th style="text-align:right">값</th></tr>'+
-   '<tr><td class="f">P(∅) = 0</td><td class="n">0.000</td></tr>'+
-   '<tr><td class="f">P(A<sup>c</sup>) = 1 − P(A)</td><td class="n">'+(1-pA).toFixed(3)+'</td></tr>'+
-   '<tr><td class="f">P(A∩B) ≤ P(A)</td><td class="n">'+pAB.toFixed(3)+' ≤ '+pA.toFixed(3)+'</td></tr>'+
-   '<tr><td class="f">P(A)P(B)</td><td class="n">'+(pA*pB).toFixed(3)+'</td></tr>';
+   '<tr><td class="f">\\(P(\\varnothing) = 0\\)</td><td class="n">0.000</td></tr>'+
+   '<tr><td class="f">\\(P(A^{c}) = 1 - P(A)\\)</td><td class="n">'+(1-pA).toFixed(3)+'</td></tr>'+
+   '<tr><td class="f">\\(P(A \\cap B) \\le P(A)\\)</td><td class="n">'+pAB.toFixed(3)+' ≤ '+pA.toFixed(3)+'</td></tr>'+
+   '<tr><td class="f">\\(P(A)P(B)\\)</td><td class="n">'+(pA*pB).toFixed(3)+'</td></tr>';
   const naive=pA+pB;
   document.getElementById('add-out').innerHTML=
-   '<span style="font-size:16px">P(A∪B) = P(A) + P(B) − P(A∩B)</span><br>'+
+   '<span style="font-size:16px">\\(P(A \\cup B) = P(A) + P(B) - P(A \\cap B)\\)</span><br>'+
    '<span style="font-variant-numeric:tabular-nums">'+
    pU.toFixed(3)+' = '+pA.toFixed(3)+' + '+pB.toFixed(3)+' − '+pAB.toFixed(3)+'</span><br><br>'+
    '그냥 더하면 <em>'+naive.toFixed(3)+'</em> — 교집합 '+k.nab+'개를 두 번 세어 '+
    (naive-pU).toFixed(3)+'만큼 부풀려집니다.<br><br>'+
    (pAB===0
-     ? '지금은 <b>배반</b>입니다. 그런데 P(A)P(B) = '+(pA*pB).toFixed(3)+' ≠ 0 = P(A∩B) — 배반인데 <em>독립이 아닙니다</em>.'
+     ? '지금은 <b>배반</b>입니다. 그런데 \\(P(A)P(B) = '+(pA*pB).toFixed(3)+' \\ne 0 = P(A \\cap B)\\) — 배반인데 <em>독립이 아닙니다</em>.'
      : (Math.abs(pAB-pA*pB)<0.004
-        ? '지금은 P(A∩B) ≈ P(A)P(B) — 거의 <b>독립</b>입니다.'
-        : 'P(A∩B) = '+pAB.toFixed(3)+' vs P(A)P(B) = '+(pA*pB).toFixed(3)+' — 독립이 아닙니다.'));
+        ? '지금은 \\(P(A \\cap B) \\approx P(A)P(B)\\) — 거의 <b>독립</b>입니다.'
+        : '\\(P(A \\cap B) = '+pAB.toFixed(3)+'\\) vs \\(P(A)P(B) = '+(pA*pB).toFixed(3)+'\\) — 독립이 아닙니다.'));
 }
 (function buildOps(){
   const box=document.getElementById('ops');
   OPS.forEach((o,i)=>{const b=document.createElement('button');
-    b.className='ghost'+(i===curOp?' on':'');b.innerHTML=o[0];
+    b.className='ghost'+(i===curOp?' on':'');b.innerHTML='\\('+o[0]+'\\)';
     b.onclick=()=>{curOp=i;
       document.querySelectorAll('#ops button').forEach((x,j)=>x.classList.toggle('on',j===i));
       vennDraw();};
@@ -1271,12 +1276,12 @@ function llnRender(p,n){
 
 /* ═══════════ 선택 진단 퀴즈 ═══════════ */
 const QZ=[
- {q:'실제 오염률 0.5%인 로트를 민감도 <i>P</i>(양성 | 실제 오염) = 98%, 특이도 <i>P</i>(음성 | 실제 정상) = 95%인 신속검사로 검사했더니 <b>양성</b>이 떴다. 이 로트가 정말 오염됐을 확률에 가장 가까운 것은?',
+ {q:'실제 오염률 0.5%인 로트를 민감도 \\(P(\\text{양성} \\mid \\text{실제 오염})\\) = 98%, 특이도 \\(P(\\text{음성} \\mid \\text{실제 정상})\\) = 95%인 신속검사로 검사했더니 <b>양성</b>이 떴다. 이 로트가 정말 오염됐을 확률에 가장 가까운 것은?',
   o:['약 98%','약 90%','약 50%','약 9%'],a:3,
-  e:'정상 로트가 995개나 되기 때문에 위양성 P(양성 | 실제 정상)만 약 50개 나옵니다. 진짜 양성 5개와 합쳐 55개, 그중 진짜는 5개입니다. 희귀한 것을 찾을 때 양성예측도는 민감도 P(양성 | 실제 오염)가 아니라 <b>유병률과 특이도 P(음성 | 실제 정상)</b>가 지배합니다. → 2섹션'},
- {q:'논문에 <i>p</i> = 0.03이라고 적혀 있다. 올바른 해석은?',
+  e:'정상 로트가 995개나 되기 때문에 위양성 \\(P(\\text{양성} \\mid \\text{실제 정상})\\)만 약 50개 나옵니다. 진짜 양성 5개와 합쳐 55개, 그중 진짜는 5개입니다. 희귀한 것을 찾을 때 양성예측도는 민감도 \\(P(\\text{양성} \\mid \\text{실제 오염})\\)가 아니라 <b>유병률과 특이도 \\(P(\\text{음성} \\mid \\text{실제 정상})\\)</b>가 지배합니다. → 2섹션'},
+ {q:'논문에 \\(p = 0.03\\)이라고 적혀 있다. 올바른 해석은?',
   o:['영가설이 참일 확률이 3%다','대립가설이 참일 확률이 97%다','영가설이 참이라면 이만큼 극단적인 결과가 나올 확률이 3%다','실험을 반복하면 97%에서 같은 결과가 나온다'],a:2,
-  e:'<i>p</i>값은 영가설과 모형 가정 아래에서 관측값만큼 또는 더 극단적인 검정통계량이 나올 꼬리확률입니다. <i>P</i>(H₀ | 데이터)가 아니며, 1번 문항처럼 조건의 방향을 뒤집어서는 안 됩니다. → 4섹션'},
+  e:'\\(p\\)값은 영가설과 모형 가정 아래에서 관측값만큼 또는 더 극단적인 검정통계량이 나올 꼬리확률입니다. \\(P(H_{0} \\mid \\text{데이터})\\)가 아니며, 1번 문항처럼 조건의 방향을 뒤집어서는 안 됩니다. → 4섹션'},
  {q:'평균 차이의 95% 신뢰구간이 [1.2, 4.8]로 보고되었다. 올바른 해석은?',
   o:['참값이 이 구간에 있을 확률이 95%다','같은 방법으로 구간을 반복 생성하면 95%가 참값을 포함한다','표본의 95%가 이 구간에 들어간다','1.2와 4.8 사이 값들이 모두 95% 신뢰된다'],a:1,
   e:'구간이 확률변수이고 모수는 고정된 값입니다. 눈앞의 이 구간 하나는 참값을 덮었거나 못 덮었거나 둘 중 하나입니다. Hoekstra 등(2014)에서 연구자·박사과정생 모두 높은 비율로 틀린 문항입니다. → 4섹션'},
@@ -1356,12 +1361,12 @@ function ssDraw(){
   lab(g,'보라 영역 = 놓친 오염(위음성)',x0+4,y1+14,'left',C.violet,11);
   lab(g,'주황 영역 = 헛경보(위양성)',x1-4,y1+14,'right',C.amber,11);
   const se=1-Phi(c-d), sp=Phi(c);
-  const judge=(se>=0.95&&sp>=0.95)?'민감도 P(양성 | 실제 오염)와 특이도 P(음성 | 실제 정상)가 모두 높습니다. 그래도 예측도와 최종 판단에는 오염률과 검사 맥락이 필요합니다.'
+  const judge=(se>=0.95&&sp>=0.95)?'민감도 \\(P(\\text{양성} \\mid \\text{실제 오염})\\)와 특이도 \\(P(\\text{음성} \\mid \\text{실제 정상})\\)가 모두 높습니다. 그래도 예측도와 최종 판단에는 오염률과 검사 맥락이 필요합니다.'
     :(se>sp+0.12?'선별 쪽에 유리한 설정입니다 — 놓침을 줄이는 대신 헛경보를 더 감수합니다.'
     :(sp>se+0.12?'확인 쪽에 유리한 설정입니다 — 헛경보를 줄이는 대신 일부 오염을 놓칩니다.'
     :'선별과 확인 사이 어중간한 설정입니다.'));
   document.getElementById('ss-out').innerHTML=
-   '<span class="big">'+(se*100).toFixed(1)+' / '+(sp*100).toFixed(1)+'</span><i>P</i>(양성 | 실제 오염) / <i>P</i>(음성 | 실제 정상) (%)<br><br>'+
+   '<span class="big">'+(se*100).toFixed(1)+' / '+(sp*100).toFixed(1)+'</span>\\(P(\\text{양성} \\mid \\text{실제 오염})\\) / \\(P(\\text{음성} \\mid \\text{실제 정상})\\) (%)<br><br>'+
    '오염 100개 중 <b>'+(se*100).toFixed(0)+'개</b>를 잡아내고 '+((1-se)*100).toFixed(0)+'개를 놓칩니다.<br>'+
    '정상 100개 중 <b>'+(sp*100).toFixed(0)+'개</b>를 통과시키고 '+((1-sp)*100).toFixed(0)+'개를 헛되이 붙잡습니다.<br><br>'+
    judge;
@@ -1543,9 +1548,9 @@ function rvDraw(n,p){
   const mean=n*p, sd=Math.sqrt(n*p*(1-p));
   document.getElementById('c-out').innerHTML=
    '<span class="big">'+nf(Math.pow(2,n))+' → '+(n+1)+'</span>표본점의 수 → X가 가질 수 있는 값의 수<br><br>'+
-   'E[X] = np = <b>'+nf(mean,2)+'</b> · SD = √(npq) = '+nf(sd,2)+'<br>'+
+   '\\(E[X] = np\\) = <b>'+nf(mean,2)+'</b> · \\(\\mathrm{SD} = \\sqrt{npq}\\) = '+nf(sd,2)+'<br>'+
    (n===2?'가운데 값이 두 배 높은 이유는 앞뒤와 뒤앞이 <em>같은 값 1로 접히기</em> 때문입니다.'
-        :'값 k로 접히는 표본점이 ₙCₖ개라서 <em>C(n,k) p<sup>k</sup>(1−p)<sup>n−k</sup></em> — 이것이 이항분포입니다.')+
+        :'값 \\(k\\)로 접히는 표본점이 \\(\\binom{n}{k}\\)개라서 <em>\\(\\binom{n}{k} p^{k}(1-p)^{n-k}\\)</em> — 이것이 이항분포입니다.')+
    (coinEmp?'<br><br>실측 최대 오차: '+
      (Math.max(...coinEmp.map((v,k)=>Math.abs(v-binPmf(k,n,p))))).toFixed(3):'');
 }
@@ -1591,8 +1596,8 @@ function evDraw(){
   lab(g,'±SD ('+sd.toFixed(2)+')',mxp,y0+8,'center',C.amber,11);
 
   document.getElementById('ev-out').innerHTML=
-   '<span class="big">'+mean.toFixed(3)+'</span>E[X] — 분포의 무게중심<br><br>'+
-   'Var(X) = '+varr.toFixed(3)+' &nbsp;→&nbsp; SD(X) = √'+varr.toFixed(3)+' = <em>'+sd.toFixed(3)+'</em><br><br>'+
+   '<span class="big">'+mean.toFixed(3)+'</span>\\(E[X]\\) — 분포의 무게중심<br><br>'+
+   '\\(\\mathrm{Var}(X) = '+varr.toFixed(3)+'\\) &nbsp;→&nbsp; \\(\\mathrm{SD}(X) = \\sqrt{'+varr.toFixed(3)+'}\\) = <em>'+sd.toFixed(3)+'</em><br><br>'+
    '이항분포는 공식이 따로 있어 매번 이렇게 손으로 더하지 않아도 됩니다.<br>'+
    'E[X] = np = '+(n*p).toFixed(3)+' &nbsp;·&nbsp; Var(X) = np(1−p) = '+(n*p*(1-p)).toFixed(3)+
    ' &nbsp;— 표의 결과와 <b>정확히 일치</b>합니다.';
@@ -1632,10 +1637,10 @@ function normDraw(){
   lab(g,'밀도 f(x)   단위: g⁻¹',x0-46,y0-12,'left',C.soft,11);
   const variance=sd*sd;
   document.getElementById('nm-out').innerHTML=
-   '<span class="big">E[X] = '+mu.toFixed(2)+' g</span>기대값<br><br>'+
-   '모수: μ = '+mu.toFixed(2)+' g · σ = '+sd.toFixed(2)+' g<br>'+
-   'Var(X) = σ² = <em>'+variance.toFixed(3)+' g²</em><br>'+
-   'SD(X) = σ = '+sd.toFixed(3)+' g';
+   '<span class="big">\\(E[X]\\) = '+mu.toFixed(2)+' g</span>기대값<br><br>'+
+   '모수: \\(\\mu\\) = '+mu.toFixed(2)+' g · \\(\\sigma\\) = '+sd.toFixed(2)+' g<br>'+
+   '\\(\\mathrm{Var}(X) = \\sigma^{2}\\) = <em>'+variance.toFixed(3)+' g²</em><br>'+
+   '\\(\\mathrm{SD}(X) = \\sigma\\) = '+sd.toFixed(3)+' g';
 }
 
 /* ═══════════ 04-3a 표준화와 Z 변환 ═══════════ */
@@ -1794,12 +1799,12 @@ function stdDraw(){
 
   const direction=z>0?'위':z<0?'아래':'같은';
   document.getElementById('z-out').innerHTML=
-    '<span class="big">Z = '+z.toFixed(2)+'</span>'+
+    '<span class="big">\\(Z\\) = '+z.toFixed(2)+'</span>'+
     'Z 변환계수<br><br>'+
-    '① x − μ = '+x.toFixed(1)+' − '+mu.toFixed(1)+' = <b>'+shifted.toFixed(1)+' g</b><br>'+
-    '② Z = '+shifted.toFixed(1)+' ⁄ '+sd.toFixed(1)+' = <em>'+z.toFixed(2)+'</em><br><br>'+
+    '① \\(x - \\mu\\) = '+x.toFixed(1)+' − '+mu.toFixed(1)+' = <b>'+shifted.toFixed(1)+' g</b><br>'+
+    '② \\(Z\\) = '+shifted.toFixed(1)+' ⁄ '+sd.toFixed(1)+' = <em>'+z.toFixed(2)+'</em><br><br>'+
     '관측값은 평균보다 표준편차 <b>'+Math.abs(z).toFixed(2)+'개</b> '+direction+'에 있습니다.<br>'+
-    '따라서 P(X ≤ x) = P(Z ≤ '+z.toFixed(2)+') = Φ('+z.toFixed(2)+') ≈ '+(Phi(z)*100).toFixed(1)+'%입니다.';
+    '따라서 \\(P(X \\le x) = P(Z \\le '+z.toFixed(2)+') = \\Phi('+z.toFixed(2)+') \\approx '+(Phi(z)*100).toFixed(1)+'\\%\\)입니다.';
   zAnimationDraw();
 }
 
@@ -1824,10 +1829,10 @@ function binomDraw(){
   g.strokeStyle=C.saf;g.setLineDash([4,3]);g.beginPath();g.moveTo(cx,y0-6);g.lineTo(cx,y1);g.stroke();g.setLineDash([]);
   lab(g,'E[X] = np = '+mean.toFixed(2),cx+6,y0+2,'left',C.saf,12);
   document.getElementById('t-out').innerHTML=
-   '<span class="big">E[X] = '+mean.toFixed(2)+'</span>기대 정답자 수<br><br>'+
-   '모수: n = '+n+' · p = '+p.toFixed(3)+'<br>'+
-   'Var(X) = np(1−p) = <em>'+variance.toFixed(3)+'</em><br>'+
-   'SD(X) = √Var(X) = '+Math.sqrt(variance).toFixed(3);
+   '<span class="big">\\(E[X]\\) = '+mean.toFixed(2)+'</span>기대 정답자 수<br><br>'+
+   '모수: \\(n\\) = '+n+' · \\(p\\) = '+p.toFixed(3)+'<br>'+
+   '\\(\\mathrm{Var}(X) = np(1-p)\\) = <em>'+variance.toFixed(3)+'</em><br>'+
+   '\\(\\mathrm{SD}(X) = \\sqrt{\\mathrm{Var}(X)}\\) = '+Math.sqrt(variance).toFixed(3);
 }
 let poisData=[];
 function poisGen(){
@@ -1858,9 +1863,9 @@ function poisRender(){
   const m=poisData.reduce((a,b)=>a+b,0)/poisData.length;
   const v=poisData.reduce((a,b)=>a+(b-m)**2,0)/(poisData.length-1);
   document.getElementById('p-out').innerHTML=
-   '<span class="big">E[X] = '+lam.toFixed(2)+'</span>기대 건수<br><br>'+
-   '모수: λ = '+lam.toFixed(2)+'<br>'+
-   'Var(X) = λ = <em>'+lam.toFixed(2)+'</em><br>'+
+   '<span class="big">\\(E[X]\\) = '+lam.toFixed(2)+'</span>기대 건수<br><br>'+
+   '모수: \\(\\lambda\\) = '+lam.toFixed(2)+'<br>'+
+   '\\(\\mathrm{Var}(X) = \\lambda\\) = <em>'+lam.toFixed(2)+'</em><br>'+
    '실측 평균 '+m.toFixed(2)+' · 실측 분산 '+v.toFixed(2);
 }
 
@@ -1924,7 +1929,7 @@ function sampRun(){
   document.getElementById('s-out').innerHTML=
    '<span class="big">'+nf(msd,3)+'</span>표본평균들의 표준편차 (실측 SE)<br><br>'+
    '모집단: <b>'+sourceLabel+'</b><br>'+
-   '이론적 SE = σ/√n = <em>'+nf(se,3)+'</em><br>'+
+   '이론적 SE = \\(\\sigma/\\sqrt{n}\\) = <em>'+nf(se,3)+'</em><br>'+
    '실측 평균 = '+nf(mm,3)+' · 실측 SE = '+nf(msd,3)+'<br>'+
    '비대칭도: 실측 '+nf(skew,3)+' · 이론 '+nf(expectedSkew,3)+' <span class="muted">(0에 가까울수록 대칭)</span><br><br>'+
    observation+' 반복 횟수는 이론을 바꾸지 않고, 히스토그램을 더 안정적으로 보이게 합니다.';
@@ -1946,8 +1951,8 @@ function nullRun(){
   document.getElementById('n-out').innerHTML=
    '<span class="big" style="color:'+C.saf+'">'+(hit/rep*100).toFixed(1)+'%</span>'+
    '차이가 없는데 유의하게 나온 비율<br><br>'+
-   nf(rep)+'번 중 <em>'+hit+'</em>번. 이 비율은 이산검정의 실제 제1종 오류확률 '+(binTail(crit,n,1/3)*100).toFixed(1)+'%에 수렴하며, 설정한 α = 5% 이하입니다.<br>'+
-   '<b>α는 제1종 오류확률에 두는 상한이며, 유의한 결과 중 위양성인 비율은 아닙니다.</b>';
+   nf(rep)+'번 중 <em>'+hit+'</em>번. 이 비율은 이산검정의 실제 제1종 오류확률 '+(binTail(crit,n,1/3)*100).toFixed(1)+'%에 수렴하며, 설정한 \\(\\alpha\\) = 5% 이하입니다.<br>'+
+   '<b>\\(\\alpha\\)는 제1종 오류확률에 두는 상한이며, 유의한 결과 중 위양성인 비율은 아닙니다.</b>';
 }
 function r3Draw(){
   const n=+document.getElementById('r3-n').value;
@@ -2013,7 +2018,7 @@ function multRender(){
    '실제로는 <b>전부 효과가 없습니다</b>. 이 '+hit+'건은 전부 위양성입니다.<br>'+
    '기대 위양성 수: '+(k*thr).toFixed(2)+'건<br>'+
    '독립 가정에서 하나라도 나올 확률: <em>'+(fw*100).toFixed(1)+'%</em><br>'+
-   (bonf?'<br><b>Bonferroni 적용 중</b> — 기준을 α/k = '+thr.toFixed(4)+'로 낮췄고, 의존성이 있어도 가족wise 오류율은 α 이하입니다.':'');
+   (bonf?'<br><b>Bonferroni 적용 중</b> — 기준을 \\(\\alpha/k\\) = '+thr.toFixed(4)+'로 낮췄고, 의존성이 있어도 가족wise 오류율은 \\(\\alpha\\) 이하입니다.':'');
 }
 
 /* ═══════════ 배선 ═══════════ */
