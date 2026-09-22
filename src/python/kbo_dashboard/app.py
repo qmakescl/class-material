@@ -2,6 +2,7 @@
 
 `datasets/kbo_dashboard.sqlite3`를 읽어, 팀 · 타자 · 주자 상황(on_1b/2b/3b) ·
 타석 결과(events) · 해당 타석 득점(runs_scored)을 선택해 필터링한 결과를 보여준다.
+`/viewer`에서는 원본 투구 단위 데이터를 컬럼 변형 없이 그대로 볼 수 있다.
 원본 데이터는 재배포하지 않으며, 이 서버는 로컬(127.0.0.1)에서만 실행한다.
 
 사전 준비:
@@ -146,6 +147,76 @@ def index():
     teams = [(code, TEAM_LABELS.get(code, code)) for code in codes]
     return render_template(
         "index.html", meta=meta, event_labels=EVENT_LABELS, teams=teams
+    )
+
+
+def pitch_columns(db: sqlite3.Connection) -> list:
+    """`pitches` 테이블의 컬럼 이름을 원본 순서 그대로 반환."""
+    return [row["name"] for row in db.execute("PRAGMA table_info(pitches)").fetchall()]
+
+
+@app.route("/viewer")
+def viewer():
+    """원본 투구 단위 데이터를 변형 없이 그대로 볼 수 있는 뷰어 페이지."""
+    meta = dataset_meta()
+    db = get_db()
+    return render_template("viewer.html", meta=meta, columns=pitch_columns(db))
+
+
+@app.route("/api/raw")
+def api_raw():
+    """`pitches` 테이블(원본 투구 단위)을 페이지 단위로 조회."""
+    db = get_db()
+    page = max(1, request.args.get("page", 1, type=int) or 1)
+    page_size = min(200, max(10, request.args.get("page_size", 50, type=int) or 50))
+
+    conditions: list[str] = []
+    params: list = []
+
+    game_date = request.args.get("game_date", "").strip()
+    if game_date:
+        conditions.append("game_date = ?")
+        params.append(game_date)
+
+    batter = request.args.get("batter", "").strip()
+    if batter:
+        conditions.append("batter_name = ?")
+        params.append(batter)
+
+    game_pk = request.args.get("game_pk", "").strip()
+    if game_pk:
+        conditions.append("game_pk = ?")
+        params.append(game_pk)
+
+    where = " AND ".join(conditions) if conditions else "1=1"
+
+    total = db.execute(
+        f"SELECT COUNT(*) AS n FROM pitches WHERE {where}", params
+    ).fetchone()["n"]
+
+    offset = (page - 1) * page_size
+    rows = db.execute(
+        f"""
+        SELECT * FROM pitches
+        WHERE {where}
+        ORDER BY game_pk, at_bat_number, pitch_number
+        LIMIT ? OFFSET ?
+        """,
+        [*params, page_size, offset],
+    ).fetchall()
+
+    columns = list(rows[0].keys()) if rows else pitch_columns(db)
+    total_pages = max(1, (total + page_size - 1) // page_size)
+
+    return jsonify(
+        {
+            "columns": columns,
+            "rows": [list(row) for row in rows],
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages,
+        }
     )
 
 

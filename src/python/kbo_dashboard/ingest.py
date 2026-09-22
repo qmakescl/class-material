@@ -80,8 +80,13 @@ def build_plate_appearance_table(pitch_df: pd.DataFrame) -> pd.DataFrame:
     return pa_df
 
 
-def write_sqlite(pa_df: pd.DataFrame, db_path: Path) -> None:
-    """타석 단위 DataFrame을 sqlite3 DB(plate_appearances 테이블)로 저장."""
+def write_sqlite(pa_df: pd.DataFrame, pitch_df: pd.DataFrame, db_path: Path) -> None:
+    """타석 단위·투구 단위 DataFrame을 sqlite3 DB로 저장.
+
+    `plate_appearances`는 실습(타자 분석)용 축약 테이블이고, `pitches`는
+    원본 투구 단위 데이터를 컬럼 변형 없이 그대로 담은 테이블이다. 후자는
+    데이터 뷰어(`/viewer`)가 "원본 그대로"를 보여줄 때 사용한다.
+    """
     db_path.parent.mkdir(parents=True, exist_ok=True)
     if db_path.exists():
         db_path.unlink()
@@ -94,6 +99,12 @@ def write_sqlite(pa_df: pd.DataFrame, db_path: Path) -> None:
         con.execute("CREATE INDEX idx_pa_events ON plate_appearances(events)")
         con.execute("CREATE INDEX idx_pa_team ON plate_appearances(batting_team)")
         con.execute("CREATE INDEX idx_pa_batter ON plate_appearances(batter_name)")
+
+        pitch_df.to_sql("pitches", con, index=False)
+        con.execute("CREATE INDEX idx_pitch_game ON pitches(game_pk)")
+        con.execute("CREATE INDEX idx_pitch_batter ON pitches(batter_name)")
+        con.execute("CREATE INDEX idx_pitch_date ON pitches(game_date)")
+
         con.execute(
             """
             CREATE TABLE dataset_meta (
@@ -109,6 +120,7 @@ def write_sqlite(pa_df: pd.DataFrame, db_path: Path) -> None:
                 ("source_url", DATASET_PAGE),
                 ("season", "2025"),
                 ("row_count", str(len(pa_df))),
+                ("pitch_row_count", str(len(pitch_df))),
             ],
         )
         con.commit()
@@ -121,7 +133,7 @@ def main() -> None:
     print(f"parquet 로드 중: {parquet_path}")
     pitch_df = pd.read_parquet(parquet_path)
     pa_df = build_plate_appearance_table(pitch_df)
-    write_sqlite(pa_df, DB_PATH)
+    write_sqlite(pa_df, pitch_df, DB_PATH)
 
     league_avg = pa_df.loc[pa_df["is_ab"] == 1, "is_hit"].mean()
     risp = pa_df["on_2b"].notna() | pa_df["on_3b"].notna()

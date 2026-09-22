@@ -34,6 +34,25 @@ GitHub Pages의 프로젝트 사이트 경로에서도 동작하도록 내부 �
 사용합니다. 페이지를 새로 추가할 때는 [DESIGN.md](DESIGN.md)의 과목별
 아이콘 매핑과 절대 URL 규칙을 함께 적용합니다.
 
+## 회귀분석 실습용 연간 평균기온 데이터셋
+
+`src/python/build_temperature_dataset.py`가 NASA GISTEMP(GISS Surface
+Temperature Analysis v4)의 공개 월별 편차표에서 연평균(J-D)만 뽑아
+`docs/downlodable/연간평균기온-실습데이터.xlsx`를 생성합니다. 1880–2025년,
+146개 연도의 "연도–지구 연평균기온편차(℃)"이며, 최소제곱과 잔차 실습처럼
+연도를 x로 둔 단순 선형회귀 실습에 바로 쓸 수 있습니다.
+
+```sh
+uv sync
+uv run python src/python/build_temperature_dataset.py
+```
+
+원본 자료는 `datasets/temperature/GLB.Ts+dSST.csv`이며, 최신 자료로 갱신하려면
+<https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv>를 다시
+내려받아 덮어쓰고 스크립트를 재실행합니다. 인용: GISTEMP Team, 2026: GISS
+Surface Temperature Analysis (GISTEMP), version 4. NASA Goddard Institute for
+Space Studies.
+
 ## KBO 2025 타석 탐색 대시보드 (로컬 전용)
 
 `src/python/kbo_dashboard/`에 있는 로컬 전용 도구로, Hugging Face

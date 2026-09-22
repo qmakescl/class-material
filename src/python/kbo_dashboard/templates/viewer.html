@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KBO 2025 원본 데이터 뷰어</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg-1: #dfe9ff;
+    --bg-2: #f3e8ff;
+    --bg-3: #ffe8f0;
+    --text: #1c1c1e;
+    --text-dim: #55555c;
+    --glass-bg: rgba(255, 255, 255, 0.55);
+    --glass-bg-strong: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.65);
+    --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
+    --accent: #0a84ff;
+    --accent-2: #bf5af2;
+    --track-bg: rgba(120, 120, 140, 0.14);
+    --divider: rgba(120, 120, 140, 0.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-1: #1b1030;
+      --bg-2: #0f1c3f;
+      --bg-3: #2a0f2e;
+      --text: #f2f2f7;
+      --text-dim: #b6b6c0;
+      --glass-bg: rgba(40, 40, 55, 0.45);
+      --glass-bg-strong: rgba(45, 45, 62, 0.6);
+      --glass-border: rgba(255, 255, 255, 0.14);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+      --accent: #409cff;
+      --accent-2: #d17aff;
+      --track-bg: rgba(255, 255, 255, 0.08);
+      --divider: rgba(255, 255, 255, 0.12);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    padding: clamp(16px, 4vw, 40px);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Apple SD Gothic Neo",
+      "Malgun Gothic", sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at 15% 10%, var(--bg-1), transparent 55%),
+      radial-gradient(circle at 85% 15%, var(--bg-2), transparent 55%),
+      radial-gradient(circle at 50% 90%, var(--bg-3), transparent 60%),
+      linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    background-attachment: fixed;
+  }
+
+  header { margin-bottom: 16px; }
+  .back-link {
+    display: inline-block;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    margin-bottom: 8px;
+  }
+  .back-link:hover { color: var(--accent); }
+  h1 {
+    font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle { color: var(--text-dim); font-size: 0.85rem; margin: 0; }
+
+  .glass {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
+  .field label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; }
+  .field input {
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--divider);
+    background: var(--glass-bg-strong);
+    color: var(--text);
+    font-size: 0.85rem;
+  }
+  .toolbar button {
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg-strong);
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .toolbar button.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    border: none;
+  }
+
+  .status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0 4px 10px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+  .pager { display: flex; align-items: center; gap: 8px; }
+  .pager button {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg-strong);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  .pager button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .pager input {
+    width: 52px;
+    text-align: center;
+    padding: 5px;
+    border-radius: 8px;
+    border: 1px solid var(--divider);
+    background: var(--glass-bg-strong);
+    color: var(--text);
+  }
+
+  .table-panel { padding: 4px; }
+  .table-wrap { overflow: auto; max-height: 70vh; border-radius: 16px; }
+  table { border-collapse: collapse; font-size: 0.74rem; white-space: nowrap; }
+  th, td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--divider); }
+  thead th {
+    position: sticky; top: 0;
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    color: var(--text-dim);
+    font-weight: 600;
+    z-index: 1;
+  }
+  tbody tr:hover { background: rgba(10, 132, 255, 0.06); }
+  td.null { color: var(--text-dim); font-style: italic; }
+
+  footer {
+    margin-top: 18px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    padding: 14px 20px;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+  <header>
+    <a class="back-link" href="/">← 대시보드로 돌아가기</a>
+    <h1>🔍 KBO 2025 원본 데이터 뷰어</h1>
+    <p class="subtitle">투구 단위 원본 컬럼을 가공 없이 그대로 보여줍니다. 컬럼 의미는 하단 스키마 링크를 참고하세요.</p>
+  </header>
+
+  <div class="glass toolbar">
+    <div class="field">
+      <label>경기 날짜</label>
+      <input type="date" id="f-date">
+    </div>
+    <div class="field">
+      <label>타자</label>
+      <input type="text" id="f-batter" list="batter-list" placeholder="이름 입력 또는 선택" autocomplete="off">
+      <datalist id="batter-list"></datalist>
+    </div>
+    <div class="field">
+      <label>경기 ID (game_pk)</label>
+      <input type="text" id="f-game-pk" placeholder="예: 20250322KTOB02025">
+    </div>
+    <button class="primary" id="apply-btn">적용</button>
+    <button type="button" id="reset-btn">초기화</button>
+  </div>
+
+  <div class="status-row">
+    <div id="status-label">불러오는 중…</div>
+    <div class="pager">
+      <button id="prev-btn">← 이전</button>
+      <span><input type="number" id="page-input" min="1" value="1"> / <span id="total-pages">1</span> 쪽</span>
+      <button id="next-btn">다음 →</button>
+    </div>
+  </div>
+
+  <div class="glass table-panel">
+    <div class="table-wrap">
+      <table>
+        <thead><tr id="header-row"></tr></thead>
+        <tbody id="body-rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer class="glass">
+    데이터 출처: <a href="{{ meta.source_url }}" target="_blank" rel="noopener">{{ meta.source }}</a>
+    · 컬럼 스키마: <a href="https://huggingface.co/datasets/slothman3878/kbo_playbyplay/blob/main/v0/schema.yaml" target="_blank" rel="noopener">schema.yaml</a>
+    — 이 뷰어는 수업용 로컬 도구이며 원본 데이터를 재배포하지 않습니다. 시즌: {{ meta.season }} / 총 투구 수: {{ meta.pitch_row_count }}
+  </footer>
+
+<script>
+const PAGE_SIZE = 50;
+let currentPage = 1;
+
+async function refreshBatterList() {
+  const res = await fetch("/api/batters");
+  const names = await res.json();
+  document.getElementById("batter-list").innerHTML = names.map(n => `<option value="${n}">`).join("");
+}
+
+function cellValue(v) {
+  if (v === null || v === undefined) return `<td class="null">null</td>`;
+  return `<td>${v}</td>`;
+}
+
+async function loadPage(page) {
+  const params = new URLSearchParams();
+  params.set("page", page);
+  params.set("page_size", PAGE_SIZE);
+  const date = document.getElementById("f-date").value;
+  if (date) params.set("game_date", date);
+  const batter = document.getElementById("f-batter").value.trim();
+  if (batter) params.set("batter", batter);
+  const gamePk = document.getElementById("f-game-pk").value.trim();
+  if (gamePk) params.set("game_pk", gamePk);
+
+  document.getElementById("status-label").textContent = "불러오는 중…";
+  const res = await fetch("/api/raw?" + params.toString());
+  const data = await res.json();
+
+  currentPage = data.page;
+  document.getElementById("page-input").value = data.page;
+  document.getElementById("total-pages").textContent = data.total_pages;
+  document.getElementById("prev-btn").disabled = data.page <= 1;
+  document.getElementById("next-btn").disabled = data.page >= data.total_pages;
+
+  const from = data.total === 0 ? 0 : (data.page - 1) * data.page_size + 1;
+  const to = Math.min(data.total, data.page * data.page_size);
+  document.getElementById("status-label").textContent =
+    `전체 ${data.total.toLocaleString()}행 중 ${from.toLocaleString()}–${to.toLocaleString()}행 표시`;
+
+  const headerRow = document.getElementById("header-row");
+  headerRow.innerHTML = data.columns.map(c => `<th>${c}</th>`).join("");
+
+  const tbody = document.getElementById("body-rows");
+  tbody.innerHTML = data.rows.map(row => `<tr>${row.map(cellValue).join("")}</tr>`).join("");
+}
+
+document.getElementById("apply-btn").addEventListener("click", () => loadPage(1));
+document.getElementById("reset-btn").addEventListener("click", () => {
+  document.getElementById("f-date").value = "";
+  document.getElementById("f-batter").value = "";
+  document.getElementById("f-game-pk").value = "";
+  loadPage(1);
+});
+document.getElementById("prev-btn").addEventListener("click", () => loadPage(Math.max(1, currentPage - 1)));
+document.getElementById("next-btn").addEventListener("click", () => loadPage(currentPage + 1));
+document.getElementById("page-input").addEventListener("change", (e) => {
+  const p = parseInt(e.target.value, 10);
+  if (p >= 1) loadPage(p);
+});
+
+refreshBatterList();
+loadPage(1);
+</script>
+</body>
+</html>
