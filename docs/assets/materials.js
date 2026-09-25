@@ -59,5 +59,13 @@ window.MATERIALS = [
     description: "코딩 에이전트 안의 LLM이 도구 호출과 반복 실행을 통해 실제 작업을 해내는 구조를 단계별 체험과 예시로 확인합니다.",
     href: "ai/coding-agent-how-it-works.html",
     date: "2026-09-26"
+  },
+  {
+    subject: "ai",
+    label: "MNIST 예제",
+    title: "흉부 X선 28×28로 배우는 딥러닝",
+    description: "28×28 흉부 X선(PneumoniaMNIST)으로 데이터, 전처리, 모델, 손실, 학습, 평가까지 딥러닝의 전 과정을 단계별로 체험합니다.",
+    href: "ai/pneumoniamnist-deep-learning.html",
+    date: "2026-09-26"
   }
 ];
