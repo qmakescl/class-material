@@ -285,7 +285,7 @@ mjx-container[display="true"]{margin:.6em 0!important}
   <p>사전학습(Pre-training)에서 모델이 하는 일은 딱 하나, <b>앞의 글을 보고 다음 토큰을 맞히는 것</b>입니다. 그런데 이것을 잘하려면 문법, 사실, 상식, 문체를 모두 익혀야 합니다. 직접 빈칸을 채워 보고 모델의 확률과 비교해 보세요.</p>
   <div class="quiz-tabs seg" id="quizTabs" role="tablist" aria-label="빈칸 문제 선택"></div>
   <div class="quiz" id="quiz"></div>
-  <p class="toy">확률은 설명용 장난감 값입니다. 실제 모델은 수만~수십만 개 토큰 전체에 확률을 나눠 줍니다.</p>
+  <p class="toy">확률은 설명용 예시 값이며 실제 모델의 값이 아닙니다. 실제 모델은 수만~수십만 개 토큰 전체에 확률을 나눠 줍니다.</p>
   <div class="goal">
     <h3>네 문제에서 본 것</h3>
     <p>모델은 문법과 사실과 속설을 <b>같은 방식으로</b> 배웁니다. 글에 자주, 일관되게 나온 이어짐일수록 확률이 높아집니다. 학습 목표는 "다음에 올 토큰을 맞혀라"일 뿐, "사실만 골라라"라고 요구하지 않습니다. 그래서 흔한 속설도 배우고, 글에 거의 없는 정보는 그럴듯한 흔한 답으로 메웁니다.</p>
@@ -318,7 +318,7 @@ mjx-container[display="true"]{margin:.6em 0!important}
       <button class="btn ghost" id="genReset">처음부터 다시</button>
     </div>
   </div>
-  <p class="toy">설명용 장난감 예시입니다. 실제 토큰은 이보다 훨씬 작은 조각이고, 확률 값도 지어낸 것입니다. 몇 번 다시 해 보면 같은 질문에 다른 답이 나옵니다.</p>
+  <p class="toy">설명용 예시입니다. 실제 토큰은 이보다 훨씬 작은 조각이고, 확률 값도 설명을 위해 임의로 정한 값입니다. 몇 번 다시 해 보면 같은 질문에 다른 답이 나옵니다.</p>
 </section>
 
 <section id="read">
