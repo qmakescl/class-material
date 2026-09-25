@@ -1,0 +1,576 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>LLM은 무엇을 배우고, 배운 것을 어떻게 쓰나 | Q의 수업 자료</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/ai/llm-what-it-learns.html">
+<meta name="description" content="대규모 언어 모델이 사전학습부터 배포까지 무엇을 배우고, 배운 것을 어떻게 답으로 만들어 내는지 단계별로 확인하는 인공지능 수업 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 수업 자료">
+<meta property="og:title" content="LLM은 무엇을 배우고, 배운 것을 어떻게 쓰나 | Q의 수업 자료">
+<meta property="og:description" content="대규모 언어 모델이 사전학습부터 배포까지 무엇을 배우고, 배운 것을 어떻게 답으로 만들어 내는지 단계별로 확인합니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/ai/llm-what-it-learns.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/ai.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="인공지능 수업 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LLM은 무엇을 배우고, 배운 것을 어떻게 쓰나 | Q의 수업 자료">
+<meta name="twitter:description" content="대규모 언어 모델이 사전학습부터 배포까지 무엇을 배우고, 배운 것을 어떻게 답으로 만들어 내는지 단계별로 확인합니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/ai.png">
+<meta name="twitter:image:alt" content="인공지능 수업 자료 아이콘">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;700;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F4F6FB; --surface:#FFFFFF; --ink:#0B1220; --muted:#45506B; --line:#DBE1EE;
+  --token:#2F6FED; --token-soft:#EAF1FF;
+  --vector:#0EA968; --vector-soft:#E6F8F0;
+  --attn:#FFB020; --attn-soft:#FFF3DE;
+  --warn:#D1264F; --warn-soft:#FDE7EE;
+  --ok:#0EA968; --ok-soft:#E6F8F0;
+  --violet:#8B3FF0;
+  --rail:250px;
+  --display:"Hahmlet","Noto Serif KR","Apple SD Gothic Neo",serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.75;word-break:keep-all;overflow-wrap:break-word}
+
+/* ── 좌측 레일 ───────────────────────────── */
+.rail{
+  position:fixed;left:0;top:0;bottom:0;width:var(--rail);
+  background:var(--ink);color:#E4E9F5;padding:34px 0 20px;
+  display:flex;flex-direction:column;z-index:50;overflow-y:auto;
+}
+.rail .rail-back{
+  display:block;margin:0 26px 18px;padding:0;color:#B7C2DE;font-size:12.5px;
+  font-weight:600;text-decoration:none;white-space:nowrap;border-left:0;
+}
+.rail .rail-back:hover,.rail .rail-back:focus-visible{color:var(--attn)}
+.rail h1{
+  font-family:var(--display);font-size:21px;font-weight:800;
+  margin:0 26px 30px;line-height:1.4;color:#F4F6FB;letter-spacing:-.01em;
+}
+.rail nav{display:flex;flex-direction:column}
+.rail nav a{
+  display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:baseline;
+  padding:11px 24px;color:#B7C2DE;text-decoration:none;font-size:13.5px;
+  border-left:3px solid transparent;transition:.16s;cursor:pointer;
+}
+.rail nav a b{font-variant-numeric:tabular-nums;font-weight:600;color:#7C88A8;font-size:12px}
+.rail nav a:hover{background:#16213D;color:#fff}
+.rail nav a.on{background:#16213D;color:#fff;border-left-color:var(--attn)}
+.rail nav a.on b{color:var(--attn)}
+.rail footer{margin-top:auto;padding:20px 24px 0;font-size:11.5px;color:#7C88A8;line-height:1.6}
+
+main{margin-left:var(--rail);max-width:900px;padding:28px 40px 64px;display:flex;flex-direction:column;gap:56px}
+@media (max-width:860px){
+  :root{--rail:0px}
+  .rail{position:static;width:auto;height:auto;padding:22px 0 8px}
+  .rail nav{flex-direction:row;overflow-x:auto;padding:0 16px 8px}
+  .rail nav a{border-left:0;border-bottom:3px solid transparent;white-space:nowrap;padding:8px 14px}
+  .rail nav a.on{border-left:0;border-bottom-color:var(--attn)}
+  .rail .rail-back{margin:0 16px 10px}
+  .rail h1{margin:0 16px 16px}
+  .rail footer{display:none}
+  main{padding:20px 16px 64px}
+}
+h1,h2,h3{font-family:var(--display);line-height:1.3;text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,6vw,40px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:clamp(22px,4.6vw,28px);font-weight:700}
+h2.page-title{font-size:clamp(28px,6vw,40px);font-weight:800;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+section{display:flex;flex-direction:column;gap:16px}
+.eyebrow{font-size:13px;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.lead{font-size:18px;color:var(--ink)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.tag{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.recap{border-left:3px solid var(--line);padding:4px 0 4px 16px;display:flex;flex-direction:column;gap:6px}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px}
+.flow span.n{padding:2px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
+.flow .t{color:var(--token);border-color:var(--token)!important}
+.flow .v{color:var(--vector);border-color:var(--vector)!important}
+.flow .a{color:var(--attn);border-color:var(--attn)!important}
+.goal{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.goal ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:4px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat{border-top:2px solid var(--ink);padding-top:10px;display:flex;flex-direction:column;gap:2px}
+.stat b{font-family:var(--mono);font-size:22px;font-weight:500}
+.stat span{font-size:13px;color:var(--muted);line-height:1.5}
+@media (max-width:520px){.stats{grid-template-columns:1fr}}
+
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(6,1fr);gap:0;position:relative;margin-top:4px}
+.pipe button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:12.5px;line-height:1.35;color:var(--muted);position:relative;padding:0 2px}
+.pipe button::before{content:"";position:absolute;top:15px;left:0;right:0;height:2px;background:var(--line);z-index:0}
+.pipe button:first-child::before{left:50%}
+.pipe button:last-child::before{right:50%}
+.pipe .dot{width:32px;height:32px;border-radius:50%;border:2px solid var(--line);background:var(--surface);display:grid;place-items:center;font-family:var(--mono);font-size:13px;position:relative;z-index:1;color:var(--muted)}
+.pipe button.done .dot{border-color:var(--ink);color:var(--ink)}
+.pipe button.on{color:var(--ink);font-weight:600}
+.pipe button.on .dot{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.pipe button:focus-visible .dot{outline:3px solid var(--token);outline-offset:2px}
+.bracket{display:grid;grid-template-columns:repeat(6,1fr);font-size:11.5px;color:var(--muted);text-align:center;margin-top:-4px}
+.bracket div{border-top:1px dashed var(--line);padding-top:4px;margin:0 6px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:16px}
+.panel .row{display:grid;grid-template-columns:110px 1fr;gap:12px}
+.panel .row dt{font-size:13px;color:var(--muted);font-weight:600;padding-top:2px}
+.panel .row dd{margin:0}
+.panel dl{margin:0;display:flex;flex-direction:column;gap:12px}
+@media (max-width:520px){.panel .row{grid-template-columns:1fr;gap:2px}}
+.chat{border-radius:10px;border:1px solid var(--line);overflow:hidden}
+.chat .q{padding:10px 14px;background:var(--token-soft);font-size:15px}
+.chat .q b{color:var(--token);font-weight:600;margin-right:6px}
+.chat .r{padding:12px 14px;font-size:15px;white-space:pre-line;min-height:3.2em}
+.chat .r.noise{font-family:var(--mono);color:var(--muted);letter-spacing:.02em}
+.chat .r.doc{font-family:var(--mono);font-size:14px}
+.chat .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 14px;border-top:1px dashed var(--line);font-size:12px;color:var(--muted);flex-wrap:wrap}
+.hint{display:flex;gap:10px;background:var(--attn-soft);border-radius:10px;padding:12px 14px;font-size:15px}
+.hint b{color:var(--attn);white-space:nowrap}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:inherit;font-size:14px;font-weight:600;padding:8px 14px;border-radius:8px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn:focus-visible,.chip:focus-visible,.sent:focus-visible,.seg button:focus-visible{outline:3px solid var(--token);outline-offset:2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;padding:6px 12px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.seg button.on{background:var(--ink);color:var(--paper)}
+
+/* fill-in */
+.quiz-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.quiz{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:16px}
+.prompt{font-size:20px;font-family:var(--display);font-weight:500}
+.blank{display:inline-block;min-width:3.5em;border-bottom:2px solid var(--token);color:var(--token);text-align:center;padding:0 4px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font:inherit;font-size:15px;padding:6px 12px;border-radius:8px;border:1px solid var(--token);background:var(--token-soft);color:var(--token);cursor:pointer}
+.chip.pick{background:var(--token);color:var(--surface)}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:96px 1fr 48px;gap:10px;align-items:center;font-size:14px}
+.bar .lab{color:var(--token);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .track{height:14px;background:var(--paper);border-radius:4px;overflow:hidden}
+.bar .fill{height:100%;background:var(--attn);border-radius:4px;width:0;transition:width .5s ease}
+.bar .pct{font-family:var(--mono);font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+.bar.mine .lab::after{content:" ← 내 선택";color:var(--muted);font-size:12px;font-weight:400}
+.verdict{border-radius:10px;padding:12px 14px;background:var(--vector-soft);display:flex;flex-direction:column;gap:4px}
+.verdict b{color:var(--vector)}
+.verdict.warn{background:var(--warn-soft)}
+.verdict.warn b{color:var(--warn)}
+
+/* compression */
+.compress{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center}
+.box{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:6px}
+.box .big{font-family:var(--mono);font-size:22px}
+.arrow{font-family:var(--mono);color:var(--muted);text-align:center;font-size:13px}
+@media (max-width:520px){.compress{grid-template-columns:1fr}.arrow{transform:none}}
+
+/* generator */
+.gen{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.out{font-size:17px;line-height:1.9;min-height:3.8em}
+.out .tok{background:var(--token-soft);color:var(--ink);border-radius:4px;padding:1px 4px;margin-right:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.out .tok.new{outline:2px solid var(--token)}
+.out .pr{color:var(--muted)}
+.step-label{font-size:13px;color:var(--muted)}
+
+/* table */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14.5px}
+th,td{text-align:left;vertical-align:top;padding:12px 14px;border-bottom:1px solid var(--line)}
+th{font-size:12.5px;color:var(--muted);letter-spacing:.04em;font-weight:600}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600;white-space:nowrap}
+td:last-child{color:var(--ink)}
+
+/* answer check */
+.answer{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.answer .who{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.sent{all:unset;cursor:pointer;display:block;padding:10px 12px;border-radius:8px;border:1px dashed var(--line);font-size:15.5px;line-height:1.7}
+.sent:hover{border-color:var(--muted)}
+.sent .why{display:none;margin-top:8px;font-size:14px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
+.sent.open{border-style:solid}
+.sent.open .why{display:block}
+.sent .lvl{display:none;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.sent.open .lvl{display:inline-block}
+.lvl.lo{background:var(--ok-soft);color:var(--ok)}
+.lvl.mid{background:var(--attn-soft);color:var(--attn)}
+.lvl.hi{background:var(--warn-soft);color:var(--warn)}
+
+.myth{display:flex;flex-direction:column;gap:12px}
+.myth article{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.myth .x{color:var(--warn);font-weight:600}
+.myth .o{color:var(--vector);font-weight:600}
+details{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 18px}
+details summary{cursor:pointer;font-weight:600}
+details[open] summary{margin-bottom:12px}
+.formula{font-size:17px;background:var(--paper);border-radius:8px;padding:6px 14px;overflow-x:auto;overflow-y:hidden;color:var(--ink)}
+.sym .m{color:var(--token);white-space:nowrap}
+mjx-container{color:inherit}
+mjx-container[display="true"]{margin:.6em 0!important}
+.sym{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:14.5px;margin:12px 0;align-items:baseline}
+.sym code{font-family:var(--mono);color:var(--token)}
+.next{border-top:2px solid var(--ink);padding-top:14px;display:flex;flex-direction:column;gap:6px}
+.refs{font-size:14px;color:var(--muted);padding-left:1.2em;margin:0;display:flex;flex-direction:column;gap:6px}
+.refs a{color:var(--token)}
+.toy{font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.bar .fill{transition:none}}
+</style>
+</head><body>
+
+<aside class="rail">
+  <a class="rail-back" href="../index.html#ai">← 처음으로</a>
+  <h1>LLM은 무엇을 배우고,<br>배운 것을 어떻게 쓰나</h1>
+  <nav id="nav">
+    <a href="#intro"><b>01</b><span>설계도와 숫자</span></a>
+    <a href="#pipeline"><b>02</b><span>여섯 단계 지도</span></a>
+    <a href="#learn"><b>03</b><span>무엇을 배우나</span></a>
+    <a href="#store"><b>04</b><span>어디에 남나</span></a>
+    <a href="#use"><b>05</b><span>어떻게 쓰나</span></a>
+    <a href="#read"><b>06</b><span>AI 답 읽는 법</span></a>
+    <a href="#myth"><b>07</b><span>오개념 바로잡기</span></a>
+  </nav>
+  <footer>인공지능 작동이해</footer>
+</aside>
+
+<main>
+<header style="display:flex;flex-direction:column;gap:14px">
+  <div class="eyebrow">인공지능 작동이해</div>
+  <h2 class="page-title">LLM은 무엇을 배우고, 배운 것을 어떻게 쓰나</h2>
+  <p class="lead">대규모 언어 모델(LLM, Large Language Model)이 만들어지는 과정을 한눈에 봅니다. 목표는 하나입니다. <b>모델이 무엇을 배웠는지 알면, AI가 내놓은 답을 어디까지 믿고 어디부터 확인해야 할지 판단할 수 있습니다.</b></p>
+  <div class="recap">
+    <span class="small muted">모델이 글을 처리하는 방식</span>
+    <div class="flow">
+      <span class="n">문장</span>→<span class="n t">토큰</span>→<span class="n v">임베딩(벡터)</span>→<span class="n a">어텐션으로 문맥 섞기</span>→<span class="n a">다음 토큰 확률</span>→<span class="n t">하나 뽑기</span>
+    </div>
+    <span class="small muted">여기서는 모델을 어떻게 만드는지 살펴봅니다.</span>
+  </div>
+</header>
+
+<section id="intro">
+  <h2>설계도는 짧고, 숫자는 많다</h2>
+  <p>LLM을 "만든다"는 말은 프로그램을 한 줄씩 짠다는 뜻이 아닙니다. 트랜스포머(Transformer)라는 설계도는 비교적 짧습니다. 만드는 과정의 대부분은 설계도 안에 들어가는 <b>파라미터(parameter)</b>, 곧 수천억 개의 숫자를 알맞은 값으로 맞추는 일입니다. 이 값을 사람이 하나하나 정하지는 않습니다. 엄청난 양의 글을 보며 <b>다음 토큰 맞히기</b>를 되풀이하는 동안 숫자가 조금씩 고쳐집니다. 이 과정을 학습(training)이라고 합니다.</p>
+  <div class="stats">
+    <div class="stat"><b>약 300줄</b><span>교육용 GPT 모델 정의 코드 길이 (nanoGPT의 model.py)</span></div>
+    <div class="stat"><b>4,050억 개</b><span>Llama 3 405B 모델의 파라미터 수 (Meta, 2024)</span></div>
+    <div class="stat"><b>약 15.6조</b><span>같은 모델이 사전학습에서 읽은 토큰 수</span></div>
+  </div>
+  <p class="toy">실제 값 · 공개 논문 기준. 모델마다 규모는 크게 다릅니다. 기준 시점 2026년 9월.</p>
+</section>
+
+<section id="pipeline">
+  <h2>여섯 단계로 보는 전체 지도</h2>
+  <p>단계를 눌러 보세요. 각 단계에서 모델이 무엇을 얻는지, 그리고 <b>같은 질문</b>에 모델이 어떻게 답하는지가 바뀝니다.</p>
+  <div>
+    <div class="pipe" id="pipe" role="tablist" aria-label="LLM 구축 단계"></div>
+    <div class="bracket" aria-hidden="true">
+      <div style="grid-column:1/3">준비</div>
+      <div style="grid-column:3/5">학습 (숫자가 바뀜)</div>
+      <div style="grid-column:5/7">점검·사용</div>
+    </div>
+  </div>
+  <div class="panel" id="panel" role="tabpanel" aria-live="polite"></div>
+  <div class="btns">
+    <button class="btn ghost" id="prevStage">이전 단계</button>
+    <button class="btn" id="nextStage">다음 단계</button>
+  </div>
+  <p class="toy">응답은 모두 단계별 특징을 보여 주려고 만든 설명용 예시입니다. 실제 모델의 출력이 아닙니다.</p>
+</section>
+
+<section id="learn">
+  <h2>무엇을 배우나: 빈칸 맞히기</h2>
+  <p>사전학습(Pre-training)에서 모델이 하는 일은 딱 하나, <b>앞의 글을 보고 다음 토큰을 맞히는 것</b>입니다. 그런데 이것을 잘하려면 문법, 사실, 상식, 문체를 모두 익혀야 합니다. 직접 빈칸을 채워 보고 모델의 확률과 비교해 보세요.</p>
+  <div class="quiz-tabs seg" id="quizTabs" role="tablist" aria-label="빈칸 문제 선택"></div>
+  <div class="quiz" id="quiz"></div>
+  <p class="toy">확률은 설명용 장난감 값입니다. 실제 모델은 수만~수십만 개 토큰 전체에 확률을 나눠 줍니다.</p>
+  <div class="goal">
+    <h3>네 문제에서 본 것</h3>
+    <p>모델은 문법과 사실과 속설을 <b>같은 방식으로</b> 배웁니다. 글에 자주, 일관되게 나온 이어짐일수록 확률이 높아집니다. 학습 목표는 "다음에 올 토큰을 맞혀라"일 뿐, "사실만 골라라"라고 요구하지 않습니다. 그래서 흔한 속설도 배우고, 글에 거의 없는 정보는 그럴듯한 흔한 답으로 메웁니다.</p>
+  </div>
+</section>
+
+<section id="store">
+  <h2>배운 것은 어디에 남나: 도서관이 아닌 압축</h2>
+  <p>학습이 끝나면 읽은 글은 사라지고 <b>파라미터만 남습니다</b>. 원문을 통째로 저장하기에는 파라미터 수가 한참 모자랍니다.</p>
+  <div class="compress">
+    <div class="box"><span class="small muted">읽은 글</span><span class="big">15.6조 토큰</span></div>
+    <div class="arrow">압축<br>→</div>
+    <div class="box"><span class="small muted">남은 숫자</span><span class="big">4,050억 개</span></div>
+  </div>
+  <p>파라미터 하나가 약 <span class="num">38</span>개 토큰 분량의 글을 떠안은 셈입니다(Llama 3 405B 기준, 15.6조 ÷ 4,050억). 그래서 모델에 남는 것은 원문이 아니라 <b>글의 패턴</b>입니다. 답할 때는 저장된 문서를 꺼내 오지 않고, 그 패턴으로 답을 <b>새로 만들어 냅니다</b>.</p>
+  <div class="hint"><b>결과</b><span>큰 줄기는 잘 재현하지만 숫자, 날짜, 인용문, 문헌 제목, 웹 주소 같은 세부는 틀리기 쉽습니다. 또 모델 안에는 "이 내용이 어느 문서에서 왔다"는 출처 목록이 없습니다.</span></div>
+  <p class="small muted">비유의 한계: "압축"이라고 해서 모든 것이 흐릿하게 남는 것은 아닙니다. 학습 데이터에 여러 번 반복된 글(유명한 문구, 라이선스 문서 등)은 거의 그대로 외워지기도 합니다(Carlini et al., 2021).</p>
+</section>
+
+<section id="use">
+  <h2>배운 것을 어떻게 쓰나: 한 조각씩 만들기</h2>
+  <p>학습이 끝난 모델을 쓰는 단계를 추론(Inference)이라고 합니다. 이때 파라미터는 더 이상 바뀌지 않습니다. 질문이 들어오면 모델은 다음 조각의 확률을 계산하고, 하나를 뽑아 붙이고, 다시 계산합니다. <b>답 전체를 미리 정해 두지 않습니다.</b></p>
+  <div class="gen">
+    <div class="chat" style="border:0"><div class="q"><b>질문</b>사과는 어떤 과일인가요?</div></div>
+    <div class="out" id="genOut" aria-live="polite"></div>
+    <div class="step-label" id="genLabel"></div>
+    <div class="bars" id="genBars"></div>
+    <div class="btns">
+      <button class="btn" id="genStep">다음 조각 만들기</button>
+      <button class="btn ghost" id="genReset">처음부터 다시</button>
+    </div>
+  </div>
+  <p class="toy">설명용 장난감 예시입니다. 실제 토큰은 이보다 훨씬 작은 조각이고, 확률 값도 지어낸 것입니다. 몇 번 다시 해 보면 같은 질문에 다른 답이 나옵니다.</p>
+</section>
+
+<section id="read">
+  <h2>그래서, AI의 답을 어떻게 받아들일까</h2>
+  <p>지금까지 본 학습의 성질 하나하나가 결과물의 특징으로 이어집니다.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>학습의 성질</th><th>결과물에 나타나는 특징</th><th>읽는 법</th></tr></thead>
+      <tbody>
+        <tr><td>다음 토큰 예측</td><td>사실이 아니어도 문장은 매끄럽습니다.</td><td>유창함을 정확성의 근거로 삼지 않습니다.</td></tr>
+        <tr><td>데이터 속 빈도</td><td>흔한 주제에 강하고, 지역·전문·소수 주제에 약합니다. 흔한 속설과 편향도 따라 나옵니다.</td><td>내 질문이 인터넷에 얼마나 흔한 주제인지 가늠합니다.</td></tr>
+        <tr><td>압축된 패턴</td><td>숫자·날짜·인용·출처가 틀리기 쉽고, 없는 문헌을 지어낼 수 있습니다.</td><td>세부 정보와 출처는 원문에서 직접 확인합니다.</td></tr>
+        <tr><td>학습 시점에 고정</td><td>학습 이후 일어난 일은 모릅니다.</td><td>최신 정보가 필요하면 검색 기능이 켜져 있는지 확인합니다.</td></tr>
+        <tr><td>사후학습의 말투</td><td>친절하고 자신 있는 어조로 답하고, 사용자 의견에 맞춰 주는 경향이 있습니다.</td><td>어조를 확신의 정도로 읽지 않습니다. 반대 입장도 물어봅니다.</td></tr>
+        <tr><td>확률에 따른 뽑기</td><td>같은 질문에도 답이 달라집니다.</td><td>중요한 답은 다시 물어 비교합니다. 매번 같아도 그것이 사실이라는 보장은 아닙니다.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-top:12px">연습: 이 답변에서 어디를 확인해야 할까</h3>
+  <p class="small">문장을 하나씩 눌러 보세요. 확인이 얼마나 필요한지와 그 이유가 나옵니다.</p>
+  <div class="answer" id="answer">
+    <div class="who"><span><b>질문</b> 한글은 언제, 어떻게 만들어졌나요?</span><span class="tag">설명용으로 만든 가상의 AI 답변</span></div>
+  </div>
+  <div class="btns"><button class="btn ghost" id="openAll">모두 펼치기</button></div>
+</section>
+
+<section id="myth">
+  <h2>오개념 바로잡기</h2>
+  <div class="myth">
+    <article>
+      <span class="x">✕ "개발자가 질문별 답을 규칙으로 입력해 둔다"</span>
+      <span class="o">○ 사람이 정하는 것은 설계, 학습 데이터, 학습 방법입니다.</span>
+      <p class="small">개별 답은 학습으로 정해진 파라미터로 그때그때 계산됩니다. 그래서 개발자도 모델이 어떤 질문에 무엇이라고 답할지 미리 다 알지 못합니다.</p>
+    </article>
+    <article>
+      <span class="x">✕ "AI는 답할 때마다 인터넷을 찾아보고, 대화하면서 계속 배운다"</span>
+      <span class="o">○ 기본적으로는 학습이 끝난 파라미터만으로 답을 계산합니다.</span>
+      <p class="small">검색은 검색 도구가 연결되어 있을 때만 합니다. 대화 내용은 컨텍스트 창 안에서 참고할 뿐 파라미터를 바꾸지 않습니다. 이전 대화를 "기억"하는 기능도 보통은 메모를 입력에 덧붙이는 방식입니다.</p>
+    </article>
+  </div>
+</section>
+
+<section id="math">
+  <details>
+    <summary>더 깊이: 사전학습이 줄이려는 값 (수식)</summary>
+    <p>사전학습은 아래 손실(loss)을 작게 만드는 방향으로 파라미터를 고칩니다. 이 방법을 경사하강법(Gradient descent)이라고 합니다.</p>
+    <div class="formula">\[ \mathcal{L}(\theta) = -\frac{1}{N}\sum_{t=1}^{N} \log p_{\theta}\left(x_t \mid x_{\lt t}\right) \]</div>
+    <div class="sym">
+      <span class="m">\(\theta\)</span><span>세타. 모델의 파라미터 전체(수천억 개의 숫자).</span>
+      <span class="m">\(x_t\)</span><span>글 속 \(t\)번째 토큰. 맞혀야 하는 "정답".</span>
+      <span class="m">\(x_{&lt;t}\)</span><span>\(t\)번째보다 앞에 나온 토큰들 \(x_1, \ldots, x_{t-1}\). 모델이 보는 "문제".</span>
+      <span class="m">\(p_{\theta}(\,\cdot \mid \cdot\,)\)</span><span>앞 토큰들을 보고 모델이 정답 토큰에 준 확률.</span>
+      <span class="m">\(\log\)</span><span>로그. 확률이 1에 가까우면 0에 가깝고, 0에 가까우면 큰 음수가 됩니다.</span>
+      <span class="m">\(\frac{1}{N}\sum_{t=1}^{N}\)</span><span>글 전체 \(N\)개 토큰에 대해 더한 뒤 평균을 냅니다.</span>
+      <span class="m">\(-\)</span><span>앞의 마이너스 부호. 정답 확률이 높을수록 손실이 작아지게 뒤집습니다.</span>
+      <span class="m">\(\mathcal{L}(\theta)\)</span><span>손실. 파라미터가 \(\theta\)일 때 예측이 얼마나 틀렸는지 나타내는 값.</span>
+    </div>
+    <p class="small">예: 정답 토큰에 0.9를 주면 \(-\log 0.9 \approx 0.105\), 0.1을 주면 \(-\log 0.1 \approx 2.303\)입니다(자연로그 기준). 틀리게 예측할수록 손실이 크게 늘어납니다. 이 식을 교차 엔트로피(Cross-entropy) 손실이라고 합니다. 식 어디에도 "사실인가"를 따지는 항은 없습니다. 정답은 그저 "원래 글에 실제로 나온 다음 토큰"입니다.</p>
+  </details>
+</section>
+
+<section id="refs">
+  <h2 style="font-size:20px">더 알아보기</h2>
+  <ol class="refs">
+    <li>Vaswani, A. et al. (2017). Attention Is All You Need. NeurIPS. <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">arXiv:1706.03762</a></li>
+    <li>Radford, A. et al. (2019). Language Models are Unsupervised Multitask Learners. OpenAI.</li>
+    <li>Brown, T. et al. (2020). Language Models are Few-Shot Learners. NeurIPS. <a href="https://arxiv.org/abs/2005.14165" target="_blank" rel="noopener">arXiv:2005.14165</a></li>
+    <li>Ouyang, L. et al. (2022). Training Language Models to Follow Instructions with Human Feedback. NeurIPS. <a href="https://arxiv.org/abs/2203.02155" target="_blank" rel="noopener">arXiv:2203.02155</a></li>
+    <li>Llama Team, AI @ Meta (2024). The Llama 3 Herd of Models. <a href="https://arxiv.org/abs/2407.21783" target="_blank" rel="noopener">arXiv:2407.21783</a></li>
+    <li>Carlini, N. et al. (2021). Extracting Training Data from Large Language Models. USENIX Security. <a href="https://arxiv.org/abs/2012.07805" target="_blank" rel="noopener">arXiv:2012.07805</a></li>
+    <li>Sharma, M. et al. (2023). Towards Understanding Sycophancy in Language Models. <a href="https://arxiv.org/abs/2310.13548" target="_blank" rel="noopener">arXiv:2310.13548</a></li>
+    <li>Kalai, A. T. et al. (2025). Why Language Models Hallucinate. <a href="https://arxiv.org/abs/2509.04664" target="_blank" rel="noopener">arXiv:2509.04664</a></li>
+    <li>Karpathy, A. nanoGPT (교육용 GPT 구현). <a href="https://github.com/karpathy/nanoGPT" target="_blank" rel="noopener">github.com/karpathy/nanoGPT</a></li>
+  </ol>
+</section>
+</main>
+
+<script>
+window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"]]},svg:{fontCache:"global"},options:{enableMenu:false}};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" defer></script>
+<script>
+(function(){
+const Q = "사과는 어떤 과일인가요?";
+const stages = [
+  { name:"데이터 준비", short:"데이터", what:"웹 문서, 책, 논문, 코드 등 글을 대량으로 모읍니다. 중복된 글과 질 낮은 글, 개인정보를 걸러 냅니다.",
+    gets:"아직 모델은 없습니다. 모델이 읽을 교재가 생깁니다.",
+    resp:{type:"doc", text:"(교재 속 글 조각 예시)\n…사과는 장미과에 속하는 낙엽 교목의 열매로…\nQ. 사과는 어떤 과일인가요? A. 빨갛고 새콤달콤한…\n…금붕어의 기억력은 3초라고 한다…"},
+    note:"응답 없음 · 교재 수집 중",
+    hint:"모델이 아는 것의 범위와 치우침은 여기서 정해집니다. 교재에 없거나 드문 내용은 나중에도 약하고, 교재에 담긴 속설과 편향도 함께 배웁니다. 수집을 멈춘 시점 이후의 일은 모릅니다." },
+  { name:"토크나이저·설계", short:"설계", what:"글을 자를 토큰 어휘 사전을 만들고, 층 수·벡터 차원 같은 모델 크기를 정합니다. 파라미터는 무작위 숫자로 채워 둡니다.",
+    gets:"내용이 빈 그릇. 구조는 있지만 숫자에 의미가 없습니다.",
+    resp:{type:"noise", text:"껍 ⟨휴⟩ 사과ᄏ 1987 는는 ;; 어떤ㅂ 쥬 ▁▁ 뉘 %"},
+    note:"무작위 파라미터 → 무작위 토큰",
+    hint:"설계는 무엇을 얼마나 담을 수 있는지를 정할 뿐입니다. 이 단계의 모델은 아무것도 모릅니다. 모델의 지식은 모두 다음 단계인 학습에서 생깁니다." },
+  { name:"사전학습", short:"사전학습", what:"수조 개 토큰의 글에서 다음 토큰 맞히기를 끝없이 반복하며 파라미터를 조금씩 고칩니다. 수천 개의 GPU로 몇 주에서 몇 달이 걸립니다.",
+    gets:"베이스 모델(Base model). 문법, 사실, 문체, 글의 흐름을 담은 '문서 이어쓰기 기계'.",
+    resp:{type:"doc", text:"사과는 어떤 과일인가요?\n배는 어떤 과일인가요?\n포도는 어떤 과일인가요?\n\n[1학년 2학기 · 과일 이름 익히기 활동지]"},
+    note:"질문에 답하지 않고, 글을 이어 씀",
+    hint:"베이스 모델은 질문에 답하도록 배우지 않았습니다. 이 글 다음에 흔히 올 법한 글을 이어 쓸 뿐입니다. 위 예시에서는 질문 목록이 이어지는 활동지가 그럴듯하다고 보고 그렇게 이어 썼습니다. 결과물의 기준은 '사실인가'가 아니라 '이 다음에 흔히 오는가'입니다." },
+  { name:"사후학습", short:"사후학습", what:"모범 질문·답변 예시로 추가 학습하고(지시 따르기 학습, SFT), 사람이 더 낫다고 고른 답 쪽으로 다듬습니다(선호 학습, RLHF 등).",
+    gets:"어시스턴트 모델. 질문에 답하는 형식과 말투를 익힙니다.",
+    variants:{
+      sft:{label:"지시 학습 직후", type:"", text:"사과는 장미과에 속하는 사과나무의 열매입니다. 둥근 모양에 빨간색이나 초록색 껍질을 가지고 있으며, 새콤달콤한 맛이 납니다."},
+      pref:{label:"선호 학습 후", type:"", text:"사과는 장미과 사과나무의 열매예요.\n• 맛: 새콤달콤하고 아삭한 식감\n• 제철: 한국에서는 주로 가을\n• 먹는 법: 생으로 먹거나 주스·잼·파이로\n\n더 궁금한 점이 있으면 말씀해 주세요!"}
+    },
+    note:"대화 형식과 말투를 익힘",
+    hint:"사후학습은 주로 답하는 방식을 바꿉니다. 새로운 사실을 대량으로 넣는 단계는 아닙니다. 친절하고 자신 있는 말투는 사람들이 선호해서 생긴 것이라, 내용이 틀렸을 때도 똑같이 나타납니다. 사용자 의견에 맞춰 주는 경향도 여기서 생길 수 있습니다." },
+  { name:"평가·안전 점검", short:"평가", what:"벤치마크 시험, 사람 평가, 레드팀(일부러 문제를 일으켜 약점 찾기)으로 성능과 위험을 점검합니다. 문제가 보이면 앞 단계로 돌아가 다시 학습합니다.",
+    gets:"파라미터는 바뀌지 않습니다. 성적표와 약점 목록이 생깁니다.",
+    resp:{type:"doc", text:"(점검표 예시)\n☐ 수학·코딩·상식 벤치마크 정답률\n☐ 사람이 두 답변 중 더 나은 쪽을 고르는 비교 평가\n☐ 위험한 요청을 거절하는지, 거절하지 않아도 될 요청은 돕는지"},
+    note:"점검 결과에 따라 이전 단계 반복",
+    hint:"벤치마크 점수는 정해진 시험 문제에서의 평균 성적입니다. 내가 묻는 특정 질문에서 맞는다는 보장은 아닙니다. 시험 문제가 학습 데이터에 섞여 점수가 부풀려지는 경우도 있습니다." },
+  { name:"배포·사용", short:"사용", what:"완성된 파라미터를 서버에 올려 서비스합니다. 질문이 들어오면 다음 토큰 확률을 계산하고 하나를 뽑는 일을 반복해 답을 만듭니다.",
+    gets:"파라미터가 고정됩니다. 사용 중에는 새로 배우지 않습니다.",
+    samples:[
+      "사과는 장미과 사과나무의 열매예요. 새콤달콤한 맛과 아삭한 식감이 특징이고, 한국에서는 가을이 제철입니다.",
+      "사과는 장미과에 속하는 과일로, 전 세계에서 널리 재배됩니다. 생으로 먹거나 주스, 잼, 파이 등으로 만들어 먹어요.",
+      "사과는 아삭하고 새콤달콤한 맛이 나는 장미과의 과일입니다. 한국에서는 부사(후지), 홍로 같은 품종이 많이 재배돼요."
+    ],
+    note:"같은 질문, 매번 조금씩 다른 답",
+    hint:"모델은 학습이 끝난 시점의 패턴으로만 답합니다. 최신 정보는 검색 도구가 연결된 경우에만 참고합니다. 확률에 따라 뽑기 때문에 같은 질문에도 답이 달라집니다. '다시 생성'을 눌러 보세요." }
+];
+let cur = 0, variant = "pref", sampleIdx = 0;
+const pipe = document.getElementById("pipe"), panel = document.getElementById("panel");
+stages.forEach((s,i)=>{
+  const b = document.createElement("button");
+  b.setAttribute("role","tab"); b.id = "st"+i;
+  b.innerHTML = '<span class="dot">'+(i+1)+'</span><span>'+s.short+'</span>';
+  b.addEventListener("click",()=>{cur=i;renderStage();});
+  pipe.appendChild(b);
+});
+function esc(t){return t.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function renderStage(){
+  const s = stages[cur];
+  [...pipe.children].forEach((b,i)=>{b.classList.toggle("on",i===cur);b.classList.toggle("done",i<cur);b.setAttribute("aria-selected",i===cur);});
+  let respType="", respText="", extra="";
+  if(s.variants){
+    const v = s.variants[variant]; respType=v.type; respText=v.text;
+    extra = '<div class="seg" role="group" aria-label="사후학습 단계 선택">'+Object.entries(s.variants).map(([k,v])=>'<button data-v="'+k+'" class="'+(k===variant?"on":"")+'">'+v.label+'</button>').join("")+'</div>';
+  } else if(s.samples){
+    respText = s.samples[sampleIdx];
+    extra = '<button class="btn ghost" id="regen" style="padding:4px 10px;font-size:13px">다시 생성</button>';
+  } else { respType=s.resp.type; respText=s.resp.text; }
+  panel.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><h3>'+(cur+1)+'단계 · '+s.name+'</h3><span class="tag">'+s.note+'</span></div>'+
+    '<dl><div class="row"><dt>하는 일</dt><dd>'+s.what+'</dd></div><div class="row"><dt>모델이 얻는 것</dt><dd>'+s.gets+'</dd></div></dl>'+
+    '<div class="chat"><div class="q"><b>질문</b>'+Q+'</div><div class="r '+respType+'">'+esc(respText)+'</div><div class="foot"><span>'+(cur<2?"이 단계의 모습":"이 단계 모델의 응답 (설명용 예시)")+'</span>'+extra+'</div></div>'+
+    '<div class="hint"><b>읽는 법</b><span>'+s.hint+'</span></div>';
+  panel.querySelectorAll("[data-v]").forEach(b=>b.addEventListener("click",()=>{variant=b.dataset.v;renderStage();}));
+  const rg = document.getElementById("regen");
+  if(rg) rg.addEventListener("click",()=>{sampleIdx=(sampleIdx+1)%s.samples.length;renderStage();document.getElementById("regen").focus();});
+  document.getElementById("prevStage").disabled = cur===0;
+  document.getElementById("nextStage").disabled = cur===stages.length-1;
+}
+document.getElementById("prevStage").onclick=()=>{if(cur>0){cur--;renderStage();}};
+document.getElementById("nextStage").onclick=()=>{if(cur<stages.length-1){cur++;renderStage();}};
+renderStage();
+
+/* fill-in quiz */
+const quizzes = [
+  { tab:"문법", before:"나는 사과를 먹", after:".", opts:[["었다",.64],["는다",.18],["고",.09],["을",.03],["기",.02]],
+    kind:"ok", title:"문법을 배웠습니다",
+    body:"'먹' 뒤에 무엇이 오는지는 수많은 문장에서 일관되게 나타납니다. 모델은 문법 규칙을 따로 배우지 않았지만, 다음 토큰을 맞히다 보니 규칙이 확률 속에 담겼습니다." },
+  { tab:"사실", before:"대한민국의 수도는", after:"이다.", opts:[["서울",.91],["세종",.03],["어디",.02],["바로",.01],["부산",.01]],
+    kind:"ok", title:"자주 나온 사실을 배웠습니다",
+    body:"같은 사실이 수없이 반복된 글에 나오면 확률이 한쪽으로 크게 쏠립니다. 이런 질문에서 모델의 답은 대체로 정확합니다." },
+  { tab:"속설", before:"금붕어의 기억력은", after:"이다.", opts:[["3초",.46],["몇 달",.19],["생각보다",.17],["짧",.1],["매우",.05]],
+    kind:"warn", title:"사실이 아닌 속설도 똑같이 배웁니다",
+    body:"'금붕어의 기억력은 3초'는 널리 퍼진 속설입니다. 실험 연구에서는 금붕어가 몇 주에서 몇 달 동안 기억을 유지하는 것으로 나타났습니다. 글에 자주 나온 이어짐이면 사실이 아니어도 확률이 높아집니다. 사후학습으로 이런 경우를 상당히 바로잡기도 하지만, 모든 속설을 다 잡아내지는 못합니다." },
+  { tab:"드문 정보", before:"우리 동네 ○○작은도서관의 휴관일은", after:"이다.", opts:[["월요일",.31],["매주 월요일",.22],["공휴일",.16],["일요일",.14],["매월 둘째",.09]],
+    kind:"warn", title:"모르는 것은 흔한 답으로 메웁니다",
+    body:"특정 동네 도서관 정보는 학습 데이터에 거의 없습니다. 그러면 확률이 여러 후보로 흩어지고, '도서관 휴관일'에 흔히 나오는 답(월요일)이 가장 높아집니다. 이렇게 나온 답은 문장이 매끄러워서 사실처럼 보입니다. 이것이 환각(Hallucination)이 생기는 대표적인 방식입니다." }
+];
+let qi = 0, picked = null;
+const qt = document.getElementById("quizTabs"), qz = document.getElementById("quiz");
+quizzes.forEach((q,i)=>{const b=document.createElement("button");b.textContent=q.tab;b.setAttribute("role","tab");b.onclick=()=>{qi=i;picked=null;renderQuiz();};qt.appendChild(b);});
+function renderQuiz(){
+  const q = quizzes[qi];
+  [...qt.children].forEach((b,i)=>{b.classList.toggle("on",i===qi);b.setAttribute("aria-selected",i===qi);});
+  const shuffled = q.opts.map(o=>o[0]).slice().sort((a,b)=>a.localeCompare(b,"ko"));
+  let html = '<div class="prompt">'+q.before+' <span class="blank">'+(picked?esc(picked):"?")+'</span> '+q.after+'</div>';
+  if(picked===null){
+    html += '<p class="small muted">빈칸에 올 말을 골라 보세요.</p><div class="chips">'+shuffled.map(o=>'<button class="chip" data-o="'+o+'">'+o+'</button>').join("")+'</div><div><button class="btn ghost" id="reveal" style="font-size:13px;padding:6px 12px">고르지 않고 확률 보기</button></div>';
+  } else {
+    html += '<div class="bars">'+q.opts.map(o=>'<div class="bar'+(o[0]===picked?" mine":"")+'"><span class="lab">'+o[0]+'</span><span class="track"><span class="fill" data-w="'+(o[1]*100)+'"></span></span><span class="pct">'+Math.round(o[1]*100)+'%</span></div>').join("")+'</div>'+
+      '<div class="verdict '+(q.kind==="warn"?"warn":"")+'"><b>'+q.title+'</b><span>'+q.body+'</span></div>';
+  }
+  qz.innerHTML = html;
+  qz.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{picked=c.dataset.o;renderQuiz();});
+  const rv = document.getElementById("reveal"); if(rv) rv.onclick=()=>{picked="";renderQuiz();};
+  requestAnimationFrame(()=>requestAnimationFrame(()=>qz.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%")));
+}
+renderQuiz();
+
+/* generator tree */
+const tree = { opts:[
+  {t:"사과는 장미과에 속하는",p:.5, next:{opts:[{t:"나무의 열매로,",p:.6},{t:"과일로,",p:.4}]}},
+  {t:"사과는 새콤달콤한",p:.3, next:{opts:[{t:"맛이 나는 과일로,",p:.8},{t:"과일로,",p:.2}]}},
+  {t:"사과는 가을이 제철인",p:.2, next:{opts:[{t:"과일로,",p:.7},{t:"장미과 열매로,",p:.3}]}}
+]};
+const last = {opts:[{t:"전 세계에서 널리 재배됩니다.",p:.5},{t:"생으로 먹거나 주스·잼으로 만들어 먹습니다.",p:.35},{t:"한국에서는 부사와 홍로가 많이 재배됩니다.",p:.15}]};
+let path=[], node=tree;
+const gOut=document.getElementById("genOut"), gBars=document.getElementById("genBars"), gLab=document.getElementById("genLabel"), gStep=document.getElementById("genStep");
+function sample(opts){let r=Math.random(),acc=0;for(const o of opts){acc+=o.p;if(r<acc)return o;}return opts[opts.length-1];}
+function renderGen(chosen){
+  gOut.innerHTML = path.length? path.map((t,i)=>'<span class="tok'+(i===path.length-1?" new":"")+'">'+t+'</span>').join("") : '<span class="pr">(아직 만든 조각이 없습니다)</span>';
+  const done = path.length===3;
+  const opts = done? null : (node? node.opts : null);
+  if(done){ gLab.textContent="완성. '처음부터 다시'를 누르면 확률에 따라 다른 답이 나올 수 있습니다."; gBars.innerHTML=""; gStep.disabled=true; return; }
+  gStep.disabled=false;
+  gLab.textContent = (path.length+1)+"번째 조각 후보와 확률"+(chosen?" · 방금 뽑힌 조각: “"+chosen+"”":"");
+  gBars.innerHTML = opts.map(o=>'<div class="bar"><span class="lab" title="'+o.t+'">'+o.t+'</span><span class="track"><span class="fill" data-w="'+(o.p*100)+'"></span></span><span class="pct">'+Math.round(o.p*100)+'%</span></div>').join("");
+  requestAnimationFrame(()=>requestAnimationFrame(()=>gBars.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%")));
+}
+gStep.onclick=()=>{
+  const o = sample(node.opts); path.push(o.t);
+  node = path.length===1? o.next : (path.length===2? last : null);
+  renderGen(o.t);
+};
+document.getElementById("genReset").onclick=()=>{path=[];node=tree;renderGen();};
+renderGen();
+
+/* answer check */
+const sents = [
+  {t:"한글은 조선의 세종대왕이 만든 문자입니다.", lvl:"lo", l:"확인 필요 낮음",
+   w:"수많은 글에 반복해서 나오는 사실입니다. 확률이 한쪽으로 크게 쏠리는 유형이라 틀릴 가능성이 낮습니다."},
+  {t:"1443년에 창제되었고, 1446년에 『훈민정음』이라는 이름으로 반포되었습니다.", lvl:"mid", l:"확인 권장",
+   w:"흔한 사실이지만 숫자가 들어 있습니다. 숫자는 비슷한 다른 숫자와 헷갈리기 쉬워서 한 번 확인하는 편이 좋습니다. (이 예시의 연도는 맞습니다.)"},
+  {t:"한글은 과학적 원리로 만들어져 세계에서 가장 배우기 쉬운 문자로 평가받습니다.", lvl:"mid", l:"사실과 평가 구분",
+   w:"'과학적 원리'는 제자 원리를 가리키는 흔한 표현이지만, '세계에서 가장 배우기 쉬운'은 누가 어떻게 평가했는지 알 수 없는 주장입니다. 글에 자주 나오는 표현이라 그대로 따라 나옵니다."},
+  {t:"김지현(2018)의 『한글 창제의 수리적 원리』에 따르면, 초성 17자는 발음 기관의 모양을 본떠 체계적으로 만들어졌습니다.", lvl:"hi", l:"반드시 확인",
+   w:"이 예시에서 지어낸 가상의 문헌입니다. 모델에는 출처 목록이 없어서, 저자·연도·제목의 형식만 그럴듯하게 만들어 내는 일이 생깁니다. 내용 일부(초성 17자, 발음 기관 본뜨기)가 맞아서 더 믿음직해 보입니다. 인용된 문헌은 실제로 있는지 반드시 검색해 보세요."},
+  {t:"현재 한국어를 쓰는 인구는 약 8천만 명입니다.", lvl:"hi", l:"기준 시점 확인",
+   w:"시간에 따라 바뀌는 수치입니다. 모델은 학습 시점의 글을 바탕으로 답하고, 어느 해 기준인지 밝히지 않는 경우가 많습니다. 최신 통계와 출처를 따로 확인해야 합니다."}
+];
+const ans=document.getElementById("answer");
+sents.forEach(s=>{
+  const b=document.createElement("button"); b.className="sent"; b.setAttribute("aria-expanded","false");
+  b.innerHTML=s.t+'<span class="lvl '+s.lvl+'">'+s.l+'</span><span class="why">'+s.w+'</span>';
+  b.onclick=()=>{const o=b.classList.toggle("open");b.setAttribute("aria-expanded",o);};
+  ans.appendChild(b);
+});
+document.getElementById("openAll").onclick=()=>ans.querySelectorAll(".sent").forEach(b=>{b.classList.add("open");b.setAttribute("aria-expanded","true");});
+
+/* 좌측 레일 내비게이션: 스크롤 위치에 따라 현재 절 표시 */
+const railLinks=[...document.querySelectorAll(".rail nav a")];
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){
+  railLinks.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+e.target.id));}});},
+  {rootMargin:"-25% 0px -65% 0px"});
+document.querySelectorAll("main > section[id]").forEach(s=>io.observe(s));
+})();
+</script>
+</body></html>

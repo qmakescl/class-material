@@ -43,5 +43,21 @@ window.MATERIALS = [
     description: "자유도가 2, 8, 16, 32로 커질 때 t 분포가 표준정규분포에 가까워지는 모습을 겹쳐 확인합니다.",
     href: "statistics/t-distribution-degrees-of-freedom.html",
     date: "2026-09-21"
+  },
+  {
+    subject: "ai",
+    label: "인공지능 작동이해",
+    title: "LLM은 무엇을 배우고, 배운 것을 어떻게 쓰나",
+    description: "대규모 언어 모델이 사전학습부터 배포까지 무엇을 배우고, 그 배운 것을 답으로 어떻게 만들어 내는지 단계별 체험과 예시로 확인합니다.",
+    href: "ai/llm-what-it-learns.html",
+    date: "2026-09-25"
+  },
+  {
+    subject: "ai",
+    label: "인공지능 작동이해",
+    title: "코딩 에이전트는 어떻게 일하나",
+    description: "코딩 에이전트 안의 LLM이 도구 호출과 반복 실행을 통해 실제 작업을 해내는 구조를 단계별 체험과 예시로 확인합니다.",
+    href: "ai/coding-agent-how-it-works.html",
+    date: "2026-09-26"
   }
 ];
