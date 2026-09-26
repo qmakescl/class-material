@@ -67,5 +67,13 @@ window.MATERIALS = [
     description: "28×28 흉부 X선(PneumoniaMNIST)으로 데이터, 전처리, 모델, 손실, 학습, 평가까지 딥러닝의 전 과정을 단계별로 체험합니다.",
     href: "ai/pneumoniamnist-deep-learning.html",
     date: "2026-09-26"
+  },
+  {
+    subject: "statistics",
+    label: "인터랙티브 실습",
+    title: "지리학과 졸업생의 평균 연봉이 가장 높았다!",
+    description: "평균 연봉 1위 이야기를 실제 정부 통계에 조던을 넣어 다시 계산하며, 평균을 읽을 때 먼저 물어볼 것을 확인합니다.",
+    href: "statistics/geography-graduate-salary-outlier.html",
+    date: "2026-09-26"
   }
 ];
