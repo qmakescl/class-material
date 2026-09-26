@@ -128,13 +128,62 @@
 카드는 `<a class="material-card">`로 그려지며 카드 전체가 클릭 영역이고,
 `.card-status`는 과목 강조색 배경의 흰 글씨 칩("바로가기 →")이 된다.
 
-자료 페이지 자체가 별도 디자인 시스템(자체 `<style>`)을 갖고 있다면,
-다음 기본 레이아웃과 스타일을 따른다.
+## 자료 페이지 공통 테마 (`docs/assets/material.css`)
+
+`docs/{subject}/`의 자료 페이지(실습·해설 HTML)는 모두 **`docs/assets/material.css`**
+한 파일을 공유한다. 목록/홈 페이지는 `styles.css`, 자료 페이지는
+`material.css`다. 페이지마다 팔레트·본문·박스·레일을 새로 정의하지 않는다.
+
+```html
+<head>
+  ...
+  <link rel="stylesheet" href="../assets/katex/katex.min.css">  <!-- 수식이 있으면, material.css보다 앞 -->
+  <link rel="stylesheet" href="../assets/material.css">
+  <style>/* 이 자료 고유의 위젯 스타일만 */</style>
+</head>
+```
+
+**`material.css`가 제공하는 것**
+
+| 영역 | 내용 |
+| --- | --- |
+| 토큰 | `--paper` `--surface` `--soft` `--ink` `--muted` `--line` `--navy` `--amber` `--accent`/`--accent-soft` `--pos` `--neg` `--ok` `--warn`(각 `-soft`) `--shadow` `--sans` `--mono` `--rail` `--radius` |
+| 기본 | `body`, `h1`~`h4`(산세리프 800, 자간 -0.02em), `p`, `a`, `code`/`.mono`/`.num`, `.muted`, `.note`, `.lede`, `.eyebrow`, `.katex-display` |
+| 레이아웃 | `.rail`(레일·목차·모바일 전환), `main`(레일 폭만큼 왼쪽 여백, 최대 1060px), `main > section` |
+| 박스 | `.panel`(기본 박스), `.panel.raised`(그림자), `.callout`(`.warn`), `.recap`, `.row`/`.col`, `.scroll` |
+| 조각 | `.tag`, `.readout`(`.math`), `.metrics`, `.legend`, `.nav` |
+| 입력 | `.btn`(`.ghost`), `.controls`, `input[type=range]` |
+| 표·기타 | `table`/`th`/`td`/`td.n`, `details`, `pre`, `ol.refs` |
+
+**규칙**
+
+- **문단 `p`에는 `max-width`를 주지 않는다.** 박스(`.panel`)의 패딩 안쪽 폭을
+  문단이 꽉 채우는 것이 기본이다. 가독성을 위해 줄을 좁히고 싶으면 문단이 아니라
+  박스나 열 자체의 폭으로 조절한다. 글자 수 단위(`ch`/`em`) 폭 제한은 쓰지 않는다.
+- 페이지 `<style>`에는 **그 자료에만 있는 위젯**(차트, 시각화, 특수 그리드)만 둔다.
+  이미 `material.css`에 있는 것(본문, 제목, 박스, 레일, 표, 버튼…)을 다시
+  정의하지 않는다. 색은 자체 팔레트를 만들지 말고 토큰을 쓴다. 차트 계열색처럼
+  그 자료 안에서만 쓰는 값만 지역 변수로 둔다.
+- 과목 강조색이 기본(통계 파랑 `#2f6fed`)과 다르면 페이지 `:root`에서
+  `--accent`/`--accent-soft`만 덮어쓴다.
+- 공통 이름과 충돌하는 지역 클래스를 만들지 않는다. 특히 `.row`(flex 줄),
+  `.col`(`flex:1 1 260px`), `.readout`(한 줄 mono 박스), `.metrics`(수치 카드
+  격자)를 공통이 이미 정의한다. 다른 뜻으로 쓰려면 `.brow`, `.kv`, `.stack`처럼
+  다른 이름을 쓴다.
+- 글꼴은 산세리프만 쓰고 외부 웹폰트(Google Fonts)·세리프·다크 모드/테마
+  토글을 두지 않는다.
+- 여러 자료에서 반복되는 규칙이 페이지 `<style>`에 생기면 그 자리에서 복사하지
+  말고 `material.css`로 올린다.
+- 공통 테마를 바꾸면 모든 자료 페이지에 영향을 주므로, 바꾼 뒤 자료 페이지를
+  몇 개 열어 레일·박스·본문 폭을 확인한다.
+
+자료 페이지가 위 공통 테마 위에 추가로 지켜야 할 기본 레이아웃과 스타일은
+다음과 같다.
 
 ### 자료 페이지 기본 레이아웃: 좌측 레일
 
 새 인터랙티브 수업 자료는 `docs/statistics/grad-probability-lab.html` 및
-`docs/statistics/point-estimation-confidence-interval.html`처럼 **좌측 고정
+`docs/statistics/point-estimation-confidence-interval.html`처럼(모두 `material.css`의 `.rail`/`main`을 쓴다) **좌측 고정
 레일 + 본문** 구조를 기본으로 사용한다. 레일은 자료의 제목과 목차를 계속
 보이게 해 긴 실습에서 현재 위치와 다른 주제를 빠르게 오갈 수 있게 한다.
 
@@ -161,14 +210,14 @@
 - 한 화면 안에 끝나는 아주 짧은 자료처럼 레일이 탐색에 도움이 되지 않는 경우만
   예외로 하며, 예외 여부는 구현 시 명시한다.
 
-- **색상**: 본문 팔레트를 이 문서의 색상 변수 값으로 맞추고, 어두운
+- **색상**: 본문 팔레트는 `material.css`의 토큰을 그대로 쓰고, 어두운
   레일은 `--navy`(`#0b1220`) + `--amber`(`#ffb020`) 조합으로(= 이 사이트의
   `.guide` 섹션과 동일한 배색) 통일한다.
   해당 자료의 과목 강조색(예: 통계 `#2f6fed`)이 있다면 그 안에서도
   주요 강조색으로 재사용한다.
-- **타이포그래피**: 세리프 대신 `Pretendard, "Noto Sans KR", Inter,
-  system-ui, sans-serif`로 통일하고(프로젝터 가독성), 외부 웹폰트
-  로딩(Google Fonts 등)은 제거한다.
+- **타이포그래피**: `material.css`의 `--sans`(`Pretendard, "Noto Sans KR",
+  Inter, system-ui, sans-serif`)로 통일하고(프로젝터 가독성), 외부 웹폰트
+  로딩(Google Fonts 등)은 두지 않는다.
 - **돌아가기 링크**: 레일 상단에 `docs/index.html`의 해당 과목 섹션으로
   돌아가는 링크(`../index.html#statistics`)를 넣는다. 사이드바
   폭이 좁아 한 줄로 잘리기 쉬우므로 문구는 "처음으로"처럼 짧게 쓴다.

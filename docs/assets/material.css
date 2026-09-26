@@ -1,0 +1,124 @@
+/* 자료 페이지 공통 테마 (docs/{subject}/*.html 의 실습·해설 자료용)
+   - 목록/홈 페이지는 styles.css, 자료 페이지는 이 파일을 쓴다.
+   - 페이지 <style> 에는 이 파일에 없는 "그 자료 고유의" 위젯 스타일만 둔다.
+   - 과목 강조색은 페이지에서 --accent(+ --accent-soft)만 덮어쓴다.
+   - 규칙 전체는 DESIGN.md "자료 페이지 공통 테마" 참고. */
+
+:root{
+  /* 색: styles.css 의 팔레트와 같은 값 */
+  --paper:#f4f6fb; --surface:#ffffff; --soft:#eef1f8;
+  --ink:#0b1220; --muted:#45506b; --line:#dbe1ee;
+  --navy:#0b1220; --amber:#ffb020;
+  --accent:#2f6fed; --accent-soft:#eaf1ff;   /* 통계 기본값. 과목 색으로 덮어쓴다 */
+  --pos:#d1264f; --pos-soft:#fde7ee;         /* 경고·오류·양의 방향 */
+  --neg:#0b8a8f;                              /* 음의 방향 */
+  --ok:#0ea968;  --ok-soft:#e6f8f0;
+  --warn:#b26a00; --warn-soft:#fff3de;
+  --shadow:0 1px 2px rgb(11 18 32 / 6%), 0 8px 24px -10px rgb(11 18 32 / 14%);
+  /* 글꼴: 세리프·외부 웹폰트 없음 */
+  --sans:Pretendard,"Noto Sans KR",Inter,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans KR",monospace;
+  /* 레이아웃 */
+  --rail:250px;
+  --radius:10px;
+}
+
+/* ---------- 기본 ---------- */
+html{scroll-behavior:smooth;background:var(--paper)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+img,svg,canvas{max-width:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;
+  word-break:keep-all;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+h1,h2,h3,h4{font-family:var(--sans);font-weight:800;letter-spacing:-.02em;line-height:1.3;margin:0;text-wrap:balance}
+h1{font-size:clamp(28px,6vw,40px)}
+h2{font-size:clamp(22px,4.6vw,28px)}
+h3{font-size:18px;font-weight:700}
+h4{font-size:16px;font-weight:700}
+/* 문단: 폭 제한 없음 — 부모 박스(패딩 안쪽)를 꽉 채운다 */
+p{margin:0}
+strong,b{font-weight:700}
+code,.mono,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted,.note{color:var(--muted)}
+.note{font-size:14px}
+.lede{font-size:17px;color:var(--muted)}
+.eyebrow{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.katex-display{margin:.4em 0;overflow-x:auto;overflow-y:hidden}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- 좌측 레일 (자료 제목 + 목차) ---------- */
+.rail{position:fixed;left:0;top:0;bottom:0;width:var(--rail);background:var(--navy);color:#e4e9f5;padding:34px 0 20px;
+  display:flex;flex-direction:column;z-index:50;overflow-y:auto}
+.rail .rail-back{display:block;margin:0 26px 18px;padding:0;color:#b7c2de;font-size:12.5px;font-weight:600;
+  text-decoration:none;white-space:nowrap;border-left:0}
+.rail .rail-back:hover,.rail .rail-back:focus-visible{color:var(--amber)}
+.rail h1{font-size:21px;margin:0 26px 30px;line-height:1.4;color:#f4f6fb;letter-spacing:-.01em}
+.rail nav{display:flex;flex-direction:column}
+.rail nav a{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:baseline;padding:11px 24px;color:#b7c2de;
+  text-decoration:none;font-size:13.5px;border-left:3px solid transparent;transition:.16s;cursor:pointer}
+.rail nav a b{font-variant-numeric:tabular-nums;font-weight:600;color:#7c88a8;font-size:12px}
+.rail nav a:hover{background:#16213d;color:#fff}
+.rail nav a.on{background:#16213d;color:#fff;border-left-color:var(--amber)}
+.rail nav a.on b{color:var(--amber)}
+.rail nav a:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+.rail footer{margin-top:auto;padding:20px 24px 0;font-size:11.5px;color:#7c88a8;line-height:1.6}
+
+/* ---------- 본문 ---------- */
+main{margin-left:var(--rail);max-width:1060px;padding:28px 46px 64px;display:flex;flex-direction:column;gap:20px}
+main > section{display:flex;flex-direction:column;gap:16px}
+h2.page-title{font-size:clamp(28px,6vw,40px)}
+@media (max-width:860px){
+  :root{--rail:0px}
+  .rail{position:static;width:auto;height:auto;padding:22px 0 8px}
+  .rail nav{flex-direction:row;overflow-x:auto;padding:0 16px 8px}
+  .rail nav a{border-left:0;border-bottom:3px solid transparent;white-space:nowrap;padding:8px 14px}
+  .rail nav a.on{border-left:0;border-bottom-color:var(--amber)}
+  .rail .rail-back{margin:0 16px 10px}
+  .rail h1{margin:0 16px 16px}
+  .rail footer{display:none}
+  main{padding:20px 16px 64px}
+}
+
+/* ---------- 박스 (기본 컨테이너) ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px 20px;
+  display:flex;flex-direction:column;gap:16px}
+@media (min-width:640px){.panel{padding:28px 32px}}
+.panel.raised{box-shadow:var(--shadow)}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0;padding:12px 16px}
+.callout.warn{border-left-color:var(--pos);background:var(--pos-soft)}
+.recap{border-left:3px solid var(--line);padding:4px 0 4px 16px;display:flex;flex-direction:column;gap:6px}
+.row{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+.col{display:flex;flex-direction:column;gap:10px;flex:1 1 260px;min-width:0}
+.scroll{overflow-x:auto}
+
+/* ---------- 조각 ---------- */
+.tag{display:inline-block;font:600 12px var(--mono);padding:1px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent)}
+.readout{font-family:var(--mono);font-size:14px;background:var(--soft);border-radius:6px;padding:8px 12px;font-variant-numeric:tabular-nums}
+.readout.math{font-family:var(--sans);font-size:16px;overflow-x:auto;overflow-y:hidden}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:3px;vertical-align:4px;margin-right:6px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.metrics > div{border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.metrics b{display:block;font:600 22px var(--mono);font-variant-numeric:tabular-nums}
+.metrics span{font-size:13px;color:var(--muted)}
+.nav{display:flex;justify-content:space-between;gap:8px;padding-top:8px;border-top:1px solid var(--line)}
+
+/* ---------- 버튼·입력 ---------- */
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--paper);font:500 14px var(--sans);padding:8px 14px;border-radius:6px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn:disabled{opacity:.4;cursor:default}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input[type=range]{width:100%;accent-color:var(--accent)}
+
+/* ---------- 표·접기·코드 ---------- */
+table{border-collapse:collapse;font-size:15px;width:100%}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:500;color:var(--muted);font-size:13px}
+td.n{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+details{border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--soft)}
+details summary{cursor:pointer;font-weight:500}
+details[open] summary{margin-bottom:10px}
+pre{margin:0;font:13px/1.55 var(--mono);overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}
+ol.refs{padding-left:20px;margin:0;font-size:14px;display:flex;flex-direction:column;gap:6px}

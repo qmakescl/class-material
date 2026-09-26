@@ -23,226 +23,94 @@
 <meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
 <meta name="twitter:image:alt" content="통계 수업 자료 아이콘">
 <link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/material.css">
 <style>
+/* 이 자료 고유의 스타일만. 공통 토큰·레이아웃은 ../assets/material.css */
 :root{
-  --rail:250px;
-  --paper:#f4f6fb;
-  --surface:#ffffff;
-  --surface-2:#eaf1ff;
-  --ink:#0b1220;
-  --muted:#45506b;
-  --line:#dbe1ee;
   --line-soft:#e6ebf5;
-  --pos:#e2662a;
-  --pos-soft:rgba(226,102,42,.14);
+  --fit:var(--ink);
+  /* 잔차 부호 색(차트 계열색): 양(+)=주황, 음(-)=파랑 */
+  --pos:#e2662a; --pos-soft:rgba(226,102,42,.14);
   --neg:#2f6fed;
-  --neg-soft:rgba(47,111,237,.14);
-  --fit:#0b1220;
-  --accent:#0a8a56;
-  --accent-soft:rgba(14,169,104,.13);
-  --amber:#ffb020;
-  --shadow:0 1px 2px rgb(11 18 32 / 6%), 0 8px 24px -10px rgb(11 18 32 / 14%);
-  --f-body:Pretendard, "Noto Sans KR", Inter, system-ui, -apple-system, sans-serif;
-  --f-mono:ui-monospace, SFMono-Regular, Menlo, "Noto Sans KR", monospace;
 }
-html{background:var(--paper)}
-img{max-width:100%}
-[hidden]{display:none!important}
-*{box-sizing:border-box}
-body{
-  margin:0; background:var(--paper); color:var(--ink);
-  font-family:var(--f-body); font-size:16px; line-height:1.7;
-  -webkit-font-smoothing:antialiased;
-}
-.col{max-width:64ch}
+.skip-link{position:fixed;top:-3rem;left:1rem;z-index:100;padding:.6rem 1rem;color:#fff;background:#1c3fd6;border-radius:4px;font-weight:700;text-decoration:none}
+.skip-link:focus{top:1rem}
 
-/* ---------- masthead ---------- */
-header.masthead{padding-block:76px 34px; border-bottom:1px solid var(--line)}
-.eyebrow{
-  font-family:var(--f-mono); font-size:12px; letter-spacing:.14em;
-  text-transform:uppercase; color:var(--accent); margin:0 0 14px
-}
-h1{
-  font-family:inherit; font-weight:800; letter-spacing:-.03em;
-  font-size:clamp(34px,6.2vw,52px); line-height:1.16; margin:0 0 16px; text-wrap:balance;
-}
-.lede{font-size:clamp(16px,2.4vw,18.5px); color:var(--muted); margin:0; max-width:56ch}
-.mast-meta{
-  display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:24px;
-  font-family:var(--f-mono); font-size:12.5px; color:var(--muted);
-}
-.mast-meta span{display:inline-flex; align-items:center; gap:7px}
-.swatch{width:11px; height:11px; border-radius:2px; display:inline-block}
+/* 머리말 */
+.masthead{display:flex;flex-direction:column;gap:12px;padding-bottom:4px}
+.mast-meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.mast-meta span{display:inline-flex;align-items:center;gap:7px}
+.swatch{width:11px;height:11px;border-radius:2px;display:inline-block}
 
-/* ---------- sections ---------- */
-section{padding-block:56px; border-bottom:1px solid var(--line-soft)}
-section:last-of-type{border-bottom:none}
-.sec-head{display:flex; gap:16px; align-items:baseline; margin-bottom:10px}
-.sec-num{
-  font-family:var(--f-mono); font-size:13px; color:var(--accent);
-  letter-spacing:.08em; flex:none; padding-top:2px;
-}
-h2{
-  font-family:inherit; font-weight:800; letter-spacing:-.03em;
-  font-size:clamp(24px,3.6vw,32px); line-height:1.3; margin:0; text-wrap:balance;
-}
-h3{font-size:17px; font-weight:600; margin:32px 0 8px; letter-spacing:-.005em}
-p{margin:0 0 16px}
-.sec-head + p, .sec-head + .col > p:first-child{margin-top:4px}
-strong{font-weight:600}
-em{font-style:normal; background:var(--accent-soft); padding:1px 5px; border-radius:3px}
-code, .num{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+/* 절 머리 */
+.sec-head{display:flex;gap:16px;align-items:baseline}
+.sec-num{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;flex:none;padding-top:2px}
+.stack{display:flex;flex-direction:column;gap:10px}
+em{font-style:normal;background:var(--accent-soft);padding:1px 5px;border-radius:3px}
 .pos{color:var(--pos)} .neg{color:var(--neg)}
 
-/* ---------- figure shell ---------- */
-.fig{
-  background:var(--surface); border:1px solid var(--line); border-radius:6px;
-  box-shadow:var(--shadow); margin:26px 0 22px; overflow:hidden;
-}
-.fig-bar{
-  display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center;
-  padding:13px 16px; border-bottom:1px solid var(--line-soft);
-  background:var(--surface-2);
-}
-.fig-title{font-size:13px; font-weight:600; letter-spacing:.01em; margin-right:auto}
-.fig-body{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}
+/* 그림 틀 */
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.fig-bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line-soft);background:var(--accent-soft)}
+.fig-title{font-size:13px;font-weight:600;letter-spacing:.01em;margin-right:auto}
+.fig-body{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}
 .fig-body.solo{grid-template-columns:minmax(0,1fr)}
 .fig-body.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-.fig-plot{padding:10px 8px 4px; min-width:0; display:flex; flex-direction:column; justify-content:center}
+.fig-plot{padding:10px 8px 4px;min-width:0;display:flex;flex-direction:column;justify-content:center}
 .fig-plot > div{width:100%}
-.fig-side{border-left:1px solid var(--line-soft); padding:16px; min-width:0}
+.fig-side{border-left:1px solid var(--line-soft);padding:16px;min-width:0}
 @media (max-width:760px){
   .fig-body{grid-template-columns:minmax(0,1fr)}
-  .fig-side{border-left:none; border-top:1px solid var(--line-soft)}
+  .fig-side{border-left:none;border-top:1px solid var(--line-soft)}
 }
-.fig-note{
-  padding:12px 16px; border-top:1px solid var(--line-soft);
-  font-size:13.5px; color:var(--muted); line-height:1.6;
-}
-svg.plot{display:block; width:100%; height:auto; overflow:visible}
-svg.plot text{font-family:var(--f-mono); fill:var(--muted)}
+.fig-note{padding:12px 16px;border-top:1px solid var(--line-soft);font-size:13.5px;color:var(--muted);line-height:1.6}
+svg.plot{display:block;width:100%;height:auto;overflow:visible}
+svg.plot text{font-family:var(--mono);fill:var(--muted)}
 
-/* ---------- controls ---------- */
-.ctrl{display:flex; align-items:center; gap:10px; font-size:13px}
-.ctrl label{font-family:var(--f-mono); font-size:12px; color:var(--muted); white-space:nowrap}
-input[type=range]{
-  -webkit-appearance:none; appearance:none; height:22px; background:transparent;
-  width:clamp(96px,20vw,168px); cursor:pointer;
-}
-input[type=range]::-webkit-slider-runnable-track{height:3px; background:var(--line); border-radius:2px}
-input[type=range]::-moz-range-track{height:3px; background:var(--line); border-radius:2px}
-input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none; width:15px; height:15px; border-radius:50%;
-  background:var(--accent); margin-top:-6px; border:2px solid var(--surface);
-}
-input[type=range]::-moz-range-thumb{
-  width:15px; height:15px; border-radius:50%; background:var(--accent);
-  border:2px solid var(--surface);
-}
-input[type=range]:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:4px}
-button{
-  font-family:var(--f-body); font-size:12.5px; font-weight:500; color:var(--ink);
-  background:var(--surface); border:1px solid var(--line); border-radius:4px;
-  padding:6px 12px; cursor:pointer; transition:background .15s, border-color .15s;
-}
-button:hover{border-color:var(--accent); color:var(--accent)}
-button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--surface)}
-.seg{display:inline-flex; border:1px solid var(--line); border-radius:4px; overflow:hidden}
-.seg button{border:none; border-radius:0; border-right:1px solid var(--line)}
-.seg button:last-child{border-right:none}
-.seg button[aria-pressed="true"]{color:var(--surface)}
+/* 조작 */
+.ctrl{display:flex;align-items:center;gap:10px;font-size:13px}
+.ctrl label{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+input[type=range]{-webkit-appearance:none;appearance:none;height:22px;background:transparent;width:clamp(96px,20vw,168px);cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--line);border-radius:2px}
+input[type=range]::-moz-range-track{height:3px;background:var(--line);border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--accent);margin-top:-6px;border:2px solid var(--surface)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent);border:2px solid var(--surface)}
+.fig-bar .btn{font-size:12.5px;padding:6px 12px;background:var(--surface);color:var(--ink);border-color:var(--line);transition:background .15s,border-color .15s}
+.fig-bar .btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn[aria-pressed="true"]:hover{color:var(--surface)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg .btn{border:none;border-radius:0;border-right:1px solid var(--line)}
+.seg .btn:last-child{border-right:none}
 
-/* ---------- readouts ---------- */
-.stat-row{display:flex; flex-wrap:wrap; gap:6px 22px; margin-bottom:14px}
-.stat{display:flex; flex-direction:column; gap:1px}
-.stat dt{font-family:var(--f-mono); font-size:11px; letter-spacing:.06em; color:var(--muted); text-transform:uppercase}
-.stat dd{margin:0; font-family:var(--f-mono); font-size:19px; font-weight:500; font-variant-numeric:tabular-nums}
-.stat dd small{font-size:11px; color:var(--muted); font-weight:400; margin-left:3px}
-
-table.dev{width:100%; border-collapse:collapse; font-family:var(--f-mono); font-size:12.5px; font-variant-numeric:tabular-nums}
+/* 수치 표시 */
+.stat-row{display:flex;flex-wrap:wrap;gap:6px 22px;margin-bottom:14px}
+.stat{display:flex;flex-direction:column;gap:1px}
+.stat dt{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.stat dd{margin:0;font-family:var(--mono);font-size:19px;font-weight:500;font-variant-numeric:tabular-nums}
+.stat dd small{font-size:11px;color:var(--muted);font-weight:400;margin-left:3px}
+table.dev{font-family:var(--mono);font-size:12.5px}
 .tablewrap{overflow-x:auto}
-table.dev th{
-  text-align:right; font-weight:500; color:var(--muted); font-size:10.5px;
-  letter-spacing:.04em; padding:4px 5px; border-bottom:1px solid var(--line);
-  white-space:nowrap;
-}
-table.dev td{text-align:right; padding:3px 5px; border-bottom:1px solid var(--line-soft); white-space:nowrap}
-table.dev th:first-child, table.dev td:first-child{text-align:left; color:var(--muted)}
+table.dev th{text-align:right;font-size:10.5px;letter-spacing:.04em;padding:4px 5px;white-space:nowrap}
+table.dev td{text-align:right;padding:3px 5px;border-bottom-color:var(--line-soft);white-space:nowrap}
+table.dev th:first-child,table.dev td:first-child{text-align:left;color:var(--muted)}
 table.dev tbody tr{cursor:pointer}
-table.dev tbody tr:hover, table.dev tbody tr.on{background:var(--accent-soft)}
-table.dev tfoot td{
-  padding:6px 5px; font-weight:500; border-top:1px solid var(--line); border-bottom:none;
-}
+table.dev tbody tr:hover,table.dev tbody tr.on{background:var(--accent-soft)}
+table.dev tfoot td{padding:6px 5px;font-weight:500;border-top:1px solid var(--line);border-bottom:none}
 table.dev tfoot td:first-child{color:var(--ink)}
+.fig-side .readout{margin-top:14px;line-height:1.85;font-size:13px}
+.readout .k{color:var(--muted);font-size:11.5px;letter-spacing:.05em}
+.hint{font-size:13px;color:var(--muted);margin:10px 0 0}
+textarea#z-data{width:100%;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:var(--ink);background:var(--accent-soft);border:1px solid var(--line);border-radius:6px;padding:10px 12px;resize:vertical;tab-size:12;white-space:pre;overflow-x:auto}
 
-textarea#z-data{
-  width:100%; font-family:var(--f-mono); font-size:12.5px; line-height:1.7;
-  color:var(--ink); background:var(--surface-2); border:1px solid var(--line);
-  border-radius:5px; padding:10px 12px; resize:vertical; tab-size:12;
-  white-space:pre; overflow-x:auto;
-}
-textarea#z-data:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-.callout{
-  background:var(--surface-2); border-radius:5px; padding:12px 14px;
-  font-family:var(--f-mono); font-size:13px; line-height:1.85; margin-top:14px;
-}
-.callout .k{color:var(--muted); font-size:11.5px; letter-spacing:.05em}
-.hint{font-size:13px; color:var(--muted); margin:10px 0 0}
-
-/* ---------- prose extras ---------- */
-.aside{
-  border-left:2px solid var(--accent); padding:2px 0 2px 18px; margin:26px 0;
-  color:var(--muted); font-size:15px;
-}
-.aside strong{color:var(--ink)}
-table.info{width:100%; border-collapse:collapse; font-size:14px; margin:20px 0}
-table.info th{
-  text-align:left; font-size:11px; letter-spacing:.07em; text-transform:uppercase;
-  color:var(--muted); font-weight:500; padding:6px 12px 6px 0; border-bottom:1px solid var(--line);
-}
-table.info td{padding:11px 12px 11px 0; border-bottom:1px solid var(--line-soft); vertical-align:top}
-table.info td:first-child{font-weight:500; white-space:nowrap}
-.eq .katex-display{margin:0; text-align:left}
-.eq{
-  font-family:var(--f-mono); font-size:15px; background:var(--surface);
-  border:1px solid var(--line-soft); border-radius:5px; padding:14px 16px;
-  margin:18px 0; overflow-x:auto; white-space:nowrap;
-}
-.page > footer{padding-block:40px 0; color:var(--muted); font-size:13.5px}
-.page > footer a{color:var(--accent)}
-.dl-link{display:inline-flex; align-items:center; gap:6px; padding:9px 16px; background:var(--ink); color:var(--surface)!important; border-radius:9px; font-weight:700; font-size:14px; text-decoration:none}
+/* 본문 보조 */
+table.info td:first-child{font-weight:500;white-space:nowrap}
+.readout.math .katex-display{margin:0;text-align:left}
+main > footer{padding-top:8px;color:var(--muted);font-size:13.5px}
+main > footer a{color:var(--accent)}
+.dl-link{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:var(--ink);color:var(--surface)!important;border-radius:9px;font-weight:700;font-size:14px;text-decoration:none}
 .dl-link:hover,.dl-link:focus-visible{opacity:.88}
-.page > footer a.dl-link{display:inline; padding:0; background:none; color:var(--accent)!important; border-radius:0; font-weight:inherit; font-size:inherit; text-decoration:underline}
-@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
-
-/* ---------- left rail (site material layout) ---------- */
-.skip-link{position:fixed; top:-3rem; left:1rem; z-index:100; padding:.6rem 1rem; color:#fff; background:#1c3fd6; border-radius:4px; font-weight:700; text-decoration:none}
-.skip-link:focus{top:1rem}
-.rail{position:fixed; top:0; bottom:0; left:0; z-index:50; display:flex; flex-direction:column; width:var(--rail); padding:34px 0 20px; overflow-y:auto; background:var(--ink); color:#e4e9f5}
-.rail .rail-back{display:block; margin:0 26px 18px; padding:0; color:#b7c2de; border:0; font-size:12.5px; font-weight:600; text-decoration:none; white-space:nowrap}
-.rail .rail-back:hover, .rail .rail-back:focus-visible{color:var(--amber)}
-.rail h1{margin:0 26px 30px; color:#f4f6fb; font-size:23px; font-weight:800; line-height:1.4; letter-spacing:-.02em}
-.rail nav{display:flex; flex-direction:column}
-.rail nav a{display:grid; grid-template-columns:28px 1fr; gap:10px; align-items:baseline; padding:11px 24px; color:#b7c2de; border-left:3px solid transparent; font-size:13.5px; line-height:1.5; text-decoration:none; transition:.16s}
-.rail nav a b{color:#7c88a8; font-size:12px; font-variant-numeric:tabular-nums}
-.rail nav a:hover, .rail nav a:focus-visible{background:#16213d; color:#fff}
-.rail nav a.on{background:#16213d; color:#fff; border-left-color:var(--amber)}
-.rail nav a.on b{color:var(--amber)}
-.rail footer{margin-top:auto; padding:20px 24px 0; color:#7c88a8; border:0; font-size:11.5px; line-height:1.6}
-.page{max-width:1060px; margin:0 0 0 var(--rail); padding:0 46px 120px}
-@media (max-width:860px){
-  :root{--rail:0px}
-  .rail{position:static; width:auto; height:auto; padding:22px 0 8px}
-  .rail nav{flex-direction:row; padding:0 16px 8px; overflow-x:auto}
-  .rail nav a{display:inline-grid; grid-template-columns:28px max-content; padding:8px 14px; border-bottom:3px solid transparent; border-left:0; white-space:nowrap}
-  .rail nav a.on{border-bottom-color:var(--amber); border-left:0}
-  .rail footer{display:none}
-  .rail .rail-back{margin:0 16px 10px}
-  .rail h1{margin:0 16px 16px}
-  .page{margin-left:0; padding:0 18px 80px}
-  header.masthead{padding-block:42px 28px}
-}
+main > footer a.dl-link{display:inline;padding:0;background:none;color:var(--accent)!important;border-radius:0;font-weight:inherit;font-size:inherit;text-decoration:underline}
 </style>
 <script defer src="../assets/katex/katex.min.js"></script>
 <script defer src="../assets/katex/contrib/auto-render.min.js"></script>
@@ -264,8 +132,10 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
   </nav>
   <footer>슬라이더와 버튼으로 직선과 데이터를 바꾸면 그림과 수치가 즉시 갱신됩니다.</footer>
 </aside>
-<div class="page">
 
+
+
+<main id="content">
 <header class="masthead">
   <p class="eyebrow">회귀분석 ① · 단순 선형회귀</p>
   <h1>회귀분석 조금 깊이 보기 - 최소제곱과 잔차</h1>
@@ -276,12 +146,10 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <span><i class="swatch" style="background:var(--neg)"></i>e &lt; 0 · 실측이 아래</span>
   </div>
 </header>
-
-<main id="content">
 <!-- ======================= 0 ======================= -->
-<section id="excel-trendline">
+<section class="panel" id="excel-trendline">
   <div class="sec-head"><span class="sec-num">01</span><h2>엑셀이 이미 그려주던 그 직선</h2></div>
-  <div class="col">
+  <div class="stack">
     <p>회귀직선을 처음 만나는 자리는 대개 통계 수업이 아니라 엑셀이다. 점을 흩뿌려 놓고 <strong>추세선 추가 &gt; 선형</strong>을 누르면 직선이 하나 생기고, 체크박스를 켜면 수식과 \(R^{2}\)까지 딸려 나온다. 그 직선의 이름이 바로 <strong>회귀직선</strong>이다.</p>
     <p>엑셀은 결과만 보여주고 기준은 말해주지 않는다. 이 페이지는 <em>왜 하필 그 직선인가</em>를 되짚는 자료이고, 출발점은 직접 한 번 그려 보는 것이다.</p>
 
@@ -293,7 +161,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
   <div class="fig">
     <div class="fig-bar">
       <span class="fig-title">실습 데이터 · n = 8</span>
-      <button id="z-copy">표 전체 선택</button>
+      <button class="btn ghost" id="z-copy">표 전체 선택</button>
     </div>
     <div class="fig-body solo" style="padding:14px 16px">
       <textarea id="z-data" readonly rows="9" spellcheck="false" aria-label="실습 데이터 (탭 구분)">시장	광고비 x (만원)	매출 y (백만원)
@@ -309,14 +177,14 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <p class="fig-note">엑셀에 붙여 넣은 뒤 <strong>x와 y 두 열만</strong> 선택한다. 시장 번호 열까지 함께 선택하면 엉뚱한 차트가 나온다.</p>
   </div>
 
-  <div class="col">
+  <div class="stack">
     <table class="info">
       <tr><td>① 차트</td><td>x·y 두 열 선택 → <strong>삽입 &gt; 분산형(XY)</strong>. 꺾은선이 아니라 분산형이어야 한다. 꺾은선은 x를 이름표로만 취급해 간격을 무시한다.</td></tr>
       <tr><td>② 추세선</td><td>점 하나를 우클릭 → <strong>추세선 추가 → 선형</strong>.</td></tr>
       <tr><td>③ 수식 표시</td><td>추세선 서식 아래쪽에서 <strong>수식을 차트에 표시</strong>와 <strong>R-제곱 값을 차트에 표시</strong>를 체크.</td></tr>
     </table>
     <p>그러면 차트 안에 이런 두 줄이 뜬다.</p>
-    <div class="eq">\[y = 0.0881x + 5.3603 \qquad R^{2} = 0.9828\]</div>
+    <div class="readout math">\[y = 0.0881x + 5.3603 \qquad R^{2} = 0.9828\]</div>
 
     <h3>2단계 · 이 두 줄을 읽는다</h3>
   </div>
@@ -324,12 +192,12 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
   <div class="fig" id="figZ">
     <div class="fig-bar">
       <span class="fig-title">엑셀이 보여주는 화면</span>
-      <button id="z-reveal" aria-pressed="false">엑셀이 감춘 것 보기</button>
+      <button class="btn ghost" id="z-reveal" aria-pressed="false">엑셀이 감춘 것 보기</button>
     </div>
     <div class="fig-body">
       <div class="fig-plot"><div id="z-plot"></div></div>
       <div class="fig-side">
-        <div class="callout" style="margin-top:0">
+        <div class="readout" style="margin-top:0">
           <span class="k">기울기 0.0881</span><br>광고비를 1만원 더 쓰면 매출이 평균 <strong>0.0881백만원</strong>, 즉 8만 8천원쯤 늘어난다.<br><br>
           <span class="k">절편 5.3603</span><br>광고비가 0일 때의 예측 매출. 데이터에 x=0인 시장이 없다면 이 값은 <strong>외삽</strong>이다.<br><br>
           <span class="k">\(R^{2}\) = 0.9828</span><br>매출 변동의 98.3%가 광고비로 설명된다.
@@ -340,7 +208,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <p class="fig-note">엑셀의 <strong>SLOPE</strong>, <strong>INTERCEPT</strong>, <strong>RSQ</strong> 함수도 같은 값을 돌려준다(배포 파일 데이터 시트 아래쪽에 확인용으로 넣어 두었다). 차트의 추세선과 회귀분석은 같은 계산이며, 이름만 다르다.</p>
   </div>
 
-  <div class="col">
+  <div class="stack">
     <h3>3단계 · 엑셀이 말해주지 않는 것</h3>
     <p>추세선은 답을 주지만 근거를 주지 않는다. 남는 질문이 셋이고, 이 페이지의 나머지가 각각에 대한 답이다.</p>
     <table class="info">
@@ -348,16 +216,16 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
       <tr><td>어느 시장이 빗나갔나</td><td>\(R^{2}\) 하나로는 개별 시장이 얼마나 벗어났는지 알 수 없다 → <strong>03·05</strong></td></tr>
       <tr><td>직선이 맞는 모양인가</td><td>\(R^{2}\)가 0.98이어도 직선이 틀린 선택일 수 있다 → <strong>06</strong></td></tr>
     </table>
-    <div class="aside">
+    <div class="callout">
       <strong>추세선의 함정.</strong> 엑셀은 어떤 데이터에도 군말 없이 직선을 그려준다. 관계가 곡선이든, 이상치가 하나 섞였든, 점이 세 개뿐이든 마찬가지다. <strong>추세선이 그려졌다는 사실 자체는 아무것도 보증하지 않는다.</strong>
     </div>
   </div>
 </section>
 
 <!-- ======================= 0b ======================= -->
-<section id="earth-temperature">
+<section class="panel" id="earth-temperature">
   <div class="sec-head"><span class="sec-num">02</span><h2>실제 데이터로 확인하기 — 지구의 평균 기온은 어떻게 변할까</h2></div>
-  <div class="col">
+  <div class="stack">
     <p>지금까지는 광고비와 매출이라는 <strong>만든 데이터</strong> 8개로 연습했다. 이번에는 방향을 바꿔, 실제로 관측된 146개 연도의 기온 기록에 같은 도구를 대 본다. 질문은 하나다 — <strong>지구의 평균 기온은 앞으로 어떻게 변할까?</strong></p>
     <p>미국 항공우주국(NASA) 산하 고다드 우주연구소(GISS)는 전 세계 관측소의 지표·해수면 온도를 모아 매달 <strong>지구 평균기온편차</strong>를 발표한다. 이 자료가 <strong>GISTEMP</strong>이고, 기후 변화를 이야기할 때 가장 자주 인용되는 데이터셋 중 하나다.</p>
     <p>여기서 쓰는 값은 <strong>절대 기온이 아니라 편차</strong>다. 1951~1980년 30년간의 평균 기온을 0으로 두고, 그해가 그보다 몇 ℃ 높았는지·낮았는지를 나타낸다. 절대 기온 대신 편차를 쓰는 이유는 지역마다 관측 기준이 달라도 <strong>"기준보다 얼마나 변했는가"는 비교할 수 있기 때문</strong>이다. 회귀분석에서는 기울기(연간 상승폭)가 그대로 의미를 가지므로 이 실습에는 문제가 없다.</p>
@@ -378,8 +246,8 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <p class="fig-note">점 하나가 한 해의 관측값이다. <span class="pos">주황</span>은 기준보다 높았던 해, <span class="neg">파랑</span>은 낮았던 해다. 눈으로만 봐도 오른쪽으로 갈수록 위로 올라가는 경향이 뚜렷하다 — 이 경향에 직선 하나를 그어 기울기를 읽어내는 것이 이 다음부터 할 일이다.</p>
   </div>
 
-  <div class="col">
-    <div class="aside">
+  <div class="stack">
+    <div class="callout">
       <strong>지금은 추세선을 긋지 않는다.</strong> 점들이 위아래로 흔들리면서도 전반적으로 오르는 모양인가, 아니면 특정 구간에서만 급격히 꺾이는가? 이 관찰이 "직선이 이 데이터에 맞는 모형인가"를 판단하는 첫 단서다. 아래 03부터는 이 8개짜리 예시 데이터로 최소제곱의 원리를 먼저 익히고, 05·06의 \(R^{2}\)와 잔차 진단을 같은 방식으로 이 기온 데이터에도 적용해 볼 수 있다.
     </div>
     <p>엑셀에서 직접 확인하려면 위에서 내려받은 파일의 <code>data</code> 시트에서 두 열을 선택해 <strong>삽입 &gt; 분산형(XY)</strong> 차트를 그려 보자. <code>plot</code> 시트에는 완성된 차트가, <code>desc</code> 시트에는 출처와 단위 설명이 들어 있다.</p>
@@ -387,11 +255,11 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
 </section>
 
 <!-- ======================= 1 ======================= -->
-<section id="deviation">
+<section class="panel" id="deviation">
   <div class="sec-head"><span class="sec-num">03</span><h2>편차 하나를 들여다본다</h2></div>
-  <div class="col">
+  <div class="stack">
     <p>엑셀이 고른 직선을 잠시 지우고, 직선을 우리 손으로 그어 보자. 같은 8개 시장 데이터다. 직선을 하나 긋는 순간, 각 시장마다 두 개의 숫자가 생긴다.</p>
-    <div class="eq">\[\text{실측값 } y_{i} \quad\cdot\quad \text{예측값 } \hat{y}_{i} = \hat{\beta}_{0} + \hat{\beta}_{1}x_{i} \quad\to\quad \text{잔차 } e_{i} = y_{i} - \hat{y}_{i}\]</div>
+    <div class="readout math">\[\text{실측값 } y_{i} \quad\cdot\quad \text{예측값 } \hat{y}_{i} = \hat{\beta}_{0} + \hat{\beta}_{1}x_{i} \quad\to\quad \text{잔차 } e_{i} = y_{i} - \hat{y}_{i}\]</div>
     <p>잔차는 <strong>세로 거리</strong>다. 점에서 직선까지의 최단거리가 아니라, <em>같은 x에서 위아래로 잰 거리</em>다. 우리가 맞히려는 것이 y이기 때문이다. 아래에서 직선을 움직이며 그 막대들이 어떻게 변하는지 보자.</p>
   </div>
 
@@ -400,8 +268,8 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
       <span class="fig-title">직선을 움직여 본다</span>
       <span class="ctrl"><label for="a-b0">절편 \(\beta_{0}\)</label><input type="range" id="a-b0" min="2" max="9" step="0.05" value="7.2"></span>
       <span class="ctrl"><label for="a-b1">기울기 \(\beta_{1}\)</label><input type="range" id="a-b1" min="0" max="0.18" step="0.001" value="0.062"></span>
-      <button id="a-squares" aria-pressed="false">제곱을 넓이로</button>
-      <button id="a-solve">최소제곱 해로</button>
+      <button class="btn ghost" id="a-squares" aria-pressed="false">제곱을 넓이로</button>
+      <button class="btn ghost" id="a-solve">최소제곱 해로</button>
     </div>
     <div class="fig-body">
       <div class="fig-plot"><div id="a-plot"></div></div>
@@ -418,13 +286,13 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
             <tfoot><tr><td colspan="5">합계 RSS</td><td id="a-foot">—</td></tr></tfoot>
           </table>
         </div>
-        <div class="callout" id="a-callout"></div>
+        <div class="readout" id="a-callout"></div>
       </div>
     </div>
     <p class="fig-note">표의 행에 마우스를 올리면 해당 시장의 편차가 그림에서 강조된다. <span class="pos">주황</span>은 실측이 예측보다 높은 시장, <span class="neg">파랑</span>은 낮은 시장이다.</p>
   </div>
 
-  <div class="col">
+  <div class="stack">
     <p>세 가지를 확인하고 넘어간다.</p>
     <table class="info">
       <tr><td>부호가 섞인다</td><td>잔차를 그냥 더하면 +와 −가 상쇄된다. 최소제곱 해에서는 <strong>합이 정확히 0</strong>이 된다 — 그래서 합은 직선의 좋고 나쁨을 재는 기준이 될 수 없다.</td></tr>
@@ -433,7 +301,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     </table>
   </div>
 
-  <div class="col">
+  <div class="stack">
     <h3>기온 데이터에 적용하기</h3>
     <p>같은 정의를 146개 연도에 그대로 적용해 보자. 최소제곱 해는 <span id="ta-eq">\(\hat{y} = \ldots\)</span>다 — 연도가 1 늘 때마다 지구 평균기온편차가 그만큼 오른다는 뜻이다.</p>
   </div>
@@ -450,7 +318,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
           <div class="stat"><dt>기울기 \(\hat{\beta}_{1}\)</dt><dd id="ta-b1">—</dd></div>
           <div class="stat"><dt>절편 \(\hat{\beta}_{0}\)</dt><dd id="ta-b0">—</dd></div>
         </div>
-        <div class="callout" id="ta-callout"></div>
+        <div class="readout" id="ta-callout"></div>
       </div>
     </div>
     <p class="fig-note">시장 예제와 똑같은 세 가지가 여기서도 성립한다 — 잔차의 합은 0에 가깝고, 직선은 무게중심 \((\bar{x}, \bar{y})\)를 지나며, 제곱 때문에 가장 크게 벗어난 두 해(<strong class="pos">2024년</strong>·<strong class="neg">1976년</strong>)가 RSS를 지배한다.</p>
@@ -458,9 +326,9 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
 </section>
 
 <!-- ======================= 2 ======================= -->
-<section id="why-squares">
+<section class="panel" id="why-squares">
   <div class="sec-head"><span class="sec-num">04</span><h2>왜 하필 제곱인가</h2></div>
-  <div class="col">
+  <div class="stack">
     <p>부호를 없애는 방법은 제곱 말고도 있다. 절댓값을 더해도 된다. 실제로 두 기준은 서로 다른 직선을 고르고, <strong>차이는 데이터에 이상한 점이 하나 섞일 때 드러난다.</strong></p>
   </div>
 
@@ -468,7 +336,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <div class="fig-bar">
       <span class="fig-title">한 점을 끌어올려 본다</span>
       <span class="ctrl"><label for="b-out">5번 시장의 매출</label><input type="range" id="b-out" min="10" max="22" step="0.1" value="10"></span>
-      <button id="b-reset">되돌리기</button>
+      <button class="btn ghost" id="b-reset">되돌리기</button>
     </div>
     <div class="fig-body">
       <div class="fig-plot"><div id="b-plot"></div></div>
@@ -478,13 +346,13 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
           <div class="stat"><dt>절댓값 기준 기울기</dt><dd id="b-l1">—</dd></div>
         </div>
         <p class="hint" id="b-msg"></p>
-        <div class="callout"><span class="k">제곱 기준(최소제곱)</span><br>큰 편차에 제곱만큼의 벌점 → <strong>이상한 점 하나에 직선이 끌려간다</strong><br><br><span class="k">절댓값 기준</span><br>벌점이 거리에 비례 → 잘 버티지만, 손으로 풀리는 공식이 없다</div>
+        <div class="readout"><span class="k">제곱 기준(최소제곱)</span><br>큰 편차에 제곱만큼의 벌점 → <strong>이상한 점 하나에 직선이 끌려간다</strong><br><br><span class="k">절댓값 기준</span><br>벌점이 거리에 비례 → 잘 버티지만, 손으로 풀리는 공식이 없다</div>
       </div>
     </div>
     <p class="fig-note">최소제곱이 절댓값 기준보다 우월해서 표준이 된 것이 아니다. <strong>미분해서 닫힌 해가 나오고</strong>, 오차가 정규분포라는 가정 아래에서 <strong>최대우도 추정과 일치</strong>하기 때문이다. 대신 이상치에 약하다는 값을 치른다 — 그래서 <strong>05</strong>의 잔차 진단이 선택이 아니라 필수가 된다.</p>
   </div>
 
-  <div class="col">
+  <div class="stack">
     <h3>RSS는 어떻게 생긴 함수인가</h3>
     <p>기울기를 조금씩 바꿔가며 RSS를 계산하면 <strong>아래로 볼록한 포물선</strong>이 나온다. 바닥이 하나뿐이라는 것, 그래서 "가장 좋은 직선"이 유일하게 정해진다는 것이 최소제곱의 또 다른 장점이다.</p>
   </div>
@@ -495,7 +363,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <p class="fig-note">위쪽 03의 기울기 슬라이더를 움직이면 이 곡선 위의 점이 함께 움직인다. (현재 절편 \(\beta_{0}\)를 고정한 채 기울기만 훑은 단면이다.)</p>
   </div>
 
-  <div class="col">
+  <div class="stack">
     <h3>기온 데이터에 적용하기</h3>
     <p>146개 연도에서는 최소제곱과 절댓값 기준의 차이가 훨씬 작다. 점이 많아지면 한 해의 영향력이 희석되기 때문이다 — 시장 예제에서 5번 시장 하나가 직선 전체를 끌고 갔던 것과 대비된다.</p>
   </div>
@@ -520,9 +388,9 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
 </section>
 
 <!-- ======================= 3 ======================= -->
-<section id="r-squared">
+<section class="panel" id="r-squared">
   <div class="sec-head"><span class="sec-num">05</span><h2>편차를 두 번 잰다 — \(R^{2}\)의 정체</h2></div>
-  <div class="col">
+  <div class="stack">
     <p>"이 직선이 잘 맞는가"라는 질문은 <strong>무엇과 비교해서</strong>인지를 정해야 답이 된다. 회귀가 잡은 비교 대상은 <em>x를 전혀 쓰지 않는 모형</em>, 즉 수평선 \(\bar{y}\)이다.</p>
     <p>같은 점들에 대해 편차를 두 번 잰다. 한 번은 수평선 \(\bar{y}\)까지(<strong>TSS</strong>), 한 번은 적합선까지(<strong>RSS</strong>). 줄어든 몫의 비율이 \(R^{2}\)다.</p>
   </div>
@@ -531,9 +399,9 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <div class="fig-bar">
       <span class="fig-title">무엇과 비교하는가</span>
       <span class="seg" role="group" aria-label="비교 대상">
-        <button data-mode="tss" aria-pressed="true">\(\bar{y}\) 수평선까지</button>
-        <button data-mode="rss" aria-pressed="false">적합선까지</button>
-        <button data-mode="both" aria-pressed="false">겹쳐 보기</button>
+        <button class="btn ghost" data-mode="tss" aria-pressed="true">\(\bar{y}\) 수평선까지</button>
+        <button class="btn ghost" data-mode="rss" aria-pressed="false">적합선까지</button>
+        <button class="btn ghost" data-mode="both" aria-pressed="false">겹쳐 보기</button>
       </span>
     </div>
     <div class="fig-body">
@@ -545,17 +413,17 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
           <div class="stat"><dt>\(R^{2}\)</dt><dd id="d-r2">—</dd></div>
         </div>
         <div id="d-bar"></div>
-        <div class="callout"><span class="k">읽는 법</span><br>\(\bar{y}\)만 쓸 때 남던 변동의 <strong id="d-pct">—</strong>를 x가 걷어냈다. 나머지는 이 모형이 설명하지 못한 몫이다.</div>
+        <div class="readout"><span class="k">읽는 법</span><br>\(\bar{y}\)만 쓸 때 남던 변동의 <strong id="d-pct">—</strong>를 x가 걷어냈다. 나머지는 이 모형이 설명하지 못한 몫이다.</div>
       </div>
     </div>
     <p class="fig-note">\(\mathrm{RSE} = \sqrt{\mathrm{RSS}/(n-2)} =\) <span class="num" id="d-rse">—</span> — 같은 정보를 매출의 단위로 말한 것. "예측이 평균적으로 이만큼 빗나간다".</p>
   </div>
 
-  <div class="aside">
+  <div class="callout">
     <strong>\(R^{2}\)가 얼마면 좋은가?</strong> 답이 없다. 물리 실험에서 0.6이면 뭔가 잘못된 것이고, 교육·심리·마케팅에서 0.6이면 훌륭하다. 도메인이 기준을 정한다.
   </div>
 
-  <div class="col">
+  <div class="stack">
     <h3>기온 데이터에 적용하기</h3>
     <p>같은 셈을 146개 연도에도 해 보면, 시장 예제보다 훨씬 낮은 \(R^{2}\)가 나온다. 자연 현상은 연도 하나만으로 다 설명되지 않는다는 뜻이고, 그 자체로는 이상한 일이 아니다.</p>
   </div>
@@ -576,9 +444,9 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
 </section>
 
 <!-- ======================= 4 ======================= -->
-<section id="residual-diagnostics">
+<section class="panel" id="residual-diagnostics">
   <div class="sec-head"><span class="sec-num">06</span><h2>잔차만 따로 떼어낸다</h2></div>
-  <div class="col">
+  <div class="stack">
     <p>여기서부터가 잔차 <em>분석</em>이다. 앞에서 잔차는 직선을 고르기 위한 재료였다. 이제는 <strong>고른 직선이 애초에 맞는 모양이었는지 되묻는 증거</strong>가 된다.</p>
     <p>방법은 단순하다. 잔차 막대를 전부 같은 높이(0)로 끌어내려 눕힌 다음, 가로축을 예측값 \(\hat{y}\)으로 놓고 다시 뿌린다. 직선이 데이터에 맞는다면 이 그림에는 <strong>아무 패턴도 없어야</strong> 한다.</p>
   </div>
@@ -587,12 +455,12 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <div class="fig-bar">
       <span class="fig-title">데이터 네 종류</span>
       <span class="seg" role="group" aria-label="데이터셋">
-        <button data-ds="linear" aria-pressed="true">A</button>
-        <button data-ds="curve" aria-pressed="false">B</button>
-        <button data-ds="fan" aria-pressed="false">C</button>
-        <button data-ds="outlier" aria-pressed="false">D</button>
+        <button class="btn ghost" data-ds="linear" aria-pressed="true">A</button>
+        <button class="btn ghost" data-ds="curve" aria-pressed="false">B</button>
+        <button class="btn ghost" data-ds="fan" aria-pressed="false">C</button>
+        <button class="btn ghost" data-ds="outlier" aria-pressed="false">D</button>
       </span>
-      <button id="e-reveal" aria-pressed="false">진단 보기</button>
+      <button class="btn ghost" id="e-reveal" aria-pressed="false">진단 보기</button>
     </div>
     <div class="fig-body even">
       <div class="fig-plot"><div id="e-plot1"></div></div>
@@ -607,7 +475,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     </div>
   </div>
 
-  <div class="col">
+  <div class="stack">
     <h3>잔차 그림에서 무엇을 찾는가</h3>
     <table class="info">
       <tr><th>보이는 것</th><th>진단</th><th>대응</th></tr>
@@ -619,7 +487,7 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <p>\(R^{2}\)는 네 경우 모두 높게 나온다. <strong>적합도 지표는 모형이 틀렸다는 사실을 알려주지 않는다.</strong> 그걸 알려주는 건 잔차 그림 한 장이다.</p>
   </div>
 
-  <div class="col">
+  <div class="stack">
     <h3>기온 데이터에 적용하기</h3>
     <p>기온 데이터의 잔차를 연도별로 펼쳐 보면, A~D 중 어느 것과 가장 닮았을까? 눈으로 먼저 판단해 보고 아래 설명을 읽자.</p>
   </div>
@@ -627,10 +495,10 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
   <div class="fig" id="figTE">
     <div class="fig-bar"><span class="fig-title">잔차 vs 연도 — 기온 데이터 · n = 146</span></div>
     <div class="fig-body solo"><div class="fig-plot"><div id="te-plot"></div></div></div>
-    <p class="fig-note">점은 그 해의 잔차이고, 초록 점선은 20~40년 구간 평균을 이어 그린 것이다.</p>
+    <p class="fig-note">점은 그 해의 잔차이고, 파란 점선은 20~40년 구간 평균을 이어 그린 것이다.</p>
   </div>
 
-  <div class="col">
+  <div class="stack">
     <table class="info">
       <tr><td>1880~1919년</td><td>구간 평균 잔차 <span id="te-era0">—</span> · 대체로 <span class="pos">위</span></td></tr>
       <tr><td>1920~1959년</td><td>구간 평균 잔차 <span id="te-era1">—</span> · 대체로 <span class="neg">아래</span></td></tr>
@@ -642,11 +510,11 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
 </section>
 
 <!-- ======================= 5 ======================= -->
-<section id="next-questions">
+<section class="panel" id="next-questions">
   <div class="sec-head"><span class="sec-num">07</span><h2>여기까지 오면 남는 질문</h2></div>
-  <div class="col">
+  <div class="stack">
     <p>지금까지 다룬 것은 전부 <strong>손에 있는 데이터 안에서의 이야기</strong>다. 직선을 그었고, 편차를 쟀고, 그 편차가 이상한 모양인지 확인했다. 하지만 아직 답하지 않은 질문이 있다.</p>
-    <div class="eq">이 데이터가 아니라 <strong>다른 표본</strong>을 뽑았다면, \(\hat{\beta}_{1}\)이 얼마나 달라졌을까?</div>
+    <div class="readout math">이 데이터가 아니라 <strong>다른 표본</strong>을 뽑았다면, \(\hat{\beta}_{1}\)이 얼마나 달라졌을까?</div>
     <p>표본이 바뀌면 직선도 바뀐다. 그러니 \(\hat{\beta}_{1} = 0.088\)은 숫자 하나가 아니라 <strong>분포를 가진 추정값</strong>이다. 그 흔들림의 폭이 표준오차이고, 거기서 신뢰구간과 p값이 나온다.</p>
     <table class="info">
       <tr><td>표준오차 \(\mathrm{SE}(\hat{\beta}_{1})\)</td><td>같은 방식으로 표본을 반복해 뽑았을 때 기울기 추정값이 흩어지는 폭. 분모에 \(\sum (x_{i}-\bar{x})^{2}\)가 있어서 <strong>x가 넓게 퍼져 있을수록 작아진다</strong>.</td></tr>
@@ -656,13 +524,13 @@ table.info td:first-child{font-weight:500; white-space:nowrap}
     <p>그리고 이 페이지에서 계속 미뤄둔 것이 하나 더 있다. 예측변수가 <strong>둘 이상</strong>일 때다. 그때는 "기울기"의 뜻부터 달라진다 — 다른 변수를 고정했을 때의 변화량이 되고, 단독으로 유의하던 변수가 유의성을 잃기도 한다.</p>
   </div>
 </section>
-</main>
-
 <footer>
   <p>회귀분석 정리 ① 단순 선형회귀 보조자료 · 실습 파일 <a class="dl-link" href="../downlodable/%ED%9A%8C%EA%B7%80%EB%B6%84%EC%84%9D-%EC%8B%A4%EC%8A%B5%EB%8D%B0%EC%9D%B4%ED%84%B0.xlsx" download="회귀분석-실습데이터.xlsx">회귀분석-실습데이터.xlsx</a>(데이터 / 예측과잔차 / 진단용 A–D 세 시트)와 함께 쓴다. 구성은 ISLR 3.1(최소제곱·계수의 정확도·적합도)과 3.3.3(잔차 진단)을 따랐고, 잔차 그림의 읽는 법은 <em style="background:none;padding:0">Learning Statistics with R</em> 15.8–15.9를 참고했다. 그림과 파일에 쓰인 수치는 설명을 위해 만든 예시 데이터다.</p>
 </footer>
+</main>
 
-</div>
+
+
 
 
 <script>

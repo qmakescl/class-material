@@ -23,250 +23,112 @@
 <meta name="twitter:image:alt" content="통계 수업 자료 아이콘">
 
 <link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/material.css">
 <style>
-:root{
-  --bench:#f4f6fb;
-  --card:#ffffff;
-  --ink:#0b1220;
-  --soft:#45506b;
-  --line:#dbe1ee;
-  --violet:#8b3ff0;
-  --safranin:#d1264f;
-  --amber:#ffb020;
-  --blue:#2f6fed;
-  --rail:250px;
-}
-*{box-sizing:border-box}
-body{
-  margin:0; background:var(--bench); color:var(--ink);
-  font-family:Pretendard,"Noto Sans KR",Inter,system-ui,-apple-system,sans-serif;
-  font-weight:350; line-height:1.75; letter-spacing:-0.01em;
-  -webkit-font-smoothing:antialiased;
-}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* 이 자료 고유 스타일. 공통 토큰·레일·박스는 material.css */
+:root{--violet:#8b3ff0}
+main > *,section > *,.panel > *{min-width:0}
 
-/* ── 좌측 레일 ───────────────────────────── */
-.rail{
-  position:fixed; left:0; top:0; bottom:0; width:var(--rail);
-  background:var(--ink); color:#e4e9f5; padding:34px 0 20px;
-  display:flex; flex-direction:column; z-index:50; overflow-y:auto;
-}
-.rail .rail-back{
-  display:block; margin:0 26px 18px; padding:0; color:#b7c2de; font-size:12.5px;
-  font-weight:600; text-decoration:none; white-space:nowrap; border-left:0;
-}
-.rail .rail-back:hover,.rail .rail-back:focus-visible{color:var(--amber)}
-.rail h1{
-  font-size:23px; font-weight:800;
-  margin:0 26px 30px; line-height:1.4; color:#f4f6fb; letter-spacing:-0.02em;
-}
-.rail nav{display:flex; flex-direction:column}
-.rail a{
-  display:grid; grid-template-columns:28px 1fr; gap:10px; align-items:baseline;
-  padding:11px 24px; color:#b7c2de; text-decoration:none; font-size:13.5px;
-  border-left:3px solid transparent; transition:.16s; cursor:pointer;
-}
-.rail a b{font-variant-numeric:tabular-nums; font-weight:600; color:#7c88a8; font-size:12px}
-.rail a:hover{background:#16213d; color:#fff}
-.rail a.on{background:#16213d; color:#fff; border-left-color:var(--amber)}
-.rail a.on b{color:var(--amber)}
-.rail .mins{display:block; font-size:11px; color:#7c88a8; font-weight:300}
-.rail footer{margin-top:auto; padding:20px 24px 0; font-size:11.5px; color:#7c88a8; line-height:1.6}
-
-main{margin-left:var(--rail); padding:0 46px 120px; max-width:1060px}
-
-/* ── 히어로 ───────────────────────────── */
-.hero{padding:76px 0 52px; border-bottom:1px solid var(--line)}
-.hero h2{
-  font-weight:800; font-size:clamp(30px,4vw,46px);
-  line-height:1.15; margin:0 0 20px; letter-spacing:-0.03em; max-width:17em;
-}
-.hero p{max-width:46em; font-size:15.5px; color:var(--soft); margin:0 0 8px}
-.heroplate{display:flex; gap:30px; align-items:center; flex-wrap:wrap; margin-top:34px}
-.heroplate canvas{border-radius:4px; background:var(--card); border:1px solid var(--line)}
-.heroplate .legend{font-size:13px; line-height:2}
-.hero-answer{margin:24px 0 0; border-left:0; padding-left:0}
-.hero-answer summary{display:inline-block; color:var(--ink); border:1px solid var(--line); border-radius:4px; padding:8px 13px}
-.hero-answer[open] summary{margin-bottom:4px}
+/* 히어로 */
+.hero{display:flex; flex-direction:column; gap:12px; padding-bottom:12px; border-bottom:1px solid var(--line)}
+.heroplate{display:flex; gap:30px; align-items:center; flex-wrap:wrap}
+.heroplate canvas{border-radius:4px; background:var(--surface); border:1px solid var(--line)}
+.heroplate .legend{display:block; line-height:2}
 .swatch{display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:8px; vertical-align:-1px}
 
-/* ── 섹션 ───────────────────────────── */
-section{padding:66px 0 10px; border-bottom:1px solid var(--line)}
-section:last-of-type{border-bottom:0}
-.tag{
-  display:inline-block; font-size:12px; font-weight:600; color:var(--amber);
-  font-variant-numeric:tabular-nums; margin-bottom:10px;
-}
-section h3{
-  font-size:29px; font-weight:800;
-  margin:0 0 6px; letter-spacing:-0.03em; line-height:1.15;
-}
-section .goal{font-size:14px; color:var(--soft); margin:0 0 26px; max-width:44em}
-p{max-width:44em}
-
-/* ── 패널 ───────────────────────────── */
-.panel{
-  background:var(--card); border:1px solid var(--line); border-radius:5px;
-  padding:26px 28px; margin:22px 0;
-}
-.panel > h4{margin:0 0 4px; font-size:15.5px; font-weight:600; letter-spacing:-0.01em}
-.panel > .hint{margin:0 0 20px; font-size:13px; color:var(--soft); max-width:46em}
+/* 섹션 머리 */
+section > h3,.diagnostic-content > h3{font-size:clamp(22px,4.6vw,28px); font-weight:800; line-height:1.3}
+section > .tag{align-self:flex-start}
+section > h3,.diagnostic-content > h3{font-size:clamp(22px,4.6vw,28px); font-weight:800; line-height:1.3}
+section > .tag{align-self:flex-start}
+section .goal{font-size:14px; color:var(--muted)}
+.panel > .hint{font-size:13px; color:var(--muted)}
 .grid2{display:grid; grid-template-columns:1fr 1fr; gap:28px}
 .grid-ctrl{display:grid; grid-template-columns:300px 1fr; gap:32px; align-items:start}
 @media(max-width:1120px){.grid-ctrl{grid-template-columns:1fr}}
 @media(max-width:900px){.grid2{grid-template-columns:1fr}}
 
-/* ── 수식 ───────────────────────────── */
-.math{
-  font-size:16px; text-align:center;
-  background:#eef2fb; border-radius:4px; padding:14px 16px; margin:14px 0;
-  line-height:1.9; letter-spacing:0;
-}
-.math .note{display:block; font-family:Pretendard,"Noto Sans KR",Inter,system-ui,sans-serif; font-size:12px; color:var(--soft); margin-top:4px}
+/* 수식 */
+.math{font-size:16px; text-align:center; background:var(--soft); border-radius:6px; padding:14px 16px; margin:14px 0; line-height:1.9}
+.math .note{display:block; font-size:12px; margin-top:4px}
 .defs{font-size:13.5px; margin:0; padding:0; list-style:none}
 .defs li{padding:10px 0; border-bottom:1px dashed var(--line)}
 .defs li:last-child{border-bottom:0}
 .defs b{font-size:16px; margin-right:9px; color:var(--violet)}
 
-/* ── 컨트롤 ───────────────────────────── */
+/* 컨트롤 */
 .ctl{margin-bottom:17px}
 .ctl label{display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px; gap:12px}
-.ctl label span{color:var(--soft)}
-.ctl label var{
-  font-style:normal; font-weight:600; font-variant-numeric:tabular-nums;
-  color:var(--ink); background:#eef1fa; padding:1px 8px; border-radius:3px; font-size:12.5px;
-}
-input[type=range]{width:100%; accent-color:var(--violet); height:22px; cursor:pointer}
-input[type=range]:focus-visible{outline:2px solid var(--blue); outline-offset:3px}
-select{
-  width:100%; font:inherit; font-size:13.5px; color:var(--ink); background:#fff;
-  border:1px solid var(--line); border-radius:4px; padding:8px 10px; cursor:pointer;
-}
-select:focus-visible{outline:2px solid var(--blue); outline-offset:3px}
-button{
-  font-family:inherit; font-size:13.5px; font-weight:500; cursor:pointer;
-  background:var(--ink); color:#f4f6fb; border:0; border-radius:4px;
-  padding:9px 17px; transition:.15s;
-}
-button:hover{background:var(--violet)}
-button:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
-button.ghost{background:transparent; color:var(--ink); border:1px solid var(--line)}
-button.ghost:hover{background:#eef1fa; color:var(--ink)}
-button.ghost.on{background:var(--ink); color:#f4f6fb; border-color:var(--ink)}
+.ctl label span{color:var(--muted)}
+.ctl label var{font-style:normal; font-weight:600; font-variant-numeric:tabular-nums; background:var(--soft); padding:1px 8px; border-radius:3px; font-size:12.5px}
+input[type=range]{accent-color:var(--violet); height:22px; cursor:pointer}
+select{width:100%; font:inherit; font-size:13.5px; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:8px 10px; cursor:pointer}
+button{font:500 13.5px var(--sans); cursor:pointer; background:var(--ink); color:var(--paper); border:1px solid var(--ink); border-radius:6px; padding:9px 17px; transition:.15s}
+button:hover{background:var(--violet); border-color:var(--violet)}
+button.ghost{background:transparent; color:var(--ink); border-color:var(--line)}
+button.ghost:hover{background:var(--soft)}
+button.ghost.on{background:var(--ink); color:var(--paper); border-color:var(--ink)}
 .btnrow{display:flex; gap:9px; flex-wrap:wrap; margin-top:6px}
 .opsrow{display:flex; gap:7px; flex-wrap:wrap; margin-bottom:16px}
 .opsrow button{font-size:15px; padding:7px 14px}
-
-canvas{display:block; max-width:100%}
+canvas{display:block}
 #vennCv{width:min(100%,480px); height:auto}
 .chart-wrap{margin:0; min-width:0}
-.chart-note{margin:7px 0 0; font-size:11.5px; line-height:1.55; color:var(--soft)}
+.chart-note{margin:7px 0 0; font-size:11.5px; line-height:1.55; color:var(--muted)}
 
-/* ── 결과 판 ───────────────────────────── */
-.readout{
-  background:#eef2fb; border-radius:4px; padding:16px 18px; margin-top:16px;
-  font-size:13.5px; line-height:1.85;
-}
+/* 결과 판 (공통 .readout 보강) */
+.readout{margin-top:16px; font-family:var(--sans); font-size:13.5px; line-height:1.85; padding:16px 18px}
+.readout .big{font-size:34px; font-weight:700; font-variant-numeric:tabular-nums; display:block; line-height:1.2; margin-bottom:2px}
 .readout .big .katex{font-size:1em}
-.readout .big{
-  font-size:34px; font-weight:700;
-  font-variant-numeric:tabular-nums; display:block; line-height:1.2; margin-bottom:2px;
-}
-.readout em{font-style:normal; color:var(--safranin); font-weight:600}
-.readout .muted{color:var(--soft)}
-table{border-collapse:collapse; width:100%; font-size:13.5px; margin-top:8px}
-th,td{text-align:left; padding:7px 10px; border-bottom:1px solid var(--line)}
-th{font-weight:600; color:var(--soft); font-size:12.5px}
-td.n{text-align:right; font-variant-numeric:tabular-nums; font-weight:500}
+.readout em{font-style:normal; color:var(--pos); font-weight:600}
+table{margin-top:8px}
+td.n{font-family:var(--sans); font-weight:500}
 td.f{font-size:15px}
-.ok{color:#0ea968; font-weight:600}
-.bad{color:var(--safranin); font-weight:600}
+.ok{color:var(--ok); font-weight:600}
+.bad{color:var(--pos); font-weight:600}
 
-/* ── 멱집합 칩 ───────────────────────────── */
+/* 멱집합 칩 */
 .chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px}
-.chip{
-  font-size:14px; background:#fff;
-  border:1px solid var(--line); border-radius:3px; padding:5px 10px;
-  cursor:pointer; color:var(--ink); transition:.12s; white-space:nowrap;
-}
+.chip{font-size:14px; background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:5px 10px; cursor:pointer; color:var(--ink); transition:.12s; white-space:nowrap}
 .chip:hover{border-color:var(--violet)}
 .chip.selA{background:var(--violet); color:#fff; border-color:var(--violet)}
-.chip.selB{background:var(--blue); color:#fff; border-color:var(--blue)}
+.chip.selB{background:var(--accent); color:#fff; border-color:var(--accent)}
 .chip.res{box-shadow:0 0 0 2px var(--amber); border-color:var(--amber)}
 
-/* ── 퀴즈 ───────────────────────────── */
+/* 퀴즈 */
 .q{border-top:1px solid var(--line); padding:20px 0}
 .q:first-of-type{border-top:0; padding-top:4px}
-.q .stem{font-weight:500; margin:0 0 12px; font-size:14.5px; max-width:44em}
-.q .stem b{color:var(--amber); font-weight:600; margin-right:7px; font-variant-numeric:tabular-nums}
-.opt{
-  display:block; width:100%; text-align:left; background:#fff; border:1px solid var(--line);
-  border-radius:4px; padding:10px 14px; margin-bottom:7px; font-size:13.5px;
-  cursor:pointer; color:var(--ink); font-family:inherit; line-height:1.6; transition:.13s;
-}
+.q .stem{font-weight:500; margin:0 0 12px; font-size:14.5px}
+.q .stem b{color:var(--warn); margin-right:7px; font-variant-numeric:tabular-nums}
+.opt{display:block; width:100%; text-align:left; background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:10px 14px; margin-bottom:7px; font-size:13.5px; cursor:pointer; color:var(--ink); font-family:inherit; line-height:1.6; transition:.13s}
 .opt:hover:not(:disabled){border-color:var(--violet); background:#f3ebff}
 .opt:disabled{cursor:default}
-.opt.right{background:#e6f8f0; border-color:#12b876; font-weight:500}
-.opt.wrong{background:#fde7ee; border-color:var(--safranin); text-decoration:line-through; color:var(--soft)}
-.exp{
-  display:none; font-size:13px; color:var(--soft); background:#eef2fb;
-  border-left:3px solid var(--amber); padding:12px 15px; border-radius:0 4px 4px 0; margin-top:10px;
-}
+.opt.right{background:var(--ok-soft); border-color:var(--ok); font-weight:500}
+.opt.wrong{background:var(--pos-soft); border-color:var(--pos); text-decoration:line-through; color:var(--muted)}
+.exp{display:none; font-size:13px; color:var(--muted); background:var(--soft); border-left:3px solid var(--amber); padding:12px 15px; border-radius:0 6px 6px 0; margin-top:10px}
 .exp.show{display:block}
 .exp b{color:var(--ink)}
 .score{font-size:14px; margin-top:20px; padding-top:18px; border-top:1px solid var(--line)}
 .score strong{font-size:22px}
 
-/* ── 강의 노트 ───────────────────────────── */
-details{margin:20px 0 6px; border-left:3px solid var(--blue); padding-left:16px}
-summary{cursor:pointer; font-size:13.5px; font-weight:500; color:var(--blue); list-style:none; padding:3px 0}
-summary::-webkit-details-marker{display:none}
-summary::before{content:"▸ "; font-size:11px}
-details[open] summary::before{content:"▾ "}
-details .body{font-size:13.5px; color:var(--soft); padding:8px 0 4px; max-width:44em}
+/* 강의 노트 (공통 details 안쪽) */
+details .body{font-size:13.5px; color:var(--muted)}
 details .body p{margin:0 0 10px}
 details .body ul{margin:0 0 10px; padding-left:19px}
 details .body li{margin-bottom:6px}
-details .body b{color:var(--ink); font-weight:600}
+details .body b{color:var(--ink)}
+.hero-answer{background:transparent; border:0; padding:0}
 
-/* ── 선택형 사전 진단 ─────────────────────── */
-.optional-diagnostic{padding-top:30px}
-.diagnostic-toggle{
-  margin:0; padding:0; border:1px solid var(--line); border-left:4px solid var(--amber);
-  border-radius:5px; background:var(--card); overflow:hidden;
-}
-.diagnostic-toggle > summary{
-  display:flex; align-items:center; gap:12px; padding:15px 20px;
-  color:var(--ink); font-size:15.5px; font-weight:700;
-}
-.diagnostic-toggle > summary::before{color:var(--amber); font-size:13px}
-.diagnostic-toggle > summary .tag{margin:0; color:var(--amber)}
-.diagnostic-toggle > summary .toggle-label{
-  margin-left:auto; color:var(--soft); font-size:12px; font-weight:500;
-}
-.diagnostic-toggle[open] > summary{border-bottom:1px solid var(--line)}
-.diagnostic-content{padding:26px 24px 20px}
-.diagnostic-content > h3{margin-top:0}
-.diagnostic-content > details{margin-top:26px}
-
-.mis{
-  background:#fde7ee; border-radius:4px; padding:14px 18px; margin:18px 0;
-  font-size:13.5px; border-left:3px solid var(--safranin); max-width:46em;
-}
-.mis b{color:var(--safranin)}
+/* 선택형 사전 진단 */
+.diagnostic-toggle{padding:0; border-left:4px solid var(--amber); background:var(--surface); overflow:hidden}
+.diagnostic-toggle > summary{display:flex; align-items:center; gap:12px; padding:15px 20px; font-size:15.5px; font-weight:700}
+.diagnostic-toggle > summary .toggle-label{margin-left:auto; color:var(--muted); font-size:12px; font-weight:500}
+.diagnostic-toggle[open] > summary{border-bottom:1px solid var(--line); margin-bottom:0}
+.diagnostic-content{padding:26px 24px 20px; display:flex; flex-direction:column; gap:16px}
+.diagnostic-content > details{background:var(--soft)}
+.mis{background:var(--pos-soft); border-radius:0 6px 6px 0; padding:14px 18px; margin:6px 0; font-size:13.5px; border-left:3px solid var(--pos)}
+.mis b{color:var(--pos)}
 .tabs{display:flex; gap:7px; margin-bottom:20px; flex-wrap:wrap}
-
-@media(max-width:860px){
-  :root{--rail:0px}
-  .rail{position:static; width:auto; height:auto; padding:22px 0 8px}
-  .rail nav{flex-direction:row; overflow-x:auto; padding:0 16px 8px}
-  .rail a{border-left:0; border-bottom:3px solid transparent; white-space:nowrap; padding:8px 14px}
-  .rail a.on{border-left:0; border-bottom-color:var(--amber)}
-  .rail a .mins,.rail footer{display:none}
-  .rail .rail-back{margin:0 16px 10px}
-  .rail h1{margin:0 16px 16px}
-  main{padding:0 18px 80px}
-}
 </style>
 <script defer src="../assets/katex/katex.min.js"></script>
 <script defer src="../assets/katex/contrib/auto-render.min.js"></script>
@@ -290,7 +152,7 @@ details .body b{color:var(--ink); font-weight:600}
 <main>
 
 <div class="hero">
-  <h2>양성이 나왔다. 이 로트는 오염됐을까?</h2>
+  <h2 class="page-title">양성이 나왔다. 이 로트는 오염됐을까?</h2>
   <p>민감도 \(P(\text{양성} \mid \text{실제 오염})\) = 98%, 특이도 \(P(\text{음성} \mid \text{실제 정상})\) = 95%인 신속검사에서 양성이 떴습니다. 실제로 오염일 확률은 얼마일까요.</p>
   <p>원한다면 사전 진단에서 자신의 생각을 먼저 남겨 보십시오. 그다음 아래 자연빈도 판을 펼쳐 답을 확인할 수 있습니다.</p>
   <details class="hero-answer">
@@ -302,7 +164,7 @@ details .body b{color:var(--ink); font-weight:600}
       <div><i class="swatch" style="background:#e2662a"></i>정상인데 양성 &nbsp;<b id="hFP">50</b></div>
       <div><i class="swatch" style="background:#cdd4e6"></i>음성 &nbsp;<b id="hTN">945</b></div>
       <div style="margin-top:12px; font-size:15px; font-weight:600">
-        양성 중 진짜 오염 = <span style="color:var(--safranin)" id="hPPV">9%</span>
+        양성 중 진짜 오염 = <span style="color:var(--pos)" id="hPPV">9%</span>
       </div>
     </div>
     </div>
@@ -337,9 +199,9 @@ details .body b{color:var(--ink); font-weight:600}
           <label><span>표본공간의 크기 \(|\Omega|\)</span><var id="v-om">3</var></label>
           <input type="range" id="om-n" min="2" max="4" step="1" value="3">
         </div>
-          <div style="font-size:13px;color:var(--soft);margin-bottom:6px">주머니에서 공 하나를 꺼냈을 때의 색 — 결과들은 서로 배반이고 전체를 덮습니다.</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:6px">주머니에서 공 하나를 꺼냈을 때의 색 — 결과들은 서로 배반이고 전체를 덮습니다.</div>
         <div id="om-list" style="font-size:13.5px;margin-bottom:16px"></div>
-        <div style="font-size:13px;color:var(--soft);margin-bottom:4px">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:4px">
           사건족 \(\mathcal{F} = 2^{\Omega}\) — 전부 <b id="om-card">8</b>개.
           아무거나 두 개를 눌러 A와 B로 지정해 보십시오.
         </div>
@@ -347,7 +209,7 @@ details .body b{color:var(--ink); font-weight:600}
         <div class="readout" id="om-out"></div>
       </div>
     </div>
-    <p style="font-size:13px;color:var(--soft);margin-top:14px">
+    <p style="font-size:13px;color:var(--muted);margin-top:14px">
       A와 B를 어떻게 고르든 \(A^{c}\), \(A \cup B\), \(A \cap B\)가 <b>전부 목록 안에 이미 들어 있습니다</b>. 연산을 해도 밖으로 나가지 않는다 — 이것이 \(\mathcal{F}\)가 갖춰야 할 닫힘 성질이고, \(\Omega\)가 무한할 때 \(\sigma\)-대수라는 이름으로 정식화됩니다.
     </p>
   </div>
@@ -399,7 +261,7 @@ details .body b{color:var(--ink); font-weight:600}
         <table id="ax-tab"></table>
       </div>
       <div>
-        <div style="font-size:13px;color:var(--soft);margin-bottom:2px">공리에서 유도되는 규칙</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:2px">공리에서 유도되는 규칙</div>
         <table id="rule-tab"></table>
         <div class="readout" id="add-out"></div>
       </div>
@@ -485,7 +347,7 @@ details .body b{color:var(--ink); font-weight:600}
   <h3>조건부확률과 베이즈 정리</h3>
   <p class="goal">조건이 붙으면 분모가 바뀝니다. \(P(\text{양성} \mid \text{오염})\)과 \(P(\text{오염} \mid \text{양성})\)은 분모가 다르므로 다른 수입니다. 이 구분이 검사 결과를 읽는 방식 전체를 바꿉니다.</p>
 
-  <div class="math" style="max-width:46em">
+  <div class="math">
     \(\displaystyle P(A \mid B) = \frac{P(A \cap B)}{P(B)}, \quad P(B) > 0\)
     <span class="note">표본공간을 \(\Omega\)에서 B로 갈아끼우는 연산입니다. 분자는 B 안에서 A인 부분, 분모는 B 전체</span>
   </div>
@@ -729,7 +591,7 @@ details .body b{color:var(--ink); font-weight:600}
   </div>
 
   <h4 style="font-size:21px;margin:44px 0 4px;font-weight:700">잘 알려진 세 가지</h4>
-  <p style="font-size:14px;color:var(--soft);margin:0 0 22px">먼저 각 분포의 모수를 움직이며 모양과 요약값이 함께 어떻게 바뀌는지 확인하십시오. 이항분포는 n과 p, 포아송분포는 \(\lambda\), 정규분포는 \(\mu\)와 \(\sigma\)가 모수입니다. 아래 결과 판에는 그때그때의 기대값 \(E[X]\)와 분산 \(\mathrm{Var}(X)\)를 계산해 표시합니다.</p>
+  <p style="font-size:14px;color:var(--muted);margin:0 0 22px">먼저 각 분포의 모수를 움직이며 모양과 요약값이 함께 어떻게 바뀌는지 확인하십시오. 이항분포는 n과 p, 포아송분포는 \(\lambda\), 정규분포는 \(\mu\)와 \(\sigma\)가 모수입니다. 아래 결과 판에는 그때그때의 기대값 \(E[X]\)와 분산 \(\mathrm{Var}(X)\)를 계산해 표시합니다.</p>
 
   <div class="tabs">
     <button class="ghost on" data-dist="binom">① 이항</button>

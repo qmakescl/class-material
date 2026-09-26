@@ -17,93 +17,17 @@
 <meta name="twitter:description" content="대규모 언어 모델이 사전학습부터 배포까지 무엇을 배우고, 배운 것을 어떻게 답으로 만들어 내는지 단계별로 확인합니다.">
 <meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/ai.png">
 <meta name="twitter:image:alt" content="인공지능 수업 자료 아이콘">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;700;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/material.css">
 <style>
-:root{
-  --paper:#F4F6FB; --surface:#FFFFFF; --ink:#0B1220; --muted:#45506B; --line:#DBE1EE;
-  --token:#2F6FED; --token-soft:#EAF1FF;
-  --vector:#0EA968; --vector-soft:#E6F8F0;
-  --attn:#FFB020; --attn-soft:#FFF3DE;
-  --warn:#D1264F; --warn-soft:#FDE7EE;
-  --ok:#0EA968; --ok-soft:#E6F8F0;
-  --violet:#8B3FF0;
-  --rail:250px;
-  --display:"Hahmlet","Noto Serif KR","Apple SD Gothic Neo",serif;
-  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.75;word-break:keep-all;overflow-wrap:break-word}
-
-/* ── 좌측 레일 ───────────────────────────── */
-.rail{
-  position:fixed;left:0;top:0;bottom:0;width:var(--rail);
-  background:var(--ink);color:#E4E9F5;padding:34px 0 20px;
-  display:flex;flex-direction:column;z-index:50;overflow-y:auto;
-}
-.rail .rail-back{
-  display:block;margin:0 26px 18px;padding:0;color:#B7C2DE;font-size:12.5px;
-  font-weight:600;text-decoration:none;white-space:nowrap;border-left:0;
-}
-.rail .rail-back:hover,.rail .rail-back:focus-visible{color:var(--attn)}
-.rail h1{
-  font-family:var(--display);font-size:21px;font-weight:800;
-  margin:0 26px 30px;line-height:1.4;color:#F4F6FB;letter-spacing:-.01em;
-}
-.rail nav{display:flex;flex-direction:column}
-.rail nav a{
-  display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:baseline;
-  padding:11px 24px;color:#B7C2DE;text-decoration:none;font-size:13.5px;
-  border-left:3px solid transparent;transition:.16s;cursor:pointer;
-}
-.rail nav a b{font-variant-numeric:tabular-nums;font-weight:600;color:#7C88A8;font-size:12px}
-.rail nav a:hover{background:#16213D;color:#fff}
-.rail nav a.on{background:#16213D;color:#fff;border-left-color:var(--attn)}
-.rail nav a.on b{color:var(--attn)}
-.rail footer{margin-top:auto;padding:20px 24px 0;font-size:11.5px;color:#7C88A8;line-height:1.6}
-
-main{margin-left:var(--rail);max-width:900px;padding:28px 40px 64px;display:flex;flex-direction:column;gap:56px}
-@media (max-width:860px){
-  :root{--rail:0px}
-  .rail{position:static;width:auto;height:auto;padding:22px 0 8px}
-  .rail nav{flex-direction:row;overflow-x:auto;padding:0 16px 8px}
-  .rail nav a{border-left:0;border-bottom:3px solid transparent;white-space:nowrap;padding:8px 14px}
-  .rail nav a.on{border-left:0;border-bottom-color:var(--attn)}
-  .rail .rail-back{margin:0 16px 10px}
-  .rail h1{margin:0 16px 16px}
-  .rail footer{display:none}
-  main{padding:20px 16px 64px}
-}
-h1,h2,h3{font-family:var(--display);line-height:1.3;text-wrap:balance;margin:0}
-h1{font-size:clamp(28px,6vw,40px);font-weight:800;letter-spacing:-.01em}
-h2{font-size:clamp(22px,4.6vw,28px);font-weight:700}
-h2.page-title{font-size:clamp(28px,6vw,40px);font-weight:800;letter-spacing:-.01em}
-h3{font-size:18px;font-weight:700}
-p{margin:0}
-section{display:flex;flex-direction:column;gap:16px}
-.eyebrow{font-size:13px;letter-spacing:.08em;color:var(--muted);font-weight:600}
-.lead{font-size:18px;color:var(--ink)}
-.muted{color:var(--muted)}
+/* 이 자료 고유의 위젯 스타일 (공통 스타일은 material.css) */
+main{gap:44px}
 .small{font-size:14px}
-.tag{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
-.recap{border-left:3px solid var(--line);padding:4px 0 4px 16px;display:flex;flex-direction:column;gap:6px}
+.toy{font-size:12px;color:var(--muted)}
 .flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px}
 .flow span.n{padding:2px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
-.flow .t{color:var(--token);border-color:var(--token)!important}
-.flow .v{color:var(--vector);border-color:var(--vector)!important}
-.flow .a{color:var(--attn);border-color:var(--attn)!important}
-.goal{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
-.goal ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:4px}
-.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.stat{border-top:2px solid var(--ink);padding-top:10px;display:flex;flex-direction:column;gap:2px}
-.stat b{font-family:var(--mono);font-size:22px;font-weight:500}
-.stat span{font-size:13px;color:var(--muted);line-height:1.5}
-@media (max-width:520px){.stats{grid-template-columns:1fr}}
+.flow .t{color:var(--accent);border-color:var(--accent)!important}
+.flow .v{color:var(--ok);border-color:var(--ok)!important}
+.flow .a{color:var(--warn);border-color:var(--amber)!important}
 
 /* pipeline */
 .pipe{display:grid;grid-template-columns:repeat(6,1fr);gap:0;position:relative;margin-top:4px}
@@ -115,79 +39,69 @@ section{display:flex;flex-direction:column;gap:16px}
 .pipe button.done .dot{border-color:var(--ink);color:var(--ink)}
 .pipe button.on{color:var(--ink);font-weight:600}
 .pipe button.on .dot{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-.pipe button:focus-visible .dot{outline:3px solid var(--token);outline-offset:2px}
+.pipe button:focus-visible .dot{outline:3px solid var(--accent);outline-offset:2px}
 .bracket{display:grid;grid-template-columns:repeat(6,1fr);font-size:11.5px;color:var(--muted);text-align:center;margin-top:-4px}
 .bracket div{border-top:1px dashed var(--line);padding-top:4px;margin:0 6px}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:16px}
-.panel .row{display:grid;grid-template-columns:110px 1fr;gap:12px}
-.panel .row dt{font-size:13px;color:var(--muted);font-weight:600;padding-top:2px}
-.panel .row dd{margin:0}
 .panel dl{margin:0;display:flex;flex-direction:column;gap:12px}
-@media (max-width:520px){.panel .row{grid-template-columns:1fr;gap:2px}}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:12px}
+.kv dt{font-size:13px;color:var(--muted);font-weight:600;padding-top:2px}
+.kv dd{margin:0}
+@media (max-width:520px){.kv{grid-template-columns:1fr;gap:2px}}
 .chat{border-radius:10px;border:1px solid var(--line);overflow:hidden}
-.chat .q{padding:10px 14px;background:var(--token-soft);font-size:15px}
-.chat .q b{color:var(--token);font-weight:600;margin-right:6px}
+.chat .q{padding:10px 14px;background:var(--accent-soft);font-size:15px}
+.chat .q b{color:var(--accent);font-weight:600;margin-right:6px}
 .chat .r{padding:12px 14px;font-size:15px;white-space:pre-line;min-height:3.2em}
 .chat .r.noise{font-family:var(--mono);color:var(--muted);letter-spacing:.02em}
 .chat .r.doc{font-family:var(--mono);font-size:14px}
 .chat .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 14px;border-top:1px dashed var(--line);font-size:12px;color:var(--muted);flex-wrap:wrap}
-.hint{display:flex;gap:10px;background:var(--attn-soft);border-radius:10px;padding:12px 14px;font-size:15px}
-.hint b{color:var(--attn);white-space:nowrap}
+.hint{display:flex;gap:10px;background:var(--warn-soft);border-radius:10px;padding:12px 14px;font-size:15px}
+.hint b{color:var(--warn);white-space:nowrap}
 .btns{display:flex;gap:8px;flex-wrap:wrap}
-.btn{font:inherit;font-size:14px;font-weight:600;padding:8px 14px;border-radius:8px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
-.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
-.btn:disabled{opacity:.4;cursor:default}
-.btn:focus-visible,.chip:focus-visible,.sent:focus-visible,.seg button:focus-visible{outline:3px solid var(--token);outline-offset:2px}
+.chip:focus-visible,.sent:focus-visible,.seg button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .seg button{font:inherit;font-size:13px;padding:6px 12px;border:0;background:transparent;color:var(--muted);cursor:pointer}
 .seg button.on{background:var(--ink);color:var(--paper)}
 
 /* fill-in */
-.quiz-tabs{display:flex;gap:6px;flex-wrap:wrap}
-.quiz{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:16px}
-.prompt{font-size:20px;font-family:var(--display);font-weight:500}
-.blank{display:inline-block;min-width:3.5em;border-bottom:2px solid var(--token);color:var(--token);text-align:center;padding:0 4px}
+.prompt{font-size:20px;font-weight:500}
+.blank{display:inline-block;min-width:3.5em;border-bottom:2px solid var(--accent);color:var(--accent);text-align:center;padding:0 4px}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{font:inherit;font-size:15px;padding:6px 12px;border-radius:8px;border:1px solid var(--token);background:var(--token-soft);color:var(--token);cursor:pointer}
-.chip.pick{background:var(--token);color:var(--surface)}
+.chip{font:inherit;font-size:15px;padding:6px 12px;border-radius:8px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);cursor:pointer}
 .bars{display:flex;flex-direction:column;gap:8px}
 .bar{display:grid;grid-template-columns:96px 1fr 48px;gap:10px;align-items:center;font-size:14px}
-.bar .lab{color:var(--token);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .lab{color:var(--accent);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bar .track{height:14px;background:var(--paper);border-radius:4px;overflow:hidden}
-.bar .fill{height:100%;background:var(--attn);border-radius:4px;width:0;transition:width .5s ease}
+.bar .fill{height:100%;background:var(--amber);border-radius:4px;width:0;transition:width .5s ease}
 .bar .pct{font-family:var(--mono);font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
 .bar.mine .lab::after{content:" ← 내 선택";color:var(--muted);font-size:12px;font-weight:400}
-.verdict{border-radius:10px;padding:12px 14px;background:var(--vector-soft);display:flex;flex-direction:column;gap:4px}
-.verdict b{color:var(--vector)}
-.verdict.warn{background:var(--warn-soft)}
-.verdict.warn b{color:var(--warn)}
+.verdict{border-radius:10px;padding:12px 14px;background:var(--ok-soft);display:flex;flex-direction:column;gap:4px}
+.verdict b{color:var(--ok)}
+.verdict.warn{background:var(--pos-soft)}
+.verdict.warn b{color:var(--pos)}
 
 /* compression */
 .compress{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center}
 .box{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:6px}
 .box .big{font-family:var(--mono);font-size:22px}
 .arrow{font-family:var(--mono);color:var(--muted);text-align:center;font-size:13px}
-@media (max-width:520px){.compress{grid-template-columns:1fr}.arrow{transform:none}}
+@media (max-width:520px){.compress{grid-template-columns:1fr}}
 
 /* generator */
-.gen{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
 .out{font-size:17px;line-height:1.9;min-height:3.8em}
-.out .tok{background:var(--token-soft);color:var(--ink);border-radius:4px;padding:1px 4px;margin-right:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
-.out .tok.new{outline:2px solid var(--token)}
+.out .tok{background:var(--accent-soft);color:var(--ink);border-radius:4px;padding:1px 4px;margin-right:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.out .tok.new{outline:2px solid var(--accent)}
 .out .pr{color:var(--muted)}
 .step-label{font-size:13px;color:var(--muted)}
 
 /* table */
-.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
-table{border-collapse:collapse;width:100%;min-width:600px;font-size:14.5px}
-th,td{text-align:left;vertical-align:top;padding:12px 14px;border-bottom:1px solid var(--line)}
-th{font-size:12.5px;color:var(--muted);letter-spacing:.04em;font-weight:600}
-tr:last-child td{border-bottom:0}
-td:first-child{font-weight:600;white-space:nowrap}
-td:last-child{color:var(--ink)}
+.tbl-wrap{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.tbl-wrap table{min-width:600px;font-size:14.5px}
+.tbl-wrap th,.tbl-wrap td{padding:12px 14px}
+.tbl-wrap th{font-size:12.5px;letter-spacing:.04em;font-weight:600}
+.tbl-wrap tr:last-child td{border-bottom:0}
+.tbl-wrap td:first-child{font-weight:600;white-space:nowrap}
 
 /* answer check */
-.answer{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px}
 .answer .who{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .sent{all:unset;cursor:pointer;display:block;padding:10px 12px;border-radius:8px;border:1px dashed var(--line);font-size:15.5px;line-height:1.7}
 .sent:hover{border-color:var(--muted)}
@@ -197,26 +111,21 @@ td:last-child{color:var(--ink)}
 .sent .lvl{display:none;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
 .sent.open .lvl{display:inline-block}
 .lvl.lo{background:var(--ok-soft);color:var(--ok)}
-.lvl.mid{background:var(--attn-soft);color:var(--attn)}
-.lvl.hi{background:var(--warn-soft);color:var(--warn)}
+.lvl.mid{background:var(--warn-soft);color:var(--warn)}
+.lvl.hi{background:var(--pos-soft);color:var(--pos)}
 
 .myth{display:flex;flex-direction:column;gap:12px}
 .myth article{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px 18px;display:flex;flex-direction:column;gap:6px}
-.myth .x{color:var(--warn);font-weight:600}
-.myth .o{color:var(--vector);font-weight:600}
-details{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 18px}
-details summary{cursor:pointer;font-weight:600}
-details[open] summary{margin-bottom:12px}
-.formula{font-size:17px;background:var(--paper);border-radius:8px;padding:6px 14px;overflow-x:auto;overflow-y:hidden;color:var(--ink)}
-.sym .m{color:var(--token);white-space:nowrap}
+.myth .x{color:var(--pos);font-weight:600}
+.myth .o{color:var(--ok);font-weight:600}
+.formula{font-size:17px;background:var(--paper);border-radius:8px;padding:6px 14px;overflow-x:auto;overflow-y:hidden}
 mjx-container{color:inherit}
 mjx-container[display="true"]{margin:.6em 0!important}
 .sym{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:14.5px;margin:12px 0;align-items:baseline}
-.sym code{font-family:var(--mono);color:var(--token)}
-.next{border-top:2px solid var(--ink);padding-top:14px;display:flex;flex-direction:column;gap:6px}
-.refs{font-size:14px;color:var(--muted);padding-left:1.2em;margin:0;display:flex;flex-direction:column;gap:6px}
-.refs a{color:var(--token)}
-.toy{font-size:12px;color:var(--muted)}
+.sym .m{color:var(--accent);white-space:nowrap}
+.sym code{color:var(--accent)}
+.refs{color:var(--muted)}
+.refs a{color:var(--accent)}
 @media (prefers-reduced-motion:reduce){.bar .fill{transition:none}}
 </style>
 </head><body>
@@ -240,9 +149,9 @@ mjx-container[display="true"]{margin:.6em 0!important}
 <header style="display:flex;flex-direction:column;gap:14px">
   <div class="eyebrow">인공지능 작동이해</div>
   <h2 class="page-title">LLM은 무엇을 배우고, 배운 것을 어떻게 쓰나</h2>
-  <p class="lead">대규모 언어 모델(LLM, Large Language Model)이 만들어지는 과정을 한눈에 봅니다. 목표는 하나입니다. <b>모델이 무엇을 배웠는지 알면, AI가 내놓은 답을 어디까지 믿고 어디부터 확인해야 할지 판단할 수 있습니다.</b></p>
+  <p class="lede">대규모 언어 모델(LLM, Large Language Model)이 만들어지는 과정을 한눈에 봅니다. 목표는 하나입니다. <b>모델이 무엇을 배웠는지 알면, AI가 내놓은 답을 어디까지 믿고 어디부터 확인해야 할지 판단할 수 있습니다.</b></p>
   <div class="recap">
-    <span class="small muted">모델이 글을 처리하는 방식 (Transformer Explainer - from <a href="https://poloclub.github.io/transformer-explainer/" target="_blank" rel="noopener" style="color:var(--token)">poloclub</a>)</span>
+    <span class="small muted">모델이 글을 처리하는 방식 (Transformer Explainer - from <a href="https://poloclub.github.io/transformer-explainer/" target="_blank" rel="noopener" >poloclub</a>)</span>
     <div class="flow">
       <span class="n">문장</span>→<span class="n t">토큰</span>→<span class="n v">임베딩(벡터)</span>→<span class="n a">어텐션으로 문맥 섞기</span>→<span class="n a">다음 토큰 확률</span>→<span class="n t">하나 뽑기</span>
     </div>
@@ -253,10 +162,10 @@ mjx-container[display="true"]{margin:.6em 0!important}
 <section id="intro">
   <h2>설계도는 단순하고, 숫자는 많다</h2>
   <p>LLM을 "만든다"는 말은 프로그램을 한 줄씩 짠다는 뜻이 아닙니다. 트랜스포머(Transformer)라는 설계도(구조, 아키텍처)는 코드로 옮기면 수백 줄 정도로 단순합니다. 만드는 과정의 대부분은 설계도 안에 들어가는 <b>파라미터(parameter)</b>, 곧 수천억 개의 숫자를 알맞은 값으로 맞추는 일입니다. 이 값을 사람이 하나하나 정하지는 않습니다. 엄청난 양의 글을 보며 <b>다음 토큰 맞히기</b>를 되풀이하는 동안 숫자가 조금씩 고쳐집니다. 이 과정을 학습(training)이라고 합니다.</p>
-  <div class="stats">
-    <div class="stat"><b>약 300줄</b><span>교육용 GPT 모델 정의 코드 길이 (nanoGPT의 model.py)</span></div>
-    <div class="stat"><b>4,050억 개</b><span>Llama 3 405B 모델의 파라미터 수 (Meta, 2024)</span></div>
-    <div class="stat"><b>약 15.6조</b><span>같은 모델이 사전학습에서 읽은 토큰 수</span></div>
+  <div class="metrics">
+    <div><b>약 300줄</b><span>교육용 GPT 모델 정의 코드 길이 (nanoGPT의 model.py)</span></div>
+    <div><b>4,050억 개</b><span>Llama 3 405B 모델의 파라미터 수 (Meta, 2024)</span></div>
+    <div><b>약 15.6조</b><span>같은 모델이 사전학습에서 읽은 토큰 수</span></div>
   </div>
   <p class="toy">실제 값 · 공개 논문 기준. 모델마다 규모는 크게 다릅니다. 기준 시점 2026년 9월.</p>
 </section>
@@ -284,9 +193,9 @@ mjx-container[display="true"]{margin:.6em 0!important}
   <h2>무엇을 배우나: 빈칸 맞히기</h2>
   <p>사전학습(Pre-training)에서 모델이 하는 일은 딱 하나, <b>앞의 글을 보고 다음 토큰을 맞히는 것</b>입니다. 그런데 이것을 잘하려면 문법, 사실, 상식, 문체를 모두 익혀야 합니다. 직접 빈칸을 채워 보고 모델의 확률과 비교해 보세요.</p>
   <div class="quiz-tabs seg" id="quizTabs" role="tablist" aria-label="빈칸 문제 선택"></div>
-  <div class="quiz" id="quiz"></div>
+  <div class="panel" id="quiz"></div>
   <p class="toy">확률은 설명용 예시 값이며 실제 모델의 값이 아닙니다. 실제 모델은 수만~수십만 개 토큰 전체에 확률을 나눠 줍니다.</p>
-  <div class="goal">
+  <div class="panel">
     <h3>네 문제에서 본 것</h3>
     <p>모델은 문법과 사실과 속설을 <b>같은 방식으로</b> 배웁니다. 글에 자주, 일관되게 나온 이어짐일수록 확률이 높아집니다. 학습 목표는 "다음에 올 토큰을 맞혀라"일 뿐, "사실만 골라라"라고 요구하지 않습니다. 그래서 흔한 속설도 배우고, 글에 거의 없는 정보는 그럴듯한 흔한 답으로 메웁니다.</p>
   </div>
@@ -308,7 +217,7 @@ mjx-container[display="true"]{margin:.6em 0!important}
 <section id="use">
   <h2>배운 것을 어떻게 쓰나: 한 조각씩 만들기</h2>
   <p>학습이 끝난 모델을 쓰는 단계를 추론(Inference)이라고 합니다. 이때 파라미터는 더 이상 바뀌지 않습니다. 질문이 들어오면 모델은 다음 조각의 확률을 계산하고, 하나를 뽑아 붙이고, 다시 계산합니다. <b>답 전체를 미리 정해 두지 않습니다.</b></p>
-  <div class="gen">
+  <div class="panel">
     <div class="chat" style="border:0"><div class="q"><b>질문</b>사과는 어떤 과일인가요?</div></div>
     <div class="out" id="genOut" aria-live="polite"></div>
     <div class="step-label" id="genLabel"></div>
@@ -324,7 +233,7 @@ mjx-container[display="true"]{margin:.6em 0!important}
 <section id="read">
   <h2>그래서, AI의 답을 어떻게 받아들일까</h2>
   <p>지금까지 본 학습의 성질 하나하나가 결과물의 특징으로 이어집니다.</p>
-  <div class="tbl-wrap">
+  <div class="tbl-wrap scroll">
     <table>
       <thead><tr><th>학습의 성질</th><th>결과물에 나타나는 특징</th><th>읽는 법</th></tr></thead>
       <tbody>
@@ -340,7 +249,7 @@ mjx-container[display="true"]{margin:.6em 0!important}
 
   <h3 style="margin-top:12px">연습: 이 답변에서 어디를 확인해야 할까</h3>
   <p class="small">문장을 하나씩 눌러 보세요. 확인이 얼마나 필요한지와 그 이유가 나옵니다.</p>
-  <div class="answer" id="answer">
+  <div class="panel answer" id="answer">
     <div class="who"><span><b>질문</b> 한글은 언제, 어떻게 만들어졌나요?</span><span class="tag">설명용으로 만든 가상의 AI 답변</span></div>
   </div>
   <div class="btns"><button class="btn ghost" id="openAll">모두 펼치기</button></div>
@@ -466,7 +375,7 @@ function renderStage(){
   } else { respType=s.resp.type; respText=s.resp.text; }
   panel.innerHTML =
     '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><h3>'+(cur+1)+'단계 · '+s.name+'</h3><span class="tag">'+s.note+'</span></div>'+
-    '<dl><div class="row"><dt>하는 일</dt><dd>'+s.what+'</dd></div><div class="row"><dt>모델이 얻는 것</dt><dd>'+s.gets+'</dd></div></dl>'+
+    '<dl><div class="kv"><dt>하는 일</dt><dd>'+s.what+'</dd></div><div class="kv"><dt>모델이 얻는 것</dt><dd>'+s.gets+'</dd></div></dl>'+
     '<div class="chat"><div class="q"><b>질문</b>'+Q+'</div><div class="r '+respType+'">'+esc(respText)+'</div><div class="foot"><span>'+(cur<2?"이 단계의 모습":"이 단계 모델의 응답 (설명용 예시)")+'</span>'+extra+'</div></div>'+
     '<div class="hint"><b>읽는 법</b><span>'+s.hint+'</span></div>';
   panel.querySelectorAll("[data-v]").forEach(b=>b.addEventListener("click",()=>{variant=b.dataset.v;renderStage();}));

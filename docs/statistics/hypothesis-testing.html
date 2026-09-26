@@ -22,211 +22,84 @@
 <meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
 <meta name="twitter:image:alt" content="통계 수업 자료 아이콘">
 <link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/material.css">
 <style>
-  :root {
-    --page: #f9f9f7;
-    --surface: #fcfcfb;
-    --surface-2: #f2f1ec;
-    --ink: #0b0b0b;
-    --ink-2: #52514e;
-    --muted: #898781;
-    --grid: #e1e0d9;
-    --axis: #c3c2b7;
-    --border: rgba(11,11,11,0.10);
-    --blue: #2a78d6;
-    --blue-soft: rgba(42,120,214,0.13);
-    --red: #e34948;
-    --red-soft: rgba(227,73,72,0.13);
-    --aqua: #1baf7a;
-    --yellow: #eda100;
-    --violet: #4a3aa7;
-    --shadow: 0 1px 2px rgba(11,11,11,0.06), 0 8px 24px -10px rgba(11,11,11,0.14);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --page:#0d0d0d; --surface:#1a1a19; --surface-2:#212120; --ink:#ffffff; --ink-2:#c3c2b7;
-      --muted:#8f8d87; --grid:#2c2c2a; --axis:#3a3a37; --border: rgba(255,255,255,0.12);
-      --blue:#3987e5; --blue-soft: rgba(57,135,229,0.20);
-      --red:#e66767; --red-soft: rgba(230,103,103,0.20);
-      --aqua:#199e70; --yellow:#c98500; --violet:#9085e9;
-      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 12px 30px -12px rgba(0,0,0,0.6);
-    }
-  }
-  :root[data-theme="dark"] {
-    --page:#0d0d0d; --surface:#1a1a19; --surface-2:#212120; --ink:#ffffff; --ink-2:#c3c2b7;
-    --muted:#8f8d87; --grid:#2c2c2a; --axis:#3a3a37; --border: rgba(255,255,255,0.12);
-    --blue:#3987e5; --blue-soft: rgba(57,135,229,0.20);
-    --red:#e66767; --red-soft: rgba(230,103,103,0.20);
-    --aqua:#199e70; --yellow:#c98500; --violet:#9085e9;
-    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 12px 30px -12px rgba(0,0,0,0.6);
-  }
-
-  * { box-sizing: border-box; }
-  body {
-    background: var(--page);
-    color: var(--ink);
-    font-family: "IBM Plex Sans KR", "Noto Sans KR", system-ui, -apple-system, sans-serif;
-    line-height: 1.7;
-    padding-inline: 20px;
-  }
-  h1, h2, h3, h4 { font-family: "Gowun Batang", "Noto Serif KR", serif; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
-  .katex-display { margin: 0.4em 0; overflow-x: auto; overflow-y: hidden; }
-  .formula-card .katex-display { margin: 0; }
-
-  a { color: var(--blue); }
-  .page { max-width: 1040px; margin: 0 auto; padding-bottom: 64px; }
-
-  .masthead { padding: 56px 0 28px; border-bottom: 1px solid var(--border); }
-  .eyebrow { font-size: 12.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-  .masthead h1 { font-size: clamp(28px, 5vw, 40px); margin: 10px 0 12px; }
-  .masthead .lede { max-width: 640px; color: var(--ink-2); font-size: 15.5px; }
-
-  .tocbar {
-    position: sticky; top: env(safe-area-inset-top, 0px);
-    z-index: 20; background: color-mix(in srgb, var(--page) 88%, transparent);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border);
-    display: flex; gap: 4px; padding: 10px 0; margin-bottom: 8px; flex-wrap: wrap;
-  }
-  .tocbar a { font-size: 13.5px; font-weight: 600; color: var(--ink-2); text-decoration: none; padding: 6px 12px; border-radius: 999px; border: 1px solid transparent; }
-  .tocbar a:hover { border-color: var(--border); color: var(--ink); }
-
-  main { padding-top: 20px; }
-  section { padding: 40px 0; }
-  section + section { border-top: 1px solid var(--border); }
-
-  .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
-  .section-num { font-family: "Gowun Batang", serif; font-size: 15px; color: var(--muted); font-weight: 700; }
-  .section-head h2 { font-size: clamp(22px, 3.4vw, 28px); margin: 0; }
-  .section-sub { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
-
-  article.block { max-width: 700px; margin: 0 auto 44px; }
-  article.block.wide { max-width: 900px; }
-  article.block:last-child { margin-bottom: 0; }
-  .block h3 { font-size: 19px; margin: 0 0 4px; }
-  .block .kicker { font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--blue); font-weight: 700; margin-bottom: 6px; }
-  .block p { margin: 12px 0; color: var(--ink); }
-  .block p.dim { color: var(--ink-2); font-size: 14.5px; }
-
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow); }
-  .formula-card { text-align: center; padding: 22px; font-size: 18px; }
-  .formula-card .note { font-family: "IBM Plex Sans KR", sans-serif; font-style: normal; font-size: 12.5px; color: var(--muted); margin-top: 10px; }
-
-  .callout { border-left: 3px solid var(--blue); background: var(--blue-soft); border-radius: 0 10px 10px 0; padding: 14px 18px; font-size: 14.5px; color: var(--ink); margin: 16px 0; }
-  .callout.warn { border-left-color: var(--red); background: var(--red-soft); }
-  .callout strong { color: var(--ink); }
-
-  .prop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 18px; }
-  .prop-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow); }
-  .prop-card .bar { width: 28px; height: 3px; border-radius: 2px; margin-bottom: 10px; }
-  .prop-card h4 { font-size: 15.5px; margin: 0 0 6px; font-family: "IBM Plex Sans KR", sans-serif; font-weight: 700; }
-  .prop-card p { font-size: 13.5px; color: var(--ink-2); margin: 0 0 10px; }
-
-  .btn { font-family: "IBM Plex Sans KR", sans-serif; font-size: 13.5px; font-weight: 600; background: var(--ink); color: var(--page); border: none; border-radius: 9px; padding: 9px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-  .btn:hover { opacity: 0.88; }
-  .btn:focus-visible, .level-btn:focus-visible, .tocbar a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-  .btn-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
-
-  .chip { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; padding: 5px 9px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13.5px; }
-  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
-
-  .level-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 16px 0; }
-  .level-btn { font-family: "IBM Plex Sans KR", sans-serif; font-size: 13.5px; font-weight: 600; background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--border); border-radius: 9px; padding: 8px 14px; cursor: pointer; font-variant-numeric: tabular-nums; }
-  .level-btn.active { background: var(--ink); color: var(--page); border-color: var(--ink); }
-  .level-btn.blue-active.active { background: var(--blue); border-color: var(--blue); }
-
-  .curve-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
-  .curve-wrap svg { width: 100%; height: auto; display: block; }
-  .curve-line { fill: none; stroke: var(--ink); stroke-width: 2; }
-  .curve-line-alt { fill: none; stroke: var(--blue); stroke-width: 2; stroke-dasharray: 6 3; }
-  .crit-fill { fill: var(--muted); opacity: 0.18; }
-  .pval-fill { fill: var(--red); opacity: 0.26; }
-  .power-fill { fill: var(--blue); opacity: 0.30; }
-  .obs-line { stroke: var(--ink); stroke-width: 2; }
-  .obs-dot { fill: var(--ink); stroke: var(--surface); stroke-width: 2; }
-  .crit-line { stroke: var(--ink-2); stroke-width: 1.4; stroke-dasharray: 3 3; }
-  .z-label { fill: var(--ink-2); font-size: 11.5px; font-family: "IBM Plex Sans KR", sans-serif; }
-  .tail-label { fill: var(--muted); font-size: 11px; font-family: "IBM Plex Sans KR", sans-serif; }
-  .curve-axis { stroke: var(--axis); stroke-width: 1; }
-
-  .slider-row { display: flex; align-items: center; gap: 14px; margin: 16px 0 4px; }
-  .slider-row input[type="range"] { flex: 1; accent-color: var(--blue); height: 4px; }
-  .slider-row .n-value { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 15px; min-width: 108px; text-align: right; }
-
-  .readout-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
-  .readout { background: var(--surface-2); border-radius: 10px; padding: 10px 14px; min-width: 110px; }
-  .readout .k { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
-  .readout .v { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
-
-  .sim-legend { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--ink-2); margin: 14px 0; }
-  .sim-legend .sw { display: inline-flex; align-items: center; gap: 6px; }
-  .sim-legend .dot { width: 10px; height: 10px; border-radius: 50%; }
-  .sim-legend .dot.blue { background: var(--blue); }
-  .sim-legend .swatch { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
-  .sim-legend .swatch.crit { background: var(--muted); opacity: 0.5; }
-  .sim-legend .swatch.pval { background: var(--red); opacity: 0.55; }
-
-  .decision-card { border-radius: 12px; padding: 16px 20px; font-weight: 700; text-align: center; font-size: 15.5px; margin-top: 16px; border: 1.5px solid transparent; }
-  .decision-card.reject { background: var(--red-soft); color: var(--red); border-color: var(--red); }
-  .decision-card.retain { background: var(--blue-soft); color: var(--blue); border-color: var(--blue); }
-
-  .two-col { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
-  @media (min-width: 640px) { .two-col { grid-template-columns: 1fr 1fr; } }
-  .info-card h5 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 8px; font-family: "IBM Plex Sans KR", sans-serif; }
-  .info-card ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--ink-2); }
-  .info-card li { margin-bottom: 7px; }
-  .info-card li strong { color: var(--ink); }
-
-  .effect-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
-  .effect-chip { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 12.5px; color: var(--ink-2); }
-  .effect-chip b { color: var(--ink); }
-
-  .step-badge { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--page); font-size: 12.5px; font-weight: 700; margin-right: 10px; flex-shrink: 0; font-family: "IBM Plex Sans KR", sans-serif; }
-  .step-head { display: flex; align-items: center; margin-bottom: 4px; }
-  .step-head h3 { margin: 0; }
-
-  .chart-scroll { position: relative; overflow-x: auto; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 8px 4px 2px; }
-  .chart-scroll svg { display: block; }
-  .grid-line { stroke: var(--grid); stroke-width: 1; }
-  .axis-line { stroke: var(--axis); stroke-width: 1; }
-  .tick-label { fill: var(--muted); font-size: 10.5px; font-family: "IBM Plex Sans KR", sans-serif; font-variant-numeric: tabular-nums; }
-  .ref-line { stroke: var(--ink-2); stroke-width: 1.5; stroke-dasharray: 4 3; }
-  .ref-label { fill: var(--ink-2); font-size: 11px; font-weight: 600; font-family: "IBM Plex Sans KR", sans-serif; }
-  .ref-label-bg { fill: var(--surface); opacity: 0.88; }
-  .sample-dot { fill: var(--blue); opacity: 0.7; }
-
-  footer { border-top: 1px solid var(--border); padding: 32px 0 8px; max-width: 700px; margin: 0 auto; }
-  footer h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-family: "IBM Plex Sans KR", sans-serif; }
-  footer ol { padding-left: 18px; font-size: 13.5px; color: var(--ink-2); }
-  footer li { margin-bottom: 6px; }
-
-  @media (max-width: 560px) {
-    .prop-grid { grid-template-columns: 1fr; }
-  }
-</style>
-
-<style>
-  :root, :root:not([data-theme="light"]), :root[data-theme="dark"] { --page:#f4f6fb; --surface:#fff; --surface-2:#eaf1ff; --ink:#0b1220; --ink-2:#45506b; --muted:#45506b; --grid:#dbe1ee; --axis:#aab7d0; --border:#dbe1ee; --blue:#2f6fed; --blue-soft:#eaf1ff; --red:#d1264f; --red-soft:#fde7ee; --aqua:#0ea968; --yellow:#ffb020; --violet:#8b3ff0; --shadow:0 1px 2px rgb(11 18 32 / 6%),0 8px 24px -10px rgb(11 18 32 / 14%); --rail:250px; }
-  body { margin:0; padding:0; font-family:Pretendard,"Noto Sans KR",Inter,system-ui,-apple-system,sans-serif; }
-  h1,h2,h3,h4,.section-num,.formula-card .note,.prop-card h4,.btn,.level-btn,.z-label,.tail-label,.info-card h5,.step-badge,.tick-label,.ref-label,footer h3 { font-family:inherit; }
-  h1,h2,h3,h4 { font-weight:800; letter-spacing:-.03em; }
-  .skip-link { position:fixed; top:-3rem; left:1rem; z-index:100; padding:.6rem 1rem; color:#fff; background:#1c3fd6; border-radius:4px; font-weight:700; text-decoration:none; }
+  :root { --grid:var(--line); --axis:#aab7d0; }
+  .skip-link { position:fixed; top:-3rem; left:1rem; z-index:100; padding:.6rem 1rem; color:#fff; background:var(--accent); border-radius:4px; font-weight:700; text-decoration:none; }
   .skip-link:focus { top:1rem; }
-  .rail { position:fixed; top:0; bottom:0; left:0; z-index:50; display:flex; flex-direction:column; width:var(--rail); padding:34px 0 20px; overflow-y:auto; background:var(--ink); color:#e4e9f5; }
-  .rail .rail-back { display:block; margin:0 26px 18px; padding:0; color:#b7c2de; border:0; font-size:12.5px; font-weight:600; text-decoration:none; white-space:nowrap; }
-  .rail .rail-back:hover,.rail .rail-back:focus-visible { color:var(--yellow); }
-  .rail h1 { margin:0 26px 30px; color:#f4f6fb; font-size:23px; font-weight:800; line-height:1.4; letter-spacing:-.02em; }
-  .rail nav { display:flex; flex-direction:column; }
-  .rail nav a { display:grid; grid-template-columns:28px 1fr; gap:10px; align-items:baseline; padding:11px 24px; color:#b7c2de; border-left:3px solid transparent; font-size:13.5px; text-decoration:none; transition:.16s; }
-  .rail nav a b { color:#7c88a8; font-size:12px; font-variant-numeric:tabular-nums; }
-  .rail nav a:hover,.rail nav a:focus-visible { background:#16213d; color:#fff; }
-  .rail nav a.on { color:#fff; background:#16213d; border-left-color:var(--yellow); }
-  .rail nav a.on b { color:var(--yellow); }
-  .rail footer { margin-top:auto; padding:20px 24px 0; color:#7c88a8; border:0; font-size:11.5px; line-height:1.6; }
-  .page { max-width:1060px; margin:0 0 0 var(--rail); padding:0 46px 120px; }
-  .masthead { padding:76px 0 52px; }
-  .tocbar { display:none; }
-  @media(max-width:860px) { :root { --rail:0px; } .rail { position:static; width:auto; height:auto; padding:22px 0 8px; } .rail nav { flex-direction:row; padding:0 16px 8px; overflow-x:auto; } .rail nav a { display:inline-grid; grid-template-columns:28px max-content; padding:8px 14px; border-bottom:3px solid transparent; border-left:0; white-space:nowrap; } .rail nav a.on { border-bottom-color:var(--yellow); border-left:0; } .rail footer { display:none; } .rail .rail-back { margin:0 16px 10px; } .rail h1 { margin:0 16px 16px; } .page { margin-left:0; padding:0 18px 80px; } .masthead { padding:42px 0 32px; } }
+  .formula-card .katex-display { margin:0; }
+
+  .section-head { display:flex; align-items:baseline; gap:14px; }
+  .section-num { font-size:15px; color:var(--muted); font-weight:700; }
+  .section-sub { color:var(--muted); font-size:14px; }
+  .kicker { font-size:12px; letter-spacing:.07em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+  .kicker.warn { color:var(--pos); }
+
+  .card { background:var(--soft); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; }
+  .formula-card { text-align:center; font-size:18px; }
+  .formula-card .note { font-size:12.5px; margin-top:10px; }
+
+  .chip { display:inline-flex; align-items:center; justify-content:center; min-width:34px; padding:5px 9px; border-radius:8px; background:var(--soft); border:1px solid var(--line); font-variant-numeric:tabular-nums; font-weight:600; font-size:13.5px; }
+  .chip-row, .effect-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .level-row { display:flex; gap:6px; flex-wrap:wrap; }
+  .level-btn { font:600 13.5px var(--sans); background:var(--soft); color:var(--muted); border:1px solid var(--line); border-radius:9px; padding:8px 14px; cursor:pointer; font-variant-numeric:tabular-nums; }
+  .level-btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .level-btn.active { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  .level-btn.blue-active.active { background:var(--accent); border-color:var(--accent); }
+
+  .curve-wrap { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .curve-wrap svg { width:100%; height:auto; display:block; }
+  .curve-line { fill:none; stroke:var(--ink); stroke-width:2; }
+  .curve-line-alt { fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:6 3; }
+  .crit-fill { fill:var(--muted); opacity:.18; }
+  .pval-fill { fill:var(--pos); opacity:.26; }
+  .power-fill { fill:var(--accent); opacity:.30; }
+  .obs-line { stroke:var(--ink); stroke-width:2; }
+  .obs-dot { fill:var(--ink); stroke:var(--surface); stroke-width:2; }
+  .crit-line { stroke:var(--muted); stroke-width:1.4; stroke-dasharray:3 3; }
+  .z-label { fill:var(--muted); font-size:11.5px; font-family:var(--sans); }
+  .curve-axis { stroke:var(--axis); stroke-width:1; }
+
+  .slider-row { display:flex; align-items:center; gap:14px; }
+  .slider-row input[type="range"] { flex:1; height:4px; }
+  .slider-row .n-value { font-variant-numeric:tabular-nums; font-weight:700; font-size:15px; min-width:108px; text-align:right; }
+
+  .legend { align-items:center; }
+  .legend .sw { display:inline-flex; align-items:center; gap:6px; }
+  .legend .dot { width:10px; height:10px; border-radius:50%; }
+  .legend .dot.blue { background:var(--accent); }
+  .legend .swatch { width:14px; height:10px; border-radius:3px; display:inline-block; }
+  .legend .swatch.crit { background:var(--muted); opacity:.5; }
+  .legend .swatch.pval { background:var(--pos); opacity:.55; }
+
+  .decision-card { border-radius:var(--radius); padding:16px 20px; font-weight:700; text-align:center; font-size:15.5px; border:1.5px solid transparent; }
+  .decision-card.reject { background:var(--pos-soft); color:var(--pos); border-color:var(--pos); }
+  .decision-card.retain { background:var(--accent-soft); color:var(--accent); border-color:var(--accent); }
+
+  .two-col { display:grid; grid-template-columns:1fr; gap:16px; }
+  @media (min-width:640px) { .two-col { grid-template-columns:1fr 1fr; } }
+  .info-card h5 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:0 0 8px; }
+  .info-card ul { margin:0; padding-left:18px; font-size:13.5px; color:var(--muted); }
+  .info-card li { margin-bottom:7px; }
+  .info-card li strong { color:var(--ink); }
+
+  .effect-chip { background:var(--soft); border:1px solid var(--line); border-radius:8px; padding:6px 12px; font-size:12.5px; color:var(--muted); }
+  .effect-chip b { color:var(--ink); }
+
+  .step-badge { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:var(--ink); color:var(--paper); font-size:12.5px; font-weight:700; margin-right:10px; flex-shrink:0; }
+  .step-head { display:flex; align-items:center; }
+
+  .chart-scroll { position:relative; overflow-x:auto; border-radius:var(--radius); background:var(--surface); border:1px solid var(--line); padding:8px 4px 2px; }
+  .chart-scroll svg { display:block; }
+  .grid-line { stroke:var(--grid); stroke-width:1; }
+  .axis-line { stroke:var(--axis); stroke-width:1; }
+  .tick-label { fill:var(--muted); font-size:10.5px; font-family:var(--sans); font-variant-numeric:tabular-nums; }
+  .ref-line { stroke:var(--muted); stroke-width:1.5; stroke-dasharray:4 3; }
+  .ref-label { fill:var(--muted); font-size:11px; font-weight:600; font-family:var(--sans); }
+  .ref-label-bg { fill:var(--surface); opacity:.88; }
+  .sample-dot { fill:var(--accent); opacity:.7; }
+
+  main > footer h3 { font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
 </style>
 <script defer src="../assets/katex/katex.min.js"></script>
 <script defer src="../assets/katex/contrib/auto-render.min.js"></script>
@@ -250,31 +123,17 @@
   </nav>
   <footer>값을 바꾸거나 표본을 다시 추출하면 시뮬레이션 결과가 즉시 갱신됩니다.</footer>
 </aside>
-<div class="page">
-  <header class="masthead">
-    <div class="eyebrow">통계적 추론 · 강의자료</div>
-    <h1>통계적 가설검정</h1>
-    <p class="lede">모집단에 대한 주장을 표본으로 검증하는 절차 — 용어를 정리한 뒤, 평균 170·표준편차 6인 정규모집단에서 뽑은 표본 16개로 "모평균이 172인가"를 직접 검정해봅니다.</p>
-  </header>
-
-  <nav class="tocbar">
-    <a href="#hypotheses">가설</a>
-    <a href="#alpha-power">유의수준과 파워</a>
-    <a href="#test-stat">검정통계량</a>
-    <a href="#p-value">유의확률과 효과크기</a>
-    <a href="#verdict-term">판정</a>
-    <a href="#ex-hypotheses">① 가설수립</a>
-    <a href="#ex-alpha">② 유의수준</a>
-    <a href="#ex-stat">③ 검정통계량</a>
-    <a href="#ex-verdict">④ 판정</a>
-  </nav>
-
   <main id="content">
+    <header>
+      <div class="eyebrow">통계적 추론 · 강의자료</div>
+      <h2 class="page-title">통계적 가설검정</h2>
+      <p class="lede">모집단에 대한 주장을 표본으로 검증하는 절차 — 용어를 정리한 뒤, 평균 170·표준편차 6인 정규모집단에서 뽑은 표본 16개로 "모평균이 172인가"를 직접 검정해봅니다.</p>
+    </header>
     <section id="terms">
       <div class="section-head"><span class="section-num">01</span><h2>용어 정리</h2></div>
       <p class="section-sub">가설검정의 다섯 가지 핵심 용어를 순서대로 정리합니다.</p>
 
-      <article class="block" id="hypotheses">
+      <article class="panel" id="hypotheses">
         <div class="kicker">Hypotheses</div>
         <h3>가설 — 영가설과 대립가설</h3>
         <p><strong>영가설(귀무가설, \(H_{0}\))</strong>은 "차이가 없다·효과가 없다"처럼 기본적으로 참이라고 가정하고 검증 대상으로 삼는 잠정적 주장입니다. <strong>대립가설(\(H_{1}\))</strong>은 영가설이 틀렸을 때 대신 받아들이는, 연구자가 실제로 보이고 싶어하는 주장입니다.</p>
@@ -282,10 +141,24 @@
           \[H_{0} : \mu  = \mu _{0}\]
           <div class="note">양측: \(H_{1} : \mu \ne \mu_{0}\) &nbsp;|&nbsp; 단측: \(H_{1} : \mu < \mu_{0}\) 또는 \(H_{1} : \mu > \mu_{0}\)</div>
         </div>
-        <p class="dim">가설검정은 \(H_{1}\)이 맞다는 것을 직접 증명하는 절차가 아니라, "\(H_{0}\)가 맞다면 이런 데이터가 나올 가능성이 얼마나 낮은가"를 따져 \(H_{0}\)를 <em>기각할지 말지</em>를 결정하는 절차입니다.</p>
+        <p>아래는 표본평균 \(\bar{X}\)(\(n=16\), \(\sigma=6\))의 분포입니다. 영가설이 참이면 \(\bar{X}\sim N(172,\ 1.5^{2})\)이고, 대립가설이 참이면 분포의 중심이 172에서 벗어납니다. 대립가설의 형태를 골라 두 분포를 비교해보세요. (예시로 대립가설의 모평균을 172에서 4만큼 떨어진 값으로 두었고, 회색 음영은 \(\alpha=0.05\)의 기각역입니다.)</p>
+        <div class="level-row" role="group" aria-label="대립가설 선택">
+          <button class="level-btn blue-active ht-h1 active" data-h1="two" type="button">양측 (\(\mu \ne 172\))</button>
+          <button class="level-btn blue-active ht-h1" data-h1="less" type="button">단측 (\(\mu < 172\))</button>
+          <button class="level-btn blue-active ht-h1" data-h1="greater" type="button">단측 (\(\mu > 172\))</button>
+        </div>
+        <div class="curve-wrap">
+          <svg id="h1-svg" viewBox="0 0 640 230"></svg>
+        </div>
+        <div class="legend">
+          <span class="sw"><span class="dot" style="background:var(--ink)"></span>\(H_{0}\) 하의 분포 \(N(172,\ 1.5^{2})\)</span>
+          <span class="sw"><span class="dot blue"></span>\(H_{1}\) 하의 분포 (예: \(\mu = \)<span id="h1-mean-legend">168, 176</span>)</span>
+          <span class="sw"><span class="swatch crit"></span>기각역 (\(\alpha=0.05\))</span>
+        </div>
+        <p class="note">가설검정은 \(H_{1}\)이 맞다는 것을 직접 증명하는 절차가 아니라, "\(H_{0}\)가 맞다면 이런 데이터가 나올 가능성이 얼마나 낮은가"를 따져 \(H_{0}\)를 <em>기각할지 말지</em>를 결정하는 절차입니다.</p>
       </article>
 
-      <article class="block wide" id="alpha-power">
+      <article class="panel" id="alpha-power">
         <div class="kicker">Significance Level &amp; Power</div>
         <h3>유의수준과 파워</h3>
         <p><strong>유의수준(\(\alpha\))</strong>은 영가설이 실제로 참인데도 잘못 기각할 확률(1종 오류율)의 상한입니다. 반대로 영가설이 실제로 거짓인데 기각하지 못하는 오류를 <strong>2종 오류(\(\beta\))</strong>라 하고, 그 반대 확률 \(1 - \beta\)를 <strong>검정력(power)</strong>이라 부릅니다 — 거짓인 영가설을 올바르게 기각할 확률입니다.</p>
@@ -304,26 +177,26 @@
           <input type="range" id="power-slider" min="164" max="180" step="0.5" value="170" aria-label="실제 모평균">
           <span class="n-value"><span id="power-mean-value">170.0</span></span>
         </div>
-        <div class="btn-row" style="margin-top:0;">
+        <div class="controls">
           <button class="btn" id="power-reset" type="button">예제 값(170)으로</button>
         </div>
-        <div class="curve-wrap" style="margin-top:14px;">
+        <div class="curve-wrap">
           <svg id="power-svg" viewBox="0 0 640 230"></svg>
         </div>
-        <div class="sim-legend">
+        <div class="legend">
           <span class="sw"><span class="dot" style="background:var(--ink)"></span>\(H_{0}\) 분포 \(N(172,\ 1.5^{2})\)</span>
           <span class="sw"><span class="dot blue"></span>실제 분포 \(N(\)<span id="power-mean-legend">170</span>\(,\ 1.5^{2})\)</span>
-          <span class="sw"><span class="swatch" style="background:var(--blue);opacity:.3"></span>검정력(\(1-\beta\))</span>
+          <span class="sw"><span class="swatch" style="background:var(--accent);opacity:.3"></span>검정력(\(1-\beta\))</span>
         </div>
-        <div class="readout-row">
-          <div class="readout"><div class="k">실제 모평균과 \(\mu_{0}\)의 차이</div><div class="v" id="power-diff">−2.0</div></div>
-          <div class="readout"><div class="k">검정력 (\(1-\beta\))</div><div class="v" id="power-value">0.266</div></div>
-          <div class="readout"><div class="k">2종 오류 \(\beta\)</div><div class="v" id="beta-value">0.734</div></div>
+        <div class="metrics">
+          <div><span>실제 모평균과 \(\mu_{0}\)의 차이</span><b id="power-diff">−2.0</b></div>
+          <div><span>검정력 (\(1-\beta\))</span><b id="power-value">0.266</b></div>
+          <div><span>2종 오류 \(\beta\)</span><b id="beta-value">0.734</b></div>
         </div>
-        <p class="dim">실제 평균이 \(\mu_{0} = 172\)와 같아지는 지점(슬라이더를 172로)에서는 검정력이 정확히 \(\alpha\)와 같아집니다 — \(H_{0}\)가 참이라면 "올바른 기각"이라는 개념 자체가 없기 때문입니다.</p>
+        <p class="note">실제 평균이 \(\mu_{0} = 172\)와 같아지는 지점(슬라이더를 172로)에서는 검정력이 정확히 \(\alpha\)와 같아집니다 — \(H_{0}\)가 참이라면 "올바른 기각"이라는 개념 자체가 없기 때문입니다.</p>
       </article>
 
-      <article class="block" id="test-stat">
+      <article class="panel" id="test-stat">
         <div class="kicker">Test Statistic</div>
         <h3>검정통계량</h3>
         <p>표본으로부터 계산하는 하나의 숫자로, 관측값이 영가설에서 얼마나 벗어나 있는지를 표준화된 단위로 나타냅니다. 모표준편차 \(\sigma\)를 아는 경우(z-검정)에는 표본평균을 다음과 같이 표준화합니다.</p>
@@ -331,10 +204,33 @@
           \[Z = \frac{\bar{X} - \mu _{0}}{\sigma /\sqrt{n}}\]
           <div class="note">\(\sigma\)를 모를 때는 표본표준편차 s로 대체하고 자유도 n−1의 t분포를 사용합니다 (t-검정).</div>
         </div>
-        <p class="dim">Z가 0에서 멀리 떨어질수록 — 즉 표본평균이 영가설이 예측하는 값 \(\mu_{0}\)에서 멀리 떨어질수록 — 영가설에 불리한 증거가 됩니다.</p>
+        <p>임의의 표본 16개를 뽑아 Z를 계산하고, 영가설 하의 표준정규분포에서 그 위치와 임계값(\(\alpha=0.05\)), 관측된 Z보다 극단적인 값이 나올 확률(붉은 음영)을 확인해봅니다. 양측검정은 \(\mu=\mu_{0}=172\)인 모집단에서, 단측검정은 \(\mu<\mu_{0}\)인 모집단(\(\mu=170\))에서 표본을 뽑으며, 단측검정의 기각역은 왼쪽 꼬리입니다.</p>
+        <div class="level-row" role="group" aria-label="검정 방향 선택">
+          <button class="level-btn blue-active ts-tail active" data-tail="two" type="button">양측검정 (\(\mu = \mu_{0}\)인 모집단)</button>
+          <button class="level-btn blue-active ts-tail" data-tail="less" type="button">단측검정 (\(\mu < \mu_{0}\)인 모집단)</button>
+        </div>
+        <div class="controls">
+          <button class="btn" id="ts-draw" type="button">임의의 표본 뽑기 (n = 16)</button>
+        </div>
+        <div class="curve-wrap">
+          <svg id="ts-svg" viewBox="0 0 640 230"></svg>
+        </div>
+        <div class="legend">
+          <span class="sw"><span class="swatch crit"></span>기각역</span>
+          <span class="sw"><span class="swatch pval"></span>Z보다 극단적일 확률</span>
+          <span class="sw"><span class="dot" style="background:var(--ink)"></span>관측된 Z</span>
+        </div>
+        <div class="metrics">
+          <div><span>표본평균 \(\bar{X}\)</span><b id="ts-xbar">-</b></div>
+          <div><span>확률</span><b id="ts-p">-</b></div>
+          <div><span>검정통계량 Z</span><b id="ts-z">-</b></div>
+          <div><span>임계값</span><b id="ts-crit">-</b></div>
+        </div>
+        <div class="decision-card retain" id="ts-decision"></div>
+        <p class="note">Z가 0에서 멀리 떨어질수록 — 즉 표본평균이 영가설이 예측하는 값 \(\mu_{0}\)에서 멀리 떨어질수록 — 영가설에 불리한 증거가 됩니다.</p>
       </article>
 
-      <article class="block wide" id="p-value">
+      <article class="panel" id="p-value">
         <div class="kicker">P-Value &amp; Effect Size</div>
         <h3>유의확률(p-value)과 효과크기</h3>
         <p><strong>유의확률(p-value)</strong>은 영가설이 참이라고 가정했을 때, 지금 관측한 검정통계량만큼 극단적이거나 더 극단적인 값이 나올 확률입니다. p-값이 작을수록 "영가설이 참이라면 일어나기 힘든 일이 일어났다"는 뜻이 되어 영가설에 불리한 증거가 됩니다.</p>
@@ -342,8 +238,30 @@
           \[p = P( |Z| \ge  |z_{\text{관측}}| \mid  H_{0} )\]
           <div class="note">양측검정 기준. 단측검정은 한쪽 꼬리의 확률만 계산합니다.</div>
         </div>
+        <p>앞 절에서 계산한 검정통계량 Z가 곧 이 확률의 출발점입니다. 표본평균 \(\bar{X}\)를 Z로 표준화하면 영가설 하의 표준정규분포 위에 한 점이 찍히고, 그 점보다 바깥쪽 꼬리의 면적이 유의확률입니다. 슬라이더로 Z를 움직여보세요.</p>
+        <div class="level-row" role="group" aria-label="검정 방향 선택">
+          <button class="level-btn blue-active pv-tail active" data-tail="two" type="button">양측 (\(|Z|\) 이상)</button>
+          <button class="level-btn blue-active pv-tail" data-tail="less" type="button">단측 (Z 이하)</button>
+          <button class="level-btn blue-active pv-tail" data-tail="greater" type="button">단측 (Z 이상)</button>
+        </div>
+        <div class="slider-row">
+          <input type="range" id="pv-slider" min="-4" max="4" step="0.05" value="-1.58" aria-label="관측된 검정통계량 Z">
+          <span class="n-value">Z = <span id="pv-z-value">-1.58</span></span>
+        </div>
+        <div class="curve-wrap">
+          <svg id="pv-svg" viewBox="0 0 640 230"></svg>
+        </div>
+        <div class="legend">
+          <span class="sw"><span class="swatch pval"></span>p-value = 붉은 음영의 면적</span>
+          <span class="sw"><span class="dot" style="background:var(--ink)"></span>관측된 Z</span>
+        </div>
+        <div class="metrics">
+          <div><span>표본평균 \(\bar{X}\) (\(=172+1.5Z\))</span><b id="pv-xbar">-</b></div>
+          <div><span>검정통계량 Z</span><b id="pv-z">-</b></div>
+          <div><span>유의확률 p</span><b id="pv-p">-</b></div>
+        </div>
 
-        <h3 style="margin-top:28px;">효과크기 (Effect Size)</h3>
+        <h3>효과크기 (Effect Size)</h3>
         <p>p-값은 표본크기가 커지면 아주 작은 차이에도 작아질 수 있어(앞 절의 표본오차와 같은 논리), "통계적으로 유의함"이 "실질적으로 의미 있음"을 보장하지 않습니다. 이를 보완하는 지표가 <strong>효과크기</strong>이며, 표준편차 단위로 차이의 크기를 나타내는 Cohen's d가 대표적입니다.</p>
         <div class="card formula-card">
           \[d = \frac{\bar{X} - \mu _{0}}{\sigma }\]
@@ -353,10 +271,50 @@
           <span class="effect-chip">d ≈ <b>0.5</b> — 중간 효과</span>
           <span class="effect-chip">d ≈ <b>0.8</b> — 큰 효과</span>
         </div>
-        <p class="dim">Cohen(1988)의 관례적 기준입니다. 절대적 기준이 아니라, p-값과 별개로 "차이가 실제로 얼마나 큰가"를 함께 보고해야 한다는 점이 핵심입니다.</p>
+        <p>효과크기는 표본의 크기와 무관하게 "두 모집단의 분포가 얼마나 떨어져 있는가"를 나타냅니다. 아래에서 d를 바꾸면 영가설의 모집단 \(N(172,\ 6^{2})\)과 실제 모집단(평균이 \(6d\)만큼 작은 분포)이 얼마나 겹치는지 볼 수 있습니다.</p>
+        <div class="slider-row">
+          <input type="range" id="es-slider" min="0" max="1.5" step="0.05" value="0.35" aria-label="효과크기 d">
+          <span class="n-value">d = <span id="es-d-value">0.35</span></span>
+        </div>
+        <div class="curve-wrap">
+          <svg id="es-svg" viewBox="0 0 640 230"></svg>
+        </div>
+        <div class="legend">
+          <span class="sw"><span class="dot" style="background:var(--ink)"></span>영가설 모집단 \(N(172,\ 6^{2})\)</span>
+          <span class="sw"><span class="dot blue"></span>실제 모집단 \(N(172-6d,\ 6^{2})\)</span>
+          <span class="sw"><span class="swatch crit"></span>겹치는 부분</span>
+        </div>
+        <div class="metrics">
+          <div><span>평균 차이 \(6d\)</span><b id="es-diff">-</b></div>
+          <div><span>두 분포의 겹침</span><b id="es-overlap">-</b></div>
+          <div><span>해석</span><b id="es-label">-</b></div>
+        </div>
 
-        <div class="card" style="margin-top:24px;">
-          <div class="kicker" style="color:var(--red);">ASA Statement on P-Values (2016)</div>
+        <h3>같은 효과크기, 다른 표본크기</h3>
+        <p>모집단의 차이(d)가 같아도 표본크기 n이 커지면 표본평균의 분포가 좁아져 \(H_{0}\) 아래의 분포와 거의 겹치지 않게 됩니다. 표본평균이 실제 평균(\(172-6d\))과 같게 관측되었다고 할 때, n에 따라 검정통계량 \(Z = d\sqrt{n}\)과 p-값이 어떻게 달라지는지 위의 d로 확인해보세요.</p>
+        <div class="level-row" role="group" aria-label="표본크기 선택">
+          <button class="level-btn blue-active es-n" data-n="16" type="button">n = 16</button>
+          <button class="level-btn blue-active es-n" data-n="100" type="button">n = 100</button>
+          <button class="level-btn blue-active es-n active" data-n="400" type="button">n = 400</button>
+          <button class="level-btn blue-active es-n" data-n="2000" type="button">n = 2000</button>
+        </div>
+        <div class="curve-wrap">
+          <svg id="es-n-svg" viewBox="0 0 640 230"></svg>
+        </div>
+        <div class="legend">
+          <span class="sw"><span class="dot" style="background:var(--ink)"></span>\(H_{0}\) 하의 \(\bar{X}\) 분포</span>
+          <span class="sw"><span class="dot blue"></span>실제 \(\bar{X}\) 분포</span>
+          <span class="sw"><span class="swatch crit"></span>기각역 (\(\alpha=0.05\), 양측)</span>
+        </div>
+        <div class="metrics">
+          <div><span>표준오차 \(6/\sqrt{n}\)</span><b id="esn-se">-</b></div>
+          <div><span>검정통계량 \(Z=d\sqrt{n}\)</span><b id="esn-z">-</b></div>
+          <div><span>유의확률 p</span><b id="esn-p">-</b></div>
+        </div>
+        <p class="note">Cohen(1988)의 관례적 기준입니다. 절대적 기준이 아니라, p-값과 별개로 "차이가 실제로 얼마나 큰가"를 함께 보고해야 한다는 점이 핵심입니다.</p>
+
+        <div class="card">
+          <div class="kicker warn">ASA Statement on P-Values (2016)</div>
           <h3 style="margin-bottom:10px;">p-value 만능주의에 대한 경고</h3>
           <p style="margin-top:0;">미국통계학회(American Statistical Association)는 2016년 성명에서 p-값이 널리 오용되고 있음을 지적하며, 다음을 명확히 했습니다.</p>
           <div class="two-col">
@@ -382,7 +340,7 @@
         </div>
       </article>
 
-      <article class="block" id="verdict-term">
+      <article class="panel" id="verdict-term">
         <div class="kicker">Verdict</div>
         <h3>판정</h3>
         <p>다음 두 기준은 항상 같은 결론을 줍니다.</p>
@@ -390,7 +348,7 @@
           \(|Z| > z_{\text{critical}} \iff p < \alpha\)
           <div class="note">둘 중 하나를 만족하면 \(H_{0}\)를 기각하고, 그렇지 않으면 기각하지 못합니다.</div>
         </div>
-        <p class="dim">이때 "영가설을 <strong>채택한다(accept)</strong>"라는 표현은 피하는 것이 정확합니다. 데이터가 \(H_{0}\)를 기각할 만큼 극단적이지 않았을 뿐, \(H_{0}\)가 참이라고 적극적으로 입증된 것은 아니기 때문입니다. 그래서 "기각하지 못했다(fail to reject)" 또는 "기각하지 않았다(retained)"라는 표현을 씁니다.</p>
+        <p class="note">이때 "영가설을 <strong>채택한다(accept)</strong>"라는 표현은 피하는 것이 정확합니다. 데이터가 \(H_{0}\)를 기각할 만큼 극단적이지 않았을 뿐, \(H_{0}\)가 참이라고 적극적으로 입증된 것은 아니기 때문입니다. 그래서 "기각하지 못했다(fail to reject)" 또는 "기각하지 않았다(retained)"라는 표현을 씁니다.</p>
       </article>
     </section>
 
@@ -398,7 +356,7 @@
       <div class="section-head"><span class="section-num">02</span><h2>예제로 직접 해보기</h2></div>
       <p class="section-sub">평균 170, 표준편차 6인 정규모집단 \(N(170,\ 6^{2})\)에서 표본 16개를 뽑아, "모평균이 172인가?"를 검정합니다. 실제 모평균(170)과 영가설이 주장하는 값(172)에 일부러 차이를 두어, 검정이 어떻게 작동하는지 살펴봅니다.</p>
 
-      <article class="block wide" id="ex-sample">
+      <article class="panel" id="ex-sample">
         <div class="kicker">Sample</div>
         <h3>표본 살펴보기</h3>
         <p>아래는 \(N(170,\ 6^{2})\)에서 뽑은 표본 16개입니다. 점 하나가 관측값 하나이고, 실선은 표본평균 \(\bar{X}\), 점선은 영가설이 주장하는 값 \(\mu _{0} = 172\)입니다.</p>
@@ -406,12 +364,12 @@
           <svg id="sample-strip-svg" viewBox="0 0 640 110"></svg>
         </div>
         <div class="chip-row" id="sample-chip-row"></div>
-        <div class="btn-row">
+        <div class="controls">
           <button class="btn" id="resample-btn" type="button">표본 다시 뽑기 (n = 16)</button>
         </div>
       </article>
 
-      <article class="block" id="ex-hypotheses">
+      <article class="panel" id="ex-hypotheses">
         <div class="step-head"><span class="step-badge">1</span><h3>가설수립</h3></div>
         <p>모평균이 172인지를 검정하므로, 두 경우 모두 영가설은 같습니다.</p>
         <div class="card formula-card">
@@ -421,17 +379,17 @@
           <div class="card">
             <div class="kicker">양측검정</div>
             \(H_{1} : \mu  \ne  172\)
-            <p class="dim" style="margin-top:10px;">172보다 크든 작든, "다르다"는 것만 검증하고 싶을 때.</p>
+            <p class="note">172보다 크든 작든, "다르다"는 것만 검증하고 싶을 때.</p>
           </div>
           <div class="card">
             <div class="kicker">단측검정</div>
             \(H_{1} : \mu  < 172\)
-            <p class="dim" style="margin-top:10px;">사전에 "172보다 작을 것"이라는 방향을 예상하고 있을 때.</p>
+            <p class="note">사전에 "172보다 작을 것"이라는 방향을 예상하고 있을 때.</p>
           </div>
         </div>
       </article>
 
-      <article class="block" id="ex-alpha">
+      <article class="panel" id="ex-alpha">
         <div class="step-head"><span class="step-badge">2</span><h3>유의수준 설정</h3></div>
         <p>관례적으로 가장 많이 쓰이는 \(\alpha = 0.05\)를 기본으로 사용합니다. 아래에서 유의수준을 바꿔가며 판정이 어떻게 달라지는지도 확인할 수 있습니다.</p>
         <div class="level-row" role="group" aria-label="유의수준 선택">
@@ -442,20 +400,20 @@
         </div>
       </article>
 
-      <article class="block" id="ex-stat">
+      <article class="panel" id="ex-stat">
         <div class="step-head"><span class="step-badge">3</span><h3>검정통계량 구하기</h3></div>
         <p>현재 표본의 값을 공식에 대입합니다.</p>
         <div class="card formula-card">
           <div id="ex-stat-formula">\[Z = \dfrac{169.63 - 172}{6/\sqrt{16}} = -1.578\]</div>
         </div>
-        <div class="readout-row">
-          <div class="readout"><div class="k">표본평균 \(\bar{X}\)</div><div class="v" id="ex-xbar">169.63</div></div>
-          <div class="readout"><div class="k">표준오차 \(\sigma/\sqrt{n}\)</div><div class="v">1.500</div></div>
-          <div class="readout"><div class="k">검정통계량 Z</div><div class="v" id="ex-z">−1.578</div></div>
+        <div class="metrics">
+          <div><span>표본평균 \(\bar{X}\)</span><b id="ex-xbar">169.63</b></div>
+          <div><span>표준오차 \(\sigma/\sqrt{n}\)</span><b>1.500</b></div>
+          <div><span>검정통계량 Z</span><b id="ex-z">−1.578</b></div>
         </div>
       </article>
 
-      <article class="block wide" id="ex-verdict">
+      <article class="panel" id="ex-verdict">
         <div class="step-head"><span class="step-badge">4</span><h3>판정</h3></div>
         <p>같은 검정통계량 Z라도 양측검정이냐 단측검정이냐에 따라 p-값과 기각역이 달라집니다. 아래 도표에서 검정통계량(굵은 세로선)과 p-값(붉은 음영), 기각역(회색 음영)의 관계를 직접 비교해보세요.</p>
         <div class="level-row" role="group" aria-label="검정 방향 선택">
@@ -465,33 +423,32 @@
         <div class="curve-wrap">
           <svg id="verdict-svg" viewBox="0 0 640 230"></svg>
         </div>
-        <div class="sim-legend">
+        <div class="legend">
           <span class="sw"><span class="swatch crit"></span>기각역 (\(\alpha\))</span>
           <span class="sw"><span class="swatch pval"></span>p-value 영역</span>
           <span class="sw"><span class="dot" style="background:var(--ink)"></span>관측된 Z</span>
         </div>
-        <div class="readout-row">
-          <div class="readout"><div class="k">검정통계량 Z</div><div class="v" id="v-z">−1.578</div></div>
-          <div class="readout"><div class="k">임계값</div><div class="v" id="v-crit">±1.960</div></div>
-          <div class="readout"><div class="k">유의확률 p</div><div class="v" id="v-p">0.1146</div></div>
-          <div class="readout"><div class="k">유의수준 \(\alpha\)</div><div class="v" id="v-alpha">0.05</div></div>
+        <div class="metrics">
+          <div><span>검정통계량 Z</span><b id="v-z">−1.578</b></div>
+          <div><span>임계값</span><b id="v-crit">±1.960</b></div>
+          <div><span>유의확률 p</span><b id="v-p">0.1146</b></div>
+          <div><span>유의수준 \(\alpha\)</span><b id="v-alpha">0.05</b></div>
         </div>
         <div class="decision-card retain" id="verdict-decision">\(p = 0.1146 \ge \alpha = 0.05\) → 귀무가설을 기각하지 못합니다</div>
-        <p class="dim" style="margin-top:14px;">표본을 다시 뽑으면(위쪽 "표본 다시 뽑기" 버튼) 같은 절차라도 매번 다른 Z와 p-값이 나옵니다 — 실제 모평균(170)이 영가설(172)과 다름에도 이 검정의 검정력이 크지 않다면, 여러 번 중 상당수는 기각에 실패(2종 오류)할 수 있습니다. 위 "유의수준과 파워" 절의 슬라이더를 170에 두면 이 예제의 실제 검정력을 확인할 수 있습니다.</p>
+        <p class="note">표본을 다시 뽑으면(위쪽 "표본 다시 뽑기" 버튼) 같은 절차라도 매번 다른 Z와 p-값이 나옵니다 — 실제 모평균(170)이 영가설(172)과 다름에도 이 검정의 검정력이 크지 않다면, 여러 번 중 상당수는 기각에 실패(2종 오류)할 수 있습니다. 위 "유의수준과 파워" 절의 슬라이더를 170에 두면 이 예제의 실제 검정력을 확인할 수 있습니다.</p>
       </article>
     </section>
-  </main>
-
-  <footer>
+  
+    <footer class="panel">
     <h3>참고문헌</h3>
-    <ol>
+    <ol class="refs">
       <li>Bertsekas, D. P., &amp; Tsitsiklis, J. N. (2008). <em>Introduction to Probability</em> (2nd ed.), Ch. 9, §9.3–9.4 "Binary Hypothesis Testing" &amp; "Significance Testing" — 가설검정의 일반 방법론과 기각역의 구성.</li>
       <li>Navarro, D. <em>Learning Statistics with R</em>, Ch. 11 "Hypothesis Testing" — 검정통계량, 임계영역, 1·2종 오류, 검정력 함수, 효과크기.</li>
       <li>Wasserstein, R. L., &amp; Lazar, N. A. (2016). The ASA Statement on p-Values: Context, Process, and Purpose. <em>The American Statistician</em>, 70(2), 129–133.</li>
       <li>Cohen, J. (1988). <em>Statistical Power Analysis for the Behavioral Sciences</em> (2nd ed.) — 효과크기(Cohen's d) 해석 기준.</li>
     </ol>
-  </footer>
-</div>
+    </footer>
+  </main>
 
 <script>
 (function () {
@@ -595,13 +552,13 @@
     var xbarLine = document.createElementNS(svgNS, "line");
     xbarLine.setAttribute("x1", px(xbar)); xbarLine.setAttribute("x2", px(xbar));
     xbarLine.setAttribute("y1", midY - 34); xbarLine.setAttribute("y2", midY + 4);
-    xbarLine.setAttribute("stroke", "var(--blue)"); xbarLine.setAttribute("stroke-width", "2");
+    xbarLine.setAttribute("stroke", "var(--accent)"); xbarLine.setAttribute("stroke-width", "2");
     svg.appendChild(xbarLine);
     var xbarLabel = document.createElementNS(svgNS, "text");
     xbarLabel.setAttribute("x", px(xbar)); xbarLabel.setAttribute("y", xbarLabelY);
     xbarLabel.setAttribute("text-anchor", "middle");
     xbarLabel.setAttribute("class", "ref-label");
-    xbarLabel.setAttribute("fill", "var(--blue)");
+    xbarLabel.setAttribute("fill", "var(--accent)");
     xbarLabel.textContent = "x̄ = " + xbar.toFixed(2);
     svg.appendChild(xbarLabel);
   }
@@ -905,6 +862,232 @@
     renderPowerWidget();
   });
 
+  /* ---------- shared helpers for the new distribution widgets ---------- */
+  function mk(name, attrs) {
+    var e = document.createElementNS(svgNS, name);
+    Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    return e;
+  }
+  function makeChart(svg, xMin, xMax, maxDens, ticks) {
+    var W = 640, H = 230, padL = 28, padR = 28, padT = 26, padB = 34;
+    var plotW = W - padL - padR, plotH = H - padT - padB, base = padT + plotH;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var c = {
+      base: base, padT: padT,
+      px: function (x) { return padL + (x - xMin) / (xMax - xMin) * plotW; },
+      py: function (d) { return base - d / maxDens * plotH; }
+    };
+    svg.appendChild(mk("line", { x1: padL, x2: padL + plotW, y1: base, y2: base, "class": "curve-axis" }));
+    ticks.forEach(function (t) {
+      svg.appendChild(mk("line", { x1: c.px(t), x2: c.px(t), y1: base, y2: base + 5, "class": "axis-line" }));
+      var l = mk("text", { x: c.px(t), y: base + 17, "text-anchor": "middle", "class": "tick-label" });
+      l.textContent = t;
+      svg.appendChild(l);
+    });
+    c.fill = function (f, x0, x1, cls) {
+      if (x1 <= x0) return;
+      var pts = ["M " + c.px(x0) + "," + base], step = (x1 - x0) / 60;
+      for (var x = x0; x <= x1 + 1e-9; x += step) pts.push("L " + c.px(x) + "," + c.py(f(x)));
+      pts.push("L " + c.px(x1) + "," + base + " Z");
+      svg.appendChild(mk("path", { d: pts.join(" "), "class": cls }));
+    };
+    c.curve = function (f, cls) {
+      var pts = [], step = (xMax - xMin) / 140;
+      for (var x = xMin; x <= xMax + 1e-9; x += step) pts.push((pts.length ? "L " : "M ") + c.px(x) + "," + c.py(f(x)));
+      svg.appendChild(mk("path", { d: pts.join(" "), "class": cls }));
+    };
+    c.vline = function (x, cls, label) {
+      svg.appendChild(mk("line", { x1: c.px(x), x2: c.px(x), y1: padT, y2: base, "class": cls }));
+      if (label) {
+        var t = mk("text", { x: c.px(x), y: base + 30, "text-anchor": "middle", "class": "z-label" });
+        t.textContent = label;
+        svg.appendChild(t);
+      }
+    };
+    return c;
+  }
+
+  /* ---------- H0 vs H1 distributions (hypotheses section) ---------- */
+  var h1Tail = "two";
+  function renderH1Widget() {
+    var svg = document.getElementById("h1-svg");
+    if (!svg) return;
+    var means = h1Tail === "two" ? [MU0 - 4, MU0 + 4] : [h1Tail === "less" ? MU0 - 4 : MU0 + 4];
+    var zc = alphaTable["0.05"][h1Tail === "two" ? "two" : "one"];
+    var c = makeChart(svg, 161, 183, phi(0) / SE, [164, 168, 172, 176, 180]);
+    var h0 = function (x) { return phi((x - MU0) / SE) / SE; };
+    var lo = MU0 - zc * SE, hi = MU0 + zc * SE;
+    if (h1Tail !== "greater") c.fill(h0, 161, lo, "crit-fill");
+    if (h1Tail !== "less") c.fill(h0, hi, 183, "crit-fill");
+    means.forEach(function (m) { c.curve(function (x) { return phi((x - m) / SE) / SE; }, "curve-line-alt"); });
+    c.curve(h0, "curve-line");
+    c.vline(MU0, "ref-line", "μ₀ = 172");
+    if (h1Tail !== "greater") c.vline(lo, "crit-line");
+    if (h1Tail !== "less") c.vline(hi, "crit-line");
+    document.getElementById("h1-mean-legend").textContent = means.join(", ");
+  }
+  document.querySelectorAll(".ht-h1").forEach(function (b) {
+    b.addEventListener("click", function () {
+      h1Tail = b.dataset.h1;
+      document.querySelectorAll(".ht-h1").forEach(function (x) { x.classList.toggle("active", x === b); });
+      renderH1Widget();
+    });
+  });
+
+  /* ---------- random test statistic on the null distribution ---------- */
+  var tsTail = "two", tsSample = [];
+  function drawTsSample() {
+    var m = tsTail === "two" ? MU0 : 170;
+    tsSample = [];
+    for (var i = 0; i < N; i++) tsSample.push(randNormal(m, SIGMA));
+  }
+  function renderTsWidget() {
+    var svg = document.getElementById("ts-svg");
+    if (!svg) return;
+    var isTwo = tsTail === "two";
+    var xbar = mean(tsSample), z = (xbar - MU0) / SE;
+    var crit = alphaTable["0.05"][isTwo ? "two" : "one"];
+    var pValue = isTwo ? 2 * (1 - stdNormCdf(Math.abs(z))) : stdNormCdf(z);
+    var c = makeChart(svg, -4, 4, phi(0), [-3, -2, -1, 0, 1, 2, 3]);
+    c.fill(phi, -4, -crit, "crit-fill");
+    if (isTwo) c.fill(phi, crit, 4, "crit-fill");
+    var zx = Math.max(-4, Math.min(4, z));
+    if (isTwo) {
+      c.fill(phi, -4, -Math.abs(zx), "pval-fill");
+      c.fill(phi, Math.abs(zx), 4, "pval-fill");
+    } else {
+      c.fill(phi, -4, zx, "pval-fill");
+    }
+    c.curve(phi, "curve-line");
+    c.vline(-crit, "crit-line", (-crit).toFixed(3));
+    if (isTwo) c.vline(crit, "crit-line", crit.toFixed(3));
+    c.vline(zx, "obs-line");
+    svg.appendChild(mk("circle", { cx: c.px(zx), cy: c.py(phi(zx)), r: 4.5, "class": "obs-dot" }));
+    var t = mk("text", { x: c.px(zx), y: c.padT - 8, "text-anchor": "middle", "class": "z-label", "font-weight": "700" });
+    t.textContent = "Z = " + z.toFixed(2);
+    svg.appendChild(t);
+
+    var reject = pValue < 0.05;
+    document.getElementById("ts-xbar").textContent = xbar.toFixed(2);
+    document.getElementById("ts-p").textContent = pValue.toFixed(4);
+    document.getElementById("ts-z").textContent = z.toFixed(3);
+    document.getElementById("ts-crit").textContent = (isTwo ? "±" : "−") + crit.toFixed(3);
+    var d = document.getElementById("ts-decision");
+    d.className = "decision-card " + (reject ? "reject" : "retain");
+    d.textContent = "Z가 기각역 " + (reject ? "안에 있습니다 → 귀무가설을 기각합니다" : "밖에 있습니다 → 귀무가설을 기각하지 못합니다");
+  }
+  var tsDraw = document.getElementById("ts-draw");
+  if (tsDraw) tsDraw.addEventListener("click", function () {
+    drawTsSample();
+    renderTsWidget();
+  });
+  document.querySelectorAll(".ts-tail").forEach(function (b) {
+    b.addEventListener("click", function () {
+      tsTail = b.dataset.tail;
+      document.querySelectorAll(".ts-tail").forEach(function (x) { x.classList.toggle("active", x === b); });
+      drawTsSample();
+      renderTsWidget();
+    });
+  });
+
+  /* ---------- p-value as tail area of the test statistic ---------- */
+  var pvTail = "two";
+  function renderPvWidget() {
+    var svg = document.getElementById("pv-svg");
+    if (!svg) return;
+    var z = Number(document.getElementById("pv-slider").value);
+    var c = makeChart(svg, -4, 4, phi(0), [-3, -2, -1, 0, 1, 2, 3]);
+    var pValue;
+    if (pvTail === "two") {
+      pValue = 2 * (1 - stdNormCdf(Math.abs(z)));
+      c.fill(phi, -4, -Math.abs(z), "pval-fill");
+      c.fill(phi, Math.abs(z), 4, "pval-fill");
+    } else if (pvTail === "less") {
+      pValue = stdNormCdf(z);
+      c.fill(phi, -4, z, "pval-fill");
+    } else {
+      pValue = 1 - stdNormCdf(z);
+      c.fill(phi, z, 4, "pval-fill");
+    }
+    c.curve(phi, "curve-line");
+    c.vline(z, "obs-line");
+    if (pvTail === "two") c.vline(-z, "crit-line");
+    svg.appendChild(mk("circle", { cx: c.px(z), cy: c.py(phi(z)), r: 4.5, "class": "obs-dot" }));
+    var t = mk("text", { x: c.px(z), y: c.padT - 8, "text-anchor": "middle", "class": "z-label", "font-weight": "700" });
+    t.textContent = "Z = " + z.toFixed(2);
+    svg.appendChild(t);
+    document.getElementById("pv-z-value").textContent = z.toFixed(2);
+    document.getElementById("pv-z").textContent = z.toFixed(2);
+    document.getElementById("pv-xbar").textContent = (MU0 + SE * z).toFixed(2);
+    document.getElementById("pv-p").textContent = pValue.toFixed(4);
+  }
+  var pvSlider = document.getElementById("pv-slider");
+  if (pvSlider) pvSlider.addEventListener("input", renderPvWidget);
+  document.querySelectorAll(".pv-tail").forEach(function (b) {
+    b.addEventListener("click", function () {
+      pvTail = b.dataset.tail;
+      document.querySelectorAll(".pv-tail").forEach(function (x) { x.classList.toggle("active", x === b); });
+      renderPvWidget();
+    });
+  });
+
+  /* ---------- effect size: overlap of two populations ---------- */
+  function renderEsWidget() {
+    var svg = document.getElementById("es-svg");
+    if (!svg) return;
+    var d = Number(document.getElementById("es-slider").value);
+    var m1 = MU0 - SIGMA * d;
+    var c = makeChart(svg, 148, 196, phi(0) / SIGMA, [154, 160, 166, 172, 178, 184, 190]);
+    var f0 = function (x) { return phi((x - MU0) / SIGMA) / SIGMA; };
+    var f1 = function (x) { return phi((x - m1) / SIGMA) / SIGMA; };
+    c.fill(function (x) { return Math.min(f0(x), f1(x)); }, 148, 196, "crit-fill");
+    c.curve(f1, "curve-line-alt");
+    c.curve(f0, "curve-line");
+    c.vline(MU0, "ref-line", "μ₀ = 172");
+    var overlap = 2 * stdNormCdf(-d / 2);
+    document.getElementById("es-d-value").textContent = d.toFixed(2);
+    document.getElementById("es-diff").textContent = (SIGMA * d).toFixed(1);
+    document.getElementById("es-overlap").textContent = (overlap * 100).toFixed(0) + "%";
+    document.getElementById("es-label").textContent = d < 0.2 ? "무시할 만함" : d < 0.5 ? "작은 효과" : d < 0.8 ? "중간 효과" : "큰 효과";
+  }
+  var esSlider = document.getElementById("es-slider");
+  if (esSlider) esSlider.addEventListener("input", function () { renderEsWidget(); renderEsNWidget(); });
+  var esN = 400;
+  function renderEsNWidget() {
+    var svg = document.getElementById("es-n-svg");
+    if (!svg) return;
+    var d = Number(document.getElementById("es-slider").value);
+    var m1 = MU0 - SIGMA * d, se = SIGMA / Math.sqrt(esN);
+    var c = makeChart(svg, 160, 178, phi(0) / se, [160, 163, 166, 169, 172, 175, 178]);
+    var f0 = function (x) { return phi((x - MU0) / se) / se; };
+    var f1 = function (x) { return phi((x - m1) / se) / se; };
+    var lo = MU0 - 1.96 * se, hi = MU0 + 1.96 * se;
+    c.fill(f0, 160, Math.max(160, Math.min(178, lo)), "crit-fill");
+    c.fill(f0, Math.max(160, Math.min(178, hi)), 178, "crit-fill");
+    c.curve(f1, "curve-line-alt");
+    c.curve(f0, "curve-line");
+    c.vline(MU0, "ref-line", "μ₀ = 172");
+    var z = d * Math.sqrt(esN);
+    document.getElementById("esn-se").textContent = se.toFixed(3);
+    document.getElementById("esn-z").textContent = z.toFixed(2);
+    var pv = 2 * (1 - stdNormCdf(z));
+    document.getElementById("esn-p").textContent = pv < 0.0001 ? "< 0.0001" : pv.toFixed(4);
+  }
+  document.querySelectorAll(".es-n").forEach(function (b) {
+    b.addEventListener("click", function () {
+      esN = Number(b.dataset.n);
+      document.querySelectorAll(".es-n").forEach(function (x) { x.classList.toggle("active", x === b); });
+      renderEsNWidget();
+    });
+  });
+
+
+  renderH1Widget();
+  renderPvWidget();
+  renderEsWidget();
+  renderEsNWidget();
+  drawTsSample();
+  renderTsWidget();
   renderPowerWidget();
   updateAll();
 

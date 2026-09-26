@@ -17,128 +17,40 @@
 <meta name="twitter:description" content="28×28 흉부 X선(PneumoniaMNIST)으로 데이터, 전처리, 모델, 손실, 학습, 평가까지 딥러닝의 전 과정을 단계별로 체험하는 인공지능 수업 자료입니다.">
 <meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/ai.png">
 <meta name="twitter:image:alt" content="인공지능 수업 자료 아이콘">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;700;800&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/material.css">
 <script defer src="../assets/katex/katex.min.js"></script>
 <script defer src="../assets/katex/contrib/auto-render.min.js"></script>
 <script defer src="../assets/math.js"></script>
 <style>
-:root{
-  --bg:#F4F6FB; --panel:#FFFFFF; --ink:#0B1220; --muted:#45506B; --line:#DBE1EE; --soft:#EEF1F8;
-  --data:#2F6FED; --data-soft:#EAF1FF;
-  --vec:#0EA968; --vec-soft:#E6F8F0;
-  --loss:#B26A00; --loss-soft:#FFF3DE;
-  --amber:#FFB020;
-  --pos:#D1264F; --neg:#0B8A8F;
-  --film:#0E1419;
-  --rail:250px;
-  --display:"Hahmlet","Noto Serif KR","Apple SD Gothic Neo",serif;
-  --sans:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
-}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-*{box-sizing:border-box}
-[hidden]{display:none!important}
-body{margin:0;word-break:keep-all;overflow-wrap:anywhere;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7}
-main{margin-left:var(--rail);max-width:900px;padding:28px 40px 64px;display:flex;flex-direction:column;gap:20px}
-h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.3;margin:0}
-h2.page-title{font-size:clamp(28px,6vw,40px);font-weight:800;letter-spacing:-.01em}
-h2{font-size:24px;font-weight:700}
-h3{font-size:17px;font-weight:700}
-p{margin:0;max-width:65ch}
-.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.lede{color:var(--muted);font-size:17px}
-.mono{font-family:var(--mono)}
-.num{font-variant-numeric:tabular-nums}
+:root{--film:#0E1419}
 /* hero */
 .hero{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
 .hero-film{background:var(--film);padding:10px;border-radius:6px;display:grid;grid-template-columns:repeat(4,56px);gap:6px}
 .hero-film canvas{width:56px;height:56px;image-rendering:pixelated;display:block}
 @media (max-width:620px){.hero{grid-template-columns:1fr}.hero-film{justify-self:start}}
-button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--data);outline-offset:2px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px 20px;display:flex;flex-direction:column;gap:16px}
-@media (min-width:640px){.panel{padding:28px 32px}}
-.row{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
-.col{display:flex;flex-direction:column;gap:10px;flex:1 1 260px;min-width:0}
-.btn{border:1px solid var(--ink);background:var(--ink);color:var(--bg);font:500 14px var(--sans);padding:8px 14px;border-radius:6px;cursor:pointer}
-.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
-.btn:disabled{opacity:.4;cursor:default}
-.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.nav{display:flex;justify-content:space-between;gap:8px;padding-top:8px;border-top:1px solid var(--line)}
-.tag{display:inline-block;font:600 12px var(--mono);padding:1px 8px;border-radius:4px}
-.tag.data{background:var(--data-soft);color:var(--data)}
-.tag.vec{background:var(--vec-soft);color:var(--vec)}
-.tag.loss{background:var(--loss-soft);color:var(--loss)}
-.note{font-size:14px;color:var(--muted)}
-.toy{font:600 11px var(--mono);letter-spacing:.06em;color:var(--loss);border:1px solid var(--loss);border-radius:4px;padding:0 6px;margin-left:6px;vertical-align:2px}
-table{border-collapse:collapse;font-size:15px;width:100%}
-th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-weight:500;color:var(--muted);font-size:13px}
-td.n{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
-.scroll{overflow-x:auto}
+.tag.vec{background:var(--ok-soft);color:var(--ok)}
+.tag.loss{background:var(--warn-soft);color:var(--warn)}
+.toy{font:600 11px var(--mono);letter-spacing:.06em;color:var(--warn);border:1px solid var(--warn);border-radius:4px;padding:0 6px;margin-left:6px;vertical-align:2px}
 .film{background:var(--film);border-radius:6px;padding:8px;display:inline-block;max-width:100%}
 canvas.px{image-rendering:pixelated;display:block;max-width:100%;height:auto}
 .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:10px}
 .gallery button{background:var(--film);border:2px solid transparent;border-radius:6px;padding:4px;cursor:pointer;display:flex;flex-direction:column;gap:4px;align-items:center;color:#cfd8df;font:500 12px var(--sans)}
-.gallery button[aria-pressed="true"]{border-color:var(--data)}
+.gallery button[aria-pressed="true"]{border-color:var(--accent)}
 .gallery canvas{width:100%;aspect-ratio:1;image-rendering:pixelated}
-.readout.math{font-family:var(--sans);font-size:16px;overflow-x:auto;overflow-y:hidden}
-.readout.math .katex-display{margin:.4em 0}
-.readout{font-family:var(--mono);font-size:14px;background:var(--soft);border-radius:6px;padding:8px 12px;font-variant-numeric:tabular-nums}
 .pipeline{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px}
 .pipeline span{padding:4px 10px;border-radius:4px;border:1px solid var(--line);background:var(--soft)}
 .pipeline i{font-style:normal;color:var(--muted)}
-details{border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--soft)}
-details summary{cursor:pointer;font-weight:500}
-details[open] summary{margin-bottom:10px}
-pre{margin:0;font:13px/1.55 var(--mono);overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px}
 .kernel{display:grid;grid-template-columns:repeat(3,44px);gap:3px}
-.kernel div{height:44px;display:grid;place-items:center;font:600 14px var(--mono);border-radius:4px;background:var(--vec-soft);color:var(--vec)}
+.kernel div{height:44px;display:grid;place-items:center;font:600 14px var(--mono);border-radius:4px;background:var(--ok-soft);color:var(--ok)}
 .cm{display:grid;grid-template-columns:auto 1fr 1fr;gap:4px;max-width:380px;font-size:14px}
 .cm div{padding:10px;border-radius:4px;text-align:center}
 .cm .h{color:var(--muted);font-size:12px;padding:4px}
-.cm .ok{background:var(--vec-soft)} .cm .bad{background:var(--loss-soft)}
+.cm .ok{background:var(--ok-soft)} .cm .bad{background:var(--warn-soft)}
 .cm b{display:block;font:600 22px var(--mono);font-variant-numeric:tabular-nums}
-.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.metrics div{border:1px solid var(--line);border-radius:6px;padding:10px 12px}
-.metrics b{display:block;font:600 22px var(--mono);font-variant-numeric:tabular-nums}
-.metrics span{font-size:13px;color:var(--muted)}
-input[type=range]{width:100%;accent-color:var(--data)}
 .myth{display:grid;gap:12px}
 .myth div{border-top:1px solid var(--line);padding-top:10px}
 .myth s{color:var(--muted)}
-ol.refs{padding-left:20px;margin:0;font-size:14px;display:flex;flex-direction:column;gap:6px}
-a{color:var(--data)}
-.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted)}
-.legend i{display:inline-block;width:14px;height:3px;vertical-align:4px;margin-right:6px}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-/* 좌측 레일: 단계 선택 */
-.rail{position:fixed;left:0;top:0;bottom:0;width:var(--rail);background:var(--ink);color:#E4E9F5;padding:34px 0 20px;display:flex;flex-direction:column;z-index:50;overflow-y:auto}
-.rail .rail-back{display:block;margin:0 26px 18px;padding:0;color:#B7C2DE;font-size:12.5px;font-weight:600;text-decoration:none;white-space:nowrap}
-.rail .rail-back:hover,.rail .rail-back:focus-visible{color:var(--amber)}
-.rail h1{font-size:21px;font-weight:800;margin:0 26px 30px;line-height:1.4;color:#F4F6FB;letter-spacing:-.01em}
-.rail nav{display:flex;flex-direction:column}
-.rail nav a{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:baseline;padding:11px 24px;color:#B7C2DE;text-decoration:none;font-size:13.5px;border-left:3px solid transparent;transition:.16s;cursor:pointer}
-.rail nav a b{font-variant-numeric:tabular-nums;font-weight:600;color:#7C88A8;font-size:12px}
-.rail nav a:hover{background:#16213D;color:#fff}
-.rail nav a.on{background:#16213D;color:#fff;border-left-color:var(--amber)}
-.rail nav a.on b{color:var(--amber)}
-.rail nav a:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
-.rail footer{margin-top:auto;padding:20px 24px 0;font-size:11.5px;color:#7C88A8;line-height:1.6}
-@media (max-width:860px){
-  :root{--rail:0px}
-  .rail{position:static;width:auto;height:auto;padding:22px 0 8px}
-  .rail nav{flex-direction:row;overflow-x:auto;padding:0 16px 8px}
-  .rail nav a{border-left:0;border-bottom:3px solid transparent;white-space:nowrap;padding:8px 14px}
-  .rail nav a.on{border-left:0;border-bottom-color:var(--amber)}
-  .rail .rail-back{margin:0 16px 10px}
-  .rail h1{margin:0 16px 16px}
-  .rail footer{display:none}
-  main{padding:20px 16px 64px}
-}
 </style>
 </head><body>
 <aside class="rail">
@@ -316,7 +228,7 @@ a{color:var(--data)}
       <button class="btn ghost" id="stepBtn">1 에폭만</button>
       <button class="btn ghost" id="resetBtn">처음부터</button>
       <label for="lrSel" class="note" style="margin-left:6px">학습률 \(\eta\)</label>
-      <select id="lrSel" style="font:14px var(--mono);padding:6px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink)">
+      <select id="lrSel" style="font:14px var(--mono);padding:6px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink)">
         <option value="0.5">0.5 (느림)</option>
         <option value="10" selected>10</option>
         <option value="600">600 (너무 큼)</option>
@@ -324,13 +236,13 @@ a{color:var(--data)}
     </div>
     <div class="metrics">
       <div><span>에폭</span><b id="mEpoch">0</b></div>
-      <div><span>학습 손실</span><b id="mLoss" style="color:var(--loss)">–</b></div>
+      <div><span>학습 손실</span><b id="mLoss" style="color:var(--warn)">–</b></div>
       <div><span>시험 정확도</span><b id="mAcc">–</b></div>
     </div>
     <div class="row">
       <div class="col" style="flex:2 1 320px">
         <canvas id="curve" width="480" height="240" style="width:100%;height:auto"></canvas>
-        <div class="legend"><span><i style="background:var(--loss)"></i>학습용 손실</span><span><i style="background:var(--muted)"></i>시험용 손실</span></div>
+        <div class="legend"><span><i style="background:var(--warn)"></i>학습용 손실</span><span><i style="background:var(--muted)"></i>시험용 손실</span></div>
       </div>
       <div class="col" style="flex:1 1 180px;align-items:flex-start">
         <span class="note">가중치 지도 (784개 w를 28×28로)</span>
@@ -357,7 +269,35 @@ a{color:var(--data)}
         <div class="metrics" id="evalMetrics"></div>
       </div>
     </div>
-    <p><b>함정: 클래스 불균형.</b> 실제 시험용 624장 중 폐렴은 390장입니다. 사진을 보지도 않고 무조건 "폐렴"이라고 답하는 모델도 정확도 390 ÷ 624 = <b class="mono">62.5%</b>를 얻습니다. 그래서 의료 영상에서는 폐렴을 놓치지 않는 비율(<b>민감도</b>)과 정상을 정상이라 하는 비율(<b>특이도</b>), 그리고 기준값을 0부터 1까지 모두 바꿔 가며 민감도와 특이도를 한꺼번에 요약한 AUC(Area Under the ROC Curve, 1에 가까울수록 좋음)를 함께 봅니다. 기준값을 낮추면 민감도는 오르고 특이도는 떨어집니다. 어느 쪽을 택할지는 모델이 아니라 사용 목적이 정합니다.</p>
+    <p><b>함정: 클래스 불균형.</b> 실제 시험용 624장 중 폐렴은 390장입니다. 사진을 보지도 않고 무조건 "폐렴"이라고 답하는 모델도 정확도 390 ÷ 624 = <b class="mono">62.5%</b>를 얻습니다. 그래서 의료 영상에서는 정확도 대신, 위 혼동행렬에서 <b>실제 폐렴</b> 줄과 <b>실제 정상</b> 줄을 따로 채점하는 두 지표를 봅니다.</p>
+    <div class="row">
+      <div class="col">
+        <h3>민감도(Sensitivity)</h3>
+        <div class="readout math">\[ \text{민감도}=\frac{TP}{TP+FN}=\frac{\text{찾아낸 폐렴}}{\text{실제 폐렴 전체}} \]</div>
+        <p>"실제 환자를 얼마나 놓치지 않는가"입니다. 놓친 환자(FN)가 적을수록 높습니다.</p>
+        <p class="note"><b>활용:</b> 놓치면 치명적인 병의 <b>선별검사</b>에 씁니다. 민감도가 높은 검사에서 "음성"이 나오면 그 병일 가능성이 매우 낮아 배제할 수 있습니다(SnNout).</p>
+      </div>
+      <div class="col">
+        <h3>특이도(Specificity)</h3>
+        <div class="readout math">\[ \text{특이도}=\frac{TN}{TN+FP}=\frac{\text{정상으로 통과}}{\text{실제 정상 전체}} \]</div>
+        <p>"건강한 사람을 얼마나 환자로 만들지 않는가"입니다. 잘못된 경보(FP)가 적을수록 높습니다.</p>
+        <p class="note"><b>활용:</b> 양성 판정이 추가 검사·치료·비용으로 이어질 때, <b>확진 보조</b>에 씁니다. 특이도가 높은 검사에서 "양성"이 나오면 그 병일 가능성이 커 확진에 가깝습니다(SpPin).</p>
+      </div>
+    </div>
+    <p>둘은 <b>기준값 하나로 맞바꾸는 관계</b>입니다. 기준값을 낮추면 폐렴이라 부르는 사진이 늘어 민감도는 오르고 특이도는 떨어집니다. 어느 쪽을 택할지는 모델이 아니라 사용 목적이 정합니다. 슬라이더로 직접 확인해 보세요. 또 하나 주의할 점은 이 두 값이 시험 묶음의 폐렴 비율과 무관하다는 것입니다. 그래서 정확도와 달리 다른 병원·다른 유병률로 옮겨도 비교하기 좋습니다. 다만 "양성 판정이 실제 환자일 확률"(양성예측도)은 유병률에 따라 크게 달라지므로 따로 따져야 합니다.</p>
+
+    <h3>ROC 곡선과 AUC: 모든 기준값을 한 장에</h3>
+    <p>기준값을 0에서 1까지 훑으며 (1 − 특이도, 민감도) 점을 찍어 이으면 <b>ROC 곡선</b>이 됩니다. 왼쪽 위 모서리에 붙을수록 좋은 모델이고, 대각선은 동전 던지기(AUC 0.5)입니다. 곡선 아래 넓이가 <b>AUC</b>로, "무작위로 뽑은 폐렴 사진이 무작위로 뽑은 정상 사진보다 높은 확률을 받을 가능성"과 같습니다. 1에 가까울수록 좋고, 기준값을 하나로 정하기 전에 모델 자체의 변별력을 비교할 때 씁니다.</p>
+    <div class="row">
+      <div class="col" style="flex:0 1 340px">
+        <canvas id="rocCv" width="340" height="340" style="width:100%;max-width:340px;height:auto" role="img" aria-label="ROC 곡선과 AUC"></canvas>
+      </div>
+      <div class="col">
+        <div class="metrics"><div><span>AUC (곡선 아래 넓이)</span><b id="aucVal">-</b></div></div>
+        <div class="legend"><span><i style="background:var(--accent)"></i>ROC 곡선</span><span><i style="background:var(--muted);height:2px"></i>동전 던지기(0.5)</span><span><i style="background:var(--pos)"></i>현재 기준값</span></div>
+        <p class="note">위 슬라이더의 기준값이 곡선 위의 빨간 점입니다. 점을 오른쪽 위로 옮기면(기준값↓) 더 많이 찾지만 잘못된 경보도 늘고, 왼쪽 아래로 옮기면(기준값↑) 그 반대입니다. 곡선 자체는 기준값과 무관하게 모델이 정합니다.</p>
+      </div>
+    </div>
     <p class="note">참고로 MedMNIST v2 논문의 기준 실험에서 ResNet-18(28×28 입력)은 PneumoniaMNIST 시험 정확도 약 85%, AUC 약 0.94를 보고했습니다. 이 페이지의 합성 데이터 수치와는 비교할 수 없습니다.</p>
   </section>
 
@@ -516,7 +456,7 @@ const gal=document.getElementById('gallery'), zoom=document.getElementById('zoom
 let sel=0;
 SAMPLES.forEach((s,i)=>{const b=document.createElement('button');b.setAttribute('aria-pressed',i===0);b.append(smallCanvas(s.img));b.append(s.y?'폐렴':'정상');b.onclick=()=>{sel=i;[...gal.children].forEach((x,j)=>x.setAttribute('aria-pressed',j===i));drawZoom(14,10);drawFlat(0)};gal.appendChild(b)});
 function drawZoom(hx,hy){const img=SAMPLES[sel].img;for(let y=0;y<28;y++)for(let x=0;x<28;x++){const v=img[y*28+x];zc.fillStyle=`rgb(${v},${v},${v})`;zc.fillRect(x*10,y*10,10,10)}
-  if(hx>=0){zc.strokeStyle=css('--data');zc.lineWidth=2;zc.strokeRect(hx*10+1,hy*10+1,8,8);const v=img[hy*28+hx];
+  if(hx>=0){zc.strokeStyle=css('--accent');zc.lineWidth=2;zc.strokeRect(hx*10+1,hy*10+1,8,8);const v=img[hy*28+hx];
     pxRead.innerHTML=`행 ${String(hy).padStart(2)} · 열 ${String(hx).padStart(2)} → 값 <b>${v}</b> (정규화 ${(v/255).toFixed(3)}) · 순번 ${hy*28+hx+1}/784`}}
 function zoomMove(e){const r=zoom.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/r.width*28),y=Math.floor((e.clientY-r.top)/r.height*28);if(x>=0&&x<28&&y>=0&&y<28)drawZoom(x,y)}
 zoom.addEventListener('pointermove',zoomMove);zoom.addEventListener('pointerdown',zoomMove);
@@ -558,7 +498,7 @@ function drawLoss(){const p=pS.value/100;document.getElementById('pVal').textCon
   document.getElementById('lossRead').innerHTML=`\\(L = -\\log(${yT?p.toFixed(2):(1-p).toFixed(2)}) = {\\color{#B26A00}\\mathbf{${L.toFixed(3)}}}\\)`;
   const c=lossCv.getContext('2d'),W=360,H=240,m={l:40,r:12,t:22,b:34},ymax=5,sx=v=>m.l+v*(W-m.l-m.r),sy=v=>H-m.b-Math.min(v,ymax)/ymax*(H-m.t-m.b);
   axes(c,W,H,m,1,ymax,[0,.25,.5,.75,1],[0,1,2,3,4,5],'p (폐렴 확률)','손실 L');
-  c.strokeStyle=css('--loss');c.lineWidth=2.5;c.beginPath();for(let i=1;i<=199;i++){const q=i/200,x=sx(q),y=sy(bce(q,yT));i===1?c.moveTo(x,y):c.lineTo(x,y)}c.stroke();
+  c.strokeStyle=css('--warn');c.lineWidth=2.5;c.beginPath();for(let i=1;i<=199;i++){const q=i/200,x=sx(q),y=sy(bce(q,yT));i===1?c.moveTo(x,y):c.lineTo(x,y)}c.stroke();
   c.fillStyle=css('--ink');c.beginPath();c.arc(sx(p),sy(L),5,0,7);c.fill()}
 
 // ---------- step 5 ----------
@@ -579,8 +519,8 @@ function drawTrain(){const h=hist[hist.length-1];document.getElementById('mEpoch
   const yt=[];for(let v=0;v<=ymax+1e-9;v+=ymax>2?1:.25)yt.push(+v.toFixed(2));const xt=[];for(let v=0;v<=xmax;v+=xmax/4)xt.push(v);
   axes(c,W,H,m,xmax,ymax,xt,yt,'에폭','손실');
   const sx=v=>m.l+v/xmax*(W-m.l-m.r),sy=v=>H-m.b-v/ymax*(H-m.t-m.b);
-  [['te','--muted',[5,4]],['tr','--loss',[]]].forEach(([k,col,d])=>{c.strokeStyle=css(col);c.lineWidth=2.5;c.setLineDash(d);c.beginPath();hist.forEach((v,i)=>{i?c.lineTo(sx(i),sy(v[k])):c.moveTo(sx(i),sy(v[k]))});c.stroke()});c.setLineDash([]);
-  const last=hist.length-1;c.fillStyle=css('--loss');c.beginPath();c.arc(sx(last),sy(hist[last].tr),4,0,7);c.fill();
+  [['te','--muted',[5,4]],['tr','--warn',[]]].forEach(([k,col,d])=>{c.strokeStyle=css(col);c.lineWidth=2.5;c.setLineDash(d);c.beginPath();hist.forEach((v,i)=>{i?c.lineTo(sx(i),sy(v[k])):c.moveTo(sx(i),sy(v[k]))});c.stroke()});c.setLineDash([]);
+  const last=hist.length-1;c.fillStyle=css('--warn');c.beginPath();c.arc(sx(last),sy(hist[last].tr),4,0,7);c.fill();
   // weight map
   const wc=document.getElementById('wmap').getContext('2d'),d=wc.createImageData(28,28);let mw=1e-6;for(const v of w)mw=Math.max(mw,Math.abs(v));
   const hex=s=>[1,3,5].map(i=>parseInt(s.slice(i,i+2),16)),P=hex(css('--pos')),Q=hex(css('--neg'));
@@ -600,11 +540,25 @@ function drawEval(){const t=th.value/100;document.getElementById('thVal').textCo
   document.getElementById('cm').innerHTML=`<div class="h"></div><div class="h">판정: 폐렴</div><div class="h">판정: 정상</div>
    <div class="h" style="align-self:center">실제 폐렴</div><div class="ok"><b>${TP}</b>맞게 찾음</div><div class="bad"><b>${FN}</b>놓침</div>
    <div class="h" style="align-self:center">실제 정상</div><div class="bad"><b>${FP}</b>잘못 경보</div><div class="ok"><b>${TN}</b>맞게 통과</div>`;
+  drawROC(t,{tpr:TP/(TP+FN||1),fpr:FP/(FP+TN||1)});
   const N=TP+FN+FP+TN,f=v=>(v*100).toFixed(1)+'%';
   document.getElementById('evalMetrics').innerHTML=`<div><span>정확도 (맞힌 것 ÷ 전체)</span><b>${f((TP+TN)/N)}</b></div>
    <div><span>민감도 (폐렴 중 찾은 비율)</span><b>${f(TP/(TP+FN||1))}</b></div>
    <div><span>특이도 (정상 중 통과 비율)</span><b>${f(TN/(TN+FP||1))}</b></div>
    <div><span>무조건 "폐렴" 모델의 정확도 (합성 시험셋)</span><b>${f((TP+FN)/N)}</b></div>`}
+function drawROC(t,TE){const cv=document.getElementById('rocCv'),c=cv.getContext('2d'),W=340,H=340,m={l:44,r:14,t:24,b:40};
+  const P=Xte.map(x=>prob(x)),Y=TEST.Y,nP=Y.reduce((a,v)=>a+v,0),nN=Y.length-nP;
+  const idx=P.map((_,i)=>i).sort((i,j)=>P[j]-P[i]);let tp=0,fp=0;const pts=[[0,0]];
+  for(let k=0;k<idx.length;k++){Y[idx[k]]?tp++:fp++;if(k===idx.length-1||P[idx[k+1]]!==P[idx[k]])pts.push([fp/nN,tp/nP])}
+  let auc=0;for(let i=1;i<pts.length;i++)auc+=(pts[i][0]-pts[i-1][0])*(pts[i][1]+pts[i-1][1])/2;
+  document.getElementById('aucVal').textContent=auc.toFixed(3);
+  const tk=[0,.25,.5,.75,1];axes(c,W,H,m,1,1,tk,tk,'1 − 특이도','민감도');
+  const sx=v=>m.l+v*(W-m.l-m.r),sy=v=>H-m.b-v*(H-m.t-m.b);
+  c.beginPath();c.moveTo(sx(0),sy(0));pts.forEach(q=>c.lineTo(sx(q[0]),sy(q[1])));c.lineTo(sx(1),sy(0));c.closePath();c.fillStyle=css('--accent-soft');c.fill();
+  c.setLineDash([5,4]);c.strokeStyle=css('--muted');c.lineWidth=1.5;c.beginPath();c.moveTo(sx(0),sy(0));c.lineTo(sx(1),sy(1));c.stroke();c.setLineDash([]);
+  c.strokeStyle=css('--accent');c.lineWidth=2.5;c.beginPath();pts.forEach((q,i)=>i?c.lineTo(sx(q[0]),sy(q[1])):c.moveTo(sx(q[0]),sy(q[1])));c.stroke();
+  c.fillStyle=css('--accent');c.textAlign='center';c.fillText('AUC = '+auc.toFixed(3),sx(.68),sy(.3));
+  c.fillStyle=css('--pos');c.beginPath();c.arc(sx(TE.fpr),sy(TE.tpr),6,0,7);c.fill();c.strokeStyle='#fff';c.lineWidth=2;c.stroke()}
 drawEval();
 
 })();

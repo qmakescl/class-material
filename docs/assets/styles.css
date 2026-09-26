@@ -249,7 +249,6 @@ h2 {
 }
 
 .hero-copy {
-  max-width: 620px;
   margin-bottom: 2.25rem;
   color: var(--muted);
   font-size: 1.15rem;
@@ -361,7 +360,6 @@ h2 {
 }
 
 .section-heading p:last-child {
-  max-width: 440px;
   margin-bottom: 0.5rem;
   color: var(--muted);
   font-size: 1.05rem;

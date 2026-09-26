@@ -23,255 +23,120 @@
 <meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
 <meta name="twitter:image:alt" content="통계 수업 자료 아이콘">
 <link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/material.css">
 <style>
-  :root {
-    --page: #f4f6fb;
-    --surface: #ffffff;
-    --surface-2: #eaf1ff;
-    --ink: #0b1220;
-    --ink-2: #45506b;
-    --muted: #45506b;
-    --grid: #dbe1ee;
-    --axis: #aab7d0;
-    --border: #dbe1ee;
-    --blue: #2f6fed;
-    --blue-soft: #eaf1ff;
-    --red: #d1264f;
-    --red-soft: #fde7ee;
-    --aqua: #0ea968;
-    --yellow: #ffb020;
-    --violet: #8b3ff0;
-    --shadow: 0 1px 2px rgb(11 18 32 / 6%), 0 8px 24px -10px rgb(11 18 32 / 14%);
-  }
-
-  * { box-sizing: border-box; }
-  body {
-    background: var(--page);
-    color: var(--ink);
-    margin: 0;
-    font-family: Pretendard, "Noto Sans KR", Inter, system-ui, -apple-system, sans-serif;
-    line-height: 1.7;
-    padding-inline: 20px;
-  }
-  h1, h2, h3, h4 { font-family: inherit; font-weight: 800; letter-spacing: -0.03em; text-wrap: balance; }
-  .katex-display { margin: 0.4em 0; overflow-x: auto; overflow-y: hidden; }
+  :root { --blue:var(--accent); --red:var(--pos); --aqua:var(--ok); --yellow:var(--amber); --violet:#8b3ff0; --axis:#aab7d0; --grid:var(--line); }
+  .skip-link { position: fixed; top: -3rem; left: 1rem; z-index: 100; padding: .6rem 1rem; color: #fff; background: #1c3fd6; border-radius: 4px; font-weight: 700; text-decoration: none; }
+  .skip-link:focus { top: 1rem; }
+  .lede { margin-top: 10px; }
+  main > *, .panel > * { min-width: 0; }
+  section { scroll-margin-top: 20px; }
+  .section-head { display: flex; align-items: baseline; gap: 14px; }
+  .section-num { font-size: 15px; color: var(--muted); font-weight: 700; }
+  .section-sub { color: var(--muted); font-size: 14px; }
+  .panel[id] { scroll-margin-top: 20px; }
+  .eyebrow.kick { color: var(--accent); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; }
+  .formula-card { text-align: center; font-size: 18px; }
   .formula-card .katex-display { margin: 0; }
-
-  a { color: var(--blue); }
-
-  .page { max-width: 1040px; margin: 0 auto; padding-bottom: 64px; }
-
-  .masthead { padding: 56px 0 28px; border-bottom: 1px solid var(--border); }
-  .eyebrow { font-size: 12.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-  .masthead h1 { font-size: clamp(28px, 5vw, 40px); margin: 10px 0 12px; }
-  .masthead .lede { max-width: 640px; color: var(--ink-2); font-size: 15.5px; }
-
-  .tocbar {
-    position: sticky; top: env(safe-area-inset-top, 0px);
-    z-index: 20; background: color-mix(in srgb, var(--page) 88%, transparent);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border);
-    display: flex; gap: 4px; padding: 10px 0; margin-bottom: 8px; flex-wrap: wrap;
-  }
-  .tocbar a {
-    font-size: 13.5px; font-weight: 600; color: var(--ink-2); text-decoration: none;
-    padding: 6px 12px; border-radius: 999px; border: 1px solid transparent;
-  }
-  .tocbar a:hover { border-color: var(--border); color: var(--ink); }
-
-  main { padding-top: 20px; }
-  section { padding: 40px 0; }
-  section + section { border-top: 1px solid var(--border); }
-
-  .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
-  .section-num { font-family: inherit; font-size: 15px; color: var(--muted); font-weight: 700; }
-  .section-head h2 { font-size: clamp(22px, 3.4vw, 28px); margin: 0; }
-  .section-sub { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
-
-  article.block { max-width: 700px; margin: 0 auto 44px; }
-  article.block.wide { max-width: 900px; }
-  article.block:last-child { margin-bottom: 0; }
-  .block h3 { font-size: 19px; margin: 0 0 4px; }
-  .block .kicker { font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--blue); font-weight: 700; margin-bottom: 6px; }
-  .block p { margin: 12px 0; color: var(--ink); }
-  .block p.dim { color: var(--ink-2); font-size: 14.5px; }
-
-  .card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-    padding: 20px 22px; box-shadow: var(--shadow);
-  }
-  .formula-card { text-align: center; padding: 22px; font-size: 18px; }
-  .formula-card .note { font-family: inherit; font-style: normal; font-size: 12.5px; color: var(--muted); margin-top: 10px; }
-
-  .callout { border-left: 3px solid var(--blue); background: var(--blue-soft); border-radius: 0 10px 10px 0; padding: 14px 18px; font-size: 14.5px; color: var(--ink); margin: 16px 0; }
-  .callout.warn { border-left-color: var(--red); background: var(--red-soft); }
-  .callout strong { color: var(--ink); }
-
-  .prop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 18px; }
-  .prop-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow); }
+  .formula-card .note { font-size: 12.5px; margin-top: 10px; }
+  .prop-grid, .target-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .prop-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
   .prop-card .bar { width: 28px; height: 3px; border-radius: 2px; margin-bottom: 10px; }
-  .prop-card h4 { font-size: 15.5px; margin: 0 0 6px; font-family: inherit; font-weight: 700; }
-  .prop-card p { font-size: 13.5px; color: var(--ink-2); margin: 0 0 10px; }
-
-
-  .deep-list { display: grid; gap: 12px; margin-top: 16px; }
-  details.deep { --c: var(--blue); background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--c); border-radius: 12px; box-shadow: var(--shadow); scroll-margin-top: 20px; }
+  .prop-card h4 { font-size: 15.5px; margin: 0 0 6px; }
+  .prop-card p { font-size: 13.5px; color: var(--muted); margin: 0 0 10px; }
+  .deep-list { display: grid; gap: 12px; }
+  details.deep { --c: var(--accent); background: var(--surface); border-left: 4px solid var(--c); border-radius: var(--radius); padding: 0; }
   details.deep > summary { cursor: pointer; padding: 14px 18px; font-weight: 700; font-size: 15px; list-style: none; display: flex; align-items: center; gap: 10px; }
+  details.deep[open] > summary { margin-bottom: 0; }
   details.deep > summary::-webkit-details-marker { display: none; }
-  details.deep > summary::before { content: "▸"; color: var(--c); transition: transform .15s; }
+  details.deep > summary::before { content: "\25B8"; color: var(--c); transition: transform .15s; }
   details.deep[open] > summary::before { transform: rotate(90deg); }
   details.deep > summary small { margin-left: auto; color: var(--muted); font-weight: 500; font-size: 12.5px; }
-  details.deep > summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 8px; }
-  .deep-body { padding: 2px 20px 18px; border-top: 1px solid var(--border); }
+  .deep-body { padding: 2px 20px 18px; border-top: 1px solid var(--line); }
   .deep-body h5 { margin: 20px 0 6px; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--c); font-weight: 700; }
   .deep-body p { margin: 8px 0; font-size: 14.5px; }
   .deep-body ol { margin: 8px 0; padding-left: 20px; font-size: 14.5px; }
   .deep-body li { margin-bottom: 6px; }
   .deep-body .katex-display { text-align: left; margin: 0.5em 0; }
-  .num-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13.5px; font-variant-numeric: tabular-nums; }
-  .num-table th, .num-table td { padding: 6px 10px; text-align: center; border-bottom: 1px solid var(--border); }
-  .num-table th { background: var(--surface-2); font-weight: 700; }
-  .num-table tr.sum td { font-weight: 700; background: var(--blue-soft); }
+  .num-table { margin: 10px 0; font-size: 13.5px; }
+  .num-table th, .num-table td { text-align: center; }
+  .num-table th { background: var(--accent-soft); font-weight: 700; color: var(--ink); }
+  .num-table tr.sum td { font-weight: 700; background: var(--accent-soft); }
   .table-scroll { overflow-x: auto; }
-
-  .btn {
-    font-family: inherit; font-size: 13.5px; font-weight: 600;
-    background: var(--ink); color: var(--page); border: none; border-radius: 9px;
-    padding: 9px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-  }
+  .btn { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
   .btn:hover { opacity: 0.88; }
-  .btn:focus-visible, .level-btn:focus-visible, .tocbar a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-  .btn-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
-
-  .target-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 18px; }
-  .target-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; box-shadow: var(--shadow); }
+  .btn-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .target-grid { gap: 16px; }
+  .target-cell { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; text-align: center; }
   .target-cell svg { width: 100%; height: auto; max-width: 150px; }
   .target-cell .label { font-size: 13px; font-weight: 600; margin-top: 8px; }
   .target-cell .label .b { color: var(--blue); }
   .target-cell .label .r { color: var(--red); }
-
-  .chip { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; padding: 5px 9px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13.5px; }
-  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
-  .estimate-panel { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+  .chip { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; padding: 5px 9px; border-radius: 8px; background: var(--accent-soft); border: 1px solid var(--line); font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13.5px; }
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .estimate-panel { display: grid; grid-template-columns: 1fr; gap: 16px; }
   @media (min-width: 620px) { .estimate-panel { grid-template-columns: 1fr 1fr; } }
-  .estimate-panel .card h4 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-family: inherit; }
+  .estimate-panel .card h4 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
   .estimate-panel .value { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .estimate-panel .value.dyn { color: var(--blue); }
-
-  .level-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 16px 0; }
-  .level-btn {
-    font-family: inherit; font-size: 13.5px; font-weight: 600;
-    background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--border);
-    border-radius: 9px; padding: 8px 14px; cursor: pointer; font-variant-numeric: tabular-nums;
-  }
-  .level-btn.active { background: var(--ink); color: var(--page); border-color: var(--ink); }
-
-  .curve-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
-  .curve-wrap svg { width: 100%; height: auto; display: block; }
+  .estimate-panel .value.dyn { color: var(--accent); }
+  .level-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .level-btn { font: 600 13.5px var(--sans); background: var(--accent-soft); color: var(--muted); border: 1px solid var(--line); border-radius: 9px; padding: 8px 14px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .level-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .curve-wrap, .moe-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+  .curve-wrap svg, .moe-wrap svg { width: 100%; height: auto; display: block; }
   .curve-line { fill: none; stroke: var(--ink); stroke-width: 2; }
-  .curve-fill { fill: var(--blue); opacity: 0.20; }
-  .z-line { stroke: var(--ink-2); stroke-width: 1.4; stroke-dasharray: 3 3; }
-  .z-label { fill: var(--ink-2); font-size: 11.5px; font-family: inherit; }
-  .tail-label { fill: var(--muted); font-size: 11px; font-family: inherit; }
+  .curve-fill { fill: var(--accent); opacity: 0.20; }
+  .z-line { stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 3 3; }
+  .z-label { fill: var(--muted); font-size: 11.5px; }
+  .tail-label { fill: var(--muted); font-size: 11px; }
   .curve-axis { stroke: var(--axis); stroke-width: 1; }
-
-  .readout-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
-  .readout { background: var(--surface-2); border-radius: 10px; padding: 10px 14px; min-width: 120px; }
-  .readout .k { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
-  .readout .v { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
-
-  .sim-legend { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--ink-2); margin: 14px 0; }
+  .readout-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .stat { background: var(--accent-soft); border-radius: var(--radius); padding: 10px 14px; min-width: 120px; }
+  .stat .k { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat .v { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .sim-legend { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--muted); }
   .sim-legend .sw { display: inline-flex; align-items: center; gap: 6px; }
   .sim-legend .dot { width: 10px; height: 10px; border-radius: 50%; }
   .sim-legend .dot.blue { background: var(--blue); }
   .sim-legend .dot.red { background: var(--red); }
-  .sim-legend .dash { width: 16px; height: 0; border-top: 2px dashed var(--ink-2); display: inline-block; }
-
-  .chart-scroll { position: relative; overflow-x: auto; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 8px 4px 2px; }
+  .sim-legend .dash { width: 16px; height: 0; border-top: 2px dashed var(--muted); display: inline-block; }
+  .chart-scroll { position: relative; overflow-x: auto; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); padding: 8px 4px 2px; }
   .chart-scroll svg { display: block; }
   .grid-line { stroke: var(--grid); stroke-width: 1; }
   .axis-line { stroke: var(--axis); stroke-width: 1; }
-  .tick-label { fill: var(--muted); font-size: 10.5px; font-family: inherit; font-variant-numeric: tabular-nums; }
-  .ref-line { stroke: var(--ink-2); stroke-width: 1.5; stroke-dasharray: 4 3; }
-  .ref-label { fill: var(--ink-2); font-size: 11px; font-weight: 600; font-family: inherit; }
+  .tick-label { fill: var(--muted); font-size: 10.5px; font-variant-numeric: tabular-nums; }
+  .ref-line { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 3; }
+  .ref-label { fill: var(--muted); font-size: 11px; font-weight: 600; }
   .ref-label-bg { fill: var(--surface); opacity: 0.88; }
   .ci-line { stroke-width: 2.4; stroke-linecap: round; }
   .ci-line.hit { stroke: var(--blue); }
   .ci-line.miss { stroke: var(--red); }
   .ci-dot.hit { fill: var(--blue); }
   .ci-dot.miss { fill: var(--red); }
-
-  #sim-tooltip {
-    position: absolute; pointer-events: none; background: var(--ink); color: var(--page);
-    font-size: 12.5px; line-height: 1.5; padding: 8px 11px; border-radius: 8px; z-index: 5;
-    max-width: 220px; box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-  }
-  #sim-summary { margin-top: 14px; font-size: 14.5px; }
-  .compare-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+  #sim-tooltip { position: absolute; pointer-events: none; background: var(--ink); color: var(--paper); font-size: 12.5px; line-height: 1.5; padding: 8px 11px; border-radius: 8px; z-index: 5; max-width: 220px; box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
+  #sim-summary { font-size: 14.5px; }
+  .compare-row { display: grid; grid-template-columns: 1fr; gap: 12px; }
   @media (min-width: 560px) { .compare-row { grid-template-columns: 1fr 1fr; } }
-  .compare-card { border-radius: 12px; padding: 16px 18px; border: 1px solid var(--border); }
-  .compare-card.point { background: var(--surface-2); }
-  .compare-card.interval { background: var(--blue-soft); }
-  .compare-card .tag { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+  .compare-card { border-radius: var(--radius); padding: 16px 18px; border: 1px solid var(--line); }
+  .compare-card.point { background: var(--soft); }
+  .compare-card.interval { background: var(--accent-soft); }
+  .compare-card .tag { background: none; padding: 0; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
   .compare-card p { margin: 8px 0 0; font-size: 14.5px; }
   .compare-card svg { margin-top: 10px; }
-
-  footer { border-top: 1px solid var(--border); padding: 32px 0 8px; max-width: 700px; margin: 0 auto; }
-  footer h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-family: inherit; }
-  footer ol { padding-left: 18px; font-size: 13.5px; color: var(--ink-2); }
-  footer li { margin-bottom: 6px; }
-
-  @media (max-width: 560px) {
-    .prop-grid, .target-grid { grid-template-columns: 1fr; }
-  }
-</style>
-
-<style>
-  :root { --rail: 250px; padding-top: 0; padding-bottom: 0; }
-  html, body { background: var(--page); }
-  body { padding: 0; }
-  img { max-width: 100%; }
-  [hidden] { display: none !important; }
-  .skip-link { position: fixed; top: -3rem; left: 1rem; z-index: 100; padding: .6rem 1rem; color: #fff; background: #1c3fd6; border-radius: 4px; font-weight: 700; text-decoration: none; }
-  .skip-link:focus { top: 1rem; }
-  .rail { position: fixed; top: 0; bottom: 0; left: 0; z-index: 50; display: flex; flex-direction: column; width: var(--rail); padding: 34px 0 20px; overflow-y: auto; background: var(--ink); color: #e4e9f5; }
-  .rail .rail-back { display: block; margin: 0 26px 18px; padding: 0; color: #b7c2de; border: 0; font-size: 12.5px; font-weight: 600; text-decoration: none; white-space: nowrap; }
-  .rail .rail-back:hover, .rail .rail-back:focus-visible { color: var(--yellow); }
-  .rail h1 { margin: 0 26px 30px; color: #f4f6fb; font-size: 23px; font-weight: 800; line-height: 1.4; letter-spacing: -.02em; }
-  .rail nav { display: flex; flex-direction: column; }
-  .rail nav a { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: baseline; padding: 11px 24px; color: #b7c2de; border-left: 3px solid transparent; font-size: 13.5px; text-decoration: none; transition: .16s; }
-  .rail nav a b { color: #7c88a8; font-size: 12px; font-variant-numeric: tabular-nums; }
-  .rail nav a:hover, .rail nav a:focus-visible { background: #16213d; color: #fff; }
-  .rail nav a.on { background: #16213d; color: #fff; border-left-color: var(--yellow); }
-  .rail nav a.on b { color: var(--yellow); }
-  .rail footer { margin-top: auto; padding: 20px 24px 0; color: #7c88a8; border: 0; font-size: 11.5px; line-height: 1.6; }
-  .moe-wrap { padding: 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); }
-  .moe-wrap svg { display: block; width: 100%; height: auto; }
-  .moe-marker { fill: var(--blue); stroke: var(--surface); stroke-width: 2; }
+  .moe-marker { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
   .moe-band-svg { width: 100%; height: auto; margin-top: 6px; }
-  .moe-band-rect { fill: var(--blue-soft); stroke: var(--blue); stroke-width: 1.5; }
+  .moe-band-rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
   .moe-center-line { stroke: var(--ink); stroke-width: 2; }
-  .slider-row { display: flex; align-items: center; gap: 14px; margin: 16px 0 4px; }
-  .slider-row input[type="range"] { flex: 1; height: 4px; accent-color: var(--blue); }
+  .slider-row { display: flex; align-items: center; gap: 14px; }
+  .slider-row input[type="range"] { flex: 1; height: 4px; }
   .slider-row .n-value { min-width: 84px; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
-  .n-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 18px; }
-  .n-chip { padding: 6px 11px; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; font: inherit; font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; }
-  .n-chip.active { color: #fff; background: var(--blue); border-color: var(--blue); }
-  .page { max-width: 1060px; margin: 0 0 0 var(--rail); padding: 0 46px 120px; }
-  .masthead { padding: 76px 0 52px; }
-  .tocbar { display: none; }
-  @media (max-width: 860px) {
-    :root { --rail: 0px; }
-    .rail { position: static; width: auto; height: auto; padding: 22px 0 8px; }
-    .rail nav { flex-direction: row; padding: 0 16px 8px; overflow-x: auto; }
-    .rail nav a { display: inline-grid; grid-template-columns: 28px max-content; padding: 8px 14px; border-bottom: 3px solid transparent; border-left: 0; white-space: nowrap; }
-    .rail nav a.on { border-bottom-color: var(--yellow); border-left: 0; }
-    .rail footer { display: none; }
-    .rail .rail-back { margin: 0 16px 10px; }
-    .rail h1 { margin: 0 16px 16px; }
-    .page { margin-left: 0; padding: 0 18px 80px; }
-    .masthead { padding: 42px 0 32px; }
-  }
+  .n-chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .n-chip { padding: 6px 11px; color: var(--muted); background: var(--accent-soft); border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; }
+  .n-chip.active { color: #fff; background: var(--accent); border-color: var(--accent); }
+  footer.refs h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  footer.refs ol { padding-left: 18px; font-size: 13.5px; color: var(--muted); }
+  @media (max-width: 560px) { .prop-grid, .target-grid { grid-template-columns: 1fr; } }
 </style>
 <script defer src="../assets/katex/katex.min.js"></script>
 <script defer src="../assets/katex/contrib/auto-render.min.js"></script>
@@ -294,35 +159,25 @@
   </nav>
   <footer>값을 바꾸거나 표본을 다시 추출하면 시뮬레이션 결과가 즉시 갱신됩니다.</footer>
 </aside>
-<div class="page">
-  <header class="masthead">
-    <div class="eyebrow">통계적 추론 · 강의자료</div>
-    <h1>점추정과 신뢰구간</h1>
-    <p class="lede">하나의 숫자로 모수를 짚어내는 점추정에서 출발해, 그 추정이 얼마나 믿을 만한지를 구간으로 말해주는 신뢰구간까지 — 직접 표본을 뽑아보며 확인합니다.</p>
-  </header>
-
-  <nav class="tocbar">
-    <a href="#estimator-estimate">추정량과 추정치</a>
-    <a href="#good-properties">좋은 추정량의 성질</a>
-    <a href="#point-problem">점추정의 문제</a>
-    <a href="#ci-formula">신뢰구간 구하기</a>
-    <a href="#ci-meaning">95% 신뢰구간의 의미</a>
-  </nav>
-
   <main id="content">
+    <header>
+      <div class="eyebrow">통계적 추론 · 강의자료</div>
+      <h2 class="page-title">점추정과 신뢰구간</h2>
+      <p class="lede">하나의 숫자로 모수를 짚어내는 점추정에서 출발해, 그 추정이 얼마나 믿을 만한지를 구간으로 말해주는 신뢰구간까지 — 직접 표본을 뽑아보며 확인합니다.</p>
+    </header>
     <section id="point-estimation">
       <div class="section-head"><span class="section-num">01</span><h2>점추정</h2></div>
       <p class="section-sub">모수 하나를 대표하는 값 하나를 계산하는 가장 단순한 추론 방법입니다.</p>
 
-      <article class="block" id="estimator-estimate">
-        <div class="kicker">Point Estimation</div>
+      <article class="panel" id="estimator-estimate">
+        <div class="eyebrow kick">Point Estimation</div>
         <h3>추정량과 추정치</h3>
         <p>모수 \(\theta\)를 추정하기 위해 표본 \(X_{1},\ldots ,X_{n}\)의 함수로 정의한 확률변수를 <strong>추정량(estimator)</strong>이라 하고, 실제로 관측된 표본값 \(x_{1},\ldots ,x_{n}\)을 대입해 얻은 구체적인 숫자를 <strong>추정치(estimate)</strong>라 부릅니다.</p>
         <div class="card formula-card">
           \[\hat{\theta } = g(X_{1}, X_{2}, \ldots , X_{n})\]
           <div class="note">추정량 — 표본을 뽑기 전에는 값이 정해지지 않은 확률변수</div>
         </div>
-        <p class="dim">가장 흔한 예는 모평균 \(\mu\)의 추정량으로 쓰는 표본평균입니다.</p>
+        <p class="note">가장 흔한 예는 모평균 \(\mu\)의 추정량으로 쓰는 표본평균입니다.</p>
         <div class="card formula-card">
           \[\bar{X} = \frac{X_{1} + X_{2} + \cdots  + X_{n}}{n}\]
         </div>
@@ -375,7 +230,7 @@
         <p style="margin-top:22px;"><strong>왜 이 값들이 나올까?</strong> 기댓값의 선형성과 독립인 변수들의 분산의 덧셈 성질만 쓰면 됩니다.</p>
         \[E[\bar{X}] = \frac{1}{n}\sum_{i=1}^{n}E[X_i] = \frac{1}{n}\cdot n\mu = \mu\]
         \[\mathrm{Var}(\bar{X}) = \frac{1}{n^{2}}\sum_{i=1}^{n}\mathrm{Var}(X_i) = \frac{1}{n^{2}}\cdot n\sigma^{2} = \frac{\sigma^{2}}{n}\]
-        <p class="dim">상수 \(1/n\)이 분산에서는 제곱(\(1/n^2\))되어 밖으로 나오는 점에 주의하세요. 이 유도는 아래 “좋은 추정량의 성질”의 펼침 메뉴에서 숫자 예제와 함께 다시 다룹니다.</p>
+        <p class="note">상수 \(1/n\)이 분산에서는 제곱(\(1/n^2\))되어 밖으로 나오는 점에 주의하세요. 이 유도는 아래 “좋은 추정량의 성질”의 펼침 메뉴에서 숫자 예제와 함께 다시 다룹니다.</p>
 
         <p><strong>숫자로 이해하기.</strong> 위의 통계 시험 점수를 모집단 평균 \(\mu = 75\), 표준편차 \(\sigma = 8\)로 두고, 표본크기 \(n\)을 바꿔 봅니다.</p>
         <div class="table-scroll">
@@ -399,8 +254,8 @@
         <div class="callout warn"><strong>\(\sigma\)와 표준오차를 혼동하지 마세요.</strong> \(\sigma = 8\)은 <em>학생 한 명 한 명의 점수</em>가 흩어진 정도이고, 표준오차 \(8/\sqrt{6}\approx 3.27\)은 <em>6명 평균이라는 추정치</em>가 표본마다 흩어지는 정도입니다. 평균을 내면 개인차가 서로 상쇄되어 추정치는 개별 값보다 훨씬 덜 흔들립니다. 표준오차가 작을수록 그 추정량은 더 믿을 만하고, 이것이 뒤에서 나올 효율성과 신뢰구간의 출발점입니다.</div>
       </article>
 
-      <article class="block" id="good-properties">
-        <div class="kicker">Properties of Estimators</div>
+      <article class="panel" id="good-properties">
+        <div class="eyebrow kick">Properties of Estimators</div>
         <h3>좋은 추정량의 성질</h3>
         <p>같은 모수를 추정하는 방법은 여러 가지일 수 있습니다. 그중 무엇이 더 나은 추정량인지 판단하는 기준은 다음과 같습니다.</p>
         <div class="prop-grid">
@@ -461,7 +316,7 @@
             </tbody>
           </table>
         </div>
-        <p class="dim">예: 표본 (2, 6)의 \(s^2 = \dfrac{(2-4)^2 + (6-4)^2}{2 - 1} = 8\), \(\tilde{s}^2 = \dfrac{4 + 4}{2} = 4\).</p>
+        <p class="note">예: 표본 (2, 6)의 \(s^2 = \dfrac{(2-4)^2 + (6-4)^2}{2 - 1} = 8\), \(\tilde{s}^2 = \dfrac{4 + 4}{2} = 4\).</p>
 
         <div class="deep-list">
           <details class="deep" id="detail-unbiased" style="--c:var(--blue)">
@@ -646,8 +501,8 @@
         </div>
       </article>
 
-      <article class="block" id="point-problem">
-        <div class="kicker">The Catch</div>
+      <article class="panel" id="point-problem">
+        <div class="eyebrow kick">The Catch</div>
         <h3>점 추정의 문제</h3>
         <p>점추정치는 숫자 하나만 내놓습니다. 그 숫자가 참값에 얼마나 가까운지, 표본이 4개였는지 400개였는지에 대한 정보는 그 안에 전혀 담겨 있지 않습니다.</p>
         <div class="callout warn"><strong>같은 76점이라도 다릅니다.</strong> 표본 4명으로 얻은 평균 76점과 표본 400명으로 얻은 평균 76점은 신뢰도가 전혀 다르지만, 점추정치만 보면 둘을 구분할 방법이 없습니다.</div>
@@ -663,7 +518,7 @@
             <svg width="140" height="40" viewBox="0 0 140 40"><line x1="10" y1="20" x2="130" y2="20" stroke="var(--axis)" stroke-width="1"/><line x1="46" y1="20" x2="94" y2="20" stroke="var(--blue)" stroke-width="4" stroke-linecap="round"/><circle cx="70" cy="20" r="4.5" fill="var(--blue)"/></svg>
           </div>
         </div>
-        <p class="dim">그래서 통계적 추론은 점추정 하나로 끝나지 않고, 불확실성을 함께 표현하는 구간추정으로 이어집니다.</p>
+        <p class="note">그래서 통계적 추론은 점추정 하나로 끝나지 않고, 불확실성을 함께 표현하는 구간추정으로 이어집니다.</p>
       </article>
     </section>
 
@@ -671,8 +526,8 @@
       <div class="section-head"><span class="section-num">02</span><h2>구간추정</h2></div>
       <p class="section-sub">추정치 하나 대신, 모수를 포함할 가능성이 높은 구간을 제시합니다.</p>
 
-      <article class="block wide" id="ci-formula">
-        <div class="kicker">Confidence Interval</div>
+      <article class="panel wide" id="ci-formula">
+        <div class="eyebrow kick">Confidence Interval</div>
         <h3>100(1 − \(\alpha\))% 신뢰구간 구하기</h3>
         <p>모분산 \(\sigma ^{2}\)을 알고 있는 정규모집단에서 표본을 뽑으면, 표본평균은 \(\bar{X} \sim  N(\mu , \sigma ^{2}/n)\)을 따릅니다. 이를 표준화하면：</p>
         <div class="card formula-card">
@@ -700,14 +555,14 @@
           <svg id="curve-svg" viewBox="0 0 640 220"></svg>
         </div>
         <div class="readout-row">
-          <div class="readout"><div class="k">\(z_{\alpha/2}\)</div><div class="v" id="z-value">1.960</div></div>
-          <div class="readout"><div class="k">오차범위 (\(\sigma/\sqrt{n}\) = 1)</div><div class="v" id="margin-value">1.960</div></div>
-          <div class="readout"><div class="k">신뢰구간 예시</div><div class="v" id="ci-example" style="font-size:14px;">\(\bar{x} \pm 1.960\)</div></div>
+          <div class="stat"><div class="k">\(z_{\alpha/2}\)</div><div class="v" id="z-value">1.960</div></div>
+          <div class="stat"><div class="k">오차범위 (\(\sigma/\sqrt{n}\) = 1)</div><div class="v" id="margin-value">1.960</div></div>
+          <div class="stat"><div class="k">신뢰구간 예시</div><div class="v" id="ci-example" style="font-size:14px;">\(\bar{x} \pm 1.960\)</div></div>
         </div>
       </article>
 
-      <article class="block wide" id="ci-meaning">
-        <div class="kicker">What 95% Really Means</div>
+      <article class="panel wide" id="ci-meaning">
+        <div class="eyebrow kick">What 95% Really Means</div>
         <h3>95% 신뢰구간의 의미</h3>
         <div class="callout"><strong>흔한 오해:</strong> “이미 계산된 구간이 모평균을 포함할 확률이 95%”가 아닙니다. 모평균은 고정된 상수이므로 이미 정해진 하나의 구간에 대해서는 포함 여부가 확률적이지 않습니다. 정확한 해석은 <strong>“같은 절차를 반복해서 신뢰구간을 100번 만들면, 그중 약 95개가 모평균을 포함한다”</strong>는 것입니다.</div>
         <p>직접 확인해봅시다. 모평균 \(\mu  = 1\), 모표준편차 \(\sigma  = 2\)인 정규분포에서 크기 \(n = 4\)인 표본을 100번 독립적으로 뽑고, 매번 95% 신뢰구간 \(\bar{x} \pm  1.96\)을 계산합니다. 모평균 1을 포함하지 못한 구간은 붉은색으로 표시됩니다.</p>
@@ -726,7 +581,7 @@
         <div class="btn-row">
           <button class="btn" id="resample-btn" type="button">100번 다시 추출하기</button>
         </div>
-        <p class="dim">x축은 100번의 추출 각각의 번호, y축은 각 추출의 표본평균과 95% 신뢰구간입니다. 매번 다시 뽑을 때마다 실패하는 구간의 개수는 달라지지만, 평균적으로는 약 5개(5%) 근처에서 흔들립니다 — 이것이 “95% 신뢰수준”이 실제로 의미하는 바입니다.</p>
+        <p class="note">x축은 100번의 추출 각각의 번호, y축은 각 추출의 표본평균과 95% 신뢰구간입니다. 매번 다시 뽑을 때마다 실패하는 구간의 개수는 달라지지만, 평균적으로는 약 5개(5%) 근처에서 흔들립니다 — 이것이 “95% 신뢰수준”이 실제로 의미하는 바입니다.</p>
       </article>
     </section>
 
@@ -734,8 +589,8 @@
       <div class="section-head"><span class="section-num">03</span><h2>표본오차 읽기</h2></div>
       <p class="section-sub">여론조사 보고서의 “95% 신뢰수준에서 표본오차는 ±3.1%p” — 이 한 문장을 신뢰구간의 언어로 다시 읽어봅니다.</p>
 
-      <article class="block wide" id="moe-formula">
-        <div class="kicker">Margin of Error</div>
+      <article class="panel wide" id="moe-formula">
+        <div class="eyebrow kick">Margin of Error</div>
         <h3>표본오차는 어떻게 계산할까</h3>
         <p>여론조사는 모집단 중 지지율 같은 <strong>비율(proportion)</strong> \(p\)를 추정합니다. 표본에서 얻은 응답 비율 \(\hat{p}\)은 표본크기 \(n\)이 충분히 크면 근사적으로 정규분포를 따릅니다.</p>
         <div class="card formula-card">
@@ -753,8 +608,8 @@
         </div>
       </article>
 
-      <article class="block wide" id="moe-explorer">
-        <div class="kicker">Try It</div>
+      <article class="panel wide" id="moe-explorer">
+        <div class="eyebrow kick">Try It</div>
         <h3>표본수를 조절해보기</h3>
         <p>표본수 \(n\)과 신뢰수준을 바꿔가며 표본오차가 어떻게 달라지는지 확인하세요. 실제 여론조사에서 자주 쓰이는 표본수는 칩을 눌러 바로 확인할 수 있습니다.</p>
         <div class="level-row" role="group" aria-label="표본오차 신뢰수준 선택">
@@ -778,26 +633,24 @@
         </div>
         <div class="moe-wrap"><svg id="moe-curve-svg" viewBox="0 0 640 220"></svg></div>
         <div class="readout-row">
-          <div class="readout"><div class="k">표본수 n</div><div class="v" id="moe-n-readout">1,000</div></div>
-          <div class="readout"><div class="k">표본오차 (±%p)</div><div class="v" id="moe-e-readout">3.10</div></div>
-          <div class="readout"><div class="k">보고서 표현</div><div class="v" id="moe-report" style="font-size:13px;">95% 신뢰수준에 표본오차 ±3.1%p</div></div>
+          <div class="stat"><div class="k">표본수 n</div><div class="v" id="moe-n-readout">1,000</div></div>
+          <div class="stat"><div class="k">표본오차 (±%p)</div><div class="v" id="moe-e-readout">3.10</div></div>
+          <div class="stat"><div class="k">보고서 표현</div><div class="v" id="moe-report" style="font-size:13px;">95% 신뢰수준에 표본오차 ±3.1%p</div></div>
         </div>
         <p style="margin-top:18px;">아래 눈금은 지지율 50%를 기준으로 한 신뢰구간의 폭입니다. n을 줄이면 밴드가 넓어지고, 늘리면 좁아집니다.</p>
         <svg id="moe-band-svg" viewBox="0 0 640 70" class="moe-band-svg"></svg>
       </article>
 
-      <article class="block" id="moe-meaning">
-        <div class="kicker">What It Means</div>
+      <article class="panel" id="moe-meaning">
+        <div class="eyebrow kick">What It Means</div>
         <h3>표본오차, 이렇게 읽습니다</h3>
         <div class="callout">“95% 신뢰수준에서 표본오차 ±3.1%p”란, <strong>같은 방식으로 조사를 100번 반복하면 그중 약 95번은 실제 모집단의 응답률이 “발표된 응답률 ± 3.1%p” 구간 안에 들어온다</strong>는 뜻입니다. 앞서 살펴본 95% 신뢰구간의 해석과 정확히 같은 논리입니다.</div>
         <p>표본수를 늘리면 오차는 줄어들지만, \(1/\sqrt{n}\)에 비례해 줄어들기 때문에 <strong>오차를 절반으로 줄이려면 표본을 4배로 늘려야</strong> 합니다. 위 슬라이더로 n = 1,000에서 n = 4,000으로 옮겨 직접 확인해보세요.</p>
         <div class="callout warn"><strong>흔한 오해 — “오차범위 내 접전”.</strong> 두 후보의 지지율 차이가 표본오차보다 작다고 해서 통계적으로 우열이 없다고 단정할 수는 없습니다. 같은 표본에서 얻은 두 비율의 <em>차이</em>에 대한 오차는 단일 비율의 오차보다 크며(약 \(\sqrt{2}\)배), n = 1,000 · 95% 기준으로는 약 ±4.4%p가 됩니다.</div>
-        <p class="dim">표본오차는 무작위 표집 과정에서 생기는 오차만을 설명합니다. 무응답·응답 거부에 따른 편향, 질문 문항의 설계, 조사 방식(전화면접·ARS·온라인 패널 등)에서 비롯되는 오차는 표본오차에 포함되지 않습니다.</p>
+        <p class="note">표본오차는 무작위 표집 과정에서 생기는 오차만을 설명합니다. 무응답·응답 거부에 따른 편향, 질문 문항의 설계, 조사 방식(전화면접·ARS·온라인 패널 등)에서 비롯되는 오차는 표본오차에 포함되지 않습니다.</p>
       </article>
     </section>
-  </main>
-
-  <footer>
+  <footer class="refs panel">
     <h3>참고문헌</h3>
     <ol>
       <li>Bertsekas, D. P., & Tsitsiklis, J. N. (2008). <em>Introduction to Probability</em> (2nd ed.), Ch. 9 “Classical Statistical Inference” — 추정량의 성질과 신뢰구간의 정의 및 도출.</li>
@@ -805,7 +658,7 @@
       <li>중앙선거여론조사심의위원회(NESDC), 여론조사 등록 현황 — 보고서에 표기되는 “95% 신뢰수준에서 표본오차 ±%p” 표현의 실제 사례 (nesdc.go.kr).</li>
     </ol>
   </footer>
-</div>
+  </main>
 
 <script>
 (function () {
