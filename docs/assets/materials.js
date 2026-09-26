@@ -69,11 +69,11 @@ window.MATERIALS = [
     date: "2026-09-26"
   },
   {
-    subject: "statistics",
+    subject: "data-science",
     label: "인터랙티브 실습",
     title: "지리학과 졸업생의 평균 연봉이 가장 높았다!",
     description: "평균 연봉 1위 이야기를 실제 정부 통계에 조던을 넣어 다시 계산하며, 평균을 읽을 때 먼저 물어볼 것을 확인합니다.",
-    href: "statistics/geography-graduate-salary-outlier.html",
+    href: "data-science/geography-graduate-salary-outlier.html",
     date: "2026-09-26"
   }
 ];
