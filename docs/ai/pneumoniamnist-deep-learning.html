@@ -178,11 +178,11 @@ a{color:var(--data)}
       <tr><td>내용</td><td>손글씨 숫자</td><td>소아 흉부 X선(정면)</td></tr>
       <tr><td>크기</td><td>28×28, 흑백</td><td>28×28, 흑백 (원본을 축소)</td></tr>
       <tr><td>정답 종류</td><td>10개 (0~9)</td><td>2개 (정상 0 / 폐렴 1)</td></tr>
-      <tr><td>이미지 수</td><td class="num">70,000</td><td class="num">5,031 (Kaggle 사본 기준)</td></tr>
-      <tr><td>클래스 균형</td><td>거의 균등</td><td>폐렴이 더 많음 (시험용은 390/624 ≈ 62.5%)</td></tr>
+      <tr><td>이미지 수</td><td class="num">70,000</td><td class="num">5,030 (Kaggle 사본 기준)</td></tr>
+      <tr><td>클래스 균형</td><td>거의 균등</td><td>폐렴이 더 많음 (학습용 90.0% · 검증용 74.2% · 시험용 62.5%)</td></tr>
     </table>
-    <p class="note">이 페이지는 Kaggle의 "PneumoniaMNIST classification" 데이터셋 설명을 따릅니다. 28×28 흑백 흉부 X선 이미지가 NumPy 배열로 저장되어 있고, 정답은 1이 폐렴, 0이 정상입니다. 학습용 3,883장 · 검증용 524장 · 시험용 624장으로 나뉘며 합계는 5,031장입니다. MedMNIST v2 공식 버전(총 5,856장, 학습용 4,708장)과는 학습용 장 수가 다르므로, 공식 논문 수치와 섞어 쓰지 마세요. 원본 X선은 Kermany et al.(2018)이 공개한 광저우 여성아동의료센터 1~5세 소아 영상입니다.</p>
-    <p>두 가지 차이가 이후 단계에 영향을 줍니다. 정답이 2개라서 출력은 "폐렴일 확률" 하나면 되고(4단계), 폐렴 사진이 훨씬 많아서 "정확도"만 보면 속기 쉽습니다(6단계).</p>
+    <p class="note">이 페이지는 Kaggle의 "PneumoniaMNIST classification" 데이터셋을 실제로 읽어 확인한 값을 따릅니다. 28×28 흑백 흉부 X선 이미지가 NumPy 배열로 저장되어 있고, 정답은 1이 폐렴, 0이 정상입니다. 학습용 3,882장 · 검증용 524장 · 시험용 624장으로 나뉘며 합계는 5,030장입니다. MedMNIST v2 공식 버전(총 5,856장, 학습용 4,708장)과는 장 수와 분할이 다르므로, 공식 논문 수치와 섞어 쓰지 마세요. 원본 X선은 Kermany et al.(2018)이 공개한 광저우 여성아동의료센터 1~5세 소아 영상입니다.</p>
+    <p>두 가지 차이가 이후 단계에 영향을 줍니다. 정답이 2개라서 출력은 "폐렴일 확률" 하나면 되고(4단계), 폐렴 사진이 훨씬 많아서(특히 학습용은 90%) "정확도"만 보면 속기 쉽습니다(6단계).</p>
   </section>
 
   <!-- 1 data -->
@@ -203,11 +203,11 @@ a{color:var(--data)}
     </div>
     <h3>데이터는 세 묶음으로 나눈다</h3>
     <table>
-      <tr><th>묶음</th><th>용도</th><th style="text-align:right">장 수</th></tr>
-      <tr><td>학습용(train)</td><td>모델이 숫자를 조정할 때 보는 문제집</td><td class="n">3,883</td></tr>
-      <tr><td>검증용(validation)</td><td>학습 중 설정(학습률 등)을 고를 때 쓰는 모의고사</td><td class="n">524</td></tr>
-      <tr><td>시험용(test)</td><td>마지막에 한 번만 보는 수능. 정상 234 · 폐렴 390</td><td class="n">624</td></tr>
-      <tr><td colspan="3" class="note">비유의 한계: 사람은 문제집을 풀며 개념을 익히지만, 모델은 학습용 사진의 정답을 맞히도록 숫자를 조정할 뿐입니다. 그래서 시험용을 학습 중에 한 번이라도 보면 점수가 부풀려집니다.</td></tr>
+      <tr><th>묶음</th><th>용도</th><th style="text-align:right">장 수</th><th style="text-align:right">정상 / 폐렴</th></tr>
+      <tr><td>학습용(train)</td><td>모델이 숫자를 조정할 때 보는 문제집</td><td class="n">3,882</td><td class="n">388 / 3,494 (폐렴 90.0%)</td></tr>
+      <tr><td>검증용(validation)</td><td>학습 중 설정(학습률 등)을 고를 때 쓰는 모의고사</td><td class="n">524</td><td class="n">135 / 389 (폐렴 74.2%)</td></tr>
+      <tr><td>시험용(test)</td><td>마지막에 한 번만 보는 수능</td><td class="n">624</td><td class="n">234 / 390 (폐렴 62.5%)</td></tr>
+      <tr><td colspan="4" class="note">묶음마다 폐렴 비율이 다릅니다. 학습용은 폐렴이 90%이고 시험용은 62.5%입니다. 학습 때 본 비율과 시험 때 만나는 비율이 다르면 정확도의 의미도 달라집니다. 비유의 한계: 사람은 문제집을 풀며 개념을 익히지만, 모델은 학습용 사진의 정답을 맞히도록 숫자를 조정할 뿐입니다. 그래서 시험용을 학습 중에 한 번이라도 보면 점수가 부풀려집니다.</td></tr>
     </table>
   </section>
 
@@ -304,16 +304,16 @@ a{color:var(--data)}
     <p><b>경사하강법(Gradient Descent)</b>: 가중치 하나하나에 대해 "이 값을 조금 올리면 손실이 늘까, 줄까"를 계산하고(기울기, gradient), 줄어드는 쪽으로 <b>학습률(learning rate)</b>만큼 옮깁니다. 학습용 사진 전체를 한 번 훑는 것을 <b>에폭(epoch)</b>이라고 합니다.</p>
     <div class="readout">w ← w − η · ∂L/∂w</div>
     <p class="note"><b>η</b>(에타): 학습률, 한 번에 움직이는 보폭 · <b>∂L/∂w</b>: 가중치 w를 아주 조금 바꿨을 때 손실 L이 변하는 비율(기울기).</p>
-    <p>아래는 3단계의 로지스틱 회귀 모델을 합성 사진 학습용 600장(폐렴 약 73%)으로 이 브라우저에서 실제로 학습시키는 장면입니다<span class="toy">설명용 합성 데이터</span>. 입력은 0~1로 정규화한 뒤 픽셀마다 학습용 사진들의 평균을 뺀 값입니다(2단계에서 말한 "한 번 더 맞추기").</p>
+    <p>아래는 3단계의 로지스틱 회귀 모델을 합성 사진 학습용 3,882장(정상 388 · 폐렴 3,494, 실제 학습용과 같은 구성)으로 이 브라우저에서 실제로 학습시키는 장면입니다<span class="toy">설명용 합성 데이터</span>. 입력은 0~1로 정규화한 뒤 픽셀마다 학습용 사진들의 평균을 뺀 값입니다(2단계에서 말한 "한 번 더 맞추기").</p>
     <div class="controls">
       <button class="btn" id="trainBtn">학습 시작</button>
       <button class="btn ghost" id="stepBtn">1 에폭만</button>
       <button class="btn ghost" id="resetBtn">처음부터</button>
       <label for="lrSel" class="note" style="margin-left:6px">학습률 η</label>
       <select id="lrSel" style="font:14px var(--mono);padding:6px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink)">
-        <option value="0.05">0.05 (느림)</option>
-        <option value="0.5" selected>0.5</option>
-        <option value="60">60 (너무 큼)</option>
+        <option value="0.5">0.5 (느림)</option>
+        <option value="10" selected>10</option>
+        <option value="600">600 (너무 큼)</option>
       </select>
     </div>
     <div class="metrics">
@@ -332,15 +332,15 @@ a{color:var(--data)}
         <div class="legend"><span><i style="background:var(--pos)"></i>밝으면 폐렴 쪽</span><span><i style="background:var(--neg)"></i>밝으면 정상 쪽</span></div>
       </div>
     </div>
-    <p class="note">학습이 진행되면 가중치 지도에서 폐 영역이 붉게 물듭니다. "폐가 뿌옇게 밝으면 폐렴일 가능성이 높다"는 규칙을 사람이 알려 주지 않았는데도 데이터에서 찾아낸 것입니다. 학습률을 60으로 바꾸면 손실 곡선이 들쭉날쭉해지는 것도 확인해 보세요.</p>
+    <p class="note">학습이 진행되면 가중치 지도에서 폐 영역이 붉게 물듭니다. "폐가 뿌옇게 밝으면 폐렴일 가능성이 높다"는 규칙을 사람이 알려 주지 않았는데도 데이터에서 찾아낸 것입니다. 학습 초반에는 학습용의 90%가 폐렴이라 모델이 "모두 폐렴"이라고만 답해 시험 정확도가 62.5%에 머뭅니다. 정상을 가려내기 시작하면서 정확도가 오릅니다. 학습률을 600으로 바꾸면 손실 곡선이 들쭉날쭉해지는 것도 확인해 보세요.</p>
   </section>
 
   <!-- 6 eval -->
   <section class="panel" id="step-6" data-step="6" data-title="평가" hidden>
     <div class="eyebrow">6 · 평가</div>
     <h2>정확도 하나로는 부족하다</h2>
-    <p>학습에 쓰지 않은 시험용 사진으로 채점합니다. 모델은 확률 p를 내므로, p가 <b>기준값(threshold)</b>을 넘으면 "폐렴"이라고 판정합니다. 기준값을 움직여 보세요. 5단계의 모델과 합성 시험용 사진 250장을 그대로 씁니다<span class="toy">설명용 합성 데이터</span>.</p>
-    <p class="note" id="autoNote" hidden>5단계에서 학습하지 않은 상태라, 학습률 0.5로 40 에폭 자동 학습한 모델로 평가했습니다.</p>
+    <p>학습에 쓰지 않은 시험용 사진으로 채점합니다. 모델은 확률 p를 내므로, p가 <b>기준값(threshold)</b>을 넘으면 "폐렴"이라고 판정합니다. 기준값을 움직여 보세요. 5단계의 모델과 합성 시험용 사진 624장(정상 234 · 폐렴 390, 실제 시험용과 같은 구성)을 그대로 씁니다<span class="toy">설명용 합성 데이터</span>.</p>
+    <p class="note" id="autoNote" hidden>5단계에서 학습하지 않은 상태라, 학습률 10으로 40 에폭 자동 학습한 모델로 평가했습니다.</p>
     <label for="thSlider" class="note">기준값 = <b id="thVal" class="mono">0.50</b></label>
     <input type="range" id="thSlider" min="5" max="95" value="50">
     <div class="row">
@@ -360,7 +360,7 @@ a{color:var(--data)}
     <div class="eyebrow">7 · 직접 해 보기</div>
     <h2>같은 과정을 PyTorch 코드로</h2>
     <p><b>워크숍 진행 페이지:</b> <a href="https://qworks.notion.site/ws-gbssh" target="_blank" rel="noopener">qworks.notion.site/ws-gbssh</a> 워크숍에서는 이 링크의 안내에 따라 진행합니다.</p>
-    <p>위 여섯 단계를 코드로 옮긴 최소 예시입니다. Google Colab에서 그대로 실행할 수 있습니다. <span class="mono">medmnist</span> 패키지로 받는 방법을 기본으로 썼고, Kaggle에서 받은 <span class="mono">.npz</span> 파일을 쓰는 방법을 주석으로 달았습니다.</p>
+    <p>위 여섯 단계를 코드로 옮긴 최소 예시입니다. 학습용의 정상이 388장(10%)뿐이라 아래 코드로 학습하면 폐렴 쪽으로 치우치기 쉬우니, 결과는 정확도만 보지 말고 민감도·특이도로 확인하세요. Google Colab에서 그대로 실행할 수 있습니다. <span class="mono">medmnist</span> 패키지로 받는 방법을 기본으로 썼고, Kaggle에서 받은 <span class="mono">.npz</span> 파일을 쓰는 방법을 주석으로 달았습니다.</p>
     <details open>
       <summary>전체 코드</summary>
 <pre># pip install medmnist torch torchvision scikit-learn
@@ -422,14 +422,14 @@ print("정확도", (pred == y).mean())
 print("민감도", tp / (y == 1).sum(), " 특이도", tn / (y == 0).sum())
 print("AUC", roc_auc_score(y, p))</pre>
     </details>
-    <p class="note">다음 실험 거리: ① 손실 함수에 <span class="mono">pos_weight</span>를 줘서 클래스 불균형 보정하기 ② 좌우 반전·회전 같은 데이터 증강(augmentation) 추가하기 ③ 64×64 이상 해상도 버전과 비교하기.</p>
+    <p class="note">다음 실험 거리: ① 손실 함수에 <span class="mono">pos_weight</span>를 줘서 클래스 불균형 보정하기(학습용은 정상 : 폐렴이 약 1 : 9) ② 좌우 반전·회전 같은 데이터 증강(augmentation) 추가하기 ③ 64×64 이상 해상도 버전과 비교하기.</p>
   </section>
 
   <section class="panel">
     <div class="eyebrow">오개념 바로잡기</div>
     <div class="myth">
       <div><h3><s>"AI가 사진을 사람처럼 본다"</s></h3><p>모델이 받는 것은 784개의 숫자이고, 하는 일은 곱하고 더하는 계산입니다. "본다"는 비유일 뿐이며, 모델은 폐의 해부학을 모릅니다. 학습 데이터에서 정답과 함께 자주 나타난 픽셀 패턴에 반응할 뿐이라, 병원마다 다른 촬영 장비 표시나 글자 같은 엉뚱한 단서에 기대는 일도 실제로 보고됩니다(Zech et al., 2018).</p></div>
-      <div><h3><s>"정확도 90%면 10명 중 9명을 맞힌다"</s></h3><p>정확도는 시험 묶음의 구성에 따라 달라집니다. 폐렴이 73%인 묶음과 5%인 실제 외래 환자군에서 같은 모델의 정확도는 크게 다릅니다. 민감도·특이도를 함께 보고, 쓰려는 현장의 비율을 따져야 합니다.</p></div>
+      <div><h3><s>"정확도 90%면 10명 중 9명을 맞힌다"</s></h3><p>정확도는 시험 묶음의 구성에 따라 달라집니다. 폐렴이 62.5%인 시험 묶음과 5%인 실제 외래 환자군에서 같은 모델의 정확도는 크게 다릅니다. 민감도·특이도를 함께 보고, 쓰려는 현장의 비율을 따져야 합니다.</p></div>
     </div>
     <p class="note">이 페이지는 학습용 교재이며, 모델 결과를 진단에 쓸 수 없습니다.</p>
   </section>
@@ -475,8 +475,11 @@ function genImage(pneu, r){
   }
   return img;
 }
-function makeSet(n,seed,ratio){const r=rng(seed),X=[],Y=[];for(let i=0;i<n;i++){const y=r()<ratio?1:0;X.push(genImage(y,r));Y.push(y)}return{X,Y}}
-const TRAIN=makeSet(600,11,.73), TEST=makeSet(250,97,390/624);
+// 실제 데이터의 정상·폐렴 장 수와 같게 만든다(정상 수, 폐렴 수). 순서는 섞는다.
+function makeSet(nNormal,nPneu,seed){const r=rng(seed),X=[],Y=[];for(let i=0;i<nNormal+nPneu;i++)Y.push(i<nNormal?0:1);
+  for(let i=Y.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[Y[i],Y[j]]=[Y[j],Y[i]]}
+  Y.forEach(y=>X.push(genImage(y,r)));return{X,Y}}
+const TRAIN=makeSet(388,3494,11), TEST=makeSet(234,390,97);
 const SAMPLES=(()=>{const r=rng(5),a=[];for(let i=0;i<8;i++){const y=i%2;a.push({img:genImage(y,r),y})}return a})();
 
 function drawGray(cv,img,w=28,h=28){const c=cv.getContext('2d'),d=c.createImageData(w,h);for(let i=0;i<w*h;i++){const v=img[i];d.data[i*4]=d.data[i*4+1]=d.data[i*4+2]=v;d.data[i*4+3]=255}c.putImageData(d,0,0)}
@@ -499,7 +502,7 @@ const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 railLinks.forEach(a=>a.addEventListener('click',e=>{e.preventDefault();go(+a.dataset.step)}));
 function go(i){cur=i;panels.forEach((p,j)=>p.hidden=j!==i);railLinks.forEach((a,j)=>{a.classList.toggle('on',j===i);if(j===i)a.setAttribute('aria-current','step');else a.removeAttribute('aria-current')});
   if(booted){if(i===0)window.scrollTo({top:0,behavior:reduceMotion?'auto':'smooth'});else panels[i].scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'start'})}
-  if(i===4)drawLoss();if(i===5)drawTrain();if(i===6){if(epoch===0){const s=document.getElementById('lrSel');s.value='0.5';for(let k=0;k<40;k++)trainEpoch();document.getElementById('autoNote').hidden=false}drawTrain();drawEval()}}
+  if(i===4)drawLoss();if(i===5)drawTrain();if(i===6){if(epoch===0){const s=document.getElementById('lrSel');s.value='10';for(let k=0;k<40;k++)trainEpoch();document.getElementById('autoNote').hidden=false}drawTrain();drawEval()}}
 go(0);booted=true;
 
 // ---------- step 1 ----------
