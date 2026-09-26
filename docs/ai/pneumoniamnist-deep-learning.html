@@ -20,6 +20,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;700;800&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
 <style>
 :root{
   --bg:#F4F6FB; --panel:#FFFFFF; --ink:#0B1220; --muted:#45506B; --line:#DBE1EE; --soft:#EEF1F8;
@@ -81,6 +85,8 @@ canvas.px{image-rendering:pixelated;display:block;max-width:100%;height:auto}
 .gallery button{background:var(--film);border:2px solid transparent;border-radius:6px;padding:4px;cursor:pointer;display:flex;flex-direction:column;gap:4px;align-items:center;color:#cfd8df;font:500 12px var(--sans)}
 .gallery button[aria-pressed="true"]{border-color:var(--data)}
 .gallery canvas{width:100%;aspect-ratio:1;image-rendering:pixelated}
+.readout.math{font-family:var(--sans);font-size:16px;overflow-x:auto;overflow-y:hidden}
+.readout.math .katex-display{margin:.4em 0}
 .readout{font-family:var(--mono);font-size:14px;background:var(--soft);border-radius:6px;padding:8px 12px;font-variant-numeric:tabular-nums}
 .pipeline{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px}
 .pipeline span{padding:4px 10px;border-radius:4px;border:1px solid var(--line);background:var(--soft)}
@@ -240,8 +246,8 @@ a{color:var(--data)}
     <div class="eyebrow">3 · 모델</div>
     <h2>숫자 784개를 확률 하나로 바꾸는 함수</h2>
     <p>모델(model)은 입력 숫자에 <span class="tag vec">가중치(weight)</span>를 곱해 더하는 계산을 여러 겹 쌓은 함수입니다. 학습 전 가중치는 무작위라서 엉뚱한 답을 냅니다. 가장 단순한 형태부터 보겠습니다.</p>
-    <div class="readout" style="line-height:1.9">z = w₁x₁ + w₂x₂ + … + w₇₈₄x₇₈₄ + b<br>p = σ(z) = 1 / (1 + e<sup>−z</sup>)</div>
-    <p class="note"><b>x₁…x₇₈₄</b>: 정규화된 픽셀 값 · <b>w₁…w₇₈₄</b>: 픽셀마다 하나씩 있는 가중치(이 픽셀이 밝으면 폐렴 쪽으로 얼마나 기울일지) · <b>b</b>: 절편(bias), 모든 픽셀이 0일 때의 기본 점수 · <b>z</b>: 점수 · <b>σ</b>: 시그모이드(sigmoid), 어떤 점수든 0~1 사이 확률로 눌러 담는 함수 · <b>p</b>: 모델이 말하는 "폐렴일 확률".</p>
+    <div class="readout math">\[ z = w_1 x_1 + w_2 x_2 + \cdots + w_{784} x_{784} + b \]\[ p = \sigma(z) = \frac{1}{1 + e^{-z}} \]</div>
+    <p class="note">\(x_1, \ldots, x_{784}\): 정규화된 픽셀 값 · \(w_1, \ldots, w_{784}\): 픽셀마다 하나씩 있는 가중치(이 픽셀이 밝으면 폐렴 쪽으로 얼마나 기울일지) · \(b\): 절편(bias), 모든 픽셀이 0일 때의 기본 점수 · \(z\): 점수 · \(\sigma\): 시그모이드(sigmoid), 어떤 점수든 0~1 사이 확률로 눌러 담는 함수 · \(p\): 모델이 말하는 "폐렴일 확률".</p>
     <p>이것이 로지스틱 회귀(logistic regression)이고, 층이 하나뿐인 신경망입니다. 5단계에서 이 모델을 직접 학습시킵니다. 실전에서는 아래의 합성곱 층을 앞에 쌓은 <b>합성곱 신경망(CNN, Convolutional Neural Network)</b>을 씁니다.</p>
 
     <h3>합성곱(Convolution): 작은 돋보기로 훑기</h3>
@@ -279,8 +285,8 @@ a{color:var(--data)}
     <div class="eyebrow">4 · 손실 함수</div>
     <h2>얼마나 틀렸는지를 숫자 하나로</h2>
     <p>학습하려면 "지금 얼마나 틀렸는가"를 숫자로 재야 합니다. 이 숫자가 <span class="tag loss">손실(loss)</span>입니다. 정답이 두 가지일 때는 이진 교차 엔트로피(Binary Cross-Entropy)를 씁니다.</p>
-    <div class="readout">손실 L = −[ y·log(p) + (1−y)·log(1−p) ]</div>
-    <p class="note"><b>y</b>: 정답(0 또는 1) · <b>p</b>: 모델이 낸 폐렴 확률 · <b>log</b>: 자연로그. y=1이면 −log(p)만 남고, y=0이면 −log(1−p)만 남습니다.</p>
+    <div class="readout math">\[ L = -\bigl[\, y \log p + (1-y)\log(1-p) \,\bigr] \]</div>
+    <p class="note">\(L\): 손실 · \(y\): 정답(0 또는 1) · \(p\): 모델이 낸 폐렴 확률 · \(\log\): 자연로그. \(y=1\)이면 \(-\log p\)만 남고, \(y=0\)이면 \(-\log(1-p)\)만 남습니다.</p>
     <div class="row">
       <div class="col">
         <div class="controls" role="group" aria-label="정답 선택">
@@ -302,14 +308,14 @@ a{color:var(--data)}
     <div class="eyebrow">5 · 학습</div>
     <h2>손실이 줄어드는 쪽으로 가중치를 조금씩</h2>
     <p><b>경사하강법(Gradient Descent)</b>: 가중치 하나하나에 대해 "이 값을 조금 올리면 손실이 늘까, 줄까"를 계산하고(기울기, gradient), 줄어드는 쪽으로 <b>학습률(learning rate)</b>만큼 옮깁니다. 학습용 사진 전체를 한 번 훑는 것을 <b>에폭(epoch)</b>이라고 합니다.</p>
-    <div class="readout">w ← w − η · ∂L/∂w</div>
-    <p class="note"><b>η</b>(에타): 학습률, 한 번에 움직이는 보폭 · <b>∂L/∂w</b>: 가중치 w를 아주 조금 바꿨을 때 손실 L이 변하는 비율(기울기).</p>
+    <div class="readout math">\[ w \leftarrow w - \eta \, \frac{\partial L}{\partial w} \]</div>
+    <p class="note">\(\eta\)(에타): 학습률, 한 번에 움직이는 보폭 · \(\partial L / \partial w\): 가중치 \(w\)를 아주 조금 바꿨을 때 손실 \(L\)이 변하는 비율(기울기).</p>
     <p>아래는 3단계의 로지스틱 회귀 모델을 합성 사진 학습용 3,882장(정상 388 · 폐렴 3,494, 실제 학습용과 같은 구성)으로 이 브라우저에서 실제로 학습시키는 장면입니다<span class="toy">설명용 합성 데이터</span>. 입력은 0~1로 정규화한 뒤 픽셀마다 학습용 사진들의 평균을 뺀 값입니다(2단계에서 말한 "한 번 더 맞추기").</p>
     <div class="controls">
       <button class="btn" id="trainBtn">학습 시작</button>
       <button class="btn ghost" id="stepBtn">1 에폭만</button>
       <button class="btn ghost" id="resetBtn">처음부터</button>
-      <label for="lrSel" class="note" style="margin-left:6px">학습률 η</label>
+      <label for="lrSel" class="note" style="margin-left:6px">학습률 \(\eta\)</label>
       <select id="lrSel" style="font:14px var(--mono);padding:6px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink)">
         <option value="0.5">0.5 (느림)</option>
         <option value="10" selected>10</option>
@@ -518,7 +524,7 @@ drawZoom(14,10);
 
 // ---------- step 2 ----------
 const rawS=document.getElementById('rawSlider');
-function upNorm(){const v=+rawS.value;document.getElementById('rawVal').textContent=v;document.getElementById('normRead').innerHTML=`${v} ÷ 255 = <b>${(v/255).toFixed(3)}</b>`}
+function upNorm(){const v=+rawS.value;document.getElementById('rawVal').textContent=v;document.getElementById('normRead').innerHTML=`\\(${v} \\div 255 = \\mathbf{${(v/255).toFixed(3)}}\\)`}
 rawS.oninput=upNorm;upNorm();
 const flat=document.getElementById('flat'),fc=flat.getContext('2d');let flatAnim=null;
 function drawFlat(rows){fc.fillStyle=css('--film');fc.fillRect(0,0,784,28);const img=SAMPLES[sel].img;
@@ -549,7 +555,7 @@ function axes(c,W,H,m,xmax,ymax,xt,yt,xl,yl){c.clearRect(0,0,W,H);c.font='12px '
   xt.forEach(v=>{const x=m.l+(v/xmax)*(W-m.l-m.r);c.textAlign='center';c.fillText(v,x,H-m.b+16)});
   c.textAlign='left';c.fillText(yl,m.l,m.t-6);c.textAlign='right';c.fillText(xl,W-m.r,H-4)}
 function drawLoss(){const p=pS.value/100;document.getElementById('pVal').textContent=p.toFixed(2);const L=bce(p,yT);
-  document.getElementById('lossRead').innerHTML=`L = −log(${yT?p.toFixed(2):(1-p).toFixed(2)}) = <b style="color:var(--loss)">${L.toFixed(3)}</b>`;
+  document.getElementById('lossRead').innerHTML=`\\(L = -\\log(${yT?p.toFixed(2):(1-p).toFixed(2)}) = {\\color{#B26A00}\\mathbf{${L.toFixed(3)}}}\\)`;
   const c=lossCv.getContext('2d'),W=360,H=240,m={l:40,r:12,t:22,b:34},ymax=5,sx=v=>m.l+v*(W-m.l-m.r),sy=v=>H-m.b-Math.min(v,ymax)/ymax*(H-m.t-m.b);
   axes(c,W,H,m,1,ymax,[0,.25,.5,.75,1],[0,1,2,3,4,5],'p (폐렴 확률)','손실 L');
   c.strokeStyle=css('--loss');c.lineWidth=2.5;c.beginPath();for(let i=1;i<=199;i++){const q=i/200,x=sx(q),y=sy(bce(q,yT));i===1?c.moveTo(x,y):c.lineTo(x,y)}c.stroke();
