@@ -226,6 +226,17 @@
 - 목차는 `IntersectionObserver`로 현재 읽는 섹션에 `.on`을 적용한다.
 - 860px 이하에서는 레일을 상단 영역으로 바꾸고, 목차는 가로 스크롤이 가능한
   한 줄로 전환한다. 이때 레일 푸터는 숨긴다.
+- 레일 맨 아래에는 라이선스 한 줄(`.rail-license`)을 둔다. 자료는 모두
+  CC BY-SA 4.0을 따르므로 다음 markup을 레일 `footer` 바로 뒤에 넣는다.
+
+  ```html
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko"
+    target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+  ```
+
+  10.5px / `#7c88a8`에 위쪽 구분선(`#22304f`)을 두고, 링크는 `#9fb0d0`,
+  hover·focus에서 `--amber`로 바뀐다. 레일 푸터와 달리 **860px 이하에서도
+  숨기지 않는다**(라이선스 고지는 모든 화면에서 보여야 한다).
 - 한 화면 안에 끝나는 아주 짧은 자료처럼 레일이 탐색에 도움이 되지 않는 경우만
   예외로 하며, 예외 여부는 구현 시 명시한다.
 
