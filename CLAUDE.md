@@ -57,6 +57,21 @@ Because the site can be served from a GitHub Pages *project* subpath (not
 domain root), all internal links and asset references in `docs/` must be
 relative paths — never root-absolute (`/...`) paths.
 
+## Tags on published material pages
+
+Every published page under `docs/{subject}/` carries tags so materials can be
+found by topic. **When creating a new published document, decide its tags
+first — before writing the body.** Each set is one subject tag + one kind tag
+(`개념정리` | `시뮬레이션` | `시각화` | `사례분석`) + 2–5 topic tags, in that
+order. Put the same values in two places:
+
+- the page's left rail, as `#태그명` pill badges in
+  `<div class="rail-tags">` (styles live in `docs/assets/material.css`);
+- the entry's `tags` array in `docs/assets/materials.js` (no `#`).
+
+Reuse an existing tag before inventing a near-duplicate. The vocabulary,
+markup and the current per-document tag table are in `DESIGN.md` → "태그".
+
 ## Working conventions (from AGENTS.md)
 
 This repo is jointly maintained with Codex; `AGENTS.md` is the shared
