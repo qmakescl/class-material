@@ -21,8 +21,8 @@
   --data-science-tint: #e6f8f0;
   --ai: #8b3ff0;
   --ai-tint: #f3ebff;
-  --common: #e2662a;
-  --common-tint: #fdece0;
+  --things: #e2662a;
+  --things-tint: #fdece0;
   --life: #e0367a;
   --life-tint: #fdeaf1;
 
@@ -162,8 +162,8 @@ nav a.is-active .dot {
   color: var(--ai);
 }
 
-.dot-common {
-  color: var(--common);
+.dot-things {
+  color: var(--things);
 }
 
 .dot-life {
@@ -289,9 +289,9 @@ h2 {
   background: var(--ai);
 }
 
-.pill-common {
+.pill-things {
   color: white;
-  background: var(--common);
+  background: var(--things);
 }
 
 .pill-life {
@@ -320,8 +320,8 @@ h2 {
   background: var(--ai-tint);
 }
 
-.subject[data-subject="common"] {
-  background: var(--common-tint);
+.subject[data-subject="things"] {
+  background: var(--things-tint);
 }
 
 .subject[data-subject="life"] {
@@ -340,8 +340,8 @@ h2 {
   color: var(--ai);
 }
 
-.subject[data-subject="common"] .eyebrow {
-  color: var(--common);
+.subject[data-subject="things"] .eyebrow {
+  color: var(--things);
 }
 
 .subject[data-subject="life"] .eyebrow {
@@ -404,9 +404,9 @@ h2 {
   border-color: var(--ai);
 }
 
-.subject[data-subject="common"] .section-empty {
-  color: var(--common);
-  border-color: var(--common);
+.subject[data-subject="things"] .section-empty {
+  color: var(--things);
+  border-color: var(--things);
 }
 
 .subject[data-subject="life"] .section-empty {
@@ -460,8 +460,8 @@ a.material-card .card-status {
   border-left-color: var(--ai);
 }
 
-.subject[data-subject="common"] .material-card {
-  border-left-color: var(--common);
+.subject[data-subject="things"] .material-card {
+  border-left-color: var(--things);
 }
 
 .subject[data-subject="life"] .material-card {
@@ -524,7 +524,7 @@ a.material-card .card-status {
 .subject[data-subject="statistics"] .section-more a:hover { color: var(--statistics); }
 .subject[data-subject="data-science"] .section-more a:hover { color: var(--data-science); }
 .subject[data-subject="ai"] .section-more a:hover { color: var(--ai); }
-.subject[data-subject="common"] .section-more a:hover { color: var(--common); }
+.subject[data-subject="things"] .section-more a:hover { color: var(--things); }
 .subject[data-subject="life"] .section-more a:hover { color: var(--life); }
 
 .subject-index {
@@ -585,7 +585,7 @@ a.material-card .card-status {
 .subject[data-subject="statistics"] .card-grid-3 .material-card { border-top-color: var(--statistics); border-left-color: var(--line); }
 .subject[data-subject="data-science"] .card-grid-3 .material-card { border-top-color: var(--data-science); border-left-color: var(--line); }
 .subject[data-subject="ai"] .card-grid-3 .material-card { border-top-color: var(--ai); border-left-color: var(--line); }
-.subject[data-subject="common"] .card-grid-3 .material-card { border-top-color: var(--common); border-left-color: var(--line); }
+.subject[data-subject="things"] .card-grid-3 .material-card { border-top-color: var(--things); border-left-color: var(--line); }
 .subject[data-subject="life"] .card-grid-3 .material-card { border-top-color: var(--life); border-left-color: var(--line); }
 
 @media (max-width: 1000px) {

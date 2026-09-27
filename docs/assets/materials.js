@@ -1,6 +1,6 @@
 /* 자료 목록의 단일 원본. 새 자료를 발행하면 이 배열 끝에 한 항목을 추가한다.
    홈(최근 3개)과 과목별 목록 페이지(전체, 최신순)가 모두 이 목록을 읽는다.
-   - subject: statistics | data-science | ai | common | life
+   - subject: statistics | data-science | ai | things | life
    - href: docs/ 기준 상대 경로 (예: "statistics/foo.html")
    - tags: 과목 1개 + 유형 1개 + 주제 2~5개 (DESIGN.md "태그" 참고)
    - date: 발행일 YYYY-MM-DD (같은 날짜면 배열에서 뒤쪽이 더 최신) */

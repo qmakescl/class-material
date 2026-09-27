@@ -35,7 +35,11 @@
 | 통계 | `--statistics` `#2f6fed` | `--statistics-tint` |
 | 데이터과학 | `--data-science` `#0ea968` | `--data-science-tint` |
 | 인공지능 | `--ai` `#8b3ff0` | `--ai-tint` |
-| 일반적인것들 | `--common` `#e2662a` | `--common-tint` |
+| 알아두면 좋을만한 | `--things` `#e2662a` | `--things-tint` |
+
+과목 키(`things`)와 화면에 쓰는 이름("알아두면 좋을만한 :)")은 다를 수 있다.
+키는 폴더명·CSS 변수·`materials.js`의 `subject`에, 이름은 내비게이션·제목·
+태그에 쓴다.
 | 이것저것 | `--life` `#e0367a` | `--life-tint` |
 
 과목 색은 다음 요소에 일관되게 적용된다: 내비게이션 `.dot-{subject}`, 히어로
@@ -112,7 +116,7 @@
 
 ```js
 {
-  subject: "statistics",            // statistics | data-science | ai | common | life
+  subject: "statistics",            // statistics | data-science | ai | things | life
   label: "인터랙티브 실습",
   title: "제목",
   description: "한 줄 설명",
@@ -126,7 +130,7 @@
 - **홈** `docs/index.html`: 과목 섹션마다 `data-limit="3"` 컨테이너로 최근
   3개만 보여 주고, 아래 "○○ 자료 전체 보기 →" 링크가 목록 페이지로 연결된다.
 - **과목별 목록 페이지** `docs/{subject}/index.html`(`statistics/`,
-  `data-science/`, `ai/`, `common/`, `life/`): 해당 과목 전체를 최신순으로
+  `data-science/`, `ai/`, `things/`, `life/`): 해당 과목 전체를 최신순으로
   보여 주며, `.card-grid-3`로 **한 행에 카드 3개**(1000px 이하 2개, 640px
   이하 1개)를 세로형 카드로 배치한다. 헤더 내비게이션은 각 목록 페이지로
   연결되고 현재 과목에 `.is-active`가 붙는다.
@@ -261,7 +265,7 @@
 
 | 자리 | 어휘 |
 | --- | --- |
-| 과목 | `통계` `데이터과학` `인공지능` `일반` `이것저것` (`materials.js`의 `subject`와 1:1) |
+| 과목 | `통계` `데이터과학` `인공지능` `알아두면좋을만한` `이것저것` (`materials.js`의 `subject`와 1:1) |
 | 유형 | `개념정리` `시뮬레이션` `시각화` `사례분석` 중 하나 |
 | 주제 | 그 자료의 핵심 개념 (아래 표기 규칙) |
 
@@ -287,7 +291,12 @@
 - `.rail-tags` / `.rail-tag`는 `docs/assets/material.css`에 정의한다. 페이지
   `<style>`에서 다시 정의하지 않는다.
 - pill badge: `border-radius: 999px`, 배경 `#16213d`, 테두리 `#2b3a5e`, 글자
-  `#b7c2de` — 어두운 레일 위에서 목차보다 한 단계 약한 대비로 둔다.
+  `#9fb0d0`, `font-size: 11px` / `font-weight: 600` — 어두운 레일 위에서 목차
+  (13.5px)보다 작고 한 단계 약한 대비로 둔다. 목차와 구분되도록 위쪽에
+  `border-top: 1px solid #22304f`로 얇은 구분선을 둔다.
+- 크기·색을 `font` 단축 속성으로 쓰지 않는다. `font: 600 11px var(--sans)`처럼
+  쓰면 일부 브라우저에서 `var()` 때문에 선언 전체가 무시되어 태그가 본문 크기의
+  맨 텍스트로 보일 수 있다. 각 속성을 따로 쓴다.
 - 태그는 현재 링크가 아닌 표시 전용이다. 태그로 거르는 화면을 붙일 때는
   `.rail-tag`를 `<a>`로 바꾸고 `materials.js`의 `tags`를 기준으로 필터링한다.
 - 860px 이하(레일이 상단으로 바뀌는 폭)에서도 태그는 그대로 보인다. 레일
