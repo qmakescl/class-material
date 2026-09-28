@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>통계적 가설검정 | Q의 아카이브</title>
 <link rel="canonical" href="https://qmakescl.github.io/class-material/statistics/hypothesis-testing.html">
-<meta name="description" content="통계적 가설검정의 핵심 개념과 절차를 시뮬레이션으로 탐구하는 통계 자료입니다.">
+<meta name="description" content="모집단 평균에 대한 검정을 예로 삼아 통계적 가설검정의 핵심 개념과 절차를 시뮬레이션으로 탐구하는 통계 자료입니다.">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Q의 데이터 이야기 자료">
 <meta property="og:title" content="통계적 가설검정 | Q의 아카이브">
-<meta property="og:description" content="가설, 유의수준, 검정력, p값과 가설검정 절차를 시뮬레이션으로 탐구합니다.">
+<meta property="og:description" content="모집단 평균에 대한 검정을 예로 삼아 가설, 유의수준, 검정력, p값과 가설검정 절차를 시뮬레이션으로 탐구합니다.">
 <meta property="og:url" content="https://qmakescl.github.io/class-material/statistics/hypothesis-testing.html">
 <meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
 <meta property="og:image:type" content="image/png">
@@ -32,6 +32,7 @@
   .section-head { display:flex; align-items:baseline; gap:14px; }
   .section-num { font-size:15px; color:var(--muted); font-weight:700; }
   .section-sub { color:var(--muted); font-size:14px; }
+  main > header .callout { margin-top:16px; font-size:14.5px; line-height:1.7; }
   .kicker { font-size:12px; letter-spacing:.07em; text-transform:uppercase; color:var(--accent); font-weight:700; }
   .kicker.warn { color:var(--pos); }
 
@@ -107,6 +108,9 @@
   .case-title { margin:18px 0 8px; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
   .case-title .tag { font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
   .decision-card.sm { font-size:14px; padding:10px 14px; }
+  .decision-card .v-pick { display:block; }
+  .decision-card .v-stmt { display:block; margin-top:8px; padding-top:8px; border-top:1px solid currentColor; font-weight:500; font-size:14.5px; line-height:1.65; opacity:.9; }
+  .decision-card.sm .v-stmt { margin-top:6px; padding-top:6px; font-size:13.5px; }
 
   main > footer h3 { font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
 </style>
@@ -123,7 +127,7 @@
     <a href="#hypotheses"><b>01</b><span>가설</span></a>
     <a href="#test-stat"><b>02</b><span>검정통계량</span></a>
     <a href="#alpha-power"><b>03</b><span>유의수준과 검정력</span></a>
-    <a href="#p-value"><b>04</b><span>유의확률과 효과크기</span></a>
+    <a href="#p-value"><b>04</b><span>유의확률</span></a>
     <a href="#verdict-term"><b>05</b><span>판정</span></a>
     <a href="#ex-hypotheses"><b>06</b><span>가설 수립</span></a>
     <a href="#ex-alpha"><b>07</b><span>유의수준 정하기</span></a>
@@ -147,20 +151,21 @@
       <div class="eyebrow">통계적 추론 · 이야기 자료</div>
       <h2 class="page-title">통계적 가설검정</h2>
       <p class="lede">통계적 가설검정은 표본을 이용해 모집단 특성에 대한 주장의 타당성을 판정하는 통계적 추론방법입니다.<br /> — 용어를 정리한 뒤, 평균 170·표준편차 6인 정규모집단에서 뽑은 표본 16개로 "모평균이 172인가"를 직접 검정해봅니다.</p>
+      <p class="callout"><strong>다루는 검정 — 모집단 평균(모평균 \(\mu\))에 대한 검정</strong>입니다. 이 자료의 모든 설명·수식·시각화는 모표준편차 \(\sigma\)를 아는 단일표본 z-검정을 기준으로 합니다. 모비율·모분산처럼 다른 모수를 검정할 때도 검정통계량의 형태만 달라지고, 여기서 다루는 절차와 개념은 그대로 적용됩니다.</p>
     </header>
     <section id="terms">
       <div class="section-head"><span class="section-num">01</span><h2>용어 정리</h2></div>
-      <p class="section-sub">가설검정의 다섯 가지 핵심 용어를 순서대로 정리합니다.</p>
+      <p class="section-sub">가설검정의 다섯 가지 핵심 용어를 순서대로 정리합니다. 예시는 모두 모평균 \(\mu\)에 대한 검정입니다.</p>
 
       <article class="panel" id="hypotheses">
         <div class="kicker">Hypotheses</div>
         <h3>가설 — 영가설과 대안가설</h3>
-        <p><strong>영가설(귀무가설, \(H_{0}\))</strong>은 "차이가 없다·효과가 없다"처럼 기본적으로 참이라고 가정하고 검증 대상으로 삼는 잠정적 주장입니다. <strong>대안가설(대립가설, \(H_{1}\))</strong>은 영가설이 아닌 상태(\(\lnot H_{0}\))를 대신 받아들이는, 연구자가 실제로 보이고 싶어하는 모집단 특성에 대한 주장으로 연구가설이라고도 합니다.</p>
+        <p><strong>영가설(귀무가설, \(H_{0}\))</strong>은 "차이가 없다·효과가 없다"처럼 기본적으로 참이라고 가정하고 검증 대상으로 삼는 잠정적 주장입니다. <strong>대안가설(대립가설, \(H_{1}\))</strong>은 영가설이 아닌 상태(\(not~ H_{0}\))를 대신 받아들이는, 연구자가 실제로 보이고 싶어하는 모집단 특성에 대한 주장으로 연구가설이라고도 합니다.</p>
         <div class="card formula-card">
           \[H_{0} : \mu  = \mu _{0}\]
           <div class="note">양쪽: \(H_{1} : \mu \ne \mu_{0}\) &nbsp;|&nbsp; 한쪽: \(H_{1} : \mu < \mu_{0}\) 또는 \(H_{1} : \mu > \mu_{0}\)<br>한쪽검정의 영가설은 \(H_{0} : \mu \ge \mu_{0}\) (또는 \(\le\))로 쓰기도 하며, 검정은 경계값 \(\mu=\mu_{0}\)를 기준으로 합니다.</div>
         </div>
-        <p>아래는 표본평균 \(\bar{X}\)(\(n=16\), \(\sigma=6\))의 분포입니다. 영가설이 참이면 \(\bar{X}\sim N(172,\ 1.5^{2})\)이고, 대안가설이 참이면 분포의 중심이 172에서 벗어납니다. 대안가설의 형태를 골라 두 분포를 비교해보세요. (예시로 대안가설의 모평균을 172에서 4만큼 떨어진 값으로 두었습니다. 어느 지점부터 \(H_{0}\)를 기각할지, 그 경계를 어떻게 정하는지는 뒤의 "유의수준과 검정력"에서 다룹니다.)</p>
+        <p>아래는 표본평균 \(\bar{X}\)(\(n=16\), \(\sigma=6\))의 분포입니다. 영가설이 참이면 \(\bar{X}\sim N(172,\ { \left( \frac{6}{\sqrt{16}} \right) }^{2})\)이고, 대안가설이 참이면 분포의 중심이 172에서 벗어납니다. 대안가설의 형태를 골라 두 분포를 비교해보세요. (예시로 대안가설의 모평균을 172에서 4만큼 떨어진 값으로 두었습니다. 어느 지점부터 \(H_{0}\)를 기각할지, 그 경계를 어떻게 정하는지는 뒤의 "유의수준과 검정력"에서 다룹니다.)</p>
         <div class="level-row" role="group" aria-label="대안가설 선택">
           <button class="level-btn blue-active ht-h1 active" data-h1="two" type="button">양쪽 (\(\mu \ne 172\))</button>
           <button class="level-btn blue-active ht-h1" data-h1="less" type="button">한쪽 (\(\mu < 172\))</button>
@@ -170,7 +175,7 @@
           <svg id="h1-svg" viewBox="0 0 640 230"></svg>
         </div>
         <div class="legend">
-          <span class="sw"><span class="dot" style="background:var(--ink)"></span>\(H_{0}\) 하의 분포 \(N(172,\ 1.5^{2})\)</span>
+          <span class="sw"><span class="dot" style="background:var(--ink)"></span>\(H_{0}\) 하의 분포 \(N(172,\ {\left( \frac{6}{\sqrt{16}  }\right) }^{2})\)</span>
           <span class="sw"><span class="dot blue"></span>\(H_{1}\) 하의 분포 (예: \(\mu = \)<span id="h1-mean-legend">168, 176</span>)</span>
         </div>
         <p class="note">가설검정은 \(H_{1}\)이 맞다는 것을 직접 증명하는 절차가 아니라, "\(H_{0}\)가 맞다면 이런 데이터가 나올 가능성이 얼마나 낮은가"를 따져 \(H_{0}\)를 <em>기각할지 말지</em>를 결정하는 절차입니다.</p>
@@ -179,12 +184,19 @@
       <article class="panel" id="test-stat">
         <div class="kicker">Test Statistic</div>
         <h3>검정통계량</h3>
-        <p>표본으로부터 계산하는 하나의 숫자로, 관측값이 영가설에서 얼마나 벗어나 있는지를 표준화된 단위로 나타냅니다. 모표준편차 \(\sigma\)를 아는 경우(z-검정)에는 표본평균을 다음과 같이 표준화합니다.</p>
+        <p>표본으로부터 계산하는 하나의 숫자로, 관측값이 영가설에서 얼마나 벗어나 있는지를 표준화된 단위로 나타냅니다. 모표준편차 \(\sigma\)를 아는 경우(z-검정)에는 표본평균을 다음과 같이 표준화합니다. 여기서 \( \mu_{0} \) 는 영가설 하에서의 평균으로 검정통계량은 <b>영가설이 참으로 가정( \( under\ H_{0}\) )</b>하고 계산합니다.</p>
         <div class="card formula-card">
           \[Z = \frac{\bar{X} - \mu _{0}}{\sigma /\sqrt{n}}\]
           <div class="note">\(\sigma\)를 모를 때는 표본표준편차 s로 대체하고 자유도 n−1의 t분포를 사용합니다 (t-검정).</div>
         </div>
-        <p>임의의 표본 16개를 뽑아 Z를 계산하고, 영가설 하의 표준정규분포에서 그 위치와 관측된 Z보다 극단적인 값이 나올 확률(붉은 음영)을 확인해봅니다. 이 확률을 어느 기준과 견주어 판정할지는 뒤의 두 절에서 다룹니다. 검정 방향은 자료와 무관하게 연구자가 정하는 것이지만, 여기서는 두 상황을 대비해 보여주기 위해 양쪽검정일 때는 \(H_{0}\)가 참인 모집단(\(\mu=\mu_{0}=172\))에서, 한쪽검정일 때는 \(H_{0}\)가 거짓인 모집단(\(\mu=170\))에서 표본을 뽑습니다.</p>
+        <p>임의의 표본 16개를 뽑아 Z를 계산하고, 영가설 하의 표준정규분포에서 그 위치와 관측된 Z보다 극단적인 값이 나올 확률(붉은 음영)을 확인해봅니다. 이 확률을 어느 기준과 견주어 판정할지는 뒤의 두 절에서 다룹니다. </p>
+        <ul>
+          <li>검정 방향은 자료와 무관하게 연구자가 정하는 것이지만, 여기서는 두 상황을 대비해 보여주기 위해 </li>
+          <ul>
+            <li>양쪽검정( \(H_{1}:\mu \neq 172\)): \(H_{0}\)가 참인 모집단(\(\mu=\mu_{0}=172\))에서 표본을 뽑았습니다.</li>
+            <li>한쪽검정( \(H_{1}:\mu < 172\)): \(H_{0}\)가 거짓인 모집단(\(\mu=170\))에서 표본을 뽑았습니다.</li>
+          </ul>
+        </ul>
         <div class="controls">
           <button class="btn" id="ts-draw" type="button">임의의 표본 뽑기 (n = 16)</button>
         </div>        
@@ -210,12 +222,6 @@
       <article class="panel" id="alpha-power">
         <div class="kicker">Significance Level &amp; Power</div>
         <h3>유의수준과 검정력</h3>
-        <h3>유의수준 = 판정의 기준</h3>
-        <p>유의수준은 단순히 "허용하는 오류율"이 아니라, 검정을 하기 <strong>전에</strong> 정해두는 <strong>판정의 기준</strong>입니다. \(H_{0}\)가 참일 때 검정통계량이 나올 수 있는 값의 분포에서, 바깥쪽 꼬리의 면적이 \(\alpha\)가 되는 경계를 잡으면 그것이 <strong>임계값</strong>이고, 그 바깥 영역이 <strong>기각역</strong>입니다. 그래서 \(\alpha\)가 정해지면 임계값이 정해지고, 관측한 검정통계량이 기각역에 들어가는지로 판정이 결정됩니다.</p>
-        <div class="card formula-card">
-          \[\alpha \;\Rightarrow\; \text{임계값 } z_{\alpha/2}\ (\text{양쪽}),\ z_{\alpha}\ (\text{한쪽}) \;\Rightarrow\; \text{기각역} \;\Rightarrow\; \text{판정}\]
-          <div class="note">\(\alpha\)를 작게 잡을수록 임계값은 0에서 멀어져 기각하기 어려워집니다 (1종 오류는 줄지만 2종 오류는 늘어납니다).</div>
-        </div>
 
         <p><strong>유의수준(\(\alpha\))</strong>은 영가설이 실제로 참인데도 잘못 기각할 확률(1종 오류율)의 상한입니다. 반대로 영가설이 실제로 거짓인데 기각하지 못하는 오류를 <strong>2종 오류(\(\beta\))</strong>라 하고, 그 반대 확률 \(1 - \beta\)를 <strong>검정력(power)</strong>이라 부릅니다 — 거짓인 영가설을 올바르게 기각할 확률입니다.</p>        
         <div class="two-col">
@@ -235,6 +241,15 @@
             <tr><th scope="row">\(H_{1}\) (참)</th><td class="bad">제2종 오류 (\(\beta\))</td><td class="ok">정상 (검정력 \(1-\beta\))</td></tr>
           </tbody>
         </table>
+
+        <h3>유의수준 = 판정의 기준</h3>
+        <p>유의수준은 단순히 "허용하는 오류율"이 아니라, 검정을 하기 <strong>전에</strong> 정해두는 <strong>판정의 기준</strong>입니다. \(H_{0}\)가 참일 때 검정통계량이 나올 수 있는 값의 분포에서, 바깥쪽 꼬리의 면적이 \(\alpha\)가 되는 경계를 잡으면 그것이 <strong>임계값</strong>이고, 그 바깥 영역이 <strong>기각역</strong>입니다. 그래서 \(\alpha\)가 정해지면 임계값이 정해지고, 관측한 검정통계량이 기각역에 들어가는지로 판정이 결정됩니다.</p>
+        <div class="card formula-card">
+          \[\alpha \;\Rightarrow\; \text{임계값 } z_{\alpha/2}\ (\text{양쪽}),\ z_{\alpha}\ (\text{한쪽}) \;\Rightarrow\; \text{기각역} \;\Rightarrow\; \text{판정}\]
+          <div class="note">\(\alpha\)를 작게 잡을수록 임계값은 0에서 멀어져 기각하기 어려워집니다 (1종 오류는 줄지만 2종 오류는 늘어납니다).</div>
+        </div>
+
+        
 
         <p>아래에서 영가설의 분포(검정 \(\alpha = 0.05\), 양쪽)와 실제 모평균이 다를 때의 분포를 겹쳐보면, 두 분포가 멀어질수록 검정력이 커지는 것을 볼 수 있습니다. 실제 모평균 슬라이더를 움직여보세요.</p>
         <div class="slider-row">
@@ -287,11 +302,11 @@
 
       <article class="panel" id="p-value">
         <div class="kicker">P-Value &amp; Effect Size</div>
-        <h3>유의확률(p-value)과 효과크기</h3>
-        <p><strong>유의확률(p-value)</strong>은 영가설이 참이라고 가정했을 때, 지금 관측한 검정통계량만큼 극단적이거나 더 극단적인 값이 나올 확률입니다. p-값이 작을수록 "영가설이 참이라면 일어나기 힘든 일이 일어났다"는 뜻이 되어 영가설에 불리한 증거가 됩니다.</p>
+        <h3>유의확률</h3>
+        <p><strong>유의확률(\(p-value\))</strong>은 표본으로부터 계산한 검정통계량보다 극단적인 값이 나올 확률입니다. 유의확률이 작을수록 "영가설이 참이라면 일어나기 힘든 일이 일어났다"는 뜻이 되어 검정통계량을 계산할 때 수립한 영가설이 참이라는 가정을 지지하기 어려워집니다.</p>
         <div class="card formula-card">
           \[p = P_{H_{0}}( Z \ge  |z_{\text{관측}}| )\]
-          <div class="note">한쪽 꼬리의 확률입니다. 양쪽검정에서는 반대쪽 꼬리까지 더해 \(p = 2\,P_{H_{0}}(Z \ge |z_{\text{관측}}|)\)로 계산합니다.</div>
+          <div class="note">한쪽 꼬리의 확률입니다. 양쪽검정에서는 반대쪽 꼬리까지 더해 \(p = P_{H_{0}}(Z \le -z_{\text{관측}}) + P_{H_{0}}(Z \ge z_{\text{관측}})\) 로 계산합니다.</div>
         </div>
         <p>앞 절에서 계산한 검정통계량 Z가 곧 이 확률의 출발점입니다. 표본평균 \(\bar{X}\)를 Z로 표준화하면 영가설 하의 표준정규분포 위에 한 점이 찍히고, 그 점보다 바깥쪽 꼬리의 면적이 유의확률입니다. 슬라이더로 Z를 움직여보세요.</p>
         <div class="level-row" role="group" aria-label="검정 방향 선택">
@@ -317,10 +332,36 @@
         </div>
 
         <h3>효과크기 (Effect Size)</h3>
-        <p>p-값은 표본크기가 커지면 아주 작은 차이에도 작아질 수 있어(아래 "같은 효과크기, 다른 표본크기" 그래프 참고), "통계적으로 유의함"이 "실질적으로 의미 있음"을 보장하지 않습니다. 이를 보완하는 지표가 <strong>효과크기</strong>이며, 표준편차 단위로 차이의 크기를 나타내는 Cohen's d가 대표적입니다.</p>
+        <p>유의확률은 표본크기가 커지면 아주 작은 차이에도 작아질 수 있어 "통계적으로 유의함"이 "실질적으로 의미 있음"을 보장하지 않습니다. </p>
+        
+        <h4>표본크기가 다르면...</h4>
+        <p>표본이 충분히 크면 <strong>아주 작은 차이도 유의한 결과</strong>가 됩니다. 실제 모평균이 \(\mu_{0}\)에서 조금밖에 벗어나 있지 않아도, 표본크기 \(n\)이 커지면 표준오차 (\(\sigma/\sqrt{n}\))가 작아져 \(H_{0}\) 하의 표본평균 분포가 좁아지고, 같은 크기의 차이가 훨씬 극단적인 값으로 바뀝니다. 표본평균이 실제 모평균과 같게 관측되었다고 하면 \(|Z| = \dfrac{|\mu - \mu_{0}|}{\sigma/\sqrt{n}}\)이므로, 차이가 그대로여도 \(|Z|\)는 \(\sqrt{n}\)에 비례해 커지고 유의확률은 작아집니다.</p>
+        <p>아래 버튼으로 \(n\)만 바꿔보세요. 모평균의 차이는 한 번도 커지지 않았는데 유의확률만 작아집니다 — 그래서 "유의하다"는 결과만으로는 그 차이가 실질적으로 큰지 알 수 없습니다.</p>
+        <div class="level-row" role="group" aria-label="표본크기 선택">
+          <button class="level-btn blue-active es-n" data-n="16" type="button">n = 16</button>
+          <button class="level-btn blue-active es-n" data-n="100" type="button">n = 100</button>
+          <button class="level-btn blue-active es-n active" data-n="400" type="button">n = 400</button>
+          <button class="level-btn blue-active es-n" data-n="2000" type="button">n = 2000</button>
+        </div>
+        <div class="curve-wrap">
+          <svg id="es-n-svg" viewBox="0 0 640 230"></svg>
+        </div>
+        <div class="legend">
+          <span class="sw"><span class="dot" style="background:var(--ink)"></span>\(H_{0}\) 하의 \(\bar{X}\) 분포</span>
+          <span class="sw"><span class="dot blue"></span>실제 \(\bar{X}\) 분포</span>
+          <span class="sw"><span class="swatch crit"></span>기각역 (\(\alpha=0.05\), 양쪽)</span>
+        </div>
+        <div class="metrics">
+          <div><span>모평균의 차이 \(|\mu-\mu_{0}|\)</span><b id="esn-diff">-</b></div>
+          <div><span>표준오차 \(\sigma/\sqrt{n}\)</span><b id="esn-se">-</b></div>
+          <div><span>검정통계량 크기 \(|Z|\)</span><b id="esn-z">-</b></div>
+          <div><span>유의확률 p</span><b id="esn-p">-</b></div>
+        </div>
+
+        <p>이를 보완하는 지표가 <strong>효과크기</strong>이며, 표준편차 단위로 차이의 크기를 나타내는 Cohen's d가 대표적입니다.</p>
         <div class="card formula-card">
           \[d = \frac{\bar{X} - \mu _{0}}{\sigma }\]
-          <div class="note">표본으로 계산한 추정값입니다. 모집단 기준의 효과크기는 \(\bar{X}\) 대신 \(\mu\)를 쓴 \(d=(\mu-\mu_{0})/\sigma\)이며, 아래 그래프는 이 값을 사용합니다.</div>
+          <div class="note">표본으로 계산한 추정값입니다. 모집단 기준의 효과크기는 \(\bar{X}\) 대신 \(\mu\)를 쓴 \(d=(\mu-\mu_{0})/\sigma\)입니다. 이 문서의 두 그래프는 방향을 \(\mu < \mu_{0}\) 쪽으로 고정하고 그 크기 \(|d|\)만 슬라이더로 조절합니다 (\(\mu = 172 - 6|d|\), 따라서 \(d = -|d|\)).</div>
         </div>
         <div class="effect-row">
           <span class="effect-chip">d ≈ <b>0.2</b> — 작은 효과</span>
@@ -347,27 +388,7 @@
           <div><span>해석</span><b id="es-label">-</b></div>
         </div>
 
-        <h3>같은 효과크기, 다른 표본크기</h3>
-        <p>모집단의 차이(d)가 같아도 표본크기 n이 커지면 표본평균의 분포가 좁아져 \(H_{0}\) 아래의 분포와 거의 겹치지 않게 됩니다. 표본평균이 실제 평균(\(172-6d\))과 같게 관측되었다고 할 때, 검정통계량은 \(Z = -d\sqrt{n}\)이 되어 그 크기가 \(|Z| = d\sqrt{n}\)입니다. n에 따라 \(|Z|\)와 p-값이 어떻게 달라지는지 위의 d로 확인해보세요.</p>
-        <div class="level-row" role="group" aria-label="표본크기 선택">
-          <button class="level-btn blue-active es-n" data-n="16" type="button">n = 16</button>
-          <button class="level-btn blue-active es-n" data-n="100" type="button">n = 100</button>
-          <button class="level-btn blue-active es-n active" data-n="400" type="button">n = 400</button>
-          <button class="level-btn blue-active es-n" data-n="2000" type="button">n = 2000</button>
-        </div>
-        <div class="curve-wrap">
-          <svg id="es-n-svg" viewBox="0 0 640 230"></svg>
-        </div>
-        <div class="legend">
-          <span class="sw"><span class="dot" style="background:var(--ink)"></span>\(H_{0}\) 하의 \(\bar{X}\) 분포</span>
-          <span class="sw"><span class="dot blue"></span>실제 \(\bar{X}\) 분포</span>
-          <span class="sw"><span class="swatch crit"></span>기각역 (\(\alpha=0.05\), 양쪽)</span>
-        </div>
-        <div class="metrics">
-          <div><span>표준오차 \(6/\sqrt{n}\)</span><b id="esn-se">-</b></div>
-          <div><span>검정통계량 크기 \(|Z|=d\sqrt{n}\)</span><b id="esn-z">-</b></div>
-          <div><span>유의확률 p</span><b id="esn-p">-</b></div>
-        </div>
+        
 
         <div class="card">
           <div class="kicker warn">ASA Statement on P-Values (2016)</div>
@@ -399,12 +420,30 @@
       <article class="panel" id="verdict-term">
         <div class="kicker">Verdict</div>
         <h3>판정</h3>
-        <p>다음 두 기준은 항상 같은 결론을 줍니다.</p>
+        <p>판정은 두 단계로 이루어집니다. 먼저 <strong>어떤 가설을 선택할지 결정</strong>하고, 그 결정을 <strong>판정문으로 작성</strong>합니다.</p>
+        <div class="two-col">
+          <div class="card info-card">
+            <h5>① 가설 선택</h5>
+            <ul>
+              <li>\(p < \alpha\) — 즉 검정통계량이 기각역 안에 있으면 — \(H_{0}\)를 기각하고 \(H_{1}\)을 선택합니다.</li>
+              <li>\(p \ge \alpha\)이면 \(H_{0}\)를 기각하지 못하고 그대로 둡니다.</li>
+            </ul>
+          </div>
+          <div class="card info-card">
+            <h5>② 판정문 작성</h5>
+            <ul>
+              <li>기준으로 삼은 <strong>유의수준</strong>을 밝힙니다.</li>
+              <li>\(H_{0}\)의 <strong>기각 여부</strong>를 씁니다.</li>
+              <li>기각했다면 대안가설의 <strong>방향</strong>까지 문장으로 적고, 기각하지 못했다면 "근거가 충분하지 않다"로 맺습니다.</li>
+            </ul>
+          </div>
+        </div>
+        <p>①의 두 기준은 항상 같은 결론을 줍니다.</p>
         <div class="card formula-card" style="font-size:16px;">
           \(|Z| > z_{\text{critical}} \iff p < \alpha\)
           <div class="note">양쪽검정 기준입니다. 왼쪽 한쪽검정에서는 \(Z < -z_{\text{critical}} \iff p < \alpha\)가 대응합니다.<br>둘 중 하나를 만족하면 \(H_{0}\)를 기각하고, 그렇지 않으면 기각하지 못합니다.</div>
         </div>
-        <p>같은 검정통계량이라도 대안가설의 방향에 따라 임계값과 유의확률이 달라지고, 그래서 판정도 달라질 수 있습니다. 아래 탭은 <strong>하나의 임의의 검정통계량</strong>을 세 가지 검정에 똑같이 적용한 것입니다. 탭을 바꿔도 Z는 그대로이므로 판정만 어떻게 달라지는지 비교할 수 있습니다 (\(\alpha = 0.05\) 고정). 회색은 기각역, 붉은색은 유의확률에 해당하는 영역입니다.</p>
+        <p>같은 검정통계량이라도 대안가설의 방향에 따라 임계값과 유의확률이 달라지고, 그래서 판정도 달라질 수 있습니다. 아래 탭은 <strong>하나의 임의의 검정통계량</strong>을 세 가지 검정에 똑같이 적용한 것입니다. 탭을 바꿔도 Z는 그대로이므로 판정만 어떻게 달라지는지 비교할 수 있습니다 (\(\alpha = 0.05\) 고정). 회색은 기각역, 붉은색은 유의확률에 해당하는 영역입니다. 각 도표 아래 카드는 먼저 어떤 가설을 선택했는지 밝히고, 그 결정을 판정문으로 적어줍니다.</p>
         <div class="slider-row">
           <input type="range" id="vd-slider" min="-3.5" max="3.5" step="0.01" value="-1.75" aria-label="검정통계량 Z">
           <span class="n-value">Z = <span id="vd-z-value">-1.75</span></span>
@@ -460,7 +499,7 @@
 
     <section id="worked-example">
       <div class="section-head"><span class="section-num">02</span><h2>예제로 직접 해보기</h2></div>
-      <p class="section-sub">평균 170, 표준편차 6인 정규모집단 \(N(170,\ 6^{2})\)에서 표본 16개를 뽑아, "모평균이 172인가?"를 검정합니다. 모표준편차 \(\sigma=6\)은 알고 있다고 가정하여 z-검정을 사용합니다. 실제 모평균(170)과 영가설이 주장하는 값(172)에 일부러 차이를 두어, 검정이 어떻게 작동하는지 살펴봅니다.</p>
+      <p class="section-sub">모평균에 대한 단일표본 z-검정입니다. 평균 170, 표준편차 6인 정규모집단 \(N(170,\ 6^{2})\)에서 표본 16개를 뽑아, "모평균이 172인가?"를 검정합니다. 모표준편차 \(\sigma=6\)은 알고 있다고 가정하여 z-검정을 사용합니다. 실제 모평균(170)과 영가설이 주장하는 값(172)에 일부러 차이를 두어, 검정이 어떻게 작동하는지 살펴봅니다.</p>
 
       <article class="panel" id="ex-sample">
         <div class="kicker">Sample</div>
@@ -530,7 +569,7 @@
 
       <article class="panel" id="ex-verdict">
         <div class="step-head"><span class="step-badge">4</span><h3>판정</h3></div>
-        <p>같은 검정통계량 Z라도 양쪽검정이냐 한쪽검정이냐에 따라 p-값과 기각역이 달라집니다. 아래 도표에서 검정통계량(굵은 세로선)과 p-값(붉은 음영), 기각역(회색 음영)의 관계를 직접 비교해보세요.</p>
+        <p>같은 검정통계량 Z라도 양쪽검정이냐 한쪽검정이냐에 따라 p-값과 기각역이 달라집니다. 아래 도표에서 검정통계량(굵은 세로선)과 p-값(붉은 음영), 기각역(회색 음영)의 관계를 직접 비교해보세요. 도표 아래 카드는 먼저 어떤 가설을 선택했는지, 그다음 그 결정을 담은 판정문을 보여줍니다.</p>
         <div class="level-row" role="group" aria-label="검정 방향 선택">
           <button class="level-btn blue-active ht-tail active" data-tail="two" type="button">양쪽검정 (\(\mu \ne 172\))</button>
           <button class="level-btn blue-active ht-tail" data-tail="less" type="button">한쪽검정 (\(\mu < 172\))</button>
@@ -549,7 +588,7 @@
           <div><span>유의확률 p</span><b id="v-p">0.1146</b></div>
           <div><span>유의수준 \(\alpha\)</span><b id="v-alpha">0.05</b></div>
         </div>
-        <div class="decision-card retain" id="verdict-decision">\(p = 0.1146 \ge \alpha = 0.05\) → 귀무가설을 기각하지 못합니다</div>
+        <div class="decision-card retain" id="verdict-decision"></div>
         <p class="note">표본을 다시 뽑으면(위쪽 "표본 다시 뽑기" 버튼) 같은 절차라도 매번 다른 Z와 p-값이 나옵니다 — 실제 모평균(170)이 영가설(172)과 다름에도 이 검정의 검정력이 크지 않다면, 여러 번 중 상당수는 기각에 실패(2종 오류)할 수 있습니다. 위 "유의수준과 검정력" 절의 슬라이더를 170에 두면 양쪽검정(\(\alpha=0.05\))의 실제 검정력(약 0.27)을 확인할 수 있습니다. 같은 조건의 한쪽검정(\(\mu<172\))은 기각역이 한쪽에 몰려 있어 검정력이 약 0.38로 더 높습니다.</p>
       </article>
     </section>
@@ -934,7 +973,10 @@
     var reject = pValue < Number(alpha);
     var decisionEl = document.getElementById("verdict-decision");
     decisionEl.className = "decision-card " + (reject ? "reject" : "retain");
-    decisionEl.textContent = "\\(p = " + pValue.toFixed(4) + (reject ? " < " : " \\ge ") + " \\alpha = " + alpha + "\\) → 귀무가설을 " + (reject ? "기각합니다" : "기각하지 못합니다");
+    var pick = "\\(p = " + pValue.toFixed(4) + (reject ? " < " : " \\ge ") + " \\alpha = " + alpha + "\\) → "
+      + (reject ? "\\(H_{0}\\) 기각, \\(H_{1}\\) 선택" : "\\(H_{0}\\) 유지 (기각하지 못함)");
+    decisionEl.innerHTML = '<span class="v-pick">' + pick + '</span>'
+      + '<span class="v-stmt">판정문 — ' + verdictSentence(isTwo ? "two" : "less", reject, "172", alpha) + '</span>';
   }
 
   function updateExampleText() {
@@ -1073,7 +1115,7 @@
     svg.appendChild(t);
 
     document.getElementById("ts-xbar").textContent = xbar.toFixed(2);
-    document.getElementById("ts-p-label").textContent = isTwo ? "2P(Z ≥ |z|)" : "P(Z ≤ z)";
+    document.getElementById("ts-p-label").textContent = isTwo ? "P(Z ≥ |z|)" : "P(Z ≤ z)";
     document.getElementById("ts-p").textContent = pValue.toFixed(4);
     document.getElementById("ts-z").textContent = z.toFixed(3);
   }
@@ -1169,6 +1211,7 @@
     c.curve(f0, "curve-line");
     c.vline(MU0, "ref-line", "μ₀ = 172");
     var z = d * Math.sqrt(esN);
+    document.getElementById("esn-diff").textContent = (SIGMA * d).toFixed(1);
     document.getElementById("esn-se").textContent = se.toFixed(3);
     document.getElementById("esn-z").textContent = z.toFixed(2);
     var pv = 2 * (1 - stdNormCdf(z));
@@ -1236,7 +1279,18 @@
     document.getElementById("vd-" + key + "-p").textContent = pValue.toFixed(4);
     var d = document.getElementById("vd-" + key + "-d");
     d.className = "decision-card sm " + (reject ? "reject" : "retain");
-    d.textContent = "\\(p = " + pValue.toFixed(4) + (reject ? " < " : " \\ge ") + " \\alpha = 0.05\\) → 귀무가설을 " + (reject ? "기각합니다" : "기각하지 못합니다");
+    var pick = "\\(p = " + pValue.toFixed(4) + (reject ? " < " : " \\ge ") + " \\alpha = 0.05\\) → "
+      + (reject ? "\\(H_{0}\\) 기각, \\(H_{1}\\) 선택" : "\\(H_{0}\\) 유지 (기각하지 못함)");
+    d.innerHTML = '<span class="v-pick">' + pick + '</span>'
+      + '<span class="v-stmt">판정문 — ' + verdictSentence(key, reject, "\\(\\mu_{0}\\)", "0.05") + '</span>';
+  }
+  /* 판정문: 유의수준 + 기각 여부 + (기각했다면) 대안가설의 방향 */
+  function verdictSentence(key, reject, mu0, alpha) {
+    var dir = key === "less" ? "보다 작다" : key === "greater" ? "보다 크다" : "와 다르다";
+    var lead = "유의수준 \\(\\alpha = " + alpha + "\\)에서 \\(H_{0}\\)를 ";
+    return reject
+      ? lead + "기각한다. 즉 모평균은 " + mu0 + dir + "고 판단한다."
+      : lead + "기각하지 못한다. 모평균이 " + mu0 + dir + "고 판단할 근거가 충분하지 않다.";
   }
   function renderVerdictCases() {
     var slider = document.getElementById("vd-slider");

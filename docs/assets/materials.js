@@ -27,7 +27,7 @@ window.MATERIALS = [
     subject: "statistics",
     label: "인터랙티브 실습",
     title: "통계적 가설검정",
-    description: "가설, 유의수준, 검정력, p값과 가설검정 절차를 시뮬레이션으로 확인합니다.",
+    description: "모평균에 대한 검정을 예로 가설, 유의수준, 검정력, p값과 가설검정 절차를 시뮬레이션으로 확인합니다.",
     href: "statistics/hypothesis-testing.html",
     tags: ["통계", "시뮬레이션", "가설검정", "유의수준", "검정력", "p값", "효과크기"],
     date: "2026-09-18"
