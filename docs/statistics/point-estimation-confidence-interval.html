@@ -152,11 +152,12 @@
     <a href="#standard-error"><b>02</b><span>표준오차</span></a>
     <a href="#good-properties"><b>03</b><span>좋은 추정량의 성질</span></a>
     <a href="#point-problem"><b>04</b><span>점추정의 문제</span></a>
-    <a href="#ci-formula"><b>05</b><span>신뢰구간 구하기</span></a>
-    <a href="#ci-meaning"><b>06</b><span>95% 신뢰구간의 의미</span></a>
-    <a href="#moe-formula"><b>07</b><span>표본오차 계산</span></a>
-    <a href="#moe-explorer"><b>08</b><span>표본오차 시뮬레이터</span></a>
-    <a href="#moe-meaning"><b>09</b><span>표본오차 읽는 법</span></a>
+    <a href="#normal-approx"><b>05</b><span>표집분포와 정규근사</span></a>
+    <a href="#ci-formula"><b>06</b><span>신뢰구간 구하기</span></a>
+    <a href="#ci-meaning"><b>07</b><span>95% 신뢰구간의 의미</span></a>
+    <a href="#moe-formula"><b>08</b><span>표본오차 계산</span></a>
+    <a href="#moe-explorer"><b>09</b><span>표본오차 시뮬레이터</span></a>
+    <a href="#moe-meaning"><b>10</b><span>표본오차 읽는 법</span></a>
   </nav>
   <div class="rail-tags" aria-label="태그">
     <span class="rail-tag">#통계</span>
@@ -240,6 +241,7 @@
         \[E[\bar{X}] = \frac{1}{n}\sum_{i=1}^{n}E[X_i] = \frac{1}{n}\cdot n\mu = \mu\]
         \[\mathrm{Var}(\bar{X}) = \frac{1}{n^{2}}\sum_{i=1}^{n}\mathrm{Var}(X_i) = \frac{1}{n^{2}}\cdot n\sigma^{2} = \frac{\sigma^{2}}{n}\]
         <p class="note">상수 \(1/n\)이 분산에서는 제곱(\(1/n^2\))되어 밖으로 나오는 점에 주의하세요. 이 유도는 아래 “좋은 추정량의 성질”의 펼침 메뉴에서 숫자 예제와 함께 다시 다룹니다.</p>
+        <div class="callout"><strong>전제를 확인하세요.</strong> \(E[\bar{X}] = \mu\)는 표본이 모집단에서 <strong>무작위로</strong> 뽑혔다는 것만 있으면 성립하지만, \(\mathrm{Var}(\bar{X}) = \sigma^2/n\)은 관측값들이 서로 <strong>독립</strong>이어야 합니다. 같은 학급에서 몰아 뽑거나(군집), 앞 사람의 응답이 뒷사람에게 영향을 주면 독립이 깨져 실제 흩어짐은 이 값보다 커집니다. 또 크기 \(N\)인 유한모집단에서 <em>비복원</em>으로 뽑으면 분산에 유한모집단 수정계수 \(\frac{N-n}{N-1}\)이 곱해집니다 — 다만 \(n\)이 \(N\)에 비해 아주 작으면(보통 \(n/N < 0.05\)) 이 값이 1에 가까워 무시합니다.</div>
 
         <p><strong>숫자로 이해하기.</strong> 위의 통계 시험 점수를 모집단 평균 \(\mu = 75\), 표준편차 \(\sigma = 8\)로 두고, 표본크기 \(n\)을 바꿔 봅니다.</p>
         <div class="table-scroll">
@@ -303,12 +305,14 @@
             <tbody>
               <tr><td>모평균 \(\mu\)</td><td>\(\bar{X}\)</td><td>\(\sigma/\sqrt{n}\) → \(s/\sqrt{n}\)</td></tr>
               <tr><td>모비율 \(p\)</td><td>\(\hat{p}\)</td><td>\(\sqrt{p(1-p)/n}\) → \(\sqrt{\hat{p}(1-\hat{p})/n}\)</td></tr>
-              <tr><td>두 모평균의 차 \(\mu_1 - \mu_2\)</td><td>\(\bar{X}_1 - \bar{X}_2\)</td><td>\(\sqrt{\sigma_1^2/n_1 + \sigma_2^2/n_2}\)</td></tr>
-              <tr><td>두 모비율의 차 \(p_1 - p_2\)</td><td>\(\hat{p}_1 - \hat{p}_2\)</td><td>\(\sqrt{\hat{p}_1(1-\hat{p}_1)/n_1 + \hat{p}_2(1-\hat{p}_2)/n_2}\)</td></tr>
+              <tr><td>두 모평균의 차 \(\mu_1 - \mu_2\) (독립 표본)</td><td>\(\bar{X}_1 - \bar{X}_2\)</td><td>\(\sqrt{\sigma_1^2/n_1 + \sigma_2^2/n_2}\)</td></tr>
+              <tr><td>두 모비율의 차 \(p_1 - p_2\) (독립 표본)</td><td>\(\hat{p}_1 - \hat{p}_2\)</td><td>\(\sqrt{\hat{p}_1(1-\hat{p}_1)/n_1 + \hat{p}_2(1-\hat{p}_2)/n_2}\)</td></tr>
+              <tr><td>대응표본의 차이 (사전–사후 등)</td><td>\(\bar{D}\)</td><td>\(s_D/\sqrt{n}\) (차이 \(d_i\)의 표준편차로 계산)</td></tr>
             </tbody>
           </table>
         </div>
         <p class="note">공식이 어려워 보여도 원리는 하나입니다 — 추정량을 표본의 함수로 쓰고 그 분산을 구한 뒤 제곱근을 취하면 됩니다. 공식을 손으로 구하기 어려운 복잡한 추정량(중앙값, 상관계수 등)은 같은 표본에서 재추출을 반복하는 <strong>붓스트랩</strong>으로 표준오차를 수치적으로 구합니다.</p>
+        <div class="callout warn"><strong>“차” 행에 붙은 <em>독립 표본</em>이라는 단서에 주의하세요.</strong> 분산을 그냥 더하는 이 공식은 두 집단이 서로 다른 사람들로 이루어져 있을 때만 맞습니다. 같은 사람을 두 번 측정했거나(사전–사후) 한 응답자에게 두 후보의 지지 여부를 함께 물은 경우처럼 두 추정치가 <strong>같은 표본에서 나왔다면</strong> 둘 사이의 공분산까지 넣어야 합니다: \(\mathrm{Var}(\hat{\theta}_1 - \hat{\theta}_2) = \mathrm{Var}(\hat{\theta}_1) + \mathrm{Var}(\hat{\theta}_2) - 2\,\mathrm{Cov}(\hat{\theta}_1, \hat{\theta}_2)\). 이 차이가 실제로 얼마나 큰지는 <a href="#moe-meaning">“오차범위 내 접전”</a>에서 다룹니다.</div>
 
         <h4 style="margin-top:28px;">표준오차는 어디에 쓰이나</h4>
         <div class="prop-grid" style="margin-top:14px;">
@@ -608,12 +612,54 @@
 
     <section id="interval-estimation">
       <div class="section-head"><span class="section-num">02</span><h2>구간추정</h2></div>
-      <p class="section-sub">추정치 하나 대신, 모수를 포함할 가능성이 높은 구간을 제시합니다.</p>
+      <p class="section-sub">추정량의 표집분포에서 출발해, 추정치 하나 대신 모수를 포함할 가능성이 높은 구간을 제시합니다.</p>
+
+      <article class="panel wide" id="normal-approx">
+        <div class="eyebrow kick">Sampling Distribution</div>
+        <h3>표집분포와 정규근사 — 구간을 만들 수 있는 근거</h3>
+        <p>여기까지 표본평균이 모이는 중심(\(\mu\))과 흩어짐(\(\sigma/\sqrt{n}\))은 구했습니다. 하지만 “\(\bar{X}\)가 \(\mu\)에서 표준오차의 2배 넘게 벗어날 확률은 얼마인가”처럼 <em>확률</em>을 말하려면 중심과 흩어짐만으로는 부족하고, 추정량이 어떤 <strong>모양</strong>의 분포를 따르는지 알아야 합니다. 추정량의 이 분포를 <strong>표집분포(sampling distribution)</strong>라 하고, 표본평균의 표집분포가 정규분포가 되는 두 경로가 있습니다.</p>
+
+        <div class="prop-grid" style="margin-top:14px;">
+          <div class="prop-card">
+            <div class="bar" style="background:var(--blue)"></div>
+            <h4>① 모집단이 정규분포일 때 — 정확히 정규</h4>
+            <p>독립인 정규분포들의 합과 상수배는 다시 정규분포입니다. 따라서 \(X_i \sim N(\mu, \sigma^2)\)이면 표본크기가 2든 5든 \(\bar{X} \sim N(\mu,\ \sigma^2/n)\)이 <em>근사 없이</em> 정확히 성립합니다.</p>
+          </div>
+          <div class="prop-card">
+            <div class="bar" style="background:var(--aqua)"></div>
+            <h4>② 정규분포가 아닐 때 — 중심극한정리</h4>
+            <p>모집단이 치우쳐 있든 이산이든, 분산이 유한하기만 하면 \(n\)이 커질수록 표준화한 표본평균의 분포가 표준정규분포에 가까워집니다.</p>
+          </div>
+        </div>
+
+        <div class="card formula-card" style="margin-top:14px;">
+          \[Z_n = \frac{\bar{X}_n - \mu}{\sigma/\sqrt{n}} \ \xrightarrow{\ d\ }\ N(0, 1) \qquad (n \to \infty)\]
+          <div class="note">분자는 “추정치가 참값에서 벗어난 거리”, 분모는 <a href="#standard-error">표준오차</a>입니다. 즉 벗어난 거리를 표준오차 단위로 읽은 값이 표준정규분포를 따릅니다. 표본평균들의 분포가 실제로 종 모양으로 모이는 과정은 <a href="grad-probability-lab.html#s5">표집분포 시뮬레이터</a>에서 눈으로 확인할 수 있습니다.</div>
+        </div>
+        <p>이 하나의 사실이 뒤따르는 모든 내용을 떠받칩니다. \(Z\)가 표준정규분포를 따르므로 \(P(-1.96 \le Z \le 1.96) = 0.95\)를 쓸 수 있고, 이 부등식을 \(\mu\)에 대해 풀면 곧바로 신뢰구간이 됩니다. <a href="hypothesis-testing.html">가설검정</a>의 검정통계량도 같은 \(Z\)입니다.</p>
+
+        <h4 style="margin-top:28px;">\(n\)이 얼마나 커야 “충분히” 큰가</h4>
+        <p>중심극한정리는 \(n \to \infty\)의 극한을 말할 뿐, 유한한 \(n\)에서 얼마나 정확한지는 모집단 모양에 달려 있습니다. 치우침이 심할수록 더 큰 \(n\)이 필요합니다.</p>
+        <div class="table-scroll">
+          <table class="num-table">
+            <thead><tr><th>모집단의 모양</th><th>정규근사를 쓸 만한 \(n\)</th></tr></thead>
+            <tbody>
+              <tr><td>정규분포</td><td>\(n\) 무관 (근사가 아니라 정확)</td></tr>
+              <tr><td>좌우 대칭, 꼬리가 두껍지 않음</td><td>15 정도면 충분</td></tr>
+              <tr><td>한쪽으로 치우침 (소득, 대기시간, 반응시간 등)</td><td>30~50 이상, 치우침이 심하면 수백</td></tr>
+              <tr><td>비율 \(\hat{p}\) (0/1 자료)</td><td>\(n\hat{p} \ge 10\) 이고 \(n(1-\hat{p}) \ge 10\)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warn"><strong>“\(n \ge 30\)이면 정규”는 법칙이 아니라 경험칙입니다.</strong> 극단적으로 치우친 모집단이나 이상치가 섞인 자료에서는 \(n = 30\)으로 턱없이 부족할 수 있고, 반대로 대칭적인 모집단에서는 \(n = 10\)으로도 충분합니다. 또 분산이 존재하지 않는 분포(예: 코시분포)에서는 \(n\)을 아무리 키워도 중심극한정리가 성립하지 않습니다.</div>
+        <div class="callout"><strong>흔한 오해 — 정규가 되는 것은 <em>관측값</em>이 아니라 <em>표본평균</em>입니다.</strong> 표본을 아무리 크게 뽑아도 개별 관측값의 히스토그램은 원래 모집단 모양 그대로 치우쳐 있습니다. 종 모양에 가까워지는 것은 “표본을 반복해 뽑아 매번 계산한 평균”들의 분포입니다.</div>
+        <p class="note">\(\sigma\)를 모르고 \(s\)로 대신하면 분모까지 표본마다 흔들리므로 표준화한 값은 정규분포가 아니라 자유도 \(n-1\)의 <a href="t-distribution-degrees-of-freedom.html">\(t\)분포</a>를 따릅니다. \(n\)이 커지면 \(s\)가 \(\sigma\)에 가까워져 \(t\)분포도 표준정규분포에 수렴합니다.</p>
+      </article>
 
       <article class="panel wide" id="ci-formula">
         <div class="eyebrow kick">Confidence Interval</div>
         <h3>100(1 − \(\alpha\))% 신뢰구간 구하기</h3>
-        <p>모분산 \(\sigma ^{2}\)을 알고 있는 정규모집단에서 표본을 뽑으면, 표본평균은 \(\bar{X} \sim  N(\mu , \sigma ^{2}/n)\)을 따릅니다. 이를 표준화하면：</p>
+        <p>앞에서 본 <a href="#normal-approx">표집분포</a>를 그대로 씁니다. 모분산 \(\sigma ^{2}\)을 알고 있는 정규모집단에서 표본을 뽑으면 표본평균은 \(\bar{X} \sim  N(\mu , \sigma ^{2}/n)\)을 정확히 따르고, 정규모집단이 아니더라도 \(n\)이 충분히 크면 중심극한정리로 같은 형태를 근사적으로 씁니다. 이를 표준화하면：</p>
         <div class="card formula-card">
           \[Z = \frac{\bar{X} - \mu }{\sigma /\sqrt{n}} \sim  N(0, 1)\]
         </div>
@@ -628,6 +674,7 @@
         </div>
 
         <p>신뢰수준을 바꾸면 \(z_{\alpha /2}\)와 구간의 폭이 어떻게 달라지는지 직접 눌러보세요. 아래 예시는 \(\sigma  = 2\), \(n = 4\)일 때입니다.</p>
+        <div class="callout"><strong>신뢰수준과 구간의 폭은 맞바꿈 관계입니다.</strong> 놓칠 위험을 줄이려면(신뢰수준↑) 구간을 넓게 잡아야 하고, 구간을 좁혀 말을 구체적으로 하려면(정밀도↑) 틀릴 위험을 더 감수해야 합니다. 극단적으로 100% 신뢰구간은 \((-\infty, \infty)\)로, 절대 틀리지 않는 대신 아무것도 말해주지 않습니다. 같은 신뢰수준에서 구간을 좁히는 <em>유일하게 공짜가 아닌</em> 방법은 표본을 늘려 <a href="#standard-error">표준오차</a> 자체를 줄이는 것입니다.</div>
         <div class="level-row" role="group" aria-label="신뢰수준 선택">
           <button class="level-btn" data-level="80" type="button">80%</button>
           <button class="level-btn" data-level="90" type="button">90%</button>
@@ -685,6 +732,7 @@
           \[\hat{p} \pm  z_{\alpha /2} \cdot  \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\]
           <div class="note">제곱근 안의 \(\sqrt{\hat{p}(1-\hat{p})/n}\)이 \(\hat{p}\)의 <a href="#standard-error">표준오차</a>이고, 여기에 \(z_{\alpha/2}\)를 곱한 ± 뒤의 값 전체가 <strong>표본오차(margin of error)</strong>입니다. 두 용어를 혼동하지 마세요 — <strong>표본오차 = 임계값 × 표준오차</strong>입니다.</div>
         </div>
+        <div class="callout warn"><strong>이 구간이 통하는 조건.</strong> 위 식은 \(\hat{p}\)의 정규근사에 기댄 것이라 <a href="#normal-approx">\(n\hat{p} \ge 10\), \(n(1-\hat{p}) \ge 10\)</a> 정도는 되어야 제대로 작동합니다. 지지율이 1~2%인 군소후보나 표본이 작은 하위집단(예: 20대 남성 80명)에서는 실제 포함 확률이 95%에 한참 못 미치고, \(\hat{p} = 0\)이면 구간의 폭이 0이 되는 말이 안 되는 결과까지 나옵니다. 이런 경우에는 윌슨(Wilson) 구간이나 \(\hat{p}\)에 성공·실패를 2개씩 더해 계산하는 아그레스티–콜 보정을 씁니다.</div>
         <p>실제 응답 비율 \(\hat{p}\)은 문항마다 다르지만, 여론조사기관은 보고서에 <em>하나의</em> 표본오차만 표시합니다. \(\hat{p}(1 - \hat{p})\)은 \(\hat{p} = 0.5\)일 때 가장 커지므로, 오차가 최대가 되는 이 값을 대입해 <strong>가장 보수적인(넓은) 오차</strong>를 미리 계산해 두기 때문입니다.</p>
         <div class="card formula-card" style="font-size:20px;">
           \[E = \frac{z_{\alpha /2}}{2\sqrt{n}}\]
@@ -730,7 +778,14 @@
         <h3>표본오차, 이렇게 읽습니다</h3>
         <div class="callout">“95% 신뢰수준에서 표본오차 ±3.1%p”란, <strong>같은 방식으로 조사를 100번 반복하면 그중 약 95번은 실제 모집단의 응답률이 “발표된 응답률 ± 3.1%p” 구간 안에 들어온다</strong>는 뜻입니다. 앞서 살펴본 95% 신뢰구간의 해석과 정확히 같은 논리입니다.</div>
         <p>표본수를 늘리면 오차는 줄어들지만, \(1/\sqrt{n}\)에 비례해 줄어들기 때문에 <strong>오차를 절반으로 줄이려면 표본을 4배로 늘려야</strong> 합니다. 위 슬라이더로 n = 1,000에서 n = 4,000으로 옮겨 직접 확인해보세요.</p>
-        <div class="callout warn"><strong>흔한 오해 — “오차범위 내 접전”.</strong> 두 후보의 지지율 차이가 표본오차보다 작다고 해서 통계적으로 우열이 없다고 단정할 수는 없습니다. 같은 표본에서 얻은 두 비율의 <em>차이</em>에 대한 오차는 단일 비율의 오차보다 크며(약 \(\sqrt{2}\)배), n = 1,000 · 95% 기준으로는 약 ±4.4%p가 됩니다.</div>
+        <div class="callout warn"><strong>흔한 오해 — “오차범위 내 접전”.</strong> 두 후보의 지지율 차이가 발표된 표본오차 ±3.1%p보다 작다고 해서 “오차범위 안”이라고 말하는 것은 <em>잘못된 잣대를 댄 것</em>입니다. 비교해야 할 대상은 <strong>차이 \(\hat{p}_1 - \hat{p}_2\)에 대한 표본오차</strong>이고, 이 값은 단일 지지율의 표본오차보다 훨씬 큽니다.</div>
+        <p>두 후보의 지지율은 <strong>같은 응답자 집단</strong>에서 나온 값이라 서로 독립이 아닙니다. 한 응답자가 마음을 바꾸면 한쪽이 오르는 동시에 다른 쪽이 내려가므로 두 추정치는 음의 상관을 가지고, 이 공분산 \(\mathrm{Cov}(\hat{p}_1, \hat{p}_2) = -p_1p_2/n\)까지 반영하면 차이의 분산은 다음과 같습니다.</p>
+        <div class="card formula-card">
+          \[\mathrm{Var}(\hat{p}_1 - \hat{p}_2) = \frac{p_1 + p_2 - (p_1 - p_2)^2}{n}\]
+          <div class="note">독립 표본이었다면 분산을 그냥 더하면 되지만(\(\sqrt{2}\)배), 같은 표본에서는 음의 상관 때문에 차이가 <strong>더 크게</strong> 흔들립니다.</div>
+        </div>
+        <p>지지율 45% 대 42%, \(n = 1{,}000\)인 조사로 계산해 보면 \(\mathrm{Var} = (0.45 + 0.42 - 0.03^{2})/1000 = 0.000869\), 표준오차는 0.0295이므로 차이에 대한 95% 표본오차는 \(1.96 \times 0.0295 \approx\) <strong>±5.8%p</strong>입니다. 발표된 ±3.1%p의 거의 두 배이고, 관측된 3%p 차이는 이 범위 안에 있으므로 <strong>우열을 가릴 수 없다</strong>가 맞는 결론입니다.</p>
+        <div class="callout"><strong>실무 요령.</strong> 두 후보가 모두 40~50%대인 접전에서는 <strong>차이의 표본오차 ≈ 단일 표본오차 × 2</strong>로 어림하면 됩니다(지지율이 낮을수록 배수는 2보다 작아집니다). 보고서에 ±3.1%p라고 적혀 있으면 두 후보의 격차는 대략 6%p를 넘어야 “앞선다”고 말할 수 있다는 뜻입니다.</div>
         <p class="note">표본오차는 무작위 표집 과정에서 생기는 오차만을 설명합니다. 무응답·응답 거부에 따른 편향, 질문 문항의 설계, 조사 방식(전화면접·ARS·온라인 패널 등)에서 비롯되는 오차는 표본오차에 포함되지 않습니다.</p>
       </article>
     </section>
