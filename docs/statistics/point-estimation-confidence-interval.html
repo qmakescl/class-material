@@ -149,13 +149,14 @@
   <h1>점추정과<br>신뢰구간</h1>
   <nav id="rail-nav" aria-label="자료 목차">
     <a href="#estimator-estimate"><b>01</b><span>추정량과 추정치</span></a>
-    <a href="#good-properties"><b>02</b><span>좋은 추정량의 성질</span></a>
-    <a href="#point-problem"><b>03</b><span>점추정의 문제</span></a>
-    <a href="#ci-formula"><b>04</b><span>신뢰구간 구하기</span></a>
-    <a href="#ci-meaning"><b>05</b><span>95% 신뢰구간의 의미</span></a>
-    <a href="#moe-formula"><b>06</b><span>표본오차 계산</span></a>
-    <a href="#moe-explorer"><b>07</b><span>표본오차 시뮬레이터</span></a>
-    <a href="#moe-meaning"><b>08</b><span>표본오차 읽는 법</span></a>
+    <a href="#standard-error"><b>02</b><span>표준오차</span></a>
+    <a href="#good-properties"><b>03</b><span>좋은 추정량의 성질</span></a>
+    <a href="#point-problem"><b>04</b><span>점추정의 문제</span></a>
+    <a href="#ci-formula"><b>05</b><span>신뢰구간 구하기</span></a>
+    <a href="#ci-meaning"><b>06</b><span>95% 신뢰구간의 의미</span></a>
+    <a href="#moe-formula"><b>07</b><span>표본오차 계산</span></a>
+    <a href="#moe-explorer"><b>08</b><span>표본오차 시뮬레이터</span></a>
+    <a href="#moe-meaning"><b>09</b><span>표본오차 읽는 법</span></a>
   </nav>
   <div class="rail-tags" aria-label="태그">
     <span class="rail-tag">#통계</span>
@@ -226,7 +227,7 @@
           <div class="prop-card">
             <div class="bar" style="background:var(--yellow)"></div>
             <h4>표준편차 \(\mathrm{SD}(\bar{X})\) — 원래 단위의 흩어짐</h4>
-            <p>분산의 제곱근으로, 점수라면 “점” 단위로 읽습니다. 추정량의 표준편차를 특별히 <strong>표준오차(standard error, SE)</strong>라 부릅니다.</p>
+            <p>분산의 제곱근으로, 점수라면 “점” 단위로 읽습니다. 추정량의 표준편차를 특별히 <strong>표준오차(standard error, SE)</strong>라 부릅니다 — <a href="#standard-error">아래에서 자세히</a> 다룹니다.</p>
           </div>
           <div class="prop-card">
             <div class="bar" style="background:var(--violet)"></div>
@@ -260,6 +261,81 @@
           <li><strong>읽는 법:</strong> 점수가 정규분포를 따른다면 \(n=6\)일 때 표본평균의 약 95%는 \(75 \pm 1.96\times 3.27\), 즉 약 68.6~81.4점 안에 들어옵니다.</li>
         </ul>
         <div class="callout warn"><strong>\(\sigma\)와 표준오차를 혼동하지 마세요.</strong> \(\sigma = 8\)은 <em>학생 한 명 한 명의 점수</em>가 흩어진 정도이고, 표준오차 \(8/\sqrt{6}\approx 3.27\)은 <em>6명 평균이라는 추정치</em>가 표본마다 흩어지는 정도입니다. 평균을 내면 개인차가 서로 상쇄되어 추정치는 개별 값보다 훨씬 덜 흔들립니다. 표준오차가 작을수록 그 추정량은 더 믿을 만하고, 이것이 뒤에서 나올 효율성과 신뢰구간의 출발점입니다.</div>
+      </article>
+
+      <article class="panel wide" id="standard-error">
+        <div class="eyebrow kick">Standard Error</div>
+        <h3>표준오차 — 추정치가 표본마다 얼마나 흔들리는가</h3>
+        <p>앞에서 추정량 \(\bar{X}\)의 표준편차를 <strong>표준오차</strong>라 부른다고 했습니다. 같은 “표준편차”인데 왜 다른 이름을 붙일까요? 재는 대상이 다르기 때문입니다. 보통의 표준편차는 <em>관측값 하나하나</em>가 흩어진 정도를 재지만, 표준오차는 <em>추정치라는 계산 결과</em>가 표본을 다시 뽑을 때마다 흔들리는 정도를 잽니다. 즉 표준오차는 “내 추정이 얼마나 정밀한가”를 나타내는 숫자입니다.</p>
+        <div class="card formula-card">
+          \[\mathrm{SE}(\hat{\theta}) = \mathrm{SD}(\hat{\theta}) = \sqrt{\mathrm{Var}(\hat{\theta})}, \qquad \mathrm{SE}(\bar{X}) = \frac{\sigma}{\sqrt{n}}\]
+          <div class="note">어떤 추정량 \(\hat{\theta}\)든, 그 <strong>표집분포</strong>의 표준편차가 곧 표준오차입니다.</div>
+        </div>
+
+        <h4 style="margin-top:28px;">표준편차와 표준오차의 차이</h4>
+        <div class="table-scroll">
+          <table class="num-table">
+            <thead><tr><th></th><th>표준편차 \(\sigma\) (또는 \(s\))</th><th>표준오차 \(\mathrm{SE}\)</th></tr></thead>
+            <tbody>
+              <tr><td>재는 대상</td><td>관측값 \(X_i\) 하나하나</td><td>추정치 \(\hat{\theta}\) (예: \(\bar{x}\))</td></tr>
+              <tr><td>흩어짐의 원인</td><td>개체 사이의 실제 차이</td><td>표본을 새로 뽑는 데서 오는 변동</td></tr>
+              <tr><td>\(n\)을 늘리면</td><td>변하지 않음 (모집단의 성질)</td><td>\(1/\sqrt{n}\)로 줄어듦</td></tr>
+              <tr><td>답하는 질문</td><td>“학생들의 점수는 얼마나 다양한가?”</td><td>“이 평균값을 얼마나 믿을 수 있나?”</td></tr>
+              <tr><td>쓰는 곳</td><td>분포·개인차 기술</td><td>신뢰구간, 검정통계량, 오차막대</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">앞의 예에서 \(\sigma = 8\)점은 표본을 6명으로 늘리든 600명으로 늘리든 그대로 8점입니다. 반면 표준오차는 3.27점 → 0.33점으로 줄어듭니다. <strong>표본을 키워 좋아지는 것은 개인차가 아니라 추정의 정밀도</strong>라는 점이 두 값을 가르는 핵심입니다.</p>
+
+        <h4 style="margin-top:28px;">실제로는 \(\sigma\)를 모른다 — 추정된 표준오차</h4>
+        <p>\(\mathrm{SE}(\bar{X}) = \sigma/\sqrt{n}\)에는 모집단의 표준편차 \(\sigma\)가 들어 있는데, 현실에서는 이 값을 모르는 경우가 대부분입니다. 그래서 표본에서 계산한 표본표준편차 \(s\)를 대신 넣어 <strong>추정된 표준오차(estimated standard error)</strong>를 씁니다.</p>
+        <div class="card formula-card">
+          \[\widehat{\mathrm{SE}}(\bar{X}) = \frac{s}{\sqrt{n}}, \qquad s = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2}\]
+          <div class="note">분모가 \(n\)이 아니라 \(n-1\)인 이유는 <a href="t-distribution-degrees-of-freedom.html">자유도</a>에서 다룹니다.</div>
+        </div>
+        <p>보고서나 논문에서 그냥 “표준오차”라고 적힌 값은 거의 항상 이 추정된 표준오차입니다. \(\sigma\) 대신 \(s\)를 쓰면 표준오차 자체에도 추정 오차가 더해지므로, 구간을 만들 때 정규분포의 \(z\) 대신 꼬리가 두꺼운 <a href="t-distribution-degrees-of-freedom.html">\(t\)분포</a>를 써서 그만큼 구간을 넓혀 줍니다.</p>
+
+        <h4 style="margin-top:28px;">추정량마다 표준오차 공식이 다릅니다</h4>
+        <p>표준오차는 표본평균만의 개념이 아닙니다. 추정량이 무엇이든 그 표집분포의 표준편차가 표준오차이며, 추정량이 달라지면 공식도 달라집니다.</p>
+        <div class="table-scroll">
+          <table class="num-table">
+            <thead><tr><th>추정 대상</th><th>추정량</th><th>표준오차</th></tr></thead>
+            <tbody>
+              <tr><td>모평균 \(\mu\)</td><td>\(\bar{X}\)</td><td>\(\sigma/\sqrt{n}\) → \(s/\sqrt{n}\)</td></tr>
+              <tr><td>모비율 \(p\)</td><td>\(\hat{p}\)</td><td>\(\sqrt{p(1-p)/n}\) → \(\sqrt{\hat{p}(1-\hat{p})/n}\)</td></tr>
+              <tr><td>두 모평균의 차 \(\mu_1 - \mu_2\)</td><td>\(\bar{X}_1 - \bar{X}_2\)</td><td>\(\sqrt{\sigma_1^2/n_1 + \sigma_2^2/n_2}\)</td></tr>
+              <tr><td>두 모비율의 차 \(p_1 - p_2\)</td><td>\(\hat{p}_1 - \hat{p}_2\)</td><td>\(\sqrt{\hat{p}_1(1-\hat{p}_1)/n_1 + \hat{p}_2(1-\hat{p}_2)/n_2}\)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">공식이 어려워 보여도 원리는 하나입니다 — 추정량을 표본의 함수로 쓰고 그 분산을 구한 뒤 제곱근을 취하면 됩니다. 공식을 손으로 구하기 어려운 복잡한 추정량(중앙값, 상관계수 등)은 같은 표본에서 재추출을 반복하는 <strong>붓스트랩</strong>으로 표준오차를 수치적으로 구합니다.</p>
+
+        <h4 style="margin-top:28px;">표준오차는 어디에 쓰이나</h4>
+        <div class="prop-grid" style="margin-top:14px;">
+          <div class="prop-card">
+            <div class="bar" style="background:var(--blue)"></div>
+            <h4>신뢰구간의 폭</h4>
+            <p>거의 모든 신뢰구간은 “추정치 ± (임계값 × 표준오차)” 꼴입니다. 뒤에 나올 \(\bar{X} \pm z_{\alpha/2}\,\sigma/\sqrt{n}\)에서 \(\sigma/\sqrt{n}\)이 바로 표준오차입니다.</p>
+          </div>
+          <div class="prop-card">
+            <div class="bar" style="background:var(--aqua)"></div>
+            <h4>검정통계량의 분모</h4>
+            <p>\(z = (\bar{x} - \mu_0)/\mathrm{SE}\), \(t = (\bar{x}-\mu_0)/\widehat{\mathrm{SE}}\)처럼, <a href="hypothesis-testing.html">가설검정</a>은 관측된 차이를 표준오차로 나눠 “흔들림 대비 몇 배나 큰 차이인가”를 잽니다.</p>
+          </div>
+          <div class="prop-card">
+            <div class="bar" style="background:var(--yellow)"></div>
+            <h4>그래프의 오차막대</h4>
+            <p>막대그래프 위의 오차막대는 대개 \(\pm 1\,\mathrm{SE}\) 또는 95% 신뢰구간입니다. 무엇을 그렸는지 표시하지 않으면 그림을 해석할 수 없습니다.</p>
+          </div>
+          <div class="prop-card">
+            <div class="bar" style="background:var(--violet)"></div>
+            <h4>표본크기 설계</h4>
+            <p>원하는 정밀도를 표준오차로 정해 두면 필요한 \(n\)이 역산됩니다. \(\sigma/\sqrt{n} \le d\)에서 \(n \ge (\sigma/d)^2\).</p>
+          </div>
+        </div>
+
+        <div class="callout warn" style="margin-top:18px;"><strong>오차막대를 읽을 때.</strong> 같은 데이터라도 \(\pm 1\,\mathrm{SD}\), \(\pm 1\,\mathrm{SE}\), 95% 신뢰구간은 길이가 크게 다릅니다. \(n = 25\), \(s = 10\)이라면 SD 막대는 ±10, SE 막대는 ±2, 95% 신뢰구간은 약 ±4.1입니다. 그림에서 막대가 짧다고 결과가 더 확실한 것이 아니라, <em>무엇을 그렸는지</em>를 먼저 확인해야 합니다.</div>
+        <p class="note">표준오차는 <strong>무작위 표집에서 오는 변동만</strong>을 나타냅니다. 표본이 애초에 모집단을 대표하지 못하거나(선택 편향, 무응답), 측정 자체가 잘못되었다면 표준오차가 아무리 작아도 추정치는 참값에서 멀 수 있습니다. 표준오차는 정밀도(precision)의 지표이지 정확도(accuracy)의 지표가 아닙니다.</p>
       </article>
 
       <article class="panel" id="good-properties">
@@ -548,7 +624,7 @@
         <p>이 부등식을 \(\mu\)에 대해 정리하면 \(100(1-\alpha)\%\) 신뢰구간을 얻습니다.</p>
         <div class="card formula-card" style="font-size:20px;">
           \[\bar{X} \pm  z_{\alpha /2} \cdot  \frac{\sigma }{\sqrt{n}}\]
-          <div class="note">모분산 \(\sigma\)을 모를 때는 표본표준편차 \(s\)와 자유도 \(n-1\)의 <a href="t-distribution-degrees-of-freedom.html">\(t\)분포</a>로 대체합니다 (\(\bar{X} \pm t_{\alpha/2,\,n-1} \cdot s/\sqrt{n}\)).</div>
+          <div class="note">± 뒤의 \(\sigma/\sqrt{n}\)이 <a href="#standard-error">표준오차</a>입니다. 즉 신뢰구간은 “추정치 ± (임계값 × 표준오차)”의 형태입니다.<br>모분산 \(\sigma\)을 모를 때는 표본표준편차 \(s\)와 자유도 \(n-1\)의 <a href="t-distribution-degrees-of-freedom.html">\(t\)분포</a>로 대체합니다 (\(\bar{X} \pm t_{\alpha/2,\,n-1} \cdot s/\sqrt{n}\)).</div>
         </div>
 
         <p>신뢰수준을 바꾸면 \(z_{\alpha /2}\)와 구간의 폭이 어떻게 달라지는지 직접 눌러보세요. 아래 예시는 \(\sigma  = 2\), \(n = 4\)일 때입니다.</p>
@@ -607,7 +683,7 @@
         <p>앞서 살펴본 것과 같은 방식으로 \(p\)에 대한 \(100(1-\alpha)\%\) 신뢰구간을 만들 수 있습니다.</p>
         <div class="card formula-card">
           \[\hat{p} \pm  z_{\alpha /2} \cdot  \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\]
-          <div class="note">± 뒤에 붙는 이 값이 바로 <strong>표본오차(margin of error)</strong>입니다.</div>
+          <div class="note">제곱근 안의 \(\sqrt{\hat{p}(1-\hat{p})/n}\)이 \(\hat{p}\)의 <a href="#standard-error">표준오차</a>이고, 여기에 \(z_{\alpha/2}\)를 곱한 ± 뒤의 값 전체가 <strong>표본오차(margin of error)</strong>입니다. 두 용어를 혼동하지 마세요 — <strong>표본오차 = 임계값 × 표준오차</strong>입니다.</div>
         </div>
         <p>실제 응답 비율 \(\hat{p}\)은 문항마다 다르지만, 여론조사기관은 보고서에 <em>하나의</em> 표본오차만 표시합니다. \(\hat{p}(1 - \hat{p})\)은 \(\hat{p} = 0.5\)일 때 가장 커지므로, 오차가 최대가 되는 이 값을 대입해 <strong>가장 보수적인(넓은) 오차</strong>를 미리 계산해 두기 때문입니다.</p>
         <div class="card formula-card" style="font-size:20px;">
