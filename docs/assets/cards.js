@@ -38,6 +38,8 @@
         make("h3", "", item.title),
         make("p", "", item.description)
       );
+      // 직접 해 보는 실습 절이 있는 자료는 배지로 표시한다(카드 전체가 링크라 별도 링크는 두지 않는다).
+      if (item.practice) body.append(make("span", "card-badge", "실습 포함"));
 
       card.append(make("span", "card-number", item.number), body, make("span", "card-status", "바로가기 →"));
       grid.append(card);

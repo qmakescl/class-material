@@ -99,6 +99,23 @@ uv run python src/python/prepare_galton_father_son.py   # docs/assets/data/galto
   통계, 중부모 기준 비교를 계산한다. 원자료는 Galton(1886)이며
   <https://www.randomservices.org/random/data/Galton.tsv>에서 받았다.
 
+`docs/ai/regression-to-deep-learning.html`(회귀에서 딥러닝으로)이 읽는 데이터는 아래
+두 스크립트가 만든다(`window.GISTEMP_ANNUAL`, `window.MNIST_BRIDGE`를 정의하는 생성
+파일이므로 직접 수정하지 않는다).
+
+```sh
+uv run python src/python/prepare_gistemp_annual.py   # docs/assets/data/gistemp-annual.js
+uv run python src/python/prepare_mnist_bridge.py     # docs/assets/data/mnist-bridge.js
+```
+
+- `prepare_gistemp_annual.py`는 위 기온 실습과 같은 원본
+  (`datasets/temperature/GLB.Ts+dSST.csv`)에서 연평균 편차 146개 연도를 뽑는다.
+- `prepare_mnist_bridge.py`는 MNIST 원본(`datasets/mnist/*.gz`, 약 12MB)이 없으면
+  <https://ossci-datasets.s3.amazonaws.com/mnist/>에서 내려받는다(`.gitignore` 대상).
+  소프트맥스 회귀(784 → 10)와 은닉층 신경망(784 → 64 → 10)을 같은 설정(시드 2026,
+  미니배치 100, 학습률 0.1, 10에폭 SGD)으로 학습해 선형 모형 가중치, 에폭별 훈련 손실·시험
+  정확도, 시험 이미지 일부와 오답 사례를 기록한다. numpy만 쓰며 몇 초 안에 끝난다.
+
 ## GitHub Pages 배포
 
 `main` 브랜치에 `docs/` 또는 Pages 워크플로 변경 사항이 푸시되면

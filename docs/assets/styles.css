@@ -483,9 +483,27 @@ a.material-card .card-status {
   font-weight: 800;
 }
 
-.material-card div > p:last-child {
+.material-card div > p:last-of-type {
   margin-bottom: 0;
   color: var(--muted);
+}
+
+.material-card .card-badge {
+  display: inline-block;
+  margin-top: 0.7rem;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid var(--brand);
+  border-radius: 999px;
+  color: var(--brand-dark);
+  background: var(--surface);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.subject[data-subject="ai"] .material-card .card-badge {
+  border-color: var(--ai);
+  color: var(--ai);
 }
 
 .card-label {

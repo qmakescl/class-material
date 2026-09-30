@@ -3,7 +3,8 @@
    - subject: statistics | data-science | ai | things | life
    - href: docs/ 기준 상대 경로 (예: "statistics/foo.html")
    - tags: 과목 1개 + 유형 1개 + 주제 2~5개 (DESIGN.md "태그" 참고)
-   - date: 발행일 YYYY-MM-DD (같은 날짜면 배열에서 뒤쪽이 더 최신) */
+   - date: 발행일 YYYY-MM-DD (같은 날짜면 배열에서 뒤쪽이 더 최신)
+   - practice: true 이면 카드에 '실습 포함' 배지를 단다 (선택) */
 window.MATERIALS = [
   {
     subject: "statistics",
@@ -76,6 +77,16 @@ window.MATERIALS = [
     href: "ai/pneumoniamnist-deep-learning.html",
     tags: ["인공지능", "시각화", "딥러닝", "이미지분류", "손실함수", "모델평가"],
     date: "2026-09-26"
+  },
+  {
+    subject: "ai",
+    label: "인터랙티브 실습",
+    title: "회귀에서 딥러닝으로 - 직선 하나가 신경망이 되기까지",
+    description: "회귀직선을 뉴런 하나로 다시 읽고, 경사하강법·은닉층·소프트맥스를 거쳐 MNIST 분류기까지 실측 자료로 직접 움직여 봅니다.",
+    href: "ai/regression-to-deep-learning.html",
+    practice: true,
+    tags: ["인공지능", "시뮬레이션", "딥러닝", "회귀분석", "경사하강법", "손실함수", "신경망"],
+    date: "2026-09-30"
   },
   {
     subject: "data-science",
