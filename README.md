@@ -68,6 +68,37 @@ uv run python src/python/kbo_dashboard/ingest.py   # datasets/kbo_dashboard.sqli
 uv run python src/python/kbo_dashboard/app.py       # http://127.0.0.1:5050
 ```
 
+## 자료 페이지용 데이터 생성 스크립트
+
+`docs/data-science/analysis-traps-three-paradoxes.html`(데이터로 세상을 읽을 때 조심할 것들)은 가상 데이터를 쓰지 않고 실측 자료만 사용한다. 페이지가 읽는
+`docs/assets/data/*.js`는 아래 스크립트가 만든다(각각 `window.KBO_REGRESSION`,
+`window.GALTON`을 정의하는 생성 파일이므로 직접 수정하지 않는다).
+
+```sh
+uv run python src/python/prepare_kbo_regression.py      # docs/assets/data/kbo-regression.js
+uv run python src/python/prepare_kbo_traps23.py         # docs/assets/data/kbo-traps23.js
+uv run python src/python/prepare_galton_father_son.py   # docs/assets/data/galton-father-son.js
+```
+
+- `prepare_kbo_regression.py`는 `datasets/kbo_dashboard.sqlite3`에서 함정 1 데이터를
+  만든다. 대상 타자는 **규정타석**(팀당 경기수의 3.1배, 2025 시즌은 144 × 3.1 = 446.4
+  → 447타석 이상, 43명)으로 정한다. "전·후반기 모두 충분히 출전"처럼 분석자가 임의로
+  정하는 기준을 피하기 위한 선택이며, 이 코호트는 전원이 전·후반기 양쪽에 충분한
+  타수를 갖는다. 전·후반기 상·하위 10명의 이동, 선발 타수 N별 (첫 N타수 타율, 이후
+  타율) 쌍과 상·하위 25% 집단의 이동, 분산 분해와 축소추정 예측오차를 계산한다.
+  이 DB는 `.gitignore` 대상이므로, 먼저 위의 `kbo_dashboard/ingest.py`를 실행해야
+  재생성할 수 있다. 그래서 **생성된 `.js`는 저장소에 포함한다.**
+- `prepare_kbo_traps23.py`는 같은 DB에서 함정 2·3 데이터를 만든다. 크기 편향을 볼 수
+  있는 실측 수량 5종(타석당 투구수, 이닝당 타석수, 한 경기 투수 1명의 투구수, 타자별
+  시즌 타석수, 투수별 시즌 투구수), 손으로 검산할 수 있는 실제 한 경기의 투수별
+  투구수, 층화 방식 5종별 심슨 역전 쌍 개수와 대표 쌍, 주전 기준 타수를 바꿀 때의
+  윌 로저스 현상을 계산한다. 크기 편향 항등식 \(\mu + \sigma^2/\mu\)에는 모집단
+  분산(`ddof=0`)을 쓴다.
+- `prepare_galton_father_son.py`는 `datasets/galton/Galton.tsv`에서 아버지–아들
+  465쌍을 뽑아 기술통계, 양방향 회귀선, 양방향 극단 집단의 이동(대칭성), 겹침
+  통계, 중부모 기준 비교를 계산한다. 원자료는 Galton(1886)이며
+  <https://www.randomservices.org/random/data/Galton.tsv>에서 받았다.
+
 ## GitHub Pages 배포
 
 `main` 브랜치에 `docs/` 또는 Pages 워크플로 변경 사항이 푸시되면

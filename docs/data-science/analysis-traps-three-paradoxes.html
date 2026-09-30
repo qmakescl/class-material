@@ -1,0 +1,1338 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>데이터로 세상을 읽을 때 조심할 것들 | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/analysis-traps-three-paradoxes.html">
+<meta name="description" content="평균으로의 회귀, 표집 편향, 심슨의 역설 — 데이터를 읽을 때 빠지기 쉬운 함정을 데이터로 세상 읽기와 깊이 살펴보기로 나누어 정리한 데이터과학 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="데이터로 세상을 읽을 때 조심할 것들 | Q의 아카이브">
+<meta property="og:description" content="숫자는 맞는데 결론이 틀리는 상황들을 데이터로 세상 읽기와 깊이 살펴보기로 나누어 확인합니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/analysis-traps-three-paradoxes.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="데이터과학 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="데이터로 세상을 읽을 때 조심할 것들 | Q의 아카이브">
+<meta name="twitter:description" content="숫자는 맞는데 결론이 틀리는 상황들을 데이터로 세상 읽기와 깊이 살펴보기로 나누어 확인합니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/material.css">
+<style>
+  :root {
+    /* 과목 강조색: 데이터과학 (styles.css --data-science / --data-science-tint) */
+    --accent: #0ea968; --accent-soft: #e6f8f0;
+    --basic: #0b8a8f; --basic-soft: #e3f5f5;      /* 데이터로 세상 읽기 */
+    --stat: #7a4bd0;  --stat-soft: #f1ebfd;       /* 깊이 살펴보기 */
+    --axis: #aab7d0;
+    --sel-hi: #d1264f; --sel-lo: #1c3fd6;
+  }
+  .skip-link { position: fixed; top: -3rem; left: 1rem; z-index: 100; padding: .6rem 1rem; color: #fff; background: var(--accent); border-radius: 4px; font-weight: 700; text-decoration: none; }
+  .skip-link:focus { top: 1rem; }
+
+  .section-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .section-num { font-size: 15px; color: var(--muted); font-weight: 700; }
+  .block { display: flex; flex-direction: column; gap: 12px; }
+  .block + .block { margin-top: 12px; padding-top: 24px; border-top: 1px solid var(--line); }
+
+  /* ---- 보기 방식 전환 ---- */
+  .layer-switch, .pick-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .layer-btn, .pick-btn { font: inherit; font-size: 14px; font-weight: 700; padding: 8px 15px; border-radius: 999px; cursor: pointer;
+    color: var(--muted); background: var(--surface); border: 2px solid var(--line); }
+  .layer-btn[aria-pressed="true"], .pick-btn[aria-pressed="true"] { color: #fff; background: var(--ink); border-color: var(--ink); }
+  .layer-note { font-size: 13px; color: var(--muted); }
+
+  /* ---- 데이터로 세상 읽기 / 깊이 살펴보기 표시 ---- */
+  .layer-chip { display: inline-flex; align-items: center; gap: 7px; align-self: flex-start;
+    font-size: 11.5px; font-weight: 700; letter-spacing: .01em; padding: 3px 10px; border-radius: 999px; }
+  .layer-chip.basic { color: var(--basic); background: var(--basic-soft); border: 1px solid #bfe4e4; }
+  .layer-chip.stat { color: var(--stat); background: var(--stat-soft); border: 1px solid #ddd0f6; }
+  .layer-chip i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: inline-block; }
+  .tier-stat { border-left: 3px solid var(--stat); background: linear-gradient(90deg, var(--stat-soft), transparent 70%);
+    border-radius: 0 6px 6px 0; padding: 16px 18px; }
+  .tier-stat h3, .tier-stat h4 { color: #4a2a86; }
+  main[data-layer="basic"] .tier-stat { display: none; }
+  main[data-layer="basic"] .stat-only { display: none; }
+
+  /* ---- 함정 머리말 ---- */
+  .trap-banner { display: flex; gap: 14px; align-items: flex-start; border-left: 3px solid var(--pos);
+    background: var(--pos-soft); border-radius: 0 6px 6px 0; padding: 14px 18px; }
+  .trap-banner .tno { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--pos); white-space: nowrap; padding-top: 2px; }
+  .trap-banner p { font-size: 15px; }
+  .wrong-right { display: grid; gap: 12px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .wrong-right { grid-template-columns: 1fr 1fr; } }
+  .wr { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .wr.bad { border-color: #f3c6d3; background: #fef7f9; }
+  .wr.good { border-color: #b9e6d2; background: #f2fbf7; }
+  .wr .hd { font-size: 12.5px; font-weight: 700; letter-spacing: .02em; }
+  .wr.bad .hd { color: var(--pos); }
+  .wr.good .hd { color: var(--ok); }
+
+  /* ---- 위젯 ---- */
+  .sim { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .sim-ctl { display: grid; gap: 6px; }
+  .sim-ctl label { font-size: 13px; font-weight: 700; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; }
+  .sim-ctl label span { font-family: var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .sim svg { display: block; width: 100%; height: auto; }
+  .grid-line { stroke: var(--line); stroke-width: 1; }
+  .axis-line { stroke: var(--axis); stroke-width: 1; }
+  .tick-label { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; font-family: inherit; }
+  .axis-title { fill: var(--muted); font-size: 11.5px; font-family: inherit; }
+  .pt { fill: #b9c2d8; }
+  .pt.hi { fill: var(--sel-hi); }
+  .pt.lo { fill: var(--sel-lo); }
+  .mline { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; }
+  .mline.hi { stroke: var(--sel-hi); stroke-width: 1.6; stroke-dasharray: 5 4; }
+  .mline.lo { stroke: var(--sel-lo); stroke-width: 1.6; stroke-dasharray: 5 4; }
+  .idline { stroke: var(--axis); stroke-width: 1.2; stroke-dasharray: 3 3; }
+  .regline { fill: none; stroke: var(--accent); stroke-width: 2.2; }
+  /* 상관 설명 토글 */
+  .explainer summary { font-weight: 700; }
+  .explainer-body { display: flex; flex-direction: column; gap: 12px; }
+  .corr-plots { display: flex; flex-wrap: wrap; gap: 12px; }
+  .corr-plot { flex: 1 1 280px; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  .corr-plot svg { display: block; width: 100%; height: auto; }
+  .corr-plot .cap { font-size: 13px; font-weight: 700; color: var(--muted); margin: 2px 4px 4px; }
+  .corr-figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .corr-figure img { display: block; width: 100%; height: auto; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  .corr-figure figcaption { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .regline.alt { fill: none; stroke: var(--stat); stroke-width: 2.2; stroke-dasharray: 7 4; }
+  .svg-lab { font-size: 11px; font-weight: 600; font-family: inherit; }
+
+  .bars { display: flex; flex-direction: column; gap: 8px; }
+  .bar-row { display: grid; grid-template-columns: 78px 1fr 62px; gap: 10px; align-items: center; font-size: 13.5px; }
+  .bar-row .track { height: 16px; background: var(--soft); border-radius: 999px; overflow: hidden; }
+  .bar-row .fill { height: 100%; border-radius: 999px; background: var(--accent); }
+  .bar-row .fill.alt { background: var(--warn); }
+  .bar-row .v { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+
+  .verdict { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700;
+    padding: 8px 14px; border-radius: 8px; align-self: flex-start; }
+  .verdict.on { color: var(--pos); background: var(--pos-soft); border: 1px solid #f3c6d3; }
+  .verdict.off { color: var(--muted); background: var(--soft); border: 1px solid var(--line); }
+
+  .cmp-table th:first-child { width: 132px; }
+  .cmp-table td, .cmp-table th { font-size: 14px; }
+  .dag { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+  .dag svg { display: block; width: 100%; height: auto; max-width: 340px; margin: 0 auto; }
+  .dag-node { fill: var(--surface); stroke: var(--ink); stroke-width: 1.6; }
+  .dag-node.z { stroke: var(--pos); }
+  .dag-txt { fill: var(--ink); font-size: 13px; font-weight: 700; font-family: inherit; text-anchor: middle; }
+  .dag-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .dag-cap { font-size: 12.5px; color: var(--muted); text-align: center; margin-top: 6px; }
+
+  /* 항목 본문에 <strong>·<span>이 섞여 있어 li 를 그리드로 만들면 인라인 요소마다
+     별개의 그리드 아이템이 되어 줄이 깨진다. 내어쓰기(hanging indent)로 처리한다. */
+  .ck { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 9px; }
+  .ck li { position: relative; padding-left: 28px; font-size: 14.5px; }
+  .ck li::before { content: "☐"; position: absolute; left: 0; top: 0; color: var(--accent); font-weight: 700; }
+  .future { display: inline-block; font-size: 11.5px; font-weight: 700; color: var(--stat); background: var(--stat-soft);
+    border: 1px solid #ddd0f6; border-radius: 4px; padding: 0 6px; margin-left: 4px; white-space: nowrap; }
+</style>
+<script src="../assets/data/kbo-regression.js"></script>
+<script src="../assets/data/galton-father-son.js"></script>
+<script src="../assets/data/kbo-traps23.js"></script>
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../index.html#data-science">← 처음으로</a>
+  <h1>데이터로 세상을<br>읽을 때 조심할 것들</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#how-to-read"><b>01</b><span>이 자료를 읽는 방법</span></a>
+    <a href="#trap1"><b>02</b><span>함정 1 · 전후 비교</span></a>
+    <a href="#trap2"><b>03</b><span>함정 2 · 표본의 출처</span></a>
+    <a href="#trap3"><b>04</b><span>함정 3 · 전체와 집단별 비교</span></a>
+    <a href="#compare"><b>05</b><span>함정 한눈에 보기</span></a>
+    <a href="#checklist"><b>06</b><span>분석 전 점검표</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#데이터과학</span>
+    <span class="rail-tag">#개념정리</span>
+    <span class="rail-tag">#통계해석</span>
+    <span class="rail-tag">#표본오차</span>
+    <span class="rail-tag">#평균으로의회귀</span>
+    <span class="rail-tag">#심슨의역설</span>
+    <span class="rail-tag">#선택편향</span>
+  </div>
+  <footer>‘데이터로 세상 읽기 + 깊이 살펴보기’를 누르면 수식이 들어간 설명이 함께 펼쳐집니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+<main id="content" data-layer="basic">
+  <header class="panel">
+    <div class="eyebrow">통계적 사고 · 이야기 자료</div>
+    <h2 class="page-title">데이터로 세상을 읽을 때 조심할 것들</h2>
+    <p class="lede">숫자와 계산이 모두 맞아도 결론은 틀릴 수 있습니다. 누구를 골랐는지, 무엇을 한 번으로 셌는지, 어떤 집단을 합쳤는지에 따라 숫자의 뜻이 달라지기 때문입니다. 실제 기록으로 그런 사례들을 살펴봅니다.</p>
+    <div class="callout"><strong>여기서 다루는 함정들은 하나의 질문을 저마다 다르게 놓친 결과입니다.</strong> 그 질문은 “이 숫자는 어떤 과정을 거쳐 내 앞에 왔는가”입니다.</div>
+  </header>
+
+  <section class="panel" id="how-to-read">
+    <div class="section-head"><span class="section-num">01</span><h2>이 자료를 읽는 방법</h2></div>
+    <p class="note">내용을 <strong>데이터로 세상 읽기</strong>와 <strong>깊이 살펴보기</strong>로 나눠 두었습니다. 지금 필요한 것만 골라 볼 수 있습니다.</p>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>지금 바로 이해할 수 있는 내용</h3>
+      <p>무엇을 착각하는지, 왜 위험한지, 손으로 확인할 수 있는 작은 예시로 설명합니다. 수식을 쓰지 않으며 <strong>사칙연산과 평균만</strong> 알면 읽을 수 있습니다. 실제 데이터로 확인한 결과도 여기에 있습니다.</p>
+    </article>
+
+    <article class="block">
+      <div class="layer-chip stat"><i></i>깊이 살펴보기</div>
+      <h3>기호와 수식으로 한 걸음 더 들어가는 내용</h3>
+      <p>같은 현상을 기호와 수식으로 정리합니다. 분산, 표준오차, 상관계수, 조건부 기대값이 나옵니다. <strong>지금 당장 몰라도 됩니다.</strong> 기초 통계학을 배워 가면서 다시 돌아와 읽으면, 데이터로 세상 읽기에서 말로 설명한 내용이 어떤 식으로 정확해지는지 보입니다.</p>
+      <p class="note">깊이 살펴보기 박스는 보라색 왼쪽 선으로 표시됩니다. 본문 중간에 <span class="future">심화학습</span> 표시가 붙은 용어도 같은 뜻입니다.</p>
+    </article>
+
+    <article class="block">
+      <h3>보기 방식 고르기</h3>
+      <div class="layer-switch" role="group" aria-label="보기 방식 선택">
+        <button class="layer-btn" type="button" id="btn-basic" aria-pressed="true">데이터로 세상 읽기만 보기</button>
+        <button class="layer-btn" type="button" id="btn-all" aria-pressed="false">데이터로 세상 읽기 + 깊이 살펴보기</button>
+      </div>
+      <p class="layer-note" id="layer-note">지금은 <strong>데이터로 세상 읽기</strong>만 보고 있습니다. 수식이 들어간 설명은 접혀 있습니다.</p>
+    </article>
+
+    <article class="block">
+      <h3>이 자료에서 다루는 함정</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>함정</th><th>한 줄 경고</th><th>관련된 역설</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1. 전후 비교</strong></td><td>좋아졌다는 사실만으로 원인을 알 수 없다</td><td>평균으로의 회귀</td></tr>
+            <tr><td><strong>2. 표본의 출처</strong></td><td>무엇을 뽑아 셌는지에 따라 평균이 달라진다</td><td>검사 역설, 범위 제한</td></tr>
+            <tr><td><strong>3. 전체와 집단별 비교</strong></td><td>나눠 볼 때와 합쳐 볼 때 결과가 다를 수 있다</td><td>심슨의 역설, 윌 로저스 현상</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">이 자료는 <strong>가상 데이터를 쓰지 않습니다.</strong> 데이터로 세상 읽기의 수치는 모두 2025 KBO 한 시즌 전체 기록(720경기 · 56,139타석 · 217,970투구)에서 직접 계산했고, 깊이 살펴보기의 확장 예제는 갈턴이 1886년에 수집한 아버지–아들 키 자료(465쌍) 원본을 씁니다. 예외는 손으로 검증하는 산술 예시와, 상관 설명에 인용한 위키미디어 공용의 예시 그림뿐이며 두 경우 모두 그 자리에 실제 데이터가 아니라고 밝혔습니다.</p>
+    </article>
+  </section>
+
+  <!-- ======================= 함정 1 ======================= -->
+  <section class="panel" id="trap1">
+    <div class="section-head"><span class="section-num">02</span><h2>함정 1 · 좋아진 이유를 전후 비교만으로 알 수 있을까</h2></div>
+
+    <div class="trap-banner">
+      <div class="tno">함정 1</div>
+      <p>2025 KBO <strong>규정타석을 채운 타자 43명</strong> 가운데 전반기 타율 <strong>하위 10명</strong>을 모아 타격폼 교정 프로그램을 시행했다고 하자. 후반기에 이 집단의 평균 타율이 <strong>.238에서 .272로</strong> 올랐고, 10명 중 8명은 개인 타율도 올랐다. 교정이 효과가 있었다고 말할 수 있을까?</p>
+    </div>
+    <p class="note">프로그램은 가정이지만 <strong>성적은 실제 기록입니다.</strong> 같은 기간 전반기 상위 10명은 아무 조치도 받지 않고 평균이 .319에서 .288로 내려갔고, 10명 중 7명은 개인 타율도 떨어졌습니다.</p>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>무엇을 착각하는가</h3>
+      <p>타율에는 <strong>실력</strong>과 <strong>그 기간의 운</strong>이 섞여 있습니다. 어떤 투수를 주로 만났는지, 잘 맞은 타구가 야수 정면으로 갔는지, 빗맞은 타구가 빈 곳에 떨어졌는지 같은 것들입니다.</p>
+      <p>전반기 하위 10명에는 평소에도 타율이 낮은 타자와 그 기간에 유난히 잘 안 풀린 타자가 함께 있을 수 있습니다. 후반기에는 전반기의 불운이 똑같이 반복되지 않을 수 있습니다. 그러면 <strong>별다른 조치를 하지 않아도 하위 집단의 평균 타율이 오를 수 있습니다.</strong></p>
+      <p>반대로 유난히 잘 풀렸던 상위 집단의 평균은 다음 기간에 내려갈 수 있습니다. 이렇게 극단적인 기록을 기준으로 고른 집단이 다음 측정에서 전체 평균에 더 가까워지는 경향을 <strong>평균으로의 회귀</strong>라고 합니다.</p>
+      <div class="wrong-right">
+        <div class="wr bad">
+          <div class="hd">✗ 흔한 결론</div>
+          <p>대상 집단의 평균 타율이 <strong>.238에서 .272로</strong> 올랐고 10명 중 8명이 개선됐다. 교정 프로그램은 효과적이다.</p>
+        </div>
+        <div class="wr good">
+          <div class="hd">✓ 자료로 말할 수 있는 결론</div>
+          <p>타율이 오른 것은 사실이다. 그러나 교정을 받지 않은 비슷한 부진 타자들(비교 집단)과 견주지 않았으므로 교정의 효과는 <strong>알 수 없다</strong>. 위 프로그램은 가정이므로 실제 기록에서 치료 여부를 비교한 것은 아니다.</p>
+        </div>
+      </div>
+      <div class="callout warn"><strong>왜 조심해야 하나.</strong> 훈련이나 치료를 받을 사람을 성적이 가장 낮거나 위험이 가장 높은 집단에서 고르는 일은 흔합니다. 이런 집단의 수치가 나중에 좋아져도, 그 변화 전부를 훈련이나 치료의 효과로 볼 수는 없습니다.</div>
+    </article>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>숫자로 확인하기</h3>
+      <p>위 이야기의 근거입니다. 대상은 <strong>규정타석</strong>을 채운 타자입니다. KBO 규정타석은 <strong>팀당 경기수의 3.1배</strong>이고 2025 시즌은 팀당 144경기이므로 <span class="mono">144 &times; 3.1 = 446.4</span>타석, 즉 447타석 이상이 기준입니다. 여기에 <strong>43명</strong>이 해당합니다.</p>
+      <p class="note">“전·후반기에 충분히 출전한 선수”처럼 분석자가 직접 정하는 기준은 쓰지 않았습니다. 정의를 조금 바꾸면 대상과 결론이 함께 달라질 수 있기 때문입니다. 규정타석은 리그가 정해 둔 기준이라 누가 계산해도 같은 43명이 나옵니다. 그리고 이 43명은 모두 전반기 183~326타수, 후반기 115~258타수로 양쪽에 충분한 타수를 갖고 있어, 반기별 조건을 따로 둘 필요가 없습니다.</p>
+      <p>이 43명의 평균 타율은 <strong>.285</strong>입니다(리그 전체는 .262). 전반기 타율만 보고 상·하위 10명을 고른 뒤 후반기를 확인했습니다.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>집단</th><th class="n">전반기 타율</th><th class="n">후반기 타율</th><th class="n">변화</th><th class="n">같은 방향으로 움직인 선수</th></tr></thead>
+          <tbody>
+            <tr><td>전반기 <strong>상위 10명</strong></td><td class="n">.3194</td><td class="n">.2881</td><td class="n">−.0313</td><td class="n">10명 중 <strong>7명 하락</strong></td></tr>
+            <tr><td>전반기 <strong>하위 10명</strong></td><td class="n">.2380</td><td class="n">.2721</td><td class="n">+.0341</td><td class="n">10명 중 <strong>8명 상승</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>양쪽이 모두 <strong>이 43명의 평균 .285 쪽으로</strong> 이동했습니다. 상위 10명은 .288, 하위 10명은 .272에 도착해 둘 다 .285 근처입니다. 가까워지는 대상은 리그 전체 평균이 아니라 <strong>선발이 이루어진 집단의 평균</strong>입니다.</p>
+      <p>개별 선수의 이동 폭은 더 큽니다. 하위 집단에서는 오지환이 .2131에서 .2839로, 박성한이 .2471에서 .3109로 올랐습니다. 상위 집단에서는 박민우가 .3280에서 .2597로, 최형우가 .3333에서 .2714로 내려갔습니다.</p>
+      <div class="metrics">
+        <div><b>+0.196</b><span>전반기 타율과 후반기 타율의 상관</span></div>
+        <div><b>−0.479</b><span>전반기 타율과 변화량의 상관</span></div>
+      </div>
+      <p>첫 번째 수치(+0.196)는 전반기 타율만으로 후반기 타율을 예상하기 어렵다는 뜻입니다. 두 번째 수치(−0.479)는 전반기 타율이 높은 선수일수록 이후 변화가 내려가는 쪽, 낮은 선수일수록 올라가는 쪽이었다는 뜻입니다. 다만 처음 값이 변화량 계산에도 들어가므로 이 수치 하나만으로 원인을 판정할 수는 없습니다.</p>
+      <div class="callout"><strong>쉽게 해 볼 점검 — 반대쪽도 함께 보기.</strong> 여기서는 하위 10명의 평균이 <strong>+.034</strong> 오르고 상위 10명의 평균은 <strong>−.031</strong> 내려갔습니다. 하위 집단의 개선에 평소 실력과 일시적인 운이 얼마나 섞였을지 생각하게 해 주는 비교입니다. 훈련 효과를 확인하려면 훈련받지 않은 비슷한 하위 집단이 필요합니다.</div>
+      <details class="explainer" id="corr-explainer">
+        <summary>상관이란? — 두 기록이 함께 움직이는 정도 (눌러서 펼치기)</summary>
+        <div class="explainer-body">
+          <p><strong>상관</strong>(정확히는 상관계수)은 두 기록이 <strong>함께 움직이는 정도</strong>를 −1부터 +1 사이의 숫자 하나로 나타낸 것입니다. 선수 한 명을 점 하나로 삼아 두 기록을 그림에 찍어 보면 뜻이 잘 보입니다.</p>
+          <div class="scroll">
+            <table>
+              <thead><tr><th>값</th><th>점들의 모습</th><th>뜻</th></tr></thead>
+              <tbody>
+                <tr><td>+1에 가까움</td><td>오른쪽 위로 올라가는 직선 가까이에 모임</td><td>한쪽이 크면 다른 쪽도 큰 경향이 강하다</td></tr>
+                <tr><td>0 근처</td><td>뚜렷한 방향 없이 흩어짐</td><td>한쪽을 알아도 다른 쪽을 짐작하기 어렵다</td></tr>
+                <tr><td>−1에 가까움</td><td>오른쪽 아래로 내려가는 직선 가까이에 모임</td><td>한쪽이 크면 다른 쪽은 작은 경향이 강하다</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>위의 두 숫자를 실제 43명의 점으로 그리면 다음과 같습니다. 점 하나가 선수 한 명이고, 선은 점들의 전체 방향을 나타내는 직선입니다.</p>
+          <div class="corr-plots">
+            <div class="corr-plot">
+              <div class="cap">전반기 타율과 후반기 타율 · 상관 <span id="corr-a-r">+0.196</span></div>
+              <svg id="corr-a" viewBox="0 0 360 280" role="img" aria-label="규정타석 43명의 전반기 타율과 후반기 타율 산점도. 점들이 넓게 흩어져 있고 오른쪽으로 아주 약하게 올라갑니다."></svg>
+            </div>
+            <div class="corr-plot">
+              <div class="cap">전반기 타율과 변화량(후반기 − 전반기) · 상관 <span id="corr-b-r">−0.479</span></div>
+              <svg id="corr-b" viewBox="0 0 360 280" role="img" aria-label="규정타석 43명의 전반기 타율과 전·후반기 타율 변화량 산점도. 점들이 오른쪽 아래로 뚜렷하게 내려갑니다."></svg>
+            </div>
+          </div>
+          <p>왼쪽은 점들이 넓게 퍼져 있고 오른쪽으로 아주 약하게 올라갑니다(+0.196). 전반기 타율이 높았던 선수가 후반기에도 조금 높은 경향은 있지만, 전반기 기록만으로 후반기를 짐작하기는 어렵습니다. 오른쪽은 뚜렷하게 내려갑니다(−0.479). 전반기 타율이 높았던 선수일수록 후반기에 떨어진 폭이 컸습니다.</p>
+          <h4>상관을 읽을 때 주의할 점</h4>
+          <ul>
+            <li><strong>원인을 말해 주지 않습니다.</strong> 두 기록이 함께 움직인다는 것과 한쪽이 다른 쪽을 바꾼다는 것은 다른 이야기입니다.</li>
+            <li><strong>직선 모양의 경향만 잽니다.</strong> 곡선처럼 휘는 관계는 상관이 0에 가까워도 있을 수 있습니다.</li>
+            <li><strong>극단적인 점 몇 개에 크게 흔들립니다.</strong> 숫자만 보지 말고 점 그림을 함께 보세요.</li>
+            <li><strong>누구를 골라 계산했는지에 따라 달라집니다.</strong> 함정 2의 “걸러진 집단” 이야기가 이것입니다.</li>
+            <li><strong>변화량과의 상관은 음수가 나오기 쉽습니다.</strong> 변화량은 나중 값에서 처음 값을 빼서 구하므로, 처음 값이 우연히 높았던 선수는 변화량이 작게 나옵니다. 오른쪽 그림의 −0.479를 어떤 조치의 효과로 읽으면 안 되는 이유입니다.</li>
+          </ul>
+          <p class="note">“몇 이상이면 강한 상관”이라는 기준은 분야와 목적마다 다릅니다. 이 자료에서는 부호(방향)와, 0과 1 가운데 어디에 가까운지를 중심으로 읽습니다.</p>
+          <div class="tier-stat" id="corr-r">
+            <div class="layer-chip stat"><i></i>깊이 살펴보기</div>
+            <h4>상관계수 \(r\) — 기호로 정리하기</h4>
+            <p>깊이 살펴보기에 나오는 \(r\)은 표본 상관계수를 가리킵니다. 먼저 각 값을 <strong>표준화</strong>합니다. 평균을 빼고 표준편차로 나누면, 단위와 관계없이 “평균에서 표준편차 몇 개만큼 떨어져 있는가”를 나타내는 값이 됩니다.</p>
+            <div class="readout math">\[z_{x,i} = \frac{x_i - \bar{x}}{s_x}, \qquad z_{y,i} = \frac{y_i - \bar{y}}{s_y}\]</div>
+            <p>상관계수는 두 표준화 값을 곱해 평균 낸 것입니다. 표준편차를 \(n-1\)로 나눠 구했으므로 평균도 \(n-1\)로 나눕니다.</p>
+            <div class="readout math">\[r = \frac{1}{n-1}\sum_i z_{x,i}\, z_{y,i} = \frac{\sum_i (x_i-\bar{x})(y_i-\bar{y})}{\sqrt{\sum_i (x_i-\bar{x})^2}\,\sqrt{\sum_i (y_i-\bar{y})^2}}\]</div>
+            <p>한 선수의 두 기록이 모두 평균보다 크거나 모두 작으면 곱이 양수이고, 한쪽만 크면 음수입니다. 곱이 양수인 점이 많으면 \(r\)이 양수, 음수인 점이 많으면 \(r\)이 음수가 됩니다.</p>
+            <ul>
+              <li><strong>범위.</strong> \(-1 \le r \le 1\)이고, 모든 점이 한 직선 위에 있을 때만 \(r = \pm 1\)입니다.</li>
+              <li><strong>단위와 순서에 무관.</strong> 키를 cm로 재든 인치로 재든 같고, \(x\)와 \(y\)를 바꿔도 같습니다.</li>
+              <li><strong>회귀 기울기와의 관계.</strong> \(y\)를 \(x\)로 예측하는 최소제곱 직선의 기울기는 \(b = r\,\dfrac{s_y}{s_x}\)입니다. 두 변수를 표준화하면 기울기가 곧 \(r\)이 되어 \(\hat{z}_y = r\,z_x\)로 쓸 수 있습니다. 두 변수가 이변량 정규분포를 따르면 이것이 조건부 기대값 \(\mathrm{E}[Z_y \mid Z_x = z] = r\,z\)와 같습니다. 함정 1의 “회귀의 크기는 상관계수가 정한다”와 갈턴 예제의 두 회귀선이 이 관계를 씁니다.</li>
+              <li><strong>\(r^2\)의 뜻.</strong> \(y\)의 흩어짐(분산) 가운데 \(x\)에 대한 직선으로 설명되는 비율입니다. 전반기–후반기 타율은 \(r = 0.196\)이므로 \(r^2 \approx 0.038\), 약 4%만 직선으로 설명됩니다. 갈턴의 아버지–아들 키는 \(r^2 = 0.153\)입니다.</li>
+            </ul>
+          </div>
+          <figure class="corr-figure">
+            <img src="../assets/images/correlation-examples.png" width="1280" height="586" loading="lazy" alt="상관계수 값이 다른 여러 산점도. 첫째 줄은 같은 흩어짐에서 상관이 1, 0.8, 0.4, 0, −0.4, −0.8, −1로 바뀌는 모습, 둘째 줄은 기울기가 달라도 점이 직선 위에 있으면 상관이 1 또는 −1이고 수평선은 정의되지 않는 모습, 셋째 줄은 곡선·원·네 덩어리처럼 뚜렷한 모양이 있어도 상관이 0인 모습입니다.">
+            <figcaption>
+              <strong>상관계수에 따른 자료의 모양.</strong> 각 그림 위의 숫자가 상관계수입니다. 첫째 줄은 점이 직선 쪽으로 모일수록 숫자가 ±1에 가까워지는 모습입니다. 둘째 줄은 <strong>기울기가 크든 작든</strong> 점이 직선 위에 있으면 상관이 1 또는 −1이라는 것을 보여 줍니다(상관은 기울기의 크기가 아닙니다. 가운데 수평선은 한쪽 값이 변하지 않아 상관을 정의할 수 없습니다). 셋째 줄은 <strong>뚜렷한 관계가 있어도 직선 모양이 아니면 상관이 0</strong>일 수 있다는 것을 보여 줍니다. 이 그림의 점들은 설명을 위해 만든 것입니다.<br>
+              출처: DenisBoigelot(원 업로더 Imagecreator), 「<a href="https://commons.wikimedia.org/wiki/File:Correlation_examples2.svg" target="_blank" rel="noopener noreferrer">Correlation examples2.svg</a>」, 위키미디어 공용, <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.ko" target="_blank" rel="noopener noreferrer">CC0 1.0</a>. 원본 SVG를 위키미디어가 변환한 PNG를 사용했습니다.
+            </figcaption>
+          </figure>
+        </div>
+      </details>
+    </article>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>직접 확인해 보기 — 몇 타수를 보고 뽑을까</h3>
+      <p>위와 <strong>같은 43명</strong>으로 실험합니다. <strong>시즌 첫 N타수만 보고</strong> 상·하위 25%(각 11명)를 뽑은 뒤 <strong>그 이후 타수</strong>의 타율을 확인합니다. 이 43명은 모두 358타수 이상이라, N을 200까지 올려도 이후 타수가 150타수 넘게 남습니다. N을 바꿔 보세요.</p>
+      <div class="sim">
+        <div class="sim-ctl">
+          <label for="cut">선발에 쓸 타수 <span id="cut-v">45타수</span></label>
+          <input type="range" id="cut" min="0" max="5" step="1" value="1">
+        </div>
+        <div class="metrics">
+          <div><b id="m-hi">—</b><span>상위 25% · 선발 → 이후</span></div>
+          <div><b id="m-lo">—</b><span>하위 25% · 선발 → 이후</span></div>
+          <div><b id="m-gap">—</b><span>두 집단 격차 · 선발 → 이후</span></div>
+        </div>
+        <svg id="reg-chart" viewBox="0 0 700 360" role="img" aria-label="첫 N타수 타율과 그 이후 타율의 산점도. 선발 당시 상위 25%와 하위 25%를 색으로 구분해 표시합니다."></svg>
+        <div class="legend">
+          <span><i style="background:var(--sel-hi)"></i>선발 시 상위 25%</span>
+          <span><i style="background:var(--sel-lo)"></i>선발 시 하위 25%</span>
+          <span><i style="background:#b9c2d8"></i>나머지</span>
+        </div>
+        <p class="note" id="reg-note">—</p>
+      </div>
+      <p>이 기록에서는 두 가지가 보입니다. 첫째, <strong>처음에 벌어졌던 타율 차이가 이후에는 거의 사라집니다.</strong> 처음 격차가 .232이든 .095이든, 그 뒤로는 양쪽 모두 이 43명의 평균 .285 근처로 모입니다. 둘째, <strong>선발에 쓰는 타수를 늘리면 처음 격차도 줄어듭니다.</strong> 20타수로 고르면 .418 대 .186이지만 200타수로 고르면 .323 대 .228입니다. 짧은 기록일수록 우연의 영향이 더 클 수 있습니다.</p>
+      <div class="callout warn"><strong>기억할 점.</strong> 짧은 기록만 보고 특히 잘하거나 못한 사람을 고르면 일시적인 운이 많이 섞일 수 있습니다. 그 뒤에 수치가 좋아져도 조치의 효과라고 곧바로 결론 내리지 마세요.</div>
+    </article>
+
+    <article class="block tier-stat">
+      <div class="layer-chip stat"><i></i>깊이 살펴보기</div>
+      <h3>관측값의 분해와 신뢰도</h3>
+      <p>하나의 관측값을 변하지 않는 부분과 우연으로 나눕니다.</p>
+      <div class="readout math">\[X = \theta + e, \qquad \mathrm{E}[e] = 0\]</div>
+      <p>둘이 독립이면 분산이 그대로 더해집니다. 여기서 <strong>신뢰도</strong> \(\rho\)를 정의합니다.</p>
+      <div class="readout math">\[\mathrm{Var}(X) = \mathrm{Var}(\theta) + \mathrm{Var}(e), \qquad \rho = \frac{\mathrm{Var}(\theta)}{\mathrm{Var}(X)}\]</div>
+      <p>\(\rho\)는 “관측된 차이 중 실력이 설명하는 몫”입니다. \(\rho=1\)이면 관측값이 곧 실력이고, \(\rho=0\)이면 관측된 차이가 전부 우연입니다. \(\mathrm{Var}(\theta)\)는 볼 수 없지만 \(\mathrm{Var}(X)\)는 데이터에서 계산되고 \(\mathrm{Var}(e)\)는 이론으로 알 수 있으므로, <strong>빼서 추정</strong>합니다.</p>
+      <p>비율(타율, 합격률, 전환율)의 표집오차는 다음과 같습니다.</p>
+      <div class="readout math">\[\mathrm{SE}(\hat{p}) = \sqrt{\frac{p(1-p)}{n}}\]</div>
+      <p>참 실력이 .270인 타자를 45타수만 보면 \(\mathrm{SE} = \sqrt{0.270 \times 0.730 / 45} = 0.066\)입니다. <strong>타율로 치면 표준오차가 .066(6푼 6리)</strong>이므로, 실력이 같은 두 타자가 45타수씩만 치고도 .200과 .340처럼 크게 갈리는 일이 드물지 않습니다. 두 선수의 차이가 이만큼 벌어질 확률은 약 13%입니다.</p>
+      <h4>회귀의 크기는 상관계수가 정한다</h4>
+      <p>두 측정값을 표준화하고 상관계수를 \(r\)이라 하면(<a href="#corr-explainer" class="corr-link">상관계수 \(r\)과 표준화</a> 참고)</p>
+      <div class="readout math">\[\mathrm{E}[Z_2 \mid Z_1 = z] = r \cdot z\]</div>
+      <p>\(r&lt;1\)이면 항상 \(|rz| &lt; |z|\)입니다. 즉 <strong>상관이 완전하지 않은 한 회귀는 예외가 아니라 규칙</strong>입니다. \(r=0.5\)인 지표에서 상위 \(1.65\) 표준편차를 뽑으면 다음 측정의 기대값은 \(0.5 \times 1.65 \approx 0.83\) 표준편차입니다. 아무 개입 없이 절반이 사라집니다.</p>
+      <p class="note">이 현상은 갈턴(1886)이 부모와 자녀의 키에서 발견해 “평범함으로의 회귀”라 불렀고, 여기서 오늘날의 <strong>회귀분석</strong>이라는 이름이 나왔습니다.</p>
+      <h4>세 가지 설명이 분리되지 않는다</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>관측된 개선</th><th>가능한 원인</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="3">하위 집단의 타율이 올랐다</td><td>① 개입이 효과가 있었다</td></tr>
+            <tr><td>② 평균으로의 회귀</td></tr>
+            <tr><td>③ 자연 경과 · 성숙 · 계절성</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>무작위로 배정된 대조군을 두면 ②와 ③이 두 군에 똑같이 작용하므로 두 군의 <strong>차이</strong>에는 ①만 남습니다. 이것이 무작위 대조시험이 필요한 근본적인 이유입니다.</p>
+      <p class="note"><strong>실제로 일어난 일.</strong> 이스라엘 공군 교관들은 “잘한 조종사를 칭찬하면 다음 비행에서 나빠지고, 못한 조종사를 질책하면 다음에 좋아진다”는 경험에서 질책이 더 효과적이라고 결론지었습니다. 카너먼은 이것이 순수한 회귀 현상임을 지적했습니다. <strong>극단값을 기준으로 개입을 배정하는 순간, 회귀는 개입 효과로 위장합니다.</strong></p>
+    </article>
+
+    <article class="block tier-stat">
+      <div class="layer-chip stat"><i></i>깊이 살펴보기</div>
+      <h3>회귀를 처방으로 바꾸기 — 축소추정과 스테인의 역설</h3>
+      <p>회귀는 크기를 예측할 수 있으므로, “조심하자”에서 멈추지 않고 <strong>더 나은 예측 규칙</strong>으로 바꿀 수 있습니다.</p>
+      <div class="readout math">\[\hat{\theta} = \rho \cdot X + (1-\rho)\cdot \mu\]</div>
+      <p>관측값과 전체 평균을 신뢰도로 가중평균합니다. 이것은 베이즈 사후평균과 같고 <strong>축소추정</strong>이라 부릅니다. 정보가 적으면(\(\rho\)가 작으면) 전체 평균 쪽으로 많이 끌어당깁니다.</p>
+      <p><strong>James–Stein 추정량</strong>은 \(\rho\)를 데이터에서 직접 추정합니다.</p>
+      <div class="readout math">\[\hat{\rho} = 1 - \frac{k-3}{\sum_i (y_i - \bar{y})^2}, \qquad \hat{\theta}_i = \bar{y} + \hat{\rho}\,(y_i - \bar{y})\]</div>
+      <p class="note">여기서 \(y_i\)는 분산이 1이 되도록 바꾼 값입니다. 타율은 \(y_i = \sqrt{n}\,\arcsin(2\hat{p}_i - 1)\)로 바꾸면 분산이 거의 1이 되고, 이 페이지의 계산도 이 변환을 썼습니다. 타율을 그대로 넣으면 이 식은 성립하지 않습니다. 또 목표점을 미리 정하지 않고 자료의 평균 \(\bar{y}\) 쪽으로 당기기 때문에 분자가 \(k-3\)이며, 대상이 4명 이상일 때 쓸 수 있습니다.</p>
+      <p>James와 Stein은 정규분포 등 일정한 조건에서 여러 값을 함께 추정할 때, 전체 평균 쪽으로 조금 당기는 방법이 각 관측값을 그대로 쓰는 방법보다 <strong>평균제곱오차의 기댓값</strong>을 낮출 수 있음을 보였습니다. 실제 자료 한 번마다 반드시 오차가 작다는 뜻은 아닙니다. 개별 추정에는 편향이 생겨도 오차의 흔들림을 더 크게 줄일 수 있는 것이 <strong>스테인의 역설</strong>입니다. \(\mathrm{MSE} = \text{편향}^2 + \text{분산}\)으로 설명할 수 있습니다. 이 결과가 ‘역설’로 불리는 이유는, 함께 추정하는 값들이 <strong>서로 아무 관계가 없어도</strong> 성립하기 때문입니다. 서로 무관한 양을 한데 묶어 평균 쪽으로 당겨도 전체 평균제곱오차의 기댓값은 줄어듭니다.</p>
+      <h4>2025 KBO로 재현한 결과</h4>
+      <p>Efron과 Morris(1977)의 설계(시즌 초 45타수로 이후 전체를 예측)를 그대로 적용했습니다. 먼저 분산 분해입니다.</p>
+      <div class="readout">관측 타율의 표준편차 0.0653 · 우연에 따른 표준편차 0.0661 · 선수 간 실력 차이의 표준편차 추정 0 (뺀 값이 음수)</div>
+      <p>관측된 산포가 <strong>우연만으로 기대되는 산포보다 오히려 작습니다.</strong> 빼서 구한 실력 분산이 음수가 되므로 0으로 잡았습니다. 첫 45타수만으로는 이 43명 사이의 실력 차이를 읽어내기 어렵다는 뜻입니다. 관측 타수를 늘려 가면 신뢰도가 자라납니다.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>관측 타수</th><th class="n">실력 sd 추정</th><th class="n">신뢰도 \(\rho\)</th><th class="n">James–Stein \(\hat{\rho}\)</th></tr></thead>
+          <tbody>
+            <tr><td>45타수</td><td class="n">0 (뺀 값이 음수)</td><td class="n">0.000</td><td class="n">0.041</td></tr>
+            <tr><td>100타수</td><td class="n">0 (뺀 값이 음수)</td><td class="n">0.000</td><td class="n">0.000</td></tr>
+            <tr><td>200타수</td><td class="n">0.0216</td><td class="n">0.319</td><td class="n">0.356</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>두 방식으로 따로 구한 축소량이 200타수에서 0.319와 0.356으로 비슷하게 나옵니다. 예측오차 총합(SSE)을 비교하면 차이가 더 분명해집니다.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>관측 타수</th><th class="n">① 관측 타율 그대로</th><th class="n">② 전원을 같은 값으로</th><th class="n">③ James–Stein</th></tr></thead>
+          <tbody>
+            <tr><td>45타수</td><td class="n">0.2593 (1.00배)</td><td class="n">0.0440 (<strong>5.89배</strong>)</td><td class="n">0.0473 (<strong>5.49배</strong>)</td></tr>
+            <tr><td>100타수</td><td class="n">0.1247 (1.00배)</td><td class="n">0.0541 (2.31배)</td><td class="n">0.0550 (2.27배)</td></tr>
+            <tr><td>200타수</td><td class="n">0.1090 (1.00배)</td><td class="n">0.0620 (1.76배)</td><td class="n">0.0658 (1.66배)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>이 자료에서는 첫 45타수의 타율을 그대로 쓰는 것보다 전원을 같은 값(43명의 첫 45타수 타율 평균)으로 예측했을 때 <strong>예측오차 총합이 약 6분의 1</strong>이었습니다. 첫 45타수에 .400을 친 강민호는 이후 367타수에서 .253을, .378이었던 최주환과 문보경은 .263과 .266을 기록했습니다. 반대로 .200과 .178에 그쳤던 구자욱과 채은성은 이후 .331과 .299를, .156이었던 노시환은 .269를 기록했습니다.</p>
+      <div class="callout warn"><strong>정직한 단서 두 가지.</strong> ① 이 보장은 <strong>집단 전체의 총오차</strong>에 대한 것입니다. 특정 한 명만 보면 축소추정이 더 나쁠 수도 있습니다. ② “정답”으로 쓴 이후 타율에도 표집오차가 있어 모든 SSE에 공통 하한이 깔려 있습니다. 위의 개선 배수는 <strong>과소평가</strong>된 값입니다.</div>
+    </article>
+
+    <article class="block tier-stat">
+      <div class="layer-chip stat"><i></i>깊이 살펴보기</div>
+      <h3>확장 예제 — 갈턴의 아버지와 아들 키 (1886)</h3>
+      <p>지금까지는 <strong>같은 것을 두 번 측정</strong>한 경우였습니다. 타율은 실력을 두 번 재는 일이고, 회귀의 원인은 우연이 재발생하지 않는 데 있었습니다. 그런데 회귀는 <strong>서로 다른 두 변수 사이에서도</strong> 일어납니다. \(r&lt;1\)이기만 하면 됩니다. 이 개념의 출발점인 갈턴의 자료가 그 경우입니다.</p>
+      <p>갈턴이 1886년에 수집한 197가족의 키 기록에서 <strong>아버지–아들 465쌍</strong>을 뽑았습니다. 키 기록에도 측정오차는 있지만 여기서 회귀를 설명하는 중심은 측정오차가 아닙니다. 아버지와 아들은 서로 다른 사람이고, 개입도 대조군도 없습니다. 그래도 회귀는 그대로 나타납니다.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>세대</th><th class="n">평균</th><th class="n">표준편차</th><th class="n">범위</th></tr></thead>
+          <tbody>
+            <tr><td>아버지</td><td class="n">175.7cm</td><td class="n">5.8cm</td><td class="n">157.5 ~ 199.4cm</td></tr>
+            <tr><td>아들</td><td class="n">175.8cm</td><td class="n">6.7cm</td><td class="n">152.4 ~ 200.7cm</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="readout">아버지–아들 상관계수 \(r = 0.391\) · \(r^2 = 0.153\) (<a href="#corr-explainer" class="corr-link">\(r\)이란?</a>)</div>
+
+      <h4>대칭성 — 회귀는 힘이 아니다</h4>
+      <p>버튼으로 <strong>선발 방향</strong>을 바꿔 보세요. 산점도는 그대로이고, 어느 쪽 키로 상·하위 10%를 고르는지만 달라집니다.</p>
+      <div class="sim">
+        <div class="pick-row" role="group" aria-label="선발 방향 선택">
+          <button class="pick-btn" type="button" id="g-father" aria-pressed="true">아버지 키로 선발</button>
+          <button class="pick-btn" type="button" id="g-son" aria-pressed="false">아들 키로 선발</button>
+        </div>
+        <svg id="galton-chart" viewBox="0 0 700 380" role="img" aria-label="아버지 키와 아들 키의 산점도. 두 방향의 회귀선과 선발된 상·하위 10% 집단을 함께 표시합니다."></svg>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i>아들 ~ 아버지 회귀선</span>
+          <span><i style="background:var(--stat)"></i>아버지 ~ 아들 회귀선</span>
+          <span><i style="background:var(--sel-hi)"></i>선발 상위 10%</span>
+          <span><i style="background:var(--sel-lo)"></i>선발 하위 10%</span>
+        </div>
+        <div class="scroll">
+          <table>
+            <thead><tr><th id="g-th">선발 집단</th><th class="n">선발한 세대의 평균</th><th class="n">짝이 되는 세대의 평균</th><th class="n">편차 축소율</th></tr></thead>
+            <tbody id="galton-body"></tbody>
+          </table>
+        </div>
+        <p class="note" id="galton-note">—</p>
+      </div>
+      <p>어느 방향으로 골라도 짝이 되는 세대는 선발한 세대만큼 극단적이지 않습니다. 네 경우의 편차 축소율이 0.22~0.42로 모두 1보다 훨씬 작습니다. 아버지로 골라도 아들이 평균 쪽으로 오고, <strong>아들로 골라도 아버지가 평균 쪽으로 옵니다.</strong></p>
+      <p class="note">축소율의 크기가 두 방향에서 같지는 않습니다. 축소율의 기대값은 그 방향의 회귀 기울기와 같아서, cm 단위로는 아버지로 고를 때 0.448, 아들로 고를 때 0.342입니다(아들 세대의 표준편차가 더 크기 때문). 각 세대의 표준편차로 나눈 표준화 단위에서는 두 방향 모두 상관계수 \(r = 0.391\)로 같아집니다. 표의 값은 집단마다 46명으로 계산한 것이라 이 기대값 주변에서 흔들립니다.</p>
+      <div class="callout warn"><strong>이 비교가 알려 주는 것.</strong> 아들의 키를 기준으로 아버지를 골라도 비슷한 모양이 나타납니다. 따라서 그래프에서 평균 쪽으로 가까워지는 모습만 보고 한 세대가 다른 세대의 키를 변화시켰다고 해석할 수는 없습니다. 이 패턴은 두 키가 관련은 있지만 완전히 같지는 않다는 통계적 관계에서도 나타납니다.</div>
+
+      <h4>회귀선은 하나가 아니라 둘이다</h4>
+      <p>같은 산점도에 서로 다른 두 직선이 있습니다. 표준화 척도에서는 둘 다 기울기가 \(r\)이지만, 원래 단위에서는 표준편차 비가 붙습니다.</p>
+      <div class="readout math">\[b_{\text{아들}\sim\text{아버지}} = r\frac{s_{\text{아들}}}{s_{\text{아버지}}} = 0.448, \qquad b_{\text{아버지}\sim\text{아들}} = r\frac{s_{\text{아버지}}}{s_{\text{아들}}} = 0.342\]</div>
+      <div class="readout math">\[b_{\text{아들}\sim\text{아버지}} \times b_{\text{아버지}\sim\text{아들}} = r^{2} = 0.153\]</div>
+      <p>두 선은 두 평균이 만나는 한 점에서만 교차합니다. <strong>“아들 키를 아버지 키로 예측하는 선”을 뒤집어 “아버지 키를 아들 키로 예측”하면 틀립니다.</strong> 회귀선은 예측 방향을 정해 놓고 만드는 것이기 때문입니다.</p>
+
+      <h4>회귀는 결정론이 아니다</h4>
+      <p>“아버지가 작으면 아들도 작다”가 아닙니다. 아버지 하위 10% 집단에서도 <strong>아들의 26%가 아들 세대 평균보다 큽니다.</strong> 아버지 상위 10% 집단에서도 아들의 26%가 평균보다 작습니다. 두 집단의 아들 키 범위는 160.0~182.9cm와 158.8~194.3cm로 크게 겹칩니다. 회귀는 <strong>집단 평균의 이동</strong>이지 개인의 운명이 아닙니다.</p>
+      <div class="callout"><strong>흔한 두 번째 오해.</strong> “세대가 지나면 모두 평균에 수렴해 키가 균일해진다”가 아닙니다. 이 자료에서 아버지 세대의 표준편차는 5.8cm, 아들 세대는 6.7cm로 <strong>산포가 줄지 않았습니다.</strong> 극단 집단의 평균이 이동하는 것과 전체 분포가 좁아지는 것은 다른 이야기입니다.</div>
+
+      <h4>수치를 쓸 때의 두 가지 주의</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>주의할 점</th><th>내용</th></tr></thead>
+          <tbody>
+            <tr><td>갈턴의 <strong>2/3</strong>은 아버지 값이 아니다</td><td>갈턴이 보고한 약 2/3은 <strong>중부모</strong>(아버지와, 1.08배로 환산한 어머니 키의 평균) → 자녀 값입니다. 이 자료로 재계산하면 중부모 기준 기울기는 0.729이고, <strong>아버지 단독 기준은 0.448</strong>입니다. 아버지 한 명은 부모 둘보다 정보가 적어 상관이 낮습니다.</td></tr>
+            <tr><td>관측이 <strong>독립이 아니다</strong></td><td>465쌍이지만 아버지는 173명뿐이라 한 아버지가 여러 번 등장합니다. 가족별로 아들 키를 평균해 173쌍으로 다시 계산하면 기울기 0.445로 <strong>결론은 같지만</strong>, 유의성 계산에는 이 비독립을 반영해야 합니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">원자료: Galton, F. (1886), <span class="mono">randomservices.org/random/data/Galton.tsv</span>. 저장소의 <span class="mono">datasets/galton/Galton.tsv</span>와 <span class="mono">src/python/prepare_galton_father_son.py</span>로 재현할 수 있습니다.</p>
+    </article>
+
+    <article class="block">
+      <h3>분석자 점검표 · 함정 1</h3>
+      <ul class="ck">
+        <li>처음 성적이 <strong>특히 높거나 낮은 사람</strong>을 골랐는가? (하위 20%, 고위험군, 최우수자)</li>
+        <li>훈련이나 치료를 받지 않은 <strong>비슷한 비교 집단</strong>이 있는가? 없다면 변화의 원인을 가리기 어렵다.</li>
+        <li>처음 수치가 높은 사람과 낮은 사람의 <strong>이후 변화</strong>를 각각 확인했는가?</li>
+        <li><strong>반대쪽 집단도 확인했는가?</strong> 하위 집단은 좋아지고 상위 집단은 나빠졌다면 일시적인 운의 영향을 의심해 볼 수 있다.</li>
+        <li>사전–사후 <strong>상관</strong>은 얼마인가? 1에서 멀수록 회귀 폭이 크다(<a href="#corr-explainer" class="corr-link">상관이란?</a>). <span class="future">심화학습</span></li>
+        <li>측정의 <strong>신뢰도</strong>를 추정했는가? 낮으면 개별 값을 믿을 수 없다. <span class="future">심화학습</span></li>
+        <li>개별 값을 그대로 쓰는 대신 <strong>축소추정</strong>을 고려했는가? <span class="future">심화학습</span></li>
+      </ul>
+    </article>
+  </section>
+
+  <!-- ======================= 함정 2 ======================= -->
+  <section class="panel" id="trap2">
+    <div class="section-head"><span class="section-num">03</span><h2>함정 2 · 무엇을 하나씩 세었는지 확인하기</h2></div>
+
+    <div class="trap-banner">
+      <div class="tno">함정 2</div>
+      <p>2025 KBO에서 타석 하나를 무작위로 고르면 그 타석의 평균 투구수는 <strong>3.88개</strong>다. 반면 투구 하나를 무작위로 골라 그 공이 속한 타석의 투구수를 보면 평균 <strong>4.81개</strong>다. <strong>왜 다를까?</strong></p>
+    </div>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>아무도 거짓말하지 않는다</h3>
+      <p>숫자가 다섯 개뿐인 실제 경기로 확인해 보겠습니다. <strong>2025년 6월 28일 두산–NC 경기</strong>에서 NC 투수 5명이 던진 공의 수입니다.</p>
+      <div class="readout">로건 104구 · 잭로그 97구 · 박신지 11구 · 이병헌 11구 · 류진욱 6구 (합계 229구)</div>
+      <p>“이 경기에서 투수 한 명이 던진 평균 투구수”를 두 가지로 물을 수 있습니다.</p>
+      <div class="readout">투수 기준 <br />= (104 + 97 + 11 + 11 + 6) / 5 = 229 / 5 = <strong>45.8구</strong></div>
+      <div class="readout">투구 기준 <br />= (104² + 97² + 11² + 11² + 6²) / 229 <br />= \( 104 \times \frac{104}{229} + 97 \times \frac{97}{229} + 11 \times \frac{11}{229} + 11 \times \frac{11}{229} + 6 \times \frac{6}{229} \) <br />
+        = 20,503 / 229 = <strong>89.5구</strong><br></div>
+      <p>두 번째는 “이 경기의 공 하나를 무작위로 집어 그 공을 던진 투수가 몇 구를 던졌는지 보는” 계산입니다. 첫 번째 식은 투수 다섯 명에게 <span class="mono">1/5</span>씩 똑같이 나눠 주지만, 두 번째 식은 <strong>각 투수에게 <span class="mono">(자기 투구수)/229</span>만큼</strong> 나눠 줍니다. <strong>104구를 던진 투수는 뽑힐 기회가 104번이고, 6구를 던진 투수는 6번입니다.</strong> 공을 기준으로 뽑으면 많이 던진 투수가 더 자주 나타납니다. 이렇게 크기가 큰 대상일수록 더 자주 뽑히는 현상을 <strong>크기 편향</strong>이라고 합니다. 그 결과 무작위로 골라 본 평균이 실제 평균보다 커지는 일을 <strong>검사 역설</strong>이라고 부릅니다.</p>
+      <div class="wrong-right">
+        <div class="wr bad">
+          <div class="hd">✗ 흔한 결론</div>
+          <p>둘 중 하나는 계산이 틀렸다. 또는 45.8구가 맞고 89.5구는 부풀려진 값이다.</p>
+        </div>
+        <div class="wr good">
+          <div class="hd">✓ 맞는 결론</div>
+          <p>두 숫자 모두 맞다. 서로 <strong>다른 질문</strong>에 답하고 있을 뿐이다. “투수 한 명당”을 묻는지 “공 하나당”을 묻는지에 따라 답이 <strong>1.95배</strong> 달라진다.</p>
+        </div>
+      </div>
+      <div class="callout warn"><strong>왜 조심해야 하나.</strong> 기록이나 설문에 자주 등장하는 사람이 전체 사람을 대표하지는 않을 수 있습니다. 뽑힐 기회가 대상마다 다르면, 관찰한 자료의 평균을 관심 있는 전체 대상의 평균으로 곧바로 읽기 어렵습니다.</div>
+    </article>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>결국 둘 다 그냥 평균 — 가중치만 다르다</h3>
+      <p>이렇게 보면 두 숫자는 <strong>가중치가 다른 평균</strong>일 뿐입니다.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>투수</th><th class="n">투구수<br>n</th><th class="n">투수 기준<br>가중치</th><th class="n">투구 기준<br>가중치</th><th class="n">투수 기준<br>기여</th><th class="n">투구 기준<br>기여</th></tr></thead>
+          <tbody>
+            <tr><td>로건</td><td class="n">104</td><td class="n">1/5<br>= 20.0%</td><td class="n"><strong>104/229<br>= 45.4%</strong></td><td class="n">(1/5)×104<br>= 20.80구</td><td class="n"><strong>(104/229)×104<br>= 47.23구</strong></td></tr>
+            <tr><td>잭로그</td><td class="n">97</td><td class="n">1/5<br>= 20.0%</td><td class="n">97/229<br>= 42.4%</td><td class="n">(1/5)×97<br>= 19.40구</td><td class="n">(97/229)×97<br>= 41.09구</td></tr>
+            <tr><td>박신지</td><td class="n">11</td><td class="n">1/5<br>= 20.0%</td><td class="n">11/229<br>= 4.8%</td><td class="n">(1/5)×11<br>= 2.20구</td><td class="n">(11/229)×11<br>= 0.53구</td></tr>
+            <tr><td>이병헌</td><td class="n">11</td><td class="n">1/5<br>= 20.0%</td><td class="n">11/229<br>= 4.8%</td><td class="n">(1/5)×11<br>= 2.20구</td><td class="n">(11/229)×11<br>= 0.53구</td></tr>
+            <tr><td>류진욱</td><td class="n">6</td><td class="n">1/5<br>= 20.0%</td><td class="n">6/229<br>= 2.6%</td><td class="n">(1/5)×6<br>= 1.20구</td><td class="n">(6/229)×6<br>= 0.16구</td></tr>
+            <tr><td><strong>합계</strong></td><td class="n">229</td><td class="n">5/5<br>= 100%</td><td class="n">229/229<br>= 100%</td><td class="n"><strong>45.80구</strong></td><td class="n"><strong>89.53구</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li><strong>투수 기준</strong>은 투수 5명을 하나씩 세니까 전원이 <span class="mono">1/5</span>입니다. 투구수와 무관합니다.</li>
+        <li><strong>투구 기준</strong>은 공 229개를 하나씩 세니까 가중치가 <span class="mono">n/229</span>입니다. 로건은 <span class="mono">104/229 = 45.4%</span>, 류진욱은 <span class="mono">6/229 = 2.6%</span>로 17배 차이가 납니다.</li>
+      </ul>
+      <p>류진욱은 투수 기준에서 <strong>1.20</strong>을 기여하는데 투구 기준에서는 <strong>0.16</strong>만 기여합니다(약 8분의 1). 반대로 로건 한 명이 최종 89.53 중 <strong>47.23</strong>, 절반이 넘는 몫을 차지합니다.</p>
+      <div class="callout"><strong>같은 경기에 평균이 두 개 있는 것이 아니라, 세는 대상이 두 개입니다.</strong> 투수 5명을 세면 45.8구, 투구 229개를 세면 89.5구입니다. 그리고 <strong>투구 기준은 언제나 투수 기준보다 크거나 같습니다.</strong> 같아지는 경우는 딱 하나, 모든 투수가 똑같은 개수를 던졌을 때입니다.</div>
+      <div class="callout warn"><strong>실무에서 이게 문제가 되는 지점.</strong> 데이터의 한 행이 <strong>사건</strong>인데 질문은 <strong>개체</strong>에 관한 것일 때(또는 그 반대일 때) 자기도 모르게 두 평균을 갈아 끼웁니다. 로그 한 줄이 클릭인데 “사용자 평균”을 묻거나, 한 줄이 처방인데 “환자 평균”을 묻는 경우가 모두 같은 구조입니다.</div>
+    </article>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>직접 확인해 보기 — 실측 다섯 가지</h3>
+      <p>같은 질문을 2025 KBO의 다른 수량 다섯 개에 던져 봅니다. 모두 한 시즌 실제 기록이고, 편향의 크기가 수량마다 얼마나 다른지 확인하세요.</p>
+      <div class="sim">
+        <div class="pick-row" role="group" aria-label="볼 수량 선택" id="sb-btns"></div>
+        <div class="metrics">
+          <div><b id="sb-a">—</b><span id="sb-a-lab">단위 기준 평균</span></div>
+          <div><b id="sb-b">—</b><span id="sb-b-lab">크기 편향 평균</span></div>
+          <div><b id="sb-ratio">—</b><span>배율</span></div>
+        </div>
+        <div class="bars">
+          <div class="bar-row"><span id="sb-bar-a-lab">단위 기준</span><span class="track"><span class="fill" id="sb-bar-a"></span></span><span class="v" id="sb-v-a">—</span></div>
+          <div class="bar-row"><span id="sb-bar-b-lab">크기 기준</span><span class="track"><span class="fill alt" id="sb-bar-b"></span></span><span class="v" id="sb-v-b">—</span></div>
+        </div>
+        <svg id="sb-hist" viewBox="0 0 700 200" role="img" aria-label="선택한 수량의 분포를 구간별 막대로 나타낸 그래프"></svg>
+        <p class="note" id="insp-note">—</p>
+      </div>
+      <p><strong>배율이 수량마다 다릅니다.</strong> 타석당 투구수는 1.24배지만, 투수별 시즌 투구수는 1.95배입니다. 차이를 만드는 것은 <strong>분포가 얼마나 퍼져 있는지</strong>입니다. 타석은 80.5%가 2~6구 안에서 끝나 고르지만, 투수는 한 시즌에 <strong>10구</strong>만 던진 사람과 <strong>3,039구</strong>를 던진 사람이 같은 목록에 있습니다.</p>
+    </article>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>배너의 질문에 답하면</h3>
+      <p>타석 56,139개와 투구 217,970개로 계산하면 <strong>타석을 기준으로 3.883개, 투구를 기준으로 4.811개</strong>입니다. 둘 다 맞습니다. 투구 시점을 무작위로 고르면 공을 많이 던진 타석일수록 뽑힐 기회가 많아 평균이 약 24% 높아집니다. 실제 중계를 임의의 시각에 켰을 때의 값은 투구 사이 시간까지 영향을 받으므로 이 수치와 꼭 같지는 않습니다.</p>
+      <p>이 구조는 야구 밖에서도 반복됩니다.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>같은 구조의 사례</th><th>편향 방향</th></tr></thead>
+          <tbody>
+            <tr><td>버스 대기시간</td><td>간격이 긴 구간에 도착할 확률이 높다 → 체감 대기가 길다</td></tr>
+            <tr><td>친구 수 (친구 역설)</td><td>친구 많은 사람이 더 많은 명단에 등장 → 내 친구들의 친구 수 &gt; 내 친구 수</td></tr>
+            <tr><td>입원 기간</td><td>어느 날 병동을 조사하면 장기 입원 환자가 과대표집</td></tr>
+            <tr><td>웹 체류시간</td><td>오래 머무는 세션이 로그에 더 많이 남는다</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>또 하나의 경우 — 걸러진 집단만 볼 때</h3>
+      <p>크기 편향과 별개로, <strong>특정 조건을 통과한 집단</strong>만 보면 관계 자체가 달라집니다.</p>
+      <p>예를 들어 시험 성적이나 운동 능력 중 하나만 뛰어나도 뽑히는 선발 과정을 생각해 봅시다. 선발된 사람만 보면 시험 성적이 높은 쪽은 운동 능력이 낮고, 운동 능력이 높은 쪽은 시험 성적이 낮아 보일 수 있습니다. 두 능력이 원래 반대 관계라서가 아니라, <strong>선발된 사람만 살펴봤기 때문</strong>일 수 있습니다. 이렇게 걸러진 집단 안에서 없던 관계가 생겨 보이는 현상을 <strong>버크슨의 역설</strong>이라고 부릅니다.</p>
+      <p>KBO에서도 같은 일이 보입니다. 여기서는 타자의 두 가지 모습, 곧 안타를 자주 치는 <strong>정확도</strong>와 공을 멀리 보내는 <strong>강타자</strong>다운 힘을 비교합니다. 정확도는 타율로 재고, 강타자인지는 장타율에서 출발한 <strong>순수장타율</strong>로 잽니다.</p>
+      <h4>장타율과 순수장타율</h4>
+      <p><strong>장타율</strong>은 타수 하나당 얻은 루타 수입니다. 안타마다 나아간 베이스 수를 더한 <strong>총루타</strong>(단타 1, 2루타 2, 3루타 3, 홈런 4)를 타수로 나눕니다. 타율이 “안타를 얼마나 자주 치는가”라면, 장타율은 “안타로 베이스를 얼마나 멀리 가는가”까지 함께 봅니다.</p>
+      <p>그런데 장타율 안에는 <strong>타율이 이미 들어 있습니다.</strong> 모든 안타가 단타여도 장타율은 타율과 같은 값이 되기 때문입니다. 그래서 장타율에서 타율을 뺀 값을 따로 보는데, 이것이 <strong>순수장타율</strong>입니다. 단타가 주는 몫을 걷어 내고 2루타·3루타·홈런으로 더 나아간 베이스만 남기므로, 순수장타율은 (2루타 + 2 × 3루타 + 3 × 홈런) ÷ 타수와 같습니다.</p>
+      <p><strong>순수장타율은 힘이 있는 타자인지, 곧 강타자인지를 나타내는 수치</strong>입니다. 값이 클수록 강타자입니다. 기준을 잡자면 2025 KBO 전체 타자의 순수장타율은 .127이고, 규정타석을 채운 43명은 평균 .154로 가장 낮은 .043부터 가장 높은 .330까지 퍼져 있습니다.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>선수</th><th class="n">타수</th><th class="n">단타 · 2루타 · 3루타 · 홈런</th><th class="n">총루타</th><th class="n">타율</th><th class="n">장타율</th><th class="n">순수장타율</th></tr></thead>
+          <tbody>
+            <tr><td>양의지</td><td class="n">454</td><td class="n">105 · 27 · 1 · 20</td><td class="n">242</td><td class="n"><strong>.337</strong></td><td class="n">.533</td><td class="n">.196</td></tr>
+            <tr><td>디아즈</td><td class="n">551</td><td class="n">91 · 32 · 0 · 50</td><td class="n">355</td><td class="n">.314</td><td class="n">.644</td><td class="n"><strong>.330</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>양의지를 예로 계산하면 총루타는 105 × 1 + 27 × 2 + 1 × 3 + 20 × 4 = 242, 장타율은 242 ÷ 454 = .533, 순수장타율은 .533 − .337 = .196입니다. 타율은 양의지가 더 높지만, 순수장타율은 디아즈가 .330으로 규정타석 43명 가운데 가장 높은 <strong>강타자</strong>입니다. 타율이 높다고 곧 강타자인 것은 아니어서, 두 값은 서로 다른 모습을 잽니다.</p>
+      <p class="note"><strong>장타율 대신 순수장타율을 쓴 이유.</strong> 장타율에는 타율이 들어 있어서, 타율과 장타율의 상관은 계산 방식만으로도 높게 나옵니다. 같은 선수들로 계산하면 타율–장타율 상관은 50타석 이상에서 +0.764, 규정타석 43명에서 +0.488로, 아래 표의 타율–순수장타율 상관보다 크게 부풀려집니다.</p>
+      <p>이제 타석 기준을 올려 가며 타율과 순수장타율의 상관을 계산했습니다(<a href="#corr-explainer" class="corr-link">상관이란?</a>).</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>대상</th><th class="n">인원</th><th class="n">타율과 순수장타율의 상관</th></tr></thead>
+          <tbody>
+            <tr><td>50타석 이상</td><td class="n">193</td><td class="n">+0.336</td></tr>
+            <tr><td>100타석 이상</td><td class="n">155</td><td class="n">+0.329</td></tr>
+            <tr><td>200타석 이상</td><td class="n">112</td><td class="n">+0.219</td></tr>
+            <tr><td>규정타석(447타석) 이상</td><td class="n">43</td><td class="n">+0.118</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">50타석 미만은 표에서 뺐습니다. 타석이 아주 적은 선수는 안타가 하나도 없으면 타율과 순수장타율이 함께 0이 되어, 선발과 무관하게 상관을 끌어올리기 때문입니다(전체 296명 중 무안타 23명).</p>
+      <p>50타석 이상 선수에서는 타율이 높은 선수일수록 순수장타율도 높은 경향이 보이지만, 규정타석을 채운 주전급만 보면 그 관계가 약해집니다. 타율이 높은 타자든 강타자든 출전 기회를 더 얻을 수 있다는 점이 한 가지 가능한 설명입니다. 이 기록만으로 감독의 선발 이유까지 확인할 수는 없습니다.</p>
+      <div class="callout warn"><strong>주의.</strong> “표본을 자르면 상관이 약해진다”로 외우면 틀립니다. 같은 데이터에서 투수의 직구 구속과 삼진율의 상관은 투구수 기준을 100구에서 600구로 올리자 오히려 조금 <strong>강해졌습니다</strong>(+0.538 → +0.575). 무엇을 기준으로 잘랐는지가 방향을 정합니다.</div>
+    </article>
+
+    <article class="block tier-stat">
+      <div class="layer-chip stat"><i></i>깊이 살펴보기</div>
+      <h3>크기 편향의 정확한 크기</h3>
+      <p>개체가 표본에 뽑힐 확률이 그 값 \(X\)에 비례할 때, 관측값의 기대값은 다음과 같습니다.</p>
+      <div class="readout math">\[\mathrm{E}_{\text{size}}[X] = \frac{\mathrm{E}[X^2]}{\mathrm{E}[X]} = \mu + \frac{\sigma^2}{\mu}\]</div>
+      <h4>\(\sigma^2\)은 어디서 나오나</h4>
+      <p>데이터로 세상 읽기에서 본 대로 크기 편향 평균은 각 개체에 <strong>\(n_i/N\) 가중치</strong>를 주는 가중평균입니다(\(N=\sum_i n_i\)). 이것을 정리하면 제곱의 합을 값의 합으로 나눈 꼴이 됩니다.</p>
+      <div class="readout math">\[\sum_i \frac{n_i}{N}\cdot n_i = \frac{\sum_i n_i^{2}}{N} = \frac{\sum_i n_i^{2}}{\sum_i n_i}\]</div>
+      <p>여기서 위아래를 개체 수 \(k\)로 나누면 두 기대값의 비가 됩니다.</p>
+      <div class="readout math">\[\frac{\sum_i n_i^{2}}{\sum_i n_i} = \frac{\left(\sum_i n_i^{2}\right)/k}{\left(\sum_i n_i\right)/k} = \frac{\mathrm{E}[X^{2}]}{\mathrm{E}[X]}\]</div>
+      <p>여기에 분산의 정의를 옮겨 쓴 항등식 \(\mathrm{E}[X^{2}] = \mu^{2} + \sigma^{2}\)을 넣으면 \(\sigma^2\)이 드러납니다.</p>
+      <div class="readout math">\[\frac{\mathrm{E}[X^{2}]}{\mathrm{E}[X]} = \frac{\mu^{2} + \sigma^{2}}{\mu} = \mu + \frac{\sigma^{2}}{\mu}\]</div>
+      <p>한 경기 예시로 각 조각을 확인하면 이렇습니다.</p>
+      <div class="readout">E[X²] = 20,503 / 5 = 4,100.60   ·   μ² = 45.8² = 2,097.64   ·   σ² = 4,100.60 − 2,097.64 = 2,002.96</div>
+      <p><strong>편향량이 정확히 \(\sigma^2/\mu\)입니다.</strong> 분산이 클수록 심해지고, 모든 값이 같으면(\(\sigma^2=0\)) 편향이 사라집니다. 여기서 \(\sigma^2\)은 <strong>모집단 분산</strong>(\(n\)으로 나눈 값)입니다. 표본분산(\(n-1\))을 넣으면 작은 표본에서 값이 맞지 않습니다.</p>
+      <p>앞의 한 경기 예시로 검산합니다. \(\{104,97,11,11,6\}\)의 평균은 \(45.8\), 모집단 분산은 \(2002.96\)입니다.</p>
+      <div class="readout math">\[\mu + \frac{\sigma^2}{\mu} = 45.8 + \frac{2002.96}{45.8} = 45.8 + 43.73 = 89.53\]</div>
+      <p>앞에서 손으로 구한 \(20{,}503 / 229 = 89.5\)와 같습니다. 타석당 투구수도 마찬가지입니다. 평균 \(3.883\), 모집단 분산 \(3.606\)이므로 \(3.883 + 3.606/3.883 = 4.811\)입니다. <strong>위젯의 다섯 수량 전부에서 이 항등식이 성립합니다.</strong></p>
+      <p class="note">교정 방법도 여기서 나옵니다. 크기 편향을 안다면 관측값에 \(1/X\) 가중치를 주어(역가중) 참 분포를 추정할 수 있습니다.</p>
+      <h4>범위 제한과 상관의 감쇠</h4>
+      <p>선발 변수의 표준편차가 \(S\)에서 \(s\)로 줄었을 때, 제한하기 전 전체 집단의 상관계수를 \(r\)(<a href="#corr-explainer" class="corr-link">\(r\)이란?</a>)이라 하면 제한된 집단의 상관 \(r_s\)는 근사적으로</p>
+      <div class="readout math">\[r_s \approx \frac{r\,(s/S)}{\sqrt{1 - r^2 + r^2 (s/S)^2}}\]</div>
+      <p>\(s/S=1\)이면 \(r_s=r\)이고, \(s/S \to 0\)이면 \(r_s \to 0\)입니다. 이것을 <strong>상관의 감쇠</strong>라 부릅니다.</p>
+      <h4>충돌부 — 조건화하면 안 되는 변수</h4>
+      <p>다만 KBO의 타석 수 예시는 단순 절단이 아닙니다. 타석 수는 타율이나 강타자인지를 직접 자른 것이 아니라 <strong>둘의 공통 결과</strong>입니다.</p>
+      <div class="dag">
+        <svg viewBox="0 0 320 140" role="img" aria-label="타율과 강타자인지가 각각 타석 수로 화살표를 보내는 인과 다이어그램">
+          <ellipse class="dag-node" cx="52" cy="34" rx="44" ry="20"></ellipse>
+          <text class="dag-txt" x="52" y="39">타율</text>
+          <ellipse class="dag-node" cx="52" cy="106" rx="44" ry="20"></ellipse>
+          <text class="dag-txt" x="52" y="111">강타자</text>
+          <ellipse class="dag-node z" cx="240" cy="70" rx="62" ry="22"></ellipse>
+          <text class="dag-txt" x="240" y="75">타석 수</text>
+          <path class="dag-arrow" d="M97 40 L173 63" marker-end="url(#ar2)"></path>
+          <path class="dag-arrow" d="M97 100 L173 77" marker-end="url(#ar2)"></path>
+          <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"></path></marker></defs>
+        </svg>
+        <div class="dag-cap">두 원인이 하나의 결과로 모이는 지점 = 충돌부</div>
+      </div>
+      <p>두 원인이 모여 하나의 결과를 만드는 지점을 <strong>충돌부</strong>라 하고, 충돌부 값을 고정하면 원인들 사이에 없던 상관이 생깁니다. 데이터로 세상 읽기에서 본 ‘둘 중 하나만 뛰어나도 뽑히는 선발’과 같은 구조이며 <strong>버크슨의 역설</strong>이라 부릅니다. 함정 3에서 다시 만납니다.</p>
+    </article>
+
+    <article class="block">
+      <h3>분석자 점검표 · 함정 2</h3>
+      <ul class="ck">
+        <li>알고 싶은 <strong>전체 대상(모집단)</strong>을 한 문장으로 말할 수 있는가?</li>
+        <li>개체마다 표본에 들어올 <strong>확률이 같았는가?</strong></li>
+        <li>값이 큰 대상에게 뽑힐 기회가 더 많이 주어지는가? (크기 편향)</li>
+        <li>어떤 <strong>조건을 통과한</strong> 집단인가? (합격, 생존, 입원, 규정타석, 상장)</li>
+        <li>자료에서 하나로 세는 대상이 질문에서 하나로 세는 대상과 같은가? (투수 한 명당 vs 공 하나당)</li>
+        <li>그 조건이 관심 변수들의 <strong>원인인가 결과인가?</strong> 결과라면 조건화가 가짜 상관을 만든다. <span class="future">심화학습</span></li>
+      </ul>
+    </article>
+  </section>
+
+  <!-- ======================= 함정 3 ======================= -->
+  <section class="panel" id="trap3">
+    <div class="section-head"><span class="section-num">04</span><h2>함정 3 · 집단별 결과와 전체 결과가 다를 때</h2></div>
+
+    <div class="trap-banner">
+      <div class="tno">함정 3</div>
+      <p>2025 KBO에서 <strong>노시환은 전반기에도, 후반기에도 나성범보다 타율이 높다.</strong> 그런데 <strong>시즌 전체 타율은 노시환이 더 낮다.</strong> 계산이 틀렸을까?</p>
+    </div>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>계산은 틀리지 않았다</h3>
+      <p>실제 기록을 전·후반기로 나눈 표입니다. 차이가 소수 네째 자리에서 갈리므로 자리를 늘려 적었습니다.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>선수</th><th class="n">전반기</th><th class="n">후반기</th><th class="n">후반기 타수 비중</th><th class="n">시즌 전체</th></tr></thead>
+          <tbody>
+            <tr><td><strong>노시환</strong></td><td class="n">.2331 (69/296)</td><td class="n">.2922 (71/243)</td><td class="n">45%</td><td class="n"><strong>.2597 (140/539)</strong></td></tr>
+            <tr><td><strong>나성범</strong></td><td class="n">.2258 (21/93)</td><td class="n">.2917 (49/168)</td><td class="n">64%</td><td class="n"><strong>.2682 (70/261)</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>노시환은 전반기에도 이기고(.2331 &gt; .2258) 후반기에도 이깁니다(.2922 &gt; .2917). 그런데 시즌 전체는 나성범이 이깁니다(.2682 &gt; .2597). <strong>어느 숫자도 틀리지 않았습니다.</strong></p>
+      <p>이유는 <strong>타수 배분</strong>입니다. 두 선수 모두 <strong>후반기에 훨씬 잘 쳤는데</strong>(후반기 .29대, 전반기 .22~.23대), 나성범은 후반기에 타수의 <strong>64%</strong>가 몰려 있고 노시환은 <strong>45%</strong>입니다. 시즌 타율을 계산할 때는 타수가 많은 기간의 성적이 더 크게 반영됩니다. 이렇게 전반기와 후반기처럼 나눠 본 결과와 모두 합친 결과의 순서가 뒤집히는 일을 <strong>심슨의 역설</strong>이라고 합니다.</p>
+      <div class="callout"><strong>이 사례에서는 차이가 작습니다.</strong> 후반기 타율은 .2922 대 .2917로 소수 네째 자리에서 갈립니다. 각 기간 안의 차이보다 타수 배분의 영향이 커서 전체 순서가 뒤집혔습니다. 다른 자료에서는 더 큰 차이에서도 역전이 일어날 수 있습니다.</div>
+      <div class="callout warn"><strong>왜 위험한가.</strong> 전체 수치만 보고 결론을 내리면 방향을 거꾸로 읽을 수 있습니다. 대시보드, 요약표, A/B 테스트 리포트는 거의 모두 “전체 수치”입니다.</div>
+    </article>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>직접 확인해 보기 — 타수 배분만 바꿔 보기</h3>
+      <p>두 선수의 <strong>층별 타율은 실측값 그대로 고정</strong>하고, <strong>타수 배분만</strong> 바꿔 봅니다. 슬라이더의 초기 위치가 실제 배분(45% / 64%)입니다.</p>
+      <div class="sim">
+        <div class="sim-ctl">
+          <label for="wa">노시환의 후반기 타수 비중 <span id="wa-v">45%</span></label>
+          <input type="range" id="wa" min="5" max="95" step="1" value="45">
+        </div>
+        <div class="sim-ctl">
+          <label for="wb">나성범의 후반기 타수 비중 <span id="wb-v">64%</span></label>
+          <input type="range" id="wb" min="5" max="95" step="1" value="64">
+        </div>
+        <p class="note">고정된 실측 층별 타율 — 전반기: 노시환 .2331 / 나성범 .2258, 후반기: 노시환 .2922 / 나성범 .2917. <strong>두 층 모두 노시환이 우세합니다.</strong> 타수는 각각 539타수와 261타수로 고정하고 배분만 옮깁니다. 슬라이더가 1% 단위이고 층별 타율을 네 자리로 반올림해 다시 계산하므로, 전체 타율이 위 표의 실측값과 소수 네째 자리에서 1~2 정도 다를 수 있습니다.</p>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>선수</th><th class="n">전반기</th><th class="n">후반기</th><th class="n">전체</th></tr></thead>
+            <tbody id="simpson-body"></tbody>
+          </table>
+        </div>
+        <div class="verdict off" id="simpson-verdict">—</div>
+        <p class="note" id="simpson-note">—</p>
+      </div>
+      <p>두 슬라이더를 <strong>같은 값으로</strong> 맞추면 역전이 사라집니다. 가중치가 같으면 층별 우열이 그대로 전체 우열이 되기 때문입니다. <strong>역전에는 가중치 불균형이 반드시 필요합니다.</strong></p>
+    </article>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>어떤 층화에서 역전이 잘 생기나</h3>
+      <p>같은 타자들을 전·후반기, 홈·원정처럼 다섯 가지 방식으로 나눠, 집단별 순서와 전체 순서가 뒤집히는 선수 쌍을 모두 찾아봤습니다. 대상은 나눈 각 집단에서 40타수 이상, 합계 250타수 이상인 타자들입니다.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>나누는 방식</th><th class="n">대상</th><th class="n">역전 쌍</th><th class="n">타수 비중의 표준편차</th><th class="n">비중 범위</th></tr></thead>
+          <tbody id="strat-body"></tbody>
+        </table>
+      </div>
+      <p class="note" id="strat-note">—</p>
+      <div class="callout"><strong>두 경우를 비교해 보세요.</strong> 선수마다 전·후반기 타수 비중의 차이가 큰 경우에는 역전이 <strong>16쌍</strong>, 홈·원정 비중의 차이가 작은 경우에는 <strong>0쌍</strong> 나왔습니다. 표의 ‘표준편차’는 선수마다 타수 비중이 얼마나 다른지를 나타냅니다.
+        <br><br>하지만 타수 배분 차이만으로 역전 수가 정해지지는 않습니다. 득점권 여부로 나누면 배분 차이가 작아도 3쌍이 나옵니다. <strong>나눈 집단 안에서 선수 간 성적 차이가 얼마나 작은지</strong>도 함께 봐야 합니다.</div>
+    </article>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>그래서 어느 쪽을 믿어야 하나</h3>
+      <p>숫자만으로는 정할 수 없습니다. <strong>층으로 나눈 그 변수가 무엇인지</strong>가 답을 정합니다.</p>
+      <div class="wrong-right">
+        <div class="wr good">
+          <div class="hd">층별 결과가 맞는 경우</div>
+          <p>나눈 기준이 치료법 선택과 치료 결과에 모두 영향을 줄 때입니다. 신장결석 치료법 비교에서는 <strong>결석 크기</strong>가 한 예입니다. 어려운 환자가 한 치료법에 더 많이 몰렸다면, 치료법별 전체 성공률만 비교해서는 효과를 판단하기 어렵습니다.</p>
+        </div>
+        <div class="wr bad">
+          <div class="hd">층별 결과가 틀리는 경우</div>
+          <p>나눈 기준 자체가 비교하려는 두 특성의 영향을 받을 때입니다. 예를 들어 타율이 높은 타자와 강타자가 모두 출전 기회를 더 얻는다면, 출전 기회가 비슷한 선수만 골라 비교할 때 관계가 달라 보일 수 있습니다.</p>
+        </div>
+      </div>
+      <p>고전적인 사례도 첫 번째 경우입니다. 1973년 버클리 대학원은 전체로 보면 남성 합격률 44%, 여성 35%로 성차별처럼 보였습니다. 학과별로 보면 6개 중 4곳에서 여성 합격률이 더 높았습니다. 여성이 <strong>경쟁률 높은 학과에 몰려 지원</strong>했기 때문입니다.</p>
+      <div class="callout"><strong>기억할 것.</strong> 집단별 수치와 전체 수치 중 무엇이 질문에 맞는지는 나누는 기준이 어떤 역할을 하는지에 달려 있습니다. <strong>그 기준이 결과의 원인인지, 결과에 영향을 받는지</strong> 먼저 살펴보세요.</div>
+    </article>
+
+    <article class="block">
+      <div class="layer-chip basic"><i></i>데이터로 세상 읽기</div>
+      <h3>같은 함정의 다른 모습 둘</h3>
+      <h4>① 두 집단의 평균이 같은 방향으로 움직이는데 전체는 그대로</h4>
+      <p>100타수 이상 타자 <strong>150명</strong>을 “주전”과 “백업”으로 나눠 평균 타율을 봅니다. 나누는 기준만 400타수에서 350타수로 낮춰 보겠습니다. <strong>선수는 한 명도 바뀌지 않습니다.</strong></p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>주전 기준</th><th class="n">주전</th><th class="n">백업</th><th class="n">전체 150명</th></tr></thead>
+          <tbody>
+            <tr><td>400타수 이상</td><td class="n">41명 · .2831</td><td class="n">109명 · .2503</td><td class="n">.2593</td></tr>
+            <tr><td>350타수 이상</td><td class="n">54명 · <strong>.2808</strong></td><td class="n">96명 · <strong>.2472</strong></td><td class="n">.2593</td></tr>
+            <tr><td>변화</td><td class="n"><strong>−.0023</strong></td><td class="n"><strong>−.0031</strong></td><td class="n">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>주전 평균도 내려가고 백업 평균도 내려가는데 전체는 그대로입니다.</strong> 350~400타수 구간의 13명이 백업에서 주전으로 옮겨 갔기 때문입니다. 이들은 기존 주전 평균보다 낮아서 주전 평균을 끌어내리고, 동시에 기존 백업 평균보다 높아서 빠져나간 백업 평균도 끌어내립니다. 이를 <strong>윌 로저스 현상</strong>이라 합니다.</p>
+      <p class="note">이동한 13명의 평균 타율은 .2736으로, 기존 주전 평균(.2831)과 백업 평균(.2503) <strong>사이</strong>에 있습니다. 이렇게 두 평균 사이에 있는 값을 옮길 때 결과의 방향은 <strong>옮기는 방향</strong>이 정합니다. 평균이 높은 집단에서 낮은 집단으로 옮기면 양쪽이 모두 오르고, 이 사례처럼 낮은 집단에서 높은 집단으로 옮기면 양쪽이 모두 내려갑니다. 옮기는 값이 두 평균 사이 밖에 있으면 한쪽은 오르고 다른 쪽은 내려갑니다. 핵심은 <strong>전체는 변하지 않는데 부분 평균이 같은 방향으로 움직일 수 있다</strong>는 점입니다.</p>
+      <p>의학의 고전 사례가 있습니다. CT 도입으로 폐암 진단이 정밀해지자, 1기로 분류됐던 환자 중 미세 전이가 발견된 사람들이 2기로 재분류되었습니다. 결과는 <strong>1기 생존율 상승, 2기 생존율도 상승, 전체 생존율은 변화 없음</strong>이었습니다. 치료법은 그대로였습니다.</p>
+      <div class="callout warn"><strong>경고.</strong> “모든 하위 집단의 지표가 개선되었다”는 보고는 전체 개선의 증거가 <strong>아닙니다</strong>. 분류 기준이나 분모가 바뀌지 않았는지 먼저 확인하세요.</div>
+      <h4>② 같은 개체를 반복 관측한 데이터를 그냥 합칠 때</h4>
+      <p>“안타를 친 타자는 다음 타석에서도 잘 친다”는 주장을 검증했습니다. 이처럼 한번 잘 풀린 선수가 계속 잘 풀린다는 믿음을 <strong>핫핸드</strong>(hot hand)라고 부릅니다. 우연히 이어진 결과를 실력의 흐름으로 잘못 읽는 경우가 많다고 해서 ‘핫핸드 오류’라고도 부르지만, 아래에서 보듯 이 자료만으로 있다 없다를 판정하기는 어렵습니다.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>조건</th><th class="n">타율</th><th class="n">타수</th></tr></thead>
+          <tbody>
+            <tr><td>직전 타석 안타</td><td class="n">.2702</td><td class="n">12,775</td></tr>
+            <tr><td>직전 타석 아웃</td><td class="n">.2587</td><td class="n">35,949</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>전체를 합치면 직전 타석에 안타를 친 뒤의 타율이 .0115 높습니다. 그러나 <strong>잘 치는 타자에게는 ‘안타 뒤 타석’도 더 많이 생깁니다.</strong> 따라서 이 비교에는 선수 간 실력 차이가 섞입니다. 같은 선수를 기준으로 나눠 계산하면 차이는 +.0091로 줄고, 선수별 차이가 양수인 사람은 58명, 음수인 사람은 42명입니다. 이것만으로 연속 안타의 효과를 단정할 수 없습니다.</p>
+      <div class="callout"><strong>정직한 단서.</strong> 이 분석에도 함정이 있습니다. 유한한 기록에서 “안타 뒤”를 조건으로 걸어 비율을 계산하면 구조적으로 아래 방향 편향이 생긴다는 것이 2018년에 증명되었습니다. 그래서 정확한 결론은 “핫핸드는 없다”가 아니라 <strong>“그냥 합쳐서는 판정할 수 없다”</strong>입니다.</div>
+    </article>
+
+    <article class="block tier-stat">
+      <div class="layer-chip stat"><i></i>깊이 살펴보기</div>
+      <h3>가중평균과 역전의 발생 조건</h3>
+      <p>층을 나눌 수 있을 때 전체 비율은 층별 비율의 가중평균입니다.</p>
+      <div class="readout math">\[p_{\text{전체}} = \sum_i w_i\, p_i, \qquad w_i = \frac{n_i}{N}, \quad \sum_i w_i = 1\]</div>
+      <p>비교하는 두 집단의 가중치가 다르면(\(w_i^A \neq w_i^B\)), 모든 층에서 \(p_i^A &lt; p_i^B\)여도 \(p^A_{\text{전체}} &gt; p^B_{\text{전체}}\)가 될 수 있습니다. <strong>수학적으로 아무 모순이 없습니다.</strong> 가중평균은 그런 연산입니다.</p>
+      <p>역전이 일어나려면 셋이 모두 필요합니다.</p>
+      <ol>
+        <li>층화변수 \(Z\)가 <strong>결과와 연관</strong>되어 있다 (층별로 비율이 다르다)</li>
+        <li>\(Z\)의 <strong>분포가 비교 두 집단에서 다르다</strong> (가중치 불균형)</li>
+        <li>그 불균형의 영향이 <strong>층 내 차이보다 크다</strong></li>
+      </ol>
+      <p class="note">위 위젯에서 두 슬라이더를 같게 맞추면 조건 2가 깨져 역전이 사라집니다. KBO 홈/원정으로 나눠 89명을 탐색했을 때 역전 쌍이 <strong>0개</strong>였던 이유도 같습니다. 홈과 원정 타수는 선수마다 대체로 균형을 이룹니다.</p>
+      <h4>교란변수와 충돌부 — 같은 통계량, 반대 처방</h4>
+      <div class="row">
+        <div class="col">
+          <div class="dag">
+            <svg viewBox="0 0 300 130" role="img" aria-label="Z가 X와 Y의 공통 원인인 교란변수 다이어그램">
+              <ellipse class="dag-node z" cx="150" cy="26" rx="28" ry="18"></ellipse>
+              <text class="dag-txt" x="150" y="31">Z</text>
+              <ellipse class="dag-node" cx="62" cy="100" rx="28" ry="18"></ellipse>
+              <text class="dag-txt" x="62" y="105">X</text>
+              <ellipse class="dag-node" cx="238" cy="100" rx="28" ry="18"></ellipse>
+              <text class="dag-txt" x="238" y="105">Y</text>
+              <path class="dag-arrow" d="M128 40 L84 84" marker-end="url(#ar1)"></path>
+              <path class="dag-arrow" d="M172 40 L216 84" marker-end="url(#ar1)"></path>
+              <path class="dag-arrow" d="M92 100 L208 100" marker-end="url(#ar1)"></path>
+              <defs><marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"></path></marker></defs>
+            </svg>
+            <div class="dag-cap">교란변수 — <strong>층화해야 한다</strong></div>
+          </div>
+          <p class="note">\(Z\)가 \(X\)와 \(Y\)의 공통 원인이면, 층화하지 않은 전체 비교는 \(Z\)의 효과에 오염되어 있습니다. <strong>층별 결과가 맞습니다.</strong></p>
+        </div>
+        <div class="col">
+          <div class="dag">
+            <svg viewBox="0 0 300 130" role="img" aria-label="Z가 X와 Y의 공통 결과인 충돌부 다이어그램">
+              <ellipse class="dag-node" cx="42" cy="65" rx="28" ry="18"></ellipse>
+              <text class="dag-txt" x="42" y="70">X</text>
+              <ellipse class="dag-node z" cx="150" cy="65" rx="28" ry="18"></ellipse>
+              <text class="dag-txt" x="150" y="70">Z</text>
+              <ellipse class="dag-node" cx="258" cy="65" rx="28" ry="18"></ellipse>
+              <text class="dag-txt" x="258" y="70">Y</text>
+              <path class="dag-arrow" d="M72 65 L118 65" marker-end="url(#ar3)"></path>
+              <path class="dag-arrow" d="M228 65 L182 65" marker-end="url(#ar3)"></path>
+              <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"></path></marker></defs>
+            </svg>
+            <div class="dag-cap">충돌부 — <strong>층화하면 안 된다</strong></div>
+          </div>
+          <p class="note">\(Z\)가 \(X\)와 \(Y\)의 공통 결과면, \(Z\)로 층화하는 순간 없던 상관이 생깁니다. <strong>전체 결과가 맞습니다.</strong></p>
+        </div>
+      </div>
+      <div class="callout warn"><strong>데이터만으로는 구분할 수 없습니다.</strong> 두 경우의 숫자는 똑같이 생겼지만 처방이 정반대입니다. 심슨의 역설은 보통 교란변수 문제이고, 버크슨의 역설은 충돌부 문제입니다. 판단에는 <strong>인과 다이어그램</strong>이 필요합니다. 여기서 함정 2와 함정 3이 만납니다.</div>
+      <h4>개체 내 변동과 개체 간 변동</h4>
+      <p>핫핸드 사례는 정확히 심슨의 구조입니다. 같은 개체를 반복 관측한 데이터에서 그냥 합치면, <strong>개체 간</strong>(between) 차이가 효과로 위장합니다. 해법은 층화, 고정효과 모형, 다수준 모형입니다.</p>
+      <p>연속 안타로 확인해도 같습니다. 각 선수의 타율로 독립을 가정해 계산한 기대치와 실제 관측치를 비교하면 다음과 같습니다.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>연속 안타</th><th class="n">실제 관측</th><th class="n">독립가정 기대</th><th class="n">관측/기대</th></tr></thead>
+          <tbody>
+            <tr><td>4연속 이상</td><td class="n">190회</td><td class="n">186.6회</td><td class="n">1.02</td></tr>
+            <tr><td>5연속 이상</td><td class="n">44회</td><td class="n">52.4회</td><td class="n">0.84</td></tr>
+            <tr><td>6연속 이상</td><td class="n">7회</td><td class="n">14.9회</td><td class="n">0.47</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>이 자료에서는 실제 횟수가 독립을 가정한 예상 횟수와 비슷하거나 더 적습니다. 이 표만으로 연속 안타가 우연을 넘어서는 현상인지 결론 내리기는 어렵습니다.</p>
+    </article>
+
+    <article class="block">
+      <h3>분석자 점검표 · 함정 3</h3>
+      <ul class="ck">
+        <li>전체 수치만 보고 있는가? <strong>전·후반기처럼 나눠서도 봤는가?</strong></li>
+        <li>비교하는 두 집단에서 <strong>각 부분의 인원이나 횟수 비중이 같은가?</strong></li>
+        <li>같은 사람을 여러 번 기록한 자료인가? <strong>사람마다 다른 점</strong>과 <strong>한 사람 안에서 달라진 점</strong>을 구분했는가?</li>
+        <li>집단별 지표가 모두 개선되었는가? <strong>분류 기준이나 분모가 바뀌지 않았는가?</strong></li>
+        <li>층화변수가 <strong>교란변수인가 충돌부인가?</strong> <span class="future">심화학습</span></li>
+        <li>전체와 층별이 다르면, 어느 쪽이 답인지 <strong>인과 구조로 논증했는가?</strong> <span class="future">심화학습</span></li>
+      </ul>
+    </article>
+  </section>
+
+  <!-- ======================= 비교 ======================= -->
+  <section class="panel" id="compare">
+    <div class="section-head"><span class="section-num">05</span><h2>함정 한눈에 보기</h2></div>
+    <div class="scroll">
+      <table class="cmp-table">
+        <thead><tr><th></th><th>함정 1 · 전후 비교</th><th>함정 2 · 표본의 출처</th><th>함정 3 · 전체와 집단별 비교</th></tr></thead>
+        <tbody>
+          <tr><th>놓친 질문</th><td>누구를 골랐나</td><td>어떻게 뽑혔나</td><td>어떻게 합쳤나</td></tr>
+          <tr><th>놓치기 쉬운 점</th><td>우연한 변화를 조치의 효과로 읽음</td><td>뽑힌 자료의 평균을 전체 평균으로 읽음</td><td>집단별 순서가 전체에서도 같다고 생각함</td></tr>
+          <tr><th>먼저 확인할 것</th><td>비슷한 비교 집단도 좋아졌는가</td><td>누가 더 자주 뽑혔는가</td><td>집단별로 나누면 결과가 달라지는가</td></tr>
+          <tr><th>다음 단계</th><td>훈련받지 않은 비슷한 집단과 비교</td><td>세는 대상에 맞춰 다시 계산</td><td>나눈 기준이 어떤 역할을 하는지 확인</td></tr>
+          <tr class="stat-only"><th>핵심 수식</th><td>\(\mathrm{Var}(X)=\mathrm{Var}(\theta)+\mathrm{Var}(e)\)</td><td>\(\mathrm{E}_{\text{size}}[X]=\mu+\sigma^2/\mu\)</td><td>\(p=\sum_i w_i p_i\)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="recap">
+      <p><strong>1. 유난히 높거나 낮았던 기록은 다음에 달라질 수 있습니다.</strong> 변화만 보고 조치의 효과라고 판단하지 마세요.</p>
+      <p><strong>2. 뽑힌 자료가 전체를 그대로 보여 주지는 않습니다.</strong> 누구에게 더 많이 뽑힐 기회가 있었는지 확인하세요.</p>
+      <p><strong>3. 집단별 결과와 전체 결과가 다를 수 있습니다.</strong> 각 집단이 전체에서 차지하는 비중을 확인하세요.</p>
+    </div>
+    <div class="callout">이 함정들이 공통으로 요구하는 태도는 하나입니다. <strong>데이터를 낳은 과정을 먼저 생각하라.</strong> 숫자만으로는 어느 것도 판정할 수 없습니다.</div>
+  </section>
+
+  <!-- ======================= 점검표 ======================= -->
+  <section class="panel" id="checklist">
+    <div class="section-head"><span class="section-num">06</span><h2>분석 전 점검표</h2></div>
+    <p class="note">데이터를 받으면 계산에 앞서 아래 질문을 살펴보세요. 답을 모르는 항목이 있다면 그만큼 결론의 범위를 좁혀야 합니다.</p>
+    <article class="block">
+      <ul class="ck">
+        <li><strong>누구에 대해 알고 싶은가.</strong> 관심 있는 전체 대상을 한 문장으로 쓸 수 있는가?</li>
+        <li><strong>자료에 누가 들어왔는가.</strong> 사람마다 뽑힐 기회가 같았는가? 어떤 조건을 거쳐 들어왔는가?</li>
+        <li><strong>무엇을 하나로 셌는가.</strong> 사람 한 명을 셌는지, 한 사람이 만든 기록 하나를 셌는지 분명한가?</li>
+        <li><strong>처음에 특히 높거나 낮은 사람을 골랐는가.</strong> 그렇다면 비슷한 비교 집단 없이 효과를 말하기 어렵다.</li>
+        <li><strong>집단별로 나눠 봤는가.</strong> 전체와 집단별 결과가 같은가? 다르다면 그 이유를 설명할 수 있는가?</li>
+        <li><strong>측정에 우연이 얼마나 섞여 있나.</strong> 관측값 하나를 그대로 믿어도 되는 표본 크기인가?</li>
+      </ul>
+    </article>
+    <div class="callout warn"><strong>마지막으로.</strong> 이 자료에서 다룬 함정은 모두 <strong>계산 실수가 아닙니다.</strong> 숫자는 맞고 표도 맞습니다. 틀리는 것은 숫자에서 결론으로 넘어가는 한 걸음입니다. 그 한 걸음을 의식적으로 점검하는 습관이 통계학을 배우는 이유입니다.</div>
+  </section>
+
+  <section class="panel">
+    <h3>참고문헌</h3>
+    <ol class="refs">
+      <li>Galton, F. (1886). Regression towards mediocrity in hereditary stature. <em>Journal of the Anthropological Institute</em>, 15, 246–263. — 평균으로의 회귀의 최초 보고.</li>
+      <li>Efron, B., &amp; Morris, C. (1977). Stein's paradox in statistics. <em>Scientific American</em>, 236(5), 119–127. — 야구 타율로 축소추정을 설명한 원전.</li>
+      <li>Kahneman, D. (2011). <em>Thinking, Fast and Slow</em>. — 공군 교관 사례와 회귀 착시.</li>
+      <li>Feller, W. (1971). <em>An Introduction to Probability Theory and Its Applications</em>, Vol. 2. — 검사 역설과 크기 편향 표집.</li>
+      <li>Berkson, J. (1946). Limitations of the application of fourfold table analysis to hospital data. <em>Biometrics Bulletin</em>, 2(3), 47–53.</li>
+      <li>Bickel, P. J., Hammel, E. A., &amp; O'Connell, J. W. (1975). Sex bias in graduate admissions: Data from Berkeley. <em>Science</em>, 187, 398–404.</li>
+      <li>Charig, C. R., et al. (1986). Comparison of treatment of renal calculi. <em>British Medical Journal</em>, 292, 879–882. — 신장결석 치료법과 심슨의 역설.</li>
+      <li>Feinstein, A. R., Sosin, D. M., &amp; Wells, C. K. (1985). The Will Rogers phenomenon. <em>New England Journal of Medicine</em>, 312, 1604–1608.</li>
+      <li>Miller, J. B., &amp; Sanjurjo, A. (2018). Surprised by the hot hand fallacy? <em>Econometrica</em>, 86(6), 2019–2047. — 핫핸드 검증에 숨은 선택 편향.</li>
+      <li>Pearl, J., &amp; Mackenzie, D. (2018). <em>The Book of Why</em>. — 교란변수와 충돌부의 구분.</li>
+    </ol>
+    <p class="note">야구 수치는 2025 KBO 시즌 기록(<span class="mono">slothman3878/kbo_playbyplay</span>, CC BY 4.0)에서, 키 수치는 갈턴의 1886년 자료(<span class="mono">randomservices.org/random/data/Galton.tsv</span>)에서 직접 계산했습니다. 계산 스크립트는 <span class="mono">src/python/prepare_kbo_regression.py</span>와 <span class="mono">src/python/prepare_galton_father_son.py</span>입니다. 상관 설명의 예시 그림은 위키미디어 공용 「Correlation examples2.svg」(DenisBoigelot, CC0 1.0)입니다.</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var svgNS = "http://www.w3.org/2000/svg";
+  var main = document.getElementById("content");
+
+  function el(name, attrs, text) {
+    var e = document.createElementNS(svgNS, name);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); }
+  function f3(x) { return x.toFixed(3); }
+
+  /* =============== 보기 방식 전환 =============== */
+  var bBasic = document.getElementById("btn-basic");
+  var bAll = document.getElementById("btn-all");
+  var lNote = document.getElementById("layer-note");
+  function setLayer(mode) {
+    main.setAttribute("data-layer", mode);
+    var isBasic = mode === "basic";
+    bBasic.setAttribute("aria-pressed", isBasic ? "true" : "false");
+    bAll.setAttribute("aria-pressed", isBasic ? "false" : "true");
+    lNote.innerHTML = isBasic
+      ? "지금은 <strong>데이터로 세상 읽기</strong>만 보고 있습니다. 수식이 들어간 설명은 접혀 있습니다."
+      : "지금은 <strong>데이터로 세상 읽기 + 깊이 살펴보기</strong>를 모두 보고 있습니다. 보라색 왼쪽 선이 붙은 박스가 깊이 살펴보기입니다.";
+  }
+  bBasic.addEventListener("click", function () { setLayer("basic"); });
+  bAll.addEventListener("click", function () { setLayer("all"); });
+
+  /* ---- 산점도 공통 축 ---- */
+  function ticks(lo, hi, step) {
+    var out = [], v = Math.ceil(lo / step - 1e-9) * step;
+    for (; v <= hi + 1e-9; v += step) out.push(v);
+    return out;
+  }
+  function frame(svg, o) {
+    clear(svg);
+    var L = 58, R = 20, T = 18, B = 46;
+    var pw = o.W - L - R, ph = o.H - T - B;
+    var sx = function (v) { return L + (v - o.x0) / (o.x1 - o.x0) * pw; };
+    var sy = function (v) { return T + ph - (v - o.y0) / (o.y1 - o.y0) * ph; };
+    o.yt.forEach(function (t) {
+      svg.appendChild(el("line", { x1: L, x2: L + pw, y1: sy(t), y2: sy(t), "class": "grid-line" }));
+      svg.appendChild(el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", "class": "tick-label" }, (o.fmtY || o.fmt)(t)));
+    });
+    o.xt.forEach(function (t) {
+      svg.appendChild(el("line", { x1: sx(t), x2: sx(t), y1: T + ph, y2: T + ph + 5, "class": "axis-line" }));
+      svg.appendChild(el("text", { x: sx(t), y: T + ph + 19, "text-anchor": "middle", "class": "tick-label" }, (o.fmtX || o.fmt)(t)));
+    });
+    svg.appendChild(el("line", { x1: L, x2: L + pw, y1: T + ph, y2: T + ph, "class": "axis-line" }));
+    svg.appendChild(el("line", { x1: L, x2: L, y1: T, y2: T + ph, "class": "axis-line" }));
+    svg.appendChild(el("text", { x: L + pw / 2, y: o.H - 6, "text-anchor": "middle", "class": "axis-title" }, o.xlab));
+    svg.appendChild(el("text", { x: 14, y: T + ph / 2, "text-anchor": "middle", "class": "axis-title",
+      transform: "rotate(-90 14 " + (T + ph / 2) + ")" }, o.ylab));
+    return { sx: sx, sy: sy, L: L, R: L + pw, T: T, B: T + ph };
+  }
+  function avg(a) { return a.reduce(function (x, y) { return x + y; }, 0) / a.length; }
+  function pad(v, step, up) { return (up ? Math.ceil(v / step + 1e-9) : Math.floor(v / step - 1e-9)) * step; }
+  /* 타율 표기: 0.278 → .278 */
+  function ba(v) { return v.toFixed(3).replace(/^0\./, "."); }
+  function baSigned(v) { return (v < 0 ? "−" : "+") + Math.abs(v).toFixed(3).replace(/^0\./, "."); }
+
+  /* =============== 위젯 1: 평균으로의 회귀 (2025 KBO 실측) =============== */
+  var KB = window.KBO_REGRESSION;
+  var regSvg = document.getElementById("reg-chart");
+  var cutIn = document.getElementById("cut");
+  var regNote = document.getElementById("reg-note");
+
+  function drawKbo() {
+    if (!KB || !KB.steps) {
+      regNote.textContent = "KBO 데이터를 불러오지 못했습니다. assets/data/kbo-regression.js 를 확인하세요.";
+      return;
+    }
+    var st = KB.steps[Math.min(Number(cutIn.value), KB.steps.length - 1)];
+    document.getElementById("cut-v").textContent = st.cut + "타수";
+    var xs = st.pairs.map(function (q) { return q[0]; });
+    var ys = st.pairs.map(function (q) { return q[1]; });
+    var x0 = pad(Math.min.apply(null, xs), 0.05, false), x1 = pad(Math.max.apply(null, xs), 0.05, true);
+    var y0 = pad(Math.min.apply(null, ys), 0.05, false), y1 = pad(Math.max.apply(null, ys), 0.05, true);
+    var g = frame(regSvg, { W: 700, H: 360, x0: x0, x1: x1, y0: y0, y1: y1,
+      xt: ticks(x0, x1, 0.05), yt: ticks(y0, y1, 0.05), fmt: ba,
+      xlab: "첫 " + st.cut + "타수 타율 (선발 기준)", ylab: "그 이후 타수의 타율" });
+
+    var order = st.pairs.map(function (_, i) { return i; }).sort(function (i, j) { return xs[i] - xs[j]; });
+    var lowSet = {}, highSet = {};
+    order.slice(0, st.k).forEach(function (i) { lowSet[i] = 1; });
+    order.slice(order.length - st.k).forEach(function (i) { highSet[i] = 1; });
+
+    /* 대상 평균 가로선 */
+    regSvg.appendChild(el("line", { x1: g.L, x2: g.R, y1: g.sy(KB.league), y2: g.sy(KB.league), "class": "mline" }));
+    regSvg.appendChild(el("text", { x: g.R - 4, y: g.sy(KB.league) - 6, "text-anchor": "end", "class": "svg-lab",
+      fill: "var(--muted)" }, "대상 " + KB.players + "명 평균 " + ba(KB.league)));
+    /* 점 */
+    st.pairs.forEach(function (q, i) {
+      var cls = highSet[i] ? "pt hi" : (lowSet[i] ? "pt lo" : "pt");
+      regSvg.appendChild(el("circle", { cx: g.sx(q[0]).toFixed(1), cy: g.sy(q[1]).toFixed(1),
+        r: (highSet[i] || lowSet[i]) ? 4.5 : 3, "class": cls }));
+    });
+    /* 선발 집단의 '이후 타율' 평균선 */
+    regSvg.appendChild(el("line", { x1: g.L, x2: g.R, y1: g.sy(st.high.after), y2: g.sy(st.high.after), "class": "mline hi" }));
+    regSvg.appendChild(el("text", { x: g.L + 6, y: g.sy(st.high.after) - 6, "class": "svg-lab",
+      fill: "var(--sel-hi)" }, "상위 25%의 이후 타율 " + ba(st.high.after)));
+    regSvg.appendChild(el("line", { x1: g.L, x2: g.R, y1: g.sy(st.low.after), y2: g.sy(st.low.after), "class": "mline lo" }));
+    regSvg.appendChild(el("text", { x: g.L + 6, y: g.sy(st.low.after) + 14, "class": "svg-lab",
+      fill: "var(--sel-lo)" }, "하위 25%의 이후 타율 " + ba(st.low.after)));
+
+    document.getElementById("m-hi").textContent = ba(st.high.before) + " → " + ba(st.high.after);
+    document.getElementById("m-lo").textContent = ba(st.low.before) + " → " + ba(st.low.after);
+    document.getElementById("m-gap").textContent = baSigned(st.gapBefore) + " → " + baSigned(st.gapAfter);
+    regNote.innerHTML = "첫 " + st.cut + "타수만 보고 고르면 상위 25%(" + st.k + "명)는 " + ba(st.high.before) +
+      ", 하위 25%는 " + ba(st.low.before) + "로 <strong>" + baSigned(st.gapBefore) +
+      "</strong> 벌어져 있습니다. 그런데 그 이후 타수에서는 " + ba(st.high.after) + "와 " + ba(st.low.after) +
+      "로 격차가 <strong>" + baSigned(st.gapAfter) + "</strong>, 즉 거의 사라집니다. 두 색 점이 평균선 주위로 섞여 있는 모습이 그것입니다.";
+  }
+  cutIn.addEventListener("input", drawKbo);
+
+  /* =============== 위젯 1-b: 갈턴 아버지–아들 키 (깊이 살펴보기) =============== */
+  var GA = window.GALTON;
+  var gSvg = document.getElementById("galton-chart");
+  var gNote = document.getElementById("galton-note");
+  var gMode = "father";
+
+  function drawGalton() {
+    if (!GA || !GA.pairs) {
+      gNote.textContent = "갈턴 데이터를 불러오지 못했습니다. assets/data/galton-father-son.js 를 확인하세요.";
+      return;
+    }
+    var byFather = gMode === "father";
+    document.getElementById("g-father").setAttribute("aria-pressed", byFather ? "true" : "false");
+    document.getElementById("g-son").setAttribute("aria-pressed", byFather ? "false" : "true");
+
+    var xs = GA.pairs.map(function (q) { return q[0]; });
+    var ys = GA.pairs.map(function (q) { return q[1]; });
+    var x0 = pad(Math.min.apply(null, xs), 5, false), x1 = pad(Math.max.apply(null, xs), 5, true);
+    var y0 = pad(Math.min.apply(null, ys), 5, false), y1 = pad(Math.max.apply(null, ys), 5, true);
+    var g = frame(gSvg, { W: 700, H: 380, x0: x0, x1: x1, y0: y0, y1: y1,
+      xt: ticks(x0, x1, 10), yt: ticks(y0, y1, 10), fmt: function (t) { return String(Math.round(t)); },
+      xlab: "아버지 키 (cm)", ylab: "아들 키 (cm)" });
+
+    var key = byFather ? 0 : 1;
+    var k = (byFather ? GA.byFather : GA.bySon).k;
+    var order = GA.pairs.map(function (_, i) { return i; }).sort(function (i, j) { return GA.pairs[i][key] - GA.pairs[j][key]; });
+    var lowSet = {}, highSet = {};
+    order.slice(0, k).forEach(function (i) { lowSet[i] = 1; });
+    order.slice(order.length - k).forEach(function (i) { highSet[i] = 1; });
+
+    /* 두 회귀선 */
+    var s1 = GA.lines.sonOnFather;
+    gSvg.appendChild(el("path", { "class": "regline",
+      d: "M" + g.sx(x0) + "," + g.sy(s1.intercept + s1.slope * x0) + " L" + g.sx(x1) + "," + g.sy(s1.intercept + s1.slope * x1) }));
+    var s2 = GA.lines.fatherOnSon;
+    gSvg.appendChild(el("path", { "class": "regline alt",
+      d: "M" + g.sx(s2.intercept + s2.slope * y0) + "," + g.sy(y0) + " L" + g.sx(s2.intercept + s2.slope * y1) + "," + g.sy(y1) }));
+    /* 점 */
+    GA.pairs.forEach(function (q, i) {
+      var cls = highSet[i] ? "pt hi" : (lowSet[i] ? "pt lo" : "pt");
+      gSvg.appendChild(el("circle", { cx: g.sx(q[0]).toFixed(1), cy: g.sy(q[1]).toFixed(1),
+        r: (highSet[i] || lowSet[i]) ? 4 : 2.6, "class": cls }));
+    });
+    /* 짝이 되는 세대의 평균: 아버지로 골랐으면 아들(가로선), 아들로 골랐으면 아버지(세로선) */
+    var blk = byFather ? GA.byFather : GA.bySon;
+    [["hi", blk.high.paired], ["lo", blk.low.paired]].forEach(function (pairv) {
+      if (byFather) {
+        gSvg.appendChild(el("line", { x1: g.L, x2: g.R, y1: g.sy(pairv[1]), y2: g.sy(pairv[1]), "class": "mline " + pairv[0] }));
+      } else {
+        gSvg.appendChild(el("line", { x1: g.sx(pairv[1]), x2: g.sx(pairv[1]), y1: g.T, y2: g.B, "class": "mline " + pairv[0] }));
+      }
+    });
+
+    var pickedGen = byFather ? "아버지" : "아들";
+    var pairedGen = byFather ? "아들" : "아버지";
+    document.getElementById("g-th").textContent = pickedGen + " 키로 선발";
+    function row(name, o, cls) {
+      return '<tr><td><strong style="color:var(--sel-' + cls + ')">' + name + " " + k + "명</strong></td>" +
+        '<td class="n">' + o.picked.toFixed(1) + "cm (" + (o.pickedDev > 0 ? "+" : "−") + Math.abs(o.pickedDev).toFixed(2) + ")</td>" +
+        '<td class="n">' + o.paired.toFixed(1) + "cm (" + (o.pairedDev > 0 ? "+" : "−") + Math.abs(o.pairedDev).toFixed(2) + ")</td>" +
+        '<td class="n"><strong>' + o.shrink.toFixed(3) + "</strong></td></tr>";
+    }
+    document.getElementById("galton-body").innerHTML =
+      row(pickedGen + " 상위 10%", blk.high, "hi") + row(pickedGen + " 하위 10%", blk.low, "lo");
+    gNote.innerHTML = pickedGen + " 키로 상·하위 10%를 골랐습니다. 괄호 안은 각 세대 자신의 평균(아버지 " +
+      GA.father.mean.toFixed(1) + "cm, 아들 " + GA.son.mean.toFixed(1) + "cm)에서 떨어진 거리입니다. " +
+      pickedGen + "는 평균에서 10cm 이상 떨어져 있지만 " + pairedGen +
+      "는 그보다 훨씬 평균 가까이에 있습니다(표의 편차 축소율 참고). 두 버튼을 번갈아 눌러, <strong>어느 쪽으로 골라도 짝이 되는 세대가 평균 쪽으로 온다</strong>는 점을 확인하세요.";
+  }
+  document.getElementById("g-father").addEventListener("click", function () { gMode = "father"; drawGalton(); });
+  document.getElementById("g-son").addEventListener("click", function () { gMode = "son"; drawGalton(); });
+
+  /* =============== 위젯 2: 크기 편향 (2025 KBO 실측 5종) =============== */
+  var T23 = window.KBO_TRAPS23;
+  var sbIdx = 0;
+  var sbSvg = document.getElementById("sb-hist");
+  var inspNote = document.getElementById("insp-note");
+  function fmtN(v) { return v >= 100 ? Math.round(v).toLocaleString() : v.toFixed(2); }
+
+  (function buildSbButtons() {
+    if (!T23 || !T23.sizeBias) return;
+    var box = document.getElementById("sb-btns");
+    T23.sizeBias.forEach(function (q, i) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "pick-btn";
+      btn.textContent = q.label;
+      btn.setAttribute("aria-pressed", i === 0 ? "true" : "false");
+      btn.addEventListener("click", function () { sbIdx = i; drawInsp(); });
+      box.appendChild(btn);
+    });
+  })();
+
+  function drawInsp() {
+    if (!T23 || !T23.sizeBias) {
+      inspNote.textContent = "KBO 데이터를 불러오지 못했습니다. assets/data/kbo-traps23.js 를 확인하세요.";
+      return;
+    }
+    var q = T23.sizeBias[sbIdx];
+    Array.prototype.forEach.call(document.querySelectorAll("#sb-btns .pick-btn"), function (btn, i) {
+      btn.setAttribute("aria-pressed", i === sbIdx ? "true" : "false");
+    });
+    document.getElementById("sb-a").textContent = fmtN(q.mean);
+    document.getElementById("sb-b").textContent = fmtN(q.biased);
+    document.getElementById("sb-ratio").textContent = q.ratio.toFixed(2) + "배";
+    document.getElementById("sb-a-lab").textContent = q.unitA + " 하나를 무작위로 뽑을 때";
+    document.getElementById("sb-b-lab").textContent = q.unitB + " 하나를 무작위로 뽑을 때";
+    document.getElementById("sb-bar-a-lab").textContent = q.unitA + " 기준";
+    document.getElementById("sb-bar-b-lab").textContent = q.unitB + " 기준";
+    var scale = Math.max(q.mean, q.biased);
+    document.getElementById("sb-bar-a").style.width = (q.mean / scale * 100).toFixed(1) + "%";
+    document.getElementById("sb-bar-b").style.width = (q.biased / scale * 100).toFixed(1) + "%";
+    document.getElementById("sb-v-a").textContent = fmtN(q.mean);
+    document.getElementById("sb-v-b").textContent = fmtN(q.biased);
+
+    clear(sbSvg);
+    var W = 700, H = 200, L = 46, R = 14, TT = 14, BB = 36;
+    var pw = W - L - R, ph = H - TT - BB;
+    var mx = Math.max.apply(null, q.hist.map(function (h) { return h.n; })) || 1;
+    var bw = pw / q.hist.length;
+    q.hist.forEach(function (h, i) {
+      var bh = h.n / mx * ph;
+      sbSvg.appendChild(el("rect", { x: (L + i * bw + 3).toFixed(1), y: (TT + ph - bh).toFixed(1),
+        width: Math.max(1, bw - 6).toFixed(1), height: bh.toFixed(1), fill: "var(--accent)", opacity: "0.75", rx: 2 }));
+      var lab = h.hi == null ? h.lo + "+" : (h.hi - h.lo === 1 ? String(h.lo) : h.lo + "–" + (h.hi - 1));
+      sbSvg.appendChild(el("text", { x: (L + i * bw + bw / 2).toFixed(1), y: TT + ph + 16,
+        "text-anchor": "middle", "class": "tick-label" }, lab));
+    });
+    sbSvg.appendChild(el("line", { x1: L, x2: L + pw, y1: TT + ph, y2: TT + ph, "class": "axis-line" }));
+    sbSvg.appendChild(el("text", { x: L + pw / 2, y: H - 4, "text-anchor": "middle", "class": "axis-title" },
+      q.label + " 분포 — " + q.unitA + " " + q.n.toLocaleString() + "개"));
+
+    inspNote.innerHTML = "<strong>" + q.label + "</strong> — " + q.unitA + " 기준 <strong>" + fmtN(q.mean) +
+      "</strong>, " + q.unitB + " 기준 <strong>" + fmtN(q.biased) + "</strong> (<strong>" + q.ratio.toFixed(2) +
+      "배</strong>). 분포가 오른쪽으로 길게 늘어질수록 두 값의 차이가 커집니다." +
+      "<span class=\"stat-only\"> 편향량 σ²/μ = " + fmtN(q.biasTerm) + " 이고 μ + σ²/μ = " +
+      fmtN(q.mean + q.biasTerm) + " 로 항등식이 정확히 맞습니다.</span>";
+  }
+
+  /* =============== 위젯 3: 심슨의 역설 (실측 층별 타율 고정, 배분만 조절) =============== */
+  /* 2025 KBO 실측: 노시환 전반기 69/296·후반기 71/243, 나성범 전반기 21/93·후반기 49/168 */
+  var SIMP = {
+    a: { name: "노시환", ab: 539, lo: 0.2331, hi: 0.2922 },
+    b: { name: "나성범", ab: 261, lo: 0.2258, hi: 0.2917 }
+  };
+  var waIn = document.getElementById("wa"), wbIn = document.getElementById("wb");
+  function ba4(v) { return v.toFixed(4).replace(/^0\./, "."); }
+
+  function drawSimpson() {
+    var wa = Number(waIn.value) / 100, wb = Number(wbIn.value) / 100;
+    document.getElementById("wa-v").textContent = Math.round(wa * 100) + "%";
+    document.getElementById("wb-v").textContent = Math.round(wb * 100) + "%";
+    function total(p, w) { return (1 - w) * p.lo + w * p.hi; }
+    var ta = total(SIMP.a, wa), tb = total(SIMP.b, wb);
+    function row(p, w, t) {
+      return "<tr><td><strong>" + p.name + "</strong></td>" +
+        '<td class="n">' + ba4(p.lo) + ' <span class="muted">(' + Math.round(p.ab * (1 - w)) + '타수)</span></td>' +
+        '<td class="n">' + ba4(p.hi) + ' <span class="muted">(' + Math.round(p.ab * w) + '타수)</span></td>' +
+        '<td class="n"><strong>' + ba4(t) + "</strong></td></tr>";
+    }
+    document.getElementById("simpson-body").innerHTML = row(SIMP.a, wa, ta) + row(SIMP.b, wb, tb);
+    var v = document.getElementById("simpson-verdict");
+    var note = document.getElementById("simpson-note");
+    var diff = ta - tb;
+    if (diff < -1e-9) {
+      v.className = "verdict on";
+      v.textContent = "역전 발생 — 두 층 모두 노시환이 우세한데 전체는 나성범이 우세";
+      note.innerHTML = "나성범의 후반기 타수 비중이 더 큽니다. <strong>잘 친 기간의 기록이 전체 타율에 더 크게 반영되어 순서가 뒤집혔습니다.</strong>";
+    } else if (Math.abs(diff) <= 1e-9) {
+      v.className = "verdict off";
+      v.textContent = "전체가 동률";
+      note.innerHTML = "타수 배분에 따른 차이와 기간별 타율 차이가 서로 상쇄되는 지점입니다.";
+    } else {
+      v.className = "verdict off";
+      v.textContent = "역전 없음 — 층별과 전체가 같은 방향";
+      note.innerHTML = Math.abs(wa - wb) < 0.005
+        ? "두 선수의 전·후반기 타수 비중이 <strong>같습니다</strong>. 각 기간의 비중이 같으면 기간별 우열이 전체에서도 유지됩니다."
+        : "아직 기간별 타율 차이가 타수 배분의 영향보다 큽니다. 나성범의 후반기 비중을 올리고 노시환의 비중을 내려 보세요.";
+    }
+  }
+  waIn.addEventListener("input", drawSimpson);
+  wbIn.addEventListener("input", drawSimpson);
+
+  /* =============== 층화 방식별 실측 역전 쌍 표 =============== */
+  (function drawStrat() {
+    var tb = document.getElementById("strat-body");
+    if (!tb) return;
+    if (!T23 || !T23.simpson) { tb.innerHTML = '<tr><td colspan="5">데이터를 불러오지 못했습니다.</td></tr>'; return; }
+    var rows = T23.simpson.slice().sort(function (x, y) { return y.shareSd - x.shareSd; });
+    tb.innerHTML = rows.map(function (x) {
+      return "<tr><td><strong>" + x.label + "</strong></td>" +
+        '<td class="n">' + x.players + "명</td>" +
+        '<td class="n">' + (x.reversals ? "<strong>" + x.reversals + "쌍</strong>" : "0쌍") + "</td>" +
+        '<td class="n">' + (x.shareSd * 100).toFixed(1) + "%p</td>" +
+        '<td class="n">' + Math.round(x.shareMin * 100) + "% ~ " + Math.round(x.shareMax * 100) + "%</td></tr>";
+    }).join("");
+    document.getElementById("strat-note").innerHTML =
+      "‘타수 비중’은 각 선수가 <strong>두 번째 층</strong>(후반기 · 좌완 상대 · 변화구 상대 · 득점권 · 홈)에 둔 타수의 몫입니다. " +
+      "표준편차는 그 몫이 선수마다 얼마나 다른지를 뜻합니다. 표는 표준편차가 큰 순서로 정렬했습니다.";
+  })();
+
+  /* =============== 상관 설명 토글: 43명 실측 산점도 =============== */
+  function corrOf(xs, ys) {
+    var n = xs.length, mx = avg(xs), my = avg(ys), sxy = 0, sxx = 0, syy = 0;
+    for (var i = 0; i < n; i++) { sxy += (xs[i] - mx) * (ys[i] - my); sxx += (xs[i] - mx) * (xs[i] - mx); syy += (ys[i] - my) * (ys[i] - my); }
+    return sxy / Math.sqrt(sxx * syy);
+  }
+  function signedR(r) { return (r < 0 ? "−" : "+") + Math.abs(r).toFixed(3); }
+  function drawCorr(svgId, labelId, xs, ys, opt) {
+    var svg = document.getElementById(svgId);
+    if (!svg) return;
+    var x0 = pad(Math.min.apply(null, xs), 0.05, false), x1 = pad(Math.max.apply(null, xs), 0.05, true);
+    var y0 = pad(Math.min.apply(null, ys), 0.05, false), y1 = pad(Math.max.apply(null, ys), 0.05, true);
+    var g = frame(svg, { W: 360, H: 280, x0: x0, x1: x1, y0: y0, y1: y1,
+      xt: ticks(x0, x1, 0.05), yt: ticks(y0, y1, 0.05), fmt: ba, fmtY: opt.fmtY || ba,
+      xlab: "전반기 타율", ylab: opt.ylab });
+    if (opt.zero) svg.appendChild(el("line", { x1: g.L, x2: g.R, y1: g.sy(0), y2: g.sy(0), "class": "mline" }));
+    xs.forEach(function (x, i) {
+      svg.appendChild(el("circle", { cx: g.sx(x).toFixed(1), cy: g.sy(ys[i]).toFixed(1), r: 3.4, "class": "pt" }));
+    });
+    /* 최소제곱 직선: 점들의 전체 방향 */
+    var mx = avg(xs), my = avg(ys), sxy = 0, sxx = 0;
+    xs.forEach(function (x, i) { sxy += (x - mx) * (ys[i] - my); sxx += (x - mx) * (x - mx); });
+    var b = sxy / sxx, a = my - b * mx;
+    svg.appendChild(el("path", { "class": "regline",
+      d: "M" + g.sx(x0).toFixed(1) + "," + g.sy(a + b * x0).toFixed(1) + " L" + g.sx(x1).toFixed(1) + "," + g.sy(a + b * x1).toFixed(1) }));
+    var lab = document.getElementById(labelId);
+    if (lab) lab.textContent = signedR(corrOf(xs, ys));
+  }
+  (function () {
+    if (!KB || !KB.halves || !KB.halves.points) return;
+    var P = KB.halves.points;
+    var first = P.map(function (q) { return q[0]; });
+    var second = P.map(function (q) { return q[1]; });
+    var change = P.map(function (q) { return q[1] - q[0]; });
+    drawCorr("corr-a", "corr-a-r", first, second, { ylab: "후반기 타율" });
+    drawCorr("corr-b", "corr-b-r", first, change, { ylab: "변화량", zero: true,
+      fmtY: function (t) { return Math.abs(t) < 1e-9 ? "0" : baSigned(t); } });
+  })();
+  function openCorr() { var d = document.getElementById("corr-explainer"); if (d) d.open = true; }
+  Array.prototype.forEach.call(document.querySelectorAll("a.corr-link"), function (a) { a.addEventListener("click", openCorr); });
+  if (location.hash === "#corr-explainer") openCorr();
+
+  /* =============== 초기 렌더 =============== */
+  setLayer("basic");
+  drawKbo(); drawGalton(); drawInsp(); drawSimpson();
+
+  /* =============== 목차 scroll-spy =============== */
+  var links = Array.prototype.slice.call(document.querySelectorAll("#rail-nav a"));
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) links.forEach(function (l) { l.classList.toggle("on", l.getAttribute("href") === "#" + en.target.id); });
+    });
+  }, { rootMargin: "-25% 0px -65% 0px" });
+  links.forEach(function (l, i) {
+    var t = document.querySelector(l.getAttribute("href"));
+    if (t) obs.observe(t);
+    if (i === 0) l.classList.add("on");
+  });
+})();
+</script>
+</body>
+</html>

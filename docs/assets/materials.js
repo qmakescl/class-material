@@ -85,5 +85,14 @@ window.MATERIALS = [
     href: "data-science/geography-graduate-salary-outlier.html",
     tags: ["데이터과학", "사례분석", "평균", "이상치", "통계해석"],
     date: "2026-09-26"
+  },
+  {
+    subject: "data-science",
+    label: "개념 정리",
+    title: "데이터로 세상을 읽을 때 조심할 것들",
+    description: "평균으로의 회귀, 표집 편향, 심슨의 역설 — 숫자는 맞는데 결론이 틀리는 상황들을 2025년 KBO 실측 기록을 살펴보며, 데이터로 세상 읽기와 깊이 살펴보기로 나누어 확인합니다.",
+    href: "data-science/analysis-traps-three-paradoxes.html",
+    tags: ["데이터과학", "개념정리", "통계해석", "표본오차", "평균으로의회귀", "심슨의역설", "선택편향"],
+    date: "2026-09-30"
   }
 ];
