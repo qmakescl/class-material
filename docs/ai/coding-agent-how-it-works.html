@@ -1,11 +1,11 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>코딩 에이전트는 어떻게 일하나 | Q의 아카이브</title>
 <link rel="canonical" href="https://qmakescl.github.io/class-material/ai/coding-agent-how-it-works.html">
-<meta name="description" content="코딩 에이전트 안의 LLM이 도구 호출과 반복 실행을 통해 실제 작업을 해내는 구조를 단계별로 확인하는 인공지능 자료입니다.">
+<meta name="description" content="코딩 에이전트를 모델(LLM)과 그것을 감싸는 하네스로 나누어, 글만 쓰는 모델이 도구 호출과 반복으로 실제 작업을 해내는 구조를 단계별로 확인하는 인공지능 자료입니다.">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Q의 데이터 이야기 자료">
 <meta property="og:title" content="코딩 에이전트는 어떻게 일하나 | Q의 아카이브">
-<meta property="og:description" content="코딩 에이전트 안의 LLM이 도구 호출과 반복 실행을 통해 실제 작업을 해내는 구조를 단계별로 확인합니다.">
+<meta property="og:description" content="코딩 에이전트를 모델(LLM)과 그것을 감싸는 하네스로 나누어, 글만 쓰는 모델이 도구 호출과 반복으로 실제 작업을 해내는 구조를 단계별로 확인합니다.">
 <meta property="og:url" content="https://qmakescl.github.io/class-material/ai/coding-agent-how-it-works.html">
 <meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/ai.png">
 <meta property="og:image:type" content="image/png">
@@ -14,7 +14,7 @@
 <meta property="og:image:alt" content="인공지능 자료 아이콘">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="코딩 에이전트는 어떻게 일하나 | Q의 아카이브">
-<meta name="twitter:description" content="코딩 에이전트 안의 LLM이 도구 호출과 반복 실행을 통해 실제 작업을 해내는 구조를 단계별로 확인합니다.">
+<meta name="twitter:description" content="코딩 에이전트를 모델(LLM)과 그것을 감싸는 하네스로 나누어, 글만 쓰는 모델이 도구 호출과 반복으로 실제 작업을 해내는 구조를 단계별로 확인합니다.">
 <meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/ai.png">
 <meta name="twitter:image:alt" content="인공지능 자료 아이콘">
 <link rel="stylesheet" href="../assets/material.css">
@@ -30,6 +30,70 @@
 .goal ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:4px}
 .metrics > div{display:flex;flex-direction:column;gap:2px}
 @media (max-width:520px){.metrics{grid-template-columns:1fr}}
+.roles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.roles a{display:flex;flex-direction:column;gap:4px;border:1px solid var(--line);border-left:3px solid var(--ok);border-radius:var(--radius);background:var(--surface);padding:12px 14px;color:inherit;text-decoration:none}
+.roles a:hover{background:var(--ok-soft)}
+.roles b{color:var(--ok);font-size:15px}
+.roles span{font-size:14px;color:var(--muted)}
+@media (max-width:520px){.roles{grid-template-columns:1fr}}
+.harness-fig{margin:8px auto 20px;display:flex;flex-direction:column;align-items:center;gap:8px;max-width:320px;width:100%}
+.harness-fig img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px}
+/* 컨텍스트 펼쳐 보기: 하네스가 보내는 요청 구조 */
+.ctxview{border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+.ctxview>summary{cursor:pointer;padding:8px 12px;font-size:14px;font-weight:600;color:var(--accent)}
+.ctxview[open]>summary{border-bottom:1px solid var(--line)}
+.cv-wrap{padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.cv-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.cv-tabs button{all:unset;cursor:pointer;font-size:13px;padding:2px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
+.cv-tabs button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.cv-tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cv-body{max-height:440px;overflow:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px}
+.cv-body>*{flex-shrink:0}
+.cv-sec{display:flex;flex-direction:column;gap:6px}
+.cv-key{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--muted)}
+.cv-msg{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.cv-msg.new{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.cv-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cv-role{font-family:var(--mono);font-size:12px;font-weight:700;padding:0 8px;border-radius:999px}
+.cv-role.user{background:var(--warn-soft);color:var(--warn)}
+.cv-role.assistant{background:var(--accent-soft);color:var(--accent)}
+.cv-newb{font-size:12px;font-weight:600;color:var(--accent);margin-left:auto}
+.cv-part{border-left:4px solid var(--line);padding:2px 0 2px 10px;display:flex;flex-direction:column;gap:2px;background:var(--surface)}
+.cv-part.k0{border-left-color:#9AA5B3}.cv-part.k1{border-left-color:var(--amber)}.cv-part.k2{border-left-color:var(--accent)}.cv-part.k3{border-left-color:var(--ok)}.cv-part.k4{border-left-color:#8B6BD1}
+.cv-lab{font-size:12px;color:var(--muted)}
+.cv-lab b{font-family:var(--mono);font-weight:600;color:var(--ink)}
+.cv-txt,.cv-json{font-family:var(--mono);font-size:12.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.cv-json{margin:0;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.cv-json .cv-new{background:var(--accent-soft)}
+.cv-notes{margin:0;padding-left:1.2em;font-size:13.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.cv-notes code{font-family:var(--mono);font-size:12px}
+/* 결정 과정 그림: 토큰 순서대로 좁혀지는 선택 */
+.dec{gap:12px}
+.dec .lab{font-size:12.5px;font-weight:600;letter-spacing:.03em;color:var(--muted)}
+.dec-ctx{display:flex;flex-direction:column;gap:6px;border:1px dashed var(--line);border-radius:8px;padding:10px 12px;background:var(--paper)}
+.dec-chips{display:flex;flex-wrap:wrap;gap:6px}
+.dec-chips span{font-size:13px;border:1px solid var(--line);border-radius:999px;padding:1px 10px;background:var(--surface)}
+.dec-chips code{font-family:var(--mono);font-size:12px}
+.dec-down{font-family:var(--mono);font-size:13px;color:var(--accent);text-align:center}
+.dec-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;position:relative}
+.dec-steps::before{content:"";position:absolute;left:13px;top:14px;bottom:14px;border-left:2px solid var(--accent-soft)}
+.dec-steps li{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(0,1.15fr);gap:10px 12px;align-items:start}
+.dec-no{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.dec-tok{font-family:var(--mono);font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word;border:1px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:8px 10px}
+.dec-q{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)}
+.dec-q b{color:var(--ink);font-size:15px}
+.dec-cands{display:flex;flex-wrap:wrap;gap:4px}
+.dec-cands i,.dec-cands em{font-style:normal;font-size:12.5px;border-radius:999px;padding:0 9px;border:1px solid var(--line)}
+.dec-cands i{color:var(--muted);opacity:.6}
+.dec-cands i.pick{opacity:1;color:#fff;background:var(--accent);border-color:var(--accent);font-weight:600}
+.dec-cands i.pick::before{content:"✓ "}
+.dec-cands em.copy{color:var(--ok);border-color:var(--ok);background:var(--ok-soft)}
+.dec-cands em.gen{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.dec-end .dec-no{background:var(--ok)}
+.dec-end .dec-tok{border-color:var(--ok);background:var(--ok-soft)}
+.dec-end .dec-q b{color:var(--ok)}
+@media (max-width:620px){.dec-steps li{grid-template-columns:28px minmax(0,1fr)}.dec-q{grid-column:2}}
+.harness-fig figcaption{font-size:13px;color:var(--muted);line-height:1.6}
 .hint{display:flex;gap:10px;background:var(--warn-soft);border-radius:var(--radius);padding:12px 14px;font-size:15px}
 .hint b{color:var(--warn);white-space:nowrap}
 .chat{border-radius:var(--radius);border:1px solid var(--line);overflow:hidden}
@@ -101,7 +165,7 @@ mjx-container[display="true"]{margin:.6em 0!important}
   <a class="rail-back" href="../index.html#ai">← 처음으로</a>
   <h1>코딩 에이전트는<br>어떻게 일하나</h1>
   <nav id="nav">
-    <a href="#intro"><b>01</b><span>모델+도구+반복</span></a>
+    <a href="#intro"><b>01</b><span>모델+하네스</span></a>
     <a href="#loop"><b>02</b><span>요청 처리 과정</span></a>
     <a href="#text"><b>03</b><span>도구 호출도 글이다</span></a>
     <a href="#ctx"><b>04</b><span>컨텍스트 창</span></a>
@@ -113,6 +177,7 @@ mjx-container[display="true"]{margin:.6em 0!important}
     <span class="rail-tag">#인공지능</span>
     <span class="rail-tag">#개념정리</span>
     <span class="rail-tag">#코딩에이전트</span>
+    <span class="rail-tag">#하네스</span>
     <span class="rail-tag">#LLM</span>
     <span class="rail-tag">#도구호출</span>
     <span class="rail-tag">#컨텍스트창</span>
@@ -137,22 +202,42 @@ mjx-container[display="true"]{margin:.6em 0!important}
 </header>
 
 <section id="intro">
-  <h2>모델 + 도구 + 반복 = 에이전트</h2>
-  <p>코딩 에이전트는 LLM을 감싸는 <b>프로그램</b>입니다. Anthropic 문서는 이 프로그램을 하네스(harness)라고 부릅니다. 하네스가 모델에게 "쓸 수 있는 도구 목록"을 알려 주면, 모델은 답 대신 "이 도구를 이렇게 써 달라"는 글을 씁니다. 하네스가 그 글을 읽고 실제로 실행한 뒤, 결과를 다시 모델에게 보여 줍니다. 이것을 일이 끝날 때까지 되풀이합니다.</p>
-  <div class="metrics">
-    <div><b>모델</b><span>지금까지의 기록을 읽고 다음에 할 행동을 글로 씁니다.</span></div>
-    <div><b>도구</b><span>파일 읽기·검색·수정, 명령 실행, 웹 검색 등. 실행은 하네스가 합니다.</span></div>
-    <div><b>반복</b><span>정보 모으기 → 실행 → 결과 확인을 일이 끝날 때까지 되풀이합니다.</span></div>
+  <h2>모델 + 하네스 = 에이전트</h2>
+  <p>코딩 에이전트는 두 부분으로 이루어집니다. 글을 읽고 다음 글을 쓰는 <b>모델(LLM)</b>, 그리고 그 모델을 감싸고 내 컴퓨터에서 실제 일을 처리하는 <b>프로그램</b>입니다. Anthropic 문서는 이 프로그램을 하네스(harness)라고 부릅니다. harness는 본래 말이나 개 같은 동물의 몸에 채워 줄을 연결하는 장구를 뜻합니다. Claude Code나 Codex 같은 제품 이름은 보통 이 하네스를 가리키고, 그 안에서 쓸 모델은 따로 고를 수 있습니다.</p>
+  <figure class="harness-fig">
+    <img src="../assets/images/harness-french-bulldog.jpg" width="960" height="1280" loading="lazy" alt="몸통에 하네스를 채우고 줄을 연결한 프렌치 불도그 강아지">
+    <figcaption>
+      <strong>하네스(Harness).</strong> 몸통에 채운 하네스에 줄을 연결하면 사람이 강아지의 힘을 원하는 방향으로 이끌고, 위험할 때는 붙잡을 수 있습니다. 에이전트의 하네스도 모델이 쓴 글을 실제 작업으로 잇고, 위험한 실행은 멈춰 세웁니다.<br>
+      출처: Frenchiestore, 「<a href="https://commons.wikimedia.org/wiki/File:French_Bulldog_puppy_wearing_the_Health_Harness.jpg" target="_blank" rel="noopener noreferrer">French Bulldog puppy wearing the Health Harness.jpg</a>」, 위키미디어 공용, <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. 원본(3024×4032)을 960×1280으로 축소해 사용했습니다.
+    </figcaption>
+  </figure>
+  <div class="recap">
+    <span class="note">코딩 에이전트의 구성</span>
+    <div class="flow">
+      <span class="n t">모델(LLM)</span>+<span class="n v">하네스</span>=<span class="n">코딩 에이전트</span>
+    </div>
   </div>
+  <div class="metrics">
+    <div><b>모델</b><span>지금까지의 기록을 읽고 다음에 할 행동을 글로 씁니다. 파일을 열거나 명령을 실행하지는 못합니다.</span></div>
+    <div><b>하네스</b><span>모델이 읽을 글을 마련하고, 모델이 쓴 글을 실제 일로 바꿉니다. 아래 네 가지가 하네스의 일입니다.</span></div>
+  </div>
+  <div class="roles">
+    <a href="#text"><b>도구 연결</b><span>도구 설명서를 모델에게 보여 주고, 모델이 쓴 호출문을 해석해 실제로 실행합니다. 도구 자체(git, npm, MCP 서버 등)는 하네스 밖에 있습니다.</span></a>
+    <a href="#loop"><b>반복</b><span>실행 결과를 기록에 덧붙여 다시 모델을 부릅니다. 모델이 도구 호출 없이 답하면 멈춥니다.</span></a>
+    <a href="#ctx"><b>컨텍스트 관리</b><span>지침·작동규칙 설정파일·대화·결과를 모아 모델이 읽을 입력을 꾸리고, 창이 차면 줄입니다.</span></a>
+    <a href="#perm"><b>안전장치</b><span>위험한 실행 전에 승인을 묻고, 파일을 고치기 전에 체크포인트를 남깁니다.</span></a>
+  </div>
+  <p>흐름은 이렇습니다. 하네스가 모델에게 "쓸 수 있는 도구 목록"을 알려 주면, 모델은 답 대신 "이 도구를 이렇게 써 달라"는 글을 씁니다. 하네스가 그 글을 읽고 실제로 실행한 뒤, 결과를 다시 모델에게 보여 줍니다. 이것을 일이 끝날 때까지 되풀이합니다.</p>
+  <p class="note">에이전트를 흔히 "모델 + 도구 + 반복"으로 줄여 말합니다(Anthropic, 2024). 이 자료는 도구를 실행하고 반복을 돌리는 쪽을 하네스로 묶어 봅니다. 그래야 컨텍스트 관리나 권한 확인처럼 도구도 반복도 아닌 일이 누구 몫인지, 모델이 하는 일과 프로그램이 하는 일이 어디서 갈리는지가 분명해집니다.</p>
   <p class="toy">Claude Code 공식 문서는 이 반복을 "에이전트 루프(agentic loop)"라 부르고, 맥락 모으기·행동하기·결과 확인하기의 세 국면으로 설명합니다. 기준 시점 2026년 9월.</p>
 </section>
 
 <section id="loop">
   <h2>한 번의 요청이 처리되는 과정</h2>
-  <p>"삭제 버튼이 안 돼요"라는 요청 하나가 어떻게 처리되는지 단계별로 따라가 보세요. 위쪽 네 칸은 지금 누가 일하는지를, 아래 막대는 모델이 매번 읽는 글(컨텍스트 창)이 얼마나 쌓였는지를 보여 줍니다.</p>
+  <p>"삭제 버튼이 안 돼요"라는 요청 하나가 어떻게 처리되는지 단계별로 따라가 보세요. 위쪽 네 칸은 지금 누가 일하는지를, 아래 막대는 모델이 매번 읽는 글(컨텍스트 창)이 얼마나 쌓였는지를 보여 줍니다. 막대 밑의 "컨텍스트 펼쳐 보기"를 열면 하네스가 그 글을 어떤 구조로 꾸려 모델에게 보내는지 직접 볼 수 있습니다.</p>
   <div class="lanes" aria-hidden="true">
     <div class="lane you" id="ln-you"><b>나</b>요청·승인</div>
-    <div class="lane harness" id="ln-harness"><b>에이전트 프로그램</b>전달·실행·기록</div>
+    <div class="lane harness" id="ln-harness"><b>하네스</b>전달·실행·기록</div>
     <div class="lane model" id="ln-model"><b>모델(LLM)</b>다음 행동을 글로</div>
     <div class="lane pc" id="ln-pc"><b>내 컴퓨터</b>파일·명령</div>
   </div>
@@ -180,9 +265,54 @@ mjx-container[display="true"]{margin:.6em 0!important}
   </div>
   <div class="hint"><b>핵심</b><span>모델이 "파일을 읽었다"고 말할 수 있는 이유는 하네스가 실제 파일 내용을 입력에 넣어 주었기 때문입니다. 넣어 주지 않은 파일에 대해서는 모델이 아는 것이 없고, 물어보면 그럴듯하게 추측할 수 있습니다.</span></div>
   <p class="note">어떤 상황에서 어떤 도구를 어떤 형식으로 부를지는 사후학습(post-training) 단계에서 도구 사용 예시로 학습합니다(Schick et al., 2023; Yao et al., 2023 참고).</p>
+  <div class="panel dec">
+    <h3>모델은 어떻게 "결정"하나: 토큰 순서대로 좁혀지는 선택</h3>
+    <p class="small">모델 안에 "결정"만 하는 별도의 장치는 없습니다. 위 요청 처리 과정의 4단계(Edit로 수정)에서 모델이 써 낸 글을 앞에서부터 잘라 보면, 다음 토큰을 하나씩 뽑는 동안 결정이 차례로 좁혀집니다.</p>
+    <div class="dec-ctx">
+      <span class="lab">입력: 모델이 읽는 컨텍스트 \(c_k\)</span>
+      <div class="dec-chips"><span>지침</span><span>도구 설명서 (Grep·Read·Edit·Bash)</span><span>작동규칙 설정파일</span><span>요청 "삭제 버튼이 안 돼요"</span><span>Read 결과 19행 <code>todos.filter(…)</code></span></div>
+    </div>
+    <div class="dec-down">↓ 다음 토큰을 하나씩 뽑아 이어 씀</div>
+    <ol class="dec-steps">
+      <li>
+        <span class="dec-no">①</span>
+        <div class="dec-tok">19번째 줄에서 filter 결과를 어디에도 저장하지 않아 목록이 바뀌지 않습니다.</div>
+        <div class="dec-q"><b>상황 정리</b><span>먼저 쓴 글이 곧바로 컨텍스트에 더해져 뒤의 선택을 이끕니다. 원인을 "저장 누락"으로 적은 뒤에는 Edit가 나올 확률이 높아집니다.</span></div>
+      </li>
+      <li>
+        <span class="dec-no">②</span>
+        <div class="dec-tok">[도구 호출 시작]</div>
+        <div class="dec-q"><b>계속할까, 끝낼까</b><span class="dec-cands"><i class="pick">도구 호출 시작</i><i>응답 끝</i></span><span>눈에 보이지 않는 특수 토큰 하나의 선택입니다. "응답 끝"이 뽑히면 루프가 멈춥니다.</span></div>
+      </li>
+      <li>
+        <span class="dec-no">③</span>
+        <div class="dec-tok">"tool": "Edit"</div>
+        <div class="dec-q"><b>무엇으로</b><span class="dec-cands"><i>Grep</i><i>Read</i><i class="pick">Edit</i><i>Bash</i></span><span>도구 설명서에 이름이 적힌 도구만 후보가 됩니다.</span></div>
+      </li>
+      <li>
+        <span class="dec-no">④</span>
+        <div class="dec-tok">"file_path": "src/store.js"</div>
+        <div class="dec-q"><b>어디에</b><span class="dec-cands"><em class="copy">컨텍스트에서 베낌</em></span><span>앞서 검색·읽기 결과에 나온 경로를 그대로 가져옵니다.</span></div>
+      </li>
+      <li>
+        <span class="dec-no">⑤</span>
+        <div class="dec-tok">"old": "  todos.filter(t =&gt; t.id !== id);"
+"new": "  todos = todos.filter(t =&gt; t.id !== id);"</div>
+        <div class="dec-q"><b>어떻게</b><span class="dec-cands"><em class="copy">old: 컨텍스트에서 베낌</em><em class="gen">new: 새로 생성</em></span><span>고칠 줄은 Read 결과에서 베끼고, 고친 코드만 새로 만듭니다. 읽지 않은 파일이라면 없는 경로나 줄을 그럴듯하게 지어낼 수 있습니다.</span></div>
+      </li>
+      <li class="dec-end">
+        <span class="dec-no">⑥</span>
+        <div class="dec-tok">[호출 끝]</div>
+        <div class="dec-q"><b>하네스로 넘김</b><span>모델의 일은 여기까지입니다. 하네스가 호출문을 해석하고, 승인을 받아 실행합니다.</span></div>
+      </li>
+    </ol>
+  </div>
+  <div class="hint"><b>결정의 근거</b><span>확률을 만드는 것은 두 가지입니다. 사전학습·사후학습으로 파라미터 \(\theta\)에 새겨진 지식과 습관("먼저 찾고 읽는다", "고친 뒤 테스트한다"), 그리고 지금 컨텍스트 \(c_k\)에 적힌 상황과 지시입니다. 마지막에는 이 확률에 따라 뽑으므로, 같은 상황에서도 다른 도구나 다른 수정이 나올 수 있습니다.</span></div>
+  <p class="note">①처럼 글로 쓴 이유는 결정을 돕지만, 모델 안에서 실제로 일어난 계산을 그대로 보여 준다는 보장은 없습니다(Turpin et al., 2023). 이유 설명보다 실행 결과로 확인합니다. 또 모델은 여러 수를 미리 펼쳐 비교하지 않고 한 걸음씩 정하므로, 잘못된 결정은 다음 관찰(오류 메시지)을 보고서야 바로잡힙니다.</p>
+  <p class="toy">토큰 경계와 특수 토큰 표기는 이해를 돕기 위해 단순화했습니다. 실제로는 한 칸의 글도 여러 토큰으로 나뉘어 하나씩 생성됩니다.</p>
   <details class="ref-note">
     <summary>참고: 도구는 누가 등록하나</summary>
-    <p>모델은 도구를 등록하지 않습니다. 도구를 등록하는 쪽은 <b>에이전트 프로그램(하네스)을 만든 개발사와 그것을 쓰는 나</b>입니다. 하네스는 등록된 도구의 정의를 모아 매번 모델에게 보여 주고, 모델은 그 목록 안에서만 골라 호출문을 씁니다. 모델에게는 어느 방식으로 등록된 도구든 똑같이 글로 된 도구 설명서일 뿐입니다.</p>
+    <p>모델은 도구를 등록하지 않습니다. 도구를 등록하는 쪽은 <b>하네스를 만든 개발사와 그것을 쓰는 나</b>입니다. 하네스는 등록된 도구의 정의를 모아 매번 모델에게 보여 주고, 모델은 그 목록 안에서만 골라 호출문을 씁니다. 모델에게는 어느 방식으로 등록된 도구든 똑같이 글로 된 도구 설명서일 뿐입니다.</p>
     <div class="tbl-wrap">
       <table>
         <thead><tr><th>종류</th><th>누가 등록하나</th><th>어떻게 쓰나</th></tr></thead>
@@ -201,7 +331,7 @@ mjx-container[display="true"]{margin:.6em 0!important}
 
 <section id="ctx">
   <h2>모델이 아는 것은 컨텍스트 창 안의 것뿐</h2>
-  <p>모델은 단계마다 <b>그때까지 쌓인 기록 전체를 처음부터 다시 읽고</b> 다음 행동을 씁니다. 이 기록이 들어가는 공간이 컨텍스트 창(Context window)입니다. 지침, 도구 설명서, 에이전트 작동규칙 설정파일, 대화, 읽은 파일, 명령 결과가 모두 여기에 쌓입니다.</p>
+  <p>모델은 단계마다 <b>그때까지 쌓인 기록 전체를 처음부터 다시 읽고</b> 다음 행동을 씁니다. 이 기록이 들어가는 공간이 컨텍스트 창(Context window)입니다. 지침, 도구 설명서, 에이전트 작동규칙 설정파일, 대화, 읽은 파일, 명령 결과가 모두 여기에 쌓입니다. 이 창에 무엇을 넣고 언제 줄일지는 모델이 아니라 하네스가 정합니다.</p>
   <div class="compress">
     <div class="box"><span class="note">창이 차면</span><span style="font-weight:600">오래된 도구 결과를 먼저 지우고, 필요하면 대화를 요약(압축)</span></div>
     <div class="arrow">결과<br>→</div>
@@ -240,8 +370,8 @@ mjx-container[display="true"]{margin:.6em 0!important}
   <div class="myth">
     <article>
       <span class="x">✕ "AI 모델이 내 컴퓨터에서 직접 명령을 실행한다"</span>
-      <span class="o">○ 모델은 실행할 명령을 글로 쓸 뿐이고, 실행은 내 컴퓨터의 에이전트 프로그램이 합니다.</span>
-      <p class="small">그래서 에이전트 프로그램이 중간에서 권한을 묻고, 실행을 막고, 파일을 되돌릴 수 있습니다. 모델은 원격 서버에 있어도 명령은 내 컴퓨터에서 실행됩니다(로컬 실행 기준).</p>
+      <span class="o">○ 모델은 실행할 명령을 글로 쓸 뿐이고, 실행은 내 컴퓨터의 하네스가 합니다.</span>
+      <p class="small">그래서 하네스가 중간에서 권한을 묻고, 실행을 막고, 파일을 되돌릴 수 있습니다. 모델은 원격 서버에 있어도 명령은 내 컴퓨터에서 실행됩니다(로컬 실행 기준).</p>
     </article>
     <article>
       <span class="x">✕ "에이전트는 내 프로젝트 전체를 이미 알고, 지난번 대화도 기억한다"</span>
@@ -254,8 +384,8 @@ mjx-container[display="true"]{margin:.6em 0!important}
 <section id="math">
   <details>
     <summary>더 깊이: 에이전트 루프를 코드와 수식으로</summary>
-    <p>하네스의 핵심은 짧은 반복문입니다. 아래는 구조를 보여 주기 위한 의사코드(pseudocode)입니다.</p>
-<pre>기록 = [지침, 도구_설명서, 작동규칙_설정파일, 사용자_요청]
+    <p>하네스의 핵심은 짧은 반복문입니다. 아래는 구조를 보여 주기 위한 의사코드(pseudocode)입니다. 모델을 부르는 한 줄을 빼면 나머지는 모두 하네스가 하는 일이고, 주석에 해당하는 역할을 적었습니다.</p>
+<pre>기록 = [지침, 도구_설명서, 작동규칙_설정파일, 사용자_요청]  <span class="cm"># 컨텍스트 관리</span>
 <span class="cm"># 반복 시작</span>
 while True:
     응답 = 모델(기록)              <span class="cm"># 다음 토큰 예측으로 글 생성</span>
@@ -263,13 +393,13 @@ while True:
     if 응답에_도구_호출이_없음:
         break                     <span class="cm"># 최종 답변 → 루프 끝</span>
     for 호출 in 응답.도구_호출들:
-        if 승인_필요(호출) and not 사용자_승인(호출):
+        if 승인_필요(호출) and not 사용자_승인(호출):  <span class="cm"># 안전장치</span>
             결과 = "사용자가 거부함"
         else:
-            결과 = 실행(호출)        <span class="cm"># 실제 실행은 여기서만</span>
+            결과 = 실행(호출)        <span class="cm"># 도구 연결: 실제 실행은 여기서만</span>
         기록.append(결과)
     if 너무_김(기록):
-        기록 = 압축(기록)</pre>
+        기록 = 압축(기록)          <span class="cm"># 컨텍스트 관리</span></pre>
     <p style="margin-top:12px">같은 과정을 수식으로 쓰면 다음과 같습니다.</p>
     <div class="readout math">\[ \begin{aligned} y_k &\sim p_{\theta}\left(\,\cdot \mid c_k\right) \\ c_{k+1} &= c_k \oplus y_k \oplus r_k \end{aligned} \]</div>
     <div class="sym">
@@ -293,6 +423,7 @@ while True:
     <li>Anthropic (2025). Effective context engineering for AI agents. <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="noopener">anthropic.com/engineering</a></li>
     <li>Yao, S. et al. (2023). ReAct: Synergizing Reasoning and Acting in Language Models. ICLR. <a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener">arXiv:2210.03629</a></li>
     <li>Schick, T. et al. (2023). Toolformer: Language Models Can Teach Themselves to Use Tools. NeurIPS. <a href="https://arxiv.org/abs/2302.04761" target="_blank" rel="noopener">arXiv:2302.04761</a></li>
+    <li>Turpin, M. et al. (2023). Language Models Don't Always Say What They Think: Unfaithful Explanations in Chain-of-Thought Prompting. NeurIPS. <a href="https://arxiv.org/abs/2305.04388" target="_blank" rel="noopener">arXiv:2305.04388</a></li>
     <li>Jimenez, C. E. et al. (2024). SWE-bench: Can Language Models Resolve Real-World GitHub Issues? ICLR. <a href="https://arxiv.org/abs/2310.06770" target="_blank" rel="noopener">arXiv:2310.06770</a></li>
     <li>Yang, J. et al. (2024). SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering. NeurIPS. <a href="https://arxiv.org/abs/2405.15793" target="_blank" rel="noopener">arXiv:2405.15793</a></li>
   </ol>
@@ -353,6 +484,68 @@ const steps=[
 const catNames=["지침·도구 설명","작동규칙 설정파일","대화(요청·모델 응답)","읽은 파일","명령·검색 결과"], catCls=["c-sys","c-md","c-chat","c-file","c-out"];
 const MAXC=12000; let li=0;
 const lp=document.getElementById("lpanel");
+
+/* 컨텍스트 펼쳐 보기: 하네스가 매 단계 모델에 보내는 요청의 구조.
+   Claude API(Messages API) 형식을 줄여 표시한다. _cat(막대 색 범주)·_lab(설명)은 화면용이며 요청에는 없다. */
+const CV_SYSTEM="당신은 사용자의 소프트웨어 작업을 돕는 코딩 에이전트입니다. 주어진 도구로 파일을 찾고 읽고 고치며, 고친 뒤에는 실행해서 확인합니다. …(실제로는 수천 토큰 분량의 지침)";
+const CV_TOOLS=[
+ {name:"Grep",description:"파일 내용에서 패턴을 찾는다",input_schema:{pattern:"찾을 패턴",path:"찾을 폴더"}},
+ {name:"Read",description:"파일 내용을 읽는다",input_schema:{file_path:"읽을 파일 경로"}},
+ {name:"Edit",description:"파일의 글을 바꾼다",input_schema:{file_path:"고칠 파일",old:"바꿀 글",new:"새 글"}},
+ {name:"Bash",description:"셸 명령을 실행한다",input_schema:{command:"실행할 명령"}}
+];
+const T=(text,cat,lab)=>({type:"text",text,_cat:cat,_lab:lab});
+const U=(id,name,input)=>({type:"tool_use",id,name,input,_cat:2});
+const R=(id,content,cat)=>({type:"tool_result",tool_use_id:id,content,_cat:cat});
+const EDIT1={file_path:"src/store.js",old:"  todos.filter(t => t.id !== id);",new:"  todos = todos.filter(t => t.id !== id);"};
+const EDIT2={file_path:"src/store.js",old:"const todos = load();",new:"let todos = load();"};
+/* cvAdd[i]: i번째 단계에서 messages 끝에 덧붙는 메시지들 */
+const cvAdd=[
+ [{role:"user",content:[
+   T("<system-reminder>\n# AGENTS.md\n- 테스트는 npm test로 실행한다.\n- …\n</system-reminder>",1,"작동규칙 설정파일"),
+   T("<system-reminder>git 상태: main 브랜치, 변경 없음</system-reminder>",0,"환경 정보"),
+   T("할 일 목록 페이지에서 '삭제' 버튼을 눌러도 항목이 안 지워져요. 고쳐 주세요.",2,"내 요청")]}],
+ [{role:"assistant",content:[T("삭제 기능이 있는 코드를 먼저 찾아보겠습니다.",2,"모델의 글"),U("toolu_01","Grep",{pattern:"delete",path:"src"})]},
+  {role:"user",content:[R("toolu_01","src/app.js:42    deleteBtn.addEventListener(\"click\", () => deleteTodo(id))\nsrc/store.js:18  export function deleteTodo(id) {",4)]}],
+ [{role:"assistant",content:[T("deleteTodo 함수를 살펴보겠습니다.",2,"모델의 글"),U("toolu_02","Read",{file_path:"src/store.js"})]},
+  {role:"user",content:[R("toolu_02","3   const todos = load();\n    …\n18  export function deleteTodo(id) {\n19    todos.filter(t => t.id !== id);\n20    save();\n21  }",3)]}],
+ [{role:"assistant",content:[T("19번째 줄에서 filter 결과를 어디에도 저장하지 않아 목록이 바뀌지 않습니다. 결과를 todos에 다시 넣겠습니다.",2,"모델의 글"),U("toolu_03","Edit",EDIT1)]},
+  {role:"user",content:[R("toolu_03","src/store.js 수정됨 (1줄)",4)]}],
+ [{role:"assistant",content:[T("수정이 맞는지 테스트를 실행하겠습니다.",2,"모델의 글"),U("toolu_04","Bash",{command:"npm test"})]},
+  {role:"user",content:[R("toolu_04","✗ deleteTodo › 삭제 후 목록 길이가 줄어든다\n  TypeError: Assignment to constant variable.\n    at deleteTodo (src/store.js:19)\n✓ 11 passed, 1 failed",4)]}],
+ [{role:"assistant",content:[T("todos가 const로 선언되어 다시 대입할 수 없습니다. 3번째 줄을 let으로 바꾸겠습니다.",2,"모델의 글"),U("toolu_05","Edit",EDIT2)]},
+  {role:"user",content:[R("toolu_05","src/store.js 수정됨 (1줄)",4)]}],
+ [{role:"assistant",content:[U("toolu_06","Bash",{command:"npm test"})]},
+  {role:"user",content:[R("toolu_06","✓ 12 passed",4)]}],
+ [{role:"assistant",content:[T("삭제 버튼 문제를 고쳤습니다.\n• 원인: deleteTodo가 filter 결과를 저장하지 않았습니다.\n• 변경: src/store.js 2곳\n• 확인: npm test 12개 모두 통과",2,"최종 답변")]}]
+];
+let cvOpen=false, cvView="blocks";
+function cvPart(b){
+  let lab, txt;
+  if(b.type==="text"){lab='<b>text</b> · '+b._lab; txt=b.text;}
+  else if(b.type==="tool_use"){lab='<b>tool_use</b> · '+b.name+' · id '+b.id; txt=JSON.stringify(b.input,null,1).replace(/\n\s*/g," ");}
+  else {lab='<b>tool_result</b> · '+b.tool_use_id+'에 대한 결과'; txt=b.content;}
+  return '<div class="cv-part k'+b._cat+'"><span class="cv-lab">'+lab+'</span><div class="cv-txt">'+esc(txt)+'</div></div>';
+}
+function renderCV(){
+  const box=document.getElementById("cvbody"); if(!box) return;
+  const msgs=[]; for(let j=0;j<=li;j++) cvAdd[j].forEach(m=>msgs.push({m,isNew:j===li}));
+  document.querySelectorAll(".cv-tabs button").forEach(b=>{const on=b.dataset.v===cvView;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);});
+  let h;
+  if(cvView==="json"){
+    const rep=(k,v)=>k.startsWith("_")?undefined:v;
+    h='<pre class="cv-json">{\n  "system": '+esc(JSON.stringify(CV_SYSTEM))+',\n  "tools": [\n'+CV_TOOLS.map(t=>'    '+esc(JSON.stringify(t))).join(",\n")+'\n  ],\n  "messages": [\n'
+      +msgs.map(({m,isNew})=>{const s=esc(JSON.stringify(m,rep,2).replace(/^/gm,"    "));return isNew?'<span class="cv-new">'+s+'</span>':s;}).join(",\n")+'\n  ]\n}</pre>';
+  }else{
+    h='<div class="cv-sec"><span class="cv-key">system</span><div class="cv-part k0"><span class="cv-lab"><b>지침</b> · 시스템 프롬프트</span><div class="cv-txt">'+esc(CV_SYSTEM)+'</div></div></div>'
+     +'<div class="cv-sec"><span class="cv-key">tools</span><div class="cv-part k0"><span class="cv-lab"><b>도구 정의</b> · '+CV_TOOLS.length+'개</span><div class="cv-txt">'+CV_TOOLS.map(t=>esc(t.name+' — '+t.description+'  { '+Object.keys(t.input_schema).join(", ")+' }')).join("\n")+'</div></div></div>'
+     +'<div class="cv-sec"><span class="cv-key">messages · '+msgs.length+'개</span>'
+     +msgs.map(({m,isNew})=>'<div class="cv-msg'+(isNew?' new':'')+'"><div class="cv-head"><span class="cv-role '+m.role+'">'+m.role+'</span>'+(m.role==="user"&&m.content[0].type==="tool_result"?'<span class="cv-lab">하네스가 넣은 도구 결과</span>':'')+(isNew?'<span class="cv-newb">이번 단계에 추가</span>':'')+'</div>'+m.content.map(cvPart).join("")+'</div>').join("")
+     +'</div>';
+  }
+  box.innerHTML=h;
+  box.scrollTop=box.scrollHeight;
+}
 function renderLoop(){
   const s=steps[li];
   ["you","harness","model","pc"].forEach(k=>document.getElementById("ln-"+k).classList.toggle("on",s.lanes.includes(k)));
@@ -361,11 +554,24 @@ function renderLoop(){
   if(s.you) h+='<div class="chat"><div class="q"><b>나</b>'+esc(s.you)+'</div></div>';
   if(s.m) h+='<div class="io m"><span class="lab">모델이 써 낸 글</span><div class="code">'+esc(s.m)+'</div></div>';
   if(s.approve) h+='<div class="approve"><b>승인 요청</b><span>'+s.approve+'</span></div>';
-  if(s.h) h+='<div class="io h"><span class="lab">에이전트 프로그램이 한 일</span><div class="code">'+s.h+'</div></div>';
+  if(s.h) h+='<div class="io h"><span class="lab">하네스가 한 일</span><div class="code">'+s.h+'</div></div>';
   if(s.r) h+='<div class="io r"><span class="lab">돌아온 결과 → 기록에 추가</span><div class="code">'+(s.html?s.r:esc(s.r))+'</div></div>';
   h+='<div class="ctx"><span class="note"><b>다음 단계에서 모델이 다시 읽을 컨텍스트</b> · 약 <span class="num">'+total.toLocaleString()+'</span> 토큰</span><div class="meter">'+s.ctx.map((v,i)=>'<span class="'+catCls[i]+'" style="width:'+(v/MAXC*100)+'%"></span>').join("")+'</div><div class="legend">'+catNames.map((n,i)=>'<span><i class="'+catCls[i]+'"></i>'+n+'</span>').join("")+'</div></div>';
+  h+='<details class="ctxview" id="cvdet"'+(cvOpen?' open':'')+'><summary>하네스가 꾸려 보내는 컨텍스트 펼쳐 보기 (모델이 실제로 받는 내용)</summary><div class="cv-wrap">'
+    +'<div class="cv-tabs"><button type="button" data-v="blocks">구조로 보기</button><button type="button" data-v="json">API 요청으로 보기</button></div>'
+    +'<div class="cv-body" id="cvbody"></div>'
+    +'<ul class="cv-notes"><li>모델은 앞 단계를 기억하지 않습니다. 하네스가 단계마다 <b>system + tools + messages 전체</b>를 다시 보냅니다. 한 단계가 지나면 messages 끝에 <span class="cv-role assistant">assistant</span>(모델이 쓴 글·도구 호출)와 <span class="cv-role user">user</span>(도구 결과)가 한 쌍씩 붙습니다.</li>'
+    +'<li>도구 결과는 내 요청과 같은 <b>user</b> 자리에 들어갑니다. <code>tool_use_id</code>로 어느 호출의 결과인지 짝을 맞춥니다. 모델에게는 읽은 파일 속 글도 같은 입력이라, 파일에 적힌 지시문에 휘둘릴 수 있습니다(프롬프트 인젝션).</li>'
+    +'<li>작동규칙 설정파일과 git 상태는 첫 user 메시지에 <code>&lt;system-reminder&gt;</code> 같은 표식을 달아 끼워 넣습니다. 내가 쓰지 않은 글도 내 메시지 자리에 들어가는 셈입니다.</li>'
+    +'<li>system·tools·앞쪽 메시지는 매번 같으므로, 서비스는 이 부분의 계산 결과를 저장해 다시 쓰기도 합니다(프롬프트 캐싱). 모델에 들어갈 때는 이 구조 전체가 역할을 구분하는 특수 토큰과 함께 하나의 긴 토큰열로 바뀝니다.</li></ul>'
+    +'<p class="toy">Claude API(Messages API) 형식을 바탕으로 줄였습니다. 실제 지침과 도구 정의는 훨씬 길고(입력 형식은 JSON Schema로 적음), 세부 형식은 제품마다 다릅니다.</p>'
+    +'</div></details>';
   h+='<div class="hint"><b>포인트</b><span>'+s.note+'</span></div>';
   lp.innerHTML=h;
+  const det=document.getElementById("cvdet");
+  det.addEventListener("toggle",()=>{cvOpen=det.open; if(cvOpen) renderCV();});
+  det.querySelectorAll(".cv-tabs button").forEach(b=>b.onclick=()=>{cvView=b.dataset.v;renderCV();});
+  renderCV();
   document.getElementById("lprev").disabled=li===0;
   document.getElementById("lnext").disabled=li===steps.length-1;
 }
