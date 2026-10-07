@@ -109,7 +109,7 @@ window.MATERIALS = [
   {
     subject: "data-science",
     label: "R·Python 실습",
-    title: "지하철과 날씨로 배우는 R·Python",
+    title: "R과 Python 을 이용해 세상읽기",
     description: "비 오는 날 지하철 승객은 줄어들까? 2025년 서울 지하철 승하차 인원과 기상청 관측 자료를 찾고, 읽고, 다듬고, 요약하는 과정을 여섯 장과 과제로 나누어 R과 Python으로 나란히 따라 합니다.",
     href: "data-science/readtheworld/index.html",
     practice: true,

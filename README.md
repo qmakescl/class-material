@@ -116,7 +116,7 @@ uv run python src/python/prepare_mnist_bridge.py     # docs/assets/data/mnist-br
   미니배치 100, 학습률 0.1, 10에폭 SGD)으로 학습해 선형 모형 가중치, 에폭별 훈련 손실·시험
   정확도, 시험 이미지 일부와 오답 사례를 기록한다. numpy만 쓰며 몇 초 안에 끝난다.
 
-## 지하철과 날씨로 배우는 R·Python (여러 쪽 자료)
+## R과 Python 을 이용해 세상읽기 (여러 쪽 자료)
 
 `docs/data-science/readtheworld/`는 차례(`index.html`)와 여섯 장(`ch1`~`ch6.html`),
 과제(`hw.html`)로 된 묶음 자료다. 여덟 쪽이 `docs/assets/readtheworld.css`를 함께
