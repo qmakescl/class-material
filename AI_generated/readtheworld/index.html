@@ -1,0 +1,133 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>지하철과 날씨로 배우는 R·Python</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@600;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 여섯 장을 한 노선의 여섯 정거장으로 놓는다. 본문은 한 단, 코드는 R·Python 두 단. */
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --ink:#15201C; --muted:#586861; --rule:#D3DAD6;
+  --line:#007A3D; --line-soft:#DDEEE4; --code-bg:#E8EDEA;
+  --r:#245FB0; --py:#8F6200; --warn:#A14B00; --warn-soft:#FBEBDD;
+  --display:"Gothic A1","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono","D2Coding",Consolas,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+    --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+    --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+  --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+  --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.75;
+  padding-inline:20px;padding-block:0 72px;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:860px;margin-inline:auto}
+a{color:var(--line)} a:focus-visible{outline:2px solid var(--line);outline-offset:3px;border-radius:2px}
+
+/* 상단 노선 띠 */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding-block:20px;border-bottom:1px solid var(--rule)}
+.brand{font-family:var(--display);font-weight:800;font-size:15px;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.stops{display:flex;align-items:center;gap:0;margin:0;padding:0;list-style:none;flex:1;min-width:240px;max-width:400px}
+.stops li{flex:1;display:flex;align-items:center}
+.stops li::before{content:"";flex:1;height:4px;background:var(--line)}
+.stops li:first-child::before{display:none}
+.stops li:first-child{flex:0}
+.stops a{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:3px solid var(--line);
+  background:var(--surface);color:var(--ink);font:500 12px/1 var(--mono);text-decoration:none}
+.stops a[aria-current]{background:var(--line);color:var(--surface)}
+.draft{font:500 12px/1 var(--mono);color:var(--warn);border:1px solid var(--warn);padding:5px 8px;border-radius:3px}
+
+/* 제목 */
+.eyebrow{font:500 13px/1.4 var(--mono);color:var(--line);margin:48px 0 8px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.25;letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+.lead{font-size:18px;color:var(--muted);max-width:40em;margin:0 0 32px}
+h2{font-family:var(--display);font-weight:800;font-size:22px;line-height:1.35;margin:56px 0 12px;padding-top:20px;border-top:1px solid var(--rule);text-wrap:balance}
+h2 .no{font:500 14px/1 var(--mono);color:var(--line);margin-right:10px}
+h3{font-size:17px;font-weight:600;margin:28px 0 8px}
+p,ul,ol{max-width:42em;margin:0 0 14px}
+li{margin-bottom:4px}
+code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:1px 5px;border-radius:3px}
+
+.goals{background:var(--line-soft);border-left:4px solid var(--line);padding:16px 20px;margin:0 0 8px}
+.goals strong{display:block;margin-bottom:6px}
+.goals ul{margin:0;padding-left:20px}
+.note{background:var(--warn-soft);border-left:4px solid var(--warn);padding:14px 20px;margin:20px 0}
+.note strong{color:var(--warn)}
+.note p:last-child,.goals p:last-child{margin-bottom:0}
+.todo{border:1px dashed var(--muted);padding:14px 20px;margin:20px 0;color:var(--muted)}
+.todo strong{color:var(--ink)}
+
+/* 코드: R과 Python 나란히 */
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0 24px}
+.cb{min-width:0;background:var(--code-bg);border-radius:4px;border-top:3px solid var(--rule)}
+.cb.r{border-top-color:var(--r)} .cb.py{border-top-color:var(--py)}
+.cb .lang{display:block;font:500 12px/1 var(--mono);letter-spacing:.06em;padding:10px 14px 0}
+.cb.r .lang{color:var(--r)} .cb.py .lang{color:var(--py)} .cb.sh .lang{color:var(--muted)}
+.cb pre{margin:0;padding:10px 14px 14px;overflow-x:auto;font:400 13.5px/1.65 var(--mono);color:var(--ink);white-space:pre;word-break:normal;overflow-wrap:normal}
+.single{margin:16px 0 24px}
+
+.tw{overflow-x:auto;margin:16px 0 24px}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13px;white-space:nowrap}
+td code{white-space:nowrap}
+
+.tree{font:400 14px/1.7 var(--mono);background:var(--code-bg);padding:14px 18px;border-radius:4px;overflow-x:auto;white-space:pre;margin:16px 0 24px}
+
+.pager{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:64px;padding-top:24px;border-top:1px solid var(--rule)}
+.pager a{text-decoration:none;font-weight:600}
+.pager span{display:block;font:500 12px/1.6 var(--mono);color:var(--muted)}
+
+/* 첫 페이지 노선도 */
+.route{list-style:none;margin:40px 0 0;padding:0;position:relative}
+.route::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:6px;background:var(--line);border-radius:3px}
+.route li{position:relative;padding:0 0 28px 64px;margin:0}
+.route li:last-child{padding-bottom:0}
+.route .dot{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--surface);border:5px solid var(--line);
+  display:grid;place-items:center;font:500 15px/1 var(--mono);color:var(--ink)}
+.route a.st{display:block;text-decoration:none;color:var(--ink);padding-top:6px}
+.route a.st h2{border:0;padding:0;margin:0 0 4px;font-size:21px}
+.route a.st:hover h2{color:var(--line)}
+.route p{color:var(--muted);margin:0 0 6px}
+.route .out{font:400 13px/1.6 var(--mono);color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 32px;margin:8px 0 0;padding:0}
+.facts div{border-top:1px solid var(--rule);padding:14px 0}
+.facts dt{font:500 12px/1.4 var(--mono);color:var(--muted);letter-spacing:.04em}
+.facts dd{margin:4px 0 0}
+@media (max-width:640px){
+  .pair{grid-template-columns:minmax(0,1fr)}
+  body{font-size:15.5px}
+}
+</style>
+<div class="wrap">
+<header class="top"><a class="brand" href="index.html">지하철과 날씨로 배우는 R·Python</a><ol class="stops"><li><a href="ch1.html" title="작업환경 구축" aria-label="작업환경 구축">1</a></li><li><a href="ch2.html" title="데이터셋 가져오기" aria-label="데이터셋 가져오기">2</a></li><li><a href="ch3.html" title="R과 Python의 데이터 다루는 명령" aria-label="R과 Python의 데이터 다루는 명령">3</a></li><li><a href="ch4.html" title="데이터 전처리" aria-label="데이터 전처리">4</a></li><li><a href="ch5.html" title="기초 통계 구하기" aria-label="기초 통계 구하기">5</a></li><li><a href="ch6.html" title="데이터로 인사이트 얻기" aria-label="데이터로 인사이트 얻기">6</a></li><li><a href="hw.html" title="과제: 시간대로 나누어 다시 보기" aria-label="과제: 시간대로 나누어 다시 보기">과</a></li></ol><span class="draft">초안</span></header>
+<main>
+<p class="eyebrow">데이터 다루기 실습 가이드</p>
+<h1>지하철과 날씨로 배우는 R·Python</h1>
+<p class="lead">비 오는 날, 더운 날에 지하철 승객은 어떻게 달라질까? 이 질문 하나에 답하기 위해 2025년 한 해의 데이터를 찾고, 읽고, 다듬고, 요약한다. 모든 작업을 R과 Python 두 가지로 나란히 해 본다.</p>
+<dl class="facts">
+<div><dt>대상</dt><dd>프로그래밍을 처음 하는 비전공 학생</dd></div>
+<div><dt>도구</dt><dd>VS Code, Jupyter Notebook, AI 에이전트</dd></div>
+<div><dt>주 데이터</dt><dd>서울교통공사 역별 일별 시간대별 승하차인원, 2025년</dd></div>
+<div><dt>함께 쓰는 데이터</dt><dd>기상청 종관기상관측 일자료, 서울 지점, 2025년</dd></div>
+</dl>
+<ol class="route">
+<li><span class="dot">1</span><a class="st" href="ch1.html"><h2>작업환경 구축</h2></a><p>R을 설치하고, uv로 Python 3.12 가상환경을 만들고, VS Code에서 두 언어의 노트북을 실행한다.</p><p class="out">결과물: R·Python 커널이 연결된 프로젝트 폴더</p></li><li><span class="dot">2</span><a class="st" href="ch2.html"><h2>데이터셋 가져오기</h2></a><p>질문에 맞는 공공데이터를 직접 찾아 내려받고, 노트북으로 읽어 들인다.</p><p class="out">결과물: data/raw 의 2025년 지하철·기상 원본 파일</p></li><li><span class="dot">3</span><a class="st" href="ch3.html"><h2>R과 Python의 데이터 다루는 명령</h2></a><p>고르기, 거르기, 그룹 요약을 익히고, 정규표현식과 날짜 자료형을 다룬다.</p><p class="out">결과물: 날짜형으로 바뀐 표와 두 언어 대조표</p></li><li><span class="dot">4</span><a class="st" href="ch4.html"><h2>데이터 전처리</h2></a><p>원본을 점검하고, 하루 단위로 요약하고, 기상 데이터와 조인한다.</p><p class="out">결과물: data/processed/daily.csv</p></li><li><span class="dot">5</span><a class="st" href="ch5.html"><h2>기초 통계 구하기</h2></a><p>평균과 퍼짐, 분포, 집단 비교, 상관을 구하고 그림으로 확인한다.</p><p class="out">결과물: 요약표와 그림 세 장</p></li><li><span class="dot">6</span><a class="st" href="ch6.html"><h2>데이터로 인사이트 얻기</h2></a><p>비 오는 날 승객이 줄어드는지 확인하고, 각자 질문 하나에 답한다.</p><p class="out">결과물: 한 문단과 그림 한 장</p></li><li><span class="dot">과</span><a class="st" href="hw.html"><h2>과제: 시간대로 나누어 다시 보기</h2></a><p>표를 긴 형식으로 바꾸고, 날씨의 영향을 왜 낮 시간대에서 봐야 하는지 자기 그림으로 설명한다.</p><p class="out">결과물: 시간대별 그림 두 장과 설명 한 쪽</p></li>
+</ol>
+<h2>읽는 법</h2>
+<ul>
+<li>코드는 왼쪽에 R, 오른쪽에 Python을 나란히 둔다. 같은 줄 높이의 코드가 같은 일을 한다.</li>
+<li>장마다 R용과 Python용 노트북을 하나씩 만들고, 가이드의 코드를 직접 입력해 실행한다.</li>
+<li>주황색 상자는 자주 틀리는 곳이다. 점선 상자는 아직 확정되지 않은 초안 메모다.</li>
+</ul>
+<h2>초안 상태</h2>
+<p>지하철 데이터의 열 구성은 2024년 파일의 앞 10행으로 확인했고, 2025년 파일도 같다고 가정했다. 2025년 파일의 날짜 표기(YYYY-mm-dd)와 인코딩(EUC-KR)은 알려주신 내용을 따랐다. 2~6장의 Python 코드는 같은 구조로 만든 연습용 가상 데이터에서 끝까지 실행해 보았다. R 코드와 기상 파일의 열 이름은 아직 확인하지 않았다. 2025년 실제 데이터로 계산한 결과표와 그림은 들어 있지 않다.</p>
+</main>
+</div>
+
+</body></html>

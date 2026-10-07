@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>6장 데이터로 인사이트 얻기</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@600;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 여섯 장을 한 노선의 여섯 정거장으로 놓는다. 본문은 한 단, 코드는 R·Python 두 단. */
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --ink:#15201C; --muted:#586861; --rule:#D3DAD6;
+  --line:#007A3D; --line-soft:#DDEEE4; --code-bg:#E8EDEA;
+  --r:#245FB0; --py:#8F6200; --warn:#A14B00; --warn-soft:#FBEBDD;
+  --display:"Gothic A1","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono","D2Coding",Consolas,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+    --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+    --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+  --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+  --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.75;
+  padding-inline:20px;padding-block:0 72px;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:860px;margin-inline:auto}
+a{color:var(--line)} a:focus-visible{outline:2px solid var(--line);outline-offset:3px;border-radius:2px}
+
+/* 상단 노선 띠 */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding-block:20px;border-bottom:1px solid var(--rule)}
+.brand{font-family:var(--display);font-weight:800;font-size:15px;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.stops{display:flex;align-items:center;gap:0;margin:0;padding:0;list-style:none;flex:1;min-width:240px;max-width:400px}
+.stops li{flex:1;display:flex;align-items:center}
+.stops li::before{content:"";flex:1;height:4px;background:var(--line)}
+.stops li:first-child::before{display:none}
+.stops li:first-child{flex:0}
+.stops a{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:3px solid var(--line);
+  background:var(--surface);color:var(--ink);font:500 12px/1 var(--mono);text-decoration:none}
+.stops a[aria-current]{background:var(--line);color:var(--surface)}
+.draft{font:500 12px/1 var(--mono);color:var(--warn);border:1px solid var(--warn);padding:5px 8px;border-radius:3px}
+
+/* 제목 */
+.eyebrow{font:500 13px/1.4 var(--mono);color:var(--line);margin:48px 0 8px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.25;letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+.lead{font-size:18px;color:var(--muted);max-width:40em;margin:0 0 32px}
+h2{font-family:var(--display);font-weight:800;font-size:22px;line-height:1.35;margin:56px 0 12px;padding-top:20px;border-top:1px solid var(--rule);text-wrap:balance}
+h2 .no{font:500 14px/1 var(--mono);color:var(--line);margin-right:10px}
+h3{font-size:17px;font-weight:600;margin:28px 0 8px}
+p,ul,ol{max-width:42em;margin:0 0 14px}
+li{margin-bottom:4px}
+code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:1px 5px;border-radius:3px}
+
+.goals{background:var(--line-soft);border-left:4px solid var(--line);padding:16px 20px;margin:0 0 8px}
+.goals strong{display:block;margin-bottom:6px}
+.goals ul{margin:0;padding-left:20px}
+.note{background:var(--warn-soft);border-left:4px solid var(--warn);padding:14px 20px;margin:20px 0}
+.note strong{color:var(--warn)}
+.note p:last-child,.goals p:last-child{margin-bottom:0}
+.todo{border:1px dashed var(--muted);padding:14px 20px;margin:20px 0;color:var(--muted)}
+.todo strong{color:var(--ink)}
+
+/* 코드: R과 Python 나란히 */
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0 24px}
+.cb{min-width:0;background:var(--code-bg);border-radius:4px;border-top:3px solid var(--rule)}
+.cb.r{border-top-color:var(--r)} .cb.py{border-top-color:var(--py)}
+.cb .lang{display:block;font:500 12px/1 var(--mono);letter-spacing:.06em;padding:10px 14px 0}
+.cb.r .lang{color:var(--r)} .cb.py .lang{color:var(--py)} .cb.sh .lang{color:var(--muted)}
+.cb pre{margin:0;padding:10px 14px 14px;overflow-x:auto;font:400 13.5px/1.65 var(--mono);color:var(--ink);white-space:pre;word-break:normal;overflow-wrap:normal}
+.single{margin:16px 0 24px}
+
+.tw{overflow-x:auto;margin:16px 0 24px}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13px;white-space:nowrap}
+td code{white-space:nowrap}
+
+.tree{font:400 14px/1.7 var(--mono);background:var(--code-bg);padding:14px 18px;border-radius:4px;overflow-x:auto;white-space:pre;margin:16px 0 24px}
+
+.pager{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:64px;padding-top:24px;border-top:1px solid var(--rule)}
+.pager a{text-decoration:none;font-weight:600}
+.pager span{display:block;font:500 12px/1.6 var(--mono);color:var(--muted)}
+
+/* 첫 페이지 노선도 */
+.route{list-style:none;margin:40px 0 0;padding:0;position:relative}
+.route::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:6px;background:var(--line);border-radius:3px}
+.route li{position:relative;padding:0 0 28px 64px;margin:0}
+.route li:last-child{padding-bottom:0}
+.route .dot{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--surface);border:5px solid var(--line);
+  display:grid;place-items:center;font:500 15px/1 var(--mono);color:var(--ink)}
+.route a.st{display:block;text-decoration:none;color:var(--ink);padding-top:6px}
+.route a.st h2{border:0;padding:0;margin:0 0 4px;font-size:21px}
+.route a.st:hover h2{color:var(--line)}
+.route p{color:var(--muted);margin:0 0 6px}
+.route .out{font:400 13px/1.6 var(--mono);color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 32px;margin:8px 0 0;padding:0}
+.facts div{border-top:1px solid var(--rule);padding:14px 0}
+.facts dt{font:500 12px/1.4 var(--mono);color:var(--muted);letter-spacing:.04em}
+.facts dd{margin:4px 0 0}
+@media (max-width:640px){
+  .pair{grid-template-columns:minmax(0,1fr)}
+  body{font-size:15.5px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><a class="brand" href="index.html">지하철과 날씨로 배우는 R·Python</a><ol class="stops"><li><a href="ch1.html" title="작업환경 구축" aria-label="작업환경 구축">1</a></li><li><a href="ch2.html" title="데이터셋 가져오기" aria-label="데이터셋 가져오기">2</a></li><li><a href="ch3.html" title="R과 Python의 데이터 다루는 명령" aria-label="R과 Python의 데이터 다루는 명령">3</a></li><li><a href="ch4.html" title="데이터 전처리" aria-label="데이터 전처리">4</a></li><li><a href="ch5.html" title="기초 통계 구하기" aria-label="기초 통계 구하기">5</a></li><li><a href="ch6.html" title="데이터로 인사이트 얻기" aria-label="데이터로 인사이트 얻기" aria-current="page">6</a></li><li><a href="hw.html" title="과제: 시간대로 나누어 다시 보기" aria-label="과제: 시간대로 나누어 다시 보기">과</a></li></ol><span class="draft">초안</span></header>
+<main>
+<p class="eyebrow">6장 / 6</p>
+<h1>데이터로 인사이트 얻기</h1>
+<p class="lead">비 오는 날 승객이 줄어드는지 확인하고, 각자 질문 하나에 답한다.</p>
+<div class="goals"><strong>이 장을 마치면</strong><ul><li>질문을 데이터로 확인할 수 있는 형태로 바꿀 수 있다.</li><li>단순 비교가 왜 틀릴 수 있는지 설명할 수 있다.</li><li>자기 질문 하나에 대한 답을 한 문단과 그림 한 장으로 정리할 수 있다.</li></ul></div>
+<h2 id="s1"><span class="no">6.1</span>질문을 확인할 수 있는 형태로 바꾸기</h2>
+<div class="tw"><table><thead><tr><th>처음 질문</th><th>확인할 수 있는 형태</th></tr></thead><tbody><tr><td>비 오면 사람들이 지하철을 덜 탈까?</td><td>비 온 날과 안 온 날의 하루 평균 승차 인원이 다른가?</td></tr><tr><td>더우면 덜 돌아다닐까?</td><td>평균기온이 높은 날일수록 승차 인원이 줄어드는가?</td></tr><tr><td>어느 역이 주말에 붐빌까?</td><td>주말 평균이 평일 평균보다 큰 역은 어디인가?</td></tr></tbody></table></div>
+<p>오른쪽 열에는 <strong>무엇과 무엇을 비교하는지</strong>와 <strong>어떤 숫자를 볼지</strong>가 들어 있다. 여기까지 정해야 코드를 쓸 수 있다.</p>
+<h2 id="s2"><span class="no">6.2</span>안내 실습: 비 오는 날 승객은 줄어드는가</h2>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>library(tidyverse)
+daily &lt;- read_csv(&quot;../data/processed/daily.csv&quot;)</pre></div><div class="cb py"><span class="lang">Python</span><pre>import pandas as pd
+import matplotlib.pyplot as plt
+daily = pd.read_csv(&quot;../data/processed/daily.csv&quot;,
+                    parse_dates=[&quot;날짜&quot;])</pre></div></div>
+<h3>첫 번째 시도: 그냥 비교한다</h3>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily |&gt;
+  group_by(비) |&gt;
+  summarise(일수 = n(),
+            평균승차 = mean(승차))</pre></div><div class="cb py"><span class="lang">Python</span><pre>(daily.groupby(&quot;비&quot;)[&quot;승차&quot;]
+      .agg([&quot;size&quot;, &quot;mean&quot;]))</pre></div></div>
+<p>결과를 적어 둔다. 그런데 이 비교는 공정한가? 비 온 날이 우연히 주말에 많았다면, 비 때문이 아니라 주말이라서 승차가 적었을 수 있다.</p>
+<h3>두 번째 시도: 평일과 주말을 나누어 비교한다</h3>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily |&gt;
+  group_by(주말, 비) |&gt;
+  summarise(일수 = n(),
+            평균승차 = mean(승차),
+            .groups = &quot;drop&quot;)</pre></div><div class="cb py"><span class="lang">Python</span><pre>(daily.groupby([&quot;주말&quot;, &quot;비&quot;])[&quot;승차&quot;]
+      .agg([&quot;size&quot;, &quot;mean&quot;]))</pre></div></div>
+<p>이제 평일끼리, 주말끼리 비교한다. 첫 번째 시도와 결론이 같은가, 달라졌는가? 달라졌다면 <code>일수</code> 열을 보고 이유를 설명해 보자.</p>
+<div class="note"><strong>기억할 것</strong> 전체로 본 결과와 집단을 나누어 본 결과는 다를 수 있다. 비교하려는 두 집단이 다른 면에서도 다르지 않은지 먼저 의심한다.</div>
+<h3>세 번째 시도: 차이를 비율로 본다</h3>
+<p>평일만 남겨서, 비 온 날의 평균이 안 온 날보다 몇 퍼센트 다른지 구한다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>m &lt;- daily |&gt;
+  filter(!주말) |&gt;
+  group_by(비) |&gt;
+  summarise(평균 = mean(승차))
+
+(m$평균[m$비] / m$평균[!m$비] - 1) * 100</pre></div><div class="cb py"><span class="lang">Python</span><pre>m = (daily[~daily[&quot;주말&quot;]]
+     .groupby(&quot;비&quot;)[&quot;승차&quot;].mean())
+
+(m[True] / m[False] - 1) * 100</pre></div></div>
+<p>이 숫자가 생각보다 작게 나올 수 있다. 그렇다고 “비는 지하철 이용과 상관없다”고 결론 내려도 될까? 하루 합계에는 날씨와 상관없이 반드시 타야 하는 사람과, 날씨에 따라 나가지 않을 수도 있는 사람이 함께 들어 있다. 이 둘을 가르는 방법이 <a href="hw.html">과제</a>다.</p>
+<div class="todo"><strong>초안 메모</strong> 2025년 실제 데이터에서 세 시도의 결과가 어떻게 나오는지 확인하고 결과표를 넣는다. 첫 번째와 두 번째 시도의 결론이 달라지면 역설 차시의 심슨의 역설과 연결할 수 있다.</div>
+<h2 id="s3"><span class="no">6.3</span>그림으로 말하기</h2>
+<div class="tw"><table><thead><tr><th>말하려는 것</th><th>알맞은 그림</th></tr></thead><tbody><tr><td>집단 사이의 차이</td><td>상자그림, 막대그래프</td></tr><tr><td>시간에 따른 변화</td><td>선그래프</td></tr><tr><td>두 수치의 관계</td><td>산점도</td></tr><tr><td>한 변수의 분포</td><td>히스토그램</td></tr></tbody></table></div>
+<p>그림 한 장에는 주장 하나만 담는다. 제목에는 그림 종류가 아니라 주장을 적는다. “평일 승차 인원 상자그림”보다 “평일에는 비가 와도 승차 인원이 거의 줄지 않는다”.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>ggplot(daily, aes(x = 비, y = 승차)) +
+  geom_boxplot() +
+  facet_wrap(~ 주말) +
+  labs(title = &quot;여기에 주장을 적는다&quot;,
+       x = &quot;비가 온 날인가&quot;,
+       y = &quot;하루 승차 인원&quot;)
+
+ggsave(&quot;../output/비와_승차.png&quot;,
+       width = 7, height = 4)</pre></div><div class="cb py"><span class="lang">Python</span><pre>daily.boxplot(column=&quot;승차&quot;,
+              by=[&quot;주말&quot;, &quot;비&quot;])
+plt.title(&quot;여기에 주장을 적는다&quot;)
+plt.suptitle(&quot;&quot;)
+plt.ylabel(&quot;하루 승차 인원&quot;)
+plt.savefig(&quot;../output/비와_승차.png&quot;,
+            dpi=150, bbox_inches=&quot;tight&quot;)</pre></div></div>
+<h2 id="s4"><span class="no">6.4</span>해석할 때 주의할 점</h2>
+<ul><li><strong>함께 움직인다고 원인은 아니다.</strong> 더운 날 승차가 적다면 더위 때문일 수도, 그 시기가 방학과 휴가철이어서일 수도 있다.</li><li><strong>숨은 변수를 떠올린다.</strong> 요일, 공휴일, 계절, 방학, 큰 행사. 비 오는 날은 장마철에 몰려 있다.</li><li><strong>날이 적으면 우연일 수 있다.</strong> 비 온 주말이 며칠 안 된다면 그 평균은 믿기 어렵다. 일수를 항상 함께 적는다.</li><li><strong>데이터가 센 것만 말한다.</strong> 이 자료는 1~8호선 역에서 탄 횟수다. “서울 시민의 외출”과 같지 않다.</li></ul>
+<h2 id="s5"><span class="no">6.5</span>자유 탐색</h2>
+<p>각자 질문 하나를 정해 답한다. 하루 단위 표(<code>daily</code>)로 부족하면 역 단위 표(<code>subway_clean.csv</code>)로 돌아간다.</p>
+<ul><li>주말에 평일보다 더 붐비는 역은 어디인가?</li><li>비가 오면 승차가 오히려 늘어나는 역이 있는가?</li><li>가장 더운 열흘과 가장 선선한 열흘의 승차는 얼마나 다른가?</li><li>내가 매일 타는 역은 무슨 요일에 가장 붐비는가?</li></ul>
+<h2 id="s6"><span class="no">6.6</span>결과 정리하기</h2>
+<p>결과물은 그림 한 장과 한 문단이다. 문단은 아래 네 문장으로 쓴다.</p>
+<ol><li><strong>질문</strong>: 무엇을 알고 싶었는가.</li><li><strong>방법</strong>: 어떤 데이터의 무엇과 무엇을 비교했는가.</li><li><strong>결과</strong>: 숫자와 일수를 넣어 한 문장으로.</li><li><strong>한계</strong>: 이 결과로 말할 수 없는 것 한 가지.</li></ol>
+<h2 id="s7"><span class="no">6.7</span>에이전트와 함께 탐색하기</h2>
+<p>에이전트는 코드를 빨리 써 주지만, 그 결과가 맞는지 판단하는 것은 여러분이다.</p>
+<ul><li>질문을 6.1의 “확인할 수 있는 형태”로 바꿔서 요청한다.</li><li>결과를 받으면 일수, 행 수, 결측 개수를 물어본다.</li><li>에이전트의 해석을 그대로 옮겨 적지 않는다. 6.4의 네 가지로 직접 점검한다.</li><li>결과가 놀라우면 먼저 코드를 의심한다. 놀라운 결과의 대부분은 전처리 실수다.</li></ul>
+</main>
+<nav class="pager" aria-label="장 이동"><a href="ch5.html"><span>이전</span>5장 기초 통계 구하기</a><a href="hw.html" style="text-align:right"><span>다음</span>과제: 시간대로 나누어 다시 보기</a></nav>
+</div>
+</body>
+</html>

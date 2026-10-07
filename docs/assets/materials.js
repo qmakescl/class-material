@@ -105,5 +105,15 @@ window.MATERIALS = [
     href: "data-science/analysis-traps-three-paradoxes.html",
     tags: ["데이터과학", "개념정리", "통계해석", "표본오차", "평균으로의회귀", "심슨의역설", "선택편향"],
     date: "2026-09-30"
+  },
+  {
+    subject: "data-science",
+    label: "R·Python 실습",
+    title: "지하철과 날씨로 배우는 R·Python",
+    description: "비 오는 날 지하철 승객은 줄어들까? 2025년 서울 지하철 승하차 인원과 기상청 관측 자료를 찾고, 읽고, 다듬고, 요약하는 과정을 여섯 장과 과제로 나누어 R과 Python으로 나란히 따라 합니다.",
+    href: "data-science/readtheworld/index.html",
+    practice: true,
+    tags: ["데이터과학", "사례분석", "R", "Python", "공공데이터", "데이터전처리", "기술통계"],
+    date: "2026-10-07"
   }
 ];

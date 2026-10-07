@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>과제: 시간대로 나누어 다시 보기</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@600;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 여섯 장을 한 노선의 여섯 정거장으로 놓는다. 본문은 한 단, 코드는 R·Python 두 단. */
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --ink:#15201C; --muted:#586861; --rule:#D3DAD6;
+  --line:#007A3D; --line-soft:#DDEEE4; --code-bg:#E8EDEA;
+  --r:#245FB0; --py:#8F6200; --warn:#A14B00; --warn-soft:#FBEBDD;
+  --display:"Gothic A1","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono","D2Coding",Consolas,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+    --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+    --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+  --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+  --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.75;
+  padding-inline:20px;padding-block:0 72px;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:860px;margin-inline:auto}
+a{color:var(--line)} a:focus-visible{outline:2px solid var(--line);outline-offset:3px;border-radius:2px}
+
+/* 상단 노선 띠 */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding-block:20px;border-bottom:1px solid var(--rule)}
+.brand{font-family:var(--display);font-weight:800;font-size:15px;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.stops{display:flex;align-items:center;gap:0;margin:0;padding:0;list-style:none;flex:1;min-width:240px;max-width:400px}
+.stops li{flex:1;display:flex;align-items:center}
+.stops li::before{content:"";flex:1;height:4px;background:var(--line)}
+.stops li:first-child::before{display:none}
+.stops li:first-child{flex:0}
+.stops a{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:3px solid var(--line);
+  background:var(--surface);color:var(--ink);font:500 12px/1 var(--mono);text-decoration:none}
+.stops a[aria-current]{background:var(--line);color:var(--surface)}
+.draft{font:500 12px/1 var(--mono);color:var(--warn);border:1px solid var(--warn);padding:5px 8px;border-radius:3px}
+
+/* 제목 */
+.eyebrow{font:500 13px/1.4 var(--mono);color:var(--line);margin:48px 0 8px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.25;letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+.lead{font-size:18px;color:var(--muted);max-width:40em;margin:0 0 32px}
+h2{font-family:var(--display);font-weight:800;font-size:22px;line-height:1.35;margin:56px 0 12px;padding-top:20px;border-top:1px solid var(--rule);text-wrap:balance}
+h2 .no{font:500 14px/1 var(--mono);color:var(--line);margin-right:10px}
+h3{font-size:17px;font-weight:600;margin:28px 0 8px}
+p,ul,ol{max-width:42em;margin:0 0 14px}
+li{margin-bottom:4px}
+code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:1px 5px;border-radius:3px}
+
+.goals{background:var(--line-soft);border-left:4px solid var(--line);padding:16px 20px;margin:0 0 8px}
+.goals strong{display:block;margin-bottom:6px}
+.goals ul{margin:0;padding-left:20px}
+.note{background:var(--warn-soft);border-left:4px solid var(--warn);padding:14px 20px;margin:20px 0}
+.note strong{color:var(--warn)}
+.note p:last-child,.goals p:last-child{margin-bottom:0}
+.todo{border:1px dashed var(--muted);padding:14px 20px;margin:20px 0;color:var(--muted)}
+.todo strong{color:var(--ink)}
+
+/* 코드: R과 Python 나란히 */
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0 24px}
+.cb{min-width:0;background:var(--code-bg);border-radius:4px;border-top:3px solid var(--rule)}
+.cb.r{border-top-color:var(--r)} .cb.py{border-top-color:var(--py)}
+.cb .lang{display:block;font:500 12px/1 var(--mono);letter-spacing:.06em;padding:10px 14px 0}
+.cb.r .lang{color:var(--r)} .cb.py .lang{color:var(--py)} .cb.sh .lang{color:var(--muted)}
+.cb pre{margin:0;padding:10px 14px 14px;overflow-x:auto;font:400 13.5px/1.65 var(--mono);color:var(--ink);white-space:pre;word-break:normal;overflow-wrap:normal}
+.single{margin:16px 0 24px}
+
+.tw{overflow-x:auto;margin:16px 0 24px}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13px;white-space:nowrap}
+td code{white-space:nowrap}
+
+.tree{font:400 14px/1.7 var(--mono);background:var(--code-bg);padding:14px 18px;border-radius:4px;overflow-x:auto;white-space:pre;margin:16px 0 24px}
+
+.pager{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:64px;padding-top:24px;border-top:1px solid var(--rule)}
+.pager a{text-decoration:none;font-weight:600}
+.pager span{display:block;font:500 12px/1.6 var(--mono);color:var(--muted)}
+
+/* 첫 페이지 노선도 */
+.route{list-style:none;margin:40px 0 0;padding:0;position:relative}
+.route::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:6px;background:var(--line);border-radius:3px}
+.route li{position:relative;padding:0 0 28px 64px;margin:0}
+.route li:last-child{padding-bottom:0}
+.route .dot{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--surface);border:5px solid var(--line);
+  display:grid;place-items:center;font:500 15px/1 var(--mono);color:var(--ink)}
+.route a.st{display:block;text-decoration:none;color:var(--ink);padding-top:6px}
+.route a.st h2{border:0;padding:0;margin:0 0 4px;font-size:21px}
+.route a.st:hover h2{color:var(--line)}
+.route p{color:var(--muted);margin:0 0 6px}
+.route .out{font:400 13px/1.6 var(--mono);color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 32px;margin:8px 0 0;padding:0}
+.facts div{border-top:1px solid var(--rule);padding:14px 0}
+.facts dt{font:500 12px/1.4 var(--mono);color:var(--muted);letter-spacing:.04em}
+.facts dd{margin:4px 0 0}
+@media (max-width:640px){
+  .pair{grid-template-columns:minmax(0,1fr)}
+  body{font-size:15.5px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><a class="brand" href="index.html">지하철과 날씨로 배우는 R·Python</a><ol class="stops"><li><a href="ch1.html" title="작업환경 구축" aria-label="작업환경 구축">1</a></li><li><a href="ch2.html" title="데이터셋 가져오기" aria-label="데이터셋 가져오기">2</a></li><li><a href="ch3.html" title="R과 Python의 데이터 다루는 명령" aria-label="R과 Python의 데이터 다루는 명령">3</a></li><li><a href="ch4.html" title="데이터 전처리" aria-label="데이터 전처리">4</a></li><li><a href="ch5.html" title="기초 통계 구하기" aria-label="기초 통계 구하기">5</a></li><li><a href="ch6.html" title="데이터로 인사이트 얻기" aria-label="데이터로 인사이트 얻기">6</a></li><li><a href="hw.html" title="과제: 시간대로 나누어 다시 보기" aria-label="과제: 시간대로 나누어 다시 보기" aria-current="page">과</a></li></ol><span class="draft">초안</span></header>
+<main>
+<p class="eyebrow">6장 다음</p>
+<h1>과제: 시간대로 나누어 다시 보기</h1>
+<p class="lead">표를 긴 형식으로 바꾸고, 날씨의 영향을 왜 낮 시간대에서 봐야 하는지 자기 그림으로 설명한다.</p>
+<div class="goals"><strong>이 장을 마치면</strong><ul><li>넓은 형식의 표를 긴 형식으로 바꿀 수 있다.</li><li>열 이름에 들어 있던 시각을 꺼내 날짜시각형으로 만들 수 있다.</li><li>날씨의 영향을 왜 낮 시간대에서 봐야 하는지 자기 그림과 숫자로 설명할 수 있다.</li></ul></div>
+<p>6장에서 하루 합계로 비교했을 때 비의 영향은 뚜렷하지 않았을 것이다. 이 과제에서는 하루를 시간대로 쪼개서 같은 질문을 다시 본다. 완성된 코드는 주지 않는다. 3장과 4장에서 배운 명령과 아래의 힌트로 직접 만든다. R과 Python 중 하나로 한다.</p>
+<p>시작 자료: <code>data/processed/subway_clean.csv</code>(4장에서 저장)와 4장의 <code>weather</code>.</p>
+<h2 id="s1"><span class="no">과제.1</span>넓은 형식을 긴 형식으로</h2>
+<p>지금 표는 시간대 20개가 옆으로 펼쳐져 있다. 이것을 “시간대”와 “인원” 두 열로 세워서, 한 행이 <strong>어느 날, 어느 역, 승차/하차, 어느 시간대</strong>가 되게 한다.</p>
+<div class="tw"><table><thead><tr><th>날짜</th><th>호선</th><th>역번호</th><th>역</th><th>구분</th><th>시간대</th><th>인원</th></tr></thead><tbody><tr><td>2025-01-01</td><td>1호선</td><td>150</td><td>서울역</td><td>승차</td><td>06시이전</td><td>…</td></tr><tr><td>2025-01-01</td><td>1호선</td><td>150</td><td>서울역</td><td>승차</td><td>06-07시간대</td><td>…</td></tr><tr><td>2025-01-01</td><td>1호선</td><td>150</td><td>서울역</td><td>승차</td><td>07-08시간대</td><td>…</td></tr><tr><td>…</td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table></div>
+<ul><li>힌트: R은 <code>pivot_longer()</code>, Python은 <code>.melt()</code>.</li><li>확인: 바꾼 뒤의 행 수는 바꾸기 전 행 수의 몇 배여야 하는가? 실제로 그런가?</li><li>확인: 바꾸기 전후에 인원의 총합이 같은가?</li></ul>
+<h2 id="s2"><span class="no">과제.2</span>시간대에서 시각을 꺼내 날짜시각형으로</h2>
+<p><code>시간대</code> 열의 값은 <code>08-09시간대</code> 같은 문자열이다. 3장 3.11에서 값 하나로 연습한 것을 열 전체에 적용한다.</p>
+<ul><li>정규표현식으로 시작 시각을 꺼내 정수형 <code>시</code> 열을 만든다.</li><li><code>06시이전</code>과 <code>24시이후</code>는 모양이 다르다. 어떻게 처리할지 스스로 정하고, 그렇게 정한 이유를 한 줄로 적는다.</li><li><code>날짜</code>와 <code>시</code>를 합쳐 날짜시각형 <code>일시</code> 열을 만든다.</li><li>힌트: R은 <code>str_extract()</code>, <code>as.integer()</code>, <code>hours()</code> 또는 <code>make_datetime()</code>. Python은 <code>.str.extract()</code>, <code>.astype(int)</code>, <code>pd.to_timedelta()</code>.</li></ul>
+<h2 id="s3"><span class="no">과제.3</span>평일의 하루는 어떤 모양인가</h2>
+<ul><li>평일의 승차만 골라, 시간대별 평균 승차 인원을 선그래프로 그린다(가로축: 시, 세로축: 서울 전체 승차 인원의 평일 평균).</li><li>봉우리는 몇 시에 있는가? 그 시간대의 승차가 하루 전체에서 차지하는 비율은 몇 퍼센트인가?</li><li>같은 그림을 주말에 대해 그려 겹쳐 본다. 무엇이 다른가?</li></ul>
+<div class="note"><strong>공휴일</strong> 여기서는 본문과 같이 요일만으로 평일을 정한다. 공휴일은 과제 6에서 따로 다룬다.</div>
+<h2 id="s4"><span class="no">과제.4</span>비 온 평일과 안 온 평일을 시간대별로 비교하기</h2>
+<ul><li>긴 형식 표에 <code>weather</code>를 날짜로 조인한다.</li><li>평일의 승차에 대해, <code>비</code> × <code>시</code>별 평균을 구한다.</li><li>시간대마다 “비 온 날 평균 ÷ 안 온 날 평균 − 1”을 퍼센트로 구해 막대그래프로 그린다.</li><li>감소율이 가장 큰 시간대와 가장 작은 시간대는 언제인가?</li></ul>
+<h2 id="s5"><span class="no">과제.5</span>설명하기: 왜 낮 시간대를 봐야 하는가</h2>
+<p>날씨와 지하철 이용의 관계를 볼 때, 하루 전체가 아니라 출퇴근 시간대를 뺀 <strong>일과시간(09시~15시)</strong>의 인원으로 봐야 한다는 주장이 있다. 과제 3과 4의 그림과 숫자를 근거로 이 주장을 한 쪽 이내로 설명한다. 아래 질문에 모두 답해야 한다.</p>
+<ol><li>출퇴근 시간대, 새벽, 늦은 밤의 승차 인원은 날씨에 따라 얼마나 달라졌는가? 그 시간대에 타는 사람들은 어떤 이유로 타는가?</li><li>하루 합계에서 출퇴근 시간대가 차지하는 비율은 얼마였는가? 이 비율이 클 때, 낮 시간대의 변화는 하루 합계에서 어떻게 보이는가?</li><li>09시~15시라는 경계는 여러분의 그림에서도 알맞은가? 다르게 잡는다면 몇 시부터 몇 시까지인가?</li><li>일과시간만 보았을 때 6장의 세 번째 시도(평일의 차이 비율)를 다시 계산하면 얼마인가?</li></ol>
+<h2 id="s6"><span class="no">과제.6</span>공휴일을 반영하면 달라지는가</h2>
+<p>본문과 위의 과제는 공휴일을 평일로 두고 계산했다. 2025년 1월 1일처럼 요일은 평일이지만 쉬는 날이 평일 평균에 섞여 있다. 이것을 바로잡고 결과가 달라지는지 확인한다.</p>
+<ul><li>2025년의 공휴일(대체공휴일 포함)을 직접 찾아 날짜 목록을 만든다. 어디에서 찾았는지 출처를 적는다.</li><li>날짜형으로 바꾼 목록을 써서 <code>휴일</code> 열을 만들고, <code>쉬는날 = 주말 또는 휴일</code> 열을 만든다.</li><li>힌트: R은 <code>날짜 %in% 목록</code>, Python은 <code>.isin(목록)</code>. 목록의 자료형이 <code>날짜</code> 열과 같아야 한다.</li><li>확인: <code>휴일</code>이 참인 날은 며칠인가? 그중 원래 평일로 분류되어 있던 날은 며칠인가?</li><li>6장의 세 번째 시도와 과제 4의 감소율을 <code>쉬는날</code> 기준으로 다시 계산한다. 숫자가 얼마나 달라졌는가? 결론이 바뀌었는가?</li><li>공휴일에 비가 온 날이 며칠인지 세어 보고, 결과가 달라진(또는 달라지지 않은) 이유를 두세 문장으로 설명한다.</li></ul>
+<h2 id="s7"><span class="no">과제.7</span>한계 적기</h2>
+<p>자기 분석으로 말할 수 없는 것을 두 가지 이상 적는다. 생각해 볼 점:</p>
+<ul><li>강수량은 하루 합계다. 밤에만 비가 온 날도 “비 온 날”이다.</li><li>비 온 날은 장마철에 몰려 있다. 계절의 차이와 비의 차이를 구분했는가?</li><li>이 자료에는 9호선과 버스가 없다. 비 오는 날 사람들이 다른 교통수단으로 옮겨 갔을 가능성은?</li></ul>
+<h2 id="s8"><span class="no">과제.8</span>제출물</h2>
+<ul><li>노트북 한 개(처음부터 끝까지 오류 없이 실행되는 상태)</li><li>그림 두 장: 평일 시간대별 승차 곡선, 시간대별 비 온 날 감소율</li><li>설명 한 쪽(과제 5와 7)</li><li>공휴일 반영 전후의 비교표와 설명(과제 6)</li><li>에이전트를 썼다면, 무엇을 요청했고 결과를 어떻게 검증했는지 세 줄</li></ul>
+<div class="todo"><strong>초안 메모</strong> 2025년 실제 데이터로 과제를 먼저 풀어, 가설이 그림에서 드러나는지와 09시~15시 경계가 알맞은지 확인해야 한다. 드러나지 않으면 과제 5의 문장을 “이 주장이 맞는지 판단하라”로 바꾼다.</div>
+</main>
+<nav class="pager" aria-label="장 이동"><a href="ch6.html"><span>이전</span>6장 데이터로 인사이트 얻기</a><a href="index.html" style="text-align:right"><span>끝</span>차례로 돌아가기</a></nav>
+</div>
+</body>
+</html>

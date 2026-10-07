@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>3장 R과 Python의 데이터 다루는 명령 · 지하철과 날씨로 배우는 R·Python | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/readtheworld/ch3.html">
+<meta name="description" content="열 고르기, 행 거르기, 그룹 요약과 정규표현식, 날짜 자료형을 R과 Python으로 나란히 익히는 데이터과학 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="3장 R과 Python의 데이터 다루는 명령 · 지하철과 날씨로 배우는 R·Python | Q의 아카이브">
+<meta property="og:description" content="고르기, 거르기, 그룹 요약을 익히고, 정규표현식과 날짜 자료형을 다룬다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/readtheworld/ch3.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="데이터과학 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="3장 R과 Python의 데이터 다루는 명령 · 지하철과 날씨로 배우는 R·Python | Q의 아카이브">
+<meta name="twitter:description" content="고르기, 거르기, 그룹 요약을 익히고, 정규표현식과 날짜 자료형을 다룬다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
+<link rel="stylesheet" href="../../assets/material.css">
+<link rel="stylesheet" href="../../assets/readtheworld.css">
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../../index.html#data-science">← 처음으로</a>
+  <h1>지하철과 날씨로<br>배우는 R·Python</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="index.html"><b>00</b><span>차례</span></a>
+    <a href="ch1.html"><b>01</b><span>작업환경 구축</span></a>
+    <a href="ch2.html"><b>02</b><span>데이터셋 가져오기</span></a>
+    <a href="ch3.html" class="on" aria-current="page"><b>03</b><span>R과 Python의 데이터 다루는 명령</span></a>
+    <a href="ch4.html"><b>04</b><span>데이터 전처리</span></a>
+    <a href="ch5.html"><b>05</b><span>기초 통계 구하기</span></a>
+    <a href="ch6.html"><b>06</b><span>데이터로 인사이트 얻기</span></a>
+    <a href="hw.html"><b>과제</b><span>시간대로 나누어 다시 보기</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#데이터과학</span>
+    <span class="rail-tag">#사례분석</span>
+    <span class="rail-tag">#R</span>
+    <span class="rail-tag">#Python</span>
+    <span class="rail-tag">#공공데이터</span>
+    <span class="rail-tag">#데이터전처리</span>
+    <span class="rail-tag">#기술통계</span>
+  </div>
+  <footer>코드는 왼쪽이 R, 오른쪽이 Python입니다. 같은 줄 높이의 코드가 같은 일을 합니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+<main id="content">
+<header class="panel">
+<div class="eyebrow">데이터 다루기 · 3장 / 6</div>
+<h2 class="page-title">R과 Python의 데이터 다루는 명령</h2>
+<p class="lede">고르기, 거르기, 그룹 요약을 익히고, 정규표현식과 날짜 자료형을 다룬다.</p>
+<div class="callout goals"><strong>이 장을 마치면</strong><ul><li>데이터프레임에서 열을 고르고 행을 거를 수 있다.</li><li>새 열을 만들고 그룹별로 요약할 수 있다.</li><li>정규표현식으로 값의 모양을 검사하고 바꿀 수 있다.</li><li>문자열을 날짜형과 날짜시각형으로 바꾸고, 그 차이를 설명할 수 있다.</li></ul></div>
+<nav class="toc" aria-label="이 장의 차례"><a href="#s1"><b>3.1</b>데이터프레임이라는 공통 개념</a><a href="#s2"><b>3.2</b>열 빼기와 이름 바꾸기</a><a href="#s3"><b>3.3</b>행 거르기</a><a href="#s4"><b>3.4</b>정렬하기</a><a href="#s5"><b>3.5</b>새 열 만들기</a><a href="#s6"><b>3.6</b>그룹별 요약</a><a href="#s7"><b>3.7</b>명령 이어 쓰기</a><a href="#s8"><b>3.8</b>자료형 확인하기: 날짜인가, 글자인가</a><a href="#s9"><b>3.9</b>정규표현식: 모양으로 글자를 다루기</a><a href="#s10"><b>3.10</b>날짜형으로 바꾸기</a><a href="#s11"><b>3.11</b>시각까지 담기: 날짜시각형</a><a href="#s12"><b>3.12</b>한 장 요약: 대조표</a></nav>
+</header>
+<section class="panel" id="s1">
+<h2><span class="no">3.1</span>데이터프레임이라는 공통 개념</h2>
+<p>R과 Python 모두 표 모양의 데이터를 <strong>데이터프레임</strong>이라고 부른다. 한 행이 관측 하나, 한 열이 변수 하나다. 지하철 데이터에서 한 행은 “어느 날, 어느 역의 승차(또는 하차)”다.</p>
+<p>R에서는 <code>tidyverse</code>의 <code>dplyr</code>와 <code>stringr</code>, Python에서는 <code>pandas</code>를 쓴다. 이름은 다르지만 하는 일은 거의 일대일로 대응한다. 2장에서 읽어 들인 <code>subway</code>를 이어서 쓴다.</p>
+</section>
+<section class="panel" id="s2">
+<h2><span class="no">3.2</span>열 빼기와 이름 바꾸기</h2>
+<p><code>연번</code>은 줄 번호일 뿐이라 뺀다. 자주 쓸 열은 이름을 짧게 바꾼다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- subway |&gt;
+  select(-연번) |&gt;
+  rename(역 = 역명,
+         구분 = 승하차구분)</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway = (subway
+          .drop(columns=&quot;연번&quot;)
+          .rename(columns={&quot;역명&quot;: &quot;역&quot;,
+                           &quot;승하차구분&quot;: &quot;구분&quot;}))</pre></div></div>
+</section>
+<section class="panel" id="s3">
+<h2><span class="no">3.3</span>행 거르기</h2>
+<p>조건에 맞는 행만 남긴다. 2호선 강남역의 승차 기록만 골라 보자.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway |&gt;
+  filter(호선 == &quot;2호선&quot;,
+         역 == &quot;강남&quot;,
+         구분 == &quot;승차&quot;)</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway.query(
+    &#x27;호선 == &quot;2호선&quot; and 역 == &quot;강남&quot;&#x27;
+    &#x27; and 구분 == &quot;승차&quot;&#x27;)</pre></div></div>
+<div class="callout caution"><strong>자주 하는 실수</strong> 같은지 비교할 때는 <code>=</code>가 아니라 <code>==</code>다. 결과가 0행이면 먼저 값의 표기를 확인한다. 예를 들어 역 이름이 <code>강남</code>인지 <code>강남역</code>인지는 데이터를 봐야 안다.</div>
+</section>
+<section class="panel" id="s4">
+<h2><span class="no">3.4</span>정렬하기</h2>
+<p>아침 8시대에 가장 많이 탄 기록을 본다. 열 이름이 숫자로 시작하거나 <code>-</code>가 들어 있으면 R에서는 <code>`</code>(백틱)로 감싼다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway |&gt;
+  filter(구분 == &quot;승차&quot;) |&gt;
+  arrange(desc(`08-09시간대`)) |&gt;
+  head(10)</pre></div><div class="cb py"><span class="lang">Python</span><pre>(subway
+ .query(&#x27;구분 == &quot;승차&quot;&#x27;)
+ .sort_values(&quot;08-09시간대&quot;, ascending=False)
+ .head(10))</pre></div></div>
+</section>
+<section class="panel" id="s5">
+<h2><span class="no">3.5</span>새 열 만들기</h2>
+<p>시간대 20개 열을 옆으로 모두 더해 <code>하루</code> 열을 만든다. “여기부터 저기까지의 열”을 한 번에 가리킬 수 있다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- subway |&gt;
+  mutate(하루 = rowSums(
+    across(`06시이전`:`24시이후`)))</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;하루&quot;] = (
+    subway.loc[:, &quot;06시이전&quot;:&quot;24시이후&quot;]
+    .sum(axis=1))</pre></div></div>
+</section>
+<section class="panel" id="s6">
+<h2><span class="no">3.6</span>그룹별 요약</h2>
+<p>“역별로 묶어서 평균을 낸다”처럼, 묶는 기준과 계산을 차례로 적는다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway |&gt;
+  filter(구분 == &quot;승차&quot;) |&gt;
+  group_by(역) |&gt;
+  summarise(평균승차 = mean(하루),
+            행수 = n()) |&gt;
+  arrange(desc(평균승차))</pre></div><div class="cb py"><span class="lang">Python</span><pre>(subway
+ .query(&#x27;구분 == &quot;승차&quot;&#x27;)
+ .groupby(&quot;역&quot;)
+ .agg(평균승차=(&quot;하루&quot;, &quot;mean&quot;),
+      행수=(&quot;하루&quot;, &quot;size&quot;))
+ .sort_values(&quot;평균승차&quot;, ascending=False)
+ .reset_index())</pre></div></div>
+<p>결과를 보고 생각해 볼 것: <code>행수</code>가 다른 역의 두세 배인 역이 있다. 환승역은 호선마다 역번호가 달라 따로 기록되기 때문이다. 역 이름만으로 묶으면 여러 호선이 합쳐진다.</p>
+</section>
+<section class="panel" id="s7">
+<h2><span class="no">3.7</span>명령 이어 쓰기</h2>
+<p>위 예제들은 이미 여러 명령을 이어 쓰고 있다. R은 <code>|&gt;</code>(파이프)로, Python은 <code>.</code>(메서드 체이닝)으로 잇는다. 둘 다 “앞의 결과를 받아서 다음 일을 한다”로 읽는다.</p>
+</section>
+<section class="panel" id="s8">
+<h2><span class="no">3.8</span>자료형 확인하기: 날짜인가, 글자인가</h2>
+<p><code>수송일자</code>는 <code>2025-01-01</code>처럼 적혀 있다. 연도 네 자리, 월 두 자리, 일 두 자리를 <code>-</code>로 잇는 <code>YYYY-mm-dd</code>는 날짜의 국제 표준 표기다. 그런데 모양이 날짜라고 해서 컴퓨터가 날짜로 알고 있는 것은 아니다. 자료형을 확인한다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>class(subway$수송일자)
+# &quot;Date&quot; 이면 날짜형
+# &quot;character&quot; 이면 문자열</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;수송일자&quot;].dtype
+# datetime64 이면 날짜형
+# object 또는 str 이면 문자열</pre></div></div>
+<div class="callout caution"><strong>두 언어가 다르게 읽는다</strong> 같은 파일인데 결과가 다를 수 있다. R의 <code>read_csv()</code>는 표준 표기의 날짜를 알아보고 스스로 날짜형으로 읽는다. Python의 <code>pd.read_csv()</code>는 시키지 않으면 문자열로 둔다. 그래서 읽은 뒤에는 자료형부터 확인한다.</div>
+</section>
+<section class="panel" id="s9">
+<h2><span class="no">3.9</span>정규표현식: 모양으로 글자를 다루기</h2>
+<p>한 해치의 수많은 값이 전부 <code>YYYY-mm-dd</code> 모양인지 눈으로 확인할 수는 없다. 정해진 글자가 아니라 <strong>모양</strong>을 말로 적어 검사하는 도구가 정규표현식이다.</p>
+<div class="scroll"><table><thead><tr><th>기호</th><th>뜻</th><th>예</th></tr></thead><tbody><tr><td><code>\d</code></td><td>숫자 한 글자</td><td><code>\d\d</code>는 숫자 두 글자</td></tr><tr><td><code>{n}</code>, <code>{m,n}</code></td><td>바로 앞의 것이 n번, m~n번</td><td><code>\d{4}</code>는 숫자 네 글자</td></tr><tr><td><code>^</code>, <code>$</code></td><td>문자열의 처음, 끝</td><td><code>^\d{4}</code>는 맨 앞의 숫자 네 글자</td></tr><tr><td><code>\b</code></td><td>단어의 경계. 숫자가 끝나는 자리</td><td><code>\d\b</code>는 뒤에 숫자가 더 없는 숫자</td></tr><tr><td><code>( )</code></td><td>찾은 부분을 기억해 둔다</td><td>바꿀 때 <code>\1</code>로 다시 꺼내 쓴다</td></tr><tr><td><code>.</code>와 <code>\.</code></td><td>아무 글자 하나 / 글자 그대로의 마침표</td><td><code>\d\.\d</code>는 숫자, 마침표, 숫자</td></tr></tbody></table></div>
+<h3>모양 검사하기</h3>
+<p>“숫자 4개, 붙임표, 숫자 2개, 붙임표, 숫자 2개”를 정규표현식으로 적으면 <code>^\d{4}-\d{2}-\d{2}$</code>다. 모든 값이 이 모양인지 묻는다. <code>TRUE</code>(<code>True</code>) 하나가 나와야 한다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>all(str_detect(
+  as.character(subway$수송일자),
+  &quot;^\\d{4}-\\d{2}-\\d{2}$&quot;))</pre></div><div class="cb py"><span class="lang">Python</span><pre>(subway[&quot;수송일자&quot;]
+ .astype(str)
+ .str.fullmatch(r&quot;\d{4}-\d{2}-\d{2}&quot;)
+ .all())</pre></div></div>
+<div class="callout caution"><strong>두 언어의 차이</strong> R은 문자열 안에서 <code>\</code>를 두 번 써야 한다(<code>&quot;\\d&quot;</code>). Python은 따옴표 앞에 <code>r</code>을 붙이면 한 번만 써도 된다(<code>r&quot;\d&quot;</code>). 정규표현식 자체는 같다.</div>
+<h3>다른 표기를 만났을 때: 모양으로 바꾸기</h3>
+<p>모든 파일이 표준 표기인 것은 아니다. 같은 자료의 2024년 파일은 날짜가 <code>2024.1.1</code>처럼 마침표로 적혀 있고 한 자리 숫자 앞에 0이 없다. 이런 값을 표준 표기로 고치는 두 단계를 작은 예로 연습한다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>x &lt;- c(&quot;2024.1.1&quot;, &quot;2024.10.5&quot;, &quot;2024.12.25&quot;)
+
+x |&gt;
+  str_replace_all(fixed(&quot;.&quot;), &quot;-&quot;) |&gt;
+  str_replace_all(&quot;-(\\d)\\b&quot;, &quot;-0\\1&quot;)
+# &quot;2024-01-01&quot; &quot;2024-10-05&quot; &quot;2024-12-25&quot;</pre></div><div class="cb py"><span class="lang">Python</span><pre>x = pd.Series([&quot;2024.1.1&quot;, &quot;2024.10.5&quot;, &quot;2024.12.25&quot;])
+
+(x.str.replace(&quot;.&quot;, &quot;-&quot;, regex=False)
+  .str.replace(r&quot;-(\d)\b&quot;, r&quot;-0\1&quot;, regex=True))
+# 2024-01-01, 2024-10-05, 2024-12-25</pre></div></div>
+<ul><li>첫 줄은 글자 그대로의 마침표를 붙임표로 바꾼다. 정규표현식에서 <code>.</code>는 “아무 글자 하나”라서, 글자 그대로라고 알려준다(R은 <code>fixed()</code>, Python은 <code>regex=False</code>).</li><li>둘째 줄의 <code>-(\d)\b</code>는 “붙임표, 숫자 하나(기억해 둠), 숫자가 거기서 끝남”이다. 이것을 <code>-0\1</code>, 곧 “붙임표, 0, 기억해 둔 숫자”로 바꾼다. 두 자리 숫자는 건드리지 않는다.</li></ul>
+</section>
+<section class="panel" id="s10">
+<h2><span class="no">3.10</span>날짜형으로 바꾸기</h2>
+<p>표준 모양의 문자열을 <strong>날짜형</strong>으로 바꾼다. 날짜형이어야 요일을 묻거나 날짜끼리 뺄 수 있다. 이미 날짜형으로 읽힌 R에서도 같은 코드를 실행해 새 열 <code>날짜</code>를 만든다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- subway |&gt;
+  mutate(날짜 = as_date(수송일자))
+
+class(subway$날짜)     # &quot;Date&quot;</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;날짜&quot;] = pd.to_datetime(
+    subway[&quot;수송일자&quot;], format=&quot;%Y-%m-%d&quot;)
+
+subway[&quot;날짜&quot;].dtype   # datetime64</pre></div></div>
+<p>Python의 <code>format</code>은 문자열이 어떤 모양인지 알려주는 것이다. <code>%Y</code>는 네 자리 연도, <code>%m</code>은 월, <code>%d</code>는 일이다. 마침표 표기였다면 <code>&quot;%Y.%m.%d&quot;</code>라고 적는다.</p>
+<p>날짜형이 되면 할 수 있는 일:</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>range(subway$날짜)               # 처음과 끝
+max(subway$날짜) - min(subway$날짜)  # 며칠 간격
+
+subway |&gt;
+  mutate(요일 = wday(날짜, label = TRUE),
+         월 = month(날짜)) |&gt;
+  count(요일)</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;날짜&quot;].min(), subway[&quot;날짜&quot;].max()
+subway[&quot;날짜&quot;].max() - subway[&quot;날짜&quot;].min()
+
+(subway[&quot;날짜&quot;]
+ .dt.day_name()
+ .value_counts())</pre></div></div>
+<div class="scroll"><table><thead><tr><th></th><th>문자열 <code>&quot;2025-01-01&quot;</code></th><th>날짜형 <code>2025-01-01</code></th></tr></thead><tbody><tr><td>정렬</td><td>글자 순서</td><td>시간 순서</td></tr><tr><td>요일, 월 뽑기</td><td>못 한다</td><td>할 수 있다</td></tr><tr><td>날짜끼리 빼기</td><td>못 한다</td><td>며칠인지 나온다</td></tr><tr><td>그래프의 가로축</td><td>값마다 눈금 하나</td><td>시간의 흐름으로 그려진다</td></tr></tbody></table></div>
+</section>
+<section class="panel" id="s11">
+<h2><span class="no">3.11</span>시각까지 담기: 날짜시각형</h2>
+<p>날짜형은 “어느 날”까지만 안다. “어느 날 몇 시”를 담으려면 <strong>날짜시각형</strong>을 쓴다. 이 데이터에서 시각은 값이 아니라 <code>08-09시간대</code> 같은 <strong>열 이름</strong>에 들어 있다. 정규표현식으로 시작 시각을 꺼내 날짜와 합친다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>시 &lt;- str_extract(&quot;08-09시간대&quot;, &quot;^\\d{2}&quot;)
+시                                  # &quot;08&quot;
+
+ymd_h(str_c(&quot;2025-01-01&quot;, &quot; &quot;, 시))
+# &quot;2025-01-01 08:00:00 UTC&quot;</pre></div><div class="cb py"><span class="lang">Python</span><pre>import re
+시 = re.match(r&quot;\d{2}&quot;, &quot;08-09시간대&quot;).group()
+시                                  # &#x27;08&#x27;
+
+pd.to_datetime(&quot;2025-01-01 &quot; + 시,
+               format=&quot;%Y-%m-%d %H&quot;)
+# Timestamp(&#x27;2025-01-01 08:00:00&#x27;)</pre></div></div>
+<p>지금은 값 하나로 연습했다. 표 전체에 적용하려면 시간대가 열 이름이 아니라 값으로 들어 있어야 한다. 그 변환이 과제의 첫 단계다.</p>
+</section>
+<section class="panel" id="s12">
+<h2><span class="no">3.12</span>한 장 요약: 대조표</h2>
+<div class="scroll"><table><thead><tr><th>하려는 일</th><th>R</th><th>Python (pandas)</th></tr></thead><tbody><tr><td>열 고르기 / 빼기</td><td><code>select(a, b)</code> / <code>select(-a)</code></td><td><code>df[["a", "b"]]</code> / <code>.drop(columns="a")</code></td></tr><tr><td>열 이름 바꾸기</td><td><code>rename(새 = 옛)</code></td><td><code>.rename(columns={"옛": "새"})</code></td></tr><tr><td>행 거르기</td><td><code>filter(조건)</code></td><td><code>.query("조건")</code></td></tr><tr><td>정렬</td><td><code>arrange(desc(a))</code></td><td><code>.sort_values("a", ascending=False)</code></td></tr><tr><td>새 열</td><td><code>mutate(c = a + b)</code></td><td><code>df["c"] = ...</code></td></tr><tr><td>그룹 요약</td><td><code>group_by(g) |&gt; summarise(...)</code></td><td><code>.groupby("g").agg(...)</code></td></tr><tr><td>글자 그대로 바꾸기</td><td><code>str_replace_all(x, fixed("."), "-")</code></td><td><code>.str.replace(".", "-", regex=False)</code></td></tr><tr><td>모양으로 바꾸기</td><td><code>str_replace_all(x, &quot;-(\\d)\\b&quot;, &quot;-0\\1&quot;)</code></td><td><code>.str.replace(r&quot;-(\d)\b&quot;, r&quot;-0\1&quot;, regex=True)</code></td></tr><tr><td>모양 검사</td><td><code>str_detect(x, 패턴)</code></td><td><code>.str.fullmatch(패턴)</code></td></tr><tr><td>모양으로 꺼내기</td><td><code>str_extract(x, 패턴)</code></td><td><code>.str.extract(패턴)</code></td></tr><tr><td>날짜형으로</td><td><code>as_date(x)</code>, <code>ymd(x)</code></td><td><code>pd.to_datetime(x, format=...)</code></td></tr><tr><td>날짜시각형으로</td><td><code>ymd_h(x)</code></td><td><code>pd.to_datetime(x, format="%Y-%m-%d %H")</code></td></tr></tbody></table></div>
+</section>
+<nav class="nav pager" aria-label="장 이동"><a href="ch2.html"><span>이전</span>2장 데이터셋 가져오기</a><a href="ch4.html"><span>다음</span>4장 데이터 전처리</a></nav>
+</main>
+<script>
+/* 좁은 화면에서는 레일 목차가 가로로 넘긴다. 지금 보는 장이 보이도록 가운데로 옮긴다. */
+(function () {
+  var nav = document.getElementById("rail-nav");
+  var on = nav && nav.querySelector("a.on");
+  if (!on || nav.scrollWidth <= nav.clientWidth) return;
+  nav.scrollLeft += on.getBoundingClientRect().left - nav.getBoundingClientRect().left - (nav.clientWidth - on.offsetWidth) / 2;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>1장 작업환경 구축</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@600;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 여섯 장을 한 노선의 여섯 정거장으로 놓는다. 본문은 한 단, 코드는 R·Python 두 단. */
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --ink:#15201C; --muted:#586861; --rule:#D3DAD6;
+  --line:#007A3D; --line-soft:#DDEEE4; --code-bg:#E8EDEA;
+  --r:#245FB0; --py:#8F6200; --warn:#A14B00; --warn-soft:#FBEBDD;
+  --display:"Gothic A1","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono","D2Coding",Consolas,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+    --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+    --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+  --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+  --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.75;
+  padding-inline:20px;padding-block:0 72px;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:860px;margin-inline:auto}
+a{color:var(--line)} a:focus-visible{outline:2px solid var(--line);outline-offset:3px;border-radius:2px}
+
+/* 상단 노선 띠 */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding-block:20px;border-bottom:1px solid var(--rule)}
+.brand{font-family:var(--display);font-weight:800;font-size:15px;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.stops{display:flex;align-items:center;gap:0;margin:0;padding:0;list-style:none;flex:1;min-width:240px;max-width:400px}
+.stops li{flex:1;display:flex;align-items:center}
+.stops li::before{content:"";flex:1;height:4px;background:var(--line)}
+.stops li:first-child::before{display:none}
+.stops li:first-child{flex:0}
+.stops a{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:3px solid var(--line);
+  background:var(--surface);color:var(--ink);font:500 12px/1 var(--mono);text-decoration:none}
+.stops a[aria-current]{background:var(--line);color:var(--surface)}
+.draft{font:500 12px/1 var(--mono);color:var(--warn);border:1px solid var(--warn);padding:5px 8px;border-radius:3px}
+
+/* 제목 */
+.eyebrow{font:500 13px/1.4 var(--mono);color:var(--line);margin:48px 0 8px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.25;letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+.lead{font-size:18px;color:var(--muted);max-width:40em;margin:0 0 32px}
+h2{font-family:var(--display);font-weight:800;font-size:22px;line-height:1.35;margin:56px 0 12px;padding-top:20px;border-top:1px solid var(--rule);text-wrap:balance}
+h2 .no{font:500 14px/1 var(--mono);color:var(--line);margin-right:10px}
+h3{font-size:17px;font-weight:600;margin:28px 0 8px}
+p,ul,ol{max-width:42em;margin:0 0 14px}
+li{margin-bottom:4px}
+code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:1px 5px;border-radius:3px}
+
+.goals{background:var(--line-soft);border-left:4px solid var(--line);padding:16px 20px;margin:0 0 8px}
+.goals strong{display:block;margin-bottom:6px}
+.goals ul{margin:0;padding-left:20px}
+.note{background:var(--warn-soft);border-left:4px solid var(--warn);padding:14px 20px;margin:20px 0}
+.note strong{color:var(--warn)}
+.note p:last-child,.goals p:last-child{margin-bottom:0}
+.todo{border:1px dashed var(--muted);padding:14px 20px;margin:20px 0;color:var(--muted)}
+.todo strong{color:var(--ink)}
+
+/* 코드: R과 Python 나란히 */
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0 24px}
+.cb{min-width:0;background:var(--code-bg);border-radius:4px;border-top:3px solid var(--rule)}
+.cb.r{border-top-color:var(--r)} .cb.py{border-top-color:var(--py)}
+.cb .lang{display:block;font:500 12px/1 var(--mono);letter-spacing:.06em;padding:10px 14px 0}
+.cb.r .lang{color:var(--r)} .cb.py .lang{color:var(--py)} .cb.sh .lang{color:var(--muted)}
+.cb pre{margin:0;padding:10px 14px 14px;overflow-x:auto;font:400 13.5px/1.65 var(--mono);color:var(--ink);white-space:pre;word-break:normal;overflow-wrap:normal}
+.single{margin:16px 0 24px}
+
+.tw{overflow-x:auto;margin:16px 0 24px}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13px;white-space:nowrap}
+td code{white-space:nowrap}
+
+.tree{font:400 14px/1.7 var(--mono);background:var(--code-bg);padding:14px 18px;border-radius:4px;overflow-x:auto;white-space:pre;margin:16px 0 24px}
+
+.pager{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:64px;padding-top:24px;border-top:1px solid var(--rule)}
+.pager a{text-decoration:none;font-weight:600}
+.pager span{display:block;font:500 12px/1.6 var(--mono);color:var(--muted)}
+
+/* 첫 페이지 노선도 */
+.route{list-style:none;margin:40px 0 0;padding:0;position:relative}
+.route::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:6px;background:var(--line);border-radius:3px}
+.route li{position:relative;padding:0 0 28px 64px;margin:0}
+.route li:last-child{padding-bottom:0}
+.route .dot{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--surface);border:5px solid var(--line);
+  display:grid;place-items:center;font:500 15px/1 var(--mono);color:var(--ink)}
+.route a.st{display:block;text-decoration:none;color:var(--ink);padding-top:6px}
+.route a.st h2{border:0;padding:0;margin:0 0 4px;font-size:21px}
+.route a.st:hover h2{color:var(--line)}
+.route p{color:var(--muted);margin:0 0 6px}
+.route .out{font:400 13px/1.6 var(--mono);color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 32px;margin:8px 0 0;padding:0}
+.facts div{border-top:1px solid var(--rule);padding:14px 0}
+.facts dt{font:500 12px/1.4 var(--mono);color:var(--muted);letter-spacing:.04em}
+.facts dd{margin:4px 0 0}
+@media (max-width:640px){
+  .pair{grid-template-columns:minmax(0,1fr)}
+  body{font-size:15.5px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><a class="brand" href="index.html">지하철과 날씨로 배우는 R·Python</a><ol class="stops"><li><a href="ch1.html" title="작업환경 구축" aria-label="작업환경 구축" aria-current="page">1</a></li><li><a href="ch2.html" title="데이터셋 가져오기" aria-label="데이터셋 가져오기">2</a></li><li><a href="ch3.html" title="R과 Python의 데이터 다루는 명령" aria-label="R과 Python의 데이터 다루는 명령">3</a></li><li><a href="ch4.html" title="데이터 전처리" aria-label="데이터 전처리">4</a></li><li><a href="ch5.html" title="기초 통계 구하기" aria-label="기초 통계 구하기">5</a></li><li><a href="ch6.html" title="데이터로 인사이트 얻기" aria-label="데이터로 인사이트 얻기">6</a></li><li><a href="hw.html" title="과제: 시간대로 나누어 다시 보기" aria-label="과제: 시간대로 나누어 다시 보기">과</a></li></ol><span class="draft">초안</span></header>
+<main>
+<p class="eyebrow">1장 / 6</p>
+<h1>작업환경 구축</h1>
+<p class="lead">R을 설치하고, uv로 Python 3.12 가상환경을 만들고, VS Code에서 두 언어의 노트북을 실행한다.</p>
+<div class="goals"><strong>이 장을 마치면</strong><ul><li>자기 컴퓨터(Windows 또는 macOS)에 R을 설치할 수 있다.</li><li>uv로 Python 3.12 가상환경을 만들 수 있다.</li><li>VS Code에서 Python 노트북과 R 노트북을 각각 실행할 수 있다.</li><li>AI 에이전트에게 지킬 규칙을 파일로 알려줄 수 있다.</li></ul></div>
+<h2 id="s1"><span class="no">1.1</span>무엇을 설치하는가</h2>
+<p>설치할 것은 네 가지다. 아래 순서대로 진행한다.</p>
+<div class="tw"><table><thead><tr><th>순서</th><th>구성 요소</th><th>역할</th><th>받는 곳</th></tr></thead><tbody><tr><td>1</td><td>R</td><td>R 코드 실행</td><td>r-project.org</td></tr><tr><td>2</td><td>Visual Studio Code와 확장</td><td>노트북(.ipynb)을 열고 실행하는 편집기</td><td>code.visualstudio.com</td></tr><tr><td>3</td><td>uv</td><td>Python 3.12와 패키지를 프로젝트 폴더 안에 설치</td><td>터미널 명령 한 줄</td></tr><tr><td>4</td><td>IRkernel</td><td>R을 노트북에 연결</td><td>R 안에서 설치</td></tr></tbody></table></div>
+<p>Python은 따로 내려받지 않는다. uv가 Python 3.12를 대신 받아 준다.</p>
+<h2 id="s2"><span class="no">1.2</span>R 설치하기</h2>
+<p>R은 운영체제에 따라 설치 파일이 다르다. 두 경우 모두 출발점은 같다.</p>
+<ol><li><code>https://r-project.org</code>에 접속해 왼쪽 메뉴의 <strong>CRAN</strong>(또는 본문의 download R)을 누른다.</li><li>내려받을 서버(미러) 목록이 나온다. 맨 위의 <strong>0-Cloud</strong>나 <strong>Korea</strong> 아래의 주소 중 하나를 고른다.</li><li>자기 운영체제에 맞는 링크를 누르고 아래 설명을 따른다.</li></ol>
+<h3>Windows</h3>
+<ol><li><strong>Download R for Windows</strong>를 누른다.</li><li><strong>base</strong>를 누른다.</li><li>맨 위의 <strong>Download R-4.x.x for Windows</strong>를 눌러 <code>.exe</code> 파일을 받는다.</li><li>받은 파일을 실행한다. 설치 언어는 한국어를 고르고, 나머지는 기본값 그대로 <strong>다음</strong>을 눌러 끝낸다.</li><li>설치 위치(기본값 <code>C:\Program Files\R\R-4.x.x</code>)를 적어 둔다. 1.5에서 쓴다.</li></ol>
+<h3>macOS</h3>
+<ol><li>먼저 자기 Mac의 <strong>프로세서 종류</strong>를 확인한다. 화면 왼쪽 위 사과 메뉴 → <strong>이 Mac에 관하여</strong>를 열고 아래 표와 맞춰 본다.</li><li><strong>Download R for macOS</strong>를 누른다.</li><li>표에서 확인한 프로세서 종류에 맞는 <code>.pkg</code> 파일을 받는다.</li><li>받은 파일을 실행하고 기본값 그대로 <strong>계속</strong>을 눌러 설치한다.</li></ol>
+<div class="tw"><table><thead><tr><th>화면에 나오는 것</th><th>프로세서 종류</th><th>받을 파일</th></tr></thead><tbody><tr><td>칩: Apple M1, M2, M3 …</td><td>Apple silicon</td><td>이름에 <code>arm64</code>가 있는 <code>.pkg</code></td></tr><tr><td>프로세서: … Intel …</td><td>Intel</td><td>이름에 <code>x86_64</code>가 있는 <code>.pkg</code></td></tr></tbody></table></div>
+<div class="note"><strong>잘못 받기 쉬운 곳</strong> macOS에서 프로세서 종류에 맞지 않는 파일을 받으면 설치는 되지만 패키지 설치에서 오류가 난다. 파일 이름의 <code>arm64</code>와 <code>x86_64</code>를 꼭 확인한다.</div>
+<h3>설치 확인</h3>
+<p>설치된 R 프로그램을 실행한다(Windows: 시작 메뉴의 R, macOS: 응용 프로그램의 R). 창이 뜨면 아래를 입력해 버전이 출력되는지 본다. 확인한 김에 이 가이드에서 쓸 패키지도 설치한다. 몇 분 걸린다.</p>
+<div class="single"><div class="cb r"><span class="lang">R</span><pre>R.version.string
+install.packages(c(&quot;tidyverse&quot;, &quot;IRkernel&quot;))</pre></div></div>
+<h2 id="s3"><span class="no">1.3</span>VS Code와 확장 설치하기</h2>
+<ol><li><code>code.visualstudio.com</code>에서 설치 파일을 받아 설치한다.</li><li>VS Code 왼쪽의 확장 탭에서 <code>Python</code>과 <code>Jupyter</code>(둘 다 Microsoft 제공)를 설치한다.</li><li>작업할 폴더 <code>subway-weather</code>를 원하는 위치에 만들고, <strong>파일 → 폴더 열기</strong>로 연다.</li><li>메뉴의 <strong>터미널 → 새 터미널</strong>을 연다. 이후의 터미널 명령은 모두 여기에 입력한다.</li></ol>
+<div class="note"><strong>폴더 경로</strong> 폴더 경로에 한글이나 공백이 없도록 한다. 예: <code>C:\work\subway-weather</code>, <code>~/work/subway-weather</code>. 사용자 이름이 한글인 Windows에서 특히 문제가 잦다.</div>
+<h2 id="s4"><span class="no">1.4</span>uv로 Python 가상환경 만들기</h2>
+<p>가상환경은 이 프로젝트만 쓰는 Python을 폴더 안에 따로 두는 것이다. 다른 수업이나 프로그램의 Python과 섞이지 않고, 모든 학생이 같은 버전(3.12)을 쓰게 된다.</p>
+<h3>uv 설치</h3>
+<div class="pair"><div class="cb sh"><span class="lang">Windows</span><pre>powershell -ExecutionPolicy ByPass -c &quot;irm https://astral.sh/uv/install.ps1 | iex&quot;</pre></div><div class="cb sh"><span class="lang">macOS</span><pre>curl -LsSf https://astral.sh/uv/install.sh | sh</pre></div></div>
+<p>설치가 끝나면 <strong>터미널을 닫고 새로 연다.</strong> <code>uv --version</code>을 입력해 버전이 나오면 된다.</p>
+<h3>프로젝트 초기화와 가상환경</h3>
+<p><code>subway-weather</code> 폴더가 열린 터미널에서 아래 두 줄을 차례로 실행한다. 두 운영체제에서 명령이 같다.</p>
+<div class="single"><div class="cb sh"><span class="lang">터미널</span><pre>uv init --python 3.12
+uv venv</pre></div></div>
+<div class="tw"><table><thead><tr><th>명령</th><th>하는 일</th><th>생기는 것</th></tr></thead><tbody><tr><td><code>uv init --python 3.12</code></td><td>이 폴더를 Python 3.12 프로젝트로 등록한다</td><td><code>pyproject.toml</code>, <code>.python-version</code>, <code>main.py</code>, <code>README.md</code></td></tr><tr><td><code>uv venv</code></td><td>가상환경을 만든다. Python 3.12가 없으면 자동으로 받는다</td><td><code>.venv</code> 폴더</td></tr></tbody></table></div>
+<h3>패키지 설치</h3>
+<p>패키지는 <code>pip install</code>이 아니라 <code>uv add</code>로 설치한다. 설치한 목록이 <code>pyproject.toml</code>에 기록되어, 다른 컴퓨터에서도 같은 환경을 다시 만들 수 있다.</p>
+<div class="single"><div class="cb sh"><span class="lang">터미널</span><pre>uv add jupyter ipykernel pandas matplotlib</pre></div></div>
+<h3>노트북에서 가상환경 고르기</h3>
+<ol><li><code>notebooks</code> 폴더를 만들고 그 안에 <code>확인_py.ipynb</code> 파일을 만든다.</li><li>오른쪽 위 <strong>커널 선택 → Python 환경</strong>에서 <code>.venv</code>가 붙은 Python 3.12를 고른다.</li><li>셀에 <code>import pandas</code>를 입력하고 실행해 오류가 없는지 본다.</li></ol>
+<h2 id="s5"><span class="no">1.5</span>R을 노트북에 연결하기</h2>
+<p>노트북은 원래 Python용 도구다. R을 노트북에서 쓰려면 1.2에서 설치한 <code>IRkernel</code>을 Jupyter에 등록해야 한다. 등록할 때 R이 <code>jupyter</code> 명령을 찾을 수 있어야 하므로, <strong>가상환경을 켠 터미널에서</strong> R을 실행한다. 한 번만 하면 된다.</p>
+<h3>1단계: 가상환경 켜기</h3>
+<div class="pair"><div class="cb sh"><span class="lang">Windows</span><pre>.venv\Scripts\activate</pre></div><div class="cb sh"><span class="lang">macOS</span><pre>source .venv/bin/activate</pre></div></div>
+<p>터미널 줄 맨 앞에 <code>(subway-weather)</code>가 붙으면 켜진 것이다.</p>
+<h3>2단계: 그 터미널에서 R 실행하기</h3>
+<div class="pair"><div class="cb sh"><span class="lang">Windows</span><pre>&amp; &quot;C:\Program Files\R\R-4.x.x\bin\R.exe&quot;</pre></div><div class="cb sh"><span class="lang">macOS</span><pre>R</pre></div></div>
+<p>Windows는 R이 설치된 위치를 직접 적어야 한다. <code>R-4.x.x</code> 자리에 1.2에서 적어 둔 실제 버전 번호를 넣는다.</p>
+<h3>3단계: 커널 등록하기</h3>
+<div class="single"><div class="cb r"><span class="lang">R</span><pre>IRkernel::installspec()   # Jupyter에 R 커널 등록
+q()                       # R 종료. 저장 여부를 물으면 n</pre></div></div>
+<p>VS Code를 다시 시작한 뒤, 새 노트북 <code>확인_R.ipynb</code>의 <strong>커널 선택 → Jupyter Kernel</strong>에 <code>R</code>이 보이면 성공이다.</p>
+<div class="note"><strong>막힐 때</strong> <code>jupyter</code>를 찾을 수 없다는 오류가 나면 1단계의 가상환경이 켜지지 않은 것이다. Windows에서 <code>activate</code>가 “스크립트를 실행할 수 없다”며 막히면, 터미널 오른쪽 위 <strong>+</strong> 옆 화살표에서 <strong>Command Prompt</strong>를 골라 새 터미널을 열고 <code>.venv\Scripts\activate.bat</code>을 실행한 뒤 2단계를 <code>"C:\Program Files\R\R-4.x.x\bin\R.exe"</code>로 실행한다.</div>
+<div class="todo"><strong>초안 메모</strong> 1.5의 절차는 Windows와 macOS 실습 컴퓨터에서 직접 따라 해 보고 확정해야 한다. 특히 Windows의 R 경로 입력과 PowerShell 실행 정책이 초보자가 막히기 쉬운 곳이다.</div>
+<h2 id="s6"><span class="no">1.6</span>프로젝트 폴더 구조</h2>
+<p>여기까지 마치면 폴더는 아래와 같다. <code>data</code>와 <code>output</code> 폴더는 직접 만든다. 에이전트도 이 폴더 안만 본다.</p>
+<div class="tree">subway-weather/
+├─ .venv/          가상환경. 직접 건드리지 않는다
+├─ pyproject.toml  설치한 Python 패키지 목록
+├─ data/
+│  ├─ raw/         내려받은 원본. 절대 고치지 않는다
+│  └─ processed/   정리한 결과를 저장하는 곳
+├─ notebooks/      장별 노트북 (R용, Python용 한 쌍씩)
+├─ output/         그림과 표
+└─ AGENTS.md       에이전트에게 주는 규칙</div>
+<p>노트북은 장마다 두 개씩 만든다. 예: <code>3_명령_R.ipynb</code>, <code>3_명령_py.ipynb</code>. 셀 순서를 똑같이 맞춰 두면 VS Code에서 좌우로 띄워 비교하기 좋다.</p>
+<h2 id="s7"><span class="no">1.7</span>AI 에이전트와 일하는 규칙</h2>
+<p>에이전트는 폴더의 파일과 노트북 셀, 터미널 출력을 읽는다. 여러분의 머릿속 계획이나 화면에 떠 있는 그림은 보지 못한다. 그래서 규칙을 글로 적어 둔다.</p>
+<div class="single"><div class="cb sh"><span class="lang">AGENTS.md</span><pre># 이 프로젝트의 규칙
+- data/raw 의 파일은 읽기만 한다. 수정하거나 지우지 않는다.
+- 정리한 데이터는 data/processed 에, 그림은 output 에 저장한다.
+- Python은 uv 가상환경(.venv, Python 3.12)을 쓴다.
+  패키지는 uv add 로만 설치하고 pip install 은 쓰지 않는다.
+- R은 tidyverse, Python은 pandas와 matplotlib만 쓴다.
+- 코드를 고칠 때는 무엇을 왜 바꿨는지 한 줄로 설명한다.
+- 데이터를 바꾸는 작업 전후에는 행 수를 출력해서 보여준다.</pre></div></div>
+<div class="todo"><strong>초안 메모</strong> 규칙 파일의 이름과 위치는 에이전트 종류에 따라 다르다(예: <code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>.github/copilot-instructions.md</code>). 수업에서 쓸 에이전트가 정해지면 이 절의 파일 이름과 화면 설명을 확정한다.</div>
+<p>에이전트에게 요청할 때의 세 가지 습관:</p>
+<ul><li><strong>데이터를 먼저 보여준다.</strong> 앞 다섯 줄과 열 이름을 보여준 뒤에 요청한다.</li><li><strong>한 번에 한 단계만 시킨다.</strong> “전처리 다 해줘”가 아니라 “사용일자를 날짜형으로 바꿔줘”.</li><li><strong>고친 뒤에는 처음부터 다시 실행한다.</strong> 커널을 재시작하고 전체 셀을 실행해서 오류 없이 끝나는지 확인한다.</li></ul>
+<h2 id="s8"><span class="no">1.8</span>동작 확인</h2>
+<p>두 노트북에서 각각 아래 셀을 실행한다. 표가 출력되면 준비가 끝난 것이다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>library(tidyverse)
+tibble(역 = c(&quot;강남&quot;, &quot;홍대입구&quot;),
+       승차 = c(100, 80))</pre></div><div class="cb py"><span class="lang">Python</span><pre>import pandas as pd
+pd.DataFrame({&quot;역&quot;: [&quot;강남&quot;, &quot;홍대입구&quot;],
+              &quot;승차&quot;: [100, 80]})</pre></div></div>
+<div class="tw"><table><thead><tr><th>확인할 것</th><th>기대하는 결과</th></tr></thead><tbody><tr><td>터미널에서 <code>uv --version</code></td><td>버전 번호 출력</td></tr><tr><td>터미널에서 <code>uv run python --version</code></td><td><code>Python 3.12.x</code></td></tr><tr><td>Python 노트북의 커널</td><td><code>.venv</code>의 Python 3.12</td></tr><tr><td>R 노트북의 커널</td><td><code>R</code></td></tr><tr><td>위 두 셀</td><td>2행 2열 표</td></tr></tbody></table></div>
+</main>
+<nav class="pager" aria-label="장 이동"><a href="index.html"><span>이전</span>차례</a><a href="ch2.html" style="text-align:right"><span>다음</span>2장 데이터셋 가져오기</a></nav>
+</div>
+</body>
+</html>

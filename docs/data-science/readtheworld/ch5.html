@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>5장 기초 통계 구하기 · 지하철과 날씨로 배우는 R·Python | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/readtheworld/ch5.html">
+<meta name="description" content="하루 승차 인원의 평균과 퍼짐, 분포, 집단 비교, 상관을 R과 Python으로 구하고 그림으로 확인하는 데이터과학 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="5장 기초 통계 구하기 · 지하철과 날씨로 배우는 R·Python | Q의 아카이브">
+<meta property="og:description" content="평균과 퍼짐, 분포, 집단 비교, 상관을 구하고 그림으로 확인한다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/readtheworld/ch5.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="데이터과학 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="5장 기초 통계 구하기 · 지하철과 날씨로 배우는 R·Python | Q의 아카이브">
+<meta name="twitter:description" content="평균과 퍼짐, 분포, 집단 비교, 상관을 구하고 그림으로 확인한다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
+<link rel="stylesheet" href="../../assets/material.css">
+<link rel="stylesheet" href="../../assets/readtheworld.css">
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../../index.html#data-science">← 처음으로</a>
+  <h1>지하철과 날씨로<br>배우는 R·Python</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="index.html"><b>00</b><span>차례</span></a>
+    <a href="ch1.html"><b>01</b><span>작업환경 구축</span></a>
+    <a href="ch2.html"><b>02</b><span>데이터셋 가져오기</span></a>
+    <a href="ch3.html"><b>03</b><span>R과 Python의 데이터 다루는 명령</span></a>
+    <a href="ch4.html"><b>04</b><span>데이터 전처리</span></a>
+    <a href="ch5.html" class="on" aria-current="page"><b>05</b><span>기초 통계 구하기</span></a>
+    <a href="ch6.html"><b>06</b><span>데이터로 인사이트 얻기</span></a>
+    <a href="hw.html"><b>과제</b><span>시간대로 나누어 다시 보기</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#데이터과학</span>
+    <span class="rail-tag">#사례분석</span>
+    <span class="rail-tag">#R</span>
+    <span class="rail-tag">#Python</span>
+    <span class="rail-tag">#공공데이터</span>
+    <span class="rail-tag">#데이터전처리</span>
+    <span class="rail-tag">#기술통계</span>
+  </div>
+  <footer>코드는 왼쪽이 R, 오른쪽이 Python입니다. 같은 줄 높이의 코드가 같은 일을 합니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+<main id="content">
+<header class="panel">
+<div class="eyebrow">데이터 다루기 · 5장 / 6</div>
+<h2 class="page-title">기초 통계 구하기</h2>
+<p class="lede">평균과 퍼짐, 분포, 집단 비교, 상관을 구하고 그림으로 확인한다.</p>
+<div class="callout goals"><strong>이 장을 마치면</strong><ul><li>평균과 중앙값, 표준편차와 사분위수를 구하고 뜻을 설명할 수 있다.</li><li>히스토그램과 상자그림으로 분포를 볼 수 있다.</li><li>집단별 요약과 상관계수를 구할 수 있다.</li></ul></div>
+<nav class="toc" aria-label="이 장의 차례"><a href="#s1"><b>5.1</b>가운데: 평균과 중앙값</a><a href="#s2"><b>5.2</b>퍼짐: 범위, 사분위수, 표준편차</a><a href="#s3"><b>5.3</b>분포 보기</a><a href="#s4"><b>5.4</b>집단별 비교</a><a href="#s5"><b>5.5</b>시간에 따른 변화</a><a href="#s6"><b>5.6</b>두 변수의 관계</a><a href="#s7"><b>5.7</b>요약표 만들어 저장하기</a></nav>
+</header>
+<section class="panel" id="intro">
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>library(tidyverse)
+daily &lt;- read_csv(&quot;../dataset/working/daily.csv&quot;)</pre></div><div class="cb py"><span class="lang">Python</span><pre>import pandas as pd
+import matplotlib.pyplot as plt
+daily = pd.read_csv(&quot;../dataset/working/daily.csv&quot;,
+                    parse_dates=[&quot;날짜&quot;])</pre></div></div>
+<p><code>daily</code>는 2025년의 하루가 한 행인 표다(365행). <code>승차</code>는 그날 1~8호선에서 탄 횟수의 합이다.</p>
+</section>
+<section class="panel" id="s1">
+<h2><span class="no">5.1</span>가운데: 평균과 중앙값</h2>
+<p>하루 승차 인원의 “보통”은 얼마일까. 평균은 모두 더해 나눈 값, 중앙값은 크기 순으로 줄 세웠을 때 가운데 값이다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily |&gt;
+  summarise(평균 = mean(승차),
+            중앙값 = median(승차))</pre></div><div class="cb py"><span class="lang">Python</span><pre>daily[&quot;승차&quot;].agg([&quot;mean&quot;, &quot;median&quot;])</pre></div></div>
+<p>두 값이 꽤 다르게 나온다면 이유를 생각해 본다. 이 데이터에는 승차가 적은 주말과 공휴일이 섞여 있어 평균이 아래로 끌려간다.</p>
+</section>
+<section class="panel" id="s2">
+<h2><span class="no">5.2</span>퍼짐: 범위, 사분위수, 표준편차</h2>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily |&gt;
+  summarise(최소 = min(승차),
+            Q1 = quantile(승차, 0.25),
+            Q3 = quantile(승차, 0.75),
+            최대 = max(승차),
+            표준편차 = sd(승차))
+
+summary(daily$승차)   # 한 번에 보기</pre></div><div class="cb py"><span class="lang">Python</span><pre>daily[&quot;승차&quot;].agg([&quot;min&quot;, &quot;max&quot;, &quot;std&quot;])
+daily[&quot;승차&quot;].quantile([0.25, 0.75])
+
+daily[&quot;승차&quot;].describe()   # 한 번에 보기</pre></div></div>
+</section>
+<section class="panel" id="s3">
+<h2><span class="no">5.3</span>분포 보기</h2>
+<p>숫자 몇 개로는 모양을 알 수 없다. 히스토그램을 그린다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>ggplot(daily, aes(x = 승차)) +
+  geom_histogram(bins = 30) +
+  labs(x = &quot;하루 승차 인원&quot;, y = &quot;일수&quot;)</pre></div><div class="cb py"><span class="lang">Python</span><pre>plt.hist(daily[&quot;승차&quot;], bins=30)
+plt.xlabel(&quot;하루 승차 인원&quot;)
+plt.ylabel(&quot;일수&quot;)
+plt.show()</pre></div></div>
+<p>봉우리가 둘 이상으로 보인다면 서로 다른 집단이 섞여 있다는 신호다. 어떤 집단일까?</p>
+<div class="callout caution"><strong>그림의 한글이 네모로 나올 때</strong> Python은 글꼴을 지정해야 한다. Windows는 <code>plt.rcParams["font.family"] = "Malgun Gothic"</code>, macOS는 <code>"AppleGothic"</code>을 그림 그리기 전에 한 번 실행한다. 겨울에는 영하의 기온이 있어 5.6의 그림에서 축의 음수 부호가 네모로 나올 수 있다. <code>plt.rcParams["axes.unicode_minus"] = False</code>도 함께 실행해 둔다.</div>
+</section>
+<section class="panel" id="s4">
+<h2><span class="no">5.4</span>집단별 비교</h2>
+<p>평일과 주말로 나누어 다시 요약한다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily |&gt;
+  group_by(주말) |&gt;
+  summarise(일수 = n(),
+            평균 = mean(승차),
+            표준편차 = sd(승차))
+
+ggplot(daily, aes(x = 주말, y = 승차)) +
+  geom_boxplot()</pre></div><div class="cb py"><span class="lang">Python</span><pre>(daily.groupby(&quot;주말&quot;)[&quot;승차&quot;]
+      .agg([&quot;size&quot;, &quot;mean&quot;, &quot;std&quot;]))
+
+daily.boxplot(column=&quot;승차&quot;, by=&quot;주말&quot;)
+plt.show()</pre></div></div>
+<p>나눈 뒤 각 집단의 표준편차가 전체보다 얼마나 작아지는지 본다. 많이 작아진다면 전체의 퍼짐 대부분이 “평일이냐 주말이냐”에서 나온다는 뜻이다. 평일 쪽에 유난히 낮은 점이 있다면 날짜를 찾아본다. 공휴일일 가능성이 높다. 본문에서는 그대로 두고 과제에서 다룬다.</p>
+</section>
+<section class="panel" id="s5">
+<h2><span class="no">5.5</span>시간에 따른 변화</h2>
+<p>한 해 전체이므로 선그래프로 흐름을 볼 수 있다. 날짜형이기 때문에 가로축이 시간의 흐름으로 그려진다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>ggplot(daily, aes(x = 날짜, y = 승차)) +
+  geom_line()</pre></div><div class="cb py"><span class="lang">Python</span><pre>plt.plot(daily[&quot;날짜&quot;], daily[&quot;승차&quot;])
+plt.ylabel(&quot;하루 승차 인원&quot;)
+plt.show()</pre></div></div>
+</section>
+<section class="panel" id="s6">
+<h2><span class="no">5.6</span>두 변수의 관계</h2>
+<p>기온과 승차 인원을 산점도로 그리고 상관계수를 구한다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>ggplot(daily, aes(x = 기온, y = 승차,
+                  colour = 주말)) +
+  geom_point()
+
+cor(daily$기온, daily$승차)</pre></div><div class="cb py"><span class="lang">Python</span><pre>plt.scatter(daily[&quot;기온&quot;], daily[&quot;승차&quot;],
+            c=daily[&quot;주말&quot;])
+plt.xlabel(&quot;평균기온(°C)&quot;)
+plt.ylabel(&quot;하루 승차 인원&quot;)
+plt.show()
+
+daily[&quot;기온&quot;].corr(daily[&quot;승차&quot;])</pre></div></div>
+<p>상관계수는 직선 관계의 세기를 −1에서 1 사이로 나타낸다. 0에 가깝다고 해서 관계가 없다는 뜻은 아니다. 그림을 먼저 보고 숫자를 읽는다.</p>
+</section>
+<section class="panel" id="s7">
+<h2><span class="no">5.7</span>요약표 만들어 저장하기</h2>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>요약 &lt;- daily |&gt;
+  group_by(주말, 비) |&gt;
+  summarise(일수 = n(),
+            평균승차 = mean(승차),
+            .groups = &quot;drop&quot;)
+
+write_csv(요약, &quot;../output/요약표.csv&quot;)</pre></div><div class="cb py"><span class="lang">Python</span><pre>요약 = (daily
+        .groupby([&quot;주말&quot;, &quot;비&quot;])
+        .agg(일수=(&quot;승차&quot;, &quot;size&quot;),
+             평균승차=(&quot;승차&quot;, &quot;mean&quot;))
+        .reset_index())
+
+요약.to_csv(&quot;../output/요약표.csv&quot;,
+            index=False, encoding=&quot;utf-8-sig&quot;)</pre></div></div>
+</section>
+<nav class="nav pager" aria-label="장 이동"><a href="ch4.html"><span>이전</span>4장 데이터 전처리</a><a href="ch6.html"><span>다음</span>6장 데이터로 인사이트 얻기</a></nav>
+</main>
+<script>
+/* 좁은 화면에서는 레일 목차가 가로로 넘긴다. 지금 보는 장이 보이도록 가운데로 옮긴다. */
+(function () {
+  var nav = document.getElementById("rail-nav");
+  var on = nav && nav.querySelector("a.on");
+  if (!on || nav.scrollWidth <= nav.clientWidth) return;
+  nav.scrollLeft += on.getBoundingClientRect().left - nav.getBoundingClientRect().left - (nav.clientWidth - on.offsetWidth) / 2;
+})();
+</script>
+</body>
+</html>

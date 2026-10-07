@@ -116,6 +116,26 @@ uv run python src/python/prepare_mnist_bridge.py     # docs/assets/data/mnist-br
   미니배치 100, 학습률 0.1, 10에폭 SGD)으로 학습해 선형 모형 가중치, 에폭별 훈련 손실·시험
   정확도, 시험 이미지 일부와 오답 사례를 기록한다. numpy만 쓰며 몇 초 안에 끝난다.
 
+## 지하철과 날씨로 배우는 R·Python (여러 쪽 자료)
+
+`docs/data-science/readtheworld/`는 차례(`index.html`)와 여섯 장(`ch1`~`ch6.html`),
+과제(`hw.html`)로 된 묶음 자료다. 여덟 쪽이 `docs/assets/readtheworld.css`를 함께
+쓰고, `materials.js`에는 차례를 가리키는 항목 하나만 있다.
+
+본문의 코드는 가상 데이터가 아니라 아래 두 원본 파일로 확인했다. 이 파일들은
+`docs/`로 배포하지 않으며, 학생은 2장의 안내에 따라 직접 내려받는다.
+
+- `datasets/readtheworld/seoul-subway-2025.csv`: 서울교통공사, 「서울교통공사_역별
+  일별 시간대별 승하차인원 정보」 2025년 파일(EUC-KR).
+  [서울 열린데이터광장](https://data.seoul.go.kr/dataList/OA-12921/S/1/datasetView.do)
+- `datasets/readtheworld/seoul-temp-raining-2025.csv`: 기상청 종관기상관측(ASOS) 일
+  자료, 서울(108) 지점, 2025-01-01~2025-12-31, 평균기온·최고기온·일강수량(EUC-KR).
+  [기상자료개방포털](https://data.kma.go.kr/data/grnd/selectAsosRltmList.do?pgmNo=36)에서
+  **로그인한 뒤** 받는다. 고를 항목은 `docs/assets/images/kma-download.png` 화면과 같다.
+
+두 자료 모두 2025년 한 해(365일)다. 기간을 바꿔 다시 받으면 본문에 적어 둔 행 수와
+날짜 수(365, 빈칸 205일 등)도 함께 고친다.
+
 ## GitHub Pages 배포
 
 `main` 브랜치에 `docs/` 또는 Pages 워크플로 변경 사항이 푸시되면

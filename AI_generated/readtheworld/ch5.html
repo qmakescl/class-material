@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>5장 기초 통계 구하기</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@600;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 여섯 장을 한 노선의 여섯 정거장으로 놓는다. 본문은 한 단, 코드는 R·Python 두 단. */
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --ink:#15201C; --muted:#586861; --rule:#D3DAD6;
+  --line:#007A3D; --line-soft:#DDEEE4; --code-bg:#E8EDEA;
+  --r:#245FB0; --py:#8F6200; --warn:#A14B00; --warn-soft:#FBEBDD;
+  --display:"Gothic A1","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono","D2Coding",Consolas,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+    --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+    --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+  --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+  --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.75;
+  padding-inline:20px;padding-block:0 72px;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:860px;margin-inline:auto}
+a{color:var(--line)} a:focus-visible{outline:2px solid var(--line);outline-offset:3px;border-radius:2px}
+
+/* 상단 노선 띠 */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding-block:20px;border-bottom:1px solid var(--rule)}
+.brand{font-family:var(--display);font-weight:800;font-size:15px;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.stops{display:flex;align-items:center;gap:0;margin:0;padding:0;list-style:none;flex:1;min-width:240px;max-width:400px}
+.stops li{flex:1;display:flex;align-items:center}
+.stops li::before{content:"";flex:1;height:4px;background:var(--line)}
+.stops li:first-child::before{display:none}
+.stops li:first-child{flex:0}
+.stops a{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:3px solid var(--line);
+  background:var(--surface);color:var(--ink);font:500 12px/1 var(--mono);text-decoration:none}
+.stops a[aria-current]{background:var(--line);color:var(--surface)}
+.draft{font:500 12px/1 var(--mono);color:var(--warn);border:1px solid var(--warn);padding:5px 8px;border-radius:3px}
+
+/* 제목 */
+.eyebrow{font:500 13px/1.4 var(--mono);color:var(--line);margin:48px 0 8px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.25;letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+.lead{font-size:18px;color:var(--muted);max-width:40em;margin:0 0 32px}
+h2{font-family:var(--display);font-weight:800;font-size:22px;line-height:1.35;margin:56px 0 12px;padding-top:20px;border-top:1px solid var(--rule);text-wrap:balance}
+h2 .no{font:500 14px/1 var(--mono);color:var(--line);margin-right:10px}
+h3{font-size:17px;font-weight:600;margin:28px 0 8px}
+p,ul,ol{max-width:42em;margin:0 0 14px}
+li{margin-bottom:4px}
+code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:1px 5px;border-radius:3px}
+
+.goals{background:var(--line-soft);border-left:4px solid var(--line);padding:16px 20px;margin:0 0 8px}
+.goals strong{display:block;margin-bottom:6px}
+.goals ul{margin:0;padding-left:20px}
+.note{background:var(--warn-soft);border-left:4px solid var(--warn);padding:14px 20px;margin:20px 0}
+.note strong{color:var(--warn)}
+.note p:last-child,.goals p:last-child{margin-bottom:0}
+.todo{border:1px dashed var(--muted);padding:14px 20px;margin:20px 0;color:var(--muted)}
+.todo strong{color:var(--ink)}
+
+/* 코드: R과 Python 나란히 */
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0 24px}
+.cb{min-width:0;background:var(--code-bg);border-radius:4px;border-top:3px solid var(--rule)}
+.cb.r{border-top-color:var(--r)} .cb.py{border-top-color:var(--py)}
+.cb .lang{display:block;font:500 12px/1 var(--mono);letter-spacing:.06em;padding:10px 14px 0}
+.cb.r .lang{color:var(--r)} .cb.py .lang{color:var(--py)} .cb.sh .lang{color:var(--muted)}
+.cb pre{margin:0;padding:10px 14px 14px;overflow-x:auto;font:400 13.5px/1.65 var(--mono);color:var(--ink);white-space:pre;word-break:normal;overflow-wrap:normal}
+.single{margin:16px 0 24px}
+
+.tw{overflow-x:auto;margin:16px 0 24px}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13px;white-space:nowrap}
+td code{white-space:nowrap}
+
+.tree{font:400 14px/1.7 var(--mono);background:var(--code-bg);padding:14px 18px;border-radius:4px;overflow-x:auto;white-space:pre;margin:16px 0 24px}
+
+.pager{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:64px;padding-top:24px;border-top:1px solid var(--rule)}
+.pager a{text-decoration:none;font-weight:600}
+.pager span{display:block;font:500 12px/1.6 var(--mono);color:var(--muted)}
+
+/* 첫 페이지 노선도 */
+.route{list-style:none;margin:40px 0 0;padding:0;position:relative}
+.route::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:6px;background:var(--line);border-radius:3px}
+.route li{position:relative;padding:0 0 28px 64px;margin:0}
+.route li:last-child{padding-bottom:0}
+.route .dot{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--surface);border:5px solid var(--line);
+  display:grid;place-items:center;font:500 15px/1 var(--mono);color:var(--ink)}
+.route a.st{display:block;text-decoration:none;color:var(--ink);padding-top:6px}
+.route a.st h2{border:0;padding:0;margin:0 0 4px;font-size:21px}
+.route a.st:hover h2{color:var(--line)}
+.route p{color:var(--muted);margin:0 0 6px}
+.route .out{font:400 13px/1.6 var(--mono);color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 32px;margin:8px 0 0;padding:0}
+.facts div{border-top:1px solid var(--rule);padding:14px 0}
+.facts dt{font:500 12px/1.4 var(--mono);color:var(--muted);letter-spacing:.04em}
+.facts dd{margin:4px 0 0}
+@media (max-width:640px){
+  .pair{grid-template-columns:minmax(0,1fr)}
+  body{font-size:15.5px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><a class="brand" href="index.html">지하철과 날씨로 배우는 R·Python</a><ol class="stops"><li><a href="ch1.html" title="작업환경 구축" aria-label="작업환경 구축">1</a></li><li><a href="ch2.html" title="데이터셋 가져오기" aria-label="데이터셋 가져오기">2</a></li><li><a href="ch3.html" title="R과 Python의 데이터 다루는 명령" aria-label="R과 Python의 데이터 다루는 명령">3</a></li><li><a href="ch4.html" title="데이터 전처리" aria-label="데이터 전처리">4</a></li><li><a href="ch5.html" title="기초 통계 구하기" aria-label="기초 통계 구하기" aria-current="page">5</a></li><li><a href="ch6.html" title="데이터로 인사이트 얻기" aria-label="데이터로 인사이트 얻기">6</a></li><li><a href="hw.html" title="과제: 시간대로 나누어 다시 보기" aria-label="과제: 시간대로 나누어 다시 보기">과</a></li></ol><span class="draft">초안</span></header>
+<main>
+<p class="eyebrow">5장 / 6</p>
+<h1>기초 통계 구하기</h1>
+<p class="lead">평균과 퍼짐, 분포, 집단 비교, 상관을 구하고 그림으로 확인한다.</p>
+<div class="goals"><strong>이 장을 마치면</strong><ul><li>평균과 중앙값, 표준편차와 사분위수를 구하고 뜻을 설명할 수 있다.</li><li>히스토그램과 상자그림으로 분포를 볼 수 있다.</li><li>집단별 요약과 상관계수를 구할 수 있다.</li></ul></div>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>library(tidyverse)
+daily &lt;- read_csv(&quot;../data/processed/daily.csv&quot;)</pre></div><div class="cb py"><span class="lang">Python</span><pre>import pandas as pd
+import matplotlib.pyplot as plt
+daily = pd.read_csv(&quot;../data/processed/daily.csv&quot;,
+                    parse_dates=[&quot;날짜&quot;])</pre></div></div>
+<p><code>daily</code>는 2025년의 하루가 한 행인 표다(365행). <code>승차</code>는 그날 1~8호선에서 탄 횟수의 합이다.</p>
+<h2 id="s1"><span class="no">5.1</span>가운데: 평균과 중앙값</h2>
+<p>하루 승차 인원의 “보통”은 얼마일까. 평균은 모두 더해 나눈 값, 중앙값은 크기 순으로 줄 세웠을 때 가운데 값이다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily |&gt;
+  summarise(평균 = mean(승차),
+            중앙값 = median(승차))</pre></div><div class="cb py"><span class="lang">Python</span><pre>daily[&quot;승차&quot;].agg([&quot;mean&quot;, &quot;median&quot;])</pre></div></div>
+<p>두 값이 꽤 다르게 나온다면 이유를 생각해 본다. 이 데이터에는 승차가 적은 주말과 공휴일이 섞여 있어 평균이 아래로 끌려간다.</p>
+<h2 id="s2"><span class="no">5.2</span>퍼짐: 범위, 사분위수, 표준편차</h2>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily |&gt;
+  summarise(최소 = min(승차),
+            Q1 = quantile(승차, 0.25),
+            Q3 = quantile(승차, 0.75),
+            최대 = max(승차),
+            표준편차 = sd(승차))
+
+summary(daily$승차)   # 한 번에 보기</pre></div><div class="cb py"><span class="lang">Python</span><pre>daily[&quot;승차&quot;].agg([&quot;min&quot;, &quot;max&quot;, &quot;std&quot;])
+daily[&quot;승차&quot;].quantile([0.25, 0.75])
+
+daily[&quot;승차&quot;].describe()   # 한 번에 보기</pre></div></div>
+<h2 id="s3"><span class="no">5.3</span>분포 보기</h2>
+<p>숫자 몇 개로는 모양을 알 수 없다. 히스토그램을 그린다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>ggplot(daily, aes(x = 승차)) +
+  geom_histogram(bins = 30) +
+  labs(x = &quot;하루 승차 인원&quot;, y = &quot;일수&quot;)</pre></div><div class="cb py"><span class="lang">Python</span><pre>plt.hist(daily[&quot;승차&quot;], bins=30)
+plt.xlabel(&quot;하루 승차 인원&quot;)
+plt.ylabel(&quot;일수&quot;)
+plt.show()</pre></div></div>
+<p>봉우리가 둘 이상으로 보인다면 서로 다른 집단이 섞여 있다는 신호다. 어떤 집단일까?</p>
+<div class="note"><strong>그림의 한글이 네모로 나올 때</strong> Python은 글꼴을 지정해야 한다. Windows는 <code>plt.rcParams["font.family"] = "Malgun Gothic"</code>, macOS는 <code>"AppleGothic"</code>을 그림 그리기 전에 한 번 실행한다.</div>
+<h2 id="s4"><span class="no">5.4</span>집단별 비교</h2>
+<p>평일과 주말로 나누어 다시 요약한다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily |&gt;
+  group_by(주말) |&gt;
+  summarise(일수 = n(),
+            평균 = mean(승차),
+            표준편차 = sd(승차))
+
+ggplot(daily, aes(x = 주말, y = 승차)) +
+  geom_boxplot()</pre></div><div class="cb py"><span class="lang">Python</span><pre>(daily.groupby(&quot;주말&quot;)[&quot;승차&quot;]
+      .agg([&quot;size&quot;, &quot;mean&quot;, &quot;std&quot;]))
+
+daily.boxplot(column=&quot;승차&quot;, by=&quot;주말&quot;)
+plt.show()</pre></div></div>
+<p>나눈 뒤 각 집단의 표준편차가 전체보다 얼마나 작아지는지 본다. 많이 작아진다면 전체의 퍼짐 대부분이 “평일이냐 주말이냐”에서 나온다는 뜻이다. 평일 쪽에 유난히 낮은 점이 있다면 날짜를 찾아본다. 공휴일일 가능성이 높다. 본문에서는 그대로 두고 과제에서 다룬다.</p>
+<h2 id="s5"><span class="no">5.5</span>시간에 따른 변화</h2>
+<p>한 해 전체이므로 선그래프로 흐름을 볼 수 있다. 날짜형이기 때문에 가로축이 시간의 흐름으로 그려진다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>ggplot(daily, aes(x = 날짜, y = 승차)) +
+  geom_line()</pre></div><div class="cb py"><span class="lang">Python</span><pre>plt.plot(daily[&quot;날짜&quot;], daily[&quot;승차&quot;])
+plt.ylabel(&quot;하루 승차 인원&quot;)
+plt.show()</pre></div></div>
+<h2 id="s6"><span class="no">5.6</span>두 변수의 관계</h2>
+<p>기온과 승차 인원을 산점도로 그리고 상관계수를 구한다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>ggplot(daily, aes(x = 기온, y = 승차,
+                  colour = 주말)) +
+  geom_point()
+
+cor(daily$기온, daily$승차)</pre></div><div class="cb py"><span class="lang">Python</span><pre>plt.scatter(daily[&quot;기온&quot;], daily[&quot;승차&quot;],
+            c=daily[&quot;주말&quot;])
+plt.xlabel(&quot;평균기온(°C)&quot;)
+plt.ylabel(&quot;하루 승차 인원&quot;)
+plt.show()
+
+daily[&quot;기온&quot;].corr(daily[&quot;승차&quot;])</pre></div></div>
+<p>상관계수는 직선 관계의 세기를 −1에서 1 사이로 나타낸다. 0에 가깝다고 해서 관계가 없다는 뜻은 아니다. 그림을 먼저 보고 숫자를 읽는다.</p>
+<h2 id="s7"><span class="no">5.7</span>요약표 만들어 저장하기</h2>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>요약 &lt;- daily |&gt;
+  group_by(주말, 비) |&gt;
+  summarise(일수 = n(),
+            평균승차 = mean(승차),
+            .groups = &quot;drop&quot;)
+
+write_csv(요약, &quot;../output/요약표.csv&quot;)</pre></div><div class="cb py"><span class="lang">Python</span><pre>요약 = (daily
+        .groupby([&quot;주말&quot;, &quot;비&quot;])
+        .agg(일수=(&quot;승차&quot;, &quot;size&quot;),
+             평균승차=(&quot;승차&quot;, &quot;mean&quot;))
+        .reset_index())
+
+요약.to_csv(&quot;../output/요약표.csv&quot;,
+            index=False, encoding=&quot;utf-8-sig&quot;)</pre></div></div>
+<div class="todo"><strong>초안 메모</strong> 2025년 실제 데이터로 계산한 결과표와 그림을 각 절에 넣는다. 지금은 코드와 해석 방향만 적혀 있다.</div>
+</main>
+<nav class="pager" aria-label="장 이동"><a href="ch4.html"><span>이전</span>4장 데이터 전처리</a><a href="ch6.html" style="text-align:right"><span>다음</span>6장 데이터로 인사이트 얻기</a></nav>
+</div>
+</body>
+</html>

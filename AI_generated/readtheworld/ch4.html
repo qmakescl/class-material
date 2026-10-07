@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>4장 데이터 전처리</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@600;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 여섯 장을 한 노선의 여섯 정거장으로 놓는다. 본문은 한 단, 코드는 R·Python 두 단. */
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --ink:#15201C; --muted:#586861; --rule:#D3DAD6;
+  --line:#007A3D; --line-soft:#DDEEE4; --code-bg:#E8EDEA;
+  --r:#245FB0; --py:#8F6200; --warn:#A14B00; --warn-soft:#FBEBDD;
+  --display:"Gothic A1","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono","D2Coding",Consolas,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+    --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+    --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+  --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+  --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.75;
+  padding-inline:20px;padding-block:0 72px;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:860px;margin-inline:auto}
+a{color:var(--line)} a:focus-visible{outline:2px solid var(--line);outline-offset:3px;border-radius:2px}
+
+/* 상단 노선 띠 */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding-block:20px;border-bottom:1px solid var(--rule)}
+.brand{font-family:var(--display);font-weight:800;font-size:15px;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.stops{display:flex;align-items:center;gap:0;margin:0;padding:0;list-style:none;flex:1;min-width:240px;max-width:400px}
+.stops li{flex:1;display:flex;align-items:center}
+.stops li::before{content:"";flex:1;height:4px;background:var(--line)}
+.stops li:first-child::before{display:none}
+.stops li:first-child{flex:0}
+.stops a{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:3px solid var(--line);
+  background:var(--surface);color:var(--ink);font:500 12px/1 var(--mono);text-decoration:none}
+.stops a[aria-current]{background:var(--line);color:var(--surface)}
+.draft{font:500 12px/1 var(--mono);color:var(--warn);border:1px solid var(--warn);padding:5px 8px;border-radius:3px}
+
+/* 제목 */
+.eyebrow{font:500 13px/1.4 var(--mono);color:var(--line);margin:48px 0 8px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.25;letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+.lead{font-size:18px;color:var(--muted);max-width:40em;margin:0 0 32px}
+h2{font-family:var(--display);font-weight:800;font-size:22px;line-height:1.35;margin:56px 0 12px;padding-top:20px;border-top:1px solid var(--rule);text-wrap:balance}
+h2 .no{font:500 14px/1 var(--mono);color:var(--line);margin-right:10px}
+h3{font-size:17px;font-weight:600;margin:28px 0 8px}
+p,ul,ol{max-width:42em;margin:0 0 14px}
+li{margin-bottom:4px}
+code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:1px 5px;border-radius:3px}
+
+.goals{background:var(--line-soft);border-left:4px solid var(--line);padding:16px 20px;margin:0 0 8px}
+.goals strong{display:block;margin-bottom:6px}
+.goals ul{margin:0;padding-left:20px}
+.note{background:var(--warn-soft);border-left:4px solid var(--warn);padding:14px 20px;margin:20px 0}
+.note strong{color:var(--warn)}
+.note p:last-child,.goals p:last-child{margin-bottom:0}
+.todo{border:1px dashed var(--muted);padding:14px 20px;margin:20px 0;color:var(--muted)}
+.todo strong{color:var(--ink)}
+
+/* 코드: R과 Python 나란히 */
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0 24px}
+.cb{min-width:0;background:var(--code-bg);border-radius:4px;border-top:3px solid var(--rule)}
+.cb.r{border-top-color:var(--r)} .cb.py{border-top-color:var(--py)}
+.cb .lang{display:block;font:500 12px/1 var(--mono);letter-spacing:.06em;padding:10px 14px 0}
+.cb.r .lang{color:var(--r)} .cb.py .lang{color:var(--py)} .cb.sh .lang{color:var(--muted)}
+.cb pre{margin:0;padding:10px 14px 14px;overflow-x:auto;font:400 13.5px/1.65 var(--mono);color:var(--ink);white-space:pre;word-break:normal;overflow-wrap:normal}
+.single{margin:16px 0 24px}
+
+.tw{overflow-x:auto;margin:16px 0 24px}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13px;white-space:nowrap}
+td code{white-space:nowrap}
+
+.tree{font:400 14px/1.7 var(--mono);background:var(--code-bg);padding:14px 18px;border-radius:4px;overflow-x:auto;white-space:pre;margin:16px 0 24px}
+
+.pager{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:64px;padding-top:24px;border-top:1px solid var(--rule)}
+.pager a{text-decoration:none;font-weight:600}
+.pager span{display:block;font:500 12px/1.6 var(--mono);color:var(--muted)}
+
+/* 첫 페이지 노선도 */
+.route{list-style:none;margin:40px 0 0;padding:0;position:relative}
+.route::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:6px;background:var(--line);border-radius:3px}
+.route li{position:relative;padding:0 0 28px 64px;margin:0}
+.route li:last-child{padding-bottom:0}
+.route .dot{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--surface);border:5px solid var(--line);
+  display:grid;place-items:center;font:500 15px/1 var(--mono);color:var(--ink)}
+.route a.st{display:block;text-decoration:none;color:var(--ink);padding-top:6px}
+.route a.st h2{border:0;padding:0;margin:0 0 4px;font-size:21px}
+.route a.st:hover h2{color:var(--line)}
+.route p{color:var(--muted);margin:0 0 6px}
+.route .out{font:400 13px/1.6 var(--mono);color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 32px;margin:8px 0 0;padding:0}
+.facts div{border-top:1px solid var(--rule);padding:14px 0}
+.facts dt{font:500 12px/1.4 var(--mono);color:var(--muted);letter-spacing:.04em}
+.facts dd{margin:4px 0 0}
+@media (max-width:640px){
+  .pair{grid-template-columns:minmax(0,1fr)}
+  body{font-size:15.5px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><a class="brand" href="index.html">지하철과 날씨로 배우는 R·Python</a><ol class="stops"><li><a href="ch1.html" title="작업환경 구축" aria-label="작업환경 구축">1</a></li><li><a href="ch2.html" title="데이터셋 가져오기" aria-label="데이터셋 가져오기">2</a></li><li><a href="ch3.html" title="R과 Python의 데이터 다루는 명령" aria-label="R과 Python의 데이터 다루는 명령">3</a></li><li><a href="ch4.html" title="데이터 전처리" aria-label="데이터 전처리" aria-current="page">4</a></li><li><a href="ch5.html" title="기초 통계 구하기" aria-label="기초 통계 구하기">5</a></li><li><a href="ch6.html" title="데이터로 인사이트 얻기" aria-label="데이터로 인사이트 얻기">6</a></li><li><a href="hw.html" title="과제: 시간대로 나누어 다시 보기" aria-label="과제: 시간대로 나누어 다시 보기">과</a></li></ol><span class="draft">초안</span></header>
+<main>
+<p class="eyebrow">4장 / 6</p>
+<h1>데이터 전처리</h1>
+<p class="lead">원본을 점검하고, 하루 단위로 요약하고, 기상 데이터와 조인한다.</p>
+<div class="goals"><strong>이 장을 마치면</strong><ul><li>원본에 섞여 있는 빈 행과 필요 없는 열을 찾아 정리할 수 있다.</li><li>역·시간대 단위의 표를 하루 단위로 요약할 수 있다.</li><li>두 표를 날짜로 조인하고, 조인이 제대로 됐는지 확인할 수 있다.</li></ul></div>
+<p>전처리는 “분석할 수 있는 모양으로 데이터를 고치는 일”이다. 목표는 <strong>하루가 한 행</strong>이고, 그날의 지하철 승차 인원과 날씨가 나란히 들어 있는 표 하나다. 새 노트북에서 처음부터 다시 시작한다.</p>
+<h2 id="s1"><span class="no">4.1</span>읽고 점검하기</h2>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>library(tidyverse)
+
+subway &lt;- read_csv(
+  &quot;../data/raw/subway_2025.csv&quot;,
+  locale = locale(encoding = &quot;EUC-KR&quot;))
+
+nrow(subway)
+sum(is.na(subway$수송일자))   # 날짜가 빈 행</pre></div><div class="cb py"><span class="lang">Python</span><pre>import pandas as pd
+
+subway = pd.read_csv(
+    &quot;../data/raw/subway_2025.csv&quot;,
+    encoding=&quot;euc-kr&quot;, low_memory=False)
+
+len(subway)
+subway[&quot;수송일자&quot;].isna().sum()   # 날짜가 빈 행</pre></div></div>
+<p>날짜가 빈 행이 0이 아니면, 표 아래에 쉼표만 있는 빈 행이 딸려 온 것이다. 엑셀에서 일부만 잘라 저장한 파일에서 흔하다. 모든 칸이 빈 행을 지우고 3장의 정리를 다시 한다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- subway |&gt;
+  filter(!is.na(수송일자)) |&gt;
+  select(-연번) |&gt;
+  rename(역 = 역명, 구분 = 승하차구분)
+
+nrow(subway)
+count(subway, 구분)   # 승차와 하차가 같은 수인가</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway = (subway
+          .dropna(how=&quot;all&quot;)
+          .drop(columns=&quot;연번&quot;)
+          .rename(columns={&quot;역명&quot;: &quot;역&quot;,
+                           &quot;승하차구분&quot;: &quot;구분&quot;}))
+
+len(subway)
+subway[&quot;구분&quot;].value_counts()   # 승차와 하차가 같은 수인가</pre></div></div>
+<h2 id="s2"><span class="no">4.2</span>날짜형으로 바꾸기</h2>
+<p>3장에서 한 대로 <code>수송일자</code>를 날짜형 열 <code>날짜</code>로 만든다. 바꾸지 못한 값이 있는지도 센다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- subway |&gt;
+  mutate(날짜 = as_date(수송일자))
+
+sum(is.na(subway$날짜))   # 0이어야 한다
+range(subway$날짜)</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;날짜&quot;] = pd.to_datetime(
+    subway[&quot;수송일자&quot;], format=&quot;%Y-%m-%d&quot;)
+
+subway[&quot;날짜&quot;].isna().sum()   # 0이어야 한다
+subway[&quot;날짜&quot;].min(), subway[&quot;날짜&quot;].max()</pre></div></div>
+<p>기간이 2025-01-01부터 2025-12-31까지로 나오는지 확인한다.</p>
+<h2 id="s3"><span class="no">4.3</span>하루 단위로 요약하기</h2>
+<p>날씨는 하루에 값이 하나다. 지하철 데이터도 하루에 한 행이 되도록 줄인다. 먼저 시간대 20개 열을 더해 <code>하루</code>를 만들고, <strong>승차 행만</strong> 골라 날짜별로 더한다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- subway |&gt;
+  mutate(하루 = rowSums(
+    across(`06시이전`:`24시이후`)))
+
+daily &lt;- subway |&gt;
+  filter(구분 == &quot;승차&quot;) |&gt;
+  group_by(날짜) |&gt;
+  summarise(승차 = sum(하루))
+
+nrow(daily)   # 365</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;하루&quot;] = (
+    subway.loc[:, &quot;06시이전&quot;:&quot;24시이후&quot;]
+    .sum(axis=1))
+
+daily = (subway
+         .query(&#x27;구분 == &quot;승차&quot;&#x27;)
+         .groupby(&quot;날짜&quot;, as_index=False)[&quot;하루&quot;]
+         .sum()
+         .rename(columns={&quot;하루&quot;: &quot;승차&quot;}))
+
+len(daily)   # 365</pre></div></div>
+<div class="note"><strong>왜 승차만 세는가</strong> 한 사람이 한 번 이동하면 승차 한 번, 하차 한 번이 기록된다. 둘을 더하면 같은 이동을 두 번 세게 된다. “그날 지하철을 탄 횟수”는 승차만으로 충분하다.</div>
+<h2 id="s4"><span class="no">4.4</span>날짜에서 새 변수 만들기</h2>
+<p>지하철 이용은 평일과 주말이 크게 다르다. 요일과 주말 여부를 만들어 둔다. 6장에서 결정적인 역할을 한다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily &lt;- daily |&gt;
+  mutate(
+    요일 = wday(날짜, label = TRUE),
+    주말 = wday(날짜) %in% c(1, 7)
+  )
+# wday(): 1 = 일요일, 7 = 토요일</pre></div><div class="cb py"><span class="lang">Python</span><pre>daily[&quot;요일&quot;] = daily[&quot;날짜&quot;].dt.day_name()
+daily[&quot;주말&quot;] = daily[&quot;날짜&quot;].dt.dayofweek &gt;= 5
+# dayofweek: 0 = 월요일, 6 = 일요일</pre></div></div>
+<div class="note"><strong>공휴일은 평일로 남겨 둔다</strong> 2025년 1월 1일은 수요일이지만 쉬는 날이다. 위 코드는 이날을 평일로 분류한다. 설·추석 연휴도 마찬가지다. 본문에서는 공휴일을 따로 처리하지 않고 요일만으로 평일과 주말을 나눈다. 공휴일을 반영하면 결과가 얼마나 달라지는지는 <a href="hw.html">과제</a>에서 직접 확인한다.</div>
+<h2 id="s5"><span class="no">4.5</span>기상 데이터 정리하기</h2>
+<p>기상 파일도 같은 순서로 다룬다. 읽고, 필요한 열만 남기고, 이름을 바꾸고, 날짜형으로 고친다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>weather &lt;- read_csv(
+  &quot;../data/raw/asos_seoul_2025.csv&quot;,
+  locale = locale(encoding = &quot;CP949&quot;)
+) |&gt;
+  select(날짜 = 일시,
+         기온 = `평균기온(°C)`,
+         강수량 = `일강수량(mm)`) |&gt;
+  mutate(날짜 = as_date(날짜))
+
+nrow(weather)   # 365</pre></div><div class="cb py"><span class="lang">Python</span><pre>weather = pd.read_csv(
+    &quot;../data/raw/asos_seoul_2025.csv&quot;,
+    encoding=&quot;cp949&quot;)
+
+weather = weather.rename(columns={
+    &quot;일시&quot;: &quot;날짜&quot;,
+    &quot;평균기온(°C)&quot;: &quot;기온&quot;,
+    &quot;일강수량(mm)&quot;: &quot;강수량&quot;,
+})[[&quot;날짜&quot;, &quot;기온&quot;, &quot;강수량&quot;]]
+weather[&quot;날짜&quot;] = pd.to_datetime(weather[&quot;날짜&quot;])
+
+len(weather)   # 365</pre></div></div>
+<div class="todo"><strong>초안 메모</strong> 기상 파일의 열 이름, 날짜 표기, 머리글 위의 설명 줄 유무는 실제로 받은 2025년 파일에 맞춰 고친다.</div>
+<h3>비어 있는 강수량은 무엇인가</h3>
+<p>강수량 열에는 빈칸(결측)이 많다. 먼저 몇 개인지 센다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>weather |&gt;
+  summarise(결측 = sum(is.na(강수량)))</pre></div><div class="cb py"><span class="lang">Python</span><pre>weather[&quot;강수량&quot;].isna().sum()</pre></div></div>
+<p>빈칸을 어떻게 할지는 코드가 아니라 <strong>데이터 설명서</strong>가 정한다. “측정하지 못했다”는 뜻이면 그대로 두어야 하고, “비가 오지 않았다”는 뜻이면 0으로 채워도 된다. 설명서와 실제 날씨를 확인한 뒤에 아래를 실행한다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>weather &lt;- weather |&gt;
+  mutate(강수량 = replace_na(강수량, 0),
+         비 = 강수량 &gt; 0)</pre></div><div class="cb py"><span class="lang">Python</span><pre>weather[&quot;강수량&quot;] = weather[&quot;강수량&quot;].fillna(0)
+weather[&quot;비&quot;] = weather[&quot;강수량&quot;] &gt; 0</pre></div></div>
+<h2 id="s6"><span class="no">4.6</span>두 표 합치기</h2>
+<p><code>daily</code>의 각 날짜에 그날의 날씨를 붙인다. 왼쪽 표를 기준으로 붙이므로 왼쪽 조인이다. 두 표의 <code>날짜</code>가 <strong>둘 다 날짜형</strong>이어야 짝이 맞는다. 한쪽이 문자열이면 하나도 붙지 않는다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>nrow(daily)                       # 조인 전
+
+daily &lt;- daily |&gt;
+  left_join(weather, by = &quot;날짜&quot;)
+
+nrow(daily)                       # 조인 후
+sum(is.na(daily$기온))            # 못 붙은 날</pre></div><div class="cb py"><span class="lang">Python</span><pre>len(daily)                        # 조인 전
+
+daily = daily.merge(
+    weather, on=&quot;날짜&quot;, how=&quot;left&quot;)
+
+len(daily)                        # 조인 후
+daily[&quot;기온&quot;].isna().sum()        # 못 붙은 날</pre></div></div>
+<div class="note"><strong>조인 뒤 반드시 확인할 두 가지</strong> 첫째, 행 수가 조인 전과 같은가. 늘었다면 오른쪽 표에 같은 날짜가 두 번 들어 있다. 둘째, 날씨가 비어 있는 날이 없는가. 있다면 두 표의 기간이나 날짜 자료형이 다르다.</div>
+<h2 id="s7"><span class="no">4.7</span>정리한 데이터 저장하기</h2>
+<p>하루 단위 표와 함께, 정리된 원래 표도 저장해 둔다. 뒤의 것은 과제에서 쓴다. 우리가 만드는 파일은 UTF-8로 저장한다. R의 <code>write_csv()</code>는 항상 UTF-8로 쓴다. Python의 <code>utf-8-sig</code>는 엑셀에서 열어도 한글이 깨지지 않게 표시를 붙인 UTF-8이다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>write_csv(daily,
+          &quot;../data/processed/daily.csv&quot;)
+
+subway |&gt;
+  select(-수송일자, -하루) |&gt;
+  write_csv(&quot;../data/processed/subway_clean.csv&quot;)</pre></div><div class="cb py"><span class="lang">Python</span><pre>daily.to_csv(
+    &quot;../data/processed/daily.csv&quot;,
+    index=False, encoding=&quot;utf-8-sig&quot;)
+
+(subway
+ .drop(columns=[&quot;수송일자&quot;, &quot;하루&quot;])
+ .to_csv(&quot;../data/processed/subway_clean.csv&quot;,
+         index=False, encoding=&quot;utf-8-sig&quot;))</pre></div></div>
+<p>이제 5장과 6장은 <code>daily.csv</code> 하나만 읽으면 된다. 원본은 <code>data/raw</code>에 그대로 남아 있으므로, 전처리를 잘못했더라도 이 노트북을 처음부터 다시 실행하면 된다.</p>
+<h2 id="s8"><span class="no">4.8</span>에이전트와 함께 해보기</h2>
+<p>같은 전처리를 에이전트에게 한 단계씩 요청해 보고, 직접 짠 코드와 비교한다. 요청 예:</p>
+<ul><li>“<code>subway</code>의 앞 5행과 자료형을 먼저 확인하고, <code>수송일자</code>를 날짜형으로 바꿔줘. 바꾸지 못한 값의 개수도 보여줘.”</li><li>“<code>daily</code>와 <code>weather</code>를 날짜로 왼쪽 조인하고, 조인 전후 행 수와 결측 개수를 출력해줘.”</li></ul>
+</main>
+<nav class="pager" aria-label="장 이동"><a href="ch3.html"><span>이전</span>3장 R과 Python의 데이터 다루는 명령</a><a href="ch5.html" style="text-align:right"><span>다음</span>5장 기초 통계 구하기</a></nav>
+</div>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>2장 데이터셋 가져오기</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@600;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 여섯 장을 한 노선의 여섯 정거장으로 놓는다. 본문은 한 단, 코드는 R·Python 두 단. */
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --ink:#15201C; --muted:#586861; --rule:#D3DAD6;
+  --line:#007A3D; --line-soft:#DDEEE4; --code-bg:#E8EDEA;
+  --r:#245FB0; --py:#8F6200; --warn:#A14B00; --warn-soft:#FBEBDD;
+  --display:"Gothic A1","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono","D2Coding",Consolas,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+    --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+    --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101614; --surface:#18211D; --ink:#E5ECE8; --muted:#93A39B; --rule:#2B3732;
+  --line:#41C481; --line-soft:#17302390; --code-bg:#0B110E;
+  --r:#84B4F2; --py:#E2B955; --warn:#F0A35E; --warn-soft:#33241A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.75;
+  padding-inline:20px;padding-block:0 72px;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:860px;margin-inline:auto}
+a{color:var(--line)} a:focus-visible{outline:2px solid var(--line);outline-offset:3px;border-radius:2px}
+
+/* 상단 노선 띠 */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding-block:20px;border-bottom:1px solid var(--rule)}
+.brand{font-family:var(--display);font-weight:800;font-size:15px;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.stops{display:flex;align-items:center;gap:0;margin:0;padding:0;list-style:none;flex:1;min-width:240px;max-width:400px}
+.stops li{flex:1;display:flex;align-items:center}
+.stops li::before{content:"";flex:1;height:4px;background:var(--line)}
+.stops li:first-child::before{display:none}
+.stops li:first-child{flex:0}
+.stops a{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:3px solid var(--line);
+  background:var(--surface);color:var(--ink);font:500 12px/1 var(--mono);text-decoration:none}
+.stops a[aria-current]{background:var(--line);color:var(--surface)}
+.draft{font:500 12px/1 var(--mono);color:var(--warn);border:1px solid var(--warn);padding:5px 8px;border-radius:3px}
+
+/* 제목 */
+.eyebrow{font:500 13px/1.4 var(--mono);color:var(--line);margin:48px 0 8px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.25;letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+.lead{font-size:18px;color:var(--muted);max-width:40em;margin:0 0 32px}
+h2{font-family:var(--display);font-weight:800;font-size:22px;line-height:1.35;margin:56px 0 12px;padding-top:20px;border-top:1px solid var(--rule);text-wrap:balance}
+h2 .no{font:500 14px/1 var(--mono);color:var(--line);margin-right:10px}
+h3{font-size:17px;font-weight:600;margin:28px 0 8px}
+p,ul,ol{max-width:42em;margin:0 0 14px}
+li{margin-bottom:4px}
+code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:1px 5px;border-radius:3px}
+
+.goals{background:var(--line-soft);border-left:4px solid var(--line);padding:16px 20px;margin:0 0 8px}
+.goals strong{display:block;margin-bottom:6px}
+.goals ul{margin:0;padding-left:20px}
+.note{background:var(--warn-soft);border-left:4px solid var(--warn);padding:14px 20px;margin:20px 0}
+.note strong{color:var(--warn)}
+.note p:last-child,.goals p:last-child{margin-bottom:0}
+.todo{border:1px dashed var(--muted);padding:14px 20px;margin:20px 0;color:var(--muted)}
+.todo strong{color:var(--ink)}
+
+/* 코드: R과 Python 나란히 */
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0 24px}
+.cb{min-width:0;background:var(--code-bg);border-radius:4px;border-top:3px solid var(--rule)}
+.cb.r{border-top-color:var(--r)} .cb.py{border-top-color:var(--py)}
+.cb .lang{display:block;font:500 12px/1 var(--mono);letter-spacing:.06em;padding:10px 14px 0}
+.cb.r .lang{color:var(--r)} .cb.py .lang{color:var(--py)} .cb.sh .lang{color:var(--muted)}
+.cb pre{margin:0;padding:10px 14px 14px;overflow-x:auto;font:400 13.5px/1.65 var(--mono);color:var(--ink);white-space:pre;word-break:normal;overflow-wrap:normal}
+.single{margin:16px 0 24px}
+
+.tw{overflow-x:auto;margin:16px 0 24px}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13px;white-space:nowrap}
+td code{white-space:nowrap}
+
+.tree{font:400 14px/1.7 var(--mono);background:var(--code-bg);padding:14px 18px;border-radius:4px;overflow-x:auto;white-space:pre;margin:16px 0 24px}
+
+.pager{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:64px;padding-top:24px;border-top:1px solid var(--rule)}
+.pager a{text-decoration:none;font-weight:600}
+.pager span{display:block;font:500 12px/1.6 var(--mono);color:var(--muted)}
+
+/* 첫 페이지 노선도 */
+.route{list-style:none;margin:40px 0 0;padding:0;position:relative}
+.route::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:6px;background:var(--line);border-radius:3px}
+.route li{position:relative;padding:0 0 28px 64px;margin:0}
+.route li:last-child{padding-bottom:0}
+.route .dot{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--surface);border:5px solid var(--line);
+  display:grid;place-items:center;font:500 15px/1 var(--mono);color:var(--ink)}
+.route a.st{display:block;text-decoration:none;color:var(--ink);padding-top:6px}
+.route a.st h2{border:0;padding:0;margin:0 0 4px;font-size:21px}
+.route a.st:hover h2{color:var(--line)}
+.route p{color:var(--muted);margin:0 0 6px}
+.route .out{font:400 13px/1.6 var(--mono);color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 32px;margin:8px 0 0;padding:0}
+.facts div{border-top:1px solid var(--rule);padding:14px 0}
+.facts dt{font:500 12px/1.4 var(--mono);color:var(--muted);letter-spacing:.04em}
+.facts dd{margin:4px 0 0}
+@media (max-width:640px){
+  .pair{grid-template-columns:minmax(0,1fr)}
+  body{font-size:15.5px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><a class="brand" href="index.html">지하철과 날씨로 배우는 R·Python</a><ol class="stops"><li><a href="ch1.html" title="작업환경 구축" aria-label="작업환경 구축">1</a></li><li><a href="ch2.html" title="데이터셋 가져오기" aria-label="데이터셋 가져오기" aria-current="page">2</a></li><li><a href="ch3.html" title="R과 Python의 데이터 다루는 명령" aria-label="R과 Python의 데이터 다루는 명령">3</a></li><li><a href="ch4.html" title="데이터 전처리" aria-label="데이터 전처리">4</a></li><li><a href="ch5.html" title="기초 통계 구하기" aria-label="기초 통계 구하기">5</a></li><li><a href="ch6.html" title="데이터로 인사이트 얻기" aria-label="데이터로 인사이트 얻기">6</a></li><li><a href="hw.html" title="과제: 시간대로 나누어 다시 보기" aria-label="과제: 시간대로 나누어 다시 보기">과</a></li></ol><span class="draft">초안</span></header>
+<main>
+<p class="eyebrow">2장 / 6</p>
+<h1>데이터셋 가져오기</h1>
+<p class="lead">질문에 맞는 공공데이터를 직접 찾아 내려받고, 노트북으로 읽어 들인다.</p>
+<div class="goals"><strong>이 장을 마치면</strong><ul><li>질문에 필요한 데이터가 무엇인지 말로 적을 수 있다.</li><li>공공데이터 포털에서 데이터를 찾고 설명서를 읽을 수 있다.</li><li>내려받은 CSV를 R과 Python에서 읽어 들이고 구조를 설명할 수 있다.</li></ul></div>
+<h2 id="s1"><span class="no">2.1</span>질문에서 출발하기</h2>
+<p>이 가이드 전체가 답하려는 질문은 하나다. <strong>비 오는 날, 더운 날에 지하철 승객은 어떻게 달라질까?</strong></p>
+<p>질문을 데이터의 말로 바꾸면 필요한 것이 보인다.</p>
+<div class="tw"><table><thead><tr><th>필요한 것</th><th>단위</th><th>찾을 곳</th></tr></thead><tbody><tr><td>지하철을 탄 사람 수</td><td>날짜별, 역별, 가능하면 시간대별</td><td>서울 열린데이터광장</td></tr><tr><td>그날의 기온과 강수량</td><td>날짜별, 서울</td><td>기상청 기상자료개방포털</td></tr></tbody></table></div>
+<p>두 데이터에 공통으로 들어 있는 것은 <strong>날짜</strong>다. 4장에서 이 날짜를 열쇠로 두 표를 합친다. 그러려면 두 데이터의 <strong>기간이 같아야</strong> 한다. 이 가이드는 2025년 1월 1일부터 12월 31일까지 한 해를 쓴다.</p>
+<h2 id="s2"><span class="no">2.2</span>직접 찾아보기</h2>
+<h3>지하철 승하차 인원</h3>
+<ol><li>서울 열린데이터광장(data.seoul.go.kr)에서 <code>지하철 승하차</code>를 검색한다.</li><li>비슷한 이름의 데이터가 여러 개 나온다. 아래 표를 보고 질문에 맞는 것을 고른다.</li><li><strong>“서울교통공사_역별 일별 시간대별 승하차인원 정보”</strong>의 파일내려받기에서 맨 위(첫 번째) 항목인 2025년 파일 <code>서울교통공사_역별 일별 시간대별 승하차인원_20251231.csv</code>(약 24MB)를 받는다.</li></ol>
+<div class="tw"><table><thead><tr><th>데이터 이름</th><th>한 행의 단위</th><th>이번 질문에</th></tr></thead><tbody><tr><td>지하철호선별 역별 승하차 인원 정보</td><td>날짜 × 역 (하루 합계)</td><td>쓸 수 있지만 시간대가 없다</td></tr><tr><td>지하철 호선별 역별 시간대별 승하차 인원 정보</td><td><strong>월</strong> × 역 × 시간대</td><td>날짜가 없어 날씨와 합칠 수 없다</td></tr><tr><td>서울교통공사_역별 일별 시간대별 승하차인원 정보</td><td>날짜 × 역 × 승차/하차, 시간대는 열</td><td><strong>이것을 쓴다</strong></td></tr></tbody></table></div>
+<div class="note"><strong>이름만 보고 고르지 않는다</strong> 두 번째 데이터는 이름에 “시간대별”이 있어 가장 알맞아 보이지만 월 단위 합계다. 미리보기에서 날짜 열이 있는지, 한 행이 무엇인지 꼭 확인한다.</div>
+<h3>기온과 강수량</h3>
+<ol><li>기상자료개방포털(data.kma.go.kr)에서 <strong>기상관측 → 지상 → 종관기상관측(ASOS)</strong>으로 들어간다.</li><li>자료형태 <strong>일 자료</strong>, 지점 <strong>서울</strong>, 기간 <strong>2025-01-01 ~ 2025-12-31</strong>을 고른다.</li><li>요소는 평균기온, 최고기온, 일강수량을 고르고 CSV로 받는다.</li></ol>
+<div class="todo"><strong>초안 메모</strong> 기상자료개방포털은 내려받기에 회원 가입이 필요할 수 있다. 수업 전 가입을 안내할지, 정리된 파일을 미리 배포할지 정해야 한다.</div>
+<h2 id="s3"><span class="no">2.3</span>데이터 설명서 읽기</h2>
+<p>내려받기 전에 설명 페이지에서 확인한 것을 노트북 첫 셀에 적어 둔다.</p>
+<div class="tw"><table><thead><tr><th>확인할 것</th><th>지하철 데이터의 경우</th></tr></thead><tbody><tr><td>무엇을 센 것인가</td><td>시간대별로 역에서 타고 내린 인원</td></tr><tr><td>어떤 단위인가</td><td>날짜 × 역 × 승차/하차마다 한 행. 시간대 20개가 열로 펼쳐져 있다</td></tr><tr><td>어디까지 들어 있는가</td><td>서울교통공사가 운영하는 1~8호선 구간. 9호선과 코레일 구간은 없다</td></tr><tr><td>언제 갱신되는가</td><td>1년에 한 번, 연도별 파일로 올라온다. 이 가이드는 가장 최근인 2025년 파일을 쓴다</td></tr></tbody></table></div>
+<h2 id="s4"><span class="no">2.4</span>파일을 프로젝트에 넣기</h2>
+<p>받은 파일을 <code>data/raw</code>에 넣는다. 파일 이름이 길고 공백이 있으므로 이름만 짧게 바꾼다. <strong>내용은 건드리지 않는다.</strong> 엑셀로 열어서 저장하면 날짜와 숫자 형식이 바뀌거나 빈 행이 딸려 붙을 수 있다.</p>
+<div class="tw"><table><thead><tr><th>원래 이름</th><th>바꾼 이름</th></tr></thead><tbody><tr><td><code>서울교통공사_역별 일별 시간대별 승하차인원_20251231.csv</code></td><td><code>subway_2025.csv</code></td></tr><tr><td>기상청에서 받은 파일</td><td><code>asos_seoul_2025.csv</code></td></tr></tbody></table></div>
+<h2 id="s5"><span class="no">2.5</span>노트북에서 읽어 들이기: 인코딩</h2>
+<p>컴퓨터는 글자를 숫자로 저장한다. 어떤 글자를 어떤 숫자로 적을지 정해 둔 약속을 <strong>인코딩</strong>이라고 한다. 한글 파일에서는 세 가지를 만난다.</p>
+<div class="tw"><table><thead><tr><th>인코딩</th><th>특징</th><th>주로 만나는 곳</th></tr></thead><tbody><tr><td>UTF-8</td><td>전 세계의 글자를 하나의 약속으로 적는다. 지금의 표준</td><td>웹, 최근 프로그램. R과 Python이 기본으로 가정하는 것</td></tr><tr><td>EUC-KR</td><td>한글을 위해 만든 오래된 약속</td><td>한국 공공데이터, 예전 시스템에서 내보낸 CSV</td></tr><tr><td>CP949</td><td>EUC-KR에 글자를 더 넣은 Windows판. EUC-KR 파일은 CP949로도 읽힌다</td><td>Windows의 한글 엑셀에서 저장한 CSV</td></tr></tbody></table></div>
+<p>CSV 파일 안에는 자기가 어떤 인코딩인지 적혀 있지 않다. <strong>읽는 쪽이 알려줘야</strong> 한다. 알려주지 않으면 R과 Python은 UTF-8이라고 가정한다. 이 지하철 파일은 <strong>EUC-KR</strong>이다.</p>
+<h3>먼저 틀려 보기</h3>
+<p>인코딩을 알려주지 않고 읽으면 어떻게 되는지 한 번 확인해 둔다. 앞으로 자주 만날 오류다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>library(tidyverse)
+
+read_csv(&quot;../data/raw/subway_2025.csv&quot;)
+# 열 이름과 한글 값이 깨져 보이거나
+# invalid multibyte string 오류가 난다</pre></div><div class="cb py"><span class="lang">Python</span><pre>import pandas as pd
+
+pd.read_csv(&quot;../data/raw/subway_2025.csv&quot;)
+# UnicodeDecodeError: &#x27;utf-8&#x27; codec can&#x27;t
+# decode byte 0xbf in position 0: ...</pre></div></div>
+<p>Python의 오류를 풀어 읽으면 “UTF-8 약속으로 읽으려 했는데, 맨 앞의 숫자부터 그 약속에 없는 값이다”라는 뜻이다. 파일이 망가진 것이 아니라 약속이 다른 것이다.</p>
+<h3>인코딩을 알려주고 읽기</h3>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- read_csv(
+  &quot;../data/raw/subway_2025.csv&quot;,
+  locale = locale(encoding = &quot;EUC-KR&quot;)
+)</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway = pd.read_csv(
+    &quot;../data/raw/subway_2025.csv&quot;,
+    encoding=&quot;euc-kr&quot;,
+)</pre></div></div>
+<div class="note"><strong>EUC-KR로도 오류가 날 때</strong> EUC-KR에 없는 글자가 섞여 있으면 중간에서 오류가 난다. 그때는 글자가 더 많은 CP949로 바꾼다. R은 <code>encoding = "CP949"</code>, Python은 <code>encoding="cp949"</code>.</div>
+<h3>인코딩을 모를 때 알아내는 법</h3>
+<ul><li><strong>설명 페이지를 본다.</strong> 데이터 설명이나 공지에 적혀 있는 경우가 있다.</li><li><strong>VS Code로 열어 본다.</strong> 파일을 열면 오른쪽 아래 상태 표시줄에 인코딩(보통 UTF-8)이 나온다. 한글이 깨져 보이면 그 표시를 누르고 <strong>인코딩하여 다시 열기</strong>에서 Korean (EUC-KR)을 골라 본다. 제대로 보이면 그것이 답이다. 보기만 하고 저장하지 않는다.</li><li><strong>R에게 추측을 시킨다.</strong> <code>guess_encoding("../data/raw/subway_2025.csv")</code>이 가능성이 높은 순서로 알려준다.</li><li><strong>둘 중 하나다.</strong> 한국에서 만든 CSV는 대부분 UTF-8 아니면 EUC-KR(CP949)이다. 한쪽에서 실패하면 다른 쪽을 써 본다.</li></ul>
+<div class="note"><strong>저장할 때는 UTF-8로</strong> 우리가 만드는 파일은 UTF-8로 저장한다. 4장에서 정리한 결과를 저장할 때 다시 나온다. 엑셀에서도 열어야 하는 파일은 Python에서 <code>utf-8-sig</code>를 쓴다.</div>
+<h2 id="s6"><span class="no">2.6</span>첫인상 확인하기</h2>
+<p>읽어 들인 직후에는 항상 세 가지를 본다. 크기, 열의 자료형, 앞부분.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>dim(subway)        # 행 수, 열 수
+glimpse(subway)    # 열 이름과 자료형
+head(subway)       # 앞 6행</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway.shape       # 행 수, 열 수
+subway.info()      # 열 이름과 자료형
+subway.head()      # 앞 5행</pre></div></div>
+<p>행 수가 예상보다 훨씬 많다면 표 아래에 쉼표만 있는 빈 행이 딸려 온 것일 수 있다. 날짜가 빈 행을 세어 보고, 있으면 지운다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>sum(is.na(subway$수송일자))   # 빈 행의 수
+
+subway &lt;- subway |&gt;
+  filter(!is.na(수송일자))</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;수송일자&quot;].isna().sum()   # 빈 행의 수
+
+subway = subway.dropna(how=&quot;all&quot;)</pre></div></div>
+<p>열은 26개다. 앞의 6개가 “무엇에 대한 행인가”를, 뒤의 20개가 시간대별 인원을 담는다.</p>
+<div class="tw"><table><thead><tr><th>연번</th><th>수송일자</th><th>호선</th><th>역번호</th><th>역명</th><th>승하차구분</th><th>06시이전</th><th>06-07시간대</th><th>…</th><th>23-24시간대</th><th>24시이후</th></tr></thead><tbody><tr><td>1</td><td>2025-01-01</td><td>1호선</td><td>150</td><td>서울역</td><td>승차</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>2</td><td>2025-01-01</td><td>1호선</td><td>150</td><td>서울역</td><td>하차</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>3</td><td>2025-01-01</td><td>1호선</td><td>151</td><td>시청</td><td>승차</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr></tbody></table></div>
+<p>여기서 눈여겨볼 점이 세 가지 있다.</p>
+<ul><li><strong>한 역의 하루가 두 행이다.</strong> 승차 한 행, 하차 한 행.</li><li><strong>시간대가 옆으로 펼쳐져 있다.</strong> 이런 모양을 넓은 형식이라고 한다. 과제에서 긴 형식으로 바꾼다.</li><li><strong><code>수송일자</code>는 <code>2025-01-01</code> 모양이다.</strong> 날짜처럼 보이지만, 컴퓨터가 이것을 날짜로 알고 있는지 글자로 알고 있는지는 따로 확인해야 한다. 3장에서 다룬다.</li></ul>
+<div class="todo"><strong>초안 메모</strong> 2025년 파일의 열 이름과 순서는 2024년 파일의 앞부분을 보고 같다고 가정했다. 실제 2025년 파일로 열 이름, 빈 행 유무, 위 표의 값을 확인해 채운다.</div>
+<h2 id="s7"><span class="no">2.7</span>예고: API로 가져오기</h2>
+<p>지금은 사람이 누리집에서 파일을 내려받았다. API는 같은 일을 <strong>코드가 주소로 요청해서</strong> 받는 방법이다. 매일 새 자료를 받아야 할 때 쓴다.</p>
+<div class="tw"><table><thead><tr><th></th><th>파일 내려받기</th><th>API</th></tr></thead><tbody><tr><td>받는 방법</td><td>누리집에서 클릭</td><td>코드에서 주소로 요청</td></tr><tr><td>준비물</td><td>없음(또는 회원 가입)</td><td>인증키 발급</td></tr><tr><td>형태</td><td>CSV 파일</td><td>JSON 또는 XML</td></tr><tr><td>알맞은 경우</td><td>한 번 받아 분석</td><td>반복해서 최신 자료 받기</td></tr></tbody></table></div>
+<div class="todo"><strong>초안 메모</strong> API 실습은 별도 문서로 분리한다. 이 절에서는 요청 한 번을 시연하고 응답 모양만 보여준다. 인증키는 노트북에 직접 적지 않는다는 원칙을 여기서 미리 알려준다.</div>
+</main>
+<nav class="pager" aria-label="장 이동"><a href="ch1.html"><span>이전</span>1장 작업환경 구축</a><a href="ch3.html" style="text-align:right"><span>다음</span>3장 R과 Python의 데이터 다루는 명령</a></nav>
+</div>
+</body>
+</html>

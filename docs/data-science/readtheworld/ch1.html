@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>1장 작업환경 구축 · 지하철과 날씨로 배우는 R·Python | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/readtheworld/ch1.html">
+<meta name="description" content="R을 설치하고 uv로 Python 3.12 가상환경을 만들어 VS Code에서 두 언어의 노트북을 실행하기까지를 안내하는 데이터과학 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="1장 작업환경 구축 · 지하철과 날씨로 배우는 R·Python | Q의 아카이브">
+<meta property="og:description" content="R을 설치하고, uv로 Python 3.12 가상환경을 만들고, VS Code에서 두 언어의 노트북을 실행한다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/readtheworld/ch1.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="데이터과학 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="1장 작업환경 구축 · 지하철과 날씨로 배우는 R·Python | Q의 아카이브">
+<meta name="twitter:description" content="R을 설치하고, uv로 Python 3.12 가상환경을 만들고, VS Code에서 두 언어의 노트북을 실행한다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
+<link rel="stylesheet" href="../../assets/material.css">
+<link rel="stylesheet" href="../../assets/readtheworld.css">
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../../index.html#data-science">← 처음으로</a>
+  <h1>지하철과 날씨로<br>배우는 R·Python</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="index.html"><b>00</b><span>차례</span></a>
+    <a href="ch1.html" class="on" aria-current="page"><b>01</b><span>작업환경 구축</span></a>
+    <a href="ch2.html"><b>02</b><span>데이터셋 가져오기</span></a>
+    <a href="ch3.html"><b>03</b><span>R과 Python의 데이터 다루는 명령</span></a>
+    <a href="ch4.html"><b>04</b><span>데이터 전처리</span></a>
+    <a href="ch5.html"><b>05</b><span>기초 통계 구하기</span></a>
+    <a href="ch6.html"><b>06</b><span>데이터로 인사이트 얻기</span></a>
+    <a href="hw.html"><b>과제</b><span>시간대로 나누어 다시 보기</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#데이터과학</span>
+    <span class="rail-tag">#사례분석</span>
+    <span class="rail-tag">#R</span>
+    <span class="rail-tag">#Python</span>
+    <span class="rail-tag">#공공데이터</span>
+    <span class="rail-tag">#데이터전처리</span>
+    <span class="rail-tag">#기술통계</span>
+  </div>
+  <footer>코드는 왼쪽이 R, 오른쪽이 Python입니다. 같은 줄 높이의 코드가 같은 일을 합니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+<main id="content">
+<header class="panel">
+<div class="eyebrow">데이터 다루기 · 1장 / 6</div>
+<h2 class="page-title">작업환경 구축</h2>
+<p class="lede">R을 설치하고, uv로 Python 3.12 가상환경을 만들고, VS Code에서 두 언어의 노트북을 실행한다.</p>
+<div class="callout goals"><strong>이 장을 마치면</strong><ul><li>자기 컴퓨터(Windows 또는 macOS)에 R을 설치할 수 있다.</li><li>uv로 Python 3.12 가상환경을 만들 수 있다.</li><li>VS Code에서 Python 노트북과 R 노트북을 각각 실행할 수 있다.</li><li>AI 에이전트에게 지킬 규칙을 파일로 알려줄 수 있다.</li></ul></div>
+<nav class="toc" aria-label="이 장의 차례"><a href="#s1"><b>1.1</b>무엇을 설치하는가</a><a href="#s2"><b>1.2</b>R 설치하기</a><a href="#s3"><b>1.3</b>VS Code와 확장 설치하기</a><a href="#s4"><b>1.4</b>uv로 Python 가상환경 만들기</a><a href="#s5"><b>1.5</b>R을 노트북에 연결하기</a><a href="#s6"><b>1.6</b>프로젝트 폴더 구조</a><a href="#s7"><b>1.7</b>AI 에이전트와 일하는 규칙</a><a href="#s8"><b>1.8</b>동작 확인</a></nav>
+</header>
+<section class="panel" id="s1">
+<h2><span class="no">1.1</span>무엇을 설치하는가</h2>
+<p>설치할 것은 네 가지다. 아래 순서대로 진행한다.</p>
+<div class="scroll"><table><thead><tr><th>순서</th><th>구성 요소</th><th>역할</th><th>받는 곳</th></tr></thead><tbody><tr><td>1</td><td>R</td><td>R 코드 실행</td><td>r-project.org</td></tr><tr><td>2</td><td>Visual Studio Code와 확장</td><td>노트북(.ipynb)을 열고 실행하는 편집기</td><td>code.visualstudio.com</td></tr><tr><td>3</td><td>uv</td><td>Python 3.12와 패키지를 프로젝트 폴더 안에 설치</td><td>터미널 명령 한 줄</td></tr><tr><td>4</td><td>IRkernel</td><td>R을 노트북에 연결</td><td>R 안에서 설치</td></tr></tbody></table></div>
+<p>Python은 따로 내려받지 않는다. uv가 Python 3.12를 대신 받아 준다.</p>
+</section>
+<section class="panel" id="s2">
+<h2><span class="no">1.2</span>R 설치하기</h2>
+<p>R은 운영체제에 따라 설치 파일이 다르다. 두 경우 모두 출발점은 같다.</p>
+<ol>
+  <li><code>https://r-project.org</code>에 접속해 왼쪽 메뉴의 <strong>CRAN</strong>(또는 본문의 download R)을 누른다.</li>
+  <li>내려받을 서버(미러) 목록이 나온다. 맨 위의 <strong>0-Cloud</strong>나 <strong>Korea</strong> 아래의 주소 중 하나를 고른다.</li>
+    <ul>
+      <li>2026년 9월 현재 대한민국에서 제공하는 Mirror Site 가 없어 다음의 기본 Repository 선택</li>
+      <li>0-Cloud: <code>https://cloud.r-project.org/</code>
+      </ul>
+  <li>자기 운영체제에 맞는 링크를 누르고 아래 설명을 따른다.</li>
+</ol>
+<p><figure class="shot"><img src="../../assets/images/cran-first.png" width="942" loading="lazy" alt="https://cloud.r-project.org 의 화면으로 본인의 운영체제에 맞는 링크를 클릭"><figcaption>https://cloud.r-project.org 의 화면으로 본인의 운영체제에 맞는 링크를 클릭</figcaption></figure> </p>
+<h3>Windows</h3>
+<ol>
+  <li><strong>Download R for Windows</strong> Click</li>
+  <li><strong>base</strong> Click</li>
+  <li>맨 위의 <strong>Download R-4.x.x for Windows</strong>를 눌러 설치파일을 받는다.</li>
+  <li>받은 파일을 실행한다. 설치 언어는 한국어를 고르고, 나머지는 기본값 그대로 <strong>다음</strong>을 눌러 끝낸다.</li>
+  <li>설치 위치(기본값 <code>C:\Program Files\R\R-4.x.x</code>)를 확인한다. 1.5에서 쓴다.</li>
+</ol>
+<p><figure class="shot"><img src="../../assets/images/cran-win.png" width="942" loading="lazy" alt="설치파일 다운로드를 위해 base 클릭"><figcaption>설치파일 다운로드를 위해 base 클릭</figcaption></figure> </p>
+
+<h3>macOS</h3>
+<ol>
+  <li>먼저 자기 Mac의 <strong>프로세서 종류</strong>를 확인한다. 화면 왼쪽 위 사과 메뉴 → <strong>이 Mac에 관하여</strong>를 열고 아래 표와 맞춰 본다.</li>
+  <li><strong>Download R for macOS</strong>를 누른다.</li>
+  <li>표에서 확인한 프로세서 종류에 맞는 <code>.pkg</code> 파일을 받는다.</li>
+  <li>받은 파일을 실행하고 기본값 그대로 <strong>계속</strong>을 눌러 설치한다.</li>
+</ol>
+
+<p><figure class="shot"><img src="../../assets/images/cran-mac.png" width="942" loading="lazy" alt="자신의 프로세서에 맞는 설치파일 선택(1: Apple Silicon, 2: Intel)"><figcaption>자신의 프로세서에 맞는 설치파일 선택(1: Apple Silicon, 2: Intel)</figcaption></figure> </p>
+
+<div class="scroll"><table><thead><tr><th>화면에 나오는 것</th><th>프로세서 종류</th><th>받을 파일</th></tr></thead><tbody><tr><td>칩: Apple M1, M2, M3 …</td><td>Apple silicon</td><td>이름에 <code>arm64</code>가 있는 <code>.pkg</code></td></tr><tr><td>프로세서: … Intel …</td><td>Intel</td><td>이름에 <code>x86_64</code>가 있는 <code>.pkg</code></td></tr></tbody></table></div>
+<div class="callout caution"><strong>잘못 받기 쉬운 곳</strong> macOS에서 프로세서 종류에 맞지 않는 파일을 받으면 설치는 되지만 패키지 설치에서 오류가 난다. 파일 이름의 <code>arm64</code>와 <code>x86_64</code>를 꼭 확인한다.</div>
+
+
+<h3>설치 확인</h3>
+<p>설치된 R 프로그램을 실행한다(Windows: 시작 메뉴의 R, macOS: 응용 프로그램의 R). 창이 뜨면 다음 코드를 입력해 버전이 출력되는지 본다</p>
+<div class="single"><div class="cb r"><span class="lang">R</span><pre>R.version.string</pre></div></div>
+
+<p><figure class="shot"><img src="../../assets/images/R-version.png" width="942" loading="lazy" alt="R 버전 확인"><figcaption>R 버전 확인</figcaption></figure> </p>
+</section>
+
+<section class="panel" id="s3">
+<h2><span class="no">1.3</span>VS Code와 확장(Extensions) 설치하기</h2>
+<ol>
+  <li><a href="https://code.visualstudio.com/" target="_blank" rel="noopener noreferrer">https://code.visualstudio.com/</a>에서 설치 파일을 받아 설치한다.</li>
+  <li>VS Code 좌측 Acitivity Bar의 Extentions 패널에서 <code>Python</code>과 <code>Jupyter</code>(둘 다 Microsoft 제공) Extension을 찾아 설치한다.</li>
+</ol>
+
+<p><figure class="shot"><img src="../../assets/images/jupyter-notebook-extension.png" width="252" loading="lazy" alt="Jupyter Notebook Extension"><figcaption>Jupyter Notebook Extension 설치</figcaption></figure> </p>
+
+<ol start="3">
+  <li>Open Folder 를 통해 작업 폴더 생성 및 열기 : <code>readtheworld</code></li>
+  <li>Terminal 메뉴에서 New Terminal을 클릭해 Terminal을 연다.</li>
+</ol>
+
+<p><figure class="shot"><img src="../../assets/images/prepare-rw.png" width="505" loading="lazy" alt="작업폴더의 현재 상태"><figcaption>작업폴더의 현재 상태</figcaption></figure> </p>
+
+
+<div class="callout caution"><strong>폴더 경로</strong> 폴더 경로에 한글이나 공백이 없도록 한다. 예: <code>C:\classroom\readtheworld</code>, <code>~/work/readtheworld</code>. 사용자 이름이 한글인 Windows에서 특히 문제가 잦다.</div>
+</section>
+<section class="panel" id="s4">
+<h2><span class="no">1.4</span>uv로 Python 가상환경 만들기</h2>
+<p>가상환경은 이 프로젝트만 쓰는 Python을 폴더 안에 따로 두는 것이다. 다른 수업이나 프로그램의 Python과 섞이지 않고, 모든 학생이 같은 버전(3.12)을 쓰게 된다.</p>
+<h3>uv 설치</h3>
+<div class="pair"><div class="cb sh"><span class="lang">Windows</span><pre>powershell -ExecutionPolicy ByPass -c &quot;irm https://astral.sh/uv/install.ps1 | iex&quot;</pre></div><div class="cb sh"><span class="lang">macOS</span><pre>curl -LsSf https://astral.sh/uv/install.sh | sh</pre></div></div>
+<p>설치가 끝나면 <strong>터미널을 닫고 새로 연다.</strong> <code>uv --version</code>을 입력해 버전이 나오면 된다.</p>
+<h3>프로젝트 초기화와 가상환경</h3>
+<p><code>readtheworld</code> 폴더가 열린 터미널에서 아래 두 줄을 차례로 실행한다. 두 운영체제에서 명령이 같다.</p>
+<div class="single"><div class="cb sh"><span class="lang">터미널</span><pre>uv init --python 3.12
+uv venv</pre></div></div>
+<div class="scroll"><table><thead><tr><th>명령</th><th>하는 일</th><th>생기는 것</th></tr></thead><tbody><tr><td><code>uv init --python 3.12</code></td><td>이 폴더를 Python 3.12 프로젝트로 등록한다</td><td><code>pyproject.toml</code>, <code>.python-version</code>, <code>main.py</code>, <code>README.md</code></td></tr><tr><td><code>uv venv</code></td><td>가상환경을 만든다. Python 3.12가 없으면 자동으로 받는다</td><td><code>.venv</code> 폴더</td></tr></tbody></table></div>
+<h3 id="venv-activate">가상환경 켜기</h3>
+<p>만든 가상환경을 켠다(활성화). 패키지를 설치하기 전에 켜 둔다. 운영체제에 따라 명령이 다르다.</p>
+<div class="pair"><div class="cb sh"><span class="lang">Windows</span><pre>.venv\Scripts\activate</pre></div><div class="cb sh"><span class="lang">macOS</span><pre>source .venv/bin/activate</pre></div></div>
+<p>터미널 줄 맨 앞에 <code>(readtheworld)</code>가 붙으면 켜진 것이다. 가상환경은 터미널마다 따로 켠다. 터미널을 새로 열면 다시 켜야 한다.</p>
+<aside class="refbox" aria-labelledby="venv-trouble">
+<span class="tag">참고</span>
+<h3 id="venv-trouble">가상환경이 켜지지 않을 때: Windows PowerShell의 권한 오류</h3>
+<p>Windows의 PowerShell 터미널에서 위 명령을 실행하면 가상환경이 켜지지 않고 아래와 비슷한 붉은 오류가 나올 수 있다. 영어 Windows에서는 <code>running scripts is disabled on this system</code>이라고 나온다.</p>
+<div class="single"><div class="cb sh"><span class="lang">오류 메시지</span><pre>.venv\Scripts\activate : 이 시스템에서 스크립트를 실행할 수 없으므로
+C:\...\readtheworld\.venv\Scripts\Activate.ps1 파일을 로드할 수 없습니다.
+    + FullyQualifiedErrorId : UnauthorizedAccess</pre></div></div>
+<p>가상환경이 잘못 만들어진 것이 아니다. Windows는 처음에 PowerShell 스크립트(<code>.ps1</code>)의 실행을 막아 두는데, 이 규칙을 <strong>실행 정책</strong>이라고 한다. <code>activate</code>가 바로 그런 스크립트(<code>Activate.ps1</code>)여서 막힌 것이다. 수업 시간에는 VS Code의 Python 환경 Extension으로 가상환경을 켰다. 명령어로 직접 풀려면 아래 두 방법 중 하나를 쓴다. 둘 다 관리자 권한이 필요 없다.</p>
+<div class="single"><div class="cb sh"><span class="lang">방법 1 · 지금 연 터미널에서만</span><pre>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.venv\Scripts\activate</pre></div></div>
+<div class="single"><div class="cb sh"><span class="lang">방법 2 · 내 계정에서 계속</span><pre>Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+.venv\Scripts\activate</pre></div></div>
+<div class="scroll"><table><thead><tr><th></th><th>방법 1 (<code>Process</code>, <code>Bypass</code>)</th><th>방법 2 (<code>CurrentUser</code>, <code>RemoteSigned</code>)</th></tr></thead><tbody><tr><td>적용 범위</td><td>이 터미널 창 하나. 창을 닫으면 원래대로 돌아간다</td><td>내 Windows 계정 전체. 한 번만 하면 된다</td></tr><tr><td>풀리는 것</td><td>이 창에서 실행하는 모든 스크립트</td><td>내 컴퓨터에서 만든 스크립트. 인터넷에서 받은 스크립트는 서명이 있어야 실행된다</td></tr><tr><td>알맞은 경우</td><td>실습실 컴퓨터처럼 설정을 남기고 싶지 않을 때</td><td>자기 노트북에서 매번 입력하기 번거로울 때</td></tr></tbody></table></div>
+<p>첫 줄을 실행했을 때 정책을 바꿀지 물으면 <code>Y</code>를 입력하고 Enter를 누른다. 지금 설정은 <code>Get-ExecutionPolicy -List</code>로 볼 수 있다. 방법 2를 되돌리려면 <code>Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Undefined</code>를 실행한다.</p>
+<div class="callout caution"><strong>그래도 막히면</strong> 학교나 회사에서 관리하는 컴퓨터는 정책이 고정되어 있어 위 명령이 듣지 않을 수 있다(<code>Get-ExecutionPolicy -List</code>의 <code>MachinePolicy</code>나 <code>UserPolicy</code>에 값이 적혀 있는 경우). 그때는 PowerShell 대신 Command Prompt를 쓴다. 터미널 오른쪽 위 <strong>+</strong> 옆 화살표에서 <strong>Command Prompt</strong>를 골라 새 터미널을 열고 <code>.venv\Scripts\activate.bat</code>을 실행한다. 이 경우 1.5에서 R을 실행할 때는 앞의 <code>&amp;</code> 없이 <code>"C:\Program Files\R\R-4.x.x\bin\R.exe"</code>로 실행한다.</div>
+</aside>
+<h3>패키지 설치</h3>
+<p>가상환경이 켜진 터미널에서 <code>uv add</code>로 패키지를 설치한다. 설치한 목록이 <code>pyproject.toml</code>에 기록되어, 다른 컴퓨터에서도 같은 환경을 다시 만들 수 있다.</p>
+<div class="single"><div class="cb sh"><span class="lang">터미널</span><pre>uv add jupyter ipykernel pandas matplotlib</pre></div></div>
+<h3>노트북에서 가상환경 고르기</h3>
+<ol><li><code>notebooks</code> 폴더를 만들고 그 안에 <code>test_py.ipynb</code> 파일을 만든다.</li><li>노트북 오른쪽 위의 <strong>Select Kernel</strong>을 누른다(그림 ①).</li><li><strong>Python Environments...</strong>를 고른다(그림 ②).</li><li>목록에서 별표가 붙은 <code>readtheworld</code>를 고른다(그림 ③, ④). 경로가 <code>.venv</code>로 시작하는 것이 이 프로젝트의 가상환경이다.</li><li>셀에 <code>import pandas</code>를 입력하고 실행해 오류가 없는지 본다.</li></ol>
+<div class="shots" role="group" aria-label="Python 노트북의 커널 고르기 화면 네 장">
+<figure class="shot"><a href="../../assets/images/select-kernel_01.png" target="_blank" rel="noopener"><img src="../../assets/images/select-kernel_01.png" width="1199" height="794" loading="lazy" alt="VS Code에서 test_py.ipynb를 연 화면. 노트북 오른쪽 위의 Select Kernel 버튼에 마우스가 올라가 있다."></a><figcaption><b>①</b>노트북 오른쪽 위의 <strong>Select Kernel</strong>을 누른다.</figcaption></figure>
+<figure class="shot"><a href="../../assets/images/select-kernel_02.png" target="_blank" rel="noopener"><img src="../../assets/images/select-kernel_02.png" width="1199" height="798" loading="lazy" alt="Select Kernel 목록에 Python Environments와 Existing Jupyter Server 두 항목이 있고 Python Environments가 선택되어 있다."></a><figcaption><b>②</b><strong>Python Environments...</strong>를 고른다.</figcaption></figure>
+<figure class="shot"><a href="../../assets/images/select-kernel_03.png" target="_blank" rel="noopener"><img src="../../assets/images/select-kernel_03.png" width="846" height="580" loading="lazy" alt="Select a Python Environment 목록. 별표가 붙은 readtheworld (3.12.x) 항목의 경로가 .venv\Scripts\python.exe로 표시되어 있다."></a><figcaption><b>③</b>목록에서 경로가 <code>.venv</code>로 시작하는 <code>readtheworld</code>를 찾는다.</figcaption></figure>
+<figure class="shot"><a href="../../assets/images/select-kernel_04.png" target="_blank" rel="noopener"><img src="../../assets/images/select-kernel_04.png" width="1197" height="797" loading="lazy" alt="Select a Python Environment 목록에서 별표가 붙은 readtheworld (3.12.x) 항목이 주황색 테두리로 강조되어 있다."></a><figcaption><b>④</b>별표가 붙은 <code>readtheworld</code>를 고른다.</figcaption></figure>
+</div>
+<p class="shots-note">그림을 누르면 크게 볼 수 있다.</p>
+</section>
+<section class="panel" id="s5">
+<h2><span class="no">1.5</span>R을 노트북에 연결하기</h2>
+<p>노트북은 원래 Python용 도구다. R을 노트북에서 쓰려면 R 패키지 <code>IRkernel</code>을 설치하고 Jupyter에 등록해야 한다. 등록할 때 R이 <code>jupyter</code> 명령을 찾을 수 있어야 하므로, <strong>가상환경을 켠 터미널에서</strong> R을 실행한다. 한 번만 하면 된다.</p>
+<h3>1단계: 가상환경이 켜져 있는지 확인하기</h3>
+<p>터미널 줄 맨 앞에 <code>(readtheworld)</code>가 있는지 본다. 없으면(터미널을 새로 열었다면) 1.4의 <a href="#venv-activate">가상환경 켜기</a>를 다시 한다.</p>
+<h3>2단계: 그 터미널에서 R 실행하기</h3>
+<div class="pair"><div class="cb sh"><span class="lang">Windows</span><pre>&amp; &quot;C:\Program Files\R\R-4.x.x\bin\R.exe&quot;</pre></div><div class="cb sh"><span class="lang">macOS</span><pre>R</pre></div></div>
+<p>Windows는 R이 설치된 위치를 직접 적어야 한다. <code>R-4.x.x</code> 자리에 1.2에서 적어 둔 실제 버전 번호를 넣는다.</p>
+<h3>3단계: IRkernel을 설치하고 커널 등록하기</h3>
+<p>R이 실행되어 <code>&gt;</code> 표시가 나오면 아래 세 줄을 한 줄씩 차례로 실행한다. 첫 줄은 <code>IRkernel</code>을 내려받아 설치하고, 둘째 줄은 설치한 것을 Jupyter에 R 커널로 등록한다.</p>
+<div class="single"><div class="cb r"><span class="lang">R</span><pre>install.packages(&quot;IRkernel&quot;, repos = &quot;https://cloud.r-project.org&quot;)
+IRkernel::installspec()   # Jupyter에 R 커널 등록
+q()                       # R 종료. 저장 여부를 물으면 n</pre></div></div>
+<p><code>repos</code>는 패키지를 내려받을 서버다. 적어 두면 서버를 고르라는 질문이 나오지 않는다. 설치 중에 개인 라이브러리(personal library)를 쓸지 물으면 <code>yes</code>를 입력한다.</p>
+<h3>4단계: 노트북에서 R 커널 고르기</h3>
+<ol><li>VS Code를 다시 시작하고, <code>notebooks</code> 폴더에 새 노트북 <code>test_R.ipynb</code>를 만든다.</li><li>노트북 오른쪽 위의 <strong>Select Kernel</strong>을 누르고 <strong>Select Another Kernel...</strong>을 고른다(그림 ①).</li><li><strong>Jupyter Kernel...</strong>을 고른다(그림 ②).</li><li>목록의 <strong>R</strong>을 고른다(그림 ③).</li><li>오른쪽 위 표시가 <strong>R</strong>로 바뀌면 성공이다(그림 ④).</li></ol>
+<div class="shots" role="group" aria-label="R 노트북의 커널 고르기 화면 네 장">
+<figure class="shot"><a href="../../assets/images/select-R-kernel-01.png" target="_blank" rel="noopener"><img src="../../assets/images/select-R-kernel-01.png" width="1245" height="799" loading="lazy" alt="test_R.ipynb의 커널 선택 목록. readtheworld Python 환경 아래의 Select Another Kernel 항목이 주황색 테두리로 강조되어 있다."></a><figcaption><b>①</b><strong>Select Kernel</strong>을 누르고 <strong>Select Another Kernel...</strong>을 고른다.</figcaption></figure>
+<figure class="shot"><a href="../../assets/images/select-R-kernel-02.png" target="_blank" rel="noopener"><img src="../../assets/images/select-R-kernel-02.png" width="1244" height="799" loading="lazy" alt="Select Another Kernel 목록에서 Jupyter Kernel 항목이 주황색 테두리로 강조되어 있다."></a><figcaption><b>②</b><strong>Jupyter Kernel...</strong>을 고른다.</figcaption></figure>
+<figure class="shot"><a href="../../assets/images/select-R-kernel-03.png" target="_blank" rel="noopener"><img src="../../assets/images/select-R-kernel-03.png" width="1241" height="794" loading="lazy" alt="Select a Jupyter Kernel 목록에 R 항목 하나가 있고 주황색 테두리로 강조되어 있다."></a><figcaption><b>③</b>목록의 <strong>R</strong>을 고른다.</figcaption></figure>
+<figure class="shot"><a href="../../assets/images/select-R-kernel-04.png" target="_blank" rel="noopener"><img src="../../assets/images/select-R-kernel-04.png" width="1244" height="798" loading="lazy" alt="test_R.ipynb 오른쪽 위의 커널 표시가 R로 바뀌어 주황색 테두리로 강조되어 있다."></a><figcaption><b>④</b>오른쪽 위 표시가 <strong>R</strong>로 바뀌면 성공이다.</figcaption></figure>
+</div>
+<p class="shots-note">그림을 누르면 크게 볼 수 있다.</p>
+<div class="callout caution"><strong>막힐 때</strong> <code>jupyter</code>를 찾을 수 없다는 오류가 나면 1단계의 가상환경이 켜지지 않은 것이다. 터미널 줄 맨 앞에 <code>(readtheworld)</code>가 있는지 확인한다. Windows에서 <code>activate</code>가 “스크립트를 실행할 수 없다”며 막혔다면 1.4의 참고 상자 <a href="#venv-trouble">가상환경이 켜지지 않을 때</a>를 따른다.</div>
+</section>
+<section class="panel" id="s6">
+<h2><span class="no">1.6</span>프로젝트 폴더 구조</h2>
+<p>여기까지 마치면 폴더는 아래와 같다. <code>dataset</code>과 <code>output</code> 폴더는 직접 만든다. 에이전트도 이 폴더 안만 본다.</p>
+<pre class="tree">readtheworld/
+├─ .venv/          가상환경. 직접 건드리지 않는다
+├─ pyproject.toml  설치한 Python 패키지 목록
+├─ dataset/
+│  ├─ raw/         내려받은 원본. 절대 고치지 않는다
+│  └─ working/     정리한 결과를 저장하는 곳
+├─ notebooks/      장별 노트북 (R용, Python용 한 쌍씩)
+├─ output/         그림과 표
+└─ AGENTS.md       에이전트에게 주는 규칙</pre>
+<p>노트북은 장마다 두 개씩 만든다. 예: <code>3_명령_R.ipynb</code>, <code>3_명령_py.ipynb</code>. 셀 순서를 똑같이 맞춰 두면 VS Code에서 좌우로 띄워 비교하기 좋다.</p>
+</section>
+<section class="panel" id="s7">
+<h2><span class="no">1.7</span>AI 에이전트와 일하는 규칙</h2>
+<p>에이전트는 폴더의 파일과 노트북 셀, 터미널 출력을 읽는다. 여러분의 머릿속 계획이나 화면에 떠 있는 그림은 보지 못한다. 그래서 규칙을 글로 적어 둔다.</p>
+<div class="single"><div class="cb sh"><span class="lang">AGENTS.md</span><pre># 이 프로젝트의 규칙
+- dataset/raw 의 파일은 읽기만 한다. 수정하거나 지우지 않는다.
+- 정리한 데이터는 dataset/working 에, 그림은 output 에 저장한다.
+- Python은 uv 가상환경(.venv, Python 3.12)을 쓴다.
+  패키지는 uv add 로만 설치하고 pip install 은 쓰지 않는다.
+- R은 tidyverse, Python은 pandas와 matplotlib만 쓴다.
+- 코드를 고칠 때는 무엇을 왜 바꿨는지 한 줄로 설명한다.
+- 데이터를 바꾸는 작업 전후에는 행 수를 출력해서 보여준다.</pre></div></div>
+<p>규칙 파일의 이름과 위치는 에이전트 종류에 따라 다르다(예: <code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>.github/copilot-instructions.md</code>). 자기가 쓰는 에이전트에 맞는 이름으로 저장한다.</p>
+<p>에이전트에게 요청할 때의 세 가지 습관:</p>
+<ul><li><strong>데이터를 먼저 보여준다.</strong> 앞 다섯 줄과 열 이름을 보여준 뒤에 요청한다.</li><li><strong>한 번에 한 단계만 시킨다.</strong> “전처리 다 해줘”가 아니라 “사용일자를 날짜형으로 바꿔줘”.</li><li><strong>고친 뒤에는 처음부터 다시 실행한다.</strong> 커널을 재시작하고 전체 셀을 실행해서 오류 없이 끝나는지 확인한다.</li></ul>
+</section>
+<section class="panel" id="s8">
+<h2><span class="no">1.8</span>동작 확인</h2>
+<h3>tidyverse 설치하기</h3>
+<p>R 쪽은 확인하기 전에 <code>tidyverse</code>를 설치한다. R 노트북(<code>test_R.ipynb</code>)의 셀에서 아래 한 줄을 실행한다. 한 번만 하면 되고, 몇 분 걸린다.</p>
+<div class="single"><div class="cb r"><span class="lang">R</span><pre>install.packages(&quot;tidyverse&quot;, repos = &quot;https://cloud.r-project.org&quot;)</pre></div></div>
+<p><code>tidyverse</code>는 패키지 하나가 아니라, 데이터 분석에 쓰는 패키지들을 한데 묶은 <strong>패키지의 패키지</strong>다. 설치하면 아래 30개가 함께 설치된다(tidyverse 2.0.0 기준). 이 패키지들이 내부에서 쓰는 다른 패키지도 자동으로 설치되지만 여기에는 적지 않았다.</p>
+<h4><code>library(tidyverse)</code> 한 줄로 불러오는 핵심 9개</h4>
+<div class="scroll"><table><thead><tr><th>패키지</th><th>하는 일</th><th>이 가이드에서</th></tr></thead><tbody><tr><td><code>ggplot2</code></td><td>그래프 그리기</td><td>5·6장의 모든 그림</td></tr><tr><td><code>dplyr</code></td><td>표 다루기: 열 고르기, 행 거르기, 새 열 만들기, 그룹 요약, 조인</td><td>3장부터 계속</td></tr><tr><td><code>tidyr</code></td><td>표 모양 바꾸기(넓은 형식 ↔ 긴 형식), 결측 채우기</td><td>4장, 과제</td></tr><tr><td><code>readr</code></td><td>CSV 같은 텍스트 파일 읽고 쓰기</td><td>2·4장</td></tr><tr><td><code>tibble</code></td><td>보기 좋게 출력되는 데이터프레임(tibble)</td><td>바로 아래 확인 셀</td></tr><tr><td><code>stringr</code></td><td>문자열과 정규표현식</td><td>3장</td></tr><tr><td><code>lubridate</code></td><td>날짜와 시각</td><td>3·4장</td></tr><tr><td><code>purrr</code></td><td>같은 작업을 여러 대상에 되풀이해 적용하기</td><td>쓰지 않는다</td></tr><tr><td><code>forcats</code></td><td>범주형 자료(factor) 다루기</td><td>쓰지 않는다</td></tr></tbody></table></div>
+<h4>함께 설치되지만 필요할 때 따로 불러오는 21개</h4>
+<div class="scroll"><table><thead><tr><th>쓰임</th><th>패키지(다루는 것)</th></tr></thead><tbody><tr><td>파일·웹에서 자료 가져오기</td><td><code>readxl</code>(엑셀 파일), <code>haven</code>(SPSS·Stata·SAS 파일), <code>googlesheets4</code>(구글 시트), <code>googledrive</code>(구글 드라이브의 파일), <code>rvest</code>(웹 페이지에서 자료 긁어 오기), <code>httr</code>(웹 API에 요청 보내기), <code>jsonlite</code>(JSON), <code>xml2</code>(XML)</td></tr><tr><td>다른 저장 방식을 dplyr 문법으로</td><td><code>dbplyr</code>(데이터베이스), <code>dtplyr</code>(큰 표를 빠르게 다루는 data.table)</td></tr><tr><td>통계 모형</td><td><code>broom</code>(모형 결과를 표로 정리), <code>modelr</code>(모형 만들기 보조)</td></tr><tr><td>작업 보조</td><td><code>hms</code>(시:분:초 자료형), <code>magrittr</code>(<code>%&gt;%</code> 파이프), <code>reprex</code>(남에게 보여 줄 재현 예제 만들기), <code>conflicted</code>(이름이 겹치는 함수 알려 주기), <code>ragg</code>(그림을 파일로 저장하는 장치)</td></tr><tr><td>tidyverse 내부의 기반 도구</td><td><code>rlang</code>(프로그래밍 도구), <code>cli</code>(콘솔 메시지 꾸미기), <code>pillar</code>(표 출력 형식), <code>rstudioapi</code>(RStudio 연동)</td></tr></tbody></table></div>
+<p>핵심 9개는 <code>library(tidyverse)</code> 한 줄이면 모두 불러와진다. 나머지는 <code>library(readxl)</code>처럼 이름을 따로 적어 불러온다. 이 가이드에서 쓰는 함수는 모두 핵심 9개 안에 있다.</p>
+<h3>두 노트북에서 확인하기</h3>
+<p>두 노트북에서 각각 아래 셀을 실행한다. 표가 출력되면 준비가 끝난 것이다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>library(tidyverse)
+tibble(역 = c(&quot;강남&quot;, &quot;홍대입구&quot;),
+       승차 = c(100, 80))</pre></div><div class="cb py"><span class="lang">Python</span><pre>import pandas as pd
+pd.DataFrame({&quot;역&quot;: [&quot;강남&quot;, &quot;홍대입구&quot;],
+              &quot;승차&quot;: [100, 80]})</pre></div></div>
+<div class="scroll"><table><thead><tr><th>확인할 것</th><th>기대하는 결과</th></tr></thead><tbody><tr><td>터미널에서 <code>uv --version</code></td><td>버전 번호 출력</td></tr><tr><td>터미널에서 <code>uv run python --version</code></td><td><code>Python 3.12.x</code></td></tr><tr><td>Python 노트북의 커널</td><td><code>.venv</code>의 Python 3.12</td></tr><tr><td>R 노트북의 커널</td><td><code>R</code></td></tr><tr><td>위 두 셀</td><td>2행 2열 표</td></tr></tbody></table></div>
+</section>
+<nav class="nav pager" aria-label="장 이동"><a href="index.html"><span>이전</span>차례</a><a href="ch2.html"><span>다음</span>2장 데이터셋 가져오기</a></nav>
+</main>
+<script>
+/* 좁은 화면에서는 레일 목차가 가로로 넘긴다. 지금 보는 장이 보이도록 가운데로 옮긴다. */
+(function () {
+  var nav = document.getElementById("rail-nav");
+  var on = nav && nav.querySelector("a.on");
+  if (!on || nav.scrollWidth <= nav.clientWidth) return;
+  nav.scrollLeft += on.getBoundingClientRect().left - nav.getBoundingClientRect().left - (nav.clientWidth - on.offsetWidth) / 2;
+})();
+</script>
+</body>
+</html>

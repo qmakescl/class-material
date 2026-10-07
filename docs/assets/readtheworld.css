@@ -1,0 +1,100 @@
+/* 「지하철과 날씨로 배우는 R·Python」 묶음 전용 위젯 (docs/data-science/readtheworld/*.html)
+   - 본문·박스·레일·표는 material.css 가 맡는다. 여기에는 이 묶음의 여덟 쪽이 함께 쓰는
+     위젯(코드 상자, 차례 노선도, 장 이동)만 둔다.
+   - 규칙은 DESIGN.md "여러 쪽으로 된 자료" 참고. */
+
+:root{
+  --accent:#0ea968; --accent-soft:#e6f8f0;   /* 과목 강조색: 데이터과학 */
+  --accent-dark:#087a4b;                      /* 흰 바탕 위 작은 글자·링크용 */
+  --r:#245fb0; --py:#8f6200;                  /* 코드 상자의 언어 표시색 */
+}
+
+.skip-link{position:fixed;top:-3rem;left:1rem;z-index:100;padding:.6rem 1rem;color:#fff;background:var(--accent-dark);
+  border-radius:4px;font-weight:700;text-decoration:none}
+.skip-link:focus{top:1rem}
+
+/* ---------- 본문 조각 ---------- */
+main a{color:var(--accent-dark)}
+main > section{scroll-margin-top:16px}
+main ul,main ol{margin:0;padding-left:22px}
+main li{margin-bottom:4px}
+main li:last-child{margin-bottom:0}
+main code{font-size:.9em;background:var(--soft);padding:1px 5px;border-radius:4px}
+main th{white-space:nowrap}
+main td code{white-space:nowrap}
+.no{font-family:var(--mono);font-size:.62em;font-weight:700;color:var(--muted);margin-right:10px;letter-spacing:0}
+
+/* 이 장을 마치면 / 자주 틀리는 곳 */
+.callout.goals > strong{display:block;margin-bottom:6px}
+.callout.caution{border-left-color:var(--warn);background:var(--warn-soft)}
+.callout.caution strong{color:var(--warn)}
+.callout code{background:rgb(255 255 255 / 65%)}
+
+/* 장 안의 절 바로가기 */
+.toc{display:flex;flex-wrap:wrap;gap:6px 8px}
+.toc a{display:inline-flex;gap:6px;align-items:baseline;font-size:13.5px;font-weight:600;color:var(--ink);
+  text-decoration:none;padding:4px 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.toc a b{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--muted)}
+.toc a:hover,.toc a:focus-visible{border-color:var(--accent)}
+
+/* ---------- 코드: R과 Python 나란히 ---------- */
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:12px}
+.cb{min-width:0;background:var(--soft);border:1px solid var(--line);border-top:3px solid var(--muted);border-radius:6px}
+.cb.r{border-top-color:var(--r)}
+.cb.py{border-top-color:var(--py)}
+.cb .lang{display:block;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.06em;line-height:1;
+  padding:10px 14px 0;color:var(--muted)}
+.cb.r .lang{color:var(--r)}
+.cb.py .lang{color:var(--py)}
+.cb pre{border:0;border-radius:0;background:transparent;padding:8px 14px 14px;font-size:13.5px;line-height:1.65;
+  color:var(--ink);white-space:pre;word-break:normal;overflow-wrap:normal}
+pre.tree{background:var(--soft);font-size:14px;line-height:1.7;padding:14px 18px;white-space:pre;word-break:normal;
+  overflow-wrap:normal}
+
+/* ---------- 화면 갈무리 ---------- */
+.shot{margin:0;display:flex;flex-direction:column;gap:8px}
+.shot img{display:block;width:100%;max-width:760px;height:auto;border:1px solid var(--line);border-radius:6px}
+.shot figcaption{font-size:14px;color:var(--muted)}
+
+/* ---------- 장 이동 ---------- */
+.pager{padding-top:20px}
+.pager a{display:block;text-decoration:none;font-weight:700;color:var(--ink)}
+.pager a span{display:block;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--muted)}
+.pager a:last-child{margin-left:auto;text-align:right}
+.pager a:hover,.pager a:focus-visible{color:var(--accent-dark)}
+
+/* ---------- 첫 쪽: 한눈에 보기와 차례 노선도 ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 32px;margin:0}
+.facts div{border-top:1px solid var(--line);padding:12px 0}
+.facts dt{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--muted)}
+.facts dd{margin:4px 0 0}
+.route{list-style:none;margin:0;padding:0;position:relative}
+.route::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:6px;background:var(--accent);border-radius:3px}
+.route li{position:relative;padding:0 0 26px 64px;margin:0}
+.route li:last-child{padding-bottom:0}
+.route .dot{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--surface);
+  border:5px solid var(--accent);display:grid;place-items:center;font-family:var(--mono);font-size:15px;font-weight:600;
+  color:var(--ink)}
+.route a.st{display:block;text-decoration:none;color:var(--ink);padding-top:6px}
+.route a.st h3{font-size:20px;font-weight:800;margin:0 0 4px}
+.route a.st:hover h3,.route a.st:focus-visible h3{color:var(--accent-dark)}
+.route p{color:var(--muted)}
+.route .out{font-family:var(--mono);font-size:13px;margin-top:4px}
+.nw{white-space:nowrap}
+
+/* ---------- 참고 상자: 본문 흐름에서 벗어난 보충 설명(문제 해결 등) ---------- */
+.refbox{display:flex;flex-direction:column;gap:14px;background:var(--paper);border:1px solid var(--line);
+  border-left:3px solid var(--muted);border-radius:0 8px 8px 0;padding:18px 20px}
+.refbox > .tag{align-self:flex-start;background:var(--muted);color:var(--surface)}
+.refbox td:first-child{white-space:nowrap}
+.refbox .cb{background:var(--surface)}
+.refbox code{background:var(--surface)}
+.refbox .callout code{background:rgb(255 255 255 / 65%)}
+
+/* ---------- 화면 갈무리 여러 장: 두 칸 격자(좁은 화면에서는 한 칸) ---------- */
+.shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 14px}
+.shots .shot a{display:block}
+.shots .shot img{max-width:100%}
+.shots figcaption b{font-weight:700;color:var(--ink);margin-right:6px}
+.shots-note{font-size:13px;color:var(--muted)}
+@media (max-width:640px){.shots{grid-template-columns:minmax(0,1fr)}}

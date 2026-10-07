@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>지하철과 날씨로 배우는 R·Python | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/readtheworld/">
+<meta name="description" content="2025년 서울 지하철 승하차 인원과 기상청 관측 자료를 찾고, 읽고, 다듬고, 요약하는 과정을 R과 Python으로 나란히 따라 하는 데이터과학 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="지하철과 날씨로 배우는 R·Python | Q의 아카이브">
+<meta property="og:description" content="비 오는 날 지하철 승객은 줄어들까? 실제 공공데이터를 찾고, 읽고, 다듬고, 요약하는 과정을 R과 Python으로 나란히 따라 합니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/readtheworld/">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="데이터과학 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="지하철과 날씨로 배우는 R·Python | Q의 아카이브">
+<meta name="twitter:description" content="비 오는 날 지하철 승객은 줄어들까? 실제 공공데이터를 찾고, 읽고, 다듬고, 요약하는 과정을 R과 Python으로 나란히 따라 합니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
+<link rel="stylesheet" href="../../assets/material.css">
+<link rel="stylesheet" href="../../assets/readtheworld.css">
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../../index.html#data-science">← 처음으로</a>
+  <h1>지하철과 날씨로<br>배우는 R·Python</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="index.html" class="on" aria-current="page"><b>00</b><span>차례</span></a>
+    <a href="ch1.html"><b>01</b><span>작업환경 구축</span></a>
+    <a href="ch2.html"><b>02</b><span>데이터셋 가져오기</span></a>
+    <a href="ch3.html"><b>03</b><span>R과 Python의 데이터 다루는 명령</span></a>
+    <a href="ch4.html"><b>04</b><span>데이터 전처리</span></a>
+    <a href="ch5.html"><b>05</b><span>기초 통계 구하기</span></a>
+    <a href="ch6.html"><b>06</b><span>데이터로 인사이트 얻기</span></a>
+    <a href="hw.html"><b>과제</b><span>시간대로 나누어 다시 보기</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#데이터과학</span>
+    <span class="rail-tag">#사례분석</span>
+    <span class="rail-tag">#R</span>
+    <span class="rail-tag">#Python</span>
+    <span class="rail-tag">#공공데이터</span>
+    <span class="rail-tag">#데이터전처리</span>
+    <span class="rail-tag">#기술통계</span>
+  </div>
+  <footer>코드는 왼쪽이 R, 오른쪽이 Python입니다. 같은 줄 높이의 코드가 같은 일을 합니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+<main id="content">
+<header class="panel">
+<div class="eyebrow">데이터 다루기 · 실습 자료</div>
+<h2 class="page-title">지하철과 날씨로 배우는 R·Python</h2>
+<p class="lede">비 오는 날, 더운 날에 지하철 승객은 어떻게 달라질까? 이 질문 하나에 답하기 위해 2025년 한 해의 실제 데이터를 찾고, 읽고, 다듬고, 요약한다. 모든 작업을 R과 Python 두 가지로 나란히 해 본다.</p>
+<dl class="facts">
+<div><dt>대상</dt><dd>프로그래밍을 처음 하는 비전공 학생</dd></div>
+<div><dt>도구</dt><dd>VS Code, Jupyter Notebook, AI 에이전트</dd></div>
+<div><dt>주 데이터</dt><dd>서울교통공사 역별 일별 시간대별 승하차인원, 2025년</dd></div>
+<div><dt>함께 쓰는 데이터</dt><dd>기상청 종관기상관측 일 자료, 서울 지점, 2025년</dd></div>
+<div><dt>분석 기간</dt><dd>2025년 1월 1일~12월 31일(365일)</dd></div>
+</dl>
+</header>
+<section class="panel" id="route">
+<h2>차례</h2>
+<ol class="route">
+<li><span class="dot">1</span><a class="st" href="ch1.html"><h3>작업환경 구축</h3></a><p>R을 설치하고, uv로 Python 3.12 가상환경을 만들고, VS Code에서 두 언어의 노트북을 실행한다.</p><p class="out">결과물: R·Python 커널이 연결된 프로젝트 폴더</p></li>
+<li><span class="dot">2</span><a class="st" href="ch2.html"><h3>데이터셋 가져오기</h3></a><p>질문에 맞는 공공데이터를 직접 찾아 내려받고, 노트북으로 읽어 들인다.</p><p class="out">결과물: dataset/raw 의 2025년 지하철·기상 원본 파일</p></li>
+<li><span class="dot">3</span><a class="st" href="ch3.html"><h3>R과 Python의 데이터 다루는 명령</h3></a><p>고르기, 거르기, 그룹 요약을 익히고, 정규표현식과 날짜 자료형을 다룬다.</p><p class="out">결과물: 날짜형으로 바꾼 표와 두 언어 대조표</p></li>
+<li><span class="dot">4</span><a class="st" href="ch4.html"><h3>데이터 전처리</h3></a><p>원본을 점검하고, 하루 단위로 요약하고, 기상 데이터와 조인한다.</p><p class="out">결과물: dataset/working/daily.csv</p></li>
+<li><span class="dot">5</span><a class="st" href="ch5.html"><h3>기초 통계 구하기</h3></a><p>평균과 퍼짐, 분포, 집단 비교, 상관을 구하고 그림으로 확인한다.</p><p class="out">결과물: 요약표와 그림 세 장</p></li>
+<li><span class="dot">6</span><a class="st" href="ch6.html"><h3>데이터로 인사이트 얻기</h3></a><p>비 오는 날 승객이 줄어드는지 확인하고, 각자 질문 하나에 답한다.</p><p class="out">결과물: 한 문단과 그림 한 장</p></li>
+<li><span class="dot">과</span><a class="st" href="hw.html"><h3>과제: 시간대로 나누어 다시 보기</h3></a><p>표를 긴 형식으로 바꾸고, 날씨의 영향은 낮 시간대에서 봐야 한다는 주장이 맞는지 자기 그림으로 판단한다.</p><p class="out">결과물: 시간대별 그림 두 장과 설명 한 쪽</p></li>
+</ol>
+</section>
+<section class="panel" id="how-to-read">
+<h2>읽는 법</h2>
+<ul>
+<li>코드는 왼쪽에 R, 오른쪽에 Python을 나란히 둔다. 같은 줄 높이의 코드가 같은 일을 한다.</li>
+<li>장마다 R용과 Python용 노트북을 하나씩 만들고, 가이드의 코드를 직접 입력해 실행한다.</li>
+<li>주황색 상자는 자주 틀리는 곳이다.</li>
+<li>코드 옆의 <code># 365</code> 같은 숫자는 실제 파일에서 나와야 하는 값이다. 다르게 나오면 앞 단계를 다시 본다.</li>
+</ul>
+</section>
+<section class="panel" id="sources">
+<h2>데이터 출처</h2>
+<p>이 가이드는 가상 데이터를 쓰지 않는다. 아래 두 공공데이터의 원본 파일을 각자 내려받아 쓴다. 파일을 이 자료실에서 다시 나눠 주지 않으므로, <a href="ch2.html#s2">2장</a>의 안내에 따라 직접 받는다.</p>
+<div class="scroll"><table><thead><tr><th>자료</th><th>제공</th><th>받는 곳</th><th>내려받을 때</th></tr></thead><tbody><tr><td>서울교통공사_역별 일별 시간대별 승하차인원 정보, 2025년 파일</td><td class="nw">서울교통공사</td><td class="nw"><a href="https://data.seoul.go.kr/dataList/OA-12921/S/1/datasetView.do" target="_blank" rel="noopener noreferrer">서울 열린데이터광장</a></td><td>파일내려받기의 2025년 파일</td></tr><tr><td>종관기상관측(ASOS) 일 자료, 서울(108) 지점, 2025-01-01~2025-12-31, 평균기온·최고기온·일강수량</td><td class="nw">기상청</td><td class="nw"><a href="https://data.kma.go.kr/data/grnd/selectAsosRltmList.do?pgmNo=36" target="_blank" rel="noopener noreferrer">기상자료개방포털</a></td><td><strong>회원 가입과 로그인이 필요하다.</strong> 고를 항목은 2장의 화면 참고</td></tr></tbody></table></div>
+<p>2~6장의 코드는 위 두 파일로 R 4.6(tidyverse 2.0)과 Python 3.12(pandas 3.0, matplotlib 3.11)에서 처음부터 끝까지 실행해 확인했다(2026년 10월).</p>
+</section>
+<nav class="nav pager" aria-label="장 이동"><a href="ch1.html"><span>시작</span>1장 작업환경 구축</a></nav>
+</main>
+<script>
+/* 좁은 화면에서는 레일 목차가 가로로 넘긴다. 지금 보는 장이 보이도록 가운데로 옮긴다. */
+(function () {
+  var nav = document.getElementById("rail-nav");
+  var on = nav && nav.querySelector("a.on");
+  if (!on || nav.scrollWidth <= nav.clientWidth) return;
+  nav.scrollLeft += on.getBoundingClientRect().left - nav.getBoundingClientRect().left - (nav.clientWidth - on.offsetWidth) / 2;
+})();
+</script>
+</body>
+</html>

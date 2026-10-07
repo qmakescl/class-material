@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>2장 데이터셋 가져오기 · 지하철과 날씨로 배우는 R·Python | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/readtheworld/ch2.html">
+<meta name="description" content="서울 열린데이터광장과 기상자료개방포털에서 지하철·기상 자료를 직접 찾아 내려받고 R과 Python으로 읽어 들이는 데이터과학 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="2장 데이터셋 가져오기 · 지하철과 날씨로 배우는 R·Python | Q의 아카이브">
+<meta property="og:description" content="질문에 맞는 공공데이터를 직접 찾아 내려받고, 노트북으로 읽어 들인다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/readtheworld/ch2.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="데이터과학 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="2장 데이터셋 가져오기 · 지하철과 날씨로 배우는 R·Python | Q의 아카이브">
+<meta name="twitter:description" content="질문에 맞는 공공데이터를 직접 찾아 내려받고, 노트북으로 읽어 들인다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
+<link rel="stylesheet" href="../../assets/material.css">
+<link rel="stylesheet" href="../../assets/readtheworld.css">
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../../index.html#data-science">← 처음으로</a>
+  <h1>지하철과 날씨로<br>배우는 R·Python</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="index.html"><b>00</b><span>차례</span></a>
+    <a href="ch1.html"><b>01</b><span>작업환경 구축</span></a>
+    <a href="ch2.html" class="on" aria-current="page"><b>02</b><span>데이터셋 가져오기</span></a>
+    <a href="ch3.html"><b>03</b><span>R과 Python의 데이터 다루는 명령</span></a>
+    <a href="ch4.html"><b>04</b><span>데이터 전처리</span></a>
+    <a href="ch5.html"><b>05</b><span>기초 통계 구하기</span></a>
+    <a href="ch6.html"><b>06</b><span>데이터로 인사이트 얻기</span></a>
+    <a href="hw.html"><b>과제</b><span>시간대로 나누어 다시 보기</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#데이터과학</span>
+    <span class="rail-tag">#사례분석</span>
+    <span class="rail-tag">#R</span>
+    <span class="rail-tag">#Python</span>
+    <span class="rail-tag">#공공데이터</span>
+    <span class="rail-tag">#데이터전처리</span>
+    <span class="rail-tag">#기술통계</span>
+  </div>
+  <footer>코드는 왼쪽이 R, 오른쪽이 Python입니다. 같은 줄 높이의 코드가 같은 일을 합니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+<main id="content">
+<header class="panel">
+<div class="eyebrow">데이터 다루기 · 2장 / 6</div>
+<h2 class="page-title">데이터셋 가져오기</h2>
+<p class="lede">질문에 맞는 공공데이터를 직접 찾아 내려받고, 노트북으로 읽어 들인다.</p>
+<div class="callout goals"><strong>이 장을 마치면</strong><ul><li>질문에 필요한 데이터가 무엇인지 말로 적을 수 있다.</li><li>공공데이터 포털에서 데이터를 찾고 설명서를 읽을 수 있다.</li><li>내려받은 CSV를 R과 Python에서 읽어 들이고 구조를 설명할 수 있다.</li></ul></div>
+<nav class="toc" aria-label="이 장의 차례"><a href="#s1"><b>2.1</b>질문에서 출발하기</a><a href="#s2"><b>2.2</b>직접 찾아보기</a><a href="#s3"><b>2.3</b>데이터 설명서 읽기</a><a href="#s4"><b>2.4</b>파일을 프로젝트에 넣기</a><a href="#s5"><b>2.5</b>노트북에서 읽어 들이기: 인코딩</a><a href="#s6"><b>2.6</b>첫인상 확인하기</a><a href="#s7"><b>2.7</b>예고: API로 가져오기</a></nav>
+</header>
+<section class="panel" id="s1">
+<h2><span class="no">2.1</span>질문에서 출발하기</h2>
+<p>이 가이드 전체가 답하려는 질문은 하나다. <strong>비 오는 날, 더운 날에 지하철 승객은 어떻게 달라질까?</strong></p>
+<p>질문을 데이터의 말로 바꾸면 필요한 것이 보인다.</p>
+<div class="scroll"><table><thead><tr><th>필요한 것</th><th>단위</th><th>찾을 곳</th></tr></thead><tbody><tr><td>지하철을 탄 사람 수</td><td>날짜별, 역별, 가능하면 시간대별</td><td>서울 열린데이터광장</td></tr><tr><td>그날의 기온과 강수량</td><td>날짜별, 서울</td><td>기상청 기상자료개방포털</td></tr></tbody></table></div>
+<p>두 데이터에 공통으로 들어 있는 것은 <strong>날짜</strong>다. 4장에서 이 날짜를 열쇠로 두 표를 합친다. 그러려면 두 데이터의 <strong>기간이 같아야</strong> 한다. 이 가이드는 2025년 1월 1일부터 12월 31일까지 한 해를 쓴다.</p>
+</section>
+<section class="panel" id="s2">
+<h2><span class="no">2.2</span>직접 찾아보기</h2>
+<h3>지하철 승하차 인원</h3>
+<ol><li>서울 열린데이터광장(data.seoul.go.kr)에서 <code>지하철 승하차</code>를 검색한다.</li><li>비슷한 이름의 데이터가 여러 개 나온다. 아래 표를 보고 질문에 맞는 것을 고른다.</li><li><strong>“서울교통공사_역별 일별 시간대별 승하차인원 정보”</strong>의 파일내려받기에서 맨 위(첫 번째) 항목인 2025년 파일 <code>서울교통공사_역별 일별 시간대별 승하차인원_20251231.csv</code>(약 24MB)를 받는다.</li></ol>
+<div class="scroll"><table><thead><tr><th>데이터 이름</th><th>한 행의 단위</th><th>이번 질문에</th></tr></thead><tbody><tr><td>지하철호선별 역별 승하차 인원 정보</td><td>날짜 × 역 (하루 합계)</td><td>쓸 수 있지만 시간대가 없다</td></tr><tr><td>지하철 호선별 역별 시간대별 승하차 인원 정보</td><td><strong>월</strong> × 역 × 시간대</td><td>날짜가 없어 날씨와 합칠 수 없다</td></tr><tr><td>서울교통공사_역별 일별 시간대별 승하차인원 정보</td><td>날짜 × 역 × 승차/하차, 시간대는 열</td><td><strong>이것을 쓴다</strong></td></tr></tbody></table></div>
+<div class="callout caution"><strong>이름만 보고 고르지 않는다</strong> 두 번째 데이터는 이름에 “시간대별”이 있어 가장 알맞아 보이지만 월 단위 합계다. 미리보기에서 날짜 열이 있는지, 한 행이 무엇인지 꼭 확인한다.</div>
+<h3>기온과 강수량</h3>
+<p>기상 자료는 기상청 기상자료개방포털에서 받는다. <strong>회원 가입을 하고 로그인해야 파일을 내려받을 수 있다.</strong> <a href=="https://data.kma.go.kr/cmmn/main.do">기상자료개방포털</a>에 가입후 파일을 다운로드 받는다.</a></p>
+<ol>
+  <li>기상자료개방포털(<code>data.kma.go.kr</code>)에 로그인한다.</li>
+  <li><strong>데이터</strong> 메뉴에서 <strong>기상관측</strong> 항목에서  <strong>지상</strong> 클리 후 종관기상관측(ASOS)</strong>에서 <strong>자료</strong> 탭을 연다.</li>
+  <li>검색조건을 아래 화면과 같이 고른다. 자료형태 <strong>일 자료</strong>, 기간 <strong>20250101 ~ 20251231</strong>. 지점은 서울특별시 앞의 <strong>+</strong>를 눌러 펼친 뒤 <strong>서울 (108)</strong> 하나만 체크한다. 관악산 (116)은 체크하지 않는다.</li><li>요소는 기온의 <strong>평균기온</strong>과 <strong>최고기온</strong>, 강수의 <strong>일강수량</strong> 세 가지만 체크한다.</li><li><strong>조회</strong>를 누르면 화면 아래에 자료보기가 나타난다. 그 오른쪽의 <strong>CSV</strong> 버튼으로 내려받는다. 파일은 <code>OBS_ASOS_DD_20261007222035.csv</code>처럼 <code>OBS_ASOS_DD_</code> 뒤에 내려받은 시각과 일련번호가 붙은 이름으로 저장된다.</li>
+</ol>
+<figure class="shot"><img src="../../assets/images/kma-download.png" width="950" height="580" loading="lazy" alt="기상자료개방포털 종관기상관측 자료 탭의 검색조건 화면. 자료형태는 일 자료, 기간은 20250101부터 20251231, 지점은 서울특별시가 펼쳐져 있고 그 아래 관악산 (116)은 체크되지 않고 서울 (108)만 체크되어 있다. 요소는 기온의 평균기온과 최고기온, 강수의 일강수량이 체크되어 있고, 아래에 조회 버튼이 있다."><figcaption>기상자료개방포털 종관기상관측(ASOS) 자료 탭의 검색조건. 서울특별시를 펼쳐 서울 (108)만 체크했고, 관악산 (116)은 체크하지 않았다. 화면 출처: 기상청 기상자료개방포털.</figcaption></figure>
+<div class="callout caution"><strong>지점은 하나만</strong> 서울특별시 아래에는 관악산 (116)과 서울 (108) 두 지점이 있다. 서울특별시를 통째로 체크하면 두 지점이 함께 들어와 같은 날짜가 두 행씩 생기고, 4장의 조인에서 행 수가 늘어난다.</div>
+<p>이 파일은 지금 열어 보지 않고 4장에서 읽는다. 하루가 한 행으로 365행이고, 열은 <code>지점</code>, <code>지점명</code>, <code>일시</code>, <code>평균기온(°C)</code>, <code>최고기온(°C)</code>, <code>일강수량(mm)</code> 여섯 개다.</p>
+<h3>출처</h3>
+<ol class="refs"><li>서울교통공사, 「서울교통공사_역별 일별 시간대별 승하차인원 정보」 2025년 파일. 서울 열린데이터광장, <a href="https://data.seoul.go.kr/dataList/OA-12921/S/1/datasetView.do" target="_blank" rel="noopener noreferrer">data.seoul.go.kr/dataList/OA-12921</a>.</li><li>기상청, 종관기상관측(ASOS) 일 자료, 서울(108) 지점, 2025-01-01~2025-12-31. 기상자료개방포털, <a href="https://data.kma.go.kr/data/grnd/selectAsosRltmList.do?pgmNo=36" target="_blank" rel="noopener noreferrer">data.kma.go.kr</a>. 로그인한 뒤 내려받을 수 있다.</li></ol>
+</section>
+<section class="panel" id="s3">
+<h2><span class="no">2.3</span>데이터 설명서 읽기</h2>
+<p>파일을 받은 설명 페이지에서 아래 내용을 확인해 노트북 첫 셀에 적어 둔다. 숫자를 읽기 전에 그 숫자가 무엇인지부터 아는 것이다.</p>
+<div class="scroll"><table><thead><tr><th>확인할 것</th><th>지하철 데이터</th><th>기상 데이터</th></tr></thead><tbody><tr><td>무엇을 세거나 잰 것인가</td><td>시간대별로 역에서 타고 내린 인원</td><td>서울 관측소에서 잰 하루의 평균기온, 최고기온, 강수량</td></tr><tr><td>어떤 단위인가</td><td>날짜 × 역 × 승차/하차마다 한 행. 시간대 20개가 열로 펼쳐져 있다</td><td>날짜마다 한 행. 기온은 °C, 강수량은 mm</td></tr><tr><td>어디까지 들어 있는가</td><td>서울교통공사가 운영하는 1~8호선 구간. 9호선과 코레일 구간은 없다</td><td>서울 (108) 지점 한 곳. 서울 전체의 평균이 아니다</td></tr><tr><td>언제 갱신되는가</td><td>1년에 한 번, 연도별 파일로 올라온다. 이 가이드는 가장 최근인 2025년 파일을 쓴다</td><td>기간을 직접 골라 받는다. 이 가이드는 2025년 한 해를 받았다</td></tr><tr><td>빈칸은 무엇을 뜻하는가</td><td>표 아래에 딸려 온 빈 행은 자료가 아니다(2.6에서 지운다)</td><td>일강수량에 빈칸이 많다. 측정하지 못한 것인지 비가 오지 않은 것인지 설명에서 찾아 적어 둔다. 4장에서 쓴다</td></tr></tbody></table></div>
+</section>
+<section class="panel" id="s4">
+<h2><span class="no">2.4</span>파일을 프로젝트에 넣기</h2>
+<p>받은 파일을 <code>dataset/raw</code>에 넣는다. 원래 이름은 길거나 무엇이 들어 있는지 알기 어려우므로, 내용을 알 수 있는 이름으로 바꾼다. <strong>내용은 건드리지 않는다.</strong> 엑셀로 열어서 저장하면 날짜와 숫자 형식이 바뀌거나 빈 행이 딸려 붙을 수 있다.</p>
+<div class="scroll"><table><thead><tr><th>원래 이름</th><th>바꾼 이름</th></tr></thead><tbody><tr><td><code>서울교통공사_역별 일별 시간대별 승하차인원_20251231.csv</code></td><td><code>seoul-subway-2025.csv</code></td></tr><tr><td><code>OBS_ASOS_DD_20261007222035.csv</code><br>(뒤의 숫자는 받은 시각과 일련번호라 사람마다 다르다)</td><td><code>seoul-temp-raining-2025.csv</code></td></tr></tbody></table></div>
+</section>
+<section class="panel" id="s5">
+<h2><span class="no">2.5</span>노트북에서 읽어 들이기: 인코딩</h2>
+<p>컴퓨터는 글자를 숫자로 저장한다. 어떤 글자를 어떤 숫자로 적을지 정해 둔 약속을 <strong>인코딩</strong>이라고 한다. 한글 파일에서는 세 가지를 만난다.</p>
+<div class="scroll"><table><thead><tr><th>인코딩</th><th>특징</th><th>주로 만나는 곳</th></tr></thead><tbody><tr><td>UTF-8</td><td>전 세계의 글자를 하나의 약속으로 적는다. 지금의 표준</td><td>웹, 최근 프로그램. R과 Python이 기본으로 가정하는 것</td></tr><tr><td>EUC-KR</td><td>한글을 위해 만든 오래된 약속</td><td>한국 공공데이터, 예전 시스템에서 내보낸 CSV</td></tr><tr><td>CP949</td><td>EUC-KR에 글자를 더 넣은 Windows판. EUC-KR 파일은 CP949로도 읽힌다</td><td>Windows의 한글 엑셀에서 저장한 CSV</td></tr></tbody></table></div>
+<p>CSV 파일 안에는 자기가 어떤 인코딩인지 적혀 있지 않다. <strong>읽는 쪽이 알려줘야</strong> 한다. 알려주지 않으면 R과 Python은 UTF-8이라고 가정한다. 이 지하철 파일은 <strong>EUC-KR</strong>이다. 기상청에서 받은 파일도 같다.</p>
+<h3>먼저 틀려 보기</h3>
+<p>인코딩을 알려주지 않고 읽으면 어떻게 되는지 한 번 확인해 둔다. 앞으로 자주 만날 오류다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>library(tidyverse)
+
+read_csv(&quot;../dataset/raw/seoul-subway-2025.csv&quot;)
+# 열 이름과 한글 값이 깨져 보이거나
+# invalid multibyte string 오류가 난다</pre></div><div class="cb py"><span class="lang">Python</span><pre>import pandas as pd
+
+pd.read_csv(&quot;../dataset/raw/seoul-subway-2025.csv&quot;)
+# UnicodeDecodeError: &#x27;utf-8&#x27; codec can&#x27;t
+# decode byte 0xbf in position 0: ...</pre></div></div>
+<p>Python의 오류를 풀어 읽으면 “UTF-8 약속으로 읽으려 했는데, 맨 앞의 숫자부터 그 약속에 없는 값이다”라는 뜻이다. 파일이 망가진 것이 아니라 약속이 다른 것이다.</p>
+<h3>인코딩을 알려주고 읽기</h3>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- read_csv(
+  &quot;../dataset/raw/seoul-subway-2025.csv&quot;,
+  locale = locale(encoding = &quot;EUC-KR&quot;)
+)</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway = pd.read_csv(
+    &quot;../dataset/raw/seoul-subway-2025.csv&quot;,
+    encoding=&quot;euc-kr&quot;,
+)</pre></div></div>
+<div class="callout caution"><strong>EUC-KR로도 오류가 날 때</strong> EUC-KR에 없는 글자가 섞여 있으면 중간에서 오류가 난다. 그때는 글자가 더 많은 CP949로 바꾼다. R은 <code>encoding = "CP949"</code>, Python은 <code>encoding="cp949"</code>.</div>
+<h3>인코딩을 모를 때 알아내는 법</h3>
+<ul><li><strong>설명 페이지를 본다.</strong> 데이터 설명이나 공지에 적혀 있는 경우가 있다.</li><li><strong>VS Code로 열어 본다.</strong> 파일을 열면 오른쪽 아래 상태 표시줄에 인코딩(보통 UTF-8)이 나온다. 한글이 깨져 보이면 그 표시를 누르고 <strong>Reopen with Encoding</strong>(인코딩하여 다시 열기)에서 Korean (EUC-KR)을 골라 본다. 제대로 보이면 그것이 답이다. 보기만 하고 저장하지 않는다.</li><li><strong>R에게 추측을 시킨다.</strong> <code>guess_encoding("../dataset/raw/seoul-subway-2025.csv")</code>이 가능성이 높은 순서로 알려준다.</li><li><strong>둘 중 하나다.</strong> 한국에서 만든 CSV는 대부분 UTF-8 아니면 EUC-KR(CP949)이다. 한쪽에서 실패하면 다른 쪽을 써 본다.</li></ul>
+<div class="callout caution"><strong>저장할 때는 UTF-8로</strong> 우리가 만드는 파일은 UTF-8로 저장한다. 4장에서 정리한 결과를 저장할 때 다시 나온다. 엑셀에서도 열어야 하는 파일은 Python에서 <code>utf-8-sig</code>를 쓴다.</div>
+</section>
+<section class="panel" id="s6">
+<h2><span class="no">2.6</span>첫인상 확인하기</h2>
+<p>읽어 들인 직후에는 항상 세 가지를 본다. 크기, 열의 자료형, 앞부분.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>dim(subway)        # 행 수, 열 수
+glimpse(subway)    # 열 이름과 자료형
+head(subway)       # 앞 6행</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway.shape       # 행 수, 열 수
+subway.info()      # 열 이름과 자료형
+subway.head()      # 앞 5행</pre></div></div>
+<p>행 수는 199,424로 나온다. 그런데 이 파일은 표 맨 아래에 쉼표만 있는 빈 행이 딸려 있다. 날짜가 빈 행을 세어 보고(134행) 지운다. 지우고 나면 199,290행이다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>sum(is.na(subway$수송일자))   # 빈 행의 수
+
+subway &lt;- subway |&gt;
+  filter(!is.na(수송일자))</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;수송일자&quot;].isna().sum()   # 빈 행의 수
+
+subway = subway.dropna(how=&quot;all&quot;)</pre></div></div>
+<p>Python에서는 숫자가 <code>411.0</code>처럼 소수로 보인다. 빈 행 때문에 숫자 열이 실수형으로 읽힌 것이고, 계산 결과는 같다.</p>
+<p>열은 26개다. 앞의 6개가 “무엇에 대한 행인가”를, 뒤의 20개가 시간대별 인원을 담는다.</p>
+<div class="scroll"><table><thead><tr><th>연번</th><th>수송일자</th><th>호선</th><th>역번호</th><th>역명</th><th>승하차구분</th><th>06시이전</th><th>06-07시간대</th><th>…</th><th>23-24시간대</th><th>24시이후</th></tr></thead><tbody><tr><td>1</td><td>2025-01-01</td><td>1호선</td><td>150</td><td>서울역</td><td>승차</td><td>411</td><td>317</td><td>…</td><td>838</td><td>29</td></tr><tr><td>2</td><td>2025-01-01</td><td>1호선</td><td>150</td><td>서울역</td><td>하차</td><td>261</td><td>715</td><td>…</td><td>455</td><td>130</td></tr><tr><td>3</td><td>2025-01-01</td><td>1호선</td><td>151</td><td>시청</td><td>승차</td><td>62</td><td>70</td><td>…</td><td>201</td><td>1</td></tr></tbody></table></div>
+<p>여기서 눈여겨볼 점이 세 가지 있다.</p>
+<ul><li><strong>한 역의 하루가 두 행이다.</strong> 승차 한 행, 하차 한 행.</li><li><strong>시간대가 옆으로 펼쳐져 있다.</strong> 이런 모양을 넓은 형식이라고 한다. 과제에서 긴 형식으로 바꾼다.</li><li><strong><code>수송일자</code>는 <code>2025-01-01</code> 모양이다.</strong> 날짜처럼 보이지만, 컴퓨터가 이것을 날짜로 알고 있는지 글자로 알고 있는지는 따로 확인해야 한다. 3장에서 다룬다.</li></ul>
+</section>
+<section class="panel" id="s7">
+<h2><span class="no">2.7</span>예고: API로 가져오기</h2>
+<p>지금은 사람이 누리집에서 파일을 내려받았다. API는 같은 일을 <strong>코드가 주소로 요청해서</strong> 받는 방법이다. 매일 새 자료를 받아야 할 때 쓴다.</p>
+<div class="scroll"><table><thead><tr><th></th><th>파일 내려받기</th><th>API</th></tr></thead><tbody><tr><td>받는 방법</td><td>누리집에서 클릭</td><td>코드에서 주소로 요청</td></tr><tr><td>준비물</td><td>없음(또는 회원 가입)</td><td>인증키 발급</td></tr><tr><td>형태</td><td>CSV 파일</td><td>JSON 또는 XML</td></tr><tr><td>알맞은 경우</td><td>한 번 받아 분석</td><td>반복해서 최신 자료 받기</td></tr></tbody></table></div>
+<p>이 가이드에서는 API를 직접 쓰지 않는다. 한 가지만 미리 기억해 둔다. 인증키는 비밀번호와 같아서, 노트북이나 코드에 직접 적지 않는다.</p>
+</section>
+<nav class="nav pager" aria-label="장 이동"><a href="ch1.html"><span>이전</span>1장 작업환경 구축</a><a href="ch3.html"><span>다음</span>3장 R과 Python의 데이터 다루는 명령</a></nav>
+</main>
+<script>
+/* 좁은 화면에서는 레일 목차가 가로로 넘긴다. 지금 보는 장이 보이도록 가운데로 옮긴다. */
+(function () {
+  var nav = document.getElementById("rail-nav");
+  var on = nav && nav.querySelector("a.on");
+  if (!on || nav.scrollWidth <= nav.clientWidth) return;
+  nav.scrollLeft += on.getBoundingClientRect().left - nav.getBoundingClientRect().left - (nav.clientWidth - on.offsetWidth) / 2;
+})();
+</script>
+</body>
+</html>
