@@ -115,5 +115,15 @@ window.MATERIALS = [
     practice: true,
     tags: ["데이터과학", "사례분석", "R", "Python", "공공데이터", "데이터전처리", "기술통계"],
     date: "2026-10-07"
+  },
+  {
+    subject: "statistics",
+    label: "R 실습",
+    title: "모집단 평균에 대한 가설검정",
+    description: "VS Code에서 R로 단일표본·독립표본·대응표본 t 검정을 실행하고, t·자유도·p값이 영가설 아래의 분포에서 어디에 놓이는지와 효과크기를 확인합니다.",
+    href: "statistics/mean-test-with-r.html",
+    practice: true,
+    tags: ["통계", "시각화", "가설검정", "t검정", "p값", "효과크기", "R"],
+    date: "2026-10-10"
   }
 ];

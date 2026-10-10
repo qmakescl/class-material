@@ -170,10 +170,12 @@
 | 토큰 | `--paper` `--surface` `--soft` `--ink` `--muted` `--line` `--navy` `--amber` `--accent`/`--accent-soft` `--pos` `--neg` `--ok` `--warn`(각 `-soft`) `--shadow` `--sans` `--mono` `--rail` `--radius` |
 | 기본 | `body`, `h1`~`h4`(산세리프 800, 자간 -0.02em), `p`, `a`, `code`/`.mono`/`.num`, `.muted`, `.note`, `.lede`, `.eyebrow`, `.katex-display` |
 | 레이아웃 | `.rail`(레일·목차·모바일 전환), `main`(레일 폭만큼 왼쪽 여백, 최대 1060px), `main > section` |
-| 박스 | `.panel`(기본 박스), `.panel.raised`(그림자), `.callout`(`.warn`), `.recap`, `.row`/`.col`, `.scroll` |
+| 박스 | `.panel`(기본 박스), `.panel.raised`(그림자), `.callout`(`.warn`, 주의 상자 `.caution`), `.recap`, `.row`/`.col`, `.scroll` |
 | 조각 | `.tag`, `.readout`(`.math`), `.metrics`, `.legend`, `.nav` |
 | 입력 | `.btn`(`.ghost`), `.controls`, `input[type=range]` |
 | 표·기타 | `table`/`th`/`td`/`td.n`, `details`, `pre`, `ol.refs` |
+| 코드 | 코드 상자 `.cb`(`.r` R, `.py` Python, 없으면 출력·셸) + 언어 이름표 `.lang`, 폴더 구조 `pre.tree` |
+| 그림 | 화면 갈무리 `figure.shot`(`img` + `figcaption`) |
 
 **규칙**
 
@@ -277,9 +279,10 @@
   `materials.js`에는 `index.html`을 가리키는 항목 **하나만** 추가한다.
 - 쪽들이 함께 쓰는 위젯 스타일은 쪽마다 `<style>`로 복사하지 않고
   `docs/assets/{묶음}.css` 한 파일에 두고 `material.css` 뒤에 불러온다
-  (`readtheworld.css`: R·Python 코드 상자 `.pair`/`.cb`, 차례 `.route`,
-  장 이동 `.pager`, 절 바로가기 `.toc`, 주의 상자 `.callout.caution`,
-  본문 흐름에서 벗어난 보충 설명을 담는 참고 상자 `.refbox`).
+  (`readtheworld.css`: R·Python 코드 상자를 나란히 놓는 `.pair`, 차례 `.route`,
+  장 이동 `.pager`, 절 바로가기 `.toc`, 본문 흐름에서 벗어난 보충 설명을 담는
+  참고 상자 `.refbox`). 코드 상자 `.cb`, 주의 상자 `.callout.caution`,
+  화면 갈무리 `.shot`은 다른 자료도 쓰게 되어 `material.css`로 올렸다.
 
 ## 태그
 
@@ -342,6 +345,7 @@
 | 통계적 가설검정 | 통계 · 시뮬레이션 · 가설검정 · 유의수준 · 검정력 · p값 · 효과크기 |
 | 회귀분석 조금 깊이 보기 | 통계 · 시각화 · 회귀분석 · 최소제곱 · 잔차 · 결정계수 |
 | t 분포와 자유도 | 통계 · 시각화 · t분포 · 자유도 · 표본분포 |
+| 모집단 평균에 대한 가설검정 | 통계 · 시각화 · 가설검정 · t검정 · p값 · 효과크기 · R |
 | LLM은 무엇을 배우나 | 인공지능 · 개념정리 · LLM · 사전학습 · 파라미터 · 토큰 |
 | 코딩 에이전트는 어떻게 일하나 | 인공지능 · 개념정리 · 코딩에이전트 · 하네스 · LLM · 도구호출 · 컨텍스트창 |
 | 흉부 X선 28×28로 배우는 딥러닝 | 인공지능 · 시각화 · 딥러닝 · 이미지분류 · 손실함수 · 모델평가 |

@@ -72,6 +72,17 @@ order. Put the same values in two places:
 Reuse an existing tag before inventing a near-duplicate. The vocabulary,
 markup and the current per-document tag table are in `DESIGN.md` → "태그".
 
+## Terminology
+
+`GLOSSARY.md` fixes the Korean terms used in the materials — e.g. **영가설**
+(not 귀무가설) and **대안가설** (not 대립가설). Check it before writing or
+editing anything under `docs/`, and apply it to body text, figure/table
+labels, code comments, widget strings and the `materials.js` card
+descriptions. The avoided term may appear once in parentheses where a concept
+is first introduced; program output and argument names are left as they are.
+When the user settles a new term, add a row to `GLOSSARY.md` and fix leftover
+uses in published pages.
+
 ## Working conventions (from AGENTS.md)
 
 This repo is jointly maintained with Codex; `AGENTS.md` is the shared

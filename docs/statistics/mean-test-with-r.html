@@ -1,0 +1,1308 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>모집단 평균에 대한 가설검정 | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/statistics/mean-test-with-r.html">
+<meta name="description" content="VS Code에서 R로 단일표본·독립표본·대응표본 t 검정을 실행하고, p값과 효과크기를 영가설 아래의 분포 그림으로 확인하는 통계 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="모집단 평균에 대한 가설검정 | Q의 아카이브">
+<meta property="og:description" content="R로 세 가지 t 검정을 실행하고, t·자유도·p값이 영가설 아래의 분포에서 어디에 놓이는지와 효과크기를 확인합니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/statistics/mean-test-with-r.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="통계 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="모집단 평균에 대한 가설검정 | Q의 아카이브">
+<meta name="twitter:description" content="R로 세 가지 t 검정을 실행하고, t·자유도·p값이 영가설 아래의 분포에서 어디에 놓이는지와 효과크기를 확인합니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
+<meta name="twitter:image:alt" content="통계 자료 아이콘">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/material.css">
+<style>
+  /* 이 자료 고유의 위젯만 둔다. 본문·박스·레일·표·코드 상자(.cb)는 material.css 가 맡는다.
+     검정마다 "가설 → R 코드 → 실험판 → 효과크기" 순서를 똑같이 반복하고, 실험판만 면으로 띄운다. */
+  .skip-link { position: fixed; top: -3rem; left: 1rem; z-index: 100; padding: .6rem 1rem; color: #fff; background: var(--accent); border-radius: 4px; font-weight: 700; text-decoration: none; }
+  .skip-link:focus { top: 1rem; }
+
+  /* 본문 조각 */
+  main > section { scroll-margin-top: 16px; }
+  .section-head { display: flex; align-items: baseline; gap: 14px; }
+  .section-num { font-size: 15px; color: var(--muted); font-weight: 700; }
+  main section > h3 { margin-top: 14px; }
+  main section > h4 { margin-top: 6px; }
+  main ul, main ol { margin: 0; padding-left: 22px; }
+  main li { margin-bottom: 4px; }
+  main li:last-child { margin-bottom: 0; }
+  main li > ul { margin-top: 4px; }
+  main li > .shot { margin: 10px 0; }
+  main code, .tip code { font-size: .9em; background: var(--soft); padding: 1px 5px; border-radius: 4px; }
+  main th { white-space: nowrap; }
+  main td code { white-space: nowrap; }
+  .callout code { background: rgb(255 255 255 / 65%); }
+  .callout p + p { margin-top: 8px; }
+  .callout > .shot { margin: 10px 0; }
+  .readout.math { padding: 10px 16px; }
+  /* 펼쳐 보는 상세 안내(details.fold): 접어 두면 한 줄, 펼치면 단계·그림·표가 나온다 */
+  .fold { margin-top: 10px; }
+  .fold > * + * { margin-top: 12px; }
+  .fold li > p { margin-top: 10px; }
+  .fold > summary { font-weight: 700; color: var(--accent); }
+  .fold > h4 { margin-top: 20px; }
+  .fold code { background: var(--surface); }
+  .fold .cb { background: var(--surface); }
+  .fold .callout code { background: rgb(255 255 255 / 65%); }
+  /* 차례대로 따라 하는 절차: 단계 안에 코드 상자와 화면 갈무리를 넣는다 */
+  .steps > li { margin-bottom: 18px; }
+  .steps > li > .cb, .steps > li > .shot { margin-top: 10px; }
+  /* 작은 대화상자 그림을 늘리지 않는다: 원래 크기로 두고 760px 에서만 줄인다 */
+  .steps .shot, .shot.natural { align-items: flex-start; }
+  .steps .shot img, .shot.natural img { width: auto; max-width: min(100%, 760px); }
+  kbd { font-family: var(--mono); font-size: 12.5px; font-weight: 500; line-height: 1; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 2px 6px; background: var(--surface); white-space: nowrap; }
+
+  /* 머리말: 한눈에 보기 */
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0 32px; margin: 0; }
+  .facts div { border-top: 1px solid var(--line); padding: 12px 0; }
+  .facts dt { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--muted); }
+  .facts dd { margin: 4px 0 0; }
+
+  /* 코드 상자: 주석 색, 복사 버튼, 함수 도움말 */
+  .cb { position: relative; }
+  .cb .cm { color: var(--muted); }
+  .cb .copy { position: absolute; top: 6px; right: 8px; font-family: var(--mono); font-size: 12px; font-weight: 500; line-height: 1; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 5px 8px; cursor: pointer; }
+  .cb .copy:hover { color: var(--accent); border-color: var(--accent); }
+  .fn { text-decoration: underline dotted var(--accent); text-underline-offset: 3px; cursor: help; border-radius: 2px; }
+  .fn:hover, .fn:focus { background: var(--accent-soft); outline: none; }
+  .tip { position: fixed; z-index: 60; left: 8px; top: 8px; width: max-content; max-width: min(460px, calc(100vw - 16px)); max-height: calc(100vh - 16px); overflow: auto; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--accent); border-radius: 6px; padding: 12px 14px; font-size: 13.5px; line-height: 1.6; box-shadow: 0 6px 24px rgb(11 18 32 / 18%); }
+  .tip p { margin: 8px 0 0; }
+  .tip-sig { font-family: var(--mono); font-size: 12.5px; font-weight: 500; line-height: 1.55; color: var(--accent); overflow-wrap: anywhere; }
+  .tip-pkg { display: inline-block; margin-left: 8px; font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; }
+  .tip table { margin-top: 8px; font-size: 13px; }
+  .tip th, .tip td { padding: 4px 8px 4px 0; }
+  .tip th { font-size: 11.5px; }
+  .tip td:nth-child(2) { white-space: nowrap; }
+  .tip td code { white-space: nowrap; }
+  .req { font-family: var(--mono); font-size: 11.5px; font-weight: 500; line-height: 1; padding: 3px 6px; border-radius: 3px; background: var(--soft); color: var(--muted); }
+  .req.r1, .req.r2 { background: var(--warn-soft); color: var(--warn); }
+  .tip-none { color: var(--muted); }
+
+  /* 실험판 */
+  .lab { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 20px 20px; }
+  .lab-title { font-family: var(--mono); font-size: 12px; font-weight: 600; line-height: 1.4; letter-spacing: .06em; color: var(--accent); margin: 0 0 12px; }
+  .ctrls { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: flex-end; margin-bottom: 14px; }
+  .ctrl { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .ctrl > span, .ctrl > label { font-family: var(--mono); font-size: 12px; font-weight: 500; line-height: 1.3; color: var(--muted); }
+  .ctrl output { color: var(--ink); font-weight: 600; }
+  .ctrl input[type=range] { width: 220px; max-width: 100%; }
+  .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .seg label { position: relative; font-family: var(--mono); font-size: 13px; font-weight: 500; line-height: 1; cursor: pointer; }
+  .seg input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  /* 수식(KaTeX)의 안쪽 span까지 잡지 않도록 라벨 바로 아래 span만 고른다 */
+  .seg label > span { display: block; padding: 9px 12px; color: var(--muted); border-right: 1px solid var(--line); }
+  .seg label:last-child > span { border-right: 0; }
+  .seg input:checked + span { background: var(--accent); color: #fff; }
+  .seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: -4px; }
+  .rcall { font-family: var(--mono); font-size: 13.5px; line-height: 1.6; background: var(--soft); padding: 9px 12px; border-radius: 6px; overflow-x: auto; white-space: nowrap; margin-bottom: 8px; }
+  .rcall::before { content: "> "; color: var(--accent); }
+  .chart { display: block; width: 100%; height: auto; }
+  .chart text { font-family: var(--mono); fill: var(--muted); }
+  .lab .legend { gap: 6px 20px; margin: 4px 0 14px; }
+  .lab .legend i { height: 10px; vertical-align: baseline; }
+  .lab .legend .lp { background: var(--accent); opacity: .55; }
+  .lab .legend .lr { background: var(--warn); height: 5px; }
+  .lab .legend .lo { background: var(--ink); width: 3px; height: 13px; vertical-align: -2px; }
+  .read { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 20px; margin: 0; }
+  .read div { border-top: 1px solid var(--line); padding: 9px 0; min-width: 0; }
+  .read dt { font-family: var(--mono); font-size: 11.5px; font-weight: 500; line-height: 1.4; color: var(--muted); }
+  .read dd { margin: 2px 0 0; font-family: var(--mono); font-size: 16px; font-weight: 600; line-height: 1.4; font-variant-numeric: tabular-nums; }
+  .read dd.key { color: var(--accent); }
+  .verdict { margin: 14px 0 0; padding: 12px 16px; background: var(--accent-soft); border-radius: 6px; }
+  .verdict.rej { background: var(--warn-soft); }
+  .report { margin: 10px 0 0; font-size: 14.5px; color: var(--muted); }
+  .report b { color: var(--ink); font-weight: 600; }
+  .lab details { margin-top: 14px; }
+  .dgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .dgrid label { display: flex; flex-direction: column; gap: 4px; font-family: var(--mono); font-size: 12px; font-weight: 500; line-height: 1.4; color: var(--muted); min-width: 0; }
+  .dgrid textarea { width: 100%; min-height: 92px; font-family: var(--mono); font-size: 13px; line-height: 1.5; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px; resize: vertical; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+  .err { color: var(--pos); font-size: 13.5px; }
+  @media (max-width: 640px) { .lab { padding: 14px 14px 16px; } }
+</style>
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../index.html#statistics">← 처음으로</a>
+  <h1>모집단 평균에<br>대한 가설검정</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#s1"><b>01</b><span>작업환경</span></a>
+    <a href="#s2"><b>02</b><span>폴더와 스크립트 실행</span></a>
+    <a href="#s3"><b>03</b><span>데이터 읽고 다듬기</span></a>
+    <a href="#s4"><b>04</b><span>검정의 논리</span></a>
+    <a href="#s5"><b>05</b><span>단일표본 t 검정</span></a>
+    <a href="#s6"><b>06</b><span>독립표본 t 검정</span></a>
+    <a href="#s7"><b>07</b><span>대응표본 t 검정</span></a>
+    <a href="#s8"><b>08</b><span>정리</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#통계</span>
+    <span class="rail-tag">#시각화</span>
+    <span class="rail-tag">#가설검정</span>
+    <span class="rail-tag">#t검정</span>
+    <span class="rail-tag">#p값</span>
+    <span class="rail-tag">#효과크기</span>
+    <span class="rail-tag">#R</span>
+  </div>
+  <footer>코드에서 점선 밑줄이 있는 함수 이름에 마우스를 올리면 도움말이 나옵니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+<main id="content">
+<header class="panel">
+<div class="eyebrow">통계적 가설검정 실습 · 평균 비교</div>
+<h2 class="page-title">모집단 평균에 대한 가설검정</h2>
+<p class="lede">VS Code에서 R 스크립트를 한 줄씩 실행하며 세 가지 t 검정을 해 본다. R이 내놓는 t, 자유도, p-value가 영가설 아래의 분포에서 어디에 놓이는지 그림으로 확인하고, 효과크기까지 구한다.</p>
+<dl class="facts">
+<div><dt>도구</dt><dd>R과 tidyverse, VS Code, R 확장, Google Antigravity 확장. 노트북 없이 <code>.R</code> 스크립트만 쓴다.</dd></div>
+<div><dt>예제 데이터</dt><dd>식생활 교육 연구를 흉내 낸 연습용 가상 데이터. 48명의 교육 전·후 나트륨 섭취량(mg/일).</dd></div>
+<div><dt>다루는 검정</dt><dd>단일표본, 독립표본(Welch·Student), 대응표본 t 검정</dd></div>
+<div><dt>함수 도움말</dt><dd>코드에서 점선 밑줄이 있는 함수 이름에 마우스를 올리면(휴대폰은 누르면) 목적, 인수, 반환값이 나타난다.</dd></div>
+<div><dt>효과크기</dt><dd>Cohen의 d, Hedges의 g, \(d_z\)</dd></div>
+</dl>
+</header>
+
+<section class="panel" id="s1">
+<div class="section-head"><span class="section-num">01</span><h2>작업환경: VS Code에서 R 실행하기</h2></div>
+<p>스크립트 파일에 코드를 적고, 한 줄씩 R 터미널로 보내 실행한다. 막히는 곳은 VS Code 안의 AI 에이전트에게 묻는다. 아래 다섯 가지를 순서대로 설치한다. Windows에서는 4번과 5번 사이의 PATH 설정도 해 둔다.</p>
+<ol>
+<li><strong>R 설치.</strong> <a href="https://cran.r-project.org/">cran.r-project.org</a>에서 운영체제에 맞는 설치 파일을 받아 기본 옵션으로 설치한다. macOS는 프로세서(Apple silicon, Intel)에 맞는 파일을 고른다. 처음 설치한다면 아래를 펼쳐 그림과 함께 따라 한다.
+<details class="fold">
+<summary>R 설치 방법 자세히 보기 (Windows · macOS)</summary>
+<p>R은 운영체제에 따라 설치 파일이 다르다. 두 경우 모두 출발점은 같다.</p>
+<ol>
+  <li><code>https://r-project.org</code>에 접속해 왼쪽 메뉴의 <strong>CRAN</strong>(또는 본문의 download R)을 누른다.</li>
+  <li>내려받을 서버(미러) 목록이 나온다. 맨 위의 <strong>0-Cloud</strong>나 <strong>Korea</strong> 아래의 주소 중 하나를 고른다.
+    <ul>
+      <li>2026년 9월 현재 대한민국에서 제공하는 Mirror Site 가 없어 다음의 기본 Repository 선택</li>
+      <li>0-Cloud: <code>https://cloud.r-project.org/</code></li>
+    </ul></li>
+  <li>자기 운영체제에 맞는 링크를 누르고 아래 설명을 따른다.</li>
+</ol>
+<figure class="shot"><img src="../assets/images/cran-first.png" width="1547" height="1059" loading="lazy" alt="https://cloud.r-project.org 의 화면으로 본인의 운영체제에 맞는 링크를 클릭"><figcaption>https://cloud.r-project.org 의 화면으로 본인의 운영체제에 맞는 링크를 클릭</figcaption></figure>
+<h4>Windows</h4>
+<ol>
+  <li><strong>Download R for Windows</strong> Click</li>
+  <li><strong>base</strong> Click</li>
+  <li>맨 위의 <strong>Download R-4.x.x for Windows</strong>를 눌러 설치파일을 받는다.</li>
+  <li>받은 파일을 실행한다. 설치 언어는 한국어를 고르고, 나머지는 기본값 그대로 <strong>다음</strong>을 눌러 끝낸다.</li>
+  <li>설치 위치(기본값 <code>C:\Program Files\R\R-4.x.x</code>)를 확인한다. 아래 "Windows: 터미널에서 R.exe를 바로 실행하게 하기"에서 쓴다.</li>
+</ol>
+<figure class="shot"><img src="../assets/images/cran-win.png" width="1547" height="1059" loading="lazy" alt="설치파일 다운로드를 위해 base 클릭"><figcaption>설치파일 다운로드를 위해 base 클릭</figcaption></figure>
+<h4>macOS</h4>
+<ol>
+  <li>먼저 자기 Mac의 <strong>프로세서 종류</strong>를 확인한다. 화면 왼쪽 위 사과 메뉴 → <strong>이 Mac에 관하여</strong>를 열고 아래 표와 맞춰 본다.</li>
+  <li><strong>Download R for macOS</strong>를 누른다.</li>
+  <li>표에서 확인한 프로세서 종류에 맞는 <code>.pkg</code> 파일을 받는다.</li>
+  <li>받은 파일을 실행하고 기본값 그대로 <strong>계속</strong>을 눌러 설치한다.</li>
+</ol>
+<figure class="shot"><img src="../assets/images/cran-mac.png" width="1547" height="1059" loading="lazy" alt="자신의 프로세서에 맞는 설치파일 선택(1: Apple Silicon, 2: Intel)"><figcaption>자신의 프로세서에 맞는 설치파일 선택(1: Apple Silicon, 2: Intel)</figcaption></figure>
+<div class="scroll"><table><thead><tr><th>화면에 나오는 것</th><th>프로세서 종류</th><th>받을 파일</th></tr></thead><tbody><tr><td>칩: Apple M1, M2, M3 …</td><td>Apple silicon</td><td>이름에 <code>arm64</code>가 있는 <code>.pkg</code></td></tr><tr><td>프로세서: … Intel …</td><td>Intel</td><td>이름에 <code>x86_64</code>가 있는 <code>.pkg</code></td></tr></tbody></table></div>
+<div class="callout caution"><strong>잘못 받기 쉬운 곳</strong> macOS에서 프로세서 종류에 맞지 않는 파일을 받으면 설치는 되지만 패키지 설치에서 오류가 난다. 파일 이름의 <code>arm64</code>와 <code>x86_64</code>를 꼭 확인한다.</div>
+<h4>설치 확인</h4>
+<p>설치된 R 프로그램을 실행한다(Windows: 시작 메뉴의 R, macOS: 응용 프로그램의 R). 창이 뜨면 다음 코드를 입력해 버전이 출력되는지 본다.</p>
+<div class="cb r"><span class="lang">R</span><pre>R.version.string</pre></div>
+<figure class="shot"><img src="../assets/images/R-version.png" width="902" height="677" loading="lazy" alt="R 버전 확인"><figcaption>R 버전 확인</figcaption></figure>
+</details></li>
+<li><strong>VS Code 설치.</strong> <a href="https://code.visualstudio.com/">code.visualstudio.com</a>의 첫 화면에서 내려받기 버튼을 누르면 운영체제에 맞는 파일을 받는다.
+<figure class="shot"><img src="../assets/images/vscode-download.png" width="1224" height="786" loading="lazy" alt="홈페이지에서 Download for ... 를 클릭해 설치파일을 다운로드 받는다"><figcaption>홈페이지에서 Download for ... 를 클릭해 설치파일을 다운로드 받는다</figcaption></figure>
+  <ul>
+  <li>Windows: 받은 설치 파일을 실행하고 기본 옵션으로 진행한다. "PATH에 추가" 항목은 체크된 그대로 둔다.</li>
+  <li>macOS: 받은 파일의 압축을 풀고 <code>Visual Studio Code</code> 앱을 응용 프로그램 폴더로 옮긴 다음 실행한다.</li>
+  </ul>
+<details class="fold">
+<summary>VS Code 화면 구성 살펴보기</summary>
+<p>Visual Studio Code(이후 VS Code로 지칭)의 화면은 아래 여섯 영역으로 이루어진다. VS Code 공식 문서를 ChatGPT로 번역한 것이다(<a href="https://code.visualstudio.com/docs/editing/getting-started/userinterface" target="_blank" rel="noopener noreferrer">원문</a>).</p>
+<figure class="shot"><img src="../assets/images/vscode-setup/vscode-ui.png" width="1200" height="796" loading="lazy" alt="VS Code 화면에 A Activity Bar, B Primary Side Bar, C Editor Groups, D Panel, E Status Bar가 표시된 그림"><figcaption>A 활동 표시줄, B 기본 사이드바, C 편집기, D 패널, E 상태 표시줄. 보조 사이드바는 이 그림에 나오지 않는다. (그림 출처: VS Code 공식 문서)</figcaption></figure>
+<ul>
+  <li><strong>편집기(Editor)</strong> - 파일 내용을 작성하고 수정하는 중심 공간이다. 여러 파일을 위아래 또는 좌우로 나란히 열어 놓고 작업할 수 있다.</li>
+  <li><strong>기본 사이드바(Primary Side Bar)</strong> - 프로젝트 작업을 도와주는 여러 화면이 표시되는 공간이다. 파일과 폴더를 살펴보는 <strong>탐색기(Explorer)</strong> 등이 여기에 있다.</li>
+  <li><strong>보조 사이드바(Secondary Side Bar)</strong> - 기본 사이드바의 반대쪽에 있는 공간이다. 처음에는 <strong>채팅(Chat)</strong> 화면이 표시된다. 기본 사이드바에 있는 화면을 끌어다 놓아 보조 사이드바로 옮길 수 있다.</li>
+  <li><strong>상태 표시줄(Status Bar)</strong> - 현재 열려 있는 프로젝트와 편집 중인 파일의 상태 정보를 보여주는 영역이다.</li>
+  <li><strong>활동 표시줄(Activity Bar)</strong> - 화면의 가장 왼쪽에 있는 세로 막대다. 탐색기, 검색, 소스 제어 등의 화면을 전환할 때 사용한다. Git을 사용한다면 아직 서버로 보내지 않은 변경 사항의 개수와 같은 정보도 표시한다. 활동 표시줄을 마우스 오른쪽 버튼으로 클릭하면 위치를 변경할 수 있다.</li>
+  <li><strong>패널(Panel)</strong> - 편집기 아래쪽에 있는 추가 작업 공간이다. 기본적으로 프로그램 실행 결과, 디버깅 정보, 오류와 경고, 내장 터미널 등이 표시된다. 세로 공간을 더 넓게 사용하고 싶다면 패널을 화면의 왼쪽이나 오른쪽으로 옮길 수도 있다.</li>
+</ul>
+</details></li>
+<li><strong>R 확장 설치.</strong> VS Code 왼쪽의 확장(Extensions) 아이콘을 누르거나 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>(macOS는 <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>)를 누른다. <code>R</code>을 검색해 게시자가 <code>REditorSupport</code>인 확장을 설치한다.
+<details class="fold">
+<summary>R 확장 설치 방법 자세히 보기</summary>
+<ol>
+  <li>VS Code를 실행한다.</li>
+  <li>활동 표시줄(Activity Bar)에서 다섯 번째에 있는 Extensions 아이콘을 누른다.</li>
+  <li>위쪽 검색창에 <code>R</code>을 입력하고 엔터 키를 눌러 검색한다.</li>
+  <li>잠시 후 나오는 목록에서 R의 <strong>Install</strong>을 눌러 설치한다. 확장 프로그램을 만든 제작자를 믿고 설치할 것인지 묻는 질문에는 <strong>Trust Publisher &amp; Install</strong>을 누르면 확장 프로그램이 설치된다.
+<figure class="shot natural"><img src="../assets/images/vscode-setup/r-extension-install.png" width="348" height="262" loading="lazy" alt="활동 표시줄의 Extensions 아이콘, 검색창의 R, 목록 첫 항목 R의 Install 버튼이 붉은 테두리로 표시된 화면"><figcaption>Extensions에서 <code>R</code>을 검색하고, 게시자가 REditorSupport인 R의 <strong>Install</strong>을 누른다.</figcaption></figure>
+<figure class="shot natural"><img src="../assets/images/vscode-setup/r-extension-trust.png" width="454" height="277" loading="lazy" alt="Do you trust the publisher REditorSupport? 라고 묻는 창. Trust Publisher &amp; Install, Learn More, Cancel 버튼이 있다"><figcaption>제작자를 믿는지 묻는 창에서 <strong>Trust Publisher &amp; Install</strong>을 누른다.</figcaption></figure></li>
+  <li>설치 후 활동 표시줄에 R 확장 프로그램 아이콘이 생겼는지 확인한다.
+<figure class="shot natural"><img src="../assets/images/vscode-setup/r-extension-icon.png" width="341" height="299" loading="lazy" alt="활동 표시줄 맨 아래에 생긴 R 아이콘이 붉은 테두리로 표시된 화면"><figcaption>활동 표시줄에 생긴 R 확장 프로그램 아이콘</figcaption></figure></li>
+</ol>
+</details></li>
+<li><strong>Google Antigravity 확장 설치.</strong> 같은 확장 화면에서 <code>Google Antigravity</code>를 검색해 게시자가 <code>Google</code>인 확장을 설치한다. 설치가 끝나면 왼쪽 막대에 생긴 Antigravity 아이콘을 눌러 Google 계정으로 로그인한다. 설치부터 응답 확인까지의 순서는 아래를 펼쳐 본다.
+<details class="fold">
+<summary>Antigravity 확장 설치와 연결 자세히 보기</summary>
+<p>Google Antigravity는 Google의 AI 코딩 에이전트다. VS Code용 확장을 설치하면 편집기 옆에 에이전트 창이 생기고, 열어 둔 폴더의 파일을 읽고 고치는 일을 대화로 시킬 수 있다.</p>
+<div class="scroll"><table>
+<thead><tr><th>항목</th><th>내용</th></tr></thead>
+<tbody>
+<tr><td>확장 이름과 게시자</td><td>Google Antigravity, 게시자 Google (식별자 <code>Google.google-antigravity</code>)</td></tr>
+<tr><td>필요한 것</td><td>VS Code 1.90 이상, Google 계정. 무료 요금제로도 쓸 수 있다.</td></tr>
+<tr><td>운영체제</td><td>Windows, macOS, Linux</td></tr>
+</tbody></table></div>
+<ol>
+  <li>Extensions 항목에서 <code>Antigravity</code>를 검색한다. 이름이 비슷한 확장이 여럿 나오므로 아래 화면처럼 배포자가 Google인지 확인한 뒤 <em>설치(Install)</em>를 눌러 확장 프로그램을 설치한다.
+<figure class="shot natural"><img src="../assets/images/vscode-setup/antigravity-extension-install.png" width="499" height="370" loading="lazy" alt="Extensions 검색창에 Antigravity를 입력한 화면. 목록에서 배포자가 Google인 Google Antigravity 항목과 Install 버튼이 붉은 테두리로 표시되어 있다"><figcaption>이름이 비슷한 확장이 함께 나온다. 배포자가 Google인 <strong>Google Antigravity</strong>의 <strong>Install</strong>을 누른다.</figcaption></figure></li>
+  <li>활동 표시줄(Activity Bar)에 나타난 Antigravity 아이콘을 누르고, 화면에 나타나는 <strong>Continue with Google</strong>로 Google 계정을 이용한 절차를 진행한다.
+<figure class="shot natural"><img src="../assets/images/vscode-setup/antigravity-login.png" width="494" height="518" loading="lazy" alt="활동 표시줄의 Antigravity 아이콘과 Welcome to Antigravity 화면의 Continue with Google 버튼이 테두리로 표시되어 있다"><figcaption>활동 표시줄의 Antigravity 아이콘을 누르고 <strong>Continue with Google</strong>을 누른다.</figcaption></figure></li>
+  <li>한 가지 주의할 점이 있다. 로그인 과정 마지막에 웹 브라우저가 아래와 같이 물어볼 때 <strong>반드시 "열기"를 눌러야</strong> 로그인 정보가 제대로 전달된다. 누르면 브라우저에서 VS Code로 돌아온다.
+<figure class="shot natural"><img src="../assets/images/vscode-setup/antigravity-open-prompt.png" width="772" height="552" loading="lazy" alt="웹 브라우저가 '이 사이트에서 Visual Studio Code을 열려고 합니다'라고 묻는 창. 열기 버튼이 붉은 테두리로 표시되어 있다"><figcaption>브라우저가 Visual Studio Code를 열지 물으면 <strong>열기</strong>를 누른다.</figcaption></figure>
+<p>현재 Antigravity 확장은 근래에 지원하기 시작한 것이어서 로그인 과정이 불안한 경우가 있다. 로그인 과정을 여러 번 해야 할 수 있다.</p></li>
+  <li>처음 실행할 때 확장이 에이전트 실행에 필요한 프로그램(<code>agy</code>)을 자동으로 내려받아 설치한다. 끝날 때까지 기다린다.</li>
+  <li>에이전트 창에 <code>이 폴더에 어떤 파일이 있는지 알려줘</code>처럼 한 줄을 보내 응답이 오는지 확인한다.</li>
+</ol>
+</details></li>
+</ol>
+<details class="fold">
+<summary>Windows: 터미널에서 R.exe를 바로 실행하게 하기</summary>
+<p>Windows용 R은 설치할 때 실행 파일의 위치를 PATH에 등록하지 않는다. R 확장은 R을 스스로 찾아 실행하므로 2장에서 다루는 <kbd>Ctrl</kbd>+<kbd>Enter</kbd> 실행은 이 설정 없이도 되지만, VS Code의 일반 터미널(PowerShell)에 <code>R.exe</code>를 입력하면 찾을 수 없다는 오류가 난다. AI 에이전트가 터미널에서 스크립트를 실행하려 할 때도 같은 오류로 멈춘다. R의 <code>bin</code> 폴더를 PATH에 추가하면 해결된다. macOS는 이 설정이 필요 없다.</p>
+<ol class="steps">
+<li><strong>R 실행.</strong> <kbd>Windows</kbd>+<kbd>S</kbd>를 누르면 나오는 아래쪽 검색창에 <code>R</code>을 입력해 R 실행 아이콘을 찾고, 눌러서 실행한다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-01.png" width="1063" height="942" loading="lazy" alt="R 찾기 및 실행"><figcaption>R 찾기 및 실행</figcaption></figure></li>
+<li><strong>bin 폴더의 경로 확인.</strong> R이 열리면 Console 창에서 아래 한 줄을 실행하고, 결과로 나온 문자열을 따옴표는 빼고 복사한다. R을 설치한 폴더에서 실행 파일들이 있는 <code>bin</code> 폴더의 전체 경로다. 보통 <code>C:\Program Files\R\R-4.x.x\bin</code> 꼴이다. 역슬래시가 두 개씩(<code>\\</code>) 보이는 것은 R이 문자열을 표시하는 방식이다. 아래 7번 그림처럼 그대로 붙여 넣어도 되고, 하나씩으로 고쳐도 된다. 파일 탐색기에서 <code>C:\Program Files\R</code> 아래의 <code>bin</code> 폴더를 찾아 주소 표시줄의 경로를 복사해도 된다.
+<div class="cb r"><span class="lang">R</span><pre>normalizePath(file.path(R.home(), "bin"))</pre></div>
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-02.png" width="1224" height="832" loading="lazy" alt="R을 설치한 경로에서 실행 파일들이 있는 bin 폴더의 절대 경로 출력"><figcaption>R을 설치한 경로에서 실행 파일들이 있는 bin 폴더의 절대 경로 출력</figcaption></figure></li>
+<li><strong>환경 변수 편집 항목 찾기.</strong> <kbd>Windows</kbd>+<kbd>S</kbd>를 누르면 나오는 아래쪽 검색창에서 <code>환경변수</code>를 검색하고, 나타나는 <em>시스템 환경 변수 편집</em>을 누른다. 관리자 암호를 묻거나 열리지 않으면 바로 아래의 <em>계정의 환경 변수 편집</em>을 누른다. 이때는 환경 변수 창이 바로 열리므로 4번을 건너뛴다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-03.png" width="964" height="930" loading="lazy" alt="환경 변수 편집 항목 찾기"><figcaption>환경 변수 편집 항목 찾기</figcaption></figure></li>
+<li><strong>환경 변수 창 열기.</strong> 시스템 속성 창 아래쪽의 <em>환경 변수</em>를 누른다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-04.png" width="478" height="534" loading="lazy" alt="환경 변수 편집 메뉴 찾기 및 실행"><figcaption>환경 변수 편집 메뉴 찾기 및 실행</figcaption></figure></li>
+<li><strong>Path 찾기.</strong> 위쪽 <em>사용자 변수</em> 목록에서 <code>Path</code>를 찾아 누르고 <em>편집</em>을 누른다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-05.png" width="615" height="579" loading="lazy" alt="Path 환경 변수 찾기"><figcaption>Path 환경 변수 찾기</figcaption></figure></li>
+<li><strong>새 값 추가.</strong> 오른쪽 위의 <em>새로 만들기</em>를 눌러 환경 변수 Path에 새로운 값을 추가한다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-06.png" width="521" height="494" loading="lazy" alt="새로운 값 추가하기"><figcaption>새로운 값 추가하기</figcaption></figure></li>
+<li><strong>경로 붙여 넣기.</strong> 앞서 R에서 복사한 값을 붙여 넣고(①), 아래쪽의 <em>확인</em>을 누른다(②). 남아 있는 환경 변수 창과 시스템 속성 창도 <em>확인</em>을 눌러 닫는다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-07.png" width="527" height="500" loading="lazy" alt="복사한 값 붙여 넣기"><figcaption>복사한 값 붙여 넣기</figcaption></figure></li>
+<li><strong>확인.</strong> VS Code를 열고 터미널을 활성화한 뒤(<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>`</kbd>) <code>R.exe</code>를 입력하고 실행하면 R Console로 들어간다. VS Code가 이미 열려 있었다면 창을 모두 닫았다가 다시 연다. 바뀐 PATH는 새로 시작한 프로그램에만 적용된다. R을 끝낼 때는 <code>q()</code>를 입력한다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-08.png" width="1150" height="795" loading="lazy" alt="Terminal에서 R 실행"><figcaption>Terminal에서 R 실행</figcaption></figure></li>
+</ol>
+<p>터미널에서 쓰는 명령은 아래와 같다. 첫 줄에서 R의 버전이 나오면 PATH 설정이 된 것이다. VS Code의 터미널은 열어 둔 폴더(프로젝트 루트)에서 시작하므로, 스크립트는 <code>scripts/</code>를 붙여 가리킨다. 스크립트 파일은 2장 "폴더를 열고 스크립트를 실행한다"에서 만든다.</p>
+<div class="cb"><span class="lang">PowerShell · VS Code 터미널</span><pre>R.exe --version                               # 버전이 나오면 PATH 설정이 된 것이다
+R.exe                                         # R을 대화형으로 시작한다. 끝낼 때는 q()
+Rscript.exe scripts/02.prepare_datasets.R     # 프로젝트 루트에서, 스크립트 파일 전체를 실행한다</pre></div>
+<div class="callout caution"><p><strong>PowerShell에서는 <code>R</code>이 아니라 <code>R.exe</code>라고 적는다.</strong> PowerShell에서 <code>r</code>은 직전 명령을 다시 실행하는 내장 명령의 줄임말이어서, <code>R</code>만 입력하면 R이 시작되지 않는다.</p>
+<p><strong>R을 새 버전으로 올리면</strong> 설치 폴더 이름(<code>R-4.x.x</code>)이 바뀐다. Path에 넣은 경로도 새 폴더로 고친다.</p></div>
+</details>
+<ol start="5">
+<li><strong>패키지 설치.</strong> 아래 한 줄을 R에서 한 번만 실행한다. 패키지를 내려받는 저장소는 <code>repos</code> 인수로 <code>https://cloud.r-project.org/</code>를 지정한다. 저장소를 고르라는 창이 뜨지 않고, 가까운 서버로 자동 연결된다. <code>languageserver</code>는 VS Code가 자동완성과 도움말을 띄우는 데 쓴다. <code>tidyverse</code>는 데이터를 읽고 다듬고 그리는 패키지 묶음이고(Excel을 읽는 <code>readxl</code>도 함께 설치된다), <code>writexl</code>은 Excel 저장, <code>effectsize</code>는 효과크기 계산, <code>extrafont</code>는 그림에 한글 글꼴을 쓰는 데 쓴다. 설치에 몇 분 걸린다.</li>
+</ol>
+<div class="cb r"><span class="lang">R · 처음 한 번만</span><pre>install.packages(
+  c("languageserver", "tidyverse", "writexl", "effectsize", "extrafont"),
+  repos = "https://cloud.r-project.org/"
+)</pre></div>
+
+<h3>이 수업에서 AI에게 묻는 법</h3>
+<ul>
+<li><strong>오류를 풀 때.</strong> R 터미널의 오류 메시지를 그대로 붙여 넣고 실행한 코드를 함께 준다. 예: <code>scripts/03.ttest.R의 12번째 줄에서 이 오류가 난다. 원인과 고친 코드를 알려줘.</code></li>
+<li><strong>코드를 읽을 때.</strong> 예: <code>t.test(sodium_post ~ group, data = d)의 출력을 한 줄씩 설명해줘.</code></li>
+<li><strong>내 데이터에 옮길 때.</strong> 예: <code>dataset/raw/mydata.xlsx의 첫 시트를 tidyverse로 읽고, group 열로 score 열의 평균을 비교하는 Welch 검정 코드를 써줘.</code></li>
+</ul>
+<div class="callout caution"><p><strong>AI가 준 답은 직접 실행해 확인한다.</strong> 에이전트는 없는 함수나 인자를 지어내기도 하고, 검정을 잘못 고르기도 한다. 어떤 검정을 쓸지, 가설의 방향을 어떻게 둘지, 결과를 어떻게 해석할지는 스스로 정하고 설명할 수 있어야 한다. 에이전트가 파일을 고치겠다고 하면 바뀌는 내용을 읽어 본 뒤 승인한다. 개인정보가 들어 있는 연구 데이터는 에이전트에게 보내도 되는지 먼저 확인한다.</p></div>
+
+</section>
+
+<section class="panel" id="s2">
+<div class="section-head"><span class="section-num">02</span><h2>폴더를 열고 스크립트를 실행한다</h2></div>
+<p>R 코드는 스크립트 파일에 적고, 한 줄씩 R 터미널로 보내 실행한다. 첫 스크립트에서는 R에 들어 있는 예제 데이터 <code>cars</code>로 R의 가장 기본적인 사용법을 익힌다.</p>
+<ol>
+<li>실습 폴더를 하나 만든다. 예: <code>mean-test</code>. VS Code에서 <em>파일 → 폴더 열기</em>로 이 폴더를 연다.
+<details class="fold">
+<summary>실습 폴더를 만들고 여는 화면 보기</summary>
+<figure class="shot natural"><img src="../assets/images/vscode-working-folder/open-working-folder_01.png" width="502" height="346" loading="lazy" alt="VS Code의 File 메뉴가 펼쳐져 있고 Open Folder... 항목에 마우스가 올라가 있다"><figcaption><strong>File</strong> 메뉴에서 <strong>Open Folder...</strong>를 누른다. 한글 메뉴에서는 <em>파일 → 폴더 열기</em>다.</figcaption></figure>
+<figure class="shot natural"><img src="../assets/images/vscode-working-folder/open-working-folder_02.png" width="703" height="406" loading="lazy" alt="Open Folder 창의 위쪽에 있는 새 폴더 버튼이 주황색 테두리로 표시되어 있다"><figcaption>폴더를 고르는 창에서 <strong>새 폴더</strong>를 눌러 <code>mean-test</code> 폴더를 만든다.</figcaption></figure>
+<figure class="shot natural"><img src="../assets/images/vscode-working-folder/open-working-folder_03.png" width="939" height="527" loading="lazy" alt="Open Folder 창에서 mean-test 폴더가 선택되어 있고 아래쪽 Select folder 버튼이 주황색 테두리로 표시되어 있다"><figcaption>만든 <code>mean-test</code> 폴더를 고르고 <strong>Select folder</strong>를 누른다.</figcaption></figure>
+</details></li>
+<li>R 스크립트는 <code>scripts</code> 폴더에 모은다.
+<details class="fold">
+<summary>scripts 폴더를 만드는 화면 보기</summary>
+<figure class="shot natural"><img src="../assets/images/vscode-working-folder/vscode-newfolder_01.png" width="358" height="213" loading="lazy" alt="VS Code 탐색기(Explorer)에서 mean-test 오른쪽에 있는 아이콘 가운데 새 폴더 아이콘이 주황색 테두리로 표시되어 있다"><figcaption>탐색기(Explorer)에서 <code>mean-test</code> 오른쪽의 <strong>새 폴더(New Folder)</strong> 아이콘을 누른다.</figcaption></figure>
+<figure class="shot natural"><img src="../assets/images/vscode-working-folder/vscode-newfolder_02.png" width="355" height="221" loading="lazy" alt="탐색기의 mean-test 아래에 생긴 이름 칸에 scripts가 입력되어 있다"><figcaption>이름 칸에 <code>scripts</code>를 적고 엔터 키를 누른다.</figcaption></figure>
+</details></li>
+<li>탐색기에서 <code>scripts</code> 폴더를 마우스 오른쪽 버튼으로 누르고 <em>새 파일(New File...)</em>을 골라 <code>01.first_R.R</code>을 만든다. 확장자가 <code>.R</code>이어야 R 파일로 인식한다. 열린 편집기 창에 아래 "첫 스크립트"의 코드 우측 상단의 복사 버튼을 이용해서 복사한 후 열어놓은 편집기에 붙혀넣다. <code>#</code> 뒤는 실행과 상관없이 파일을 보는 사람들의 이해를 돕기 위한 설명(주석, Comment)이다.
+<details class="fold">
+<summary>01.first_R.R 파일을 만드는 화면 보기</summary>
+<figure class="shot natural"><img src="../assets/images/vscode-working-folder/vscode-newfile_01.png" width="437" height="252" loading="lazy" alt="탐색기에서 scripts 폴더를 마우스 오른쪽 버튼으로 눌러 나온 메뉴. 맨 위의 New File... 항목이 주황색 테두리로 표시되어 있다"><figcaption>탐색기에서 <code>scripts</code> 폴더를 마우스 오른쪽 버튼으로 누르고(①) <strong>New File...</strong>을 고른다.</figcaption></figure>
+<figure class="shot natural"><img src="../assets/images/vscode-working-folder/vscode-newfile_02.png" width="360" height="190" loading="lazy" alt="scripts 폴더 아래에 생긴 이름 칸에 01.first_R.R이 입력되어 있다"><figcaption>이름 칸에 <code>01.first_R.R</code>을 적고 엔터 키를 누른다.</figcaption></figure>
+<figure class="shot natural"><img src="../assets/images/vscode-working-folder/vscode-newfile_03.png" width="1077" height="488" loading="lazy" alt="탐색기의 scripts 아래에 01.first_R.R이 생기고, 오른쪽에 같은 이름의 빈 파일이 열려 있다. 그 영역에 '파일 편집기 창'이라고 적혀 있다"><figcaption>파일이 만들어지면서 오른쪽 편집기 창에 열린다. 코드는 여기에 적는다.</figcaption></figure>
+</details></li>
+<li>코드를 복사해서 붙혀넣은 다음 첫 세줄을 마우스 드래그로 선택하고 </li> <kbd>Ctrl</kbd>+<kbd>Enter</kbd>(macOS는 <kbd>⌘</kbd>+<kbd>Enter</kbd>)를 누른다. 아래쪽에 R 터미널이 열리고 그 줄이 실행된다. 같은 키를 계속 눌러 한 줄씩 내려가며 결과를 본다. 여러 줄을 선택하고 누르면 선택한 부분이 실행된다. 처음 실행할 때 <code>sess</code> 패키지를 설치할지 묻는 알림이 나오면 <strong>Yes</strong>를 누르고, 설치가 끝나면 R 터미널을 닫았다가 다시 연다(목록 아래의 설명 참고).</li>
+<li>그림은 VS Code 안의 그림 탭에 나타난다. <code>View(cars)</code>를 실행하면 데이터가 표로 열리고, <code>?cars</code>를 실행하면 도움말이 열린다.</li>
+<li>데이터와 그림을 둘 폴더는 아래 "실습 파일 만들기"에서 코드로 만든다.</li>
+</ol>
+<div class="callout"><p><strong>처음 실행할 때 나오는 알림: sess 설치.</strong> <kbd>Ctrl</kbd>+<kbd>Enter</kbd>로 R 코드를 처음 실행하면 VS Code 오른쪽 아래에 아래와 같이 묻는 알림이 나온다. <strong>Yes</strong>를 누른다.</p>
+<p><code>R package "sess" (shipped with vscode-R) is required for the session watcher to work. Do you want to install it?</code></p>
+<figure class="shot"><img src="../assets/images/vscode-working-folder/vscode-R-sess.png" width="1123" height="716" loading="lazy" alt="VS Code에서 01.first_R.R의 코드를 실행한 화면. 오른쪽 아래에 R package sess is required for the session watcher to work. Do you want to install it? 이라는 알림과 Yes, No 버튼이 나와 있다"><figcaption>오른쪽 아래의 알림에서 <strong>Yes</strong>를 누른다.</figcaption></figure>
+<p><strong>설치가 끝나면 R 터미널을 닫고 다시 연다.</strong> 알림이 나왔을 때 열려 있던 R 터미널은 <code>sess</code>가 설치되기 전에 시작된 것이어서 VS Code와 연결되지 않은 채로 남아 있을 수 있다. 터미널 창 오른쪽의 목록에서 <em>R Interactive</em>를 휴지통 아이콘으로 닫거나 <code>q()</code>를 입력해 R을 끝낸 다음, 스크립트에서 <kbd>Ctrl</kbd>+<kbd>Enter</kbd>를 다시 눌러 새 R 터미널을 연다. VS Code 맨 아래 상태 표시줄에 <code>R: (not attached)</code>가 보이면 아직 연결되지 않은 것이다. 연결되어야 그림 탭과 <code>View()</code>의 표가 VS Code 안에 열린다.</p>
+<p>R 확장은 R 터미널에서 일어나는 일을 지켜보다가 그림이나 표를 VS Code 안에 띄워 주는데, 이 기능을 세션 감시(session watcher)라고 한다. <code>sess</code>는 R과 VS Code가 이때 정보를 주고받는 데 쓰는 R 패키지다. R 확장 안에 함께 들어 있어서, Yes를 누르면 그것을 내 R에 설치한다. <code>sess</code>가 쓰는 다른 패키지가 없으면 그것은 R의 저장소에서 내려받으므로 인터넷에 연결되어 있어야 한다. 한 번 설치하면 다시 묻지 않고, R 확장이 새 버전으로 바뀌면 갱신할지 다시 물을 수 있다. 그때도 Yes를 누른다.</p></div>
+<figure class="shot"><img src="../assets/images/vscode-working-folder/vscode-R-execution.png" width="1121" height="713" loading="lazy" alt="VS Code에서 01.first_R.R의 1~3번 줄을 선택해 실행한 화면. 아래쪽 R 터미널에 1 + 2의 결과 3과 sqrt(16)의 결과 4가 나와 있고 그 부분이 주황색 테두리로 표시되어 있다"><figcaption>R 코드 실행 화면. 선택한 줄이 아래쪽 R 터미널로 보내져 실행되고, 줄마다 결과가 바로 아래에 나온다.</figcaption></figure>
+<h3>첫 스크립트: 예제 데이터 cars로 R 익히기</h3>
+<p><code>cars</code>는 R을 설치하면 함께 들어 있는 데이터다. 1920년대에 자동차 50대의 속도(<code>speed</code>, mph)와 멈출 때까지 간 거리(<code>dist</code>, ft)를 잰 기록이다. 파일을 읽지 않아도 이름만으로 불러 쓸 수 있어서 처음 연습하기에 좋다.</p>
+<div class="cb r"><span class="lang">R · scripts/01.first_R.R</span><pre># R은 계산기처럼 쓸 수 있다
+1 + 2
+sqrt(16)
+
+# 값에 이름을 붙인다. &lt;- 는 오른쪽 값을 왼쪽 이름에 담는다
+x &lt;- c(4, 7, 10)     # 숫자 세 개를 묶은 벡터
+x
+mean(x)
+
+# R에 들어 있는 예제 데이터 cars: 자동차 50대의 속도(speed)와 제동 거리(dist)
+data(cars)           # 예제 데이터를 불러온다
+cars                 # 전체를 출력한다
+head(cars)           # 앞 6행
+str(cars)            # 행과 열의 수, 열마다의 자료형
+View(cars)           # 표로 열어 본다
+
+# 열 하나는 $ 로 꺼낸다
+cars$speed
+mean(cars$speed)
+sd(cars$dist)
+summary(cars)        # 열마다 요약 통계
+
+# 그림
+plot(cars)           # 속도와 제동 거리의 관계
+hist(cars$dist)      # 제동 거리의 분포
+
+# 도움말
+?cars
+?mean</pre></div>
+<div class="cb out"><span class="lang">출력 읽기</span><pre>&gt; str(cars)
+'data.frame':	50 obs. of  2 variables:
+ $ speed: num  4 4 7 7 8 9 10 10 10 11 ...
+ $ dist : num  2 10 4 22 16 10 18 26 34 17 ...
+
+&gt; mean(cars$speed)
+[1] 15.4
+
+&gt; summary(cars)
+     speed           dist       
+ Min.   : 4.0   Min.   :  2.00  
+ 1st Qu.:12.0   1st Qu.: 26.00  
+ Median :15.0   Median : 36.00  
+ Mean   :15.4   Mean   : 42.98  
+ 3rd Qu.:19.0   3rd Qu.: 56.00  
+ Max.   :25.0   Max.   :120.00  </pre></div>
+<p><code>str()</code>의 첫 줄은 이 데이터가 50행 2열의 데이터프레임이라는 뜻이다. 그 아래는 열마다의 이름, 자료형(<code>num</code>은 숫자), 앞쪽 값이다. 출력 앞의 <code>[1]</code>은 그 줄이 결과의 첫 번째 값부터 시작한다는 표시다.</p>
+<div class="scroll"><table>
+<thead><tr><th>적는 것</th><th>뜻</th></tr></thead>
+<tbody>
+<tr><td><code># 설명</code></td><td>주석. <code>#</code> 뒤는 실행되지 않는다.</td></tr>
+<tr><td><code>이름 &lt;- 값</code></td><td>값에 이름을 붙인다(대입). 이름만 적어 실행하면 담긴 값이 출력된다.</td></tr>
+<tr><td><code>c(4, 7, 10)</code></td><td>여러 값을 하나의 벡터로 묶는다.</td></tr>
+<tr><td><code>함수(인수)</code></td><td>함수를 실행한다. 예: <code>mean(x)</code>는 x의 평균을 구한다.</td></tr>
+<tr><td><code>데이터$열</code></td><td>데이터프레임에서 열 하나를 벡터로 꺼낸다. 예: <code>cars$speed</code></td></tr>
+<tr><td><code>?이름</code></td><td>함수나 데이터의 도움말을 연다.</td></tr>
+</tbody></table></div>
+<h3>실행 방법 정리</h3>
+<div class="scroll"><table>
+<thead><tr><th>하려는 일</th><th>방법</th></tr></thead>
+<tbody>
+<tr><td>현재 줄·선택 영역 실행</td><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd> / <kbd>⌘</kbd>+<kbd>Enter</kbd></td></tr>
+<tr><td>파일 전체 실행</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> / <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td></tr>
+<tr><td>R 터미널 새로 열기</td><td>명령 팔레트(<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>)에서 <code>R: Create R terminal</code></td></tr>
+<tr><td>함수 도움말</td><td><code>?t.test</code></td></tr>
+<tr><td>지금 작업 폴더 확인</td><td><code>getwd()</code></td></tr>
+</tbody></table></div>
+<div class="callout caution"><p><strong>자주 막히는 곳.</strong> 파일 하나만 열지 말고 폴더를 연다. 폴더를 열면 R 터미널의 작업 폴더가 그 폴더(프로젝트 루트)가 되어 <code>"dataset/raw/sodium.csv"</code> 같은 상대 경로가 그대로 통한다. 스크립트가 <code>scripts</code> 폴더 안에 있어도 작업 폴더는 루트 그대로이므로, 코드의 경로는 스크립트의 위치가 아니라 루트를 기준으로 적는다. 파일을 찾지 못한다는 오류가 나면 <code>getwd()</code>로 작업 폴더가 루트인지 확인한다. 코드에 <code>setwd()</code>는 쓰지 않는다. Windows에서 R 터미널이 열리지 않으면 VS Code 설정에서 <code>r.rterm.windows</code>에 <code>R.exe</code>의 경로를 적는다.</p></div>
+
+<h3>폴더 구조: 스크립트, 원본, 작업본을 나눈다</h3>
+<pre class="tree">mean-test/         프로젝트 루트. VS Code에서 여는 폴더이자 R의 작업 폴더
+├─ scripts/       R 스크립트
+│  ├─ 01.first_R.R            R 첫걸음 (예제 데이터 cars)
+│  ├─ 02.prepare_datasets.R   폴더와 실습 데이터 만들기
+│  └─ 03.ttest.R              이 문서의 분석 코드
+├─ dataset/
+│  ├─ raw/        받은 원본 파일. 읽기만 하고 고치지 않는다
+│  └─ working/    다듬은 데이터. 코드로만 만든다
+└─ output/        그림 파일</pre>
+<p><code>scripts</code> 폴더는 위에서 직접 만들었다. 나머지 폴더(<code>dataset/raw</code>, <code>dataset/working</code>, <code>output</code>)는 바로 아래 "실습 파일 만들기"의 스크립트가 <code>dir.create()</code>로 만든다. 스크립트는 <code>scripts</code> 안에 있지만 경로는 루트를 기준으로 적으므로, 폴더는 <code>scripts</code> 아래가 아니라 루트 아래에 만들어진다.</p>
+<p>원본 파일은 Excel로 열어 고치지 않는다. 고칠 것이 있으면 코드로 고치고 결과를 <code>working</code>에 저장한다. 이렇게 해 두면 데이터셋이 바뀌어도 새 파일을 <code>raw</code>에 넣고 스크립트를 다시 실행하는 것으로 끝난다. <code>working</code>과 <code>output</code>의 파일은 언제든 지우고 다시 만들 수 있다.</p>
+
+<h3>실습 파일 만들기</h3>
+<p>실제 연구에서는 받은 파일을 <code>dataset/raw</code>에 넣는 것으로 시작한다. 여기서는 연습용 데이터를 CSV와 Excel 두 형식으로 그 자리에 만들어 둔다. 48명 중 24명은 식생활 교육을 받았고(교육군), 24명은 받지 않았다(대조군). 두 집단 모두 사전과 사후에 하루 나트륨 섭취량을 쟀다.</p>
+<p>이 일은 새 스크립트에서 한다. 첫 스크립트와 같은 방법으로 <code>scripts</code> 폴더를 마우스 오른쪽 버튼으로 누르고 <em>새 파일(New File...)</em>을 골라 <code>02.prepare_datasets.R</code>을 만든다. 아래 코드를 적고 첫 줄부터 <kbd>Ctrl</kbd>+<kbd>Enter</kbd>로 한 줄씩 실행한다. 앞부분은 데이터와 그림을 둘 폴더를 만들고, 뒷부분은 실습 데이터를 만들어 <code>dataset/raw</code>에 저장한다.</p>
+<div class="cb r"><span class="lang">R · scripts/02.prepare_datasets.R</span><pre>library(tidyverse)
+
+# 데이터와 그림을 둘 폴더를 만든다. 이미 있으면 그대로 둔다
+dir.create("dataset/raw",     recursive = TRUE, showWarnings = FALSE)
+dir.create("dataset/working", recursive = TRUE, showWarnings = FALSE)
+dir.create("output",          showWarnings = FALSE)
+
+# 실습 데이터: 48명의 사전·사후 나트륨 섭취량 (mg/일)
+d0 &lt;- tibble(
+  id    = 1:48,
+  group = rep(c("교육군", "대조군"), each = 24),
+  sodium_pre = c(
+    2350, 3340, 4150, 4660, 3300, 3680, 2630, 2420, 3300, 2900, 2120, 3330,
+    4130, 4010, 3050, 2550, 3810, 3210, 2950, 3690, 3360, 3350, 2220, 2160,
+    3370, 2660, 3380, 3390, 2450, 3400, 3340, 2550, 3930, 2370, 2460, 3850,
+    3520, 3000, 3760, 3120, 1930, 2900, 3260, 3460, 4570, 3260, 3940, 4240),
+  sodium_post = c(
+    2430, 3120, 3310, 3780, 2100, 3430, 2100, 2280, 3390, 3110, 3050, 2680,
+    3420, 3260, 2850, 2510, 3410, 3120, 2600, 3750, 2820, 2940, 2240, 1930,
+    3810, 2150, 3550, 4030, 2230, 3110, 3170, 3400, 3470, 3250, 3400, 4050,
+    3530, 1710, 3720, 2990, 1840, 2770, 3900, 3090, 3880, 3130, 4350, 4680)
+)
+
+# 변수 설명표(코드북). Excel 파일의 둘째 시트로 들어간다
+codebook &lt;- tibble(
+  변수 = c("id", "group", "sodium_pre", "sodium_post"),
+  설명 = c("참여자 번호", "교육군 / 대조군",
+           "사전 나트륨 섭취량 (mg/일)", "사후 나트륨 섭취량 (mg/일)")
+)
+
+# CSV와 Excel 두 형식으로 raw에 저장한다
+write_csv(d0, "dataset/raw/sodium.csv")
+writexl::write_xlsx(list(data = d0, codebook = codebook), "dataset/raw/sodium.xlsx")</pre></div>
+<p>끝까지 실행한 뒤 VS Code 탐색기에서 <code>dataset/raw</code> 아래에 <code>sodium.csv</code>와 <code>sodium.xlsx</code>가 생겼는지 확인한다. 이 스크립트는 여러 번 실행해도 같은 파일을 다시 만들 뿐이다.</p>
+
+
+</section>
+
+<section class="panel" id="s3">
+<div class="section-head"><span class="section-num">03</span><h2>데이터 읽고 다듬기: tidyverse</h2></div>
+<p>데이터를 읽고, 다듬고, 그리는 일은 tidyverse로 한다. <code>library(tidyverse)</code> 한 줄이 파일을 읽는 readr, 표를 다루는 dplyr, 표의 모양을 바꾸는 tidyr, 그림을 그리는 ggplot2를 한꺼번에 불러온다.</p>
+<p>tidyverse 코드는 파이프 <code>%&gt;%</code>로 잇는다. 파이프는 왼쪽의 결과를 오른쪽 함수의 첫 번째 인수로 넘긴다. <code>library(tidyverse)</code>를 실행해야 쓸 수 있다. <code>d %&gt;% filter(group == "교육군")</code>은 <code>filter(d, group == "교육군")</code>과 같고, "d를 가져와서, 교육군만 고른다"로 읽는다.</p>
+<p>이 장부터의 분석 코드는 새 스크립트에 적는다. 같은 방법으로 <code>scripts/03.ttest.R</code>을 만들고, 아래 코드부터 이 문서의 코드를 차례로 적어 실행한다. 스크립트마다 첫 줄에 <code>library(tidyverse)</code>를 적어 두면 R을 새로 켠 뒤 그 스크립트만 실행해도 돌아간다.</p>
+
+
+<h3>CSV 읽기</h3>
+<div class="cb r"><span class="lang">R · scripts/03.ttest.R</span><pre>library(tidyverse)
+
+raw &lt;- read_csv("dataset/raw/sodium.csv")
+
+glimpse(raw)   # 행·열 개수와 각 열의 자료형
+raw            # tibble은 앞 10행만 보여 준다</pre></div>
+<p><code>read_csv()</code>는 열마다 자료형을 추측해 알려 준다. <code>glimpse()</code>로 숫자여야 할 열이 문자(<code>chr</code>)로 읽히지 않았는지 확인한다.</p>
+<div class="callout caution"><p><strong>한글이 깨질 때.</strong> <code>read_csv()</code>는 파일이 UTF-8이라고 가정한다. 공공데이터포털이나 오래된 Excel에서 저장한 CSV는 CP949인 경우가 많다. 이때는 <code>read_csv("파일.csv", locale = locale(encoding = "CP949"))</code>로 읽는다.</p></div>
+
+<h3>Excel 읽기</h3>
+<p>Excel 파일은 시트가 여러 개일 수 있다. 먼저 시트 이름을 확인하고 읽을 시트를 지정한다.</p>
+<div class="cb r"><span class="lang">R</span><pre>library(readxl)   # tidyverse와 함께 설치되지만 따로 불러와야 한다
+
+excel_sheets("dataset/raw/sodium.xlsx")      # "data" "codebook"
+raw &lt;- read_excel("dataset/raw/sodium.xlsx", sheet = "data")
+
+# 제목 줄이 위에 있는 파일이면 skip = 2 처럼 건너뛸 행 수를,
+# 일부 범위만 읽으려면 range = "A1:D49" 처럼 범위를 준다</pre></div>
+
+<h3>읽은 데이터 먼저 살펴보기</h3>
+<p>읽은 데이터는 바로 고치지 않는다. 먼저 기대한 대로 읽혔는지, 값이 어떤 모양으로 퍼져 있는지를 확인한다. 크기와 구조를 보고, 기술통계로 요약하고, 그림으로 분포를 보는 순서다. 여기서 본 것이 다음 절에서 무엇을 다듬을지를 정한다.</p>
+<h4>크기와 구조, 결측</h4>
+<div class="cb r"><span class="lang">R</span><pre>dim(raw)        # 행 수와 열 수. 48행 4열이어야 한다
+names(raw)      # 열 이름
+head(raw)       # 앞 6행
+tail(raw)       # 뒤 6행. 파일 끝에 합계 줄이나 빈 줄이 딸려 오지 않았는지 본다
+
+# 집단마다 몇 명인지 센다. 아래 두 줄은 같은 일을 하고 결과도 같다
+count(raw, group)        # 데이터를 함수의 첫 번째 인수로 직접 넣는다
+raw %&gt;% count(group)     # 파이프: 왼쪽의 raw를 count()의 첫 번째 인수로 넘긴다
+
+# 전체 행 수(n)와 서로 다른 참여자 번호의 수(n_id)를 구한다. 둘이 같으면 겹치는 사람이 없다
+raw %&gt;% summarise(n = n(), n_id = n_distinct(id))
+
+# 결측값이 있는지 열마다 센다
+# across(everything(), ...)는 모든 열에 같은 계산을 적용하고, .x 자리에 각 열이 들어간다
+# is.na()는 결측이면 TRUE를 돌려주고, sum()은 TRUE의 개수를 센다
+raw %&gt;% summarise(across(everything(), ~ sum(is.na(.x))))</pre></div>
+<p>행과 열의 수, 열 이름, 앞뒤 몇 행을 눈으로 본다. 자료형은 위에서 <code>glimpse()</code>로 확인했다. <code>count(raw, group)</code>과 <code>raw %&gt;% count(group)</code>은 적는 방법만 다르고 결과가 같다. 파이프로 적으면 "raw를 가져와서, 집단별로 센다"처럼 왼쪽에서 오른쪽으로 읽히고, 뒤에 다른 단계를 이어 붙이기 쉽다. 참여자 번호가 겹치는지와 결측의 개수도 여기서 센다. 같은 사람이 두 번 들어 있으면 뒤의 모든 계산이 틀어진다.</p>
+<h4>기술통계</h4>
+<div class="cb r"><span class="lang">R</span><pre>summary(raw)    # 열마다 최솟값, 사분위수, 중앙값, 평균, 최댓값
+
+# 집단별 평균과 표준편차
+raw %&gt;%
+  group_by(group) %&gt;%
+  summarise(
+    n         = n(),
+    pre_mean  = mean(sodium_pre),
+    pre_sd    = sd(sodium_pre),
+    post_mean = mean(sodium_post),
+    post_sd   = sd(sodium_post)
+  )</pre></div>
+<div class="cb out"><span class="lang">출력 읽기</span><pre>       id              group      sodium_pre    sodium_post  
+ Min.   : 1.00   Length   :48   Min.   :1930   Min.   :1710  
+ 1st Qu.:12.75   N.unique : 2   1st Qu.:2652   1st Qu.:2660  
+ Median :24.50   N.blank  : 0   Median :3315   Median :3125  
+ Mean   :24.50   Min.nchar: 3   Mean   :3225   Mean   :3101  
+ 3rd Qu.:36.25   Max.nchar: 3   3rd Qu.:3682   3rd Qu.:3485  
+ Max.   :48.00                  Max.   :4660   Max.   :4680  
+
+# A tibble: 2 × 6
+  group      n pre_mean pre_sd post_mean post_sd
+  &lt;chr&gt;  &lt;int&gt;    &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+1 교육군    24    3195.   690.     2901.    535.
+2 대조군    24    3255.   636.     3300.    753.</pre></div>
+<p><code>summary()</code>에서는 최솟값과 최댓값을 먼저 본다. 음수나 자릿수가 하나 더 붙은 값처럼 있을 수 없는 숫자가 있으면 입력 오류다. 평균과 중앙값이 크게 다르면 분포가 한쪽으로 치우친 것이다. 문자 열인 <code>group</code>의 요약은 R 버전에 따라 다르게 보인다. 집단별 표에서는 사례 수가 같은지, 사전 평균이 두 집단에서 비슷한지를 본다.</p>
+<h4>간단한 그림</h4>
+<p>확인용 그림은 꾸미지 않고 저장하지도 않는다. 실행하면 VS Code의 그림 탭에 차례로 나타난다. 보고서에 넣을 그림은 이 장 끝의 "그림을 그려 output에 저장하기"에서 다시 그린다.</p>
+<div class="cb r"><span class="lang">R</span><pre># 분포의 모양: 한쪽으로 치우쳤는지, 동떨어진 값이 있는지
+ggplot(raw, aes(x = sodium_pre))  + geom_histogram(bins = 12)
+ggplot(raw, aes(x = sodium_post)) + geom_histogram(bins = 12)
+
+# 집단별 분포: 가운데와 퍼진 정도가 얼마나 다른지
+ggplot(raw, aes(x = group, y = sodium_post)) + geom_boxplot()
+
+# 사전과 사후의 관계: 사전에 많이 먹던 사람이 사후에도 많이 먹는지
+ggplot(raw, aes(x = sodium_pre, y = sodium_post)) + geom_point()</pre></div>
+<p>가로축에 있는 집단 이름(교육군, 대조군)의 한글이 네모로 나오면 아래 "그림에 쓸 한글 글꼴 준비하기"를 마친 뒤 다시 그린다. 값을 확인하는 데는 지장이 없다.</p>
+<div class="scroll"><table>
+<thead><tr><th>확인할 것</th><th>이 데이터에서 본 것</th></tr></thead>
+<tbody>
+<tr><td>행과 열의 수</td><td>48행 4열. 파일 끝에 딸려 온 줄이 없다.</td></tr>
+<tr><td>자료형</td><td><code>id</code>, <code>sodium_pre</code>, <code>sodium_post</code>는 숫자(<code>dbl</code>), <code>group</code>은 문자(<code>chr</code>)</td></tr>
+<tr><td>결측과 중복</td><td>결측은 모든 열에서 0개. 참여자 번호 48개가 모두 다르다.</td></tr>
+<tr><td>집단별 사례 수</td><td>교육군 24명, 대조군 24명</td></tr>
+<tr><td>값의 범위</td><td>사전 1930~4660, 사후 1710~4680 mg/일. 있을 수 없는 값은 없다.</td></tr>
+<tr><td>분포의 모양</td><td>사전·사후 모두 평균과 중앙값이 가깝고, 히스토그램에서 한쪽으로 길게 늘어진 꼬리가 보이지 않는다.</td></tr>
+<tr><td>집단 비교</td><td>사전 평균은 두 집단이 비슷하고(3195, 3255), 사후 평균은 교육군이 낮다(2901, 3300). 대조군의 사후 값은 더 넓게 퍼져 있고, 상자그림에서 아래쪽 두 값(1710, 1840)이 점으로 따로 찍힌다.</td></tr>
+<tr><td>사전과 사후의 관계</td><td>사전에 많이 먹던 사람이 사후에도 많이 먹는 경향이 보인다.</td></tr>
+</tbody></table></div>
+<div class="callout caution"><p><strong>동떨어진 값은 지우기 전에 확인한다.</strong> 상자그림에서 따로 찍힌 점은 "상자에서 멀다"는 표시일 뿐, 틀린 값이라는 뜻이 아니다. 여기서 따로 찍힌 두 값은 전체 범위 안에 있는 값이어서 그대로 둔다. 입력 오류로 확인된 값만 코드로 고치고, 무엇을 왜 고쳤는지 주석으로 남긴다.</p></div>
+
+<h3>다듬어서 working에 저장하기</h3>
+<p>살펴본 결과 고칠 값은 없었다. 분석에 쓰기 좋게 두 가지만 손본다. <code>group</code>을 순서가 정해진 범주로 바꾸고, 사전과 사후의 차이를 새 열로 만든다.</p>
+<div class="cb r"><span class="lang">R</span><pre># 원본은 그대로 두고, 다듬은 결과를 d에 담는다
+d &lt;- raw %&gt;%
+  mutate(
+    group = factor(group, levels = c("교육군", "대조군")),   # 수준의 순서를 직접 정한다
+    diff  = sodium_pre - sodium_post                         # 양수면 섭취량이 줄었다
+  )
+
+# 수준의 순서가 정한 대로(교육군, 대조군)인지 확인한다
+d %&gt;% count(group)
+
+# 한 집단만 골라 내기
+edu &lt;- d %&gt;% filter(group == "교육군")
+
+# 사전·사후를 세로로 쌓은 긴 모양
+d_long &lt;- d %&gt;%
+  pivot_longer(
+    c(sodium_pre, sodium_post),
+    names_to = "time", names_prefix = "sodium_", values_to = "sodium"
+  ) %&gt;%
+  mutate(time = factor(time, levels = c("pre", "post")))
+
+# 다듬은 데이터를 working에 저장한다
+write_csv(d,      "dataset/working/sodium_clean.csv")
+write_csv(d_long, "dataset/working/sodium_long.csv")</pre></div>
+<p><strong>수준의 순서가 차이의 부호를 정한다.</strong> <code>t.test()</code>는 첫 번째 수준에서 두 번째 수준을 뺀다. 위처럼 정하면 차이는 "교육군 − 대조군"이 된다. 순서를 정하지 않으면 R이 글자 순으로 정하므로 부호를 해석하기 전에 <code>levels(d$group)</code>을 확인한다.</p>
+<p><strong>표의 모양이 검정을 정한다.</strong> 독립표본 검정은 "집단 열 하나 + 값 열 하나"인 모양에서 <code>값 ~ 집단</code> 공식을 쓴다. 대응표본 검정은 같은 사람의 두 측정값이 한 행에 나란히 있는 모양에서 두 열을 짝지어 넣는다. <code>d</code>는 두 모양을 모두 갖추고 있다. 사전·사후를 한 그림에 그릴 때는 <code>pivot_longer()</code>로 만든 긴 모양 <code>d_long</code>을 쓴다.</p>
+<div class="callout caution"><p><strong>CSV는 factor의 순서를 기억하지 못한다.</strong> <code>working</code>의 CSV를 다시 읽으면 <code>group</code>은 문자열로 돌아온다. 읽은 뒤 <code>factor()</code>를 다시 적용하거나, R 전용 형식으로 저장한다: <code>write_rds(d, "dataset/working/sodium_clean.rds")</code>, 읽을 때는 <code>read_rds("dataset/working/sodium_clean.rds")</code>.</p></div>
+
+<h3>그림에 쓸 한글 글꼴 준비하기: extrafont</h3>
+<p>ggplot2의 기본 글꼴에는 한글이 없어서 제목이나 축 이름의 한글이 네모로 나올 수 있다. extrafont 패키지로 컴퓨터에 설치된 글꼴을 R에 등록하고, 그림의 기본 글꼴을 한글 글꼴로 바꾼다.</p>
+<p><strong>글꼴 등록.</strong> 컴퓨터마다 한 번만 한다. 몇 분 걸린다. 끝나면 R 터미널을 닫고 새로 연다.</p>
+<div class="cb r"><span class="lang">R · 처음 한 번만</span><pre>library(extrafont)
+font_import(prompt = FALSE)   # 컴퓨터의 트루타입 글꼴을 찾아 R에 등록한다</pre></div>
+<p><strong>글꼴 불러오기와 지정.</strong> R을 새로 켤 때마다 그림을 그리기 전에 실행한다. 운영체제에 맞는 쪽을 쓴다.</p>
+<div class="cb r"><span class="lang">R · Windows</span><pre>library(extrafont)
+loadfonts(device = "win", quiet = TRUE)    # 등록한 글꼴을 화면 그림 장치에 연결한다
+fonts()                                    # 쓸 수 있는 글꼴 이름. "Malgun Gothic"이 있는지 본다
+
+theme_set(theme_gray(base_family = "Malgun Gothic"))   # 이후 모든 그림의 글꼴: 맑은 고딕</pre></div>
+<div class="cb r"><span class="lang">R · macOS</span><pre>library(extrafont)
+loadfonts(quiet = TRUE)                    # 등록한 글꼴을 PDF 그림 장치에 연결한다
+fonts()                                    # 쓸 수 있는 글꼴 이름. "AppleGothic"이 있는지 본다
+
+theme_set(theme_gray(base_family = "AppleGothic"))     # 이후 모든 그림의 글꼴: 애플고딕</pre></div>
+<div class="callout caution"><p><strong>글꼴 이름은 <code>fonts()</code>가 보여 주는 그대로 적는다.</strong> 목록에 없는 이름을 쓰면 경고가 나오고 한글이 다시 깨진다. extrafont는 트루타입(.ttf) 글꼴만 등록하므로, 다른 한글 글꼴을 쓰려면 .ttf 파일을 설치한 뒤 <code>font_import()</code>를 다시 실행한다.</p></div>
+
+<h3>KoPub 서체 쓰기</h3>
+<p>운영체제의 기본 글꼴 대신, 한국출판인회의가 무료로 배포하는 KoPubWorld 서체(돋움체, 바탕체)를 쓸 수 있다. Windows와 macOS에서 같은 글꼴로 그림을 그리게 되므로 수강생끼리 결과물의 모양이 같아진다. 논문이나 보고서에 넣을 그림에도 쓸 수 있다.</p>
+<ol>
+<li><strong>내려받기.</strong> <a href="https://www.kopus.org/biz-electronic-font2/">한국출판인회의의 KoPub 서체 페이지</a>에서 사용자 정보를 입력하고 <strong>TTF</strong> 압축 파일을 받는다. extrafont는 OTF 파일을 등록하지 못하므로 OTF가 아니라 TTF를 받아야 한다.</li>
+<li><strong>설치.</strong> 압축을 풀고 글꼴 파일을 설치한다.
+  <ul>
+  <li>Windows: 글꼴 파일을 모두 선택하고 마우스 오른쪽 버튼을 눌러 <em>모든 사용자용으로 설치</em>를 고른다. 그냥 <em>설치</em>를 누르면 글꼴이 사용자 개인 폴더에 들어가 extrafont가 찾지 못한다.</li>
+  <li>macOS: 글꼴 파일을 두 번 눌러 열고 <em>서체 설치</em>를 누른다.</li>
+  </ul></li>
+<li><strong>R에 등록.</strong> 새로 설치한 글꼴만 골라 등록한다. 끝나면 R 터미널을 닫고 새로 연다.</li>
+</ol>
+<div class="cb r"><span class="lang">R · KoPub 설치 후 한 번만</span><pre>library(extrafont)
+font_import(pattern = "KoPub", prompt = FALSE)   # 파일 이름에 KoPub이 들어간 글꼴만 등록한다</pre></div>
+<p><strong>글꼴 지정.</strong> 등록된 이름을 확인하고, 그 이름을 그대로 <code>base_family</code>에 적는다.</p>
+<div class="cb r"><span class="lang">R</span><pre>library(extrafont)
+loadfonts(device = "win", quiet = TRUE)      # Windows. macOS는 loadfonts(quiet = TRUE)
+
+grep("KoPub", fonts(), value = TRUE)         # 등록된 KoPub 글꼴의 이름을 확인한다
+
+# 위에서 확인한 이름을 그대로 적는다. 아래는 돋움체 Medium의 예
+theme_set(theme_gray(base_family = "KoPubWorldDotum Medium"))</pre></div>
+<div class="callout caution"><p><strong>이름이 다르면 확인한 쪽을 따른다.</strong> 글꼴 이름은 굵기(Light, Medium, Bold)마다 따로 등록되고, 서체 판에 따라 표기가 조금씩 다를 수 있다. <code>grep()</code>의 결과에 아무것도 나오지 않으면 글꼴이 등록되지 않은 것이다. TTF 파일을 받았는지, Windows에서 모든 사용자용으로 설치했는지 확인하고 <code>font_import()</code>를 다시 실행한다.</p>
+<p>KoPub 서체는 상업적 이용을 포함해 무료로 쓸 수 있지만, 글꼴 파일을 고치거나 다른 사람에게 다시 배포하는 것은 허용되지 않는다. 수강생은 각자 내려받는다.</p></div>
+
+<h3>그림을 그려 output에 저장하기</h3>
+<p>ggplot2는 데이터와 축에 놓을 변수를 <code>ggplot()</code>과 <code>aes()</code>로 정하고, 그림의 종류를 <code>+</code>로 더한다. 그림을 변수에 담아 두었다가 <code>ggsave()</code>로 저장한다.</p>
+<div class="cb r"><span class="lang">R</span><pre># 분포: 히스토그램
+p1 &lt;- ggplot(d, aes(x = sodium_pre)) +
+  geom_histogram(bins = 12) +
+  labs(title = "사전 나트륨 섭취량", x = "mg/일", y = "사람 수")
+p1
+ggsave("output/hist_sodium_pre.png", p1, width = 6, height = 4, dpi = 300)
+
+# 집단 비교: 상자그림 위에 개별 값
+p2 &lt;- ggplot(d, aes(x = group, y = sodium_post)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.1, alpha = 0.6) +
+  labs(x = NULL, y = "사후 나트륨 섭취량 (mg/일)")
+p2
+ggsave("output/box_sodium_post.png", p2, width = 5, height = 4, dpi = 300)
+
+# 사전·사후 변화: 한 사람을 선 하나로
+p3 &lt;- d_long %&gt;%
+  filter(group == "교육군") %&gt;%
+  ggplot(aes(x = time, y = sodium, group = id)) +
+  geom_line(alpha = 0.5) +
+  geom_point() +
+  labs(x = NULL, y = "나트륨 섭취량 (mg/일)")
+p3
+ggsave("output/paired_edu.png", p3, width = 5, height = 4, dpi = 300)</pre></div>
+</section>
+
+<section class="panel" id="s4">
+<div class="section-head"><span class="section-num">04</span><h2>검정의 논리: \(H_0\) 아래의 분포와 p-value</h2></div>
+<p>세 가지 t 검정은 계산하는 재료만 다르고 논리는 같다. 이 문서에서는 영가설(귀무가설이라고도 한다)과 대안가설(대립가설이라고도 한다)이라는 용어를 쓴다.</p>
+<ol>
+<li>영가설 \(H_0\)와 대안가설 \(H_1\)을 세운다. \(H_1\)의 방향(양측, 한쪽)은 데이터를 보기 전에 정한다.</li>
+<li>표본에서 검정통계량을 구한다. 관측한 값이 영가설의 값에서 표준오차의 몇 배만큼 떨어져 있는지를 잰 것이다.</li>
+<li>\(H_0\)가 참이라면 이 통계량은 자유도 df인 t 분포를 따른다. 이 분포가 판단의 기준이 된다.</li>
+<li>p-value는 이 분포에서 관측한 t만큼, 또는 그보다 더 극단적인 값이 나올 확률이다. p-value가 유의수준 \(\alpha\)보다 작으면 \(H_0\)를 기각한다.</li>
+</ol>
+<div class="readout math">
+\[t = \frac{\text{추정값} - \text{영가설의 값}}{\text{표준오차}}\]
+</div>
+<p>아래에서 t와 자유도를 직접 움직여 본다. 파란 넓이가 p-value이고, 축 위의 주황 띠가 유의수준 \(\alpha\)로 정한 기각역이다. 관측한 t가 주황 띠 안에 들어가는 것과 \(p &lt; \alpha\)는 같은 말이다.</p>
+<div class="lab" data-type="explore"></div>
+<div class="callout caution"><p><strong>p-value는 \(H_0\)가 참일 확률이 아니다.</strong> \(H_0\)가 참이라고 가정했을 때 이런 데이터가 나올 확률이다. 또 p-value는 차이가 얼마나 큰지 말해 주지 않는다. 표본이 크면 작은 차이도 유의하게 나온다. 그래서 효과크기를 함께 보고한다(Wasserstein &amp; Lazar, 2016).</p></div>
+
+</section>
+
+<section class="panel" id="s5">
+<div class="section-head"><span class="section-num">05</span><h2>단일표본 t 검정</h2></div>
+<p><strong>질문.</strong> 참여자 48명의 사전 나트륨 섭취량 평균은 기준값과 다른가? 선행 조사에서 보고된 성인 평균이 3000 mg이라고 하고, 이 값을 기준으로 삼는다.</p>
+<div class="readout math">
+\[H_0: \mu = 3000 \qquad H_1: \mu \neq 3000\]
+\[t = \frac{\bar{x} - \mu_0}{s/\sqrt{n}}, \qquad \mathit{df} = n - 1\]
+</div>
+<div class="cb r"><span class="lang">R</span><pre>x &lt;- d %&gt;% pull(sodium_pre)    # 열 하나를 벡터로 꺼낸다
+
+# 가정 확인: 정규성. 점들이 직선을 따라가는지 본다
+p_qq &lt;- ggplot(d, aes(sample = sodium_pre)) +
+  stat_qq() +
+  stat_qq_line()
+p_qq
+ggsave("output/qq_sodium_pre.png", p_qq, width = 5, height = 5, dpi = 300)
+shapiro.test(x)
+
+# 검정
+res1 &lt;- t.test(x, mu = 3000)     # 기본값은 양측, 신뢰수준 95%
+res1
+
+# 결과에서 값만 꺼내기
+res1$statistic   # t
+res1$parameter   # df
+res1$p.value
+res1$conf.int
+
+# 결과 전체를 한 행짜리 표로
+broom::tidy(res1)</pre></div>
+<div class="cb out"><span class="lang">출력 읽기</span><pre>	One Sample t-test
+
+data:  x
+t = 2.3672, df = 47, p-value = 0.0221
+alternative hypothesis: true mean is not equal to 3000
+95 percent confidence interval:
+ 3033.720 3415.447
+sample estimates:
+mean of x
+ 3224.583 </pre></div>
+<p>둘째 줄의 <code>t</code>, <code>df</code>, <code>p-value</code>가 아래 그림의 세로선, 분포의 모양, 파란 넓이에 해당한다. \(\mu_0\)을 움직이면 같은 데이터라도 t의 위치가 달라진다. 신뢰구간의 양 끝(3033.7, 3415.4)에 \(\mu_0\)을 맞추면 p가 정확히 0.05가 되는 것도 확인해 본다.</p>
+<div class="lab" data-type="one"></div>
+
+<h3>효과크기: Cohen의 d</h3>
+<p>평균이 기준값에서 표준편차의 몇 배만큼 떨어져 있는지를 나타낸다. 단위가 없어서 다른 연구와 비교할 수 있다.</p>
+<div class="readout math">
+\[d = \frac{\bar{x} - \mu_0}{s}\]
+</div>
+<div class="cb r"><span class="lang">R</span><pre>d1 &lt;- (mean(x) - 3000) / sd(x)
+d1
+
+# 같은 값을 패키지로, 신뢰구간과 함께
+library(effectsize)
+cohens_d(x, mu = 3000)</pre></div>
+
+</section>
+
+<section class="panel" id="s6">
+<div class="section-head"><span class="section-num">06</span><h2>독립표본 t 검정</h2></div>
+<p><strong>질문.</strong> 교육이 끝난 뒤, 교육군의 나트륨 섭취량 평균은 대조군과 다른가? 두 집단은 서로 다른 사람들이다.</p>
+<div class="readout math">
+\[H_0: \mu_1 = \mu_2 \qquad H_1: \mu_1 \neq \mu_2 \qquad (1 = \text{교육군},\ 2 = \text{대조군})\]
+\[\text{Welch:}\quad t = \frac{\bar{x}_1 - \bar{x}_2}{\sqrt{s_1^2/n_1 + s_2^2/n_2}}, \qquad \mathit{df}\text{는 Welch–Satterthwaite 근사}\]
+\[\text{Student:}\quad t = \frac{\bar{x}_1 - \bar{x}_2}{s_p\sqrt{1/n_1 + 1/n_2}}, \qquad \mathit{df} = n_1 + n_2 - 2\]
+</div>
+<p>두 식은 표준오차를 구하는 방법이 다르다. Welch 검정은 집단마다의 표본분산 \(s_1^2\), \(s_2^2\)를 따로 쓴다. Student 검정은 두 집단의 모분산이 같다고 가정하고, 두 표본분산을 하나로 합친 \(s_p\)를 쓴다.</p>
+<h3>Student 검정의 \(s_p\): 합동 표준편차</h3>
+<p>\(s_p\)는 합동 표준편차(pooled standard deviation)다. 두 집단의 모분산이 같은 값 \(\sigma^2\)이라면 \(s_1^2\)과 \(s_2^2\)은 둘 다 그 \(\sigma^2\)을 추정한 값이다. 그러니 둘을 합쳐 하나의 더 나은 추정값을 만들 수 있다. 각 표본분산에 그 자유도(\(n - 1\))를 곱해 더하고 전체 자유도로 나눈 것이 합동분산 \(s_p^2\)이고, 그 제곱근이 \(s_p\)다.</p>
+<div class="readout math">
+\[s_p^2 = \frac{(n_1-1)s_1^2 + (n_2-1)s_2^2}{n_1+n_2-2}, \qquad s_p = \sqrt{s_p^2}\]
+</div>
+<p>표본이 큰 집단의 분산이 더 큰 가중치를 받는 가중평균이다. 두 집단의 크기가 같으면 두 표본분산의 단순 평균이 된다. 이 데이터에서는 \(s_1^2 = 285751\), \(s_2^2 = 566613\)이고 두 집단이 24명씩이므로 \(s_p^2 = 426182\), \(s_p = 652.8\)이다. 두 표준편차 534.6과 752.7의 사이에 있다. Student 검정의 표준오차는 \(s_p\sqrt{1/n_1 + 1/n_2} = 188.45\)가 된다. \(s_p\)는 아래 효과크기(Cohen의 d)에서도 다시 쓴다.</p>
+<h3>어느 검정을 쓸까: Welch 권고와 SPSS의 절차</h3>
+<p>R의 <code>t.test()</code>는 두 집단의 분산이 같다고 가정하지 않는 Welch 검정을 기본으로 쓴다. 분산이 실제로 같을 때도 Welch 검정은 검정력을 거의 잃지 않고, 분산이 다를 때는 Student 검정보다 1종 오류를 잘 지킨다. 그래서 등분산 검정을 먼저 하고 고르는 대신 처음부터 Welch 검정을 쓰도록 권한다(Delacre et al., 2017).</p>
+<p>한편 SPSS에서 독립표본 t 검정을 실행하면 두 집단의 분산이 같은지에 대한 검정(Levene의 등분산 검정) 결과가 함께 나오고, 그 결과를 보고 "등분산을 가정함"과 "등분산을 가정하지 않음" 두 줄 가운데 하나를 읽는다. 이 장에서는 SPSS로 익힌 사람에게 익숙한 이 절차를 R에서 따라 해 본다. 먼저 두 집단의 분산을 검정하고, 그 결과에 따라 Student 검정이나 Welch 검정을 고른다. 다만 SPSS가 쓰는 것은 Levene 검정이고 여기서 쓰는 <code>var.test()</code>는 F 검정이어서, 절차는 같지만 검정 자체는 같지 않다.</p>
+<h3>1단계: 등분산 검정 var.test()</h3>
+<p><code>var.test()</code>는 두 집단의 분산의 비에 대한 F 검정이다. 영가설은 "두 모분산의 비가 1이다"이고, 대안가설은 "비가 1이 아니다"이다. 비가 1이라는 것은 두 분산이 같다는 것과 같은 말이지만, 이 검정이 직접 다루는 대상은 분산의 차이가 아니라 비다. 그래서 R의 출력도 <code>true ratio of variances is not equal to 1</code>이라고 적고, 추정값과 신뢰구간도 분산의 비로 내놓는다.</p>
+<div class="readout math">
+\[H_0: \frac{\sigma_1^2}{\sigma_2^2} = 1 \qquad H_1: \frac{\sigma_1^2}{\sigma_2^2} \neq 1 \qquad (1 = \text{교육군},\ 2 = \text{대조군})\]
+\[F = \frac{s_1^2}{s_2^2}, \qquad \mathit{df} = (n_1 - 1,\ n_2 - 1)\]
+</div>
+<p>검정통계량 F는 두 표본분산의 비다. 영가설이 참이면 F는 분자의 자유도가 \(n_1 - 1\), 분모의 자유도가 \(n_2 - 1\)인 F 분포를 따른다. 표본분산의 비가 1에서 멀수록, 곧 F가 1보다 훨씬 크거나 훨씬 작을수록 영가설과 어긋난다.</p>
+<div class="cb r"><span class="lang">R</span><pre># 집단별 기술통계와 분포. 표준편차와 분산이 얼마나 다른지 먼저 눈으로 본다
+d %&gt;%
+  group_by(group) %&gt;%
+  summarise(n = n(), mean = mean(sodium_post), sd = sd(sodium_post), var = var(sodium_post))
+p2     # 3장에서 그린 상자그림
+
+# 1단계: 두 집단의 분산의 비가 1인지 검정한다 (F 검정)
+vt &lt;- var.test(sodium_post ~ group, data = d)
+vt
+vt$p.value</pre></div>
+<div class="cb out"><span class="lang">출력 읽기</span><pre>	F test to compare two variances
+
+data:  sodium_post by group
+F = 0.50431, num df = 23, denom df = 23, p-value = 0.1077
+alternative hypothesis: true ratio of variances is not equal to 1
+95 percent confidence interval:
+ 0.2181626 1.1657917
+sample estimates:
+ratio of variances 
+         0.5043135 </pre></div>
+<p>표본분산의 비는 0.504다(F = 285751 / 566613). 교육군의 분산이 대조군의 절반쯤이라는 뜻이다. 그러나 p-value가 0.1077로 유의수준 0.05보다 커서 "분산의 비가 1이다"라는 영가설을 기각하지 못한다. 분산의 비의 95% 신뢰구간(0.218, 1.166)에도 1이 들어 있다.</p>
+<div class="scroll"><table>
+<thead><tr><th>등분산 검정의 결과</th><th>판단</th><th>쓰는 검정</th><th>R 호출</th></tr></thead>
+<tbody>
+<tr><td>\(p \ge \alpha\)</td><td>분산의 비가 1이라는 영가설을 기각하지 못한다. 등분산을 가정한다</td><td>Student t 검정</td><td><code>t.test(y ~ g, data = d, var.equal = TRUE)</code></td></tr>
+<tr><td>\(p &lt; \alpha\)</td><td>분산의 비가 1이 아니다. 등분산을 가정하지 않는다</td><td>Welch t 검정</td><td><code>t.test(y ~ g, data = d)</code></td></tr>
+</tbody></table></div>
+<h3>2단계: 결과에 따라 t 검정 고르기</h3>
+<p>이 데이터는 분산의 비가 1이라는 영가설을 기각하지 못했으므로 등분산을 가정하는 Student t 검정을 쓴다. 아래 코드는 등분산 검정의 p-value로 <code>var.equal</code>을 정하므로, 다른 데이터로 바꿔도 같은 절차가 그대로 적용된다.</p>
+<div class="cb r"><span class="lang">R</span><pre># 2단계: 등분산 검정의 결과에 따라 t 검정을 고른다
+equal_var &lt;- vt$p.value &gt;= 0.05      # 영가설(분산의 비 = 1)을 기각하지 못하면 TRUE: 등분산을 가정한다
+equal_var
+
+res2 &lt;- t.test(sodium_post ~ group, data = d, var.equal = equal_var)
+res2
+broom::tidy(res2)
+
+# 두 검정을 직접 지정해 비교해 볼 수도 있다
+t.test(sodium_post ~ group, data = d, var.equal = TRUE)    # Student 검정
+t.test(sodium_post ~ group, data = d)                      # Welch 검정 (기본값)</pre></div>
+<div class="cb out"><span class="lang">출력 읽기</span><pre>	Two Sample t-test
+
+data:  sodium_post by group
+t = -2.1181, df = 46, p-value = 0.0396
+alternative hypothesis: true difference in means between group 교육군 and group 대조군 is not equal to 0
+95 percent confidence interval:
+ -778.5061  -19.8272
+sample estimates:
+mean in group 교육군 mean in group 대조군 
+            2901.250             3300.417 </pre></div>
+<p>첫 줄의 <code>Two Sample t-test</code>가 Student 검정이라는 표시다. Welch 검정이면 <code>Welch Two Sample t-test</code>라고 나온다. p-value가 0.0396으로 0.05보다 작아서 "두 집단의 평균이 같다"는 영가설을 기각한다. 평균 차이(교육군 − 대조군)의 95% 신뢰구간은 −778.5에서 −19.8이다.</p>
+<p>아래 실험판은 이 데이터에서 고른 Student 검정으로 시작한다. Welch로 바꿔 본다. 이 데이터는 두 집단의 크기가 같아서 t 값은 변하지 않고 자유도만 46에서 41.5로 줄어든다. 분포의 꼬리가 조금 두꺼워지고 p-value가 조금 커진다.</p>
+<div class="lab" data-type="two"></div>
+<div class="callout caution"><p><strong>등분산 검정에서 알아 둘 것.</strong> 영가설을 "기각하지 못했다"는 분산의 비가 1이라는 증거가 아니다. 표본이 작으면 분산이 실제로 달라도 등분산 검정이 그것을 잡아내지 못할 수 있다. 또 F 검정은 자료가 정규분포에서 벗어나면 결과가 쉽게 흔들린다. 위에서 본 Welch 권고가 나온 까닭이 이것이다. 어느 절차를 썼는지는 보고서에 밝힌다.</p></div>
+
+<h3>효과크기: Cohen의 d와 Hedges의 g</h3>
+<p>두 평균의 차이를 위에서 본 합동 표준편차 \(s_p\)로 나눈다. 표본이 작으면 d가 모집단 값보다 조금 크게 나오므로, 보정 계수 J를 곱한 Hedges의 g를 함께 쓴다.</p>
+<div class="readout math">
+\[s_p = \sqrt{\frac{(n_1-1)s_1^2 + (n_2-1)s_2^2}{n_1+n_2-2}}\]
+\[d = \frac{\bar{x}_1 - \bar{x}_2}{s_p}, \qquad g = d \times J, \qquad J = 1 - \frac{3}{4(n_1+n_2-2) - 1}\]
+</div>
+<div class="cb r"><span class="lang">R</span><pre>s &lt;- d %&gt;%
+  group_by(group) %&gt;%
+  summarise(n = n(), m = mean(sodium_post), v = var(sodium_post))
+s      # 첫 행이 교육군, 둘째 행이 대조군
+
+sp &lt;- sqrt(sum((s$n - 1) * s$v) / (sum(s$n) - 2))
+d2 &lt;- (s$m[1] - s$m[2]) / sp
+J  &lt;- 1 - 3 / (4 * (sum(s$n) - 2) - 1)
+c(d = d2, g = d2 * J)
+
+# 패키지로 확인
+cohens_d(sodium_post ~ group, data = d)
+hedges_g(sodium_post ~ group, data = d)</pre></div>
+
+</section>
+
+<section class="panel" id="s7">
+<div class="section-head"><span class="section-num">07</span><h2>대응표본 t 검정</h2></div>
+<p><strong>질문.</strong> 교육군 24명의 나트륨 섭취량은 교육 전보다 교육 후에 달라졌는가? 같은 사람을 두 번 쟀으므로 두 측정값은 독립이 아니다.</p>
+<p>대응표본 검정은 사람마다 차이 \(D = \text{사전} - \text{사후}\)(3장에서 만든 <code>diff</code> 열)를 구한 다음, 차이의 평균이 0인지 보는 단일표본 검정이다. 사람마다 원래 많이 먹고 적게 먹는 차이는 뺄셈에서 사라지고 변화량만 남는다.</p>
+<div class="readout math">
+\[H_0: \mu_D = 0 \qquad H_1: \mu_D \neq 0\]
+\[t = \frac{\bar{D}}{s_D/\sqrt{n}}, \qquad \mathit{df} = n - 1 \quad (n\text{은 쌍의 수})\]
+</div>
+<div class="cb r"><span class="lang">R</span><pre>edu &lt;- d %&gt;% filter(group == "교육군")    # diff 열은 3장에서 만들었다
+
+# 가정 확인: 정규성을 보는 대상은 원자료가 아니라 차이다
+ggplot(edu, aes(sample = diff)) +
+  stat_qq() +
+  stat_qq_line()
+shapiro.test(edu$diff)
+p3     # 3장에서 그린 사전·사후 변화 그림
+
+# 검정
+res3 &lt;- t.test(edu$sodium_pre, edu$sodium_post, paired = TRUE)
+res3
+
+# 차이에 대한 단일표본 검정과 결과가 같다
+t.test(edu$diff, mu = 0)</pre></div>
+<div class="lab" data-type="paired"></div>
+<div class="callout caution"><p><strong>같은 자료에 독립표본 검정을 쓰면.</strong> <code>t.test(edu$sodium_pre, edu$sodium_post)</code>처럼 <code>paired = TRUE</code>를 빼고 실행해 본다. 평균 차이는 같은데 표준오차가 커져서 t가 작아진다. 사전과 사후가 강하게 상관되어 있을수록 대응표본 검정이 유리하다.</p></div>
+
+<h3>효과크기: \(d_z\)와 \(d_{av}\)</h3>
+<p>대응표본에서는 표준화에 쓰는 표준편차를 무엇으로 잡느냐에 따라 효과크기가 둘로 나뉜다. \(d_z\)는 차이의 표준편차로 나눈 값이고 \(t/\sqrt{n}\)과 같다. 검정력 계산에 쓴다. \(d_{av}\)는 두 시점 표준편차의 평균으로 나눈 값으로, 독립표본 연구의 d와 비교할 때 쓴다(Lakens, 2013). 어느 것을 보고했는지 반드시 밝힌다.</p>
+<div class="readout math">
+\[d_z = \frac{\bar{D}}{s_D} = \frac{t}{\sqrt{n}}, \qquad d_{av} = \frac{\bar{D}}{(s_{\text{사전}} + s_{\text{사후}})/2}\]
+</div>
+<div class="cb r"><span class="lang">R</span><pre>edu %&gt;%
+  summarise(
+    dz  = mean(diff) / sd(diff),
+    dav = mean(diff) / ((sd(sodium_pre) + sd(sodium_post)) / 2),
+    r   = cor(sodium_pre, sodium_post)      # 사전·사후 상관
+  )
+
+unname(res3$statistic) / sqrt(nrow(edu))    # dz와 같다
+
+# 패키지로 확인 (dz)
+cohens_d(edu$sodium_pre, edu$sodium_post, paired = TRUE)</pre></div>
+
+</section>
+
+<section class="panel" id="s8">
+<div class="section-head"><span class="section-num">08</span><h2>정리</h2></div>
+<div class="scroll"><table>
+<thead><tr><th>검정</th><th>R 호출</th><th>추정값</th><th>표준오차</th><th>df</th><th>효과크기</th></tr></thead>
+<tbody>
+<tr><td>단일표본</td><td><code>t.test(x, mu = m0)</code></td><td>\(\bar{x}\)</td><td>\(s/\sqrt{n}\)</td><td>\(n-1\)</td><td>\(d = (\bar{x}-\mu_0)/s\)</td></tr>
+<tr><td>등분산 검정</td><td><code>var.test(y ~ g, data = d)</code></td><td>\(F = s_1^2/s_2^2\)</td><td>—</td><td>\(n_1-1,\ n_2-1\)</td><td>—</td></tr>
+<tr><td>독립표본 (Welch)</td><td><code>t.test(y ~ g, data = d)</code></td><td>\(\bar{x}_1-\bar{x}_2\)</td><td>\(\sqrt{s_1^2/n_1+s_2^2/n_2}\)</td><td>근사값</td><td>\(d = (\bar{x}_1-\bar{x}_2)/s_p\), \(g = d\cdot J\)</td></tr>
+<tr><td>독립표본 (Student)</td><td><code>t.test(y ~ g, data = d, var.equal = TRUE)</code></td><td>\(\bar{x}_1-\bar{x}_2\)</td><td>\(s_p\sqrt{1/n_1+1/n_2}\)</td><td>\(n_1+n_2-2\)</td><td>위와 같음</td></tr>
+<tr><td>대응표본</td><td><code>t.test(x1, x2, paired = TRUE)</code></td><td>\(\bar{D}\)</td><td>\(s_D/\sqrt{n}\)</td><td>\(n-1\)</td><td>\(d_z = \bar{D}/s_D\)</td></tr>
+</tbody></table></div>
+<h3>한쪽 검정과 신뢰수준</h3>
+<p>대안가설의 방향은 <code>alternative = "less"</code> 또는 <code>"greater"</code>로, 신뢰수준은 <code>conf.level = 0.99</code>처럼 준다. 독립표본에서 <code>"less"</code>는 "첫 번째 수준의 평균이 더 작다"는 뜻이다. 실험판에서 방향을 바꾸면 R 호출문이 함께 바뀐다.</p>
+<h3>효과크기를 읽는 기준</h3>
+<p>Cohen(1988)은 \(d = 0.2\)를 작은 효과, 0.5를 중간 효과, 0.8을 큰 효과의 어림값으로 제시했다. 이 기준은 다른 근거가 없을 때 쓰는 출발점이다. 같은 분야의 선행 연구에서 보고된 효과크기, 그리고 mg 단위로 본 차이가 실제로 의미 있는 크기인지를 함께 놓고 해석한다.</p>
+<h3>보고에 넣을 것</h3>
+<p>집단별 평균과 표준편차, 검정통계량과 자유도, p-value, 평균 차이의 신뢰구간, 효과크기와 그 종류. 실험판 아래의 보고 문장이 이 순서를 따른다.</p>
+<h3>확인 범위</h3>
+<p>이 문서의 R 코드는 R 4.6.0과 tidyverse 2.0.0에서 처음부터 끝까지 실행해 오류 없이 도는 것과, 5장의 출력이 위에 적은 것과 같음을 확인했다. 글꼴을 다루는 extrafont 부분과 Windows의 PATH 설정은 컴퓨터마다 결과가 달라 이 확인에 넣지 않았다. 실험판이 계산하는 t, df, p-value, 신뢰구간, 효과크기는 R의 결과와 같다.</p>
+
+</section>
+
+<section class="panel" id="refs">
+<h3>참고문헌</h3>
+<ol class="refs">
+<li>Cohen, J. (1988). <em>Statistical power analysis for the behavioral sciences</em> (2nd ed.). Lawrence Erlbaum.</li>
+<li>Delacre, M., Lakens, D., &amp; Leys, C. (2017). Why psychologists should by default use Welch's t-test instead of Student's t-test. <em>International Review of Social Psychology, 30</em>(1), 92–101. <a href="https://doi.org/10.5334/irsp.82">doi:10.5334/irsp.82</a></li>
+<li>Lakens, D. (2013). Calculating and reporting effect sizes to facilitate cumulative science: A practical primer for t-tests and ANOVAs. <em>Frontiers in Psychology, 4</em>, 863. <a href="https://doi.org/10.3389/fpsyg.2013.00863">doi:10.3389/fpsyg.2013.00863</a></li>
+<li>Navarro, D. <em>Learning statistics with R: A tutorial for psychology students and other beginners</em>. 13장 Comparing two means.</li>
+<li>Wasserstein, R. L., &amp; Lazar, N. A. (2016). The ASA statement on p-values: Context, process, and purpose. <em>The American Statistician, 70</em>(2), 129–133. <a href="https://doi.org/10.1080/00031305.2016.1154108">doi:10.1080/00031305.2016.1154108</a></li>
+<li>Welch, B. L. (1947). The generalization of "Student's" problem when several different population variances are involved. <em>Biometrika, 34</em>(1–2), 28–35.</li>
+</ol>
+</section>
+</main>
+
+<script>
+/* ── 함수 도움말 사전: [인수, 1 필수 / 0 선택 / 2 사실상 필수, 설명] ── */
+const FN={
+'install.packages':{pkg:'utils',sig:'install.packages(pkgs, repos)',why:'CRAN에서 패키지를 내려받아 설치한다. 컴퓨터마다 한 번만 하면 된다.',
+  args:[['pkgs',1,'설치할 패키지 이름. 문자형 벡터'],['repos',0,'패키지를 내려받을 저장소 주소. 기본값은 R에 설정된 저장소']],ret:'없음. 설치 과정이 화면에 출력된다.'},
+'library':{pkg:'base',sig:'library(package)',why:'설치된 패키지를 불러와 그 안의 함수를 쓸 수 있게 한다. R을 새로 켤 때마다 실행한다.',
+  args:[['package',2,'불러올 패키지 이름. 따옴표 없이 적어도 된다. 생략하면 설치된 패키지 목록을 보여 준다']],ret:'없음(불러온 패키지 목록을 보이지 않게 돌려준다).'},
+'c':{pkg:'base',sig:'c(...)',why:'여러 값을 묶어 하나의 벡터로 만든다.',
+  args:[['...',2,'묶을 값들. 쉼표로 구분한다. <code>이름 = 값</code>으로 쓰면 이름 붙은 벡터가 된다']],ret:'벡터. 자료형이 섞이면 문자형 쪽으로 통일된다.'},
+'rep':{pkg:'base',sig:'rep(x, times, each)',why:'값을 반복해 벡터를 만든다.',
+  args:[['x',1,'반복할 값 또는 벡터'],['each',0,'원소 하나하나를 연달아 반복할 횟수'],['times',0,'벡터 전체를 반복할 횟수. 기본값 1']],ret:'x와 같은 자료형의 벡터.'},
+'list':{pkg:'base',sig:'list(...)',why:'종류가 다른 객체들을 하나로 묶는다. 여기서는 Excel 시트 이름과 데이터프레임을 짝짓는 데 쓴다.',
+  args:[['...',0,'<code>이름 = 객체</code> 꼴로 묶을 것들']],ret:'리스트.'},
+'dir.create':{pkg:'base',sig:'dir.create(path, showWarnings = TRUE, recursive = FALSE)',why:'폴더를 만든다.',
+  args:[['path',1,'만들 폴더의 경로. 문자열'],['showWarnings',0,'폴더가 이미 있을 때 경고를 낼지. 기본값 TRUE'],['recursive',0,'중간 폴더까지 한꺼번에 만들지. 기본값 FALSE']],ret:'성공 여부를 나타내는 논리값 하나(화면에는 보이지 않는다).'},
+'write_xlsx':{pkg:'writexl',sig:'write_xlsx(x, path)',why:'데이터프레임을 Excel(.xlsx) 파일로 저장한다.',
+  args:[['x',1,'데이터프레임 하나, 또는 이름 붙은 리스트. 리스트의 이름이 시트 이름이 된다'],['path',2,'저장할 파일 경로. 생략하면 임시 파일에 저장한다']],ret:'저장된 파일의 경로(화면에는 보이지 않는다).'},
+'excel_sheets':{pkg:'readxl',sig:'excel_sheets(path)',why:'Excel 파일 안의 시트 이름을 확인한다.',
+  args:[['path',1,'Excel 파일 경로']],ret:'시트 이름이 담긴 문자형 벡터.'},
+'read_excel':{pkg:'readxl',sig:'read_excel(path, sheet = NULL, range = NULL, skip = 0)',why:'Excel 파일의 시트 하나를 읽는다.',
+  args:[['path',1,'Excel 파일 경로'],['sheet',0,'읽을 시트의 이름 또는 번호. 기본값은 첫 번째 시트'],['range',0,'읽을 셀 범위. 예: "A1:D49"'],['skip',0,'위에서 건너뛸 행 수. 기본값 0']],ret:'tibble(데이터프레임의 한 종류). 기본 데이터프레임이 필요하면 <code>as.data.frame()</code>으로 바꾼다.'},
+'View':{pkg:'utils',sig:'View(x)',why:'데이터를 표 형태의 창으로 띄워 본다.',args:[['x',1,'볼 데이터프레임']],ret:'없음. 표가 새 탭에 열린다.'},
+'getwd':{pkg:'base',sig:'getwd()',why:'지금 R이 기준으로 삼는 작업 폴더를 확인한다.',args:[],ret:'폴더 경로 문자열 하나.'},
+'factor':{pkg:'base',sig:'factor(x, levels, labels = levels)',why:'범주를 나타내는 변수(집단, 성별 등)를 factor로 만들고 수준의 순서를 정한다.',
+  args:[['x',2,'범주로 만들 벡터'],['levels',0,'수준과 그 순서. 생략하면 값을 정렬한 순서'],['labels',0,'수준에 붙일 표시 이름. 기본값은 levels와 같다']],ret:'factor. <code>t.test()</code>는 첫 번째 수준에서 두 번째 수준을 뺀다.'},
+'levels':{pkg:'base',sig:'levels(x)',why:'factor의 수준과 그 순서를 확인한다.',args:[['x',1,'factor']],ret:'수준 이름이 담긴 문자형 벡터.'},
+'is.na':{pkg:'base',sig:'is.na(x)',why:'값마다 결측(NA)인지 확인한다.',args:[['x',1,'확인할 벡터 또는 데이터프레임']],ret:'x와 같은 모양의 논리값(TRUE는 결측).'},
+'nrow':{pkg:'base',sig:'nrow(x)',why:'행의 수를 센다.',args:[['x',1,'데이터프레임 또는 행렬']],ret:'정수 하나.'},
+'data':{pkg:'utils',sig:'data(...)',why:'R이나 패키지에 들어 있는 예제 데이터를 불러온다. cars처럼 R에 기본으로 들어 있는 데이터는 이 줄 없이 이름만 적어도 쓸 수 있다.',args:[['...',0,'불러올 데이터의 이름. 생략하면 쓸 수 있는 예제 데이터의 목록을 보여 준다']],ret:'불러온 데이터의 이름(화면에는 보이지 않는다).'},
+'str':{pkg:'utils',sig:'str(object)',why:'객체의 구조를 짧게 보여 준다. 데이터프레임이면 행과 열의 수, 열마다의 자료형과 앞쪽 값이 나온다.',args:[['object',1,'구조를 볼 객체']],ret:'없음. 구조가 화면에 출력된다.'},
+'plot':{pkg:'graphics',sig:'plot(x, y)',why:'기본 그림을 그린다. 숫자 열이 둘인 데이터프레임을 넣으면 산점도가 된다.',args:[['x',1,'가로축에 놓을 값. 데이터프레임을 넣을 수도 있다'],['y',0,'세로축에 놓을 값']],ret:'없음. 그림이 그려진다.'},
+'hist':{pkg:'graphics',sig:'hist(x, breaks = "Sturges")',why:'히스토그램을 그린다. 값이 어떤 모양으로 퍼져 있는지 본다.',args:[['x',1,'숫자 벡터'],['breaks',0,'구간을 나누는 방법이나 구간의 수']],ret:'구간과 개수가 담긴 객체(화면에는 보이지 않는다). 그림이 그려진다.'},
+'dim':{pkg:'base',sig:'dim(x)',why:'표의 행 수와 열 수를 한 번에 확인한다.',args:[['x',1,'데이터프레임 또는 행렬']],ret:'길이 2인 정수 벡터. 앞이 행 수, 뒤가 열 수다.'},
+'names':{pkg:'base',sig:'names(x)',why:'열 이름을 확인한다.',args:[['x',1,'데이터프레임. 이름 붙은 벡터나 리스트도 된다']],ret:'이름이 담긴 문자형 벡터.'},
+'head':{pkg:'utils',sig:'head(x, n = 6)',why:'표의 앞쪽 몇 행을 본다.',args:[['x',1,'데이터프레임 또는 벡터'],['n',0,'볼 행의 수. 기본값 6']],ret:'앞쪽 n행으로 된 데이터프레임.'},
+'tail':{pkg:'utils',sig:'tail(x, n = 6)',why:'표의 뒤쪽 몇 행을 본다. 파일 끝에 합계 줄이나 빈 줄이 딸려 왔는지 볼 때 쓴다.',args:[['x',1,'데이터프레임 또는 벡터'],['n',0,'볼 행의 수. 기본값 6']],ret:'뒤쪽 n행으로 된 데이터프레임.'},
+'summary':{pkg:'base',sig:'summary(object)',why:'열마다 요약 통계를 한꺼번에 보여 준다. 숫자 열은 최솟값, 1사분위수, 중앙값, 평균, 3사분위수, 최댓값이 나온다.',args:[['object',1,'데이터프레임. 벡터 하나나 모형 결과를 넣을 수도 있다']],ret:'요약 표. 결측이 있는 열에는 결측의 개수(NA\'s)가 함께 나온다.'},
+'n_distinct':{pkg:'dplyr',sig:'n_distinct(..., na.rm = FALSE)',why:'서로 다른 값이 몇 개인지 센다. 행 수와 같으면 겹치는 값이 없는 것이다.',args:[['...',2,'셀 대상인 벡터(열)'],['na.rm',0,'결측을 빼고 셀지. 기본값 FALSE']],ret:'정수 하나.'},
+'mean':{pkg:'base',sig:'mean(x, na.rm = FALSE)',why:'산술평균을 구한다.',
+  args:[['x',1,'숫자 벡터'],['na.rm',0,'결측을 빼고 계산할지. 기본값 FALSE. 결측이 하나라도 있으면 결과가 NA가 된다']],ret:'숫자 하나.'},
+'sd':{pkg:'stats',sig:'sd(x, na.rm = FALSE)',why:'표본 표준편차를 구한다. 분모는 n − 1이다.',
+  args:[['x',1,'숫자 벡터'],['na.rm',0,'결측을 빼고 계산할지. 기본값 FALSE']],ret:'숫자 하나.'},
+'var':{pkg:'stats',sig:'var(x, na.rm = FALSE)',why:'표본 분산을 구한다. 분모는 n − 1이다.',
+  args:[['x',1,'숫자 벡터'],['na.rm',0,'결측을 빼고 계산할지. 기본값 FALSE']],ret:'숫자 하나(벡터 하나를 넣었을 때).'},
+'sqrt':{pkg:'base',sig:'sqrt(x)',why:'제곱근을 구한다.',args:[['x',1,'0 이상의 숫자 또는 숫자 벡터']],ret:'x와 길이가 같은 숫자 벡터.'},
+'cor':{pkg:'stats',sig:'cor(x, y, method = "pearson")',why:'두 변수의 상관계수를 구한다.',
+  args:[['x',1,'숫자 벡터'],['y',2,'x와 길이가 같은 숫자 벡터. x가 표이면 생략할 수 있다'],['method',0,'"pearson"(기본값), "spearman", "kendall"']],ret:'−1과 1 사이의 숫자 하나(두 벡터를 넣었을 때).'},
+'unname':{pkg:'base',sig:'unname(obj)',why:'값에 붙어 있는 이름표를 뗀다. 여기서는 t 값에 붙은 "t"라는 이름을 지운다.',args:[['obj',1,'이름이 붙은 객체']],ret:'이름이 없어진 같은 값.'},
+'shapiro.test':{pkg:'stats',sig:'shapiro.test(x)',why:'Shapiro–Wilk 정규성 검정. 영가설은 "자료가 정규분포에서 나왔다"이다.',
+  args:[['x',1,'숫자 벡터. 결측을 뺀 값이 3개 이상 5000개 이하여야 한다']],ret:'검정 결과 리스트(htest). <code>$statistic</code>에 W, <code>$p.value</code>에 p-value가 있다.'},
+'tibble':{pkg:'tibble',sig:'tibble(...)',why:'길이가 같은 벡터들을 열로 삼아 표(tibble)를 만든다. tidyverse에서 쓰는 데이터프레임이다.',
+  args:[['...',2,'<code>열이름 = 벡터</code> 꼴. 모든 벡터의 길이가 같아야 한다']],ret:'tibble. 행은 사례, 열은 변수다. 출력하면 앞 10행과 열의 자료형을 보여 준다.'},
+'write_csv':{pkg:'readr',sig:'write_csv(x, file)',why:'데이터프레임을 CSV 파일로 저장한다. 인코딩은 UTF-8이고 행 번호는 쓰지 않는다.',
+  args:[['x',1,'저장할 데이터프레임'],['file',1,'저장할 파일 경로']],ret:'넣은 데이터프레임 x(화면에는 보이지 않는다). 파일이 만들어진다.'},
+'read_csv':{pkg:'readr',sig:'read_csv(file, col_types = NULL, locale = default_locale())',why:'CSV 파일을 읽어 tibble로 만든다. 열의 자료형을 추측해 알려 준다.',
+  args:[['file',1,'읽을 파일 경로'],['col_types',0,'열의 자료형을 직접 정할 때. 기본값은 자동 추측'],['locale',0,'인코딩 등 지역 설정. 기본값은 UTF-8. <code>locale()</code>로 만든다']],ret:'tibble.'},
+'locale':{pkg:'readr',sig:'locale(encoding = "UTF-8")',why:'파일을 읽을 때의 지역 설정(인코딩, 소수점 기호 등)을 만든다. <code>read_csv()</code>의 locale 인수에 넣는다.',
+  args:[['encoding',0,'파일의 인코딩. 기본값 "UTF-8". 한글 Windows 파일은 "CP949"']],ret:'지역 설정 객체.'},
+'write_rds':{pkg:'readr',sig:'write_rds(x, file)',why:'R 객체를 R 전용 형식(.rds)으로 저장한다. factor의 순서 같은 정보가 그대로 남는다.',
+  args:[['x',1,'저장할 객체'],['file',1,'저장할 파일 경로']],ret:'넣은 객체 x(화면에는 보이지 않는다).'},
+'read_rds':{pkg:'readr',sig:'read_rds(file)',why:'.rds 파일을 읽어 저장했던 객체를 그대로 되살린다.',args:[['file',1,'읽을 파일 경로']],ret:'저장했던 객체.'},
+'glimpse':{pkg:'dplyr',sig:'glimpse(x)',why:'표의 구조를 한눈에 본다. 행·열 수, 열마다의 자료형과 앞쪽 값.',
+  args:[['x',1,'살펴볼 데이터프레임']],ret:'넣은 x(화면에는 보이지 않는다). 구조가 화면에 출력된다.'},
+'mutate':{pkg:'dplyr',sig:'mutate(.data, ...)',why:'열을 새로 만들거나 기존 열을 바꾼다. 행의 수는 변하지 않는다.',
+  args:[['.data',1,'파이프로 넘겨받는 데이터프레임. 파이프를 쓰면 적지 않는다'],['...',2,'<code>열이름 = 계산식</code> 꼴. 여러 개를 쉼표로 잇는다']],ret:'열이 추가되거나 바뀐 데이터프레임. 원래 데이터는 바뀌지 않으므로 <code>&lt;-</code>로 담아야 남는다.'},
+'filter':{pkg:'dplyr',sig:'filter(.data, ...)',why:'조건에 맞는 행만 고른다.',
+  args:[['.data',1,'파이프로 넘겨받는 데이터프레임. 파이프를 쓰면 적지 않는다'],['...',2,'행을 고르는 조건. 같다는 <code>==</code>로 쓴다. 여러 조건을 쉼표로 이으면 "그리고"가 된다']],ret:'조건에 맞는 행만 남은 데이터프레임.'},
+'count':{pkg:'dplyr',sig:'count(x, ...)',why:'범주별로 행이 몇 개인지 센다.',
+  args:[['x',1,'파이프로 넘겨받는 데이터프레임. 파이프를 쓰면 적지 않는다'],['...',0,'셀 기준이 되는 열. 생략하면 전체 행 수를 센다']],ret:'범주와 개수 <code>n</code> 열로 된 데이터프레임.'},
+'group_by':{pkg:'dplyr',sig:'group_by(.data, ...)',why:'표를 집단으로 나눈다. 뒤따르는 <code>summarise()</code>가 집단별로 계산된다.',
+  args:[['.data',1,'파이프로 넘겨받는 데이터프레임. 파이프를 쓰면 적지 않는다'],['...',2,'집단을 나누는 열']],ret:'집단 정보가 붙은 데이터프레임. 겉모습은 그대로다.'},
+'summarise':{pkg:'dplyr',sig:'summarise(.data, ...)',why:'여러 행을 요약 통계량 한 행으로 줄인다. <code>group_by()</code> 뒤에 쓰면 집단마다 한 행이 된다.',
+  args:[['.data',1,'파이프로 넘겨받는 데이터프레임. 파이프를 쓰면 적지 않는다'],['...',2,'<code>이름 = 요약 함수(열)</code> 꼴. 예: <code>m = mean(x)</code>']],ret:'요약값으로 된 데이터프레임. 집단마다 한 행.'},
+'across':{pkg:'dplyr',sig:'across(.cols, .fns)',why:'같은 계산을 여러 열에 한꺼번에 적용한다. <code>summarise()</code>나 <code>mutate()</code> 안에서 쓴다.',
+  args:[['.cols',1,'적용할 열. 열 이름들이나 <code>everything()</code>'],['.fns',2,'적용할 함수. <code>~ sum(is.na(.x))</code>처럼 쓰면 <code>.x</code> 자리에 각 열이 들어간다']],ret:'열마다 계산한 결과 열들.'},
+'everything':{pkg:'tidyselect',sig:'everything()',why:'모든 열을 가리킨다. <code>across()</code> 같은 열 선택 자리에 쓴다.',args:[],ret:'모든 열의 선택.'},
+'n':{pkg:'dplyr',sig:'n()',why:'지금 집단의 행 수를 센다. <code>summarise()</code>나 <code>mutate()</code> 안에서만 쓴다.',args:[],ret:'정수 하나.'},
+'pull':{pkg:'dplyr',sig:'pull(.data, var = -1)',why:'데이터프레임에서 열 하나를 벡터로 꺼낸다. <code>d$열이름</code>과 같다.',
+  args:[['.data',1,'파이프로 넘겨받는 데이터프레임. 파이프를 쓰면 적지 않는다'],['var',2,'꺼낼 열의 이름. 생략하면 마지막 열']],ret:'벡터.'},
+'pivot_longer':{pkg:'tidyr',sig:'pivot_longer(data, cols, names_to = "name", values_to = "value", names_prefix = NULL)',why:'옆으로 나란히 있는 열들을 세로로 쌓아 긴 모양으로 바꾼다.',
+  args:[['data',1,'파이프로 넘겨받는 데이터프레임. 파이프를 쓰면 적지 않는다'],['cols',1,'세로로 쌓을 열들'],['names_to',0,'원래 열 이름이 들어갈 새 열의 이름. 기본값 "name"'],['values_to',0,'값이 들어갈 새 열의 이름. 기본값 "value"'],['names_prefix',0,'열 이름 앞에서 지울 글자. 예: "sodium_"']],ret:'행이 늘어난 긴 모양의 데이터프레임.'},
+'sum':{pkg:'base',sig:'sum(..., na.rm = FALSE)',why:'합을 구한다. 논리값에 쓰면 TRUE의 개수가 된다.',
+  args:[['...',2,'숫자 또는 논리값 벡터'],['na.rm',0,'결측을 빼고 계산할지. 기본값 FALSE']],ret:'숫자 하나.'},
+'ggplot':{pkg:'ggplot2',sig:'ggplot(data = NULL, mapping = aes())',why:'그림의 바탕을 만든다. 어떤 데이터의 어떤 변수를 축에 놓을지 정하고, 그림의 종류는 <code>+</code>로 더한다.',
+  args:[['data',2,'그릴 데이터프레임. 파이프로 넘겨받을 수도 있다'],['mapping',0,'변수와 축의 대응. <code>aes()</code>로 만든다']],ret:'ggplot 객체. 출력하면 그림이 그려지고, 변수에 담아 두었다가 저장할 수 있다.'},
+'aes':{pkg:'ggplot2',sig:'aes(x, y, ...)',why:'데이터의 변수를 그림의 요소(가로축, 세로축, 색, 묶음 등)에 대응시킨다.',
+  args:[['x',0,'가로축에 놓을 변수'],['y',0,'세로축에 놓을 변수'],['group',0,'선으로 이을 묶음을 정하는 변수'],['sample',0,'Q–Q 그림에 쓸 변수']],ret:'대응 정보. <code>ggplot()</code>이나 geom 함수 안에 넣는다.'},
+'geom_histogram':{pkg:'ggplot2',sig:'geom_histogram(bins = 30, binwidth = NULL)',why:'히스토그램 레이어를 더한다. 분포의 모양을 본다.',
+  args:[['bins',0,'구간의 수. 기본값 30'],['binwidth',0,'구간의 너비. bins 대신 쓸 수 있다']],ret:'레이어. <code>+</code>로 그림에 더한다.'},
+'geom_boxplot':{pkg:'ggplot2',sig:'geom_boxplot(outlier.shape = 19)',why:'상자그림 레이어를 더한다. 집단별 분포를 비교한다.',
+  args:[['outlier.shape',0,'이상값 점의 모양. NA로 두면 이상값 점을 그리지 않는다(개별 값을 따로 찍을 때)']],ret:'레이어. <code>+</code>로 그림에 더한다.'},
+'geom_jitter':{pkg:'ggplot2',sig:'geom_jitter(width = NULL, alpha = 1)',why:'개별 값을 점으로 찍되 겹치지 않게 좌우로 조금 흩뜨린다.',
+  args:[['width',0,'좌우로 흩뜨리는 폭'],['alpha',0,'투명도. 0(투명)에서 1(불투명)']],ret:'레이어. <code>+</code>로 그림에 더한다.'},
+'geom_line':{pkg:'ggplot2',sig:'geom_line(alpha = 1)',why:'선 레이어를 더한다. <code>aes(group = )</code>으로 묶은 값끼리 잇는다.',
+  args:[['alpha',0,'투명도. 0(투명)에서 1(불투명)']],ret:'레이어. <code>+</code>로 그림에 더한다.'},
+'geom_point':{pkg:'ggplot2',sig:'geom_point(alpha = 1, size = 1.5)',why:'점 레이어를 더한다.',
+  args:[['alpha',0,'투명도'],['size',0,'점의 크기']],ret:'레이어. <code>+</code>로 그림에 더한다.'},
+'stat_qq':{pkg:'ggplot2',sig:'stat_qq()',why:'정규 Q–Q 그림의 점을 찍는다. 변수는 <code>aes(sample = )</code>으로 정한다. 점들이 직선에 가까우면 정규분포에 가깝다.',args:[],ret:'레이어. <code>+</code>로 그림에 더한다.'},
+'stat_qq_line':{pkg:'ggplot2',sig:'stat_qq_line()',why:'Q–Q 그림에 기준 직선을 더한다.',args:[],ret:'레이어. <code>+</code>로 그림에 더한다.'},
+'labs':{pkg:'ggplot2',sig:'labs(title, x, y)',why:'제목과 축 이름을 붙인다.',
+  args:[['title',0,'그림 제목'],['x',0,'가로축 이름. NULL이면 지운다'],['y',0,'세로축 이름']],ret:'이름표 설정. <code>+</code>로 그림에 더한다.'},
+'ggsave':{pkg:'ggplot2',sig:'ggsave(filename, plot = last_plot(), width, height, dpi = 300)',why:'그림을 파일로 저장한다. 확장자(.png, .pdf 등)에 따라 형식이 정해진다.',
+  args:[['filename',1,'저장할 파일 경로'],['plot',0,'저장할 그림. 기본값은 마지막에 그린 그림'],['width',0,'너비(인치)'],['height',0,'높이(인치)'],['dpi',0,'해상도. 기본값 300']],ret:'저장한 파일 경로(화면에는 보이지 않는다).'},
+'font_import':{pkg:'extrafont',sig:'font_import(paths = NULL, pattern = NULL, prompt = TRUE)',why:'컴퓨터에 설치된 트루타입 글꼴을 찾아 R에 등록한다. 컴퓨터마다 한 번만 하면 된다.',
+  args:[['paths',0,'글꼴을 찾을 폴더. 기본값은 시스템 글꼴 폴더'],['pattern',0,'등록할 글꼴 파일 이름에 들어 있어야 할 글자. 기본값은 모든 글꼴'],['prompt',0,'진행할지 묻는 질문을 띄울지. 기본값 TRUE. FALSE면 묻지 않고 바로 진행한다']],ret:'없음. 등록 과정이 화면에 출력된다.'},
+'loadfonts':{pkg:'extrafont',sig:'loadfonts(device = "pdf", quiet = FALSE)',why:'등록해 둔 글꼴을 그림 장치에 연결한다. R을 새로 켤 때마다 실행한다.',
+  args:[['device',0,'연결할 그림 장치. "pdf"(기본값), "postscript", "win"(Windows 화면)'],['quiet',0,'진행 메시지를 숨길지. 기본값 FALSE']],ret:'없음.'},
+'fonts':{pkg:'extrafont',sig:'fonts()',why:'등록된 글꼴의 이름을 확인한다. <code>base_family</code>에는 여기 나온 이름을 그대로 적는다.',args:[],ret:'글꼴 이름이 담긴 문자형 벡터.'},
+'grep':{pkg:'base',sig:'grep(pattern, x, value = FALSE)',why:'문자형 벡터에서 특정 글자가 들어 있는 원소를 찾는다.',
+  args:[['pattern',1,'찾을 글자(정규표현식)'],['x',1,'찾을 대상인 문자형 벡터'],['value',0,'TRUE면 찾은 원소 자체를, FALSE(기본값)면 그 위치 번호를 돌려준다']],ret:'value = TRUE이면 문자형 벡터, 아니면 정수 벡터.'},
+'normalizePath':{pkg:'base',sig:'normalizePath(path)',why:'경로를 줄임 없는 전체 경로로 바꿔 보여 준다.',args:[['path',1,'경로 문자열']],ret:'전체 경로 문자열. Windows에서는 역슬래시가 두 개씩 표시된다.'},
+'file.path':{pkg:'base',sig:'file.path(...)',why:'폴더와 파일 이름을 이어 경로 하나로 만든다.',args:[['...',2,'이을 경로 조각들. 문자열']],ret:'경로 문자열.'},
+'R.home':{pkg:'base',sig:'R.home(component = "home")',why:'R이 설치된 폴더를 알려 준다.',args:[['component',0,'알고 싶은 하위 폴더. 기본값 "home"은 설치 폴더 자체']],ret:'경로 문자열.'},
+'q':{pkg:'base',sig:'q(save = "default")',why:'R을 끝낸다.',args:[['save',0,'작업 공간을 저장할지. "no", "yes", "ask". 묻는 말이 나오면 n을 입력한다']],ret:'없음. R이 종료된다.'},
+'theme_set':{pkg:'ggplot2',sig:'theme_set(new)',why:'이후에 그리는 모든 그림의 기본 모양(테마)을 바꾼다.',args:[['new',1,'적용할 테마. 예: <code>theme_gray()</code>']],ret:'바꾸기 전의 테마(화면에는 보이지 않는다).'},
+'theme_gray':{pkg:'ggplot2',sig:'theme_gray(base_size = 11, base_family = "")',why:'ggplot2의 기본 테마. 글자 크기와 글꼴을 정할 수 있다.',
+  args:[['base_size',0,'기본 글자 크기. 기본값 11'],['base_family',0,'글꼴 이름. 한글이 깨질 때 한글 글꼴을 지정한다']],ret:'테마 객체.'},
+'tidy':{pkg:'broom',sig:'tidy(x)',why:'검정 결과를 한 행짜리 표로 바꾼다. 여러 검정의 결과를 모으거나 저장할 때 편하다. broom은 tidyverse와 함께 설치된다.',
+  args:[['x',1,'<code>t.test()</code> 등의 결과 객체']],ret:'tibble. 열은 <code>estimate</code> 추정값, <code>statistic</code> t, <code>p.value</code>, <code>parameter</code> 자유도, <code>conf.low</code>, <code>conf.high</code> 등.'},
+'var.test':{pkg:'stats',sig:'var.test(x, y, ratio = 1, alternative = "two.sided", conf.level = 0.95)',why:'두 집단의 분산의 비에 대한 F 검정. 영가설은 "두 모분산의 비가 ratio(기본값 1)와 같다"이다. 독립표본 t 검정에서 Student와 Welch 중 무엇을 쓸지 정할 때 쓴다.',
+  args:[['x',1,'숫자 벡터. 또는 <code>값 ~ 집단</code> 꼴의 공식'],['y',0,'두 번째 숫자 벡터'],['data',0,'공식을 쓸 때의 데이터프레임'],['ratio',0,'영가설에서의 분산의 비. 기본값 1'],['alternative',0,'대안가설의 방향. "two.sided"(기본값), "less", "greater"'],['conf.level',0,'신뢰수준. 기본값 0.95']],
+  ret:'검정 결과 리스트(htest). <code>$statistic</code> F 값, <code>$parameter</code> 두 자유도, <code>$p.value</code>, <code>$conf.int</code> 분산의 비의 신뢰구간, <code>$estimate</code> 표본분산의 비.'},
+'t.test':{pkg:'stats',sig:'t.test(x, y = NULL, alternative = "two.sided", mu = 0, paired = FALSE, var.equal = FALSE, conf.level = 0.95)',why:'t 검정을 한다. 넣는 인수에 따라 단일표본, 독립표본, 대응표본 검정이 된다.',
+  args:[['x',1,'숫자 벡터. 또는 <code>값 ~ 집단</code> 꼴의 공식'],['y',0,'두 번째 숫자 벡터. 넣으면 두 표본 검정이 된다'],['data',0,'공식을 쓸 때, 변수들이 들어 있는 데이터프레임'],['mu',0,'영가설의 값(평균 또는 평균 차이). 기본값 0'],['alternative',0,'대안가설의 방향. "two.sided"(기본값), "less", "greater"'],['paired',0,'대응표본이면 TRUE. 기본값 FALSE'],['var.equal',0,'등분산을 가정하면 TRUE(Student). 기본값 FALSE(Welch)'],['conf.level',0,'신뢰수준. 기본값 0.95']],
+  ret:'검정 결과 리스트(htest). <code>$statistic</code> t 값, <code>$parameter</code> 자유도, <code>$p.value</code>, <code>$conf.int</code> 신뢰구간, <code>$estimate</code> 평균(차이), <code>$stderr</code> 표준오차.'},
+'cohens_d':{pkg:'effectsize',sig:'cohens_d(x, y = NULL, data = NULL, mu = 0, paired = FALSE, pooled_sd = TRUE, ci = 0.95)',why:'Cohen의 d와 그 신뢰구간을 구한다.',
+  args:[['x',1,'숫자 벡터. 또는 <code>값 ~ 집단</code> 꼴의 공식'],['y',0,'두 번째 숫자 벡터'],['data',0,'공식을 쓸 때의 데이터프레임'],['mu',0,'비교할 기준값. 기본값 0'],['paired',0,'대응표본이면 TRUE. 이때 d_z를 구한다. 기본값 FALSE'],['pooled_sd',0,'합동 표준편차로 나눌지. 기본값 TRUE'],['ci',0,'신뢰수준. 기본값 0.95']],
+  ret:'한 행짜리 데이터프레임. 열은 <code>Cohens_d</code>, <code>CI</code>, <code>CI_low</code>, <code>CI_high</code>.'},
+'hedges_g':{pkg:'effectsize',sig:'hedges_g(x, y = NULL, data = NULL, mu = 0, paired = FALSE, pooled_sd = TRUE, ci = 0.95)',why:'Hedges의 g(작은 표본에서의 치우침을 보정한 d)와 그 신뢰구간을 구한다.',
+  args:[['x',1,'숫자 벡터. 또는 <code>값 ~ 집단</code> 꼴의 공식'],['y',0,'두 번째 숫자 벡터'],['data',0,'공식을 쓸 때의 데이터프레임'],['ci',0,'신뢰수준. 기본값 0.95']],
+  ret:'한 행짜리 데이터프레임. 열은 <code>Hedges_g</code>, <code>CI</code>, <code>CI_low</code>, <code>CI_high</code>.'}
+};
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const wrapFns=h=>h.replace(/([A-Za-z_][A-Za-z0-9._]*)(?=\()/g,m=>FN.hasOwnProperty(m)?`<span class="fn" tabindex="0" data-fn="${m}">${m}</span>`:m);
+
+/* ── 예제 데이터 (R 코드와 같은 값) ── */
+const DATA={
+ pe:[2350,3340,4150,4660,3300,3680,2630,2420,3300,2900,2120,3330,4130,4010,3050,2550,3810,3210,2950,3690,3360,3350,2220,2160],
+ pc:[3370,2660,3380,3390,2450,3400,3340,2550,3930,2370,2460,3850,3520,3000,3760,3120,1930,2900,3260,3460,4570,3260,3940,4240],
+ poe:[2430,3120,3310,3780,2100,3430,2100,2280,3390,3110,3050,2680,3420,3260,2850,2510,3410,3120,2600,3750,2820,2940,2240,1930],
+ poc:[3810,2150,3550,4030,2230,3110,3170,3400,3470,3250,3400,4050,3530,1710,3720,2990,1840,2770,3900,3090,3880,3130,4350,4680]};
+
+/* ── t 분포 ── */
+function lgamma(x){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+  let y=x,t=x+5.5;t-=(x+0.5)*Math.log(t);let s=1.000000000190015;for(let j=0;j<6;j++)s+=c[j]/++y;return -t+Math.log(2.5066282746310005*s/x);}
+function betacf(a,b,x){const F=1e-300;let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;if(Math.abs(d)<F)d=F;d=1/d;let h=d;
+  for(let m=1;m<=300;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<F)d=F;c=1+aa/c;if(Math.abs(c)<F)c=F;d=1/d;h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<F)d=F;c=1+aa/c;if(Math.abs(c)<F)c=F;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<1e-14)break;}
+  return h;}
+function ibeta(a,b,x){if(x<=0)return 0;if(x>=1)return 1;
+  const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));
+  return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+function tcdf(t,v){const p=0.5*ibeta(v/2,0.5,v/(v+t*t));return t>0?1-p:p;}
+function tpdf(t,v){return Math.exp(lgamma((v+1)/2)-lgamma(v/2)-0.5*Math.log(v*Math.PI)-(v+1)/2*Math.log(1+t*t/v));}
+function tinv(p,v){let lo=-500,hi=500;for(let i=0;i<90;i++){const m=(lo+hi)/2;if(tcdf(m,v)<p)lo=m;else hi=m;}return (lo+hi)/2;}
+function pval(t,v,alt){return alt==='less'?tcdf(t,v):alt==='greater'?tcdf(-t,v):2*tcdf(-Math.abs(t),v);}
+
+/* ── 통계량 ── */
+const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+const vari=a=>{const m=mean(a);return a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1);};
+const sd=a=>Math.sqrt(vari(a));
+function corr(a,b){const ma=mean(a),mb=mean(b);let s=0;for(let i=0;i<a.length;i++)s+=(a[i]-ma)*(b[i]-mb);return s/((a.length-1)*sd(a)*sd(b));}
+
+function compute(type,st){
+  let r={};
+  if(type==='explore'){r={t:st.t,df:st.df};}
+  else if(type==='one'){const x=st.x,n=x.length,m=mean(x),s=sd(x),se=s/Math.sqrt(n);
+    r={n,m,s,se,est:m,nul:st.mu0,t:(m-st.mu0)/se,df:n-1,d:(m-st.mu0)/s};}
+  else if(type==='two'){const x=st.x,y=st.y,n1=x.length,n2=y.length,m1=mean(x),m2=mean(y),v1=vari(x),v2=vari(y);
+    const sp=Math.sqrt(((n1-1)*v1+(n2-1)*v2)/(n1+n2-2));let se,df;
+    if(st.eq){se=sp*Math.sqrt(1/n1+1/n2);df=n1+n2-2;}
+    else{const a=v1/n1,b=v2/n2;se=Math.sqrt(a+b);df=(a+b)*(a+b)/(a*a/(n1-1)+b*b/(n2-1));}
+    const d=(m1-m2)/sp,J=1-3/(4*(n1+n2-2)-1);
+    r={n1,n2,m1,m2,s1:Math.sqrt(v1),s2:Math.sqrt(v2),sp,se,est:m1-m2,nul:0,t:(m1-m2)/se,df,d,g:d*J};}
+  else{const x=st.x,y=st.y,D=x.map((v,i)=>v-y[i]),n=D.length,m=mean(D),s=sd(D),se=s/Math.sqrt(n);
+    r={n,m1:mean(x),m2:mean(y),s1:sd(x),s2:sd(y),m,s,se,est:m,nul:0,t:m/se,df:n-1,dz:m/s,dav:m/((sd(x)+sd(y))/2),r:corr(x,y)};}
+  r.p=pval(r.t,r.df,st.alt);
+  const a=st.alpha;
+  r.crit=st.alt==='two.sided'?tinv(1-a/2,r.df):tinv(1-a,r.df);
+  if(type!=='explore'){
+    r.ci=st.alt==='two.sided'?[r.est-r.crit*r.se,r.est+r.crit*r.se]:st.alt==='less'?[-Infinity,r.est+r.crit*r.se]:[r.est-r.crit*r.se,Infinity];}
+  r.reject=r.p<a;
+  return r;
+}
+
+/* ── 표기 ── */
+const f=(x,k)=>!isFinite(x)?(x>0?'Inf':'-Inf'):x.toFixed(k).replace('-','−');
+function fp(p){return p<0.0001?p.toExponential(2).replace('-','−'):p.toFixed(4);}
+function fpr(p){return p<0.001?'p < .001':'p = '+p.toFixed(3).replace(/^0/,'');}
+const fdf=df=>Number.isInteger(df)?String(df):df.toFixed(2);
+
+/* ── 그림 ── */
+function draw(svg,r,st){
+  const W=Math.max(300,Math.round(svg.getBoundingClientRect().width)||720),H=W<480?244:302;
+  const L=14,R=14,T=30,B=64,pw=W-L-R,ph=H-T-B,df=r.df,t=r.t;
+  const xm=Math.min(60,Math.max(4.5,Math.abs(t)*1.12+0.6));
+  const ym=tpdf(0,df)*1.1;
+  const X=v=>L+(v+xm)/(2*xm)*pw,Y=v=>T+ph-(v/ym)*ph,y0=Y(0);
+  const N=240,pts=[];for(let i=0;i<=N;i++){const v=-xm+2*xm*i/N;pts.push([v,tpdf(v,df)]);}
+  const area=(a,b)=>{a=Math.max(a,-xm);b=Math.min(b,xm);if(b<=a)return '';
+    let s=`M${X(a).toFixed(1)},${y0}`;const n=Math.max(8,Math.round(N*(b-a)/(2*xm)));
+    for(let i=0;i<=n;i++){const v=a+(b-a)*i/n;s+=`L${X(v).toFixed(1)},${Y(tpdf(v,df)).toFixed(1)}`;}
+    return s+`L${X(b).toFixed(1)},${y0}Z`;};
+  const fs=W<480?10.5:12;let o='';
+  // p-value 넓이
+  const pa=st.alt==='less'?[area(-xm,t)]:st.alt==='greater'?[area(t,xm)]:[area(-xm,-Math.abs(t)),area(Math.abs(t),xm)];
+  pa.forEach(p=>{if(p)o+=`<path d="${p}" fill="var(--accent)" fill-opacity=".5"/>`;});
+  // 곡선과 축
+  o+=`<path d="${pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join('')}" fill="none" stroke="var(--ink)" stroke-width="1.6"/>`;
+  o+=`<line x1="${L}" x2="${W-R}" y1="${y0}" y2="${y0}" stroke="var(--line)" stroke-width="1"/>`;
+  const step=xm<=6?1:xm<=13?2:xm<=32?5:10;
+  for(let v=-Math.floor(xm/step)*step;v<=xm;v+=step){o+=`<line x1="${X(v)}" x2="${X(v)}" y1="${y0}" y2="${y0+5}" stroke="var(--line)"/><text x="${X(v)}" y="${y0+19}" text-anchor="middle" font-size="${fs}">${v}</text>`;}
+  // 기각역
+  const c=r.crit,band=(a,b)=>`<rect x="${X(a)}" y="${y0-3}" width="${X(b)-X(a)}" height="6" fill="var(--warn)"/>`;
+  const cl=v=>`<line x1="${X(v)}" x2="${X(v)}" y1="${T+ph*0.35}" y2="${y0}" stroke="var(--warn)" stroke-dasharray="4 3" stroke-width="1.2"/><text x="${X(v)}" y="${y0+37}" text-anchor="middle" font-size="${fs}" style="fill:var(--warn)">${f(v,2)}</text>`;
+  if(st.alt!=='greater'&&c<xm){o+=band(-xm,-c)+cl(-c);} if(st.alt!=='less'&&c<xm){o+=band(c,xm)+cl(c);}
+  // 관측된 t
+  const xt=X(Math.max(-xm,Math.min(xm,t)));
+  o+=`<line x1="${xt}" x2="${xt}" y1="${T-6}" y2="${y0}" stroke="var(--ink)" stroke-width="2.4"/>`;
+  const anc=xt>W-90?'end':xt<90?'start':'middle';
+  o+=`<text x="${xt+(anc==='end'?-6:anc==='start'?6:0)}" y="${T-12}" text-anchor="${anc}" font-size="${fs+1.5}" font-weight="500" style="fill:var(--ink)">t = ${f(t,2)}</text>`;
+  if(st.alt==='two.sided'&&Math.abs(t)>0.05){const xo=X(-t);o+=`<line x1="${xo}" x2="${xo}" y1="${Y(tpdf(t,df))-14}" y2="${y0}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="2 3"/>`;}
+  o+=`<text x="${W-R}" y="${H-4}" text-anchor="end" font-size="${fs}">H₀ 아래의 t 분포, df = ${fdf(df)}</text>`;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('height',H);svg.innerHTML=o;
+}
+
+/* ── 실험판 ── */
+const CFG={
+ explore:{title:'실험판 · t와 자유도를 움직여 본다',alts:['\\(H_1\\!: \\neq\\)','\\(H_1\\!: \\lt\\)','\\(H_1\\!: \\gt\\)']},
+ one:{title:'실험판 · 단일표본 (사전 섭취량 48명)',alts:['\\(\\mu \\neq \\mu_0\\)','\\(\\mu \\lt \\mu_0\\)','\\(\\mu \\gt \\mu_0\\)'],x:()=>DATA.pe.concat(DATA.pc),labels:['자료 (x)']},
+ two:{title:'실험판 · 독립표본 (사후 섭취량, 교육군 대 대조군)',alts:['\\(\\mu_1 \\neq \\mu_2\\)','\\(\\mu_1 \\lt \\mu_2\\)','\\(\\mu_1 \\gt \\mu_2\\)'],x:()=>DATA.poe.slice(),y:()=>DATA.poc.slice(),labels:['집단 1 (교육군)','집단 2 (대조군)']},
+ paired:{title:'실험판 · 대응표본 (교육군 24명, 사전 − 사후)',alts:['\\(\\mu_D \\neq 0\\)','\\(\\mu_D \\lt 0\\)','\\(\\mu_D \\gt 0\\)'],x:()=>DATA.pe.slice(),y:()=>DATA.poe.slice(),labels:['첫 번째 측정 (사전)','두 번째 측정 (사후)']}
+};
+const ALT=['two.sided','less','greater'];
+function seg(name,opts,sel){return `<div class="seg" role="radiogroup">`+opts.map((o,i)=>`<label><input type="radio" name="${name}" id="${name}-${i}" value="${o[0]}"${o[0]===sel?' checked':''}><span>${o[1]}</span></label>`).join('')+`</div>`;}
+
+function build(root){
+  const type=root.dataset.type,C=CFG[type];
+  const st={alt:'two.sided',alpha:0.05,mu0:3000,eq:false,t:2.1,df:20,custom:false};
+  if(C.x)st.x=C.x(); if(C.y)st.y=C.y();
+  if(type==='two')st.eq=true;   // 등분산 검정에서 고른 Student 검정으로 시작한다
+  let h=`<p class="lab-title">${C.title}</p><div class="ctrls">`;
+  if(type==='explore')h+=`<div class="ctrl"><label for="ex-t">검정통계량 t = <output id="ex-t-o"></output></label><input type="range" id="ex-t" min="-5" max="5" step="0.05" value="2.1"></div>
+    <div class="ctrl"><label for="ex-df">자유도 df = <output id="ex-df-o"></output></label><input type="range" id="ex-df" min="1" max="100" step="1" value="20"></div>`;
+  if(type==='one')h+=`<div class="ctrl"><label for="one-mu">영가설의 값 \\(\\mu_0\\) = <output id="one-mu-o"></output></label><input type="range" id="one-mu" min="2600" max="3800" step="10" value="3000"></div>`;
+  if(type==='two')h+=`<div class="ctrl"><span>분산 가정</span>${seg('two-eq',[['s','Student'],['w','Welch']],'s')}</div>`;
+  h+=`<div class="ctrl"><span>대안가설</span>${seg(type+'-alt',ALT.map((a,i)=>[a,C.alts[i]]),'two.sided')}</div>
+      <div class="ctrl"><span>유의수준 \\(\\alpha\\)</span>${seg(type+'-al',[['0.1','.10'],['0.05','.05'],['0.01','.01']],'0.05')}</div></div>`;
+  if(type!=='explore')h+=`<div class="rcall" data-k="call"></div>`;
+  h+=`<svg class="chart" role="img" aria-label="영가설 아래의 t 분포와 관측된 검정통계량"></svg>
+    <div class="legend"><span><i class="lp"></i>p-value (넓이)</span><span><i class="lr"></i>기각역 (유의수준 \\(\\alpha\\))</span><span><i class="lo"></i>관측된 t</span></div>
+    <dl class="read" data-k="read"></dl><p class="verdict" data-k="verdict"></p>`;
+  if(type!=='explore'){
+    h+=`<p class="report" data-k="report"></p><details><summary>내 데이터로 해 보기</summary><div class="dgrid">`+
+      C.labels.map((l,i)=>`<label for="${type}-d${i}">${l}<textarea id="${type}-d${i}" spellcheck="false"></textarea></label>`).join('')+
+      `</div><div class="btns"><button type="button" class="btn" data-k="apply">이 값으로 계산</button><button type="button" class="btn ghost" data-k="reset">예제로 되돌리기</button><span class="err" data-k="err"></span></div>
+      <p class="report">숫자를 쉼표, 공백, 줄바꿈으로 구분해 붙여 넣는다. Excel의 한 열을 복사해 붙여도 된다.${type==='paired'?' 두 칸의 개수와 순서가 같아야 한다.':''}</p></details>`;
+  }
+  root.innerHTML=h;
+  const q=k=>root.querySelector(`[data-k="${k}"]`),svg=root.querySelector('svg');
+  const tas=[...root.querySelectorAll('textarea')];
+  const fill=()=>{if(tas[0])tas[0].value=st.x.join(', ');if(tas[1])tas[1].value=st.y.join(', ');};
+  fill();
+
+  function render(){
+    const r=compute(type,st);draw(svg,r,st);
+    const items=[];
+    if(type==='explore'){root.querySelector('#ex-t-o').textContent=f(st.t,2);root.querySelector('#ex-df-o').textContent=st.df;
+      items.push(['p-value',fp(r.p),1],['임계값',(st.alt==='two.sided'?'±':st.alt==='less'?'−':'')+f(r.crit,3)]);}
+    if(type==='one'){root.querySelector('#one-mu-o').textContent=st.mu0;
+      items.push(['n',r.n],['평균 \\(\\bar{x}\\)',f(r.m,1)],['표준편차 s',f(r.s,1)],['표준오차',f(r.se,2)],['t',f(r.t,4),1],['df',fdf(r.df)],['p-value',fp(r.p),1],
+        [`평균의 ${(1-st.alpha)*100}% 신뢰구간`,`[${f(r.ci[0],1)}, ${f(r.ci[1],1)}]`],['Cohen의 d',f(r.d,3),1]);}
+    if(type==='two'){items.push(['집단 1: n, 평균, s',`${r.n1}, ${f(r.m1,1)}, ${f(r.s1,1)}`],['집단 2: n, 평균, s',`${r.n2}, ${f(r.m2,1)}, ${f(r.s2,1)}`],
+        ['평균 차이',f(r.est,1)],['표준오차',f(r.se,2)],['t',f(r.t,4),1],['df',fdf(r.df)],['p-value',fp(r.p),1],
+        [`차이의 ${(1-st.alpha)*100}% 신뢰구간`,`[${f(r.ci[0],1)}, ${f(r.ci[1],1)}]`],['Cohen의 d',f(r.d,3),1],['Hedges의 g',f(r.g,3),1]);}
+    if(type==='paired'){items.push(['쌍의 수 n',r.n],['차이의 평균 \\(\\bar{D}\\)',f(r.m,1)],['차이의 표준편차',f(r.s,1)],['표준오차',f(r.se,2)],['t',f(r.t,4),1],['df',fdf(r.df)],['p-value',fp(r.p),1],
+        [`차이의 ${(1-st.alpha)*100}% 신뢰구간`,`[${f(r.ci[0],1)}, ${f(r.ci[1],1)}]`],['\\(d_z\\)',f(r.dz,3),1],['\\(d_{av}\\)',f(r.dav,3),1],['두 측정의 상관 r',f(r.r,3)]);}
+    q('read').innerHTML=items.map(i=>`<div><dt>${i[0]}</dt><dd${i[2]?' class="key"':''}>${i[1]}</dd></div>`).join('');
+    const v=q('verdict');v.classList.toggle('rej',r.reject);
+    v.innerHTML=`p = ${fp(r.p)} ${r.reject?'<':'≥'} α = ${st.alpha}. `+(r.reject?'관측된 t가 기각역 안에 있다. <strong>H₀를 기각한다.</strong>':'관측된 t가 기각역 밖에 있다. <strong>H₀를 기각하지 못한다.</strong> H₀가 참이라는 증거를 얻은 것은 아니다.');
+    if(type==='explore')return;
+    // R 호출문
+    const extra=(st.alt!=='two.sided'?`, alternative = "${st.alt}"`:'')+(st.alpha!==0.05?`, conf.level = ${1-st.alpha}`:'');
+    const args=st.custom?(type==='one'?'x':'x, y'):type==='one'?'d$sodium_pre':type==='two'?'sodium_post ~ group, data = d':'edu$sodium_pre, edu$sodium_post';
+    q('call').innerHTML=wrapFns(esc('t.test('+args+(type==='one'?`, mu = ${st.mu0}`:'')+(type==='two'&&st.eq?', var.equal = TRUE':'')+(type==='paired'?', paired = TRUE':'')+extra+')'));
+    // 보고 문장
+    const sig=r.reject?'유의했다':'유의하지 않았다',tt=`t(${fdf(r.df)}) = ${f(r.t,2)}, ${fpr(r.p)}`,ci=`${(1-st.alpha)*100}% CI [${f(r.ci[0],1)}, ${f(r.ci[1],1)}]`;
+    let s='';
+    if(type==='one')s=`표본 평균(M = ${f(r.m,1)}, SD = ${f(r.s,1)})과 기준값 ${st.mu0}의 차이는 ${sig}, ${tt}, d = ${f(r.d,2)}, 평균의 ${ci}.`;
+    if(type==='two')s=`집단 1(M = ${f(r.m1,1)}, SD = ${f(r.s1,1)})과 집단 2(M = ${f(r.m2,1)}, SD = ${f(r.s2,1)})의 평균 차이는 ${sig}, ${st.eq?'':'Welch '}${tt}, 차이 = ${f(r.est,1)}, ${ci}, Hedges g = ${f(r.g,2)}.`;
+    if(type==='paired')s=`첫 번째 측정(M = ${f(r.m1,1)}, SD = ${f(r.s1,1)})과 두 번째 측정(M = ${f(r.m2,1)}, SD = ${f(r.s2,1)})의 차이는 ${sig}, ${tt}, 평균 차이 = ${f(r.m,1)}, ${ci}, d_z = ${f(r.dz,2)}.`;
+    q('report').innerHTML='보고 문장: <b>'+s+'</b>';
+  }
+
+  root.addEventListener('input',e=>{const el=e.target;if(el.tagName==='TEXTAREA')return;
+    if(el.id==='ex-t')st.t=+el.value;else if(el.id==='ex-df')st.df=+el.value;else if(el.id==='one-mu')st.mu0=+el.value;
+    else if(el.name===type+'-alt')st.alt=el.value;else if(el.name===type+'-al')st.alpha=+el.value;else if(el.name==='two-eq')st.eq=el.value==='s';
+    render();});
+  const parse=s=>s.split(/[\s,;]+/).filter(Boolean).map(Number);
+  if(q('apply'))q('apply').addEventListener('click',()=>{
+    const a=parse(tas[0].value),b=tas[1]?parse(tas[1].value):null,err=q('err');
+    if(a.some(isNaN)||(b&&b.some(isNaN))){err.textContent='숫자가 아닌 값이 섞여 있다.';return;}
+    if(a.length<2||(b&&b.length<2)){err.textContent='칸마다 값이 2개 이상 있어야 한다.';return;}
+    if(type==='paired'&&a.length!==b.length){err.textContent=`두 칸의 개수가 다르다 (${a.length}개, ${b.length}개).`;return;}
+    const chk=type==='paired'?a.map((v,i)=>v-b[i]):a;
+    if(sd(chk)===0||(type==='two'&&sd(a)===0&&sd(b)===0)){err.textContent='값이 모두 같아 표준오차가 0이다.';return;}
+    err.textContent='';st.x=a;if(b)st.y=b;st.custom=true;
+    if(type==='one'){const s=root.querySelector('#one-mu'),m=mean(a),sp=sd(a);const stp=Math.pow(10,Math.floor(Math.log10(sp))-1);
+      s.step=stp;s.min=Math.floor((m-1.5*sp)/stp)*stp;s.max=Math.ceil((m+1.5*sp)/stp)*stp;s.value=Math.round(m/stp)*stp;st.mu0=+s.value;}
+    render();});
+  if(q('reset'))q('reset').addEventListener('click',()=>{st.x=C.x();if(C.y)st.y=C.y();st.custom=false;q('err').textContent='';
+    if(type==='one'){const s=root.querySelector('#one-mu');s.step=10;s.min=2600;s.max=3800;s.value=3000;st.mu0=3000;}
+    fill();render();});
+  render();return render;
+}
+const renders=[...document.querySelectorAll('.lab')].map(build);
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>renders.forEach(r=>r()),120);});
+
+/* ── 코드 블록: 함수 도움말, 주석 색, 복사 버튼 ── */
+document.querySelectorAll('.cb').forEach(cb=>{
+  const pre=cb.querySelector('pre'),raw=pre.textContent;
+  if(!cb.classList.contains('out')){
+    pre.innerHTML=raw.split('\n').map(line=>{const i=line.indexOf('#');
+      return i<0?wrapFns(esc(line)):wrapFns(esc(line.slice(0,i)))+'<span class="cm">'+esc(line.slice(i))+'</span>';}).join('\n');
+    const b=document.createElement('button');b.type='button';b.className='copy';b.textContent='복사';
+    b.addEventListener('click',()=>{const done=()=>{b.textContent='복사됨';setTimeout(()=>b.textContent='복사',1400);};
+      // 마지막 수단: 복사가 막힌 환경에서는 코드를 선택해 두어 Ctrl+C로 복사할 수 있게 한다.
+      const fb=()=>{const s=getSelection(),r=document.createRange();r.selectNodeContents(pre);s.removeAllRanges();s.addRange(r);b.textContent='선택됨';};
+      // 먼저 숨긴 입력칸으로 복사한다. 클릭한 그 자리에서 바로 실행되어, 클립보드 API가 막힌 미리보기 창이나 http 주소에서도 된다.
+      const viaInput=()=>{const ta=document.createElement('textarea');ta.value=raw;ta.setAttribute('readonly','');
+        ta.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;padding:0;border:0;opacity:0';
+        document.body.appendChild(ta);ta.focus({preventScroll:true});ta.select();ta.setSelectionRange(0,raw.length);
+        let ok=false;try{ok=document.execCommand('copy');}catch(e){}
+        document.body.removeChild(ta);b.focus({preventScroll:true});return ok;};
+      if(viaInput()){done();return;}
+      try{navigator.clipboard.writeText(raw).then(done,fb);}catch(e){fb();}});
+    cb.appendChild(b);}
+});
+document.querySelectorAll('main p code, main li code, main td code').forEach(c=>{if(!c.children.length)c.innerHTML=wrapFns(c.innerHTML);});
+
+/* ── 풍선 도움말 ── */
+const tip=document.createElement('div');tip.className='tip';tip.id='fn-tip';tip.setAttribute('role','tooltip');tip.hidden=true;document.body.appendChild(tip);
+const REQ=['선택','필수','사실상 필수'];let tipEl=null;
+function showTip(el){const d=FN[el.dataset.fn];if(!d)return;tipEl=el;
+  tip.innerHTML=`<div class="tip-sig">${esc(d.sig)}<span class="tip-pkg">${d.pkg}</span></div><p>${d.why}</p>`+
+    (d.args.length?`<table><thead><tr><th>인수</th><th>필수 여부</th><th>설명</th></tr></thead><tbody>`+d.args.map(a=>`<tr><td><code>${a[0]}</code></td><td><span class="req r${a[1]}">${REQ[a[1]]}</span></td><td>${a[2]}</td></tr>`).join('')+`</tbody></table>`:`<p class="tip-none">인수 없이 쓴다.</p>`)+
+    `<p><b>반환값</b> ${d.ret}</p>`;
+  tip.hidden=false;el.setAttribute('aria-describedby','fn-tip');
+  const r=el.getBoundingClientRect(),tw=tip.offsetWidth,th=tip.offsetHeight;
+  let y=r.bottom+8;if(y+th>innerHeight-8)y=r.top-th-8>=8?r.top-th-8:innerHeight-th-8;
+  tip.style.left=Math.max(8,Math.min(r.left,innerWidth-tw-8))+'px';tip.style.top=Math.max(8,y)+'px';}
+function hideTip(){if(tipEl)tipEl.removeAttribute('aria-describedby');tipEl=null;tip.hidden=true;}
+const fnOf=e=>e.target.closest&&e.target.closest('.fn');
+document.addEventListener('mouseover',e=>{const el=fnOf(e);if(el&&el!==tipEl)showTip(el);});
+document.addEventListener('mouseout',e=>{const el=fnOf(e);if(el&&!el.contains(e.relatedTarget))hideTip();});
+document.addEventListener('focusin',e=>{const el=fnOf(e);if(el)showTip(el);});
+document.addEventListener('focusout',e=>{if(fnOf(e))hideTip();});
+document.addEventListener('click',e=>{const el=fnOf(e);if(el)showTip(el);else hideTip();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')hideTip();});
+window.addEventListener('scroll',hideTip,{passive:true,capture:true});
+
+/* ── 목차 scroll-spy ── */
+(()=>{const links=[...document.querySelectorAll('#rail-nav a')];
+  const obs=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting)links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+en.target.id));}),{rootMargin:'-25% 0px -65% 0px'});
+  links.forEach((l,i)=>{const t=document.querySelector(l.getAttribute('href'));if(t)obs.observe(t);if(i===0)l.classList.add('on');});})();
+</script>
+</body>
+</html>

@@ -22,6 +22,7 @@ uv run python main.py
   과목별 목록 페이지(`docs/statistics/`, `docs/data-science/`, `docs/ai/`,
   `docs/things/`, `docs/life/`, 최신순 · 한 행 3개)에 자동 반영됩니다.
 - 공통 스타일: `docs/assets/styles.css`
+- 용어: 자료에서 쓰는 용어는 [GLOSSARY.md](GLOSSARY.md)를 따릅니다(예: 영가설, 대안가설).
 - 이미지와 첨부 자료: `docs/assets/` 아래에 추가
 
 수식은 `docs/assets/katex/`의 KaTeX로 표기합니다(`\\( ... \\)`, `\\[ ... \\]`).

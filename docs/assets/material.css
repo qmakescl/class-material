@@ -14,6 +14,7 @@
   --neg:#0b8a8f;                              /* 음의 방향 */
   --ok:#0ea968;  --ok-soft:#e6f8f0;
   --warn:#b26a00; --warn-soft:#fff3de;
+  --r:#245fb0; --py:#8f6200;                  /* 코드 상자의 언어 표시색 */
   --shadow:0 1px 2px rgb(11 18 32 / 6%), 0 8px 24px -10px rgb(11 18 32 / 14%);
   /* 글꼴: 세리프·외부 웹폰트 없음 */
   --sans:Pretendard,"Noto Sans KR",Inter,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
@@ -97,6 +98,9 @@ h2.page-title{font-size:clamp(28px,6vw,40px)}
 .panel.raised{box-shadow:var(--shadow)}
 .callout{border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0;padding:12px 16px}
 .callout.warn{border-left-color:var(--pos);background:var(--pos-soft)}
+/* 주의 상자: 자주 틀리는 곳·막히는 곳 */
+.callout.caution{border-left-color:var(--warn);background:var(--warn-soft)}
+.callout.caution strong{color:var(--warn)}
 .recap{border-left:3px solid var(--line);padding:4px 0 4px 16px;display:flex;flex-direction:column;gap:6px}
 .row{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
 .col{display:flex;flex-direction:column;gap:10px;flex:1 1 260px;min-width:0}
@@ -131,3 +135,21 @@ details summary{cursor:pointer;font-weight:500}
 details[open] summary{margin-bottom:10px}
 pre{margin:0;font:13px/1.55 var(--mono);overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}
 ol.refs{padding-left:20px;margin:0;font-size:14px;display:flex;flex-direction:column;gap:6px}
+
+/* ---------- 코드 상자: 위쪽 띠와 언어 이름표 (.r R, .py Python, 없으면 출력·셸) ---------- */
+.cb{min-width:0;background:var(--soft);border:1px solid var(--line);border-top:3px solid var(--muted);border-radius:6px}
+.cb.r{border-top-color:var(--r)}
+.cb.py{border-top-color:var(--py)}
+.cb .lang{display:block;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.06em;line-height:1;
+  padding:10px 14px 0;color:var(--muted)}
+.cb.r .lang{color:var(--r)}
+.cb.py .lang{color:var(--py)}
+.cb pre{border:0;border-radius:0;background:transparent;padding:8px 14px 14px;font-size:13.5px;line-height:1.65;
+  color:var(--ink);white-space:pre;word-break:normal;overflow-wrap:normal}
+pre.tree{background:var(--soft);font-size:14px;line-height:1.7;padding:14px 18px;white-space:pre;word-break:normal;
+  overflow-wrap:normal}
+
+/* ---------- 화면 갈무리 (figure.shot > img + figcaption) ---------- */
+.shot{margin:0;display:flex;flex-direction:column;gap:8px}
+.shot img{display:block;width:100%;max-width:760px;height:auto;border:1px solid var(--line);border-radius:6px}
+.shot figcaption{font-size:14px;color:var(--muted)}

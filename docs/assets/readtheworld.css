@@ -1,12 +1,12 @@
 /* 「R과 Python 을 이용해 세상읽기」 묶음 전용 위젯 (docs/data-science/readtheworld/*.html)
    - 본문·박스·레일·표는 material.css 가 맡는다. 여기에는 이 묶음의 여덟 쪽이 함께 쓰는
-     위젯(코드 상자, 차례 노선도, 장 이동)만 둔다.
+     위젯(R·Python 나란히 놓기, 차례 노선도, 장 이동)만 둔다. 코드 상자(.cb)와 주의 상자
+     (.callout.caution), 화면 갈무리(.shot)는 다른 자료도 쓰므로 material.css 에 있다.
    - 규칙은 DESIGN.md "여러 쪽으로 된 자료" 참고. */
 
 :root{
   --accent:#0ea968; --accent-soft:#e6f8f0;   /* 과목 강조색: 데이터과학 */
   --accent-dark:#087a4b;                      /* 흰 바탕 위 작은 글자·링크용 */
-  --r:#245fb0; --py:#8f6200;                  /* 코드 상자의 언어 표시색 */
 }
 
 .skip-link{position:fixed;top:-3rem;left:1rem;z-index:100;padding:.6rem 1rem;color:#fff;background:var(--accent-dark);
@@ -24,10 +24,8 @@ main th{white-space:nowrap}
 main td code{white-space:nowrap}
 .no{font-family:var(--mono);font-size:.62em;font-weight:700;color:var(--muted);margin-right:10px;letter-spacing:0}
 
-/* 이 장을 마치면 / 자주 틀리는 곳 */
+/* 이 장을 마치면 */
 .callout.goals > strong{display:block;margin-bottom:6px}
-.callout.caution{border-left-color:var(--warn);background:var(--warn-soft)}
-.callout.caution strong{color:var(--warn)}
 .callout code{background:rgb(255 255 255 / 65%)}
 
 /* 장 안의 절 바로가기 */
@@ -37,24 +35,8 @@ main td code{white-space:nowrap}
 .toc a b{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--muted)}
 .toc a:hover,.toc a:focus-visible{border-color:var(--accent)}
 
-/* ---------- 코드: R과 Python 나란히 ---------- */
+/* ---------- 코드: R과 Python 나란히 (코드 상자 .cb 자체는 material.css) ---------- */
 .pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:12px}
-.cb{min-width:0;background:var(--soft);border:1px solid var(--line);border-top:3px solid var(--muted);border-radius:6px}
-.cb.r{border-top-color:var(--r)}
-.cb.py{border-top-color:var(--py)}
-.cb .lang{display:block;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.06em;line-height:1;
-  padding:10px 14px 0;color:var(--muted)}
-.cb.r .lang{color:var(--r)}
-.cb.py .lang{color:var(--py)}
-.cb pre{border:0;border-radius:0;background:transparent;padding:8px 14px 14px;font-size:13.5px;line-height:1.65;
-  color:var(--ink);white-space:pre;word-break:normal;overflow-wrap:normal}
-pre.tree{background:var(--soft);font-size:14px;line-height:1.7;padding:14px 18px;white-space:pre;word-break:normal;
-  overflow-wrap:normal}
-
-/* ---------- 화면 갈무리 ---------- */
-.shot{margin:0;display:flex;flex-direction:column;gap:8px}
-.shot img{display:block;width:100%;max-width:760px;height:auto;border:1px solid var(--line);border-radius:6px}
-.shot figcaption{font-size:14px;color:var(--muted)}
 
 /* ---------- 장 이동 ---------- */
 .pager{padding-top:20px}
