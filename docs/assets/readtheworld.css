@@ -38,13 +38,6 @@ main td code{white-space:nowrap}
 /* ---------- 코드: R과 Python 나란히 (코드 상자 .cb 자체는 material.css) ---------- */
 .pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:12px}
 
-/* ---------- 장 이동 ---------- */
-.pager{padding-top:20px}
-.pager a{display:block;text-decoration:none;font-weight:700;color:var(--ink)}
-.pager a span{display:block;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--muted)}
-.pager a:last-child{margin-left:auto;text-align:right}
-.pager a:hover,.pager a:focus-visible{color:var(--accent-dark)}
-
 /* ---------- 첫 쪽: 한눈에 보기와 차례 노선도 ---------- */
 .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 32px;margin:0}
 .facts div{border-top:1px solid var(--line);padding:12px 0}

@@ -1,0 +1,89 @@
+/* R 실습 자료 세 쪽이 함께 쓰는 스타일
+   (data-science/VScode-R-languageserver.html, statistics/prepare-for-ttest.html, statistics/mean-test-with-r.html)
+   - 본문·박스·레일·표·코드 상자(.cb)·절차(.steps)·갈무리(.shot)는 material.css 가 맡는다.
+   - 여기에는 세 쪽이 같이 쓰는 것만 둔다: 본문 조각, 펼침 상자(.fold), 한눈에 보기(.facts), 코드 상자의 복사 버튼과
+     함수 도움말, 조작 단추(.ctrl, .seg), 이어지는 자료 표시(.series).
+   - 한 쪽에만 있는 위젯(실험판, 넓은 모양·긴 모양)은 그 쪽의 <style> 에 둔다. */
+
+.skip-link { position: fixed; top: -3rem; left: 1rem; z-index: 100; padding: .6rem 1rem; color: #fff; background: var(--accent); border-radius: 4px; font-weight: 700; text-decoration: none; }
+.skip-link:focus { top: 1rem; }
+
+/* 본문 조각 */
+main > section { scroll-margin-top: 16px; }
+.section-head { display: flex; align-items: baseline; gap: 14px; }
+.section-num { font-size: 15px; color: var(--muted); font-weight: 700; }
+main section > h3 { margin-top: 14px; }
+main section > h4 { margin-top: 6px; }
+main ul, main ol { margin: 0; padding-left: 22px; }
+main li { margin-bottom: 4px; }
+main li:last-child { margin-bottom: 0; }
+main li > ul { margin-top: 4px; }
+main li > .shot { margin: 10px 0; }
+main code, .tip code { font-size: .9em; background: var(--soft); padding: 1px 5px; border-radius: 4px; }
+main th { white-space: nowrap; }
+main td code { white-space: nowrap; }
+.callout code { background: rgb(255 255 255 / 65%); }
+.callout p + p { margin-top: 8px; }
+.callout > .shot { margin: 10px 0; }
+.readout.math { padding: 10px 16px; }
+/* 펼쳐 보는 상세 안내(details.fold): 접어 두면 한 줄, 펼치면 단계·그림·표가 나온다 */
+.fold { margin-top: 10px; }
+.fold > * + * { margin-top: 12px; }
+.fold li > p { margin-top: 10px; }
+.fold > summary { font-weight: 700; color: var(--accent); }
+.fold > h4 { margin-top: 20px; }
+.fold code { background: var(--surface); }
+.fold .cb { background: var(--surface); }
+.fold .callout code { background: rgb(255 255 255 / 65%); }
+
+/* 머리말: 한눈에 보기 */
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0 32px; margin: 0; }
+.facts div { border-top: 1px solid var(--line); padding: 12px 0; }
+.facts dt { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--muted); }
+.facts dd { margin: 4px 0 0; }
+
+/* 코드 상자: 주석 색, 복사 버튼, 함수 도움말 */
+.cb { position: relative; }
+.cb .cm { color: var(--muted); }
+.cb .copy { position: absolute; top: 6px; right: 8px; font-family: var(--mono); font-size: 12px; font-weight: 500; line-height: 1; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 5px 8px; cursor: pointer; }
+.cb .copy:hover { color: var(--accent); border-color: var(--accent); }
+.fn { text-decoration: underline dotted var(--accent); text-underline-offset: 3px; cursor: help; border-radius: 2px; }
+.fn:hover, .fn:focus { background: var(--accent-soft); outline: none; }
+.tip { position: fixed; z-index: 60; left: 8px; top: 8px; width: max-content; max-width: min(460px, calc(100vw - 16px)); max-height: calc(100vh - 16px); overflow: auto; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--accent); border-radius: 6px; padding: 12px 14px; font-size: 13.5px; line-height: 1.6; box-shadow: 0 6px 24px rgb(11 18 32 / 18%); }
+.tip p { margin: 8px 0 0; }
+.tip-sig { font-family: var(--mono); font-size: 12.5px; font-weight: 500; line-height: 1.55; color: var(--accent); overflow-wrap: anywhere; }
+.tip-pkg { display: inline-block; margin-left: 8px; font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; }
+.tip table { margin-top: 8px; font-size: 13px; }
+.tip th, .tip td { padding: 4px 8px 4px 0; }
+.tip th { font-size: 11.5px; }
+.tip td:nth-child(2) { white-space: nowrap; }
+.tip td code { white-space: nowrap; }
+.req { font-family: var(--mono); font-size: 11.5px; font-weight: 500; line-height: 1; padding: 3px 6px; border-radius: 3px; background: var(--soft); color: var(--muted); }
+.req.r1, .req.r2 { background: var(--warn-soft); color: var(--warn); }
+.tip-none { color: var(--muted); }
+
+/* 조작 단추: 실험판과 설명 상자의 위젯이 함께 쓴다 */
+.ctrls { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: flex-end; margin-bottom: 14px; }
+.ctrl { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ctrl > span, .ctrl > label { font-family: var(--mono); font-size: 12px; font-weight: 500; line-height: 1.3; color: var(--muted); }
+.ctrl output { color: var(--ink); font-weight: 600; }
+.ctrl input[type=range] { width: 220px; max-width: 100%; }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg label { position: relative; font-family: var(--mono); font-size: 13px; font-weight: 500; line-height: 1; cursor: pointer; }
+.seg input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+/* 수식(KaTeX)의 안쪽 span까지 잡지 않도록 라벨 바로 아래 span만 고른다 */
+.seg label > span { display: block; padding: 9px 12px; color: var(--muted); border-right: 1px solid var(--line); }
+.seg label:last-child > span { border-right: 0; }
+.seg input:checked + span { background: var(--accent); color: #fff; }
+.seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: -4px; }
+
+/* 묶음의 편들: 머리말에서 지금 편과 다른 편을 보여 준다 */
+.series { display: flex; flex-direction: column; gap: 8px; }
+.series-cap { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--muted); }
+.series ol { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; }
+.series li { margin: 0; font-size: 13.5px; font-weight: 600; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+.series li > a, .series li > span { display: block; padding: 5px 13px; color: var(--ink); text-decoration: none; }
+.series li b { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--muted); margin-right: 7px; }
+.series li > a:hover, .series li > a:focus-visible { color: var(--accent-dark, var(--accent)); }
+.series li.here { background: var(--ink); border-color: var(--ink); }
+.series li.here > span, .series li.here b { color: #fff; }

@@ -21,6 +21,8 @@ uv run python main.py
 - 자료 목록: `docs/assets/materials.js`에 항목을 추가하면 홈(과목별 최근 3개)과
   과목별 목록 페이지(`docs/statistics/`, `docs/data-science/`, `docs/ai/`,
   `docs/things/`, `docs/life/`, 최신순 · 한 행 3개)에 자동 반영됩니다.
+  몇 편으로 나뉜 자료는 항목 하나에 `parts`를 적으면 한 카드 안에 편마다 링크가
+  나뉘어 그려집니다(예: "R을 이용한 평균검정"의 데이터 준비 · 분석).
 - 공통 스타일: `docs/assets/styles.css`
 - 용어: 자료에서 쓰는 용어는 [GLOSSARY.md](GLOSSARY.md)를 따릅니다(예: 영가설, 대안가설).
 - 이미지와 첨부 자료: `docs/assets/` 아래에 추가

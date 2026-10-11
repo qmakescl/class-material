@@ -58,7 +58,7 @@
 <h2 class="page-title">작업환경 구축</h2>
 <p class="lede">R을 설치하고, uv로 Python 3.12 가상환경을 만들고, VS Code에서 두 언어의 노트북을 실행한다.</p>
 <div class="callout goals"><strong>이 장을 마치면</strong><ul><li>자기 컴퓨터(Windows 또는 macOS)에 R을 설치할 수 있다.</li><li>uv로 Python 3.12 가상환경을 만들 수 있다.</li><li>VS Code에서 Python 노트북과 R 노트북을 각각 실행할 수 있다.</li><li>AI 에이전트에게 지킬 규칙을 파일로 알려줄 수 있다.</li></ul></div>
-<nav class="toc" aria-label="이 장의 차례"><a href="#s1"><b>1.1</b>무엇을 설치하는가</a><a href="#s2"><b>1.2</b>R 설치하기</a><a href="#s3"><b>1.3</b>VS Code와 확장 설치하기</a><a href="#s4"><b>1.4</b>uv로 Python 가상환경 만들기</a><a href="#s5"><b>1.5</b>R을 노트북에 연결하기</a><a href="#s6"><b>1.6</b>프로젝트 폴더 구조</a><a href="#s7"><b>1.7</b>AI 에이전트와 일하는 규칙</a><a href="#s8"><b>1.8</b>동작 확인</a></nav>
+<nav class="toc" aria-label="이 장의 차례"><a href="#s1"><b>1.1</b>무엇을 설치하는가</a><a href="#s2"><b>1.2</b>R 설치하기</a><a href="#s3"><b>1.3</b>VS Code와 확장 설치하기</a><a href="#s4"><b>1.4</b>uv로 Python 가상환경 만들기</a><a href="#r-path"><b>참고</b>Windows에서 R.exe 바로 실행하기</a><a href="#s5"><b>1.5</b>R을 노트북에 연결하기</a><a href="#s6"><b>1.6</b>프로젝트 폴더 구조</a><a href="#s7"><b>1.7</b>AI 에이전트와 일하는 규칙</a><a href="#s8"><b>1.8</b>동작 확인</a></nav>
 </header>
 <section class="panel" id="s1">
 <h2><span class="no">1.1</span>무엇을 설치하는가</h2>
@@ -173,6 +173,34 @@ C:\...\readtheworld\.venv\Scripts\Activate.ps1 파일을 로드할 수 없습니
 </div>
 <p class="shots-note">그림을 누르면 크게 볼 수 있다.</p>
 </section>
+<section class="panel" id="r-path">
+<h2><span class="no">참고</span>Windows: 터미널에서 R.exe를 바로 실행하게 하기</h2>
+<p>Windows용 R은 설치할 때 실행 파일의 위치를 PATH에 등록하지 않는다. 그래서 VS Code의 터미널(PowerShell)에 <code>R.exe</code>를 입력하면 찾을 수 없다는 오류가 난다. 1.5에서 R을 실행할 때 설치 위치를 통째로 적어야 하는 것도 이 때문이다. AI 에이전트가 터미널에서 R 스크립트를 실행하려 할 때도 같은 오류로 멈춘다. R의 <code>bin</code> 폴더를 PATH에 추가해 두면 해결된다. 이 설정은 하지 않아도 1.5를 진행할 수 있고, macOS는 필요 없다.</p>
+<ol class="steps">
+<li><strong>R 실행.</strong> <kbd>Windows</kbd>+<kbd>S</kbd>를 누르면 나오는 아래쪽 검색창에 <code>R</code>을 입력해 R 실행 아이콘을 찾고, 눌러서 실행한다.
+<figure class="shot"><img src="../../assets/images/R-win-exec/win-R-exec-01.png" width="1063" height="942" loading="lazy" alt="R 찾기 및 실행"><figcaption>R 찾기 및 실행</figcaption></figure></li>
+<li><strong>bin 폴더의 경로 확인.</strong> R이 열리면 Console 창에서 아래 한 줄을 실행하고, 결과로 나온 문자열을 따옴표는 빼고 복사한다. R을 설치한 폴더에서 실행 파일들이 있는 <code>bin</code> 폴더의 전체 경로다. 보통 <code>C:\Program Files\R\R-4.x.x\bin</code> 꼴이다. 역슬래시가 두 개씩(<code>\\</code>) 보이는 것은 R이 문자열을 표시하는 방식이다. 아래 7번 그림처럼 그대로 붙여 넣어도 되고, 하나씩으로 고쳐도 된다. 파일 탐색기에서 <code>C:\Program Files\R</code> 아래의 <code>bin</code> 폴더를 찾아 주소 표시줄의 경로를 복사해도 된다.
+<div class="cb r"><span class="lang">R</span><pre>normalizePath(file.path(R.home(), "bin"))</pre></div>
+<figure class="shot"><img src="../../assets/images/R-win-exec/win-R-exec-02.png" width="1224" height="832" loading="lazy" alt="R을 설치한 경로에서 실행 파일들이 있는 bin 폴더의 절대 경로 출력"><figcaption>R을 설치한 경로에서 실행 파일들이 있는 bin 폴더의 절대 경로 출력</figcaption></figure></li>
+<li><strong>환경 변수 편집 항목 찾기.</strong> <kbd>Windows</kbd>+<kbd>S</kbd>를 누르면 나오는 아래쪽 검색창에서 <code>환경변수</code>를 검색하고, 나타나는 <em>시스템 환경 변수 편집</em>을 누른다. 관리자 암호를 묻거나 열리지 않으면 바로 아래의 <em>계정의 환경 변수 편집</em>을 누른다. 이때는 환경 변수 창이 바로 열리므로 4번을 건너뛴다.
+<figure class="shot"><img src="../../assets/images/R-win-exec/win-R-exec-03.png" width="964" height="930" loading="lazy" alt="환경 변수 편집 항목 찾기"><figcaption>환경 변수 편집 항목 찾기</figcaption></figure></li>
+<li><strong>환경 변수 창 열기.</strong> 시스템 속성 창 아래쪽의 <em>환경 변수</em>를 누른다.
+<figure class="shot"><img src="../../assets/images/R-win-exec/win-R-exec-04.png" width="478" height="534" loading="lazy" alt="환경 변수 편집 메뉴 찾기 및 실행"><figcaption>환경 변수 편집 메뉴 찾기 및 실행</figcaption></figure></li>
+<li><strong>Path 찾기.</strong> 위쪽 <em>사용자 변수</em> 목록에서 <code>Path</code>를 찾아 누르고 <em>편집</em>을 누른다.
+<figure class="shot"><img src="../../assets/images/R-win-exec/win-R-exec-05.png" width="615" height="579" loading="lazy" alt="Path 환경 변수 찾기"><figcaption>Path 환경 변수 찾기</figcaption></figure></li>
+<li><strong>새 값 추가.</strong> 오른쪽 위의 <em>새로 만들기</em>를 눌러 환경 변수 Path에 새로운 값을 추가한다.
+<figure class="shot"><img src="../../assets/images/R-win-exec/win-R-exec-06.png" width="521" height="494" loading="lazy" alt="새로운 값 추가하기"><figcaption>새로운 값 추가하기</figcaption></figure></li>
+<li><strong>경로 붙여 넣기.</strong> 앞서 R에서 복사한 값을 붙여 넣고(①), 아래쪽의 <em>확인</em>을 누른다(②). 남아 있는 환경 변수 창과 시스템 속성 창도 <em>확인</em>을 눌러 닫는다.
+<figure class="shot"><img src="../../assets/images/R-win-exec/win-R-exec-07.png" width="527" height="500" loading="lazy" alt="복사한 값 붙여 넣기"><figcaption>복사한 값 붙여 넣기</figcaption></figure></li>
+<li><strong>확인.</strong> VS Code를 열고 터미널을 활성화한 뒤(<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>`</kbd>) <code>R.exe</code>를 입력하고 실행하면 R Console로 들어간다. VS Code가 이미 열려 있었다면 창을 모두 닫았다가 다시 연다. 바뀐 PATH는 새로 시작한 프로그램에만 적용된다. R을 끝낼 때는 <code>q()</code>를 입력한다.
+<figure class="shot"><img src="../../assets/images/R-win-exec/win-R-exec-08.png" width="1150" height="795" loading="lazy" alt="Terminal에서 R 실행"><figcaption>Terminal에서 R 실행</figcaption></figure></li>
+</ol>
+<p>터미널에서 쓰는 명령은 아래와 같다. 첫 줄에서 R의 버전이 나오면 PATH 설정이 된 것이다.</p>
+<div class="single"><div class="cb sh"><span class="lang">PowerShell · VS Code 터미널</span><pre>R.exe --version     # 버전이 나오면 PATH 설정이 된 것이다
+R.exe               # R을 대화형으로 시작한다. 끝낼 때는 q()</pre></div></div>
+<div class="callout caution"><strong>PowerShell에서는 <code>R</code>이 아니라 <code>R.exe</code>라고 적는다.</strong> PowerShell에서 <code>r</code>은 직전 명령을 다시 실행하는 내장 명령의 줄임말이어서, <code>R</code>만 입력하면 R이 시작되지 않는다.</div>
+<div class="callout caution"><strong>R을 새 버전으로 올리면</strong> 설치 폴더 이름(<code>R-4.x.x</code>)이 바뀐다. Path에 넣은 경로도 새 폴더로 고친다.</div>
+</section>
 <section class="panel" id="s5">
 <h2><span class="no">1.5</span>R을 노트북에 연결하기</h2>
 <p>노트북은 원래 Python용 도구다. R을 노트북에서 쓰려면 R 패키지 <code>IRkernel</code>을 설치하고 Jupyter에 등록해야 한다. 등록할 때 R이 <code>jupyter</code> 명령을 찾을 수 있어야 하므로, <strong>가상환경을 켠 터미널에서</strong> R을 실행한다. 한 번만 하면 된다.</p>
@@ -180,7 +208,7 @@ C:\...\readtheworld\.venv\Scripts\Activate.ps1 파일을 로드할 수 없습니
 <p>터미널 줄 맨 앞에 <code>(readtheworld)</code>가 있는지 본다. 없으면(터미널을 새로 열었다면) 1.4의 <a href="#venv-activate">가상환경 켜기</a>를 다시 한다.</p>
 <h3>2단계: 그 터미널에서 R 실행하기</h3>
 <div class="pair"><div class="cb sh"><span class="lang">Windows</span><pre>&amp; &quot;C:\Program Files\R\R-4.x.x\bin\R.exe&quot;</pre></div><div class="cb sh"><span class="lang">macOS</span><pre>R</pre></div></div>
-<p>Windows는 R이 설치된 위치를 직접 적어야 한다. <code>R-4.x.x</code> 자리에 1.2에서 적어 둔 실제 버전 번호를 넣는다.</p>
+<p>Windows는 R이 설치된 위치를 직접 적어야 한다. <code>R-4.x.x</code> 자리에 1.2에서 적어 둔 실제 버전 번호를 넣는다. 바로 위의 참고대로 PATH에 R을 등록했다면 <code>R.exe</code>만 입력해도 된다.</p>
 <h3>3단계: IRkernel을 설치하고 커널 등록하기</h3>
 <p>R이 실행되어 <code>&gt;</code> 표시가 나오면 아래 세 줄을 한 줄씩 차례로 실행한다. 첫 줄은 <code>IRkernel</code>을 내려받아 설치하고, 둘째 줄은 설치한 것을 Jupyter에 R 커널로 등록한다.</p>
 <div class="single"><div class="cb r"><span class="lang">R</span><pre>install.packages(&quot;IRkernel&quot;, repos = &quot;https://cloud.r-project.org&quot;)

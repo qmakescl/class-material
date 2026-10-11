@@ -580,6 +580,54 @@ a.material-card .card-status {
   font-weight: 700;
 }
 
+/* 여러 편을 묶은 자료: 한 카드 안에 편마다 링크를 나눠 둔다 (materials.js의 parts) */
+.card-parts {
+  grid-column: 2 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.card-part {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 1rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.card-part:hover,
+.card-part:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--brand);
+  box-shadow: 0 8px 18px rgb(11 18 32 / 10%);
+}
+
+.card-part-label,
+.card-part-go {
+  color: var(--brand-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.card-part-label {
+  letter-spacing: 0.06em;
+}
+
+.card-part-title {
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.card-part-go {
+  margin-top: 0.35rem;
+}
+
 /* 목록 페이지: 한 행에 카드 3개 (세로형 카드) */
 .card-grid.card-grid-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -598,6 +646,11 @@ a.material-card .card-status {
 .card-grid-3 .card-status {
   grid-column: auto;
   justify-self: start;
+}
+
+.card-grid-3 .card-parts {
+  grid-column: auto;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .subject[data-subject="statistics"] .card-grid-3 .material-card { border-top-color: var(--statistics); border-left-color: var(--line); }
@@ -809,6 +862,10 @@ footer p {
   .card-status {
     grid-column: 2;
     justify-self: start;
+  }
+
+  .card-parts {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .guide {

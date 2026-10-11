@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>VS Code에서 R 실행하기 | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/VScode-R-languageserver.html">
+<meta name="description" content="R과 VS Code, R 확장, Google Antigravity 확장을 설치해 VS Code에서 R 스크립트를 실행하는 작업환경을 만드는 과정을 안내하는 데이터과학 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="VS Code에서 R 실행하기 | Q의 아카이브">
+<meta property="og:description" content="R과 VS Code, R 확장, AI 에이전트 확장을 설치해 VS Code에서 R 스크립트를 실행하는 작업환경을 만듭니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/VScode-R-languageserver.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="데이터과학 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="VS Code에서 R 실행하기 | Q의 아카이브">
+<meta name="twitter:description" content="R과 VS Code, R 확장, AI 에이전트 확장을 설치해 VS Code에서 R 스크립트를 실행하는 작업환경을 만듭니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
+<link rel="stylesheet" href="../assets/material.css">
+<link rel="stylesheet" href="../assets/rlesson.css">
+<style>
+  /* 과목 강조색: 데이터과학. 흰 바탕 위 작은 글자와 링크에는 한 단계 어두운 색을 쓴다 */
+  :root { --accent: #0ea968; --accent-soft: #e6f8f0; --accent-dark: #087a4b; }
+  main a { color: var(--accent-dark); }
+  .skip-link { background: var(--accent-dark); }
+  .fold > summary { color: var(--accent-dark); }
+  .fn { text-decoration-color: var(--accent-dark); }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../index.html#data-science">← 처음으로</a>
+  <h1>VS Code에서<br>R 실행하기</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#s1"><b>01</b><span>설치하기</span></a>
+    <a href="#s2"><b>02</b><span>AI에게 묻는 법</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#데이터과학</span>
+    <span class="rail-tag">#개념정리</span>
+    <span class="rail-tag">#R</span>
+    <span class="rail-tag">#VSCode</span>
+    <span class="rail-tag">#작업환경</span>
+    <span class="rail-tag">#코딩에이전트</span>
+  </div>
+  <footer>코드에서 점선 밑줄이 있는 함수 이름에 마우스를 올리면 도움말이 나옵니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+<main id="content">
+<header class="panel">
+<div class="eyebrow">데이터 다루기 · 작업환경</div>
+<h2 class="page-title">VS Code에서 R 실행하기</h2>
+<p class="lede">R과 VS Code, R 확장, AI 에이전트 확장을 설치해 VS Code에서 R 스크립트를 한 줄씩 실행하는 작업환경을 만든다. R을 쓰는 자료를 따라 하기 전에 한 번만 해 두면 된다.</p>
+<dl class="facts">
+<div><dt>설치하는 것</dt><dd>R, VS Code, R 확장(REditorSupport)과 <code>languageserver</code> 패키지, Google Antigravity 확장. 노트북 없이 <code>.R</code> 스크립트만 쓴다.</dd></div>
+<div><dt>운영체제</dt><dd>Windows와 macOS. Windows는 터미널에서 <code>R.exe</code>를 바로 실행하도록 PATH에 등록하는 방법까지 다룬다.</dd></div>
+<div><dt>이 환경을 쓰는 자료</dt><dd><a href="../statistics/prepare-for-ttest.html">R을 이용한 평균검정</a>. 폴더를 열고 첫 스크립트를 실행하는 것부터 시작한다.</dd></div>
+<div><dt>함수 도움말</dt><dd>코드에서 점선 밑줄이 있는 함수 이름에 마우스를 올리면(휴대폰은 누르면) 목적, 인수, 반환값이 나타난다.</dd></div>
+</dl>
+</header>
+
+<section class="panel" id="s1">
+<div class="section-head"><span class="section-num">01</span><h2>작업환경: VS Code에서 R 실행하기</h2></div>
+<p>스크립트 파일에 코드를 적고, 한 줄씩 R 터미널로 보내 실행한다. 막히는 곳은 VS Code 안의 AI 에이전트에게 묻는다. 아래 다섯 가지를 순서대로 설치한다. Windows에서는 4번과 5번 사이의 PATH 설정도 해 둔다.</p>
+<ol>
+<li><strong>R 설치.</strong> <a href="https://cran.r-project.org/">cran.r-project.org</a>에서 운영체제에 맞는 설치 파일을 받아 기본 옵션으로 설치한다. macOS는 프로세서(Apple silicon, Intel)에 맞는 파일을 고른다. 처음 설치한다면 아래를 펼쳐 그림과 함께 따라 한다.
+<details class="fold">
+<summary>R 설치 방법 자세히 보기 (Windows · macOS)</summary>
+<p>R은 운영체제에 따라 설치 파일이 다르다. 두 경우 모두 출발점은 같다.</p>
+<ol>
+  <li><code>https://r-project.org</code>에 접속해 왼쪽 메뉴의 <strong>CRAN</strong>(또는 본문의 download R)을 누른다.</li>
+  <li>내려받을 서버(미러) 목록이 나온다. 맨 위의 <strong>0-Cloud</strong>나 <strong>Korea</strong> 아래의 주소 중 하나를 고른다.
+    <ul>
+      <li>2026년 9월 현재 대한민국에서 제공하는 Mirror Site 가 없어 다음의 기본 Repository 선택</li>
+      <li>0-Cloud: <code>https://cloud.r-project.org/</code></li>
+    </ul></li>
+  <li>자기 운영체제에 맞는 링크를 누르고 아래 설명을 따른다.</li>
+</ol>
+<figure class="shot"><img src="../assets/images/cran-first.png" width="1547" height="1059" loading="lazy" alt="https://cloud.r-project.org 의 화면으로 본인의 운영체제에 맞는 링크를 클릭"><figcaption>https://cloud.r-project.org 의 화면으로 본인의 운영체제에 맞는 링크를 클릭</figcaption></figure>
+<h4>Windows</h4>
+<ol>
+  <li><strong>Download R for Windows</strong> Click</li>
+  <li><strong>base</strong> Click</li>
+  <li>맨 위의 <strong>Download R-4.x.x for Windows</strong>를 눌러 설치파일을 받는다.</li>
+  <li>받은 파일을 실행한다. 설치 언어는 한국어를 고르고, 나머지는 기본값 그대로 <strong>다음</strong>을 눌러 끝낸다.</li>
+  <li>설치 위치(기본값 <code>C:\Program Files\R\R-4.x.x</code>)를 확인한다. 아래 "Windows: 터미널에서 R.exe를 바로 실행하게 하기"에서 쓴다.</li>
+</ol>
+<figure class="shot"><img src="../assets/images/cran-win.png" width="1547" height="1059" loading="lazy" alt="설치파일 다운로드를 위해 base 클릭"><figcaption>설치파일 다운로드를 위해 base 클릭</figcaption></figure>
+<h4>macOS</h4>
+<ol>
+  <li>먼저 자기 Mac의 <strong>프로세서 종류</strong>를 확인한다. 화면 왼쪽 위 사과 메뉴 → <strong>이 Mac에 관하여</strong>를 열고 아래 표와 맞춰 본다.</li>
+  <li><strong>Download R for macOS</strong>를 누른다.</li>
+  <li>표에서 확인한 프로세서 종류에 맞는 <code>.pkg</code> 파일을 받는다.</li>
+  <li>받은 파일을 실행하고 기본값 그대로 <strong>계속</strong>을 눌러 설치한다.</li>
+</ol>
+<figure class="shot"><img src="../assets/images/cran-mac.png" width="1547" height="1059" loading="lazy" alt="자신의 프로세서에 맞는 설치파일 선택(1: Apple Silicon, 2: Intel)"><figcaption>자신의 프로세서에 맞는 설치파일 선택(1: Apple Silicon, 2: Intel)</figcaption></figure>
+<div class="scroll"><table><thead><tr><th>화면에 나오는 것</th><th>프로세서 종류</th><th>받을 파일</th></tr></thead><tbody><tr><td>칩: Apple M1, M2, M3 …</td><td>Apple silicon</td><td>이름에 <code>arm64</code>가 있는 <code>.pkg</code></td></tr><tr><td>프로세서: … Intel …</td><td>Intel</td><td>이름에 <code>x86_64</code>가 있는 <code>.pkg</code></td></tr></tbody></table></div>
+<div class="callout caution"><strong>잘못 받기 쉬운 곳</strong> macOS에서 프로세서 종류에 맞지 않는 파일을 받으면 설치는 되지만 패키지 설치에서 오류가 난다. 파일 이름의 <code>arm64</code>와 <code>x86_64</code>를 꼭 확인한다.</div>
+<h4>설치 확인</h4>
+<p>설치된 R 프로그램을 실행한다(Windows: 시작 메뉴의 R, macOS: 응용 프로그램의 R). 창이 뜨면 다음 코드를 입력해 버전이 출력되는지 본다.</p>
+<div class="cb r"><span class="lang">R</span><pre>R.version.string</pre></div>
+<figure class="shot"><img src="../assets/images/R-version.png" width="902" height="677" loading="lazy" alt="R 버전 확인"><figcaption>R 버전 확인</figcaption></figure>
+</details></li>
+<li><strong>VS Code 설치.</strong> <a href="https://code.visualstudio.com/">code.visualstudio.com</a>의 첫 화면에서 내려받기 버튼을 누르면 운영체제에 맞는 파일을 받는다.
+<figure class="shot"><img src="../assets/images/vscode-download.png" width="1224" height="786" loading="lazy" alt="홈페이지에서 Download for ... 를 클릭해 설치파일을 다운로드 받는다"><figcaption>홈페이지에서 Download for ... 를 클릭해 설치파일을 다운로드 받는다</figcaption></figure>
+  <ul>
+  <li>Windows: 받은 설치 파일을 실행하고 기본 옵션으로 진행한다. "PATH에 추가" 항목은 체크된 그대로 둔다.</li>
+  <li>macOS: 받은 파일의 압축을 풀고 <code>Visual Studio Code</code> 앱을 응용 프로그램 폴더로 옮긴 다음 실행한다.</li>
+  </ul>
+<details class="fold">
+<summary>VS Code 화면 구성 살펴보기</summary>
+<p>Visual Studio Code(이후 VS Code로 지칭)의 화면은 아래 여섯 영역으로 이루어진다. VS Code 공식 문서를 ChatGPT로 번역한 것이다(<a href="https://code.visualstudio.com/docs/editing/getting-started/userinterface" target="_blank" rel="noopener noreferrer">원문</a>).</p>
+<figure class="shot"><img src="../assets/images/vscode-setup/vscode-ui.png" width="1200" height="796" loading="lazy" alt="VS Code 화면에 A Activity Bar, B Primary Side Bar, C Editor Groups, D Panel, E Status Bar가 표시된 그림"><figcaption>A 활동 표시줄, B 기본 사이드바, C 편집기, D 패널, E 상태 표시줄. 보조 사이드바는 이 그림에 나오지 않는다. (그림 출처: VS Code 공식 문서)</figcaption></figure>
+<ul>
+  <li><strong>편집기(Editor)</strong> - 파일 내용을 작성하고 수정하는 중심 공간이다. 여러 파일을 위아래 또는 좌우로 나란히 열어 놓고 작업할 수 있다.</li>
+  <li><strong>기본 사이드바(Primary Side Bar)</strong> - 프로젝트 작업을 도와주는 여러 화면이 표시되는 공간이다. 파일과 폴더를 살펴보는 <strong>탐색기(Explorer)</strong> 등이 여기에 있다.</li>
+  <li><strong>보조 사이드바(Secondary Side Bar)</strong> - 기본 사이드바의 반대쪽에 있는 공간이다. 처음에는 <strong>채팅(Chat)</strong> 화면이 표시된다. 기본 사이드바에 있는 화면을 끌어다 놓아 보조 사이드바로 옮길 수 있다.</li>
+  <li><strong>상태 표시줄(Status Bar)</strong> - 현재 열려 있는 프로젝트와 편집 중인 파일의 상태 정보를 보여주는 영역이다.</li>
+  <li><strong>활동 표시줄(Activity Bar)</strong> - 화면의 가장 왼쪽에 있는 세로 막대다. 탐색기, 검색, 소스 제어 등의 화면을 전환할 때 사용한다. Git을 사용한다면 아직 서버로 보내지 않은 변경 사항의 개수와 같은 정보도 표시한다. 활동 표시줄을 마우스 오른쪽 버튼으로 클릭하면 위치를 변경할 수 있다.</li>
+  <li><strong>패널(Panel)</strong> - 편집기 아래쪽에 있는 추가 작업 공간이다. 기본적으로 프로그램 실행 결과, 디버깅 정보, 오류와 경고, 내장 터미널 등이 표시된다. 세로 공간을 더 넓게 사용하고 싶다면 패널을 화면의 왼쪽이나 오른쪽으로 옮길 수도 있다.</li>
+</ul>
+</details></li>
+<li><strong>R 확장 설치.</strong> VS Code 왼쪽의 확장(Extensions) 아이콘을 누르거나 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>(macOS는 <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>)를 누른다. <code>R</code>을 검색해 게시자가 <code>REditorSupport</code>인 확장을 설치한다.
+<details class="fold">
+<summary>R 확장 설치 방법 자세히 보기</summary>
+<ol>
+  <li>VS Code를 실행한다.</li>
+  <li>활동 표시줄(Activity Bar)에서 다섯 번째에 있는 Extensions 아이콘을 누른다.</li>
+  <li>위쪽 검색창에 <code>R</code>을 입력하고 엔터 키를 눌러 검색한다.</li>
+  <li>잠시 후 나오는 목록에서 R의 <strong>Install</strong>을 눌러 설치한다. 확장 프로그램을 만든 제작자를 믿고 설치할 것인지 묻는 질문에는 <strong>Trust Publisher &amp; Install</strong>을 누르면 확장 프로그램이 설치된다.
+<figure class="shot natural"><img src="../assets/images/vscode-setup/r-extension-install.png" width="348" height="262" loading="lazy" alt="활동 표시줄의 Extensions 아이콘, 검색창의 R, 목록 첫 항목 R의 Install 버튼이 붉은 테두리로 표시된 화면"><figcaption>Extensions에서 <code>R</code>을 검색하고, 게시자가 REditorSupport인 R의 <strong>Install</strong>을 누른다.</figcaption></figure>
+<figure class="shot natural"><img src="../assets/images/vscode-setup/r-extension-trust.png" width="454" height="277" loading="lazy" alt="Do you trust the publisher REditorSupport? 라고 묻는 창. Trust Publisher &amp; Install, Learn More, Cancel 버튼이 있다"><figcaption>제작자를 믿는지 묻는 창에서 <strong>Trust Publisher &amp; Install</strong>을 누른다.</figcaption></figure></li>
+  <li>설치 후 활동 표시줄에 R 확장 프로그램 아이콘이 생겼는지 확인한다.
+<figure class="shot natural"><img src="../assets/images/vscode-setup/r-extension-icon.png" width="341" height="299" loading="lazy" alt="활동 표시줄 맨 아래에 생긴 R 아이콘이 붉은 테두리로 표시된 화면"><figcaption>활동 표시줄에 생긴 R 확장 프로그램 아이콘</figcaption></figure></li>
+</ol>
+</details></li>
+<li><strong>Google Antigravity 확장 설치.</strong> 같은 확장 화면에서 <code>Google Antigravity</code>를 검색해 게시자가 <code>Google</code>인 확장을 설치한다. 설치가 끝나면 왼쪽 막대에 생긴 Antigravity 아이콘을 눌러 Google 계정으로 로그인한다. 설치부터 응답 확인까지의 순서는 아래를 펼쳐 본다.
+<details class="fold">
+<summary>Antigravity 확장 설치와 연결 자세히 보기</summary>
+<p>Google Antigravity는 Google의 AI 코딩 에이전트다. VS Code용 확장을 설치하면 편집기 옆에 에이전트 창이 생기고, 열어 둔 폴더의 파일을 읽고 고치는 일을 대화로 시킬 수 있다.</p>
+<div class="scroll"><table>
+<thead><tr><th>항목</th><th>내용</th></tr></thead>
+<tbody>
+<tr><td>확장 이름과 게시자</td><td>Google Antigravity, 게시자 Google (식별자 <code>Google.google-antigravity</code>)</td></tr>
+<tr><td>필요한 것</td><td>VS Code 1.90 이상, Google 계정. 무료 요금제로도 쓸 수 있다.</td></tr>
+<tr><td>운영체제</td><td>Windows, macOS, Linux</td></tr>
+</tbody></table></div>
+<ol>
+  <li>Extensions 항목에서 <code>Antigravity</code>를 검색한다. 이름이 비슷한 확장이 여럿 나오므로 아래 화면처럼 배포자가 Google인지 확인한 뒤 <em>설치(Install)</em>를 눌러 확장 프로그램을 설치한다.
+<figure class="shot natural"><img src="../assets/images/vscode-setup/antigravity-extension-install.png" width="499" height="370" loading="lazy" alt="Extensions 검색창에 Antigravity를 입력한 화면. 목록에서 배포자가 Google인 Google Antigravity 항목과 Install 버튼이 붉은 테두리로 표시되어 있다"><figcaption>이름이 비슷한 확장이 함께 나온다. 배포자가 Google인 <strong>Google Antigravity</strong>의 <strong>Install</strong>을 누른다.</figcaption></figure></li>
+  <li>활동 표시줄(Activity Bar)에 나타난 Antigravity 아이콘을 누르고, 화면에 나타나는 <strong>Continue with Google</strong>로 Google 계정을 이용한 절차를 진행한다.
+<figure class="shot natural"><img src="../assets/images/vscode-setup/antigravity-login.png" width="494" height="518" loading="lazy" alt="활동 표시줄의 Antigravity 아이콘과 Welcome to Antigravity 화면의 Continue with Google 버튼이 테두리로 표시되어 있다"><figcaption>활동 표시줄의 Antigravity 아이콘을 누르고 <strong>Continue with Google</strong>을 누른다.</figcaption></figure></li>
+  <li>한 가지 주의할 점이 있다. 로그인 과정 마지막에 웹 브라우저가 아래와 같이 물어볼 때 <strong>반드시 "열기"를 눌러야</strong> 로그인 정보가 제대로 전달된다. 누르면 브라우저에서 VS Code로 돌아온다.
+<figure class="shot natural"><img src="../assets/images/vscode-setup/antigravity-open-prompt.png" width="772" height="552" loading="lazy" alt="웹 브라우저가 '이 사이트에서 Visual Studio Code을 열려고 합니다'라고 묻는 창. 열기 버튼이 붉은 테두리로 표시되어 있다"><figcaption>브라우저가 Visual Studio Code를 열지 물으면 <strong>열기</strong>를 누른다.</figcaption></figure>
+<p>현재 Antigravity 확장은 근래에 지원하기 시작한 것이어서 로그인 과정이 불안한 경우가 있다. 로그인 과정을 여러 번 해야 할 수 있다.</p></li>
+  <li>처음 실행할 때 확장이 에이전트 실행에 필요한 프로그램(<code>agy</code>)을 자동으로 내려받아 설치한다. 끝날 때까지 기다린다.</li>
+  <li>에이전트 창에 <code>이 폴더에 어떤 파일이 있는지 알려줘</code>처럼 한 줄을 보내 응답이 오는지 확인한다.</li>
+</ol>
+</details></li>
+</ol>
+<details class="fold" id="r-path">
+<summary>Windows: 터미널에서 R.exe를 바로 실행하게 하기</summary>
+<p>Windows용 R은 설치할 때 실행 파일의 위치를 PATH에 등록하지 않는다. R 확장은 R을 스스로 찾아 실행하므로 스크립트에서 <kbd>Ctrl</kbd>+<kbd>Enter</kbd>로 코드를 실행하는 것은 이 설정 없이도 되지만, VS Code의 일반 터미널(PowerShell)에 <code>R.exe</code>를 입력하면 찾을 수 없다는 오류가 난다. AI 에이전트가 터미널에서 스크립트를 실행하려 할 때도 같은 오류로 멈춘다. R의 <code>bin</code> 폴더를 PATH에 추가하면 해결된다. macOS는 이 설정이 필요 없다.</p>
+<ol class="steps">
+<li><strong>R 실행.</strong> <kbd>Windows</kbd>+<kbd>S</kbd>를 누르면 나오는 아래쪽 검색창에 <code>R</code>을 입력해 R 실행 아이콘을 찾고, 눌러서 실행한다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-01.png" width="1063" height="942" loading="lazy" alt="R 찾기 및 실행"><figcaption>R 찾기 및 실행</figcaption></figure></li>
+<li><strong>bin 폴더의 경로 확인.</strong> R이 열리면 Console 창에서 아래 한 줄을 실행하고, 결과로 나온 문자열을 따옴표는 빼고 복사한다. R을 설치한 폴더에서 실행 파일들이 있는 <code>bin</code> 폴더의 전체 경로다. 보통 <code>C:\Program Files\R\R-4.x.x\bin</code> 꼴이다. 역슬래시가 두 개씩(<code>\\</code>) 보이는 것은 R이 문자열을 표시하는 방식이다. 아래 7번 그림처럼 그대로 붙여 넣어도 되고, 하나씩으로 고쳐도 된다. 파일 탐색기에서 <code>C:\Program Files\R</code> 아래의 <code>bin</code> 폴더를 찾아 주소 표시줄의 경로를 복사해도 된다.
+<div class="cb r"><span class="lang">R</span><pre>normalizePath(file.path(R.home(), "bin"))</pre></div>
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-02.png" width="1224" height="832" loading="lazy" alt="R을 설치한 경로에서 실행 파일들이 있는 bin 폴더의 절대 경로 출력"><figcaption>R을 설치한 경로에서 실행 파일들이 있는 bin 폴더의 절대 경로 출력</figcaption></figure></li>
+<li><strong>환경 변수 편집 항목 찾기.</strong> <kbd>Windows</kbd>+<kbd>S</kbd>를 누르면 나오는 아래쪽 검색창에서 <code>환경변수</code>를 검색하고, 나타나는 <em>시스템 환경 변수 편집</em>을 누른다. 관리자 암호를 묻거나 열리지 않으면 바로 아래의 <em>계정의 환경 변수 편집</em>을 누른다. 이때는 환경 변수 창이 바로 열리므로 4번을 건너뛴다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-03.png" width="964" height="930" loading="lazy" alt="환경 변수 편집 항목 찾기"><figcaption>환경 변수 편집 항목 찾기</figcaption></figure></li>
+<li><strong>환경 변수 창 열기.</strong> 시스템 속성 창 아래쪽의 <em>환경 변수</em>를 누른다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-04.png" width="478" height="534" loading="lazy" alt="환경 변수 편집 메뉴 찾기 및 실행"><figcaption>환경 변수 편집 메뉴 찾기 및 실행</figcaption></figure></li>
+<li><strong>Path 찾기.</strong> 위쪽 <em>사용자 변수</em> 목록에서 <code>Path</code>를 찾아 누르고 <em>편집</em>을 누른다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-05.png" width="615" height="579" loading="lazy" alt="Path 환경 변수 찾기"><figcaption>Path 환경 변수 찾기</figcaption></figure></li>
+<li><strong>새 값 추가.</strong> 오른쪽 위의 <em>새로 만들기</em>를 눌러 환경 변수 Path에 새로운 값을 추가한다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-06.png" width="521" height="494" loading="lazy" alt="새로운 값 추가하기"><figcaption>새로운 값 추가하기</figcaption></figure></li>
+<li><strong>경로 붙여 넣기.</strong> 앞서 R에서 복사한 값을 붙여 넣고(①), 아래쪽의 <em>확인</em>을 누른다(②). 남아 있는 환경 변수 창과 시스템 속성 창도 <em>확인</em>을 눌러 닫는다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-07.png" width="527" height="500" loading="lazy" alt="복사한 값 붙여 넣기"><figcaption>복사한 값 붙여 넣기</figcaption></figure></li>
+<li><strong>확인.</strong> VS Code를 열고 터미널을 활성화한 뒤(<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>`</kbd>) <code>R.exe</code>를 입력하고 실행하면 R Console로 들어간다. VS Code가 이미 열려 있었다면 창을 모두 닫았다가 다시 연다. 바뀐 PATH는 새로 시작한 프로그램에만 적용된다. R을 끝낼 때는 <code>q()</code>를 입력한다.
+<figure class="shot"><img src="../assets/images/R-win-exec/win-R-exec-08.png" width="1150" height="795" loading="lazy" alt="Terminal에서 R 실행"><figcaption>Terminal에서 R 실행</figcaption></figure></li>
+</ol>
+<p>터미널에서 쓰는 명령은 아래와 같다. 첫 줄에서 R의 버전이 나오면 PATH 설정이 된 것이다. VS Code의 터미널은 열어 둔 폴더(프로젝트 루트)에서 시작하므로, 스크립트는 <code>scripts/</code>를 붙여 가리킨다. 셋째 줄의 <code>02.prepare_datasets.R</code>은 <a href="../statistics/prepare-for-ttest.html#make-data">t 검정을 위한 데이터 준비</a>에서 만드는 스크립트다. 실행할 스크립트의 이름으로 바꿔 쓴다.</p>
+<div class="cb"><span class="lang">PowerShell · VS Code 터미널</span><pre>R.exe --version                               # 버전이 나오면 PATH 설정이 된 것이다
+R.exe                                         # R을 대화형으로 시작한다. 끝낼 때는 q()
+Rscript.exe scripts/02.prepare_datasets.R     # 프로젝트 루트에서, 스크립트 파일 전체를 실행한다</pre></div>
+<div class="callout caution"><p><strong>PowerShell에서는 <code>R</code>이 아니라 <code>R.exe</code>라고 적는다.</strong> PowerShell에서 <code>r</code>은 직전 명령을 다시 실행하는 내장 명령의 줄임말이어서, <code>R</code>만 입력하면 R이 시작되지 않는다.</p>
+<p><strong>R을 새 버전으로 올리면</strong> 설치 폴더 이름(<code>R-4.x.x</code>)이 바뀐다. Path에 넣은 경로도 새 폴더로 고친다.</p></div>
+</details>
+<ol start="5">
+<li><strong>패키지 설치.</strong> 아래 한 줄을 R에서 한 번만 실행한다. 패키지를 내려받는 저장소는 <code>repos</code> 인수로 <code>https://cloud.r-project.org/</code>를 지정한다. 저장소를 고르라는 창이 뜨지 않고, 가까운 서버로 자동 연결된다. <code>languageserver</code>는 VS Code가 자동완성과 도움말을 띄우는 데 쓴다. <code>tidyverse</code>는 데이터를 읽고 다듬고 그리는 패키지 묶음이고(Excel을 읽는 <code>readxl</code>도 함께 설치된다), <code>writexl</code>은 Excel 저장, <code>effectsize</code>는 효과크기 계산, <code>extrafont</code>는 그림에 한글 글꼴을 쓰는 데 쓴다. 설치에 몇 분 걸린다.</li>
+</ol>
+<div class="cb r"><span class="lang">R · 처음 한 번만</span><pre>install.packages(
+  c("languageserver", "tidyverse", "writexl", "effectsize", "extrafont"),
+  repos = "https://cloud.r-project.org/"
+)</pre></div>
+<p>여기까지 하면 설치가 끝난다. 폴더를 열고 스크립트를 만들어 한 줄씩 실행하는 방법은 통계 자료 <a href="../statistics/prepare-for-ttest.html#s1">t 검정을 위한 데이터 준비</a>의 첫 절에서 예제와 함께 따라 한다.</p>
+</section>
+
+<section class="panel" id="s2">
+<div class="section-head"><span class="section-num">02</span><h2>이 수업에서 AI에게 묻는 법</h2></div>
+<ul>
+<li><strong>오류를 풀 때.</strong> R 터미널의 오류 메시지를 그대로 붙여 넣고 실행한 코드를 함께 준다. 예: <code>scripts/03.ttest.R의 12번째 줄에서 이 오류가 난다. 원인과 고친 코드를 알려줘.</code></li>
+<li><strong>코드를 읽을 때.</strong> 예: <code>t.test(sodium_post ~ group, data = d)의 출력을 한 줄씩 설명해줘.</code></li>
+<li><strong>내 데이터에 옮길 때.</strong> 예: <code>dataset/raw/mydata.xlsx의 첫 시트를 tidyverse로 읽고, group 열로 score 열의 평균을 비교하는 Welch 검정 코드를 써줘.</code></li>
+</ul>
+<div class="callout caution"><p><strong>AI가 준 답은 직접 실행해 확인한다.</strong> 에이전트는 없는 함수나 인자를 지어내기도 하고, 검정을 잘못 고르기도 한다. 어떤 검정을 쓸지, 가설의 방향을 어떻게 둘지, 결과를 어떻게 해석할지는 스스로 정하고 설명할 수 있어야 한다. 에이전트가 파일을 고치겠다고 하면 바뀌는 내용을 읽어 본 뒤 승인한다. 개인정보가 들어 있는 연구 데이터는 에이전트에게 보내도 되는지 먼저 확인한다.</p></div>
+</section>
+
+
+</main>
+
+<script src="../assets/rlesson.js"></script>
+</body>
+</html>

@@ -153,3 +153,20 @@ pre.tree{background:var(--soft);font-size:14px;line-height:1.7;padding:14px 18px
 .shot{margin:0;display:flex;flex-direction:column;gap:8px}
 .shot img{display:block;width:100%;max-width:760px;height:auto;border:1px solid var(--line);border-radius:6px}
 .shot figcaption{font-size:14px;color:var(--muted)}
+
+/* ---------- 절차 목록: 단계 안에 코드 상자와 화면 갈무리를 넣는다 (ol.steps) ---------- */
+.steps > li{margin-bottom:18px}
+.steps > li > .cb,.steps > li > .single,.steps > li > .shot{margin-top:10px}
+/* 작은 대화상자 그림을 늘리지 않는다: 원래 크기로 두고 760px 에서만 줄인다 */
+.steps .shot,.shot.natural{align-items:flex-start}
+.steps .shot img,.shot.natural img{width:auto;max-width:min(100%,760px)}
+
+/* ---------- 키보드 키 ---------- */
+kbd{font-family:var(--mono);font-size:12.5px;font-weight:500;line-height:1;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:2px 6px;background:var(--surface);white-space:nowrap}
+
+/* ---------- 쪽 이동: 앞뒤 자료로 가는 링크 (nav.nav.pager) ---------- */
+.pager{padding-top:20px}
+.pager a{display:block;text-decoration:none;font-weight:700;color:var(--ink)}
+.pager a span{display:block;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--muted)}
+.pager a:last-child{margin-left:auto;text-align:right}
+.pager a:hover,.pager a:focus-visible{color:var(--accent-dark,var(--accent))}

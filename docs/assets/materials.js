@@ -4,7 +4,9 @@
    - href: docs/ 기준 상대 경로 (예: "statistics/foo.html")
    - tags: 과목 1개 + 유형 1개 + 주제 2~5개 (DESIGN.md "태그" 참고)
    - date: 발행일 YYYY-MM-DD (같은 날짜면 배열에서 뒤쪽이 더 최신)
-   - practice: true 이면 카드에 '실습 포함' 배지를 단다 (선택) */
+   - practice: true 이면 카드에 '실습 포함' 배지를 단다 (선택)
+   - parts: 여러 편을 한 카드로 묶을 때 편마다 { label, title, href }를 적는다 (선택).
+     카드 전체 링크 대신 편마다 링크가 그려진다. href에는 첫 편을 적어 둔다. */
 window.MATERIALS = [
   {
     subject: "statistics",
@@ -117,13 +119,26 @@ window.MATERIALS = [
     date: "2026-10-07"
   },
   {
+    subject: "data-science",
+    label: "작업환경 안내",
+    title: "VS Code에서 R 실행하기",
+    description: "R과 VS Code, R 확장, Google Antigravity 확장을 설치해 VS Code에서 R 스크립트를 한 줄씩 실행하는 작업환경을 만들기까지를 그림과 함께 따라 합니다.",
+    href: "data-science/VScode-R-languageserver.html",
+    tags: ["데이터과학", "개념정리", "R", "VSCode", "작업환경", "코딩에이전트"],
+    date: "2026-10-11"
+  },
+  {
     subject: "statistics",
     label: "R 실습",
-    title: "모집단 평균에 대한 가설검정",
-    description: "VS Code에서 R로 단일표본·독립표본·대응표본 t 검정을 실행하고, t·자유도·p값이 영가설 아래의 분포에서 어디에 놓이는지와 효과크기를 확인합니다.",
-    href: "statistics/mean-test-with-r.html",
+    title: "R을 이용한 평균검정",
+    description: "VS Code에서 R로 데이터를 읽고 살펴보고 다듬은 뒤, 단일표본·독립표본·대응표본 t 검정을 실행해 p값과 효과크기를 확인하기까지를 데이터 준비와 분석 두 편으로 나누어 따라 합니다.",
+    href: "statistics/prepare-for-ttest.html",
+    parts: [
+      { label: "데이터 준비", title: "t 검정을 위한 데이터 준비", href: "statistics/prepare-for-ttest.html" },
+      { label: "분석", title: "모집단 평균에 대한 가설검정", href: "statistics/mean-test-with-r.html" }
+    ],
     practice: true,
-    tags: ["통계", "시각화", "가설검정", "t검정", "p값", "효과크기", "R"],
-    date: "2026-10-10"
+    tags: ["통계", "사례분석", "R", "데이터전처리", "가설검정", "t검정", "효과크기"],
+    date: "2026-10-11"
   }
 ];
