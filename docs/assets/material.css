@@ -144,6 +144,11 @@ ol.refs{padding-left:20px;margin:0;font-size:14px;display:flex;flex-direction:co
   padding:10px 14px 0;color:var(--muted)}
 .cb.r .lang{color:var(--r)}
 .cb.py .lang{color:var(--py)}
+/* 복사 버튼: 스크립트가 코드 상자 오른쪽 위에 붙인다 (button.copy) */
+.cb{position:relative}
+.cb .copy{position:absolute;top:6px;right:8px;font-family:var(--mono);font-size:12px;font-weight:500;line-height:1;color:var(--muted);
+  background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:5px 8px;cursor:pointer}
+.cb .copy:hover{color:var(--accent);border-color:var(--accent)}
 .cb pre{border:0;border-radius:0;background:transparent;padding:8px 14px 14px;font-size:13.5px;line-height:1.65;
   color:var(--ink);white-space:pre;word-break:normal;overflow-wrap:normal}
 pre.tree{background:var(--soft);font-size:14px;line-height:1.7;padding:14px 18px;white-space:pre;word-break:normal;

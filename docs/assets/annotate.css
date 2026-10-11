@@ -1,0 +1,93 @@
+/* 형광펜과 메모 (annotate.js 가 불러온다 — 쪽에서 직접 link 하지 않는다)
+   - 색은 material.css 의 토큰을 쓰고, 형광펜 네 색만 여기서 정한다.
+   - 본문에 끼어드는 것은 mark.anno 와 .anno-atom(통째로 칠한 수식)뿐이다. 줄 높이와 폭을 바꾸지 않도록
+     padding·border 없이 배경과 box-shadow 로만 표시한다.
+   - 화면 조각은 body 끝의 .anno-ui 안에 있고, 쪽의 넓은 선택자에 밀리지 않게 모두 .anno-ui 를 앞에 붙인다. */
+
+.anno-y{--anno:rgb(255 214 51 / 55%);--anno-ink:#9a7400;--anno-solid:#ffd633}
+.anno-g{--anno:rgb(96 211 148 / 45%);--anno-ink:#0b7f4f;--anno-solid:#60d394}
+.anno-p{--anno:rgb(255 133 170 / 42%);--anno-ink:#c21f55;--anno-solid:#ff85aa}
+.anno-b{--anno:rgb(110 168 254 / 42%);--anno-ink:#1f57c9;--anno-solid:#6ea8fe}
+
+/* ---------- 본문에 칠한 곳 ---------- */
+mark.anno{background:var(--anno,rgb(255 214 51 / 55%));color:inherit;border-radius:2px;cursor:pointer;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+mark.anno.has-note{box-shadow:inset 0 -2px 0 var(--anno-ink)}
+/* 메모가 있는 형광펜의 끝에 붙는 표시. 줄 높이를 늘리지 않게 line-height 0 으로 띄운다 */
+mark.anno.anno-end::after{content:"✎";position:relative;top:-.5em;margin-left:1px;font-size:.7em;line-height:0;
+  font-weight:700;color:var(--anno-ink)}
+.anno-atom{background:var(--anno,rgb(255 214 51 / 55%));border-radius:3px;cursor:pointer}
+.anno-atom.has-note{box-shadow:inset 0 -2px 0 var(--anno-ink)}
+.anno-flash{animation:anno-flash 1.5s ease-out}
+@keyframes anno-flash{0%,60%{outline:3px solid var(--anno-ink);outline-offset:2px}100%{outline:3px solid transparent;outline-offset:2px}}
+
+/* ---------- 화면 조각 공통 ---------- */
+.anno-ui{position:absolute;top:0;left:0;width:0;height:0;font-family:var(--sans,system-ui,sans-serif);font-size:13px;
+  line-height:1.5;color:var(--ink,#0b1220);word-break:keep-all}
+.anno-ui [hidden]{display:none!important}
+.anno-ui button{margin:0;font:inherit;color:inherit;cursor:pointer}
+.anno-ui .anno-row{display:flex;align-items:center;gap:6px}
+.anno-ui .anno-row > strong{margin-right:auto;font-size:14px}
+.anno-ui .anno-right{justify-content:flex-end}
+.anno-ui .anno-sw{flex:none;width:22px;height:22px;padding:0;border:2px solid var(--surface,#fff);border-radius:50%;
+  background:var(--anno-solid);box-shadow:0 0 0 1px var(--line,#dbe1ee)}
+.anno-ui .anno-sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink,#0b1220)}
+.anno-ui .anno-text{padding:3px 8px;border:1px solid transparent;border-radius:6px;background:transparent;
+  font-size:12.5px;font-weight:600;color:var(--muted,#45506b);white-space:nowrap}
+.anno-ui .anno-text:hover,.anno-ui .anno-text:focus-visible{border-color:var(--line,#dbe1ee);color:var(--ink,#0b1220)}
+.anno-ui .anno-text[data-act="del"]{margin-left:auto}
+.anno-ui .anno-text[data-act="del"]:hover,.anno-ui .anno-text[data-act="clear"]:hover,
+.anno-ui .anno-text[data-armed]{border-color:var(--pos,#d1264f);color:var(--pos,#d1264f)}
+
+/* ---------- 드래그하면 뜨는 형광펜 버튼 ---------- */
+.anno-ui .anno-pop{position:absolute;z-index:80;display:flex;align-items:center;gap:7px;padding:6px 8px;
+  background:var(--navy,#0b1220);border-radius:8px;box-shadow:0 6px 20px rgb(11 18 32 / 30%)}
+.anno-ui .anno-pop .anno-sw{border-color:var(--navy,#0b1220);box-shadow:none}
+.anno-ui .anno-pop .anno-sw:hover,.anno-ui .anno-pop .anno-sw:focus-visible{box-shadow:0 0 0 2px #fff}
+.anno-ui .anno-pop .anno-sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--amber,#ffb020)}
+.anno-ui .anno-memo{margin-left:3px;padding:2px 10px;border:1px solid #3a4a70;border-radius:6px;background:transparent;
+  font-size:12.5px;font-weight:600;color:#e4e9f5;white-space:nowrap}
+.anno-ui .anno-memo:hover,.anno-ui .anno-memo:focus-visible{border-color:var(--amber,#ffb020);color:var(--amber,#ffb020)}
+
+/* ---------- 메모 상자 ---------- */
+.anno-ui .anno-card{position:absolute;z-index:80;display:flex;flex-direction:column;gap:8px;
+  width:min(290px,calc(100vw - 16px));padding:10px;background:var(--surface,#fff);border:1px solid var(--line,#dbe1ee);
+  border-radius:10px;box-shadow:0 2px 4px rgb(11 18 32 / 8%),0 12px 32px -8px rgb(11 18 32 / 28%)}
+.anno-ui textarea{display:block;width:100%;min-height:66px;margin:0;padding:6px 8px;resize:vertical;font:inherit;
+  color:var(--ink,#0b1220);background:var(--surface,#fff);border:1px solid var(--line,#dbe1ee);border-radius:6px}
+.anno-ui textarea:focus-visible{outline:2px solid var(--accent,#2f6fed);outline-offset:0}
+
+/* ---------- 오른쪽 아래 단추와 목록 ---------- */
+.anno-ui .anno-fab{position:fixed;right:16px;bottom:16px;z-index:70;display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px 6px 10px;border:1px solid var(--line,#dbe1ee);border-radius:999px;background:var(--surface,#fff);
+  box-shadow:var(--shadow,0 8px 24px -10px rgb(11 18 32 / 14%));font-size:12.5px;font-weight:700;opacity:.78;
+  transition:opacity .16s}
+.anno-ui .anno-fab::before{content:"";width:12px;height:12px;border-radius:3px;background:#ffd633;
+  box-shadow:inset 0 -3px 0 #9a7400}
+.anno-ui .anno-fab:hover,.anno-ui .anno-fab:focus-visible,.anno-ui .anno-fab[aria-expanded="true"]{opacity:1}
+.anno-ui .anno-fab.is-pen{opacity:1;background:#fff3c2;border-color:#9a7400}
+.anno-ui .anno-fab b{min-width:18px;padding:0 5px;border-radius:999px;background:var(--soft,#eef1f8);font-family:var(--mono,monospace);
+  font-size:11.5px;font-weight:600;text-align:center}
+.anno-ui .anno-fab b:empty{display:none}
+.anno-ui .anno-panel{position:fixed;right:16px;bottom:58px;z-index:70;display:flex;flex-direction:column;gap:10px;
+  width:min(330px,calc(100vw - 32px));max-height:min(70vh,540px);overflow-y:auto;padding:14px;background:var(--surface,#fff);
+  border:1px solid var(--line,#dbe1ee);border-radius:10px;
+  box-shadow:0 2px 4px rgb(11 18 32 / 8%),0 12px 32px -8px rgb(11 18 32 / 28%)}
+.anno-ui .anno-help,.anno-ui .anno-empty{margin:0;font-size:12.5px;color:var(--muted,#45506b)}
+.anno-ui .anno-pen{display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer}
+.anno-ui .anno-pen input{margin:0;accent-color:var(--accent,#2f6fed)}
+.anno-ui .anno-list{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.anno-ui .anno-list:empty{display:none}
+.anno-ui .anno-list li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px;align-items:start}
+.anno-ui .anno-go{display:flex;flex-direction:column;gap:3px;padding:6px 8px;border:0;border-left:4px solid var(--anno-solid);
+  border-radius:0 6px 6px 0;background:var(--soft,#eef1f8);text-align:left}
+.anno-ui .anno-go:hover,.anno-ui .anno-go:focus-visible{background:var(--accent-soft,#eaf1ff)}
+.anno-ui .anno-q{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+.anno-ui .anno-n{font-size:12.5px;color:var(--anno-ink);white-space:pre-wrap;overflow-wrap:anywhere}
+.anno-ui .anno-n::before{content:"✎ "}
+.anno-ui .anno-lost{font-size:12px;color:var(--pos,#d1264f)}
+.anno-ui .anno-x{width:26px;height:26px;padding:0;border:1px solid transparent;border-radius:6px;background:transparent;
+  font-size:16px;line-height:1;color:var(--muted,#45506b)}
+.anno-ui .anno-x:hover,.anno-ui .anno-x:focus-visible{border-color:var(--pos,#d1264f);color:var(--pos,#d1264f)}
+
+@media print{.anno-ui{display:none}}

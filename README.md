@@ -25,6 +25,9 @@ uv run python main.py
   나뉘어 그려집니다(예: "R을 이용한 평균검정"의 데이터 준비 · 분석).
 - 공통 스타일: `docs/assets/styles.css`
 - 용어: 자료에서 쓰는 용어는 [GLOSSARY.md](GLOSSARY.md)를 따릅니다(예: 영가설, 대안가설).
+- 형광펜과 메모: 자료 페이지는 `<head>` 끝에 `<script defer src="../assets/annotate.js"></script>`
+  한 줄을 넣습니다. 본문을 드래그해 형광펜을 칠하고 메모를 달 수 있고, 내용은 읽는 사람의
+  브라우저(`localStorage`)에만 저장됩니다. 자세한 규칙은 [DESIGN.md](DESIGN.md)의 "형광펜과 메모".
 - 이미지와 첨부 자료: `docs/assets/` 아래에 추가
 
 수식은 `docs/assets/katex/`의 KaTeX로 표기합니다(`\\( ... \\)`, `\\[ ... \\]`).
@@ -118,6 +121,23 @@ uv run python src/python/prepare_mnist_bridge.py     # docs/assets/data/mnist-br
   소프트맥스 회귀(784 → 10)와 은닉층 신경망(784 → 64 → 10)을 같은 설정(시드 2026,
   미니배치 100, 학습률 0.1, 10에폭 SGD)으로 학습해 선형 모형 가중치, 에폭별 훈련 손실·시험
   정확도, 시험 이미지 일부와 오답 사례를 기록한다. numpy만 쓰며 몇 초 안에 끝난다.
+
+`docs/ai/mnist-classifier-practice.html`(MNIST 손글씨 분류기 만들기)이 읽는 데이터는 아래 스크립트가
+만든다(`window.MNIST_PRACTICE`를 정의하는 생성 파일이므로 직접 수정하지 않는다).
+
+```sh
+uv run --with torch python src/python/prepare_mnist_practice.py   # docs/assets/data/mnist-practice.js
+```
+
+- 자료 페이지의 실습과 같은 순서·같은 설정으로 PyTorch로 학습한다. 훈련 60,000장을 시드 42로
+  훈련 54,000장·검증 6,000장으로 나누고, 은닉층 신경망(784 → 64 → 10, 30에폭)과 작은 합성곱
+  신경망(Conv 16 → Conv 32 → Linear 10, 15에폭)을 미니배치 100, SGD 학습률 0.1로 학습한다.
+  에폭별 훈련·검증 손실, 검증 손실이 가장 낮았던 에폭의 시험 정확도, 혼동행렬과 오답 사례,
+  시험 사진을 오른쪽으로 0~4칸 밀었을 때의 정확도, 첫 합성곱 층의 필터 16개를 기록한다.
+  덧붙여 255로 나누지 않고 1에폭 학습한 결과와, 은닉층 신경망을 같은 출발점에서 100에폭까지
+  학습한 기록(오래 학습하면 검증 손실이 다시 오르는 것을 보이는 데 쓴다)도 남긴다.
+- `torch`는 저장소 의존성(`pyproject.toml`)에 넣지 않고 `--with torch`로 실행할 때만 불러온다.
+  MNIST 원본은 `prepare_mnist_bridge.py`가 받아 둔 `datasets/mnist/*.gz`를 쓴다. CPU로 1~2분 걸린다.
 
 ## R과 Python 을 이용해 세상읽기 (여러 쪽 자료)
 

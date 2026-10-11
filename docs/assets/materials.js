@@ -140,5 +140,15 @@ window.MATERIALS = [
     practice: true,
     tags: ["통계", "사례분석", "R", "데이터전처리", "가설검정", "t검정", "효과크기"],
     date: "2026-10-11"
+  },
+  {
+    subject: "ai",
+    label: "코딩 에이전트 실습",
+    title: "MNIST 손글씨 분류기 만들기 - 펼친 숫자에서 합성곱까지",
+    description: "손글씨 숫자 MNIST를 코딩 에이전트와 함께 PyTorch로 분류하며, 자료 보기와 분할, 학습 루프, 학습 곡선, 합성곱, 평가까지 딥러닝의 한 바퀴를 실제 학습 결과로 확인합니다.",
+    href: "ai/mnist-classifier-practice.html",
+    practice: true,
+    tags: ["인공지능", "사례분석", "딥러닝", "이미지분류", "신경망", "합성곱", "코딩에이전트"],
+    date: "2026-10-11"
   }
 ];

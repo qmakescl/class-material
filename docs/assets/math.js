@@ -34,7 +34,9 @@
     };
     const queue = (node) => {
       const el = node.nodeType === 1 ? node : node.parentElement;
-      if (!el || el.closest(".katex")) return;
+      // 코드 안(ignoredTags)과 형광펜 화면 조각은 건너뛴다. 형광펜(annotate.js)이 코드의 글을 <mark> 로
+      // 감싸거나 풀 때도 변화가 생기는데, 그때 코드 속의 \( \) 를 수식으로 읽으면 안 된다.
+      if (!el || el.closest(".katex, pre, code, textarea, .anno-ui")) return;
       pending.add(el);
       if (!scheduled) { scheduled = true; requestAnimationFrame(flush); }
     };
