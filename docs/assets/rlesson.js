@@ -6,8 +6,8 @@
 
 /* ── 함수 도움말 사전: [인수, 1 필수 / 0 선택 / 2 사실상 필수, 설명] ── */
 const FN={
-'install.packages':{pkg:'utils',sig:'install.packages(pkgs, repos)',why:'CRAN에서 패키지를 내려받아 설치한다. 컴퓨터마다 한 번만 하면 된다.',
-  args:[['pkgs',1,'설치할 패키지 이름. 문자형 벡터'],['repos',0,'패키지를 내려받을 저장소 주소. 기본값은 R에 설정된 저장소']],ret:'없음. 설치 과정이 화면에 출력된다.'},
+'install.packages':{pkg:'utils',sig:'install.packages(pkgs, repos, type)',why:'CRAN에서 패키지를 내려받아 설치한다. 컴퓨터마다 한 번만 하면 된다.',
+  args:[['pkgs',1,'설치할 패키지 이름. 문자형 벡터'],['repos',0,'패키지를 내려받을 저장소 주소. 기본값은 R에 설정된 저장소'],['type',0,'내려받을 형식. "binary"는 미리 만들어 둔 설치 파일만 받는다. Windows와 macOS의 기본값은 바이너리를 우선하되 소스가 더 새 버전이면 묻는다']],ret:'없음. 설치 과정이 화면에 출력된다.'},
 'library':{pkg:'base',sig:'library(package)',why:'설치된 패키지를 불러와 그 안의 함수를 쓸 수 있게 한다. R을 새로 켤 때마다 실행한다.',
   args:[['package',2,'불러올 패키지 이름. 따옴표 없이 적어도 된다. 생략하면 설치된 패키지 목록을 보여 준다']],ret:'없음(불러온 패키지 목록을 보이지 않게 돌려준다).'},
 'c':{pkg:'base',sig:'c(...)',why:'여러 값을 묶어 하나의 벡터로 만든다.',
@@ -47,6 +47,10 @@ const FN={
   args:[['x',1,'숫자 벡터'],['na.rm',0,'결측을 빼고 계산할지. 기본값 FALSE']],ret:'숫자 하나.'},
 'var':{pkg:'stats',sig:'var(x, na.rm = FALSE)',why:'표본 분산을 구한다. 분모는 n − 1이다.',
   args:[['x',1,'숫자 벡터'],['na.rm',0,'결측을 빼고 계산할지. 기본값 FALSE']],ret:'숫자 하나(벡터 하나를 넣었을 때).'},
+'boxplot':{pkg:'graphics',sig:'boxplot(x, horizontal = FALSE)',why:'상자그림을 그린다. 사분위수로 값이 퍼진 모양을 본다.',args:[['x',1,'숫자 벡터'],['horizontal',0,'TRUE이면 상자를 가로로 눕혀 그린다. 기본값 FALSE']],ret:'그림에 쓴 통계값이 담긴 리스트(화면에는 보이지 않는다). 그림이 그려진다.'},
+'length':{pkg:'base',sig:'length(x)',why:'벡터에 값이 몇 개 들어 있는지 센다.',args:[['x',1,'벡터. 데이터프레임을 넣으면 열의 수가 나온다']],ret:'정수 하나.'},
+'class':{pkg:'base',sig:'class(x)',why:'객체가 어떤 종류인지 확인한다.',args:[['x',1,'종류를 볼 객체']],ret:'종류의 이름이 담긴 문자형 벡터. 예: "numeric", "data.frame"'},
+'round':{pkg:'base',sig:'round(x, digits = 0)',why:'반올림한다.',args:[['x',1,'숫자 또는 숫자 벡터'],['digits',0,'남길 소수 자릿수. 기본값 0']],ret:'x와 길이가 같은 숫자 벡터.'},
 'sqrt':{pkg:'base',sig:'sqrt(x)',why:'제곱근을 구한다.',args:[['x',1,'0 이상의 숫자 또는 숫자 벡터']],ret:'x와 길이가 같은 숫자 벡터.'},
 'cor':{pkg:'stats',sig:'cor(x, y, method = "pearson")',why:'두 변수의 상관계수를 구한다.',
   args:[['x',1,'숫자 벡터'],['y',2,'x와 길이가 같은 숫자 벡터. x가 표이면 생략할 수 있다'],['method',0,'"pearson"(기본값), "spearman", "kendall"']],ret:'−1과 1 사이의 숫자 하나(두 벡터를 넣었을 때).'},

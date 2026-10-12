@@ -35,6 +35,42 @@
   .explain .cb { background: var(--surface); }
   .explain .cmp td:first-child { white-space: nowrap; font-weight: 600; }   /* 비교 표의 항목 이름은 한 줄로 */
   .explain .cmp td { min-width: 9em; }
+  #r-basics > h4 { margin-top: 26px; }   /* 네 항목의 사이를 띄운다 */
+  /* 벡터와 데이터프레임 그림 */
+  .vfig { margin: 0; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+  .vfig figcaption { font-size: 14px; color: var(--muted); }
+  .vfig-vec { display: flex; align-items: flex-end; gap: 10px; font-family: var(--mono); }
+  .vfig-name { font-weight: 700; padding-bottom: 7px; }
+  .vfig-cells { display: inline-flex; border: 2px solid var(--accent); border-radius: 8px; background: var(--accent-soft); margin-top: 18px; }
+  .vfig-cells > span { position: relative; min-width: 46px; padding: 6px 10px; text-align: center; font-weight: 600; border-right: 1px solid var(--line); }
+  .vfig-cells > span:last-child { border-right: 0; }
+  .vfig-cells i { position: absolute; left: 0; right: 0; top: -22px; font-style: normal; font-size: 11.5px; font-weight: 500; color: var(--muted); }
+  .vfig-df { display: flex; gap: 8px; font-family: var(--mono); font-size: 14px; }
+  .vfig-col { display: flex; flex-direction: column; min-width: 64px; border: 2px solid var(--accent); border-radius: 8px; background: var(--accent-soft); overflow: hidden; }
+  .vfig-col > b { padding: 5px 10px; text-align: center; font-size: 13px; background: var(--accent); color: #fff; }
+  .vfig-col > span { padding: 3px 10px; text-align: right; border-top: 1px solid var(--line); }
+  .vfig-col.vfig-rn { min-width: 0; border-color: transparent; background: none; color: var(--muted); }
+  .vfig-col.vfig-rn > b { background: none; }
+  .vfig-col.vfig-rn > span { border-top-color: transparent; }
+  /* 사분위수와 상자그림 위젯 */
+  .qb { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; }
+  .qb-plot { width: 100%; }
+  .qb-plot svg { display: block; width: 100%; height: auto; }
+  .qb-plot text { font-family: var(--mono); font-size: 11.5px; fill: var(--muted); }
+  .qb-plot .band { fill: transparent; cursor: pointer; }
+  .qb-plot .band.on { fill: var(--accent-soft); }
+  .qb-plot .bx { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
+  .qb-plot .ln { stroke: var(--ink); stroke-width: 1.5; }
+  .qb-plot .md { stroke: var(--ink); stroke-width: 3.5; }
+  .qb-plot .out { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
+  .qb-plot .ax { stroke: var(--line); stroke-width: 1; }
+  .qb-plot .dot { fill: var(--accent); }
+  .qb-plot .dot.alt { fill: var(--warn); }
+  .qb-plot .dot.dim { opacity: .18; }
+  .qb-plot text.key { fill: var(--ink); font-weight: 600; }
+  .qb-say { min-height: 3.4em; margin: 10px 0 0; font-size: 14.5px; color: var(--muted); border-left: 3px solid var(--line); padding-left: 12px; }
+  .qb-say b { color: var(--ink); }
+  .qb-tab td:nth-child(3) { font-family: var(--mono); text-align: right; white-space: nowrap; }
   /* 넓은 모양·긴 모양 위젯 */
   .wl { display: flex; flex-direction: column; gap: 12px; }
   .wl-code { font-family: var(--mono); font-size: 13.5px; line-height: 2; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; overflow-x: auto; white-space: pre; }
@@ -97,7 +133,7 @@
 <h2 class="page-title">t 검정을 위한 데이터 준비</h2>
 <p class="lede">VS Code에서 폴더를 열어 첫 R 스크립트를 실행하고 실습 데이터를 만든다. 그 데이터를 tidyverse로 읽고, 구조와 기술통계와 그림으로 먼저 살펴본 뒤, 분석에 쓰기 좋게 다듬어 저장한다.</p>
 <dl class="facts">
-<div><dt>도구</dt><dd>R과 tidyverse, VS Code. 설치는 <a href="../data-science/VScode-R-languageserver.html">VS Code에서 R 실행하기</a>를 따라 먼저 해 둔다.</dd></div>
+<div><dt>도구</dt><dd>R과 tidyverse, VS Code. 설치는 <a href="../data-science/VScode-R-languageserver.html" target="_blank" rel="noopener">VS Code에서 R 실행하기</a>를 따라 먼저 해 둔다.</dd></div>
 <div><dt>예제 데이터</dt><dd>식생활 교육 연구를 흉내 낸 연습용 가상 데이터. 48명의 교육 전·후 나트륨 섭취량(mg/일). 집단은 1과 0으로 입력되어 있다.</dd></div>
 <div><dt>하는 일</dt><dd>프로젝트 폴더와 첫 스크립트 만들기, 실습 파일 만들기, CSV와 Excel 읽기, 구조·결측·기술통계 확인, 이름표 붙이기, 넓은 모양과 긴 모양 바꾸기, 그림 저장</dd></div>
 <div><dt>함수 도움말</dt><dd>코드에서 점선 밑줄이 있는 함수 이름에 마우스를 올리면(휴대폰은 누르면) 목적, 인수, 반환값이 나타난다.</dd></div>
@@ -113,7 +149,7 @@
 
 <section class="panel" id="s1">
 <div class="section-head"><span class="section-num">01</span><h2>폴더를 열고 스크립트를 실행한다</h2></div>
-<p>R 코드는 스크립트 파일에 적고, 한 줄씩 R 터미널로 보내 실행한다. 첫 스크립트에서는 R에 들어 있는 예제 데이터 <code>cars</code>로 R의 가장 기본적인 사용법을 익힌다. R과 VS Code, R 확장을 아직 설치하지 않았다면 <a href="../data-science/VScode-R-languageserver.html">VS Code에서 R 실행하기</a>를 먼저 따라 한다.</p>
+<p>R 코드는 스크립트 파일에 적고, 한 줄씩 R 터미널로 보내 실행한다. 첫 스크립트에서는 R에 들어 있는 예제 데이터 <code>cars</code>로 R의 가장 기본적인 사용법을 익힌다. R과 VS Code, R 확장을 아직 설치하지 않았다면 <a href="../data-science/VScode-R-languageserver.html" target="_blank" rel="noopener">VS Code에서 R 실행하기</a>를 먼저 따라 한다.</p>
 <ol>
 <li>실습 폴더를 하나 만든다. 예: <code>mean-test</code>. VS Code에서 <em>파일(File) → 폴더 열기(Open Folder)</em>로 이 폴더를 연다.
 <details class="fold">
@@ -168,6 +204,7 @@ cars$speed
 mean(cars$speed)
 sd(cars$dist)
 summary(cars)        # 열마다 요약 통계
+boxplot(cars$dist, horizontal = TRUE)   # 상자그림: 요약 통계의 사분위수를 그림으로 본다
 
 # 그림
 plot(cars)           # 속도와 제동 거리의 관계
@@ -203,6 +240,121 @@ help(cars)
 <tr><td><code>데이터$열</code></td><td>데이터프레임에서 열 하나를 벡터로 꺼낸다. 예: <code>cars$speed</code></td></tr>
 <tr><td><code>help(이름)</code> | <code>?이름</code></td><td>함수나 데이터의 도움말을 연다.</td></tr>
 </tbody></table></div>
+<p>프로그래밍 언어가 처음이라면 아래 설명 상자를 펼쳐 연산자, 변수, 함수, 데이터 구조를 먼저 읽는다.</p>
+<details class="explain" id="r-basics">
+<summary><span class="tag">설명 상자</span>R 기본 문법: 연산자, 변수, 함수, 데이터 구조</summary>
+<p>위 스크립트의 몇 줄 안에 프로그래밍 언어의 기본 요소가 다 들어 있다. 아래 네 가지를 차례로 읽고, 예시 코드를 <code>01.first_R.R</code> 끝에 적어 한 줄씩 실행해 본다. <code>#</code> 뒤에 적힌 것이 그 줄을 실행했을 때 나오는 결과다.</p>
+
+<h4>연산자: 값을 가지고 계산하게 하는 기호</h4>
+<p>연산자(operator)는 값을 가지고 어떤 계산이나 동작을 하라고 시키는 기호다. <code>1 + 2</code>에서 <code>+</code>는 양쪽의 두 값을 더하라는 연산자다. 이 자료에 나오는 연산자는 아래와 같다.</p>
+<div class="scroll"><table>
+<thead><tr><th>종류</th><th>연산자</th><th>하는 일</th></tr></thead>
+<tbody>
+<tr><td>산술</td><td><code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>^</code></td><td>더하기, 빼기, 곱하기, 나누기, 거듭제곱</td></tr>
+<tr><td>비교</td><td><code>==</code> <code>!=</code> <code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code></td><td>같다, 다르다, 작다, 크다, 작거나 같다, 크거나 같다. 결과는 참(<code>TRUE</code>) 또는 거짓(<code>FALSE</code>)이다.</td></tr>
+<tr><td>할당</td><td><code>&lt;-</code></td><td>오른쪽 값을 왼쪽 이름에 담는다. 아래 "변수"에서 다룬다.</td></tr>
+<tr><td>범위</td><td><code>:</code></td><td><code>1:5</code>는 1부터 5까지의 정수다.</td></tr>
+<tr><td>꺼내기</td><td><code>$</code></td><td>데이터프레임에서 열 하나를 꺼낸다. 예: <code>cars$speed</code></td></tr>
+<tr><td>파이프</td><td><code>%&gt;%</code></td><td>왼쪽 값을 오른쪽 함수에 넘긴다. <a href="#s2">다음 절</a>부터 쓴다.</td></tr>
+</tbody></table></div>
+<div class="cb r"><span class="lang">R · 연산자 해 보기</span><pre>7 / 2          # 3.5
+2 ^ 3          # 8
+1 + 2 * 3      # 7. 곱셈과 나눗셈을 덧셈과 뺄셈보다 먼저 한다
+(1 + 2) * 3    # 9. 괄호 안을 가장 먼저 한다
+3 &gt; 2          # TRUE
+3 == 2         # FALSE
+1:5            # 1 2 3 4 5</pre></div>
+<div class="callout caution"><p><strong><code>==</code>와 <code>=</code>는 다르다.</strong> <code>==</code>는 양쪽이 같은지 묻는 비교 연산자다. <code>=</code>는 함수의 괄호 안에서 <code>n = 3</code>처럼 인수에 이름을 붙여 값을 줄 때 쓴다.</p></div>
+
+<h4>변수: 값을 담아 두는 이름 붙은 상자</h4>
+<p>변수(variable)는 값을 담아 두는 상자이고, 상자마다 이름이 있다. R에서는 상자를 미리 만들어 두는 과정이 따로 없다. 이름을 적고 할당 연산자 <code>&lt;-</code>로 값을 넣으면 그때 상자가 만들어진다. 같은 이름에 다시 할당하면 담긴 값이 바뀐다. 담아 둔 값은 이름을 불러서 쓴다.</p>
+<div class="cb r"><span class="lang">R · 변수 해 보기</span><pre>x &lt;- c(4, 7, 10)   # x라는 이름의 상자를 만들고 값을 담는다
+x                  # 이름을 부르면 담긴 값이 나온다: 4 7 10
+x &lt;- 100           # 같은 이름에 다시 할당하면 담긴 값이 바뀐다
+y &lt;- x + 1         # 이름을 불러 계산에 쓰고, 결과를 다른 상자 y에 담는다
+y                  # 101</pre></div>
+<ul>
+<li><strong>할당한 줄은 아무것도 출력하지 않는다.</strong> <code>x &lt;- 100</code>을 실행하면 값이 담길 뿐이다. 담긴 값을 보려면 이름만 적은 줄을 실행한다.</li>
+<li><strong>이름 짓기.</strong> 글자로 시작하고 글자, 숫자, 마침표(<code>.</code>), 밑줄(<code>_</code>)을 쓴다. 띄어쓰기는 쓸 수 없다. 대문자와 소문자를 구분하므로 <code>x</code>와 <code>X</code>는 다른 변수다.</li>
+<li><strong>없는 이름을 부르면 오류가 난다.</strong> 값을 담은 적이 없는 <code>z</code>를 실행하면 <code>Error: object 'z' not found</code>가 나온다. 이름을 잘못 적었거나, 값을 담는 줄을 아직 실행하지 않았다는 뜻이다.</li>
+</ul>
+
+<h4>함수: 이름을 불러 시키는 일</h4>
+<p>함수(function)는 특정한 일을 하도록 따로 만들어 이름을 붙여 둔 코드다. 함수가 일을 하는 데 필요한 정보를 인수(argument)라고 하며, 함수 이름 뒤의 괄호 <code>()</code> 안에 넣는다. <code>sqrt(16)</code>은 함수 <code>sqrt</code>에 인수 16을 주어 제곱근을 구하게 한 것이다.</p>
+<div class="cb r"><span class="lang">R · 함수 해 보기</span><pre>sqrt(16)                      # 인수 하나: 4
+head(cars, n = 3)             # 인수 둘. 쉼표로 나누고, 이름 = 값 으로 어느 인수인지 밝힌다
+round(mean(cars$dist), 1)     # 함수 안에 함수. 안쪽 mean()의 결과가 바깥 round()의 인수가 된다: 43
+m &lt;- mean(cars$speed)         # 함수가 돌려준 값을 변수에 담아 둔다
+m                             # 15.4
+getwd()                       # 인수가 없어도 괄호는 적는다</pre></div>
+<p>함수가 하는 일은 두 가지로 나뉜다.</p>
+<div class="scroll"><table>
+<thead><tr><th>하는 일</th><th>뜻</th><th>예</th></tr></thead>
+<tbody>
+<tr><td>값을 반환한다</td><td>계산한 결과를 돌려준다. 돌려받은 값은 화면에 출력되고, 변수에 담거나 다른 함수의 인수로 쓸 수 있다.</td><td><code>sqrt(16)</code>, <code>mean(x)</code>, <code>head(cars)</code></td></tr>
+<tr><td>부수 효과를 일으킨다</td><td>값을 돌려주는 것 말고 바깥에 변화를 만든다. 그림을 그리거나, 창을 열고 닫거나, 파일을 저장하는 일이다.</td><td><code>plot(cars)</code>는 그림을 그리고, <code>View(cars)</code>는 표를 열고, <code>q()</code>는 R을 끝낸다.</td></tr>
+</tbody></table></div>
+<p>어떤 인수를 받고 무엇을 반환하는지는 함수마다 다르다. <code>help(mean)</code>이나 <code>?mean</code>으로 도움말을 열어 확인한다. 이 자료의 코드 상자에서는 점선 밑줄이 있는 함수 이름에 마우스를 올리면 인수와 반환값이 나온다.</p>
+
+<h4>데이터 구조: 벡터와 데이터프레임</h4>
+<p>값을 어떤 모양으로 묶어 담는지를 데이터 구조라고 한다. 이 자료에서는 두 가지를 쓴다.</p>
+<p><strong>벡터(vector)</strong>는 R의 기본 데이터 구조다. 같은 유형의 값을 한 개 이상 한 줄로 묶어 하나로 다룬다. 여러 값은 <code>c()</code>로 묶는다. 값이 하나뿐이어도 길이가 1인 벡터다. 출력 앞에 붙는 <code>[1]</code>이 벡터의 첫 번째 값이라는 표시다.</p>
+<figure class="vfig" role="img" aria-label="벡터 x를 그린 그림. 이름 x 옆에 칸 세 개가 한 줄로 놓여 있고 칸마다 4, 7, 10이 들어 있다. 칸 위에는 순서 1, 2, 3이 적혀 있다">
+<div class="vfig-vec"><span class="vfig-name">x</span><span class="vfig-cells"><span><i>[1]</i>4</span><span><i>[2]</i>7</span><span><i>[3]</i>10</span></span></div>
+<figcaption>벡터 <code>x &lt;- c(4, 7, 10)</code>. 같은 유형의 값 세 개가 순서대로 놓여 있다.</figcaption>
+</figure>
+<div class="cb r"><span class="lang">R · 벡터 해 보기</span><pre>x &lt;- c(4, 7, 10)
+length(x)        # 값의 개수: 3
+x[2]             # 두 번째 값: 7
+x * 2            # 계산은 값마다 한다: 8 14 20
+x &gt; 5            # 비교도 값마다 한다: FALSE TRUE TRUE
+class(x)         # 값의 유형: "numeric"
+c(4, 7, "10")    # "4" "7" "10". 문자가 하나라도 섞이면 모두 문자가 된다</pre></div>
+<div class="scroll"><table>
+<thead><tr><th>값의 유형</th><th>R이 부르는 이름</th><th>예</th></tr></thead>
+<tbody>
+<tr><td>숫자</td><td><code>numeric</code> (<code>str()</code>에서는 <code>num</code>, 정수는 <code>int</code>)</td><td><code>c(4, 7, 10)</code></td></tr>
+<tr><td>문자</td><td><code>character</code> (<code>chr</code>)</td><td><code>c("speed", "dist")</code>. 따옴표로 감싼다.</td></tr>
+<tr><td>논리</td><td><code>logical</code> (<code>logi</code>)</td><td><code>c(FALSE, TRUE, TRUE)</code>. 비교의 결과다.</td></tr>
+</tbody></table></div>
+<p><strong>데이터프레임(data frame)</strong>은 행과 열로 이루어진 표 모양의 데이터 구조다. 열 하나가 벡터 하나다(벡터 대신 리스트가 열이 될 수도 있다). 그래서 한 열 안의 값은 유형이 모두 같고, 열끼리는 유형이 달라도 된다. 모든 열의 길이는 같다. 보통 행 하나가 관측 대상 하나이고 열 하나가 측정한 항목 하나다. <code>cars</code>에서는 행 하나가 자동차 한 대, 열은 속도와 제동 거리다.</p>
+<figure class="vfig" role="img" aria-label="데이터프레임 cars를 그린 그림. speed 열과 dist 열이 세로로 긴 묶음 두 개로 나란히 놓여 있다. 첫 여섯 행의 speed는 4, 4, 7, 7, 8, 9이고 dist는 2, 10, 4, 22, 16, 10이다. 그 아래로 50행까지 이어진다">
+<div class="vfig-df">
+  <div class="vfig-col vfig-rn"><b>&nbsp;</b><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>⋮</span></div>
+  <div class="vfig-col"><b>speed</b><span>4</span><span>4</span><span>7</span><span>7</span><span>8</span><span>9</span><span>⋮</span></div>
+  <div class="vfig-col"><b>dist</b><span>2</span><span>10</span><span>4</span><span>22</span><span>16</span><span>10</span><span>⋮</span></div>
+</div>
+<figcaption>데이터프레임 <code>cars</code>의 앞 6행(전체 50행). 세로 묶음 하나가 열이자 벡터다. <code>cars$dist</code>는 오른쪽 묶음을 꺼낸다.</figcaption>
+</figure>
+<div class="cb r"><span class="lang">R · 데이터프레임 해 보기</span><pre>class(cars)          # "data.frame"
+nrow(cars)           # 행의 수: 50
+names(cars)          # 열 이름: "speed" "dist"
+cars$dist            # dist 열을 벡터로 꺼낸다
+class(cars$dist)     # 꺼낸 열은 숫자 벡터다: "numeric"
+mean(cars$dist)      # 벡터이므로 벡터를 받는 함수에 그대로 넣는다</pre></div>
+<p>앞에서 본 <code>str(cars)</code>의 출력이 이 구조를 그대로 보여 준다. 첫 줄 <code>'data.frame': 50 obs. of 2 variables</code>는 50행 2열의 데이터프레임이라는 뜻이고, 그 아래 <code>$ speed: num</code>과 <code>$ dist : num</code>은 열마다 숫자 벡터가 들어 있다는 뜻이다. 다음 절부터 쓰는 tibble도 tidyverse가 쓰기 편하게 다듬은 데이터프레임이다.</p>
+</details>
+
+<h3 id="quartiles">summary()와 boxplot(): 사분위수 읽기</h3>
+<p><code>summary(cars)</code>의 출력에서 <code>1st Qu.</code>, <code>Median</code>, <code>3rd Qu.</code>가 사분위수다. 값을 작은 것부터 큰 것까지 줄 세웠을 때 4분의 1, 절반, 4분의 3 지점에 있는 값이다. 이 세 값이 자료를 네 구간으로 나누고, 구간마다 자료의 4분의 1씩이 들어간다. <code>boxplot(cars$dist, horizontal = TRUE)</code>가 그리는 상자그림은 이 값들을 그림으로 옮긴 것이다.</p>
+<div class="scroll"><table class="qb-tab">
+<thead><tr><th><code>summary()</code>의 이름</th><th>뜻</th><th><code>cars$dist</code></th><th>상자그림에서</th></tr></thead>
+<tbody>
+<tr><td><code>Min.</code></td><td>최솟값</td><td>2</td><td>왼쪽 수염의 끝</td></tr>
+<tr><td><code>1st Qu.</code></td><td>1사분위수. 아래에서 25% 지점</td><td>26</td><td>상자의 왼쪽 끝</td></tr>
+<tr><td><code>Median</code></td><td>중앙값(2사분위수). 50% 지점</td><td>36</td><td>상자 안의 굵은 선</td></tr>
+<tr><td><code>Mean</code></td><td>평균</td><td>42.98</td><td>그려지지 않는다</td></tr>
+<tr><td><code>3rd Qu.</code></td><td>3사분위수. 75% 지점</td><td>56</td><td>상자의 오른쪽 끝</td></tr>
+<tr><td><code>Max.</code></td><td>최댓값</td><td>120</td><td>오른쪽에 따로 찍힌 점</td></tr>
+</tbody></table></div>
+<p>아래 그림에서 위쪽은 <code>boxplot()</code>이 그리는 상자그림이고, 아래쪽 점 50개는 자동차 한 대씩의 제동 거리다. 구간을 골라 그 구간에 든 자동차를 확인한다.</p>
+<div class="qb" id="qb"></div>
+<ul>
+<li><strong>구간마다 든 자료의 수는 같고, 구간의 길이가 다르다.</strong> 길이가 짧은 구간은 값이 촘촘히 몰려 있는 곳이고, 긴 구간은 값이 넓게 흩어져 있는 곳이다. 상자그림에서 상자와 수염의 길이를 보는 이유다.</li>
+<li><strong>상자에는 가운데 절반이 들어 있다.</strong> 상자의 길이 56 − 26 = 30을 사분위범위(IQR)라고 한다. 자료의 가운데 50%가 퍼져 있는 폭이다.</li>
+<li><strong>수염과 따로 찍힌 점.</strong> <code>boxplot()</code>은 상자 끝에서 상자 길이의 1.5배(45)보다 멀리 떨어진 값을 수염에 넣지 않고 점으로 따로 찍는다. 오른쪽 경계는 56 + 45 = 101이므로 120이 점으로 찍히고, 수염은 그 안쪽에서 가장 큰 값 93에서 끝난다. 따로 찍힌 값을 이상치(outlier)라고 부른다. 틀린 값이라는 뜻이 아니라 다른 값들과 떨어져 있으니 확인해 보라는 표시다.</li>
+<li><strong>평균과 중앙값.</strong> 평균 42.98이 중앙값 36보다 크다. 오른쪽의 큰 값 몇 개가 평균을 끌어올렸기 때문이다. 상자그림에서도 오른쪽 수염이 왼쪽보다 길다.</li>
+</ul>
 <h3>실행 방법 정리</h3>
 <div class="scroll"><table>
 <thead><tr><th>하려는 일</th><th>방법</th></tr></thead>
@@ -265,14 +417,14 @@ codebook &lt;- tibble(
 write_csv(d0, "dataset/raw/sodium.csv")
 writexl::write_xlsx(list(data = d0, codebook = codebook), "dataset/raw/sodium.xlsx")</pre></div>
 <p>끝까지 실행한 뒤 VS Code 탐색기에서 <code>dataset/raw</code> 아래에 <code>sodium.csv</code>와 <code>sodium.xlsx</code>가 생겼는지 확인한다. 이 스크립트는 여러 번 실행해도 같은 파일을 다시 만들 뿐이다.</p>
-<p>여기까지 하면 프로젝트 폴더와 실습 데이터가 준비된 것이다. 다음 절부터 이 데이터를 읽고, 살펴보고, 다듬는다. 그 뒤 <a href="mean-test-with-r.html">모집단 평균에 대한 가설검정</a>에서 세 가지 t 검정을 한다.</p>
+<p>여기까지 하면 프로젝트 폴더와 실습 데이터가 준비된 것이다. 다음 절부터 이 데이터를 읽고, 살펴보고, 다듬는다. 그 뒤 <a href="mean-test-with-r.html" target="_blank" rel="noopener">모집단 평균에 대한 가설검정</a>에서 세 가지 t 검정을 한다.</p>
 </section>
 
 <section class="panel" id="s2">
 <div class="section-head"><span class="section-num">02</span><h2>데이터 읽기: tidyverse</h2></div>
 <p>데이터를 읽고, 다듬고, 그리는 일은 tidyverse로 한다. <code>library(tidyverse)</code> 한 줄이 파일을 읽는 readr, 표를 다루는 dplyr, 표의 모양을 바꾸는 tidyr, 그림을 그리는 ggplot2를 한꺼번에 불러온다.</p>
 <p>tidyverse 코드는 파이프 연산자<code>%&gt;%</code>로 잇는다. 파이프 연산자는 연산자 왼쪽의 데이터를 연산자 오른쪽 함수의 첫 번째 인수로 전달하고 실행한다. <code>library(tidyverse)</code>를 실행해 이름공간을 연결하고 사용한다. <code>d %&gt;% filter(group == "교육군")</code>은 <code>filter(d, group == "교육군")</code>과 같고, "d를 가져와서, 교육군만 고른다"로 읽는다.</p>
-<p>이 자료와 다음 자료(<a href="mean-test-with-r.html">모집단 평균에 대한 가설검정</a>)의 분석 코드는 새 스크립트 하나에 이어서 적는다. 앞 절에서 <a href="#first-script">첫 스크립트</a>를 만들 때와 같은 방법으로 <code>scripts/03.ttest.R</code>을 만들고, 아래 코드부터 차례로 적어 실행한다. 스크립트마다 첫 줄에 <code>library(tidyverse)</code>를 적어 두면 R을 새로 켠 뒤 그 스크립트만 실행해도 돌아간다. 읽을 파일 <code>dataset/raw/sodium.csv</code>와 <code>sodium.xlsx</code>는 앞 절의 <a href="#make-data">실습 파일 만들기</a>에서 만든 것이다.</p>
+<p>이 자료와 다음 자료(<a href="mean-test-with-r.html" target="_blank" rel="noopener">모집단 평균에 대한 가설검정</a>)의 분석 코드는 새 스크립트 하나에 이어서 적는다. 앞 절에서 <a href="#first-script">첫 스크립트</a>를 만들 때와 같은 방법으로 <code>scripts/03.ttest.R</code>을 만들고, 아래 코드부터 차례로 적어 실행한다. 스크립트마다 첫 줄에 <code>library(tidyverse)</code>를 적어 두면 R을 새로 켠 뒤 그 스크립트만 실행해도 돌아간다. 읽을 파일 <code>dataset/raw/sodium.csv</code>와 <code>sodium.xlsx</code>는 앞 절의 <a href="#make-data">실습 파일 만들기</a>에서 만든 것이다.</p>
 
 
 <h3>CSV 읽기</h3>
@@ -354,7 +506,7 @@ raw %&gt;%
   &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
 1     0    24    3255.   636.     3300.    753.
 2     1    24    3195.   690.     2901.    535.</pre></div>
-<p><code>summary()</code>에서는 최솟값과 최댓값을 먼저 본다. 음수나 자릿수가 하나 더 붙은 값처럼 있을 수 없는 숫자가 있으면 입력 오류다. 평균과 중앙값이 크게 다르면 분포가 한쪽으로 치우친 것이다. <code>group</code>은 집단을 나타내는 코드여서 숫자로서의 요약은 뜻이 없다. 다만 값이 0과 1뿐인지는 여기서 확인할 수 있고, 평균 0.5는 1(교육군)이 절반이라는 뜻이다. 집단별 표에서는 사례 수가 같은지, 사전 평균이 두 집단에서 비슷한지를 본다. 표의 첫 행(0)이 대조군, 둘째 행(1)이 교육군이다.</p>
+<p><code>summary()</code>의 각 줄이 무엇인지는 앞 절의 <a href="#quartiles">사분위수 읽기</a>에서 다뤘다. 여기서는 최솟값과 최댓값을 먼저 본다. 음수나 자릿수가 하나 더 붙은 값처럼 있을 수 없는 숫자가 있으면 입력 오류다. 평균과 중앙값이 크게 다르면 분포가 한쪽으로 치우친 것이다. <code>group</code>은 집단을 나타내는 코드여서 숫자로서의 요약은 뜻이 없다. 다만 값이 0과 1뿐인지는 여기서 확인할 수 있고, 평균 0.5는 1(교육군)이 절반이라는 뜻이다. 집단별 표에서는 사례 수가 같은지, 사전 평균이 두 집단에서 비슷한지를 본다. 표의 첫 행(0)이 대조군, 둘째 행(1)이 교육군이다.</p>
 <h3>간단한 그림</h3>
 <p>확인용 그림은 꾸미지 않고 저장하지도 않는다. 실행하면 VS Code의 그림 탭에 차례로 나타난다. 보고서에 넣을 그림은 이 자료 끝의 <a href="#s5">그림을 그려 output에 저장하기</a>에서 다시 그린다.</p>
 <div class="cb r"><span class="lang">R</span>
@@ -532,7 +684,7 @@ n_distinct(d_long$id)    # 48: 사람의 수</pre></div>
 <div class="scroll"><table>
 <thead><tr><th>하려는 일</th><th>편한 모양</th><th>이 문서에서</th></tr></thead>
 <tbody>
-<tr><td>같은 사람의 두 값을 빼거나 짝지어 비교한다</td><td>넓은 모양</td><td><code>diff</code> 열 만들기, 다음 자료의 <a href="mean-test-with-r.html#s4">대응표본 t 검정</a></td></tr>
+<tr><td>같은 사람의 두 값을 빼거나 짝지어 비교한다</td><td>넓은 모양</td><td><code>diff</code> 열 만들기, 다음 자료의 <a href="mean-test-with-r.html#s4" target="_blank" rel="noopener">대응표본 t 검정</a></td></tr>
 <tr><td>집단과 시점마다 요약한다</td><td>긴 모양</td><td><code>d_long %&gt;% group_by(group, time)</code></td></tr>
 <tr><td>시점을 가로축에 놓고 그림을 그린다</td><td>긴 모양</td><td>이 자료 끝의 <a href="#s5">사전·사후 변화 그림</a> <code>p3</code></td></tr>
 </tbody></table></div>
@@ -574,7 +726,7 @@ theme_set(theme_gray(base_family = "AppleGothic"))     # 이후 모든 그림의
 <h4>KoPub 서체 쓰기</h4>
 <p>운영체제의 기본 글꼴 대신, 한국출판인회의가 무료로 배포하는 KoPubWorld 서체(돋움체, 바탕체)를 쓸 수 있다. Windows와 macOS에서 같은 글꼴로 그림을 그리게 되므로 수강생끼리 결과물의 모양이 같아진다. 논문이나 보고서에 넣을 그림에도 쓸 수 있다.</p>
 <ol>
-<li><strong>내려받기.</strong> <a href="https://www.kopus.org/biz-electronic-font2/">한국출판인회의의 KoPub 서체 페이지</a>에서 사용자 정보를 입력하고 <strong>TTF</strong> 압축 파일을 받는다. extrafont는 OTF 파일을 등록하지 못하므로 OTF가 아니라 TTF를 받아야 한다.</li>
+<li><strong>내려받기.</strong> <a href="https://www.kopus.org/biz-electronic-font2/" target="_blank" rel="noopener noreferrer">한국출판인회의의 KoPub 서체 페이지</a>에서 사용자 정보를 입력하고 <strong>TTF</strong> 압축 파일을 받는다. extrafont는 OTF 파일을 등록하지 못하므로 OTF가 아니라 TTF를 받아야 한다.</li>
 <li><strong>설치.</strong> 압축을 풀고 글꼴 파일을 설치한다.
   <ul>
   <li>Windows: 글꼴 파일을 모두 선택하고 마우스 오른쪽 버튼을 눌러 <em>모든 사용자용으로 설치</em>를 고른다. 그냥 <em>설치</em>를 누르면 글꼴이 사용자 개인 폴더에 들어가 extrafont가 찾지 못한다.</li>
@@ -622,7 +774,7 @@ p3 &lt;- d_long %&gt;%
   labs(x = NULL, y = "나트륨 섭취량 (mg/일)")
 p3
 ggsave("output/paired_edu.png", p3, width = 5, height = 4, dpi = 300)</pre></div>
-<p>여기서 만든 <code>d</code>, <code>edu</code>, <code>d_long</code>과 그림 <code>p2</code>, <code>p3</code>는 다음 자료에서 그대로 쓴다. R 터미널을 닫지 말고 <a href="mean-test-with-r.html">모집단 평균에 대한 가설검정</a>로 넘어가, 같은 스크립트 <code>03.ttest.R</code>에 이어서 적는다.</p>
+<p>여기서 만든 <code>d</code>, <code>edu</code>, <code>d_long</code>과 그림 <code>p2</code>, <code>p3</code>는 다음 자료에서 그대로 쓴다. R 터미널을 닫지 말고 <a href="mean-test-with-r.html" target="_blank" rel="noopener">모집단 평균에 대한 가설검정</a>로 넘어가, 같은 스크립트 <code>03.ttest.R</code>에 이어서 적는다.</p>
 </section>
 
 <nav class="nav pager" aria-label="자료 이동"><a href="../index.html#statistics"><span>이전</span>통계 자료 목록</a><a href="mean-test-with-r.html"><span>다음</span>모집단 평균에 대한 가설검정</a></nav>
@@ -711,6 +863,58 @@ ggsave("output/paired_edu.png", p3, width = 5, height = 4, dpi = 300)</pre></div
   tb.addEventListener('focusin',e=>{const o=pick(e.target);if(o){st.hover=o;apply();}});
   tb.addEventListener('focusout',()=>{if(st.hover){st.hover=null;apply();}});
   renderCode();renderTables();apply();
+})();
+
+/* ── 사분위수와 상자그림 ──
+   R의 예제 데이터 cars의 dist 열 50개 값을 크기순으로 줄 세워 네 구간으로 나눠 보여 준다.
+   사분위수는 R의 summary()·quantile()과 같은 방식으로 구한다(이 데이터에서는 boxplot()이 쓰는 값과도 같다). */
+(()=>{
+  const root=document.getElementById('qb');if(!root)return;
+  const D=[2,10,4,22,16,10,18,26,34,17,28,14,20,24,28,26,34,34,46,26,36,60,80,20,26,54,32,40,32,40,50,42,56,76,84,36,46,68,32,48,52,56,64,66,54,70,92,93,120,85];
+  const s=[...D].sort((a,b)=>a-b),n=s.length;
+  const qt=p=>{const h=(n-1)*p,i=Math.floor(h);return s[i]+(h-i)*(s[Math.min(i+1,n-1)]-s[i]);};
+  const q=[s[0],qt(.25),qt(.5),qt(.75),s[n-1]],iqr=q[3]-q[1];
+  const lo=s.find(v=>v>=q[1]-1.5*iqr),hi=[...s].reverse().find(v=>v<=q[3]+1.5*iqr);   // 수염의 양 끝
+  const grp=i=>{const p=i/(n-1);return p<.25?0:p<.5?1:p<.75?2:3;};                     // 줄 세운 순서로 나눈 구간
+  const cnt=[0,1,2,3].map(g=>s.filter((_,i)=>grp(i)===g).length);
+  const NAME=['첫째 구간','둘째 구간','셋째 구간','넷째 구간'];
+  const lens=[0,1,2,3].map(g=>q[g+1]-q[g]),short=lens.indexOf(Math.min(...lens)),long=lens.indexOf(Math.max(...lens));
+  const PART=['상자그림에서는 왼쪽 수염이다.','상자그림에서는 상자의 왼쪽 칸이다.','상자그림에서는 상자의 오른쪽 칸이다.',
+    '상자그림에서는 오른쪽 수염과 따로 찍힌 점이다.'+(hi<q[4]?` 수염은 ${hi}에서 끝나고 ${s.filter(v=>v>hi).join(', ')}은 따로 찍힌다.`:'')];
+  const st={g:-1};
+  root.innerHTML=`<div class="ctrls"><div class="ctrl"><span>볼 구간</span><div class="seg" role="radiogroup">
+      <label><input type="radio" name="qb-g" value="-1" checked><span>전체</span></label>`+
+      NAME.map((nm,g)=>`<label><input type="radio" name="qb-g" value="${g}"><span>${nm}</span></label>`).join('')+`</div></div></div>
+    <div class="qb-plot"></div><p class="qb-say" aria-live="polite"></p>`;
+  const plot=root.querySelector('.qb-plot'),say=root.querySelector('.qb-say');
+  const draw=()=>{
+    const W=Math.max(280,Math.round(plot.clientWidth)||680),r=W<520?3:4.2,ml=12,mr=12,H=178,by=40,bh=20,base=140;
+    const X=v=>ml+v/125*(W-ml-mr);
+    // 점: 가까운 값끼리 겹치지 않게 위로 쌓는다
+    const lv=[];const dots=s.map((v,i)=>{const x=X(v);let L=0;while(lv[L]!==undefined&&x-lv[L]<2*r+.6)L++;lv[L]=x;return{x,y:base-r-L*(2*r+.6),g:grp(i)};});
+    let h=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="cars의 제동 거리 50개 값의 상자그림과 점그림. 최솟값 ${q[0]}, 1사분위수 ${q[1]}, 중앙값 ${q[2]}, 3사분위수 ${q[3]}, 최댓값 ${q[4]}">`;
+    for(let g=0;g<4;g++)h+=`<rect class="band${st.g===g?' on':''}" data-g="${g}" x="${X(q[g])}" y="8" width="${X(q[g+1])-X(q[g])}" height="${base-4}"></rect>`;
+    h+=`<line class="ln" x1="${X(lo)}" x2="${X(q[1])}" y1="${by}" y2="${by}"></line><line class="ln" x1="${X(q[3])}" x2="${X(hi)}" y1="${by}" y2="${by}"></line>`;
+    h+=`<line class="ln" x1="${X(lo)}" x2="${X(lo)}" y1="${by-bh/2}" y2="${by+bh/2}"></line><line class="ln" x1="${X(hi)}" x2="${X(hi)}" y1="${by-bh/2}" y2="${by+bh/2}"></line>`;
+    h+=`<rect class="bx" x="${X(q[1])}" y="${by-bh}" width="${X(q[3])-X(q[1])}" height="${bh*2}"></rect><line class="md" x1="${X(q[2])}" x2="${X(q[2])}" y1="${by-bh}" y2="${by+bh}"></line>`;
+    s.filter(v=>v<lo||v>hi).forEach(v=>{h+=`<circle class="out" cx="${X(v)}" cy="${by}" r="4"></circle>`;});
+    h+=`<line class="ax" x1="${ml}" x2="${W-mr}" y1="${base+2}" y2="${base+2}"></line>`;
+    dots.forEach(d=>{h+=`<circle class="dot${d.g%2?' alt':''}${st.g>=0&&st.g!==d.g?' dim':''}" cx="${d.x}" cy="${d.y}" r="${r}"></circle>`;});
+    q.forEach((v,k)=>{h+=`<line class="ax" x1="${X(v)}" x2="${X(v)}" y1="${base+2}" y2="${base+8}"></line><text class="key" x="${X(v)}" y="${base+22}" text-anchor="${k===0?'start':k===4?'end':'middle'}">${v}</text>`;});
+    if(hi<q[4])h+=`<line class="ax" x1="${X(hi)}" x2="${X(hi)}" y1="${base+2}" y2="${base+8}"></line><text x="${X(hi)}" y="${base+22}" text-anchor="middle">${hi}</text>`;
+    h+=`<text x="${W-mr}" y="${H-2}" text-anchor="end">제동 거리 dist (ft)</text></svg>`;
+    plot.innerHTML=h;
+    plot.querySelectorAll('.band').forEach(b=>b.addEventListener('click',()=>pick(+b.dataset.g===st.g?-1:+b.dataset.g)));
+  };
+  const tell=()=>{
+    if(st.g<0){say.innerHTML=`자동차 ${n}대를 제동 거리가 짧은 것부터 줄 세워 네 구간으로 나눴다. 구간마다 <b>${Math.min(...cnt)}~${Math.max(...cnt)}대</b>씩 들어 있고, 번갈아 다른 색으로 칠했다. 구간을 나누는 세 값이 사분위수 <b>${q[1]}, ${q[2]}, ${q[3]}</b>이다. 위의 단추나 그림의 구간을 눌러 본다.`;return;}
+    const g=st.g,extra=g===short?' 네 구간 중 가장 짧다. 값이 가장 촘촘히 몰려 있는 곳이다.':g===long?' 네 구간 중 가장 길다. 값이 넓게 흩어져 있는 곳이다.':'';
+    say.innerHTML=`<b>${NAME[g]}</b>: ${q[g]}ft부터 ${q[g+1]}ft까지, 길이 ${lens[g]}ft. ${n}대 중 <b>${cnt[g]}대</b>가 들어 있다.${extra} ${PART[g]}`;
+  };
+  const pick=g=>{st.g=g;root.querySelectorAll('input[name="qb-g"]').forEach(i=>{i.checked=+i.value===g;});draw();tell();};
+  root.querySelectorAll('input[name="qb-g"]').forEach(i=>i.addEventListener('change',()=>pick(+i.value)));
+  if(window.ResizeObserver){let w=0;new ResizeObserver(()=>{const c=Math.round(plot.clientWidth);if(c&&c!==w){w=c;draw();}}).observe(plot);}
+  draw();tell();
 })();
 </script>
 </body>
