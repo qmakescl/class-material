@@ -69,8 +69,8 @@
 <section class="panel" id="s2">
 <h2><span class="no">3.2</span>열 빼기와 이름 바꾸기</h2>
 <p><code>연번</code>은 줄 번호일 뿐이라 뺀다. 자주 쓸 열은 이름을 짧게 바꾼다.</p>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- subway |&gt;
-  select(-연번) |&gt;
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- subway %&gt;%
+  select(-연번) %&gt;%
   rename(역 = 역명,
          구분 = 승하차구분)</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway = (subway
           .drop(columns=&quot;연번&quot;)
@@ -80,7 +80,7 @@
 <section class="panel" id="s3">
 <h2><span class="no">3.3</span>행 거르기</h2>
 <p>조건에 맞는 행만 남긴다. 2호선 강남역의 승차 기록만 골라 보자.</p>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway |&gt;
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway %&gt;%
   filter(호선 == &quot;2호선&quot;,
          역 == &quot;강남&quot;,
          구분 == &quot;승차&quot;)</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway.query(
@@ -91,9 +91,9 @@
 <section class="panel" id="s4">
 <h2><span class="no">3.4</span>정렬하기</h2>
 <p>아침 8시대에 가장 많이 탄 기록을 본다. 열 이름이 숫자로 시작하거나 <code>-</code>가 들어 있으면 R에서는 <code>`</code>(백틱)로 감싼다.</p>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway |&gt;
-  filter(구분 == &quot;승차&quot;) |&gt;
-  arrange(desc(`08-09시간대`)) |&gt;
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway %&gt;%
+  filter(구분 == &quot;승차&quot;) %&gt;%
+  arrange(desc(`08-09시간대`)) %&gt;%
   head(10)</pre></div><div class="cb py"><span class="lang">Python</span><pre>(subway
  .query(&#x27;구분 == &quot;승차&quot;&#x27;)
  .sort_values(&quot;08-09시간대&quot;, ascending=False)
@@ -102,7 +102,7 @@
 <section class="panel" id="s5">
 <h2><span class="no">3.5</span>새 열 만들기</h2>
 <p>시간대 20개 열을 옆으로 모두 더해 <code>하루</code> 열을 만든다. “여기부터 저기까지의 열”을 한 번에 가리킬 수 있다.</p>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- subway |&gt;
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- subway %&gt;%
   mutate(하루 = rowSums(
     across(`06시이전`:`24시이후`)))</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;하루&quot;] = (
     subway.loc[:, &quot;06시이전&quot;:&quot;24시이후&quot;]
@@ -111,11 +111,11 @@
 <section class="panel" id="s6">
 <h2><span class="no">3.6</span>그룹별 요약</h2>
 <p>“역별로 묶어서 평균을 낸다”처럼, 묶는 기준과 계산을 차례로 적는다.</p>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway |&gt;
-  filter(구분 == &quot;승차&quot;) |&gt;
-  group_by(역) |&gt;
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway %&gt;%
+  filter(구분 == &quot;승차&quot;) %&gt;%
+  group_by(역) %&gt;%
   summarise(평균승차 = mean(하루),
-            행수 = n()) |&gt;
+            행수 = n()) %&gt;%
   arrange(desc(평균승차))</pre></div><div class="cb py"><span class="lang">Python</span><pre>(subway
  .query(&#x27;구분 == &quot;승차&quot;&#x27;)
  .groupby(&quot;역&quot;)
@@ -127,7 +127,8 @@
 </section>
 <section class="panel" id="s7">
 <h2><span class="no">3.7</span>명령 이어 쓰기</h2>
-<p>위 예제들은 이미 여러 명령을 이어 쓰고 있다. R은 <code>|&gt;</code>(파이프)로, Python은 <code>.</code>(메서드 체이닝)으로 잇는다. 둘 다 “앞의 결과를 받아서 다음 일을 한다”로 읽는다.</p>
+<p>위 예제들은 이미 여러 명령을 이어 쓰고 있다. R은 <code>%&gt;%</code>(파이프 연산자)로, Python은 <code>.</code>(메서드 체이닝)으로 잇는다. 둘 다 “앞의 결과를 받아서 다음 일을 한다”로 읽는다.</p>
+<p><code>%&gt;%</code>는 <code>library(tidyverse)</code>를 실행해야 쓸 수 있다. R 4.1부터 기본으로 들어 있는 <code>|&gt;</code>도 같은 일을 한다. 이 자료에서는 <code>%&gt;%</code>로 통일한다.</p>
 </section>
 <section class="panel" id="s8">
 <h2><span class="no">3.8</span>자료형 확인하기: 날짜인가, 글자인가</h2>
@@ -156,8 +157,8 @@
 <p>모든 파일이 표준 표기인 것은 아니다. 같은 자료의 2024년 파일은 날짜가 <code>2024.1.1</code>처럼 마침표로 적혀 있고 한 자리 숫자 앞에 0이 없다. 이런 값을 표준 표기로 고치는 두 단계를 작은 예로 연습한다.</p>
 <div class="pair"><div class="cb r"><span class="lang">R</span><pre>x &lt;- c(&quot;2024.1.1&quot;, &quot;2024.10.5&quot;, &quot;2024.12.25&quot;)
 
-x |&gt;
-  str_replace_all(fixed(&quot;.&quot;), &quot;-&quot;) |&gt;
+x %&gt;%
+  str_replace_all(fixed(&quot;.&quot;), &quot;-&quot;) %&gt;%
   str_replace_all(&quot;-(\\d)\\b&quot;, &quot;-0\\1&quot;)
 # &quot;2024-01-01&quot; &quot;2024-10-05&quot; &quot;2024-12-25&quot;</pre></div><div class="cb py"><span class="lang">Python</span><pre>x = pd.Series([&quot;2024.1.1&quot;, &quot;2024.10.5&quot;, &quot;2024.12.25&quot;])
 
@@ -169,7 +170,7 @@ x |&gt;
 <section class="panel" id="s10">
 <h2><span class="no">3.10</span>날짜형으로 바꾸기</h2>
 <p>표준 모양의 문자열을 <strong>날짜형</strong>으로 바꾼다. 날짜형이어야 요일을 묻거나 날짜끼리 뺄 수 있다. 이미 날짜형으로 읽힌 R에서도 같은 코드를 실행해 새 열 <code>날짜</code>를 만든다.</p>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- subway |&gt;
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- subway %&gt;%
   mutate(날짜 = as_date(수송일자))
 
 class(subway$날짜)     # &quot;Date&quot;</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;날짜&quot;] = pd.to_datetime(
@@ -181,9 +182,9 @@ subway[&quot;날짜&quot;].dtype   # datetime64</pre></div></div>
 <div class="pair"><div class="cb r"><span class="lang">R</span><pre>range(subway$날짜)               # 처음과 끝
 max(subway$날짜) - min(subway$날짜)  # 며칠 간격
 
-subway |&gt;
+subway %&gt;%
   mutate(요일 = wday(날짜, label = TRUE),
-         월 = month(날짜)) |&gt;
+         월 = month(날짜)) %&gt;%
   count(요일)</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;날짜&quot;].min(), subway[&quot;날짜&quot;].max()
 subway[&quot;날짜&quot;].max() - subway[&quot;날짜&quot;].min()
 
@@ -210,7 +211,7 @@ pd.to_datetime(&quot;2025-01-01 &quot; + 시,
 </section>
 <section class="panel" id="s12">
 <h2><span class="no">3.12</span>한 장 요약: 대조표</h2>
-<div class="scroll"><table><thead><tr><th>하려는 일</th><th>R</th><th>Python (pandas)</th></tr></thead><tbody><tr><td>열 고르기 / 빼기</td><td><code>select(a, b)</code> / <code>select(-a)</code></td><td><code>df[["a", "b"]]</code> / <code>.drop(columns="a")</code></td></tr><tr><td>열 이름 바꾸기</td><td><code>rename(새 = 옛)</code></td><td><code>.rename(columns={"옛": "새"})</code></td></tr><tr><td>행 거르기</td><td><code>filter(조건)</code></td><td><code>.query("조건")</code></td></tr><tr><td>정렬</td><td><code>arrange(desc(a))</code></td><td><code>.sort_values("a", ascending=False)</code></td></tr><tr><td>새 열</td><td><code>mutate(c = a + b)</code></td><td><code>df["c"] = ...</code></td></tr><tr><td>그룹 요약</td><td><code>group_by(g) |&gt; summarise(...)</code></td><td><code>.groupby("g").agg(...)</code></td></tr><tr><td>글자 그대로 바꾸기</td><td><code>str_replace_all(x, fixed("."), "-")</code></td><td><code>.str.replace(".", "-", regex=False)</code></td></tr><tr><td>모양으로 바꾸기</td><td><code>str_replace_all(x, &quot;-(\\d)\\b&quot;, &quot;-0\\1&quot;)</code></td><td><code>.str.replace(r&quot;-(\d)\b&quot;, r&quot;-0\1&quot;, regex=True)</code></td></tr><tr><td>모양 검사</td><td><code>str_detect(x, 패턴)</code></td><td><code>.str.fullmatch(패턴)</code></td></tr><tr><td>모양으로 꺼내기</td><td><code>str_extract(x, 패턴)</code></td><td><code>.str.extract(패턴)</code></td></tr><tr><td>날짜형으로</td><td><code>as_date(x)</code>, <code>ymd(x)</code></td><td><code>pd.to_datetime(x, format=...)</code></td></tr><tr><td>날짜시각형으로</td><td><code>ymd_h(x)</code></td><td><code>pd.to_datetime(x, format="%Y-%m-%d %H")</code></td></tr></tbody></table></div>
+<div class="scroll"><table><thead><tr><th>하려는 일</th><th>R</th><th>Python (pandas)</th></tr></thead><tbody><tr><td>열 고르기 / 빼기</td><td><code>select(a, b)</code> / <code>select(-a)</code></td><td><code>df[["a", "b"]]</code> / <code>.drop(columns="a")</code></td></tr><tr><td>열 이름 바꾸기</td><td><code>rename(새 = 옛)</code></td><td><code>.rename(columns={"옛": "새"})</code></td></tr><tr><td>행 거르기</td><td><code>filter(조건)</code></td><td><code>.query("조건")</code></td></tr><tr><td>정렬</td><td><code>arrange(desc(a))</code></td><td><code>.sort_values("a", ascending=False)</code></td></tr><tr><td>새 열</td><td><code>mutate(c = a + b)</code></td><td><code>df["c"] = ...</code></td></tr><tr><td>그룹 요약</td><td><code>group_by(g) %&gt;% summarise(...)</code></td><td><code>.groupby("g").agg(...)</code></td></tr><tr><td>글자 그대로 바꾸기</td><td><code>str_replace_all(x, fixed("."), "-")</code></td><td><code>.str.replace(".", "-", regex=False)</code></td></tr><tr><td>모양으로 바꾸기</td><td><code>str_replace_all(x, &quot;-(\\d)\\b&quot;, &quot;-0\\1&quot;)</code></td><td><code>.str.replace(r&quot;-(\d)\b&quot;, r&quot;-0\1&quot;, regex=True)</code></td></tr><tr><td>모양 검사</td><td><code>str_detect(x, 패턴)</code></td><td><code>.str.fullmatch(패턴)</code></td></tr><tr><td>모양으로 꺼내기</td><td><code>str_extract(x, 패턴)</code></td><td><code>.str.extract(패턴)</code></td></tr><tr><td>날짜형으로</td><td><code>as_date(x)</code>, <code>ymd(x)</code></td><td><code>pd.to_datetime(x, format=...)</code></td></tr><tr><td>날짜시각형으로</td><td><code>ymd_h(x)</code></td><td><code>pd.to_datetime(x, format="%Y-%m-%d %H")</code></td></tr></tbody></table></div>
 </section>
 <nav class="nav pager" aria-label="장 이동"><a href="ch2.html"><span>이전</span>2장 데이터셋 가져오기</a><a href="ch4.html"><span>다음</span>4장 데이터 전처리</a></nav>
 </main>

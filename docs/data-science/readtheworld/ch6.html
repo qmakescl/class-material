@@ -74,15 +74,15 @@ import matplotlib.pyplot as plt
 daily = pd.read_csv(&quot;../dataset/working/daily.csv&quot;,
                     parse_dates=[&quot;날짜&quot;])</pre></div></div>
 <h3>첫 번째 시도: 그냥 비교한다</h3>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily |&gt;
-  group_by(비) |&gt;
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily %&gt;%
+  group_by(비) %&gt;%
   summarise(일수 = n(),
             평균승차 = mean(승차))</pre></div><div class="cb py"><span class="lang">Python</span><pre>(daily.groupby(&quot;비&quot;)[&quot;승차&quot;]
       .agg([&quot;size&quot;, &quot;mean&quot;]))</pre></div></div>
 <p>결과를 적어 둔다. 그런데 이 비교는 공정한가? 비 온 날이 우연히 주말에 많았다면, 비 때문이 아니라 주말이라서 승차가 적었을 수 있다.</p>
 <h3>두 번째 시도: 평일과 주말을 나누어 비교한다</h3>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily |&gt;
-  group_by(주말, 비) |&gt;
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily %&gt;%
+  group_by(주말, 비) %&gt;%
   summarise(일수 = n(),
             평균승차 = mean(승차),
             .groups = &quot;drop&quot;)</pre></div><div class="cb py"><span class="lang">Python</span><pre>(daily.groupby([&quot;주말&quot;, &quot;비&quot;])[&quot;승차&quot;]
@@ -91,9 +91,9 @@ daily = pd.read_csv(&quot;../dataset/working/daily.csv&quot;,
 <div class="callout caution"><strong>기억할 것</strong> 전체로 본 결과와 집단을 나누어 본 결과는 다를 수 있다. 비교하려는 두 집단이 다른 면에서도 다르지 않은지 먼저 의심한다. 이 함정은 <a href="../analysis-traps-three-paradoxes.html#trap3">데이터로 세상을 읽을 때 조심할 것들</a>의 ‘전체와 집단별 비교’에서 더 자세히 다룬다.</div>
 <h3>세 번째 시도: 차이를 비율로 본다</h3>
 <p>평일만 남겨서, 비 온 날의 평균이 안 온 날보다 몇 퍼센트 다른지 구한다.</p>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>m &lt;- daily |&gt;
-  filter(!주말) |&gt;
-  group_by(비) |&gt;
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>m &lt;- daily %&gt;%
+  filter(!주말) %&gt;%
+  group_by(비) %&gt;%
   summarise(평균 = mean(승차))
 
 (m$평균[m$비] / m$평균[!m$비] - 1) * 100</pre></div><div class="cb py"><span class="lang">Python</span><pre>m = (daily[~daily[&quot;주말&quot;]]

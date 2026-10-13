@@ -143,7 +143,7 @@ subway.head()      # 앞 5행</pre></div></div>
 <p>행 수는 199,424로 나온다. 그런데 이 파일은 표 맨 아래에 쉼표만 있는 빈 행이 딸려 있다. 날짜가 빈 행을 세어 보고(134행) 지운다. 지우고 나면 199,290행이다.</p>
 <div class="pair"><div class="cb r"><span class="lang">R</span><pre>sum(is.na(subway$수송일자))   # 빈 행의 수
 
-subway &lt;- subway |&gt;
+subway &lt;- subway %&gt;%
   filter(!is.na(수송일자))</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;수송일자&quot;].isna().sum()   # 빈 행의 수
 
 subway = subway.dropna(how=&quot;all&quot;)</pre></div></div>

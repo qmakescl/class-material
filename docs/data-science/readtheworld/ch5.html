@@ -72,14 +72,14 @@ daily = pd.read_csv(&quot;../dataset/working/daily.csv&quot;,
 <section class="panel" id="s1">
 <h2><span class="no">5.1</span>가운데: 평균과 중앙값</h2>
 <p>하루 승차 인원의 “보통”은 얼마일까. 평균은 모두 더해 나눈 값, 중앙값은 크기 순으로 줄 세웠을 때 가운데 값이다.</p>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily |&gt;
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily %&gt;%
   summarise(평균 = mean(승차),
             중앙값 = median(승차))</pre></div><div class="cb py"><span class="lang">Python</span><pre>daily[&quot;승차&quot;].agg([&quot;mean&quot;, &quot;median&quot;])</pre></div></div>
 <p>두 값이 꽤 다르게 나온다면 이유를 생각해 본다. 이 데이터에는 승차가 적은 주말과 공휴일이 섞여 있어 평균이 아래로 끌려간다.</p>
 </section>
 <section class="panel" id="s2">
 <h2><span class="no">5.2</span>퍼짐: 범위, 사분위수, 표준편차</h2>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily |&gt;
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily %&gt;%
   summarise(최소 = min(승차),
             Q1 = quantile(승차, 0.25),
             Q3 = quantile(승차, 0.75),
@@ -106,8 +106,8 @@ plt.show()</pre></div></div>
 <section class="panel" id="s4">
 <h2><span class="no">5.4</span>집단별 비교</h2>
 <p>평일과 주말로 나누어 다시 요약한다.</p>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily |&gt;
-  group_by(주말) |&gt;
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily %&gt;%
+  group_by(주말) %&gt;%
   summarise(일수 = n(),
             평균 = mean(승차),
             표준편차 = sd(승차))
@@ -146,8 +146,8 @@ daily[&quot;기온&quot;].corr(daily[&quot;승차&quot;])</pre></div></div>
 </section>
 <section class="panel" id="s7">
 <h2><span class="no">5.7</span>요약표 만들어 저장하기</h2>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>요약 &lt;- daily |&gt;
-  group_by(주말, 비) |&gt;
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>요약 &lt;- daily %&gt;%
+  group_by(주말, 비) %&gt;%
   summarise(일수 = n(),
             평균승차 = mean(승차),
             .groups = &quot;drop&quot;)
