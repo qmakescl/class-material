@@ -206,6 +206,20 @@ Rscript.exe scripts/02.prepare_datasets.R     # 프로젝트 루트에서, 스�
 <div class="callout"><p><strong><code>type = "binary"</code>를 적는 이유.</strong> 패키지가 새 버전으로 바뀌면 원본 코드(소스)가 먼저 올라오고, Windows용 바이너리는 며칠 뒤에 만들어진다. 그 사이에 <code>type</code> 없이 설치하면 R이 아래와 같이 알리고, 소스를 받아 내 컴퓨터에서 직접 컴파일해 설치할지 묻는다. 소스 설치는 오래 걸리고 컴파일 도구(Rtools)가 따로 있어야 한다. <code>type = "binary"</code>를 주면 묻지 않고 바이너리를 설치한다. 한 버전 앞선 것이 설치될 수 있지만 실습에는 지장이 없다.</p>
 <p><code>There is a binary version available but the source version is later</code><br><code>Do you want to install from sources the package which needs compilation?</code></p>
 <p>다른 패키지를 설치하다가 이 질문이 나오면 <strong>no</strong>를 고른다.</p></div>
+<details class="fold" id="x11-warning-macos">
+<summary>macOS에서 설치 중 R_X11.so 경고가 나올 때 (unable to load shared object)</summary>
+<p><strong>증상.</strong> 위의 <code>install.packages()</code>를 실행하면 설치는 끝나지만, 마지막에 아래와 같은 경고가 나온다.</p>
+<div class="cb out"><span class="lang">R 터미널</span><pre>Warning message:
+In doTryCatch(return(expr), name, parentenv, handler) :
+  unable to load shared object '/Library/Frameworks/R.framework/Resources/modules//R_X11.so':
+  dlopen(...R_X11.so, 0x0006): Library not loaded: /opt/X11/lib/libSM.6.dylib
+  ...
+  Reason: tried: '/opt/X11/lib/libSM.6.dylib' (no such file), ...</pre></div>
+<p><strong>원인.</strong> macOS용 R에는 X11이라는 창 시스템으로 그림을 띄우는 부품(<code>R_X11.so</code>)이 들어 있다. 이 부품은 XQuartz라는 프로그램이 <code>/opt/X11</code> 폴더에 설치하는 라이브러리를 쓴다. macOS에는 X11이 기본으로 들어 있지 않으므로 XQuartz를 설치하지 않았다면 이 폴더가 없다. 설치 과정에서 R이 X11을 쓸 수 있는지 확인하다가 부품을 불러오지 못해 경고를 낸 것이다. 오류가 아니라 경고여서 패키지 설치는 그대로 끝난다.</p>
+<p><strong>해결: 무시해도 된다.</strong> macOS의 R은 그림을 X11이 아니라 macOS의 기본 그래픽(Quartz)으로 그리고, <code>png()</code>나 <code>ggsave()</code>로 파일에 저장할 때도 X11을 쓰지 않는다. 이 경고가 나와도 tidyverse를 비롯한 패키지는 정상적으로 쓸 수 있다. 설치가 되었는지는 아래 한 줄로 확인한다. 버전 번호가 나오면 설치된 것이다.</p>
+<div class="cb r"><span class="lang">R</span><pre>packageVersion("tidyverse")</pre></div>
+<p><strong>경고를 없애고 싶다면</strong> <a href="https://www.xquartz.org/" target="_blank" rel="noopener noreferrer">xquartz.org</a>에서 XQuartz를 설치하고 로그아웃했다가 다시 로그인한다. 이 수업의 실습에는 필요 없다. X11 창으로 그림을 띄우는 <code>X11()</code>, tcltk로 만든 대화상자 같은 기능을 쓸 때만 필요하다. VS Code에서 <code>View()</code>가 열리지 않는 것도 X11과 관련된 문제지만 원인이 다르다. <a href="../statistics/prepare-for-ttest.html#view-macos">macOS에서 View()가 열리지 않을 때</a>를 본다.</p>
+</details>
 <p>여기까지 하면 설치가 끝난다. 폴더를 열고 스크립트를 만들어 한 줄씩 실행하는 방법은 통계 자료 <a href="../statistics/prepare-for-ttest.html#s1">t 검정을 위한 데이터 준비</a>의 첫 절에서 예제와 함께 따라 한다.</p>
 </section>
 

@@ -497,7 +497,19 @@ raw %&gt;% summarise(across(everything(), ~ sum(is.na(.x))))</pre></div>
 # 기술통계를 구한다.
 summary(raw)    # raw 의 열별로 최솟값, 사분위수, 중앙값, 평균, 최댓값
 
-# 집단별 평균과 표준편차
+# summary()의 sodium_pre 열과 같은 값을 summarise()로 구한다
+# group_by() 없이 쓰면 전체 48명을 한 행으로 요약한다
+raw %&gt;%
+  summarise(
+    min    = min(sodium_pre),               # Min.
+    q1     = quantile(sodium_pre, 0.25),    # 1st Qu.
+    median = median(sodium_pre),            # Median
+    mean   = mean(sodium_pre),              # Mean
+    q3     = quantile(sodium_pre, 0.75),    # 3rd Qu.
+    max    = max(sodium_pre)                # Max.
+  )
+
+# group_by(group)을 앞에 붙이면 집단마다 한 행씩 요약한다: 집단별 평균과 표준편차
 raw %&gt;%
   group_by(group) %&gt;%
   summarise(
@@ -517,12 +529,19 @@ raw %&gt;%
  3rd Qu.:36.25   3rd Qu.:1.0   3rd Qu.:3682   3rd Qu.:3485  
  Max.   :48.00   Max.   :1.0   Max.   :4660   Max.   :4680  
 
+# A tibble: 1 × 6
+    min    q1 median  mean    q3   max
+  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1  1930 2652.   3315 3225. 3682.  4660
+
 # A tibble: 2 × 6
   group     n pre_mean pre_sd post_mean post_sd
   &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
 1     0    24    3255.   636.     3300.    753.
 2     1    24    3195.   690.     2901.    535.</pre></div>
-<p><code>summary()</code>의 각 줄이 무엇인지는 앞 절의 <a href="#quartiles">사분위수 읽기</a>에서 다뤘다. 여기서는 최솟값과 최댓값을 먼저 본다. 음수나 자릿수가 하나 더 붙은 값처럼 있을 수 없는 숫자가 있으면 입력 오류다. 평균과 중앙값이 크게 다르면 분포가 한쪽으로 치우친 것이다. <code>group</code>은 집단을 나타내는 코드여서 숫자로서의 요약은 뜻이 없다. 다만 값이 0과 1뿐인지는 여기서 확인할 수 있고, 평균 0.5는 1(교육군)이 절반이라는 뜻이다. 집단별 표에서는 사례 수가 같은지, 사전 평균이 두 집단에서 비슷한지를 본다. 표의 첫 행(0)이 대조군, 둘째 행(1)이 교육군이다.</p>
+<p><code>summary()</code>의 각 줄이 무엇인지는 앞 절의 <a href="#quartiles">사분위수 읽기</a>에서 다뤘다. 여기서는 최솟값과 최댓값을 먼저 본다. 음수나 자릿수가 하나 더 붙은 값처럼 있을 수 없는 숫자가 있으면 입력 오류다. 평균과 중앙값이 크게 다르면 분포가 한쪽으로 치우친 것이다. <code>group</code>은 집단을 나타내는 코드여서 숫자로서의 요약은 뜻이 없다. 다만 값이 0과 1뿐인지는 여기서 확인할 수 있고, 평균 0.5는 1(교육군)이 절반이라는 뜻이다.</p>
+<p><code>summary(raw)</code> 다음의 <code>summarise()</code>는 <code>summary()</code>의 <code>sodium_pre</code> 열과 같은 값을 낸다. 숫자가 조금 달라 보이는 것은 표시 방식 때문이다. <code>summary()</code>는 유효숫자 네 자리로 줄여 보여 주므로 1사분위수 2652.5가 2652로, 평균 3224.58이 3225로 보인다. tibble은 소수 부분을 줄여 보여 줄 때 숫자 뒤에 점을 찍는다(<code>2652.</code>). 이 코드에는 <code>group_by()</code>가 없어서 48명 전체가 <strong>한 행</strong>으로 요약되었다.</p>
+<p>마지막 코드처럼 <code>summarise()</code> 앞에 <code>group_by(group)</code>을 붙이면 <code>summarise()</code>가 집단마다 따로 계산된다. 결과는 집단 수만큼 <strong>두 행</strong>이 되고, 맨 앞에 어느 집단인지 알려 주는 <code>group</code> 열이 붙는다. 집단별 표에서는 사례 수가 같은지, 사전 평균이 두 집단에서 비슷한지를 본다. 표의 첫 행(0)이 대조군, 둘째 행(1)이 교육군이다.</p>
 <h3>간단한 그림</h3>
 <p>확인용 그림은 꾸미지 않고 저장하지도 않는다. 실행하면 VS Code의 그림 탭에 차례로 나타난다. 보고서에 넣을 그림은 이 자료 끝의 <a href="#s5">그림을 그려 output에 저장하기</a>에서 다시 그린다.</p>
 <div class="cb r"><span class="lang">R</span>
