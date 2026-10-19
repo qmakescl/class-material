@@ -65,6 +65,8 @@
 <h2><span class="no">3.1</span>데이터프레임이라는 공통 개념</h2>
 <p>R과 Python 모두 표 모양의 데이터를 <strong>데이터프레임</strong>이라고 부른다. 한 행이 관측 하나, 한 열이 변수 하나다. 지하철 데이터에서 한 행은 “어느 날, 어느 역의 승차(또는 하차)”다.</p>
 <p>R에서는 <code>tidyverse</code>의 <code>dplyr</code>와 <code>stringr</code>, Python에서는 <code>pandas</code>를 쓴다. 이름은 다르지만 하는 일은 거의 일대일로 대응한다. 2장에서 읽어 들인 <code>subway</code>를 이어서 쓴다.</p>
+<p>R을 새로 시작했다면 먼저 <code>library(tidyverse)</code>를 실행한다. 이 줄을 실행해야 이 장의 <code>select()</code>, <code>filter()</code> 같은 함수와 명령을 잇는 <code>%&gt;%</code>를 쓸 수 있다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>library(tidyverse)</pre></div><div class="cb py"><span class="lang">Python</span><pre>import pandas as pd</pre></div></div>
 </section>
 <section class="panel" id="s2">
 <h2><span class="no">3.2</span>열 빼기와 이름 바꾸기</h2>
@@ -128,7 +130,25 @@
 <section class="panel" id="s7">
 <h2><span class="no">3.7</span>명령 이어 쓰기</h2>
 <p>위 예제들은 이미 여러 명령을 이어 쓰고 있다. R은 <code>%&gt;%</code>(파이프 연산자)로, Python은 <code>.</code>(메서드 체이닝)으로 잇는다. 둘 다 “앞의 결과를 받아서 다음 일을 한다”로 읽는다.</p>
-<p><code>%&gt;%</code>는 <code>library(tidyverse)</code>를 실행해야 쓸 수 있다. R 4.1부터 기본으로 들어 있는 <code>|&gt;</code>도 같은 일을 한다. 이 자료에서는 <code>%&gt;%</code>로 통일한다.</p>
+<p><code>%&gt;%</code>는 tidyverse에 들어 있는 <code>magrittr</code> 패키지의 연산자다. 그래서 <code>library(tidyverse)</code>를 먼저 실행해야 쓸 수 있다. 실행하지 않고 쓰면 <code>could not find function "%&gt;%"</code> 오류가 난다. 이 자료의 R 코드는 모두 <code>library(tidyverse)</code>를 실행한 뒤 <code>%&gt;%</code>로 잇는다.</p>
+<details class="fold">
+<summary>R 기본 파이프 <code>|&gt;</code> 알아보기 (먼저 본 자료에서 <code>|&gt;</code>를 만났다면)</summary>
+<p>처음 공개한 이 자료에는 <code>%&gt;%</code> 대신 <code>|&gt;</code>가 쓰여 있었다. <code>|&gt;</code>는 R 4.1부터 R 자체에 들어 있는 파이프 연산자다. 하는 일은 <code>%&gt;%</code>와 같다. 왼쪽의 결과를 받아 오른쪽 함수의 첫 번째 인수로 넘긴다. 그때 받아 둔 코드도 그대로 돌아간다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R · %&gt;%</span><pre>library(tidyverse)
+
+subway %&gt;%
+  filter(구분 == &quot;승차&quot;) %&gt;%
+  group_by(역) %&gt;%
+  summarise(평균승차 = mean(하루))</pre></div><div class="cb r"><span class="lang">R · |&gt;</span><pre>library(tidyverse)  # filter() 등을 쓰려면 필요
+
+subway |&gt;
+  filter(구분 == &quot;승차&quot;) |&gt;
+  group_by(역) |&gt;
+  summarise(평균승차 = mean(하루))</pre></div></div>
+<p>두 코드의 결과는 같다. 이 자료의 R 코드는 <code>%&gt;%</code>를 <code>|&gt;</code>로 모두 바꿔도 같은 결과가 나온다. 다만 둘은 몇 가지가 다르다.</p>
+<div class="scroll"><table><thead><tr><th>비교</th><th><code>%&gt;%</code></th><th><code>|&gt;</code></th></tr></thead><tbody><tr><td>쓰려면</td><td><code>library(tidyverse)</code>(또는 <code>library(magrittr)</code>)를 먼저 실행</td><td>아무것도 불러오지 않아도 된다. R 4.1 이상이어야 한다</td></tr><tr><td>함수 뒤 괄호</td><td><code>x %&gt;% head</code>처럼 빼도 된다</td><td><code>x |&gt; head()</code>처럼 반드시 쓴다</td></tr><tr><td>첫 번째가 아닌 자리로 넘기기</td><td><code>.</code>로 자리를 표시: <code>data = .</code></td><td><code>_</code>로 자리를 표시: <code>data = _</code> (R 4.2 이상, 이름 붙인 인수에만)</td></tr></tbody></table></div>
+<p><code>|&gt;</code>가 패키지 없이 돌아간다고 해서 <code>library(tidyverse)</code>를 빼도 되는 것은 아니다. <code>filter()</code>, <code>group_by()</code>, <code>summarise()</code>는 여전히 tidyverse의 함수다. 내 R 버전은 <code>R.version.string</code>으로 확인한다.</p>
+</details>
 </section>
 <section class="panel" id="s8">
 <h2><span class="no">3.8</span>자료형 확인하기: 날짜인가, 글자인가</h2>

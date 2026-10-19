@@ -147,6 +147,7 @@ subway &lt;- subway %&gt;%
   filter(!is.na(수송일자))</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;수송일자&quot;].isna().sum()   # 빈 행의 수
 
 subway = subway.dropna(how=&quot;all&quot;)</pre></div></div>
+<p>R 코드의 <code>%&gt;%</code>는 <strong>파이프 연산자</strong>다. 왼쪽의 결과를 받아 오른쪽 명령에 넘긴다. 2.5에서 실행한 <code>library(tidyverse)</code>가 불러 주는 연산자라서, 그 줄을 먼저 실행해야 쓸 수 있다. 자세한 설명은 <a href="ch3.html#s7">3.7</a>에 있다.</p>
 <p>Python에서는 숫자가 <code>411.0</code>처럼 소수로 보인다. 빈 행 때문에 숫자 열이 실수형으로 읽힌 것이고, 계산 결과는 같다.</p>
 <p>열은 26개다. 앞의 6개가 “무엇에 대한 행인가”를, 뒤의 20개가 시간대별 인원을 담는다.</p>
 <div class="scroll"><table><thead><tr><th>연번</th><th>수송일자</th><th>호선</th><th>역번호</th><th>역명</th><th>승하차구분</th><th>06시이전</th><th>06-07시간대</th><th>…</th><th>23-24시간대</th><th>24시이후</th></tr></thead><tbody><tr><td>1</td><td>2025-01-01</td><td>1호선</td><td>150</td><td>서울역</td><td>승차</td><td>411</td><td>317</td><td>…</td><td>838</td><td>29</td></tr><tr><td>2</td><td>2025-01-01</td><td>1호선</td><td>150</td><td>서울역</td><td>하차</td><td>261</td><td>715</td><td>…</td><td>455</td><td>130</td></tr><tr><td>3</td><td>2025-01-01</td><td>1호선</td><td>151</td><td>시청</td><td>승차</td><td>62</td><td>70</td><td>…</td><td>201</td><td>1</td></tr></tbody></table></div>
