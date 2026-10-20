@@ -24,6 +24,48 @@
 <meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
 <link rel="stylesheet" href="../../assets/material.css">
 <link rel="stylesheet" href="../../assets/readtheworld.css">
+<style>
+  /* 넓은 형식·긴 형식 위젯 (statistics/prepare-for-ttest.html 의 넓은 모양·긴 모양 위젯과 같은 방식)
+     조작 단추(.ctrls, .seg)는 rlesson.css 와 같은 모양이다. 이 묶음은 rlesson.css 를 쓰지 않으므로 위젯 안으로 한정해 둔다. */
+  .wl { display: flex; flex-direction: column; gap: 12px; }
+  .wl .ctrls { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: flex-end; }
+  .wl .ctrl { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .wl .ctrl > span, .wl .ctrl > label { font-family: var(--mono); font-size: 12px; font-weight: 500; line-height: 1.3; color: var(--muted); }
+  .wl .ctrl output { color: var(--ink); font-weight: 600; }
+  .wl .ctrl input[type=range] { width: 220px; max-width: 100%; accent-color: var(--accent-dark); }
+  .wl .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .wl .seg label { position: relative; font-family: var(--mono); font-size: 13px; font-weight: 500; line-height: 1; cursor: pointer; }
+  .wl .seg input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .wl .seg label > span { display: block; padding: 9px 12px; color: var(--muted); border-right: 1px solid var(--line); }
+  .wl .seg label:last-child > span { border-right: 0; }
+  .wl .seg input:checked + span { background: var(--accent-dark); color: #fff; }
+  .wl .seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: -4px; }
+  .wl-code { font-family: var(--mono); font-size: 13.5px; line-height: 2; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; overflow-x: auto; white-space: pre; }
+  .wl-code .arg { font-family: inherit; font-size: inherit; line-height: 1.4; color: var(--ink); background: var(--accent-soft); border: 1px dashed var(--accent); border-radius: 4px; padding: 2px 6px; cursor: pointer; }
+  .wl-code .arg:hover { border-style: solid; }
+  .wl-code .arg[aria-pressed="true"] { background: var(--accent-dark); border-style: solid; color: #fff; }
+  .wl-say { min-height: 3.4em; font-size: 14.5px; color: var(--muted); border-left: 3px solid var(--line); padding-left: 12px; }
+  .wl-say b { color: var(--ink); }
+  .wl-cap { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--muted); margin: 0 0 6px; }
+  .wl-t { width: 100%; font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; border-collapse: separate; border-spacing: 0; }
+  .wl .row > .col { flex: 1 1 auto; }   /* 표 너비대로 놓고, 둘이 한 줄에 안 들어가면 아래로 내린다 */
+  .wl-t th, .wl-t td { padding: 5px 8px; white-space: nowrap; }
+  .wl-t th { font-family: var(--mono); font-size: 12.5px; color: var(--ink); }
+  .wl-t th.c-val, .wl-t th.c-n, .wl-t th.c-sum { text-align: right; }
+  .wl-t tbody tr { cursor: pointer; }
+  .wl-t tbody tr:last-child td { border-bottom: 0; }
+  .wl-t tr.hl-row td { background: var(--soft); }
+  .wl-t tr td.hl-cell { background: var(--warn-soft); color: var(--warn); font-weight: 700; }
+  .wl-dims { font-size: 13.5px; color: var(--muted); }
+  /* 인수를 고르면 그 인수가 가리키는 열·이름·값에 표시를 한다 */
+  .wl[data-arg="cols"] [data-t="wide"] .c-val,
+  .wl[data-arg="names_to"] [data-t="wide"] th.c-val, .wl[data-arg="names_to"] [data-t="long"] .c-time,
+  .wl[data-arg="names_from"] [data-t="wide"] th.c-val, .wl[data-arg="names_from"] [data-t="long"] .c-time,
+  .wl[data-arg="values_to"] [data-t="wide"] td.c-val, .wl[data-arg="values_to"] [data-t="long"] .c-n,
+  .wl[data-arg="values_from"] [data-t="wide"] td.c-val, .wl[data-arg="values_from"] [data-t="long"] .c-n,
+  .wl[data-arg="group"] .c-date,
+  .wl[data-arg="sum"] [data-t="long"] .c-n, .wl[data-arg="sum"] .c-sum { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+</style>
 <script defer src="../../assets/annotate.js"></script>
 </head>
 <body>
@@ -58,7 +100,7 @@
 <div class="eyebrow">데이터 다루기 · 4장 / 6</div>
 <h2 class="page-title">데이터 전처리</h2>
 <p class="lede">원본을 점검하고, 하루 단위로 요약하고, 기상 데이터와 조인한다.</p>
-<div class="callout goals"><strong>이 장을 마치면</strong><ul><li>원본에 섞여 있는 빈 행과 필요 없는 열을 찾아 정리할 수 있다.</li><li>역·시간대 단위의 표를 하루 단위로 요약할 수 있다.</li><li>두 표를 날짜로 조인하고, 조인이 제대로 됐는지 확인할 수 있다.</li></ul></div>
+<div class="callout goals"><strong>이 장을 마치면</strong><ul><li>원본에 섞여 있는 빈 행과 필요 없는 열을 찾아 정리할 수 있다.</li><li>넓은 형식과 긴 형식을 구분하고, 긴 형식으로 바꿔 하루 단위로 요약할 수 있다.</li><li>두 표를 날짜로 조인하고, 조인이 제대로 됐는지 확인할 수 있다.</li></ul></div>
 <nav class="toc" aria-label="이 장의 차례"><a href="#s1"><b>4.1</b>읽고 점검하기</a><a href="#s2"><b>4.2</b>날짜형으로 바꾸기</a><a href="#s3"><b>4.3</b>하루 단위로 요약하기</a><a href="#s4"><b>4.4</b>날짜에서 새 변수 만들기</a><a href="#s5"><b>4.5</b>기상 데이터 정리하기</a><a href="#s6"><b>4.6</b>두 표 합치기</a><a href="#s7"><b>4.7</b>정리한 데이터 저장하기</a><a href="#s8"><b>4.8</b>에이전트와 함께 해보기</a></nav>
 </header>
 <section class="panel" id="intro">
@@ -114,27 +156,62 @@ subway[&quot;날짜&quot;].min(), subway[&quot;날짜&quot;].max()</pre></div></
 </section>
 <section class="panel" id="s3">
 <h2><span class="no">4.3</span>하루 단위로 요약하기</h2>
-<p>날씨는 하루에 값이 하나다. 지하철 데이터도 하루에 한 행이 되도록 줄인다. 먼저 시간대 20개 열을 더해 <code>하루</code>를 만들고, <strong>승차 행만</strong> 골라 날짜별로 더한다.</p>
-<div class="pair"><div class="cb r"><span class="lang">R</span><pre>subway &lt;- subway %&gt;%
-  mutate(하루 = rowSums(
-    across(`06시이전`:`24시이후`)))
+<p>날씨는 하루에 값이 하나다. 지하철 데이터도 하루에 한 행이 되도록 줄인다. 그 전에 지금 표가 어떤 모양으로 값을 담고 있는지부터 본다.</p>
+<h3>넓은 형식과 긴 형식</h3>
+<p>지금 <code>subway</code>는 한 행이 “어느 날, 어느 역의 승차(또는 하차)”이고, 시간대별 인원이 <code>06시이전</code>부터 <code>24시이후</code>까지 20개 열에 옆으로 펼쳐져 있다. 이런 표를 <strong>넓은 형식</strong>(wide format)이라고 한다. 같은 값을 <code>시간대</code>와 <code>인원</code> 두 열로 세워, 한 행이 <strong>어느 날, 어느 역, 어느 시간대의 인원 하나</strong>가 되게 적을 수도 있다. 이것이 <strong>긴 형식</strong>(long format)이다. 담긴 값은 똑같고 놓인 자리만 다르다.</p>
+<p>아래 표는 실제 데이터에서 평일인 3월 4일(화)과 주말인 3월 8일(토)의 강남·홍대입구 승차 행을 골라, 시간대도 몇 개만 남긴 것이다. 코드에서 색이 칠해진 인수를 누르거나 표의 값에 마우스를 올려, 두 형식에서 같은 값이 어디에 있는지 확인한다. “긴 → 날짜별 합”을 고르면 긴 형식의 행들이 날짜별로 묶여 더해지는 과정을 볼 수 있다.</p>
+<div id="wl" class="wl"></div>
+<h3>권장: 긴 형식으로 바꿔 날짜별로 더하기</h3>
+<p>R은 <code>pivot_longer()</code>, Python은 <code>.melt()</code>로 긴 형식을 만든다. 그다음 <strong>승차 행만</strong> 골라 날짜별로 묶고(<code>group_by(날짜)</code>) 인원을 더한다(<code>summarise(승차 = sum(인원))</code>).</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre># 넓은 형식 → 긴 형식: 시간대 20개 열을 세로로 쌓는다
+subway_long &lt;- subway %&gt;%
+  pivot_longer(
+    cols      = `06시이전`:`24시이후`,  # 쌓을 열
+    names_to  = &quot;시간대&quot;,   # 열 이름이 들어갈 새 열
+    values_to = &quot;인원&quot;)     # 값이 들어갈 새 열
 
-daily &lt;- subway %&gt;%
+nrow(subway_long)   # 3,985,800 = 199,290 × 20
+
+daily &lt;- subway_long %&gt;%
   filter(구분 == &quot;승차&quot;) %&gt;%
   group_by(날짜) %&gt;%
-  summarise(승차 = sum(하루))
+  summarise(승차 = sum(인원))
 
-nrow(daily)   # 365</pre></div><div class="cb py"><span class="lang">Python</span><pre>subway[&quot;하루&quot;] = (
-    subway.loc[:, &quot;06시이전&quot;:&quot;24시이후&quot;]
-    .sum(axis=1))
+nrow(daily)   # 365</pre></div><div class="cb py"><span class="lang">Python</span><pre># 넓은 형식 → 긴 형식: 시간대 20개 열을 세로로 쌓는다
+slots = subway.loc[:, &quot;06시이전&quot;:&quot;24시이후&quot;].columns
+subway_long = subway.melt(
+    id_vars=[c for c in subway.columns
+             if c not in slots],  # 그대로 둘 열
+    var_name=&quot;시간대&quot;,     # 열 이름이 들어갈 새 열
+    value_name=&quot;인원&quot;)     # 값이 들어갈 새 열
 
-daily = (subway
+len(subway_long)   # 3,985,800 = 199,290 × 20
+
+daily = (subway_long
          .query(&#x27;구분 == &quot;승차&quot;&#x27;)
-         .groupby(&quot;날짜&quot;, as_index=False)[&quot;하루&quot;]
+         .groupby(&quot;날짜&quot;, as_index=False)[&quot;인원&quot;]
          .sum()
-         .rename(columns={&quot;하루&quot;: &quot;승차&quot;}))
+         .rename(columns={&quot;인원&quot;: &quot;승차&quot;}))
 
 len(daily)   # 365</pre></div></div>
+<p>긴 형식의 행 수는 넓은 형식 199,290행에 시간대 20개를 곱한 3,985,800이다. 바꾸기 전후에 인원의 총합은 같다. 이 자료에서는 이 방법을 권장한다.</p>
+<ul><li><strong>시간대가 변수가 된다.</strong> 넓은 형식에서 시간대는 열 이름에 숨어 있다. 긴 형식에서는 <code>시간대</code> 열의 값이므로 거르고 묶을 수 있다. <code>group_by(날짜)</code>를 <code>group_by(시간대)</code>나 <code>group_by(날짜, 시간대)</code>로 바꾸기만 하면 시간대별 합이 나온다.</li><li><strong>계산이 한 가지다.</strong> 행마다 더하기(<code>rowSums()</code>)와 묶음마다 더하기(<code>summarise()</code>)를 섞지 않고, 묶어서 더하는 계산 하나로 끝난다.</li><li><strong>열 범위를 한 번만 적는다.</strong> <code>`06시이전`:`24시이후`</code>는 형식을 바꿀 때 한 번 적고, 그 뒤로는 <code>시간대</code>와 <code>인원</code> 두 이름만 쓴다.</li></ul>
+<details class="fold">
+<summary>다른 방법: 넓은 형식에서 행마다 더하기 (<code>rowSums(across())</code>)</summary>
+<p>넓은 형식 그대로 시간대 20개 열을 행마다 더해 <code>하루</code>를 만든 뒤 날짜별로 더해도 된다. 3장 3.5에서 쓴 방법이다. 결과인 <code>daily</code>는 위의 권장 방법과 똑같다. 다만 시간대별로 보려면 코드를 새로 짜야 한다.</p>
+<div class="pair"><div class="cb r"><span class="lang">R</span><pre>daily &lt;- subway %&gt;%
+  filter(구분 == &quot;승차&quot;) %&gt;%
+  mutate(하루 = rowSums(
+    across(`06시이전`:`24시이후`))) %&gt;%
+  group_by(날짜) %&gt;%
+  summarise(승차 = sum(하루))</pre></div><div class="cb py"><span class="lang">Python</span><pre>daily = (subway
+         .query(&#x27;구분 == &quot;승차&quot;&#x27;)
+         .assign(하루=lambda d: d.loc[
+             :, &quot;06시이전&quot;:&quot;24시이후&quot;].sum(axis=1))
+         .groupby(&quot;날짜&quot;, as_index=False)[&quot;하루&quot;]
+         .sum()
+         .rename(columns={&quot;하루&quot;: &quot;승차&quot;}))</pre></div></div>
+</details>
 <div class="callout caution"><strong>왜 승차만 세는가</strong> 한 사람이 한 번 이동하면 승차 한 번, 하차 한 번이 기록된다. 둘을 더하면 같은 이동을 두 번 세게 된다. “그날 지하철을 탄 횟수”는 승차만으로 충분하다.</div>
 </section>
 <section class="panel" id="s4">
@@ -207,18 +284,18 @@ daily[&quot;기온&quot;].isna().sum()        # 못 붙은 날</pre></div></div>
 </section>
 <section class="panel" id="s7">
 <h2><span class="no">4.7</span>정리한 데이터 저장하기</h2>
-<p>하루 단위 표와 함께, 정리된 원래 표도 저장해 둔다. 뒤의 것은 과제에서 쓴다. 우리가 만드는 파일은 UTF-8로 저장한다. R의 <code>write_csv()</code>는 항상 UTF-8로 쓴다. Python의 <code>utf-8-sig</code>는 엑셀에서 열어도 한글이 깨지지 않게 표시를 붙인 UTF-8이다.</p>
+<p>하루 단위 표와 함께, 정리된 원래 표(넓은 형식의 <code>subway</code>)도 저장해 둔다. 뒤의 것은 과제에서 쓴다. 우리가 만드는 파일은 UTF-8로 저장한다. R의 <code>write_csv()</code>는 항상 UTF-8로 쓴다. Python의 <code>utf-8-sig</code>는 엑셀에서 열어도 한글이 깨지지 않게 표시를 붙인 UTF-8이다.</p>
 <div class="pair"><div class="cb r"><span class="lang">R</span><pre>write_csv(daily,
           &quot;../dataset/working/daily.csv&quot;)
 
 subway %&gt;%
-  select(-수송일자, -하루) %&gt;%
+  select(-수송일자) %&gt;%
   write_csv(&quot;../dataset/working/subway_clean.csv&quot;)</pre></div><div class="cb py"><span class="lang">Python</span><pre>daily.to_csv(
     &quot;../dataset/working/daily.csv&quot;,
     index=False, encoding=&quot;utf-8-sig&quot;)
 
 (subway
- .drop(columns=[&quot;수송일자&quot;, &quot;하루&quot;])
+ .drop(columns=&quot;수송일자&quot;)
  .to_csv(&quot;../dataset/working/subway_clean.csv&quot;,
          index=False, encoding=&quot;utf-8-sig&quot;))</pre></div></div>
 <p>이제 5장과 6장은 <code>daily.csv</code> 하나만 읽으면 된다. 원본은 <code>dataset/raw</code>에 그대로 남아 있으므로, 전처리를 잘못했더라도 이 노트북을 처음부터 다시 실행하면 된다.</p>
@@ -237,6 +314,108 @@ subway %&gt;%
   var on = nav && nav.querySelector("a.on");
   if (!on || nav.scrollWidth <= nav.clientWidth) return;
   nav.scrollLeft += on.getBoundingClientRect().left - nav.getBoundingClientRect().left - (nav.clientWidth - on.offsetWidth) / 2;
+})();
+
+/* ── 넓은 형식과 긴 형식 ──
+   4.1의 subway에서 승차 행 네 개와 시간대 몇 개를 골라 두 형식으로 나란히 보여 준다(prepare-for-ttest.html 의 위젯과 같은 방식).
+   코드의 인수를 누르면 표에서 그 인수가 가리키는 부분을, 표의 행이나 값에 마우스를 올리면(또는 누르면)
+   다른 표에서 같은 행·같은 값을 표시한다. "긴 → 날짜별 합"에서는 긴 형식의 행이 날짜별로 묶여 더해지는 것을 보여 준다. */
+(()=>{
+  const root=document.getElementById('wl');if(!root)return;
+  const SLOT=['07-08시간대','08-09시간대','09-10시간대','10-11시간대'];
+  // [날짜, 역, 시간대별 승차 인원]. datasets/readtheworld/seoul-subway-2025.csv 의 2호선 승차 행과 같은 값이다
+  const ROWS=[['2025-03-04','강남',[1845,2837,2146,1936]],['2025-03-04','홍대입구',[2445,3266,2153,1617]],
+              ['2025-03-08','강남',[528,904,1300,2124]],['2025-03-08','홍대입구',[876,1259,1718,2290]]];
+  const DATES=[...new Set(ROWS.map(r=>r[0]))];
+  const CODE={
+    longer:[['subway_long <- subway %>%'],['  pivot_longer('],
+      ['    ',['cols','cols = `06시이전`:`24시이후`'],','],['    ',['names_to','names_to = "시간대"'],','],
+      ['    ',['values_to','values_to = "인원"']],['  )']],
+    wider:[['subway_long %>%'],['  pivot_wider('],
+      ['    ',['names_from','names_from = 시간대'],','],['    ',['values_from','values_from = 인원']],['  )']],
+    sum:[['daily <- subway_long %>%'],['  filter(구분 == "승차") %>%   # 아래 표는 모두 승차 행이다'],
+      ['  ',['group','group_by(날짜)'],' %>%'],['  ',['sum','summarise(승차 = sum(인원))']]]};
+  const SAY={
+    cols:'<b>cols</b>는 세로로 쌓을 열들이다. 실제 코드는 06시이전부터 24시이후까지 20개 열을 가리킨다. 이 열들의 이름과 값이 긴 형식의 두 열로 나뉘어 들어간다.',
+    names_to:'<b>names_to</b>는 원래 열의 이름이 들어갈 새 열의 이름이다. 넓은 형식의 열 이름(07-08시간대, 08-09시간대 …)이 긴 형식의 시간대 열의 값이 된다.',
+    values_to:'<b>values_to</b>는 값이 들어갈 새 열의 이름이다. 여러 열에 나뉘어 있던 인원이 긴 형식의 인원 열 하나에 모인다.',
+    names_from:'<b>names_from</b>은 새 열의 이름이 될 값이 든 열이다. 긴 형식의 시간대 열에 있는 값이 넓은 형식의 열 이름으로 돌아간다.',
+    values_from:'<b>values_from</b>은 새 열에 채울 값이 든 열이다. 인원 열의 값이 시간대마다 다른 열로 나뉘어 들어간다.',
+    group:'<b>group_by(날짜)</b>는 날짜가 같은 행끼리 묶는다. 긴 형식에서는 역과 시간대가 달라도 날짜가 같으면 한 묶음이다.',
+    sum:'<b>summarise(승차 = sum(인원))</b>는 묶음마다 인원 열을 모두 더해 한 행으로 줄인다. 묶음 하나가 날짜별 합의 한 행이 된다.'};
+  const HINT='코드에서 색이 칠해진 인수를 누르면 표에서 그 인수가 가리키는 부분이 표시된다. 표의 행이나 값에 마우스를 올리거나 누르면 다른 표에서 같은 행, 같은 값이 표시된다.';
+  const SUMHINT='긴 형식에서는 더할 값이 모두 인원 한 열에 있다. 날짜로 묶어 그 열을 더하면 하루가 한 행인 표가 된다. 날짜별 합의 행에 마우스를 올리면 어떤 값들이 더해졌는지 보인다.';
+  const st={mode:'longer',k:3,arg:null,hover:null,pin:null};
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt=v=>v.toLocaleString('ko-KR');
+  const total=d=>ROWS.filter(r=>r[0]===d).reduce((a,r)=>a+r[2].slice(0,st.k).reduce((x,y)=>x+y,0),0);
+  root.innerHTML=`<div class="ctrls">
+      <div class="ctrl"><span>보는 단계</span><div class="seg" role="radiogroup" aria-label="보는 단계">
+        <label><input type="radio" name="wl-mode" value="longer" checked><span>넓은 → 긴 형식</span></label>
+        <label><input type="radio" name="wl-mode" value="wider"><span>긴 → 넓은 형식</span></label>
+        <label><input type="radio" name="wl-mode" value="sum"><span>긴 → 날짜별 합</span></label></div></div>
+      <div class="ctrl"><label for="wl-k">시간대 수 = <output id="wl-k-o"></output></label><input type="range" id="wl-k" min="2" max="4" step="1" value="3"></div>
+    </div>
+    <div class="wl-code" data-k="code"></div>
+    <p class="wl-say" data-k="say" aria-live="polite"></p>
+    <div class="row" data-k="tables"></div>
+    <p class="wl-dims" data-k="dims"></p>`;
+  const q=k=>root.querySelector(`[data-k="${k}"]`);
+  function renderCode(){
+    q('code').innerHTML=CODE[st.mode].map(line=>line.map(p=>typeof p==='string'?esc(p)
+      :`<button type="button" class="arg" data-arg="${p[0]}" aria-pressed="${st.arg===p[0]}">${esc(p[1])}</button>`).join('')).join('\n');}
+  const S=()=>SLOT.slice(0,st.k);
+  const wideT=()=>`<table class="wl-t" data-t="wide"><thead><tr><th class="c-date">날짜</th><th>역</th>`+S().map(s=>`<th class="c-val">${s}</th>`).join('')+`</tr></thead><tbody>`+
+    ROWS.map((r,i)=>`<tr data-id="${i}" tabindex="0"><td class="c-date">${r[0]}</td><td>${r[1]}</td>`+S().map((s,j)=>`<td class="n c-val" data-cell="${i}-${j}">${fmt(r[2][j])}</td>`).join('')+`</tr>`).join('')+`</tbody></table>`;
+  const longT=()=>`<table class="wl-t" data-t="long"><thead><tr><th class="c-date">날짜</th><th>역</th><th class="c-time">시간대</th><th class="c-n">인원</th></tr></thead><tbody>`+
+    ROWS.map((r,i)=>S().map((s,j)=>`<tr data-id="${i}" data-date="${r[0]}" data-cell="${i}-${j}" tabindex="0"><td class="c-date">${r[0]}</td><td>${r[1]}</td><td class="c-time" data-cell="${i}-${j}">${s}</td><td class="n c-n" data-cell="${i}-${j}">${fmt(r[2][j])}</td></tr>`).join('')).join('')+`</tbody></table>`;
+  const sumT=()=>`<table class="wl-t" data-t="sum"><thead><tr><th class="c-date">날짜</th><th class="c-sum">승차</th></tr></thead><tbody>`+
+    DATES.map(d=>`<tr data-date="${d}" tabindex="0"><td class="c-date">${d}</td><td class="n c-sum">${fmt(total(d))}</td></tr>`).join('')+`</tbody></table>`;
+  function renderTables(){
+    const box=(cap,t)=>`<div class="col"><p class="wl-cap">${cap}</p><div class="scroll">${t}</div></div>`;
+    const LONG='긴 형식 long · 한 시간대의 인원이 한 행';
+    q('tables').innerHTML=st.mode==='sum'?box(LONG,longT())+box('날짜별 합 · 한 날짜가 한 행',sumT())
+      :box('넓은 형식 wide · 한 날짜·역이 한 행',wideT())+box(LONG,longT());
+    root.querySelector('#wl-k-o').textContent=st.k+'개';
+    const n=ROWS.length*st.k;
+    q('dims').textContent=st.mode==='sum'
+      ?`긴 형식 ${n}행이 날짜 ${DATES.length}개로 묶여 ${DATES.length}행이 된다. 여기서는 역 두 곳, 시간대 ${st.k}개만 더했다. 실제 코드는 날짜마다 모든 역의 시간대 20개를 더해 365행을 만든다.`
+      :`넓은 형식은 ${ROWS.length}행 × ${2+st.k}열, 긴 형식은 ${n}행 × 4열이다. 인원이 들어갈 자리는 두 표 모두 ${n}개로 같다. 긴 형식에서는 날짜와 역이 시간대마다 되풀이된다. 실제 subway(199,290행, 시간대 20개)를 긴 형식으로 바꾸면 3,985,800행이 된다.`;}
+  function apply(){
+    if(st.arg)root.dataset.arg=st.arg; else delete root.dataset.arg;
+    root.querySelectorAll('.hl-row,.hl-cell').forEach(el=>el.classList.remove('hl-row','hl-cell'));
+    let say=st.arg?SAY[st.arg]:st.mode==='sum'?SUMHINT:HINT;
+    const a=st.hover||st.pin;
+    if(a&&a.date){   // 날짜별 합의 한 행: 더해진 긴 형식의 행들을 표시한다
+      root.querySelectorAll(`tr[data-date="${a.date}"]`).forEach(el=>el.classList.add('hl-row'));
+      const vs=ROWS.filter(r=>r[0]===a.date).flatMap(r=>r[2].slice(0,st.k));
+      say=`<b>${a.date}의 승차 합 ${fmt(total(a.date))}.</b> 긴 형식에서 날짜가 ${a.date}인 ${vs.length}행의 인원을 더한 값이다: ${vs.map(fmt).join(' + ')}.`;}
+    else if(a){const r=ROWS[a.id];
+      root.querySelectorAll(`tr[data-id="${a.id}"]`).forEach(el=>el.classList.add('hl-row'));
+      if(a.j!==undefined){const s=SLOT[a.j],v=fmt(r[2][a.j]);
+        root.querySelectorAll(`td[data-cell="${a.id}-${a.j}"]`).forEach(el=>el.classList.add('hl-cell'));
+        if(st.mode==='sum'){root.querySelector(`[data-t="sum"] tr[data-date="${r[0]}"]`).classList.add('hl-row');
+          say=`<b>${r[0]} ${r[1]}의 ${s} 승차 ${v}명.</b> 날짜가 같은 다른 행들과 한 묶음이 되어 날짜별 합 ${fmt(total(r[0]))}에 더해진다.`;}
+        else say=`<b>${r[0]} ${r[1]}의 ${s} 승차 ${v}명.</b> 넓은 형식에서는 ${s} 열에 있고, 긴 형식에서는 시간대가 ${s}인 행의 인원 열에 있다.`;}
+      else say=`<b>${r[0]} ${r[1]}.</b> 넓은 형식에서는 한 행이고, 긴 형식에서는 시간대마다 한 행씩, 모두 ${st.k}행이다.`;}
+    q('say').innerHTML=say;}
+  const pick=el=>{const tr=el.closest&&el.closest('tr[data-id],tr[data-date]');if(!tr)return null;
+    if(tr.dataset.id===undefined)return {date:tr.dataset.date};
+    const o={id:+tr.dataset.id},c=el.closest('[data-cell]');if(c)o.j=+c.dataset.cell.split('-')[1];return o;};
+  const same=(a,b)=>!!a&&!!b&&a.id===b.id&&a.j===b.j&&a.date===b.date;
+  root.addEventListener('input',e=>{const el=e.target;
+    if(el.name==='wl-mode'){st.mode=el.value;st.arg=st.hover=st.pin=null;renderCode();renderTables();}
+    else if(el.id==='wl-k'){st.k=+el.value;st.hover=st.pin=null;renderTables();}
+    apply();});
+  root.addEventListener('click',e=>{const b=e.target.closest('.arg');
+    if(b){st.arg=st.arg===b.dataset.arg?null:b.dataset.arg;st.pin=null;renderCode();apply();return;}
+    const o=pick(e.target);if(o){st.pin=same(st.pin,o)?null:o;apply();}});
+  const tb=q('tables');
+  tb.addEventListener('pointerover',e=>{if(e.pointerType==='touch')return;const o=pick(e.target);if(!same(o,st.hover)){st.hover=o;apply();}});
+  tb.addEventListener('pointerleave',()=>{if(st.hover){st.hover=null;apply();}});
+  tb.addEventListener('focusin',e=>{const o=pick(e.target);if(o){st.hover=o;apply();}});
+  tb.addEventListener('focusout',()=>{if(st.hover){st.hover=null;apply();}});
+  renderCode();renderTables();apply();
 })();
 </script>
 </body>
