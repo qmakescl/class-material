@@ -38,6 +38,9 @@
   .lab .legend .lp { background: var(--accent); opacity: .55; }
   .lab .legend .lr { background: var(--warn); height: 5px; }
   .lab .legend .lo { background: var(--ink); width: 3px; height: 13px; vertical-align: -2px; }
+  .lab .legend .lh0 { background: transparent; border-top: 2px solid var(--ink); height: 0; width: 18px; vertical-align: 3px; }
+  .lab .legend .lh1 { background: transparent; border-top: 2px solid var(--accent); height: 0; width: 18px; vertical-align: 3px; }
+  .lab .legend .la { background: var(--warn); opacity: .45; }
   .read { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 20px; margin: 0; }
   .read div { border-top: 1px solid var(--line); padding: 9px 0; min-width: 0; }
   .read dt { font-family: var(--mono); font-size: 11.5px; font-weight: 500; line-height: 1.4; color: var(--muted); }
@@ -53,6 +56,19 @@
   .dgrid textarea { width: 100%; min-height: 92px; font-family: var(--mono); font-size: 13px; line-height: 1.5; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px; resize: vertical; }
   .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
   .err { color: var(--pos); font-size: 13.5px; }
+  /* APA 양식 표: 가로선만, 번호는 굵게, 제목은 기울임꼴 */
+  table.apa { border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); margin: 6px 0 0; }
+  table.apa caption { text-align: left; caption-side: top; padding: 0 0 8px; line-height: 1.5; }
+  table.apa th { border-bottom: 1px solid var(--ink); color: var(--ink); font-weight: 500; text-align: center; white-space: nowrap; }
+  table.apa td { border-bottom: 0; text-align: center; font-variant-numeric: tabular-nums; }
+  table.apa th:first-child, table.apa td:first-child { text-align: left; }
+  .apa-note { font-size: 13.5px; color: var(--muted); margin: 8px 0 0; }
+  .two-figs { display: grid; grid-template-columns: 5fr 6fr; gap: 16px; align-items: start; }
+  .two-figs .shot img { max-width: none; }
+  @media (max-width: 860px) { .two-figs { grid-template-columns: minmax(0, 1fr); } }
+  table.check td:first-child { font-weight: 600; width: 9.5em; }
+  /* QQ 그림: 정사각형이라 작게 둔다 */
+  .shot.qq img { width: 100%; max-width: 420px; }
   @media (max-width: 640px) { .lab { padding: 14px 14px 16px; } }
 </style>
 <script defer src="../assets/katex/katex.min.js"></script>
@@ -67,10 +83,12 @@
   <h1>모집단 평균에<br>대한 가설검정</h1>
   <nav id="rail-nav" aria-label="자료 목차">
     <a href="#s1"><b>01</b><span>검정의 논리</span></a>
-    <a href="#s2"><b>02</b><span>단일표본 t 검정</span></a>
-    <a href="#s3"><b>03</b><span>독립표본 t 검정</span></a>
-    <a href="#s4"><b>04</b><span>대응표본 t 검정</span></a>
-    <a href="#s5"><b>05</b><span>정리</span></a>
+    <a href="#normality"><b>02</b><span>정규성 확인</span></a>
+    <a href="#s2"><b>03</b><span>단일표본 t 검정</span></a>
+    <a href="#s3"><b>04</b><span>독립표본 t 검정</span></a>
+    <a href="#s4"><b>05</b><span>대응표본 t 검정</span></a>
+    <a href="#report"><b>06</b><span>결과 한 번에</span></a>
+    <a href="#s5"><b>07</b><span>정리</span></a>
   </nav>
   <div class="rail-tags" aria-label="태그">
     <span class="rail-tag">#통계</span>
@@ -88,13 +106,14 @@
 <header class="panel">
 <div class="eyebrow">R을 이용한 평균검정 · 분석</div>
 <h2 class="page-title">모집단 평균에 대한 가설검정</h2>
-<p class="lede">VS Code에서 R 스크립트를 한 줄씩 실행하며 세 가지 t 검정을 해 본다. R이 내놓는 t, 자유도, p-value가 영가설 아래의 분포에서 어디에 놓이는지 그림으로 확인하고, 효과크기까지 구한다.</p>
+<p class="lede">VS Code에서 R 스크립트를 한 줄씩 실행하며, 정규성 가정을 확인한 뒤 세 가지 t 검정을 해 본다. R이 내놓는 t, 자유도, p-value가 영가설 아래의 분포에서 어디에 놓이는지 그림으로 확인하고, 효과크기까지 구한다.</p>
 <dl class="facts">
 <div><dt>도구</dt><dd>R과 tidyverse, VS Code. 설치는 <a href="../data-science/VScode-R-languageserver.html">VS Code에서 R 실행하기</a>에, 폴더를 열고 스크립트를 실행하는 방법은 <a href="prepare-for-ttest.html#s1">데이터 준비 자료</a>에 있다.</dd></div>
 <div><dt>예제 데이터</dt><dd>식생활 교육 연구를 흉내 낸 연습용 가상 데이터. 48명의 교육 전·후 나트륨 섭취량(mg/일). <a href="prepare-for-ttest.html">데이터 준비 자료</a>에서 읽고 다듬은 것을 쓴다.</dd></div>
 <div><dt>다루는 검정</dt><dd>단일표본, 독립표본(등분산 검정 뒤 Student 또는 Welch), 대응표본 t 검정</dd></div>
 <div><dt>함수 도움말</dt><dd>코드에서 점선 밑줄이 있는 함수 이름에 마우스를 올리면(휴대폰은 누르면) 목적, 인수, 반환값이 나타난다.</dd></div>
 <div><dt>효과크기</dt><dd>Cohen의 d, Hedges의 g, \(d_z\)</dd></div>
+<div><dt>가정</dt><dd>t 검정의 정규성 가정은 이 자료 전체에서 만족된다고 보고 진행한다. 확인하는 방법(QQ 그림, Shapiro-Wilk 검정)은 02절에서 한 번 보인다.</dd></div>
 </dl>
 <nav class="series" aria-label="묶음의 자료">
 <p class="series-cap">R을 이용한 평균검정 · 두 편</p>
@@ -123,24 +142,50 @@
 <div class="callout caution"><p><strong>p-value는 \(H_0\)가 참일 확률이 아니다.</strong> \(H_0\)가 참이라고 가정했을 때 이런 데이터가 나올 확률이다. 또 p-value는 차이가 얼마나 큰지 말해 주지 않는다. 표본이 크면 작은 차이도 유의하게 나온다. 그래서 효과크기를 함께 보고한다(Wasserstein &amp; Lazar, 2016).</p></div>
 </section>
 
-<section class="panel" id="s2">
-<div class="section-head"><span class="section-num">02</span><h2>단일표본 t 검정</h2></div>
-<p><strong>질문.</strong> 참여자 48명의 사전 나트륨 섭취량 평균은 기준값과 다른가? 선행 조사에서 보고된 성인 평균이 3000 mg이라고 하고, 이 값을 기준으로 삼는다.</p>
-<div class="readout math">
-\[H_0: \mu = 3000 \qquad H_1: \mu \neq 3000\]
-\[t = \frac{\bar{x} - \mu_0}{s/\sqrt{n}}, \qquad \mathit{df} = n - 1\]
-</div>
-<div class="cb r"><span class="lang">R</span><pre>x &lt;- d %&gt;% pull(sodium_pre)    # 열 하나를 벡터로 꺼낸다
+<section class="panel" id="normality">
+<div class="section-head"><span class="section-num">02</span><h2>정규성 가정 확인</h2></div>
+<p>t 검정은 자료가 정규분포를 따르는 모집단에서 나왔다고 가정한다. 단일표본 검정은 자료 자체, 독립표본 검정은 집단마다의 자료, 대응표본 검정은 사전·사후의 차이가 그 대상이다. 검정에 들어가기 전에 이 가정을 어떻게 확인하는지 사전 나트륨 섭취량 48명으로 한 번 해 본다. 그림(QQ 그림)으로 모양을 보고, 검정(Shapiro-Wilk)으로 숫자를 본다.</p>
+<div class="cb r"><span class="lang">R</span><pre>x &lt;- d %&gt;% pull(sodium_pre)    # 열 하나를 벡터로 꺼낸다. 03절의 검정에서도 이 x를 쓴다
 
-# 가정 확인: 정규성. 점들이 직선을 따라가는지 본다
+# 그림: 점들이 직선을 따라가는지 본다
 p_qq &lt;- ggplot(d, aes(sample = sodium_pre)) +
   stat_qq() +
   stat_qq_line()
 p_qq
 ggsave("output/qq_sodium_pre.png", p_qq, width = 5, height = 5, dpi = 300)
-shapiro.test(x)
 
-# 검정
+# 검정: 영가설은 "자료가 정규분포에서 나왔다"
+shapiro.test(x)</pre></div>
+<div class="cb prompt"><span class="lang">프롬프트 · 같은 일을 에이전트에게</span><pre>scripts/03.ttest.R 에 이어서, 사전 나트륨 섭취량(d 의 sodium_pre)의 정규성을 확인하는 코드를 써서 실행해 줘.
+- ggplot2 로 QQ 그림을 그리고(점과 기준선), output/qq_sodium_pre.png 로 저장한다.
+- Shapiro-Wilk 검정을 실행하고 W 와 p-value 를 보여 준다.
+- QQ 그림에서 점이 직선에서 벗어난 곳이 있는지, 그 모양이 무엇을 뜻하는지 한 문단으로 설명해 줘.
+- 결론은 "정규성 가정을 기각할 증거가 있는가"로만 말하고, 정규분포임을 증명했다고 쓰지 않는다.</pre><button type="button" class="copy">복사</button></div>
+<h3>QQ 그림은 무엇을 보나</h3>
+<p>QQ 그림(quantile-quantile plot)은 이 가정을 눈으로 확인하는 도구다. 자료를 작은 값부터 늘어놓고, 각 값(세로축)을 "자료가 정규분포라면 그 순서의 값이 놓일 자리"인 표준정규분포의 분위수(가로축)와 짝지어 찍은 것이다. <code>stat_qq_line()</code>이 긋는 직선은 자료의 1사분위수와 3사분위수를 지나는 선으로, 자료가 정규분포를 따르면 점들이 이 직선 위에 놓인다. 직선에서 벗어나는 모양이 어긋남의 종류를 알려 준다.</p>
+<ul>
+<li><b>양 끝이 직선 바깥으로 휨</b>(왼쪽 아래 점은 선 아래, 오른쪽 위 점은 선 위): 정규분포보다 꼬리가 두껍다. 극단값이 더 자주 나온다.</li>
+<li><b>양 끝이 직선 안쪽으로 들어옴</b>: 꼬리가 가볍다. 극단값이 정규분포보다 적다.</li>
+<li><b>한쪽 끝만 휨</b>: 분포가 한쪽으로 치우쳐 있다(왜도).</li>
+<li><b>가운데에 평평한 계단</b>: 같은 값이 여럿이다. 측정 단위가 거칠거나 값이 특정 구간에 몰려 있을 때 나타난다.</li>
+</ul>
+<figure class="shot natural qq"><img src="../assets/images/ttest/qq-sodium-pre.png" width="750" height="750" loading="lazy" alt="사전 나트륨 섭취량 48명의 QQ 그림. 점들이 대각선을 따라 놓여 있고, 가운데 3300에서 3400 사이가 평평하며, 양 끝 점은 직선 안쪽에 있다"><figcaption>위 코드의 <code>p_qq</code>를 R에서 실행해 저장한 그림. 가로축이 표준정규분포의 분위수, 세로축이 사전 섭취량(mg/일)이다.</figcaption></figure>
+<p><b>결과 읽기.</b> 48명의 점이 대체로 직선을 따라간다. 가운데 3300~3400 mg 구간이 평평한 것은 그 값대에 여러 명이 몰려 있어서다. 가장 작은 값(1930)은 직선 위에, 가장 큰 값들(4240~4660)은 직선 아래에 있어 양 끝이 안쪽으로 조금 들어와 있다. 정규분포보다 꼬리가 약간 가볍다는 뜻이지, 뚜렷한 치우침이나 동떨어진 값은 없다. 뒤이은 Shapiro-Wilk 검정도 같은 결론이다. 영가설 "자료가 정규분포에서 나왔다"를 기각할 증거가 없다.</p>
+<div class="cb out"><span class="lang">출력 읽기 · shapiro.test(x)</span><pre>	Shapiro-Wilk normality test
+
+data:  x
+W = 0.97725, p-value = 0.47</pre></div>
+<div class="callout"><p><strong>이 자료에서의 가정.</strong> 여기서는 정규성 가정을 확인하는 방법을 한 번 보였다. 이후의 검정(독립표본은 집단마다의 자료, 대응표본은 사전·사후의 차이)에서도 같은 방법으로 확인할 수 있지만, <b>이 자료에서는 모든 검정에서 정규성 가정이 만족된다고 보고 진행한다.</b> 그래서 뒤의 코드와 프롬프트에는 정규성 확인이 다시 나오지 않는다. 두 가지를 기억해 둔다. 첫째, 정규성 검정에서 영가설을 기각하지 못한 것은 정규분포라는 증명이 아니다. 표본이 작으면 어긋남을 잘 잡아내지 못하고, 표본이 크면 사소한 어긋남도 유의하게 나오므로 그림을 함께 본다. 둘째, 표본이 어느 정도 크면 평균의 표집분포는 정규분포에 가까워져 t 검정이 정규성에서 조금 벗어나도 견딘다. 자료가 정규성에서 크게 벗어날 때 쓰는 변환이나 비모수 검정(Wilcoxon 검정 등)은 이 자료의 범위 밖이다.</p></div>
+</section>
+
+<section class="panel" id="s2">
+<div class="section-head"><span class="section-num">03</span><h2>단일표본 t 검정</h2></div>
+<p><strong>질문.</strong> 참여자 48명의 사전 나트륨 섭취량 평균은 기준값과 다른가? 선행 조사에서 보고된 성인 평균이 3000 mg이라고 하고, 이 값을 기준으로 삼는다.</p>
+<div class="readout math">
+\[H_0: \mu = 3000 \qquad H_1: \mu \neq 3000\]
+\[t = \frac{\bar{x} - \mu_0}{s/\sqrt{n}}, \qquad \mathit{df} = n - 1\]
+</div>
+<div class="cb r"><span class="lang">R</span><pre># 정규성은 02절에서 확인했다. x는 그때 꺼낸 사전 섭취량 벡터다
 res1 &lt;- t.test(x, mu = 3000)     # 기본값은 양측, 신뢰수준 95%
 res1
 
@@ -152,6 +197,11 @@ res1$conf.int
 
 # 결과 전체를 한 행짜리 표로
 broom::tidy(res1)</pre></div>
+<div class="cb prompt"><span class="lang">프롬프트 · 같은 일을 에이전트에게</span><pre>scripts/03.ttest.R 에 이어서, 사전 나트륨 섭취량(x)의 평균이 기준값 3000 mg 과 다른지 단일표본 t 검정을 해 줘.
+- 양측 검정, 신뢰수준 95%. 결과를 res1 에 담고 출력한다.
+- 출력에서 t, df, p-value, 95% 신뢰구간, 표본 평균을 짚어 주고, 각각이 무엇을 뜻하는지 한 줄씩 설명해 줘.
+- broom::tidy() 로 결과를 한 행짜리 표로도 보여 준다.
+- 다른 검정은 아직 하지 않는다.</pre><button type="button" class="copy">복사</button></div>
 <div class="cb out"><span class="lang">출력 읽기</span><pre>	One Sample t-test
 
 data:  x
@@ -176,10 +226,13 @@ d1
 # 같은 값을 패키지로, 신뢰구간과 함께
 library(effectsize)
 cohens_d(x, mu = 3000)</pre></div>
+<div class="cb prompt"><span class="lang">프롬프트 · 효과크기</span><pre>res1 의 효과크기 Cohen 의 d 를 구해 줘.
+- 먼저 (평균 − 3000) / 표준편차로 직접 계산하고, effectsize 패키지의 cohens_d() 로 같은 값이 나오는지 확인한다. 패키지가 없으면 설치 전에 내 허락을 받는다.
+- d 의 값이 Cohen 의 어림 기준(0.2, 0.5, 0.8)에서 어디쯤인지와, mg 단위의 차이가 실제로 어느 정도인지 함께 말해 줘.</pre><button type="button" class="copy">복사</button></div>
 </section>
 
 <section class="panel" id="s3">
-<div class="section-head"><span class="section-num">03</span><h2>독립표본 t 검정</h2></div>
+<div class="section-head"><span class="section-num">04</span><h2>독립표본 t 검정</h2></div>
 <p><strong>질문.</strong> 교육이 끝난 뒤, 교육군의 나트륨 섭취량 평균은 대조군과 다른가? 두 집단은 서로 다른 사람들이다.</p>
 <div class="readout math">
 \[H_0: \mu_1 = \mu_2 \qquad H_1: \mu_1 \neq \mu_2 \qquad (1 = \text{교육군},\ 2 = \text{대조군})\]
@@ -187,6 +240,39 @@ cohens_d(x, mu = 3000)</pre></div>
 \[\text{Student:}\quad t = \frac{\bar{x}_1 - \bar{x}_2}{s_p\sqrt{1/n_1 + 1/n_2}}, \qquad \mathit{df} = n_1 + n_2 - 2\]
 </div>
 <p>두 식은 표준오차를 구하는 방법이 다르다. Welch 검정은 집단마다의 표본분산 \(s_1^2\), \(s_2^2\)를 따로 쓴다. Student 검정은 두 집단의 모분산이 같다고 가정하고, 두 표본분산을 하나로 합친 \(s_p\)를 쓴다.</p>
+<details class="fold">
+<summary>펼쳐 보기: 두 분모는 같은 표준오차에서 나온다 (수식 전개)</summary>
+<p>분자는 두 검정이 같다. 다른 것은 분모, 곧 두 표본평균의 차이 \(\bar{x}_1 - \bar{x}_2\)의 표준오차를 어떻게 추정하느냐다. 출발점은 하나다.</p>
+<h4>1. 차이의 분산은 두 분산의 합이다</h4>
+<p>단일표본에서 본 것처럼 표본평균의 분산은 모분산을 표본 크기로 나눈 것이다. 두 집단은 서로 다른 사람들이라 \(\bar{x}_1\)과 \(\bar{x}_2\)가 독립이고, 독립인 두 양의 차이의 분산은 각 분산의 합이다.</p>
+<div class="readout math">
+\[\mathrm{Var}(\bar{x}_1) = \frac{\sigma_1^2}{n_1}, \qquad \mathrm{Var}(\bar{x}_2) = \frac{\sigma_2^2}{n_2}\]
+\[\mathrm{Var}(\bar{x}_1 - \bar{x}_2) = \frac{\sigma_1^2}{n_1} + \frac{\sigma_2^2}{n_2}, \qquad \mathrm{SE}(\bar{x}_1 - \bar{x}_2) = \sqrt{\frac{\sigma_1^2}{n_1} + \frac{\sigma_2^2}{n_2}}\]
+</div>
+<p>이 표준오차가 두 검정 모두의 분모다. 모분산 \(\sigma_1^2\), \(\sigma_2^2\)를 모르니 표본에서 추정해 넣어야 하고, 여기서 두 검정이 갈린다.</p>
+<h4>2. Welch: 모분산을 각자의 표본분산으로 바꾼다</h4>
+<p>두 모분산이 같다고 가정하지 않으므로 \(\sigma_1^2\) 자리에 \(s_1^2\), \(\sigma_2^2\) 자리에 \(s_2^2\)를 그대로 넣는다.</p>
+<div class="readout math">
+\[\mathrm{SE}_{\text{Welch}} = \sqrt{\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}}\]
+</div>
+<h4>3. Student: 모분산이 같다고 보고 하나로 합쳐 추정한다</h4>
+<p>\(\sigma_1^2 = \sigma_2^2 = \sigma^2\)이면 1의 식에서 \(\sigma^2\)을 묶어 낼 수 있다. 그 하나의 \(\sigma^2\)을 두 표본분산을 자유도로 가중평균한 합동분산 \(s_p^2\)으로 추정한다.</p>
+<div class="readout math">
+\[\frac{\sigma^2}{n_1} + \frac{\sigma^2}{n_2} = \sigma^2\left(\frac{1}{n_1} + \frac{1}{n_2}\right) \quad\Rightarrow\quad \mathrm{SE}_{\text{Student}} = s_p\sqrt{\frac{1}{n_1} + \frac{1}{n_2}}, \qquad s_p^2 = \frac{(n_1-1)s_1^2 + (n_2-1)s_2^2}{n_1+n_2-2}\]
+</div>
+<h4>4. 두 집단의 크기가 같으면 두 분모는 같아진다</h4>
+<p>\(n_1 = n_2 = n\)이면 \(s_p^2\)은 두 표본분산의 단순 평균이 되고, 이것을 3의 식에 넣으면 2의 식과 똑같아진다.</p>
+<div class="readout math">
+\[s_p^2 = \frac{s_1^2 + s_2^2}{2} \quad\Rightarrow\quad s_p\sqrt{\frac{2}{n}} = \sqrt{\frac{s_1^2 + s_2^2}{2}\cdot\frac{2}{n}} = \sqrt{\frac{s_1^2}{n} + \frac{s_2^2}{n}} = \mathrm{SE}_{\text{Welch}}\]
+</div>
+<p>이 데이터가 그 경우다. \(s_1^2/24 = 11906.3\), \(s_2^2/24 = 23608.9\)이고 둘의 합은 35515.2이므로 Welch의 표준오차는 \(\sqrt{35515.2} = 188.45\)다. Student 쪽은 \(s_p^2 = 426182\)에 \(2/24\)를 곱해도 35515.2, 제곱근은 같은 188.45다. 그래서 아래 실험판에서 Student와 Welch를 오가도 t는 −2.1181로 변하지 않는다. 두 집단의 크기가 다르면 두 분모는 달라지고, 분산이 큰 집단이 작을수록 차이가 커진다.</p>
+<h4>5. 그러면 무엇이 다른가: 자유도</h4>
+<p>분모가 같아도 그 분모가 얼마나 믿을 만한지, 곧 분산 추정에 쓴 정보의 양이 다르다. Student 검정은 두 표본을 합쳐 하나의 \(\sigma^2\)을 추정하므로 자유도가 \(n_1 + n_2 - 2 = 46\)이다. Welch 검정은 분산 둘을 따로 추정하므로 자유도를 Welch–Satterthwaite 식으로 근사하고, 그 값은 항상 \(n_1 + n_2 - 2\)보다 작거나 같다.</p>
+<div class="readout math">
+\[\mathit{df}_{\text{Welch}} = \frac{\left(\dfrac{s_1^2}{n_1} + \dfrac{s_2^2}{n_2}\right)^2}{\dfrac{(s_1^2/n_1)^2}{n_1-1} + \dfrac{(s_2^2/n_2)^2}{n_2-1}} = \frac{35515.2^2}{\dfrac{11906.3^2}{23} + \dfrac{23608.9^2}{23}} = 41.5\]
+</div>
+<p>두 표본분산이 같으면 이 값이 \(n_1 + n_2 - 2\)와 같아지고, 다를수록 작아진다. 자유도가 작으면 t 분포의 꼬리가 두꺼워져 같은 t에서 p-value가 조금 커진다. 이 데이터에서 Student의 p = 0.0396, Welch의 p = 0.0402가 된 까닭이다.</p>
+</details>
 <h3>Student 검정의 \(s_p\): 합동 표준편차</h3>
 <p>\(s_p\)는 합동 표준편차(pooled standard deviation)다. 두 집단의 모분산이 같은 값 \(\sigma^2\)이라면 \(s_1^2\)과 \(s_2^2\)은 둘 다 그 \(\sigma^2\)을 추정한 값이다. 그러니 둘을 합쳐 하나의 더 나은 추정값을 만들 수 있다. 각 표본분산에 그 자유도(\(n - 1\))를 곱해 더하고 전체 자유도로 나눈 것이 합동분산 \(s_p^2\)이고, 그 제곱근이 \(s_p\)다.</p>
 <div class="readout math">
@@ -213,6 +299,11 @@ p2     # 데이터 준비 자료에서 그린 상자그림
 vt &lt;- var.test(sodium_post ~ group, data = d)
 vt
 vt$p.value</pre></div>
+<div class="cb prompt"><span class="lang">프롬프트 · 같은 일을 에이전트에게</span><pre>scripts/03.ttest.R 에 이어서, 사후 나트륨 섭취량(sodium_post)을 집단(group)별로 비교할 준비를 해 줘.
+- 집단별 n, 평균, 표준편차, 분산을 표로 보여 준다.
+- 두 집단의 분산의 비가 1인지 var.test() 로 F 검정을 하고 결과를 vt 에 담는다.
+- 출력에서 F, 두 자유도, p-value, 분산 비의 신뢰구간을 짚어 주고, 영가설을 기각하는지 아닌지 말해 줘.
+- 아직 t 검정은 하지 않는다.</pre><button type="button" class="copy">복사</button></div>
 <div class="cb out"><span class="lang">출력 읽기</span><pre>	F test to compare two variances
 
 data:  sodium_post by group
@@ -224,6 +315,38 @@ sample estimates:
 ratio of variances 
          0.5043135 </pre></div>
 <p>표본분산의 비는 0.504다(F = 285751 / 566613). 교육군의 분산이 대조군의 절반쯤이라는 뜻이다. 그러나 p-value가 0.1077로 유의수준 0.05보다 커서 "분산의 비가 1이다"라는 영가설을 기각하지 못한다. 분산의 비의 95% 신뢰구간(0.218, 1.166)에도 1이 들어 있다.</p>
+<details class="fold">
+<summary>펼쳐 보기: F 분포는 어떻게 생겼나 — 영가설 아래와 대안가설 아래의 분포</summary>
+<p>t 검정에서 t 분포가 판단의 기준이었듯, 등분산 검정에서는 F 분포가 기준이다. 정규분포를 따르는 모집단에서 표본분산 \(s^2\)은 \((n-1)s^2/\sigma^2\)이 자유도 \(n-1\)인 \(\chi^2\) 분포를 따른다. 그런 \(\chi^2\) 변수 둘을 각각의 자유도로 나누어 비를 만들면 그 비가 따르는 분포가 F 분포다.</p>
+<div class="readout math">
+\[\frac{s_1^2/\sigma_1^2}{s_2^2/\sigma_2^2} \sim F(n_1-1,\ n_2-1)\]
+</div>
+<p>F 분포는 0보다 큰 쪽에만 있고 오른쪽 꼬리가 긴 비대칭 모양이다. 두 자유도가 커질수록 1 근처로 모인다. 분모 자유도가 2보다 크면 평균은 \(df_2/(df_2-2)\)로, 이 데이터(23, 23)에서는 1.095다. 이 식에서 두 가설 아래의 분포가 바로 나온다.</p>
+<ul>
+<li><b>영가설 아래</b>: \(\sigma_1^2/\sigma_2^2 = 1\)이므로 \(F = s_1^2/s_2^2\)이 그대로 \(F(23, 23)\)을 따른다. 유의수준 \(\alpha\)의 양쪽 꼬리, 곧 \(F \lt 0.433\)이거나 \(F \gt 2.312\)인 영역이 기각역이다. R의 양측 p-value는 두 꼬리 확률 가운데 작은 쪽의 두 배다.</li>
+<li><b>대안가설 아래</b>: 참 분산의 비가 \(\theta = \sigma_1^2/\sigma_2^2 \neq 1\)이면 \(F = \theta \cdot G\), \(G \sim F(23, 23)\)이다. 영가설 아래의 분포를 가로로 \(\theta\)배 늘인 곡선이다. \(\theta\)가 1보다 작으면 왼쪽으로 몰리고, 크면 오른쪽으로 퍼진다. 이 분포의 넓이 가운데 기각역에 들어가는 부분이 <b>검정력</b>, 곧 분산이 실제로 다를 때 그것을 잡아낼 확률이다.</li>
+</ul>
+<p>아래 실험판에서 참 분산의 비 \(\theta\)와 자유도를 움직여 본다. 검은 곡선이 영가설 아래의 분포, 파란 곡선이 대안가설 아래의 분포다. 관측한 F = 0.504는 영가설 분포의 기각역 밖에 있다. 그런데 \(\theta\)를 관측한 비 0.50에 두면 파란 넓이 가운데 기각역에 든 부분은 37%쯤이다. 분산이 실제로 절반이어도 24명씩으로는 열 번에 네 번도 잡아내지 못한다는 뜻이다. 자유도를 늘려 몇 명이면 80%가 되는지도 찾아본다(약 60명씩이면 75%, 80명씩이면 87%).</p>
+<div class="lab" data-type="fdist"></div>
+<p>같은 그림을 R로 그리면 아래와 같다. <code>df()</code>, <code>pf()</code>, <code>qf()</code>가 F 분포의 밀도, 누적확률, 분위수다. 대안가설 아래의 밀도는 \(\theta\)배 늘인 것이므로 \(x\)를 \(\theta\)로 나눈 자리의 밀도를 다시 \(\theta\)로 나눈다.</p>
+<div class="cb r"><span class="lang">R</span><pre>df1 &lt;- vt$parameter[["num df"]]      # 23
+df2 &lt;- vt$parameter[["denom df"]]    # 23
+theta &lt;- unname(vt$estimate)         # 관측한 분산의 비 0.504를 참값으로 가정해 본다
+crit &lt;- qf(c(0.025, 0.975), df1, df2) # 양측 기각역의 경계 0.433, 2.312
+
+p_f &lt;- ggplot(data.frame(x = c(0.01, 4)), aes(x)) +
+  stat_function(fun = df, args = list(df1 = df1, df2 = df2),
+                aes(colour = "H0: 비 = 1")) +
+  stat_function(fun = function(x) df(x / theta, df1, df2) / theta,
+                aes(colour = "H1: 비 = 0.504")) +
+  geom_vline(xintercept = crit, linetype = "dashed") +
+  geom_vline(xintercept = vt$statistic, linewidth = 1) +
+  labs(x = "F", y = "밀도", colour = NULL)
+p_f
+
+# 검정력: 참 비가 theta일 때 F가 기각역에 들어갈 확률
+pf(crit[1] / theta, df1, df2) + 1 - pf(crit[2] / theta, df1, df2)   # 0.358</pre></div>
+</details>
 <div class="scroll"><table>
 <thead><tr><th>등분산 검정의 결과</th><th>판단</th><th>쓰는 검정</th><th>R 호출</th></tr></thead>
 <tbody>
@@ -235,7 +358,6 @@ ratio of variances
 <div class="cb r"><span class="lang">R</span><pre># 2단계: 등분산 검정의 결과에 따라 t 검정을 고른다
 equal_var &lt;- vt$p.value &gt;= 0.05      # 영가설(분산의 비 = 1)을 기각하지 못하면 TRUE: 등분산을 가정한다
 equal_var
-
 res2 &lt;- t.test(sodium_post ~ group, data = d, var.equal = equal_var)
 res2
 broom::tidy(res2)
@@ -243,6 +365,11 @@ broom::tidy(res2)
 # 두 검정을 직접 지정해 비교해 볼 수도 있다
 t.test(sodium_post ~ group, data = d, var.equal = TRUE)    # Student 검정
 t.test(sodium_post ~ group, data = d)                      # Welch 검정 (기본값)</pre></div>
+<div class="cb prompt"><span class="lang">프롬프트 · 같은 일을 에이전트에게</span><pre>vt 의 p-value 가 0.05 이상이면 등분산을 가정하는 Student t 검정, 아니면 Welch t 검정이 되도록 var.equal 을 정해 사후 섭취량을 집단별로 비교해 줘. 결과는 res2 에 담는다.
+- 출력의 첫 줄이 "Two Sample t-test"인지 "Welch Two Sample t-test"인지 알려 주고, 어느 검정이 골라졌는지 말해 준다.
+- t, df, p-value, 평균 차이의 95% 신뢰구간, 두 집단의 평균을 짚어 준다.
+- 비교를 위해 Student 와 Welch 를 둘 다 실행해 t, df, p-value 가 어떻게 다른지 표로 보여 줘.
+- 다른 줄은 고치지 않는다.</pre><button type="button" class="copy">복사</button></div>
 <div class="cb out"><span class="lang">출력 읽기</span><pre>	Two Sample t-test
 
 data:  sodium_post by group
@@ -277,10 +404,14 @@ c(d = d2, g = d2 * J)
 # 패키지로 확인
 cohens_d(sodium_post ~ group, data = d)
 hedges_g(sodium_post ~ group, data = d)</pre></div>
+<div class="cb prompt"><span class="lang">프롬프트 · 효과크기</span><pre>res2 의 효과크기를 구해 줘.
+- 합동 표준편차 sp 를 직접 계산하고, 두 평균의 차이를 sp 로 나눈 Cohen 의 d 와 작은 표본 보정을 한 Hedges 의 g 를 구한다.
+- effectsize 패키지의 cohens_d(), hedges_g() 로 같은 값이 나오는지 확인한다.
+- 부호가 음수인 까닭(어느 집단에서 어느 집단을 뺐는지)을 설명해 줘.</pre><button type="button" class="copy">복사</button></div>
 </section>
 
 <section class="panel" id="s4">
-<div class="section-head"><span class="section-num">04</span><h2>대응표본 t 검정</h2></div>
+<div class="section-head"><span class="section-num">05</span><h2>대응표본 t 검정</h2></div>
 <p><strong>질문.</strong> 교육군 24명의 나트륨 섭취량은 교육 전보다 교육 후에 달라졌는가? 같은 사람을 두 번 쟀으므로 두 측정값은 독립이 아니다.</p>
 <p>대응표본 검정은 사람마다 차이 \(D = \text{사전} - \text{사후}\)(<a href="prepare-for-ttest.html#s4">데이터 준비 자료</a>에서 만든 <code>diff</code> 열)를 구한 다음, 차이의 평균이 0인지 보는 단일표본 검정이다. 사람마다 원래 많이 먹고 적게 먹는 차이는 뺄셈에서 사라지고 변화량만 남는다.</p>
 <div class="readout math">
@@ -289,11 +420,6 @@ hedges_g(sodium_post ~ group, data = d)</pre></div>
 </div>
 <div class="cb r"><span class="lang">R</span><pre>edu &lt;- d %&gt;% filter(group == "교육군")    # diff 열은 데이터 준비 자료에서 만들었다
 
-# 가정 확인: 정규성을 보는 대상은 원자료가 아니라 차이다
-ggplot(edu, aes(sample = diff)) +
-  stat_qq() +
-  stat_qq_line()
-shapiro.test(edu$diff)
 p3     # 데이터 준비 자료에서 그린 사전·사후 변화 그림
 
 # 검정
@@ -302,6 +428,10 @@ res3
 
 # 차이에 대한 단일표본 검정과 결과가 같다
 t.test(edu$diff, mu = 0)</pre></div>
+<div class="cb prompt"><span class="lang">프롬프트 · 같은 일을 에이전트에게</span><pre>scripts/03.ttest.R 에 이어서, 교육군(group == "교육군")의 사전·사후 나트륨 섭취량을 대응표본 t 검정으로 비교해 줘.
+- t.test() 에 paired = TRUE 를 주어 검정하고 결과를 res3 에 담는다. 차이(diff = 사전 − 사후)는 데이터 준비 자료에서 이미 만들었다.
+- 같은 자료에서 diff 에 대한 단일표본 검정(mu = 0)을 실행해 두 결과가 같은 것을 보여 준다.
+- paired = TRUE 를 빼고 독립표본으로 잘못 검정하면 t 와 p 가 어떻게 달라지는지도 보여 주고, 왜 그런지 한 문장으로 설명해 줘.</pre><button type="button" class="copy">복사</button></div>
 <div class="lab" data-type="paired"></div>
 <div class="callout caution"><p><strong>같은 자료에 독립표본 검정을 쓰면.</strong> <code>t.test(edu$sodium_pre, edu$sodium_post)</code>처럼 <code>paired = TRUE</code>를 빼고 실행해 본다. 평균 차이는 같은데 표준오차가 커져서 t가 작아진다. 사전과 사후가 강하게 상관되어 있을수록 대응표본 검정이 유리하다.</p></div>
 
@@ -321,10 +451,67 @@ unname(res3$statistic) / sqrt(nrow(edu))    # dz와 같다
 
 # 패키지로 확인 (dz)
 cohens_d(edu$sodium_pre, edu$sodium_post, paired = TRUE)</pre></div>
+<div class="cb prompt"><span class="lang">프롬프트 · 효과크기</span><pre>res3 의 효과크기를 두 가지로 구해 줘.
+- dz: 차이의 평균을 차이의 표준편차로 나눈 값. t / sqrt(n) 과 같은지 확인한다.
+- dav: 차이의 평균을 사전·사후 표준편차의 평균으로 나눈 값.
+- 사전·사후의 상관계수도 함께 구하고, 상관이 높을수록 dz 가 dav 보다 커지는 까닭을 설명해 줘.
+- 보고할 때 어느 효과크기인지 반드시 밝힌다는 점을 결과 문장에 반영해 줘.</pre><button type="button" class="copy">복사</button></div>
+</section>
+
+<section class="panel" id="report">
+<div class="section-head"><span class="section-num">06</span><h2>프롬프트로 결과 한 번에 만들기</h2></div>
+<p>위에서는 검정을 하나씩 했다. 보고서에 넣을 것은 결국 기술통계 요약표, 자료의 도표, 검정 결과표와 검정 도표, 그리고 결과 문장이다. 이것을 코딩 에이전트에게 한 번에 시키는 프롬프트가 아래에 있다. 표는 APA 양식(표 번호는 굵게, 제목은 다음 줄에 기울임꼴, 가로선만 쓰고 세로선은 쓰지 않음)으로 받는다. 프롬프트의 요점은 <b>숫자를 손으로 적지 말고 코드로 계산한 값을 그대로 넣게</b> 하고, 내가 R 출력과 대조할 수 있게 <b>코드를 함께 받는</b> 것이다.</p>
+<div class="cb prompt"><span class="lang">프롬프트 · 요약표·도표·검정 도표·결과 문장을 한 번에</span><pre>scripts/04.report.R 을 만들어 실행해 줘. 데이터는 dataset/working/sodium_clean.rds 를 read_rds() 로 읽는다(group 은 교육군·대조군 factor, diff = 사전 − 사후).
+1. 표 1 · 기술통계: 집단별로 n, 사전 M (SD), 사후 M (SD), 변화 M (SD)를 한 표로 만든다. 소수 첫째 자리까지.
+2. 표 2 · 검정 결과: 단일표본(사전 vs 3000), 등분산 검정(F), 독립표본(사후, 등분산 검정 결과에 따라 Student 또는 Welch), 대응표본(교육군 사전 vs 사후)을 행으로 두고 t(또는 F), df, p, 95% 신뢰구간, 효과크기(d, g, dz)를 열로 둔다. p 는 소수 셋째 자리, .001 보다 작으면 "&lt; .001".
+3. 두 표는 APA 양식으로 Markdown 파일 output/tables.md 에 저장한다: "표 1"은 굵게, 제목은 다음 줄에 기울임꼴, 표 아래에 "주." 로 단위(mg/일)와 효과크기의 종류를 적는다.
+4. 그림 1: 집단별 사후 섭취량을 상자그림 위에 관측값 점을 겹쳐 그리고 평균을 표시한다. 격자 없는 흰 배경(theme_classic), 축 제목에 단위. output/fig1_box.png, 5×4 인치, 300 dpi.
+5. 그림 2: 독립표본 t 검정의 영가설 아래 t 분포를 그리고, 양측 5% 기각역과 관측한 t, p-value 에 해당하는 넓이를 색으로 구분해 표시한다. 제목에 p-value 를 적는다. output/fig2_ttest.png, 6×4 인치, 300 dpi.
+6. 독립표본 검정의 결과 문장을 APA 형식으로 쓴다: 집단별 M 과 SD, t(df), p, 평균 차이와 95% CI, 효과크기와 그 이름.
+- 모든 숫자는 코드로 계산한 값을 넣고 손으로 적지 않는다. 표의 숫자가 R 출력과 맞는지 내가 대조할 수 있게 검정 결과 객체(res1, vt, res2, res3)를 출력한다.
+- 한글 글꼴은 데이터 준비 자료의 글꼴 설정을 따른다.</pre><button type="button" class="copy">복사</button></div>
+<h3>예: 이 프롬프트로 받게 될 결과</h3>
+<p>아래는 같은 요구를 R로 직접 만들어 본 것이다. 에이전트가 만든 결과는 이와 같아야 한다. 숫자는 위 절들의 R 출력과 같고, 글꼴과 세부 모양은 환경에 따라 조금 다를 수 있다.</p>
+<div class="scroll">
+<table class="apa">
+<caption><b>표 1</b><br><i>집단별 교육 전·후 나트륨 섭취량의 기술통계</i></caption>
+<thead><tr><th>집단</th><th>n</th><th>사전 M (SD)</th><th>사후 M (SD)</th><th>변화 M (SD)</th></tr></thead>
+<tbody>
+<tr><td>교육군</td><td>24</td><td>3194.6 (690.4)</td><td>2901.3 (534.6)</td><td>293.3 (443.7)</td></tr>
+<tr><td>대조군</td><td>24</td><td>3254.6 (635.9)</td><td>3300.4 (752.7)</td><td>−45.8 (541.5)</td></tr>
+</tbody></table>
+<p class="apa-note"><i>주.</i> 단위는 mg/일. 변화 = 사전 − 사후.</p>
+</div>
+<div class="scroll">
+<table class="apa">
+<caption><b>표 2</b><br><i>나트륨 섭취량에 대한 가설검정 결과</i></caption>
+<thead><tr><th>검정</th><th>비교</th><th>통계량</th><th>df</th><th>p</th><th>95% CI</th><th>효과크기</th></tr></thead>
+<tbody>
+<tr><td>단일표본 t</td><td>사전 vs 3000</td><td>t = 2.37</td><td>47</td><td>.022</td><td>[3033.7, 3415.4]</td><td>d = 0.34</td></tr>
+<tr><td>등분산 F</td><td>사후, 교육군 vs 대조군</td><td>F = 0.50</td><td>23, 23</td><td>.108</td><td>[0.22, 1.17]</td><td>—</td></tr>
+<tr><td>독립표본 t (Student)</td><td>사후, 교육군 − 대조군</td><td>t = −2.12</td><td>46</td><td>.040</td><td>[−778.5, −19.8]</td><td>g = −0.60</td></tr>
+<tr><td>대응표본 t</td><td>교육군 사전 − 사후</td><td>t = 3.24</td><td>23</td><td>.004</td><td>[106.0, 480.7]</td><td>d<sub>z</sub> = 0.66</td></tr>
+</tbody></table>
+<p class="apa-note"><i>주.</i> 신뢰구간은 단일표본은 평균, 등분산 검정은 분산의 비, 나머지는 평균 차이에 대한 것. g는 Hedges의 g, d<sub>z</sub>는 차이의 표준편차로 나눈 효과크기.</p>
+</div>
+<div class="two-figs">
+<figure class="shot"><img src="../assets/images/ttest/apa-box.png" width="750" height="600" loading="lazy" alt="교육군과 대조군의 사후 나트륨 섭취량 상자그림. 관측값 점이 겹쳐 있고 흰 마름모가 평균이다"><figcaption><b>그림 1.</b> 집단별 사후 나트륨 섭취량(mg/일). 상자는 사분위 범위, 가운데 선은 중앙값, 흰 마름모는 평균, 점은 관측값.</figcaption></figure>
+<figure class="shot"><img src="../assets/images/ttest/apa-ttest.png" width="900" height="600" loading="lazy" alt="자유도 46의 t 분포. 양쪽 꼬리의 기각역이 주황, 관측한 t보다 극단적인 영역이 파랑으로 칠해져 있고 관측한 t = -2.12에 세로선"><figcaption><b>그림 2.</b> 독립표본 t 검정(Student)의 영가설 아래 t 분포(df = 46). 주황은 양측 5% 기각역, 파랑은 p-value에 해당하는 넓이, 굵은 세로선이 관측한 t = −2.12.</figcaption></figure>
+</div>
+<div class="callout"><p><strong>결과 문장(APA 형식).</strong> 교육이 끝난 뒤 교육군(<i>M</i> = 2901.3, <i>SD</i> = 534.6)의 나트륨 섭취량은 대조군(<i>M</i> = 3300.4, <i>SD</i> = 752.7)보다 낮았다, <i>t</i>(46) = −2.12, <i>p</i> = .040, 평균 차이 = −399.2 mg/일, 95% CI [−778.5, −19.8], Hedges의 <i>g</i> = −0.60.</p></div>
+<div class="scroll"><table class="check">
+<thead><tr><th>확인할 것</th><th>어떻게 확인하나</th></tr></thead>
+<tbody>
+<tr><td>표의 숫자</td><td>표 2의 t, df, p, 신뢰구간이 03~05절의 R 출력과 같은가. 표 1의 M, SD 가 04절 첫 코드의 집단별 요약과 같은가</td></tr>
+<tr><td>어느 검정인가</td><td>독립표본 행이 등분산 검정의 결과대로 Student 인가. 에이전트가 Welch 를 골랐다면 vt 의 p-value 를 어떻게 읽었는지 묻는다</td></tr>
+<tr><td>그림 2</td><td>세로선이 t = −2.12 에 있고, 기각역의 경계가 ±2.01 인가. 파란 넓이가 양쪽 꼬리에 모두 있는가(양측 검정)</td></tr>
+<tr><td>결과 문장</td><td>M, SD, t(df), p, 차이와 CI, 효과크기의 이름이 모두 들어 있는가. "유의했다"만 있고 효과크기가 빠지지 않았는가</td></tr>
+<tr><td>손으로 적은 숫자</td><td>코드에서 표로 숫자가 흘러가는가. 코드에 2901.3 같은 값이 직접 적혀 있으면 손으로 넣은 것이다</td></tr>
+</tbody></table></div>
 </section>
 
 <section class="panel" id="s5">
-<div class="section-head"><span class="section-num">05</span><h2>정리</h2></div>
+<div class="section-head"><span class="section-num">07</span><h2>정리</h2></div>
 <div class="scroll"><table>
 <thead><tr><th>검정</th><th>R 호출</th><th>추정값</th><th>표준오차</th><th>df</th><th>효과크기</th></tr></thead>
 <tbody>
@@ -341,7 +528,7 @@ cohens_d(edu$sodium_pre, edu$sodium_post, paired = TRUE)</pre></div>
 <h3>보고에 넣을 것</h3>
 <p>집단별 평균과 표준편차, 검정통계량과 자유도, p-value, 평균 차이의 신뢰구간, 효과크기와 그 종류. 실험판 아래의 보고 문장이 이 순서를 따른다.</p>
 <h3>확인 범위</h3>
-<p>이 자료와 앞 자료(데이터 준비)의 R 코드는 R 4.6.0과 tidyverse 2.0.0에서 처음부터 끝까지 이어서 실행해 오류 없이 도는 것과, 단일표본 t 검정의 출력이 위에 적은 것과 같음을 확인했다. <a href="prepare-for-ttest.html#korean-font">글꼴을 다루는 extrafont 부분</a>은 컴퓨터마다 결과가 달라 이 확인에 넣지 않았다. 실험판이 계산하는 t, df, p-value, 신뢰구간, 효과크기는 R의 결과와 같다.</p>
+<p>이 자료와 앞 자료(데이터 준비)의 R 코드는 R 4.6.0과 tidyverse 2.0.0에서 처음부터 끝까지 이어서 실행해 오류 없이 도는 것과, 단일표본 t 검정의 출력, QQ 그림, Shapiro-Wilk 검정의 출력이 위에 적은 것과 같음을 확인했다. <a href="prepare-for-ttest.html#korean-font">글꼴을 다루는 extrafont 부분</a>은 컴퓨터마다 결과가 달라 이 확인에 넣지 않았다. 실험판이 계산하는 t, df, p-value, 신뢰구간, 효과크기와, F 분포 실험판의 임계값·p-value·검정력은 R의 <code>qf()</code>, <code>pf()</code> 결과와 같다.</p>
 </section>
 
 <section class="panel" id="refs">
@@ -382,6 +569,12 @@ function tcdf(t,v){const p=0.5*ibeta(v/2,0.5,v/(v+t*t));return t>0?1-p:p;}
 function tpdf(t,v){return Math.exp(lgamma((v+1)/2)-lgamma(v/2)-0.5*Math.log(v*Math.PI)-(v+1)/2*Math.log(1+t*t/v));}
 function tinv(p,v){let lo=-500,hi=500;for(let i=0;i<90;i++){const m=(lo+hi)/2;if(tcdf(m,v)<p)lo=m;else hi=m;}return (lo+hi)/2;}
 function pval(t,v,alt){return alt==='less'?tcdf(t,v):alt==='greater'?tcdf(-t,v):2*tcdf(-Math.abs(t),v);}
+
+/* ── F 분포 ── */
+function fcdf(x,d1,d2){if(x<=0)return 0;return ibeta(d1/2,d2/2,d1*x/(d1*x+d2));}
+function fpdf(x,d1,d2){if(x<=0)return 0;const lb=lgamma(d1/2)+lgamma(d2/2)-lgamma((d1+d2)/2);
+  return Math.exp((d1/2)*Math.log(d1/d2)+(d1/2-1)*Math.log(x)-((d1+d2)/2)*Math.log(1+d1*x/d2)-lb);}
+function finv(p,d1,d2){let lo=0,hi=1;while(fcdf(hi,d1,d2)<p&&hi<1e6)hi*=2;for(let i=0;i<80;i++){const m=(lo+hi)/2;if(fcdf(m,d1,d2)<p)lo=m;else hi=m;}return (lo+hi)/2;}
 
 /* ── 통계량 ── */
 const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
@@ -541,8 +734,63 @@ function build(root){
     fill();render();});
   render();return render;
 }
-const renders=[...document.querySelectorAll('.lab')].map(build);
+/* ── F 분포 실험판: 영가설 아래의 F(df1, df2)와 대안가설(참 비 θ) 아래의 θ·F(df1, df2) ── */
+function buildF(root){
+  const F_OBS=vari(DATA.poe)/vari(DATA.poc);        // 관측한 분산의 비 0.504
+  const st={d1:23,d2:23,th:0.5,alpha:0.05};
+  root.innerHTML=`<p class="lab-title">실험판 · F 분포: 영가설과 대안가설 아래의 분포</p><div class="ctrls">
+    <div class="ctrl"><label for="f-d1">분자 자유도 \\(n_1 - 1\\) = <output id="f-d1-o"></output></label><input type="range" id="f-d1" min="2" max="120" step="1" value="23"></div>
+    <div class="ctrl"><label for="f-d2">분모 자유도 \\(n_2 - 1\\) = <output id="f-d2-o"></output></label><input type="range" id="f-d2" min="2" max="120" step="1" value="23"></div>
+    <div class="ctrl"><label for="f-th">대안가설의 참 분산 비 \\(\\theta\\) = <output id="f-th-o"></output></label><input type="range" id="f-th" min="0.1" max="5" step="0.01" value="0.5"></div>
+    <div class="ctrl"><span>유의수준 \\(\\alpha\\)</span>${seg('f-al',[['0.1','.10'],['0.05','.05'],['0.01','.01']],'0.05')}</div></div>
+    <svg class="chart" role="img" aria-label="영가설과 대안가설 아래의 F 분포"></svg>
+    <div class="legend"><span><i class="lh0"></i>\\(H_0\\) 아래: \\(F(df_1, df_2)\\)</span><span><i class="lh1"></i>\\(H_1\\) 아래: \\(\\theta \\cdot F(df_1, df_2)\\)</span><span><i class="la"></i>기각역 (유의수준 \\(\\alpha\\))</span><span><i class="lp"></i>검정력 (\\(H_1\\) 넓이 중 기각역 안)</span><span><i class="lo"></i>관측한 F</span></div>
+    <dl class="read" data-k="read"></dl><p class="verdict" data-k="verdict"></p>`;
+  const svg=root.querySelector('svg'),q=k=>root.querySelector(`[data-k="${k}"]`);
+  function render(){
+    const {d1,d2,th,alpha:a}=st;
+    root.querySelector('#f-d1-o').textContent=d1;root.querySelector('#f-d2-o').textContent=d2;root.querySelector('#f-th-o').textContent=th.toFixed(2);
+    const cl=finv(a/2,d1,d2),ch=finv(1-a/2,d1,d2);
+    const pObs=2*Math.min(fcdf(F_OBS,d1,d2),1-fcdf(F_OBS,d1,d2));
+    const power=fcdf(cl/th,d1,d2)+1-fcdf(ch/th,d1,d2);
+    const f0=x=>fpdf(x,d1,d2),f1=x=>fpdf(x/th,d1,d2)/th;
+    // 그림
+    const W=Math.max(300,Math.round(svg.getBoundingClientRect().width)||720),H=W<480?250:310;
+    const L=14,R=14,T=30,B=64,pw=W-L-R,ph=H-T-B;
+    const xm=Math.min(40,Math.max(3.5,ch*1.15,th*finv(0.99,d1,d2)*1.08,F_OBS*1.3));
+    const N=320,g=[];for(let i=1;i<=N;i++){const x=xm*i/N;g.push([x,f0(x),f1(x)]);}
+    const ym=Math.min(8,Math.max(...g.filter(p=>p[0]>=0.04).map(p=>Math.max(p[1],p[2]))))*1.12;
+    const X=x=>L+x/xm*pw,Y=y=>T+ph-Math.min(y,ym)/ym*ph,y0=Y(0);
+    const curve=fn=>'M'+X(0).toFixed(1)+','+y0+g.map(p=>'L'+X(p[0]).toFixed(1)+','+Y(fn(p[0])).toFixed(1)).join('');
+    const area=(fn,lo,hi)=>{lo=Math.max(lo,0);hi=Math.min(hi,xm);if(hi<=lo)return '';const n=Math.max(8,Math.round(N*(hi-lo)/xm));
+      let s=`M${X(lo).toFixed(1)},${y0}`;for(let i=0;i<=n;i++){const x=lo+(hi-lo)*i/n;s+=`L${X(x).toFixed(1)},${Y(fn(x)).toFixed(1)}`;}return s+`L${X(hi).toFixed(1)},${y0}Z`;};
+    const fs=W<480?10.5:12;let o='';
+    o+=`<path d="${area(f0,0,cl)}" fill="var(--warn)" fill-opacity=".35"/><path d="${area(f0,ch,xm)}" fill="var(--warn)" fill-opacity=".35"/>`;
+    o+=`<path d="${area(f1,0,cl)}" fill="var(--accent)" fill-opacity=".5"/><path d="${area(f1,ch,xm)}" fill="var(--accent)" fill-opacity=".5"/>`;
+    o+=`<path d="${curve(f1)}" fill="none" stroke="var(--accent)" stroke-width="1.8"/>`;
+    o+=`<path d="${curve(f0)}" fill="none" stroke="var(--ink)" stroke-width="1.6"/>`;
+    o+=`<line x1="${L}" x2="${W-R}" y1="${y0}" y2="${y0}" stroke="var(--line)"/>`;
+    const step=xm<=5?0.5:xm<=12?1:xm<=25?2:5;
+    for(let v=0;v<=xm+1e-9;v+=step){o+=`<line x1="${X(v)}" x2="${X(v)}" y1="${y0}" y2="${y0+5}" stroke="var(--line)"/><text x="${X(v)}" y="${y0+19}" text-anchor="middle" font-size="${fs}">${+v.toFixed(1)}</text>`;}
+    const band=(a_,b_)=>`<rect x="${X(a_)}" y="${y0-3}" width="${X(b_)-X(a_)}" height="6" fill="var(--warn)"/>`;
+    const cl_=v=>`<line x1="${X(v)}" x2="${X(v)}" y1="${T+ph*0.3}" y2="${y0}" stroke="var(--warn)" stroke-dasharray="4 3" stroke-width="1.2"/><text x="${X(v)}" y="${y0+37}" text-anchor="middle" font-size="${fs}" style="fill:var(--warn)">${f(v,3)}</text>`;
+    o+=band(0,cl)+cl_(cl);if(ch<xm)o+=band(ch,xm)+cl_(ch);
+    const xo=X(F_OBS);o+=`<line x1="${xo}" x2="${xo}" y1="${T-6}" y2="${y0}" stroke="var(--ink)" stroke-width="2.4"/><text x="${xo+6}" y="${T-12}" text-anchor="start" font-size="${fs+1.5}" font-weight="500" style="fill:var(--ink)">관측한 F = ${f(F_OBS,3)}</text>`;
+    o+=`<text x="${W-R}" y="${H-4}" text-anchor="end" font-size="${fs}">F(${d1}, ${d2}) · H₁의 참 비 θ = ${th.toFixed(2)}</text>`;
+    svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('height',H);svg.innerHTML=o;
+    // 수치
+    const items=[['H₀ 분포의 평균',d2>2?f(d2/(d2-2),3):'—'],['기각역의 경계',`[0, ${f(cl,3)}] ∪ [${f(ch,3)}, ∞)`],['관측한 F',f(F_OBS,4)],['관측한 F의 양측 p-value',fp(pObs),1],['검정력 (참 비 θ일 때)',(power*100).toFixed(1)+'%',1]];
+    q('read').innerHTML=items.map(i=>`<div><dt>${i[0]}</dt><dd${i[2]?' class="key"':''}>${i[1]}</dd></div>`).join('');
+    const v=q('verdict');v.classList.toggle('rej',power>=0.8);
+    v.innerHTML=`두 집단의 분산의 비가 실제로 <strong>${th.toFixed(2)}</strong>라면, 자유도 (${d1}, ${d2})의 F 검정이 유의수준 ${a}에서 영가설을 기각할 확률은 <strong>${(power*100).toFixed(1)}%</strong>다. `+(power>=0.8?'흔히 기준으로 삼는 80%를 넘는다.':'80%에 못 미친다. 영가설을 기각하지 못해도 분산이 같다는 증거로 읽을 수 없다.');
+  }
+  root.addEventListener('input',e=>{const el=e.target;if(el.id==='f-d1')st.d1=+el.value;else if(el.id==='f-d2')st.d2=+el.value;else if(el.id==='f-th')st.th=+el.value;else if(el.name==='f-al')st.alpha=+el.value;render();});
+  render();return render;
+}
+const renders=[...document.querySelectorAll('.lab')].map(r=>r.dataset.type==='fdist'?buildF(r):build(r));
 let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>renders.forEach(r=>r()),120);});
+/* 접힌 상자 안의 실험판은 폭을 모른 채 그려지므로, 펼칠 때 다시 그린다 */
+document.querySelectorAll('details.fold').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)renders.forEach(r=>r());}));
 </script>
 </body>
 </html>

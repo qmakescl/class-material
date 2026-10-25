@@ -166,6 +166,7 @@
     <a href="#packages"><b>08</b><span>테마 패키지</span></a>
     <a href="#custom"><b>09</b><span>theme 사용자화</span></a>
     <a href="#hangul"><b>10</b><span>showtext 한글</span></a>
+    <a href="#gallery-site"><b>11</b><span>R Graph Gallery</span></a>
     <a href="#refs"><b>—</b><span>참고문헌</span></a>
   </nav>
   <div class="rail-tags" aria-label="태그">
@@ -208,7 +209,7 @@
 
 <!-- 01 -->
 <section class="panel" id="basic">
-  <div class="section-head"><span class="section-num">01</span><h2>가장 기본적인 ggplot(): cars로 첫 그림</h2></div>
+  <div class="section-head"><span class="section-num">01</span><h2>가장 기본적인 ggplot(): cars 데이터셋으로 시각화를 시작합니다.</h2></div>
   <p><code>cars</code>는 R에 기본으로 들어 있는 자료입니다. 1920년대에 자동차 50대가 달리던 속도(<code>speed</code>, 마일/시)와 그 속도에서 브레이크를 밟아 멈추기까지 달린 거리(<code>dist</code>, 피트)를 쟀습니다. 열이 둘뿐이어서 ggplot()이 무엇을 정하고 무엇을 알아서 채우는지 보기 좋습니다. 아래 코드는 데이터, 매핑, geom 세 가지만 적고 나머지는 모두 기본값에 맡깁니다.</p>
   <div class="split">
     <div class="ctl">
@@ -969,6 +970,27 @@ ggplot(
       <li>09절에서 만든 <code>theme_lab()</code>으로 최종 그림을 저장하고, 다른 운영체제를 쓰는 사람과 결과를 비교하세요.</li></ol></div>
 </section>
 
+<section class="panel" id="gallery-site">
+  <div class="section-head"><span class="section-num">11</span><h2>더 보기: R Graph Gallery</h2></div>
+  <p>이 자료는 산점도 한 장을 끝까지 다듬는 데 집중했습니다. R로 그릴 수 있는 그림의 종류는 훨씬 많습니다. <a href="https://r-graph-gallery.com/" target="_blank" rel="noopener noreferrer">R Graph Gallery</a>(Yan Holtz가 운영)는 R 그림 예제 400여 개를 50가지 가까운 종류로 묶어 둔 곳입니다. 예제마다 <b>다시 실행할 수 있는 R 코드</b>와 설명이 붙어 있고, 대부분 ggplot2로 그린 것이라 이 자료에서 익힌 구성요소 이름 그대로 읽을 수 있습니다.</p>
+  <div class="tbl-wrap"><table class="ftbl">
+    <thead><tr><th>찾는 것</th><th>갤러리에서 보는 곳</th><th>이 자료와의 연결</th></tr></thead>
+    <tbody>
+      <tr><td>내 자료에 맞는 그림 종류</td><td>분포(Distribution), 상관(Correlation), 순위(Ranking), 부분과 전체(Part of a whole), 변화(Evolution), 지도(Map), 흐름(Flow)으로 나뉜 차트 종류 목록</td><td>04절의 "무엇을 보여 줄 때 어떤 geom" 표를 넓힌 것</td></tr>
+      <tr><td>ggplot2의 세부 조정</td><td>ggplot2 절: 축, 색, 테마, 범례, 패널 나누기(facet)</td><td>05·07~09절의 구성요소와 테마</td></tr>
+      <tr><td>색 고르기와 흔한 실수</td><td>General knowledge 절의 Colors, Caveats</td><td>03절의 미적 속성, 09절의 학술지 그림</td></tr>
+      <tr><td>잘 만든 그림의 예</td><td>Best R charts</td><td>따라 그려 보며 코드를 읽는 연습</td></tr>
+    </tbody>
+  </table></div>
+  <p>갤러리의 코드는 그대로 실행해도 되고, 코딩 에이전트에게 주소를 알려 주고 내 자료에 맞게 고쳐 달라고 해도 됩니다. 어느 쪽이든 결과 그림에서 데이터, 미적 매핑, geom, 테마가 각각 어디에 쓰였는지 읽어 내는 것이 이 자료에서 익힌 것을 쓰는 길입니다.</p>
+  <div class="cb prompt"><span class="lang">프롬프트 · 갤러리 예제를 내 자료에 맞게</span><pre>R Graph Gallery 의 이 예제 [주소] 를 내 자료에 맞게 고쳐 줘. 스크립트는 scripts/11_gallery.R 로 만든다.
+- 예제의 데이터 대신 data/ 의 내 자료를 쓰고, 예제의 열 이름을 내 자료의 [열1], [열2] 로 바꾼다.
+- 그림 종류와 테마는 예제를 따르되, 저장은 AGENTS.md 의 그림 모양 규칙대로 한다.
+- 예제 코드에서 바꾼 줄과 바꾸지 않은 줄을 나누어 보여 주고, 바꾼 줄마다 어느 구성요소인지 설명해 줘.
+- 예제가 쓰는 패키지가 설치되어 있지 않으면 먼저 알려 주고 내 허락을 받는다.
+- 그림은 output/figures/11_gallery.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
+</section>
+
 <section class="panel" id="refs">
   <h3>참고문헌</h3>
   <ol class="refs">
@@ -978,6 +1000,7 @@ ggplot(
     <li>ggplot2 reference: Modify components of a theme (<code>theme()</code>), Complete themes. <a href="https://ggplot2.tidyverse.org/reference/theme.html" target="_blank" rel="noopener noreferrer">ggplot2.tidyverse.org</a></li>
     <li>van den Brand, T. (2025). ggplot2 4.0.0. <i>Tidyverse blog</i>. <a href="https://tidyverse.org/blog/2025/09/ggplot2-4-0-0/" target="_blank" rel="noopener noreferrer">tidyverse.org</a></li>
     <li>Qiu, Y. showtext: Using fonts more easily in R graphs. <a href="https://github.com/yixuan/showtext" target="_blank" rel="noopener noreferrer">github.com/yixuan/showtext</a></li>
+    <li>Holtz, Y. <i>The R Graph Gallery</i>. <a href="https://r-graph-gallery.com/" target="_blank" rel="noopener noreferrer">r-graph-gallery.com</a></li>
     <li>Google Fonts. Noto Sans KR. <a href="https://fonts.google.com/noto/specimen/Noto+Sans+KR" target="_blank" rel="noopener noreferrer">fonts.google.com</a></li>
     <li>Arnold, J. B. ggthemes; Rudis, B. hrbrthemes; Wilke, C. O. cowplot; Kassambara, A. ggpubr; Dawson, C. ggprism; BBC Visual and Data Journalism, bbplot.</li>
     <li>American Psychological Association. Figure setup. <i>APA Style</i>. <a href="https://apastyle.apa.org/style-grammar-guidelines/tables-figures/figures" target="_blank" rel="noopener noreferrer">apastyle.apa.org</a></li>

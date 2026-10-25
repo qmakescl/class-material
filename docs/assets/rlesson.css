@@ -27,7 +27,9 @@ main td code { white-space: nowrap; }
 .callout code { background: rgb(255 255 255 / 65%); }
 .callout p + p { margin-top: 8px; }
 .callout > .shot { margin: 10px 0; }
-.readout.math { padding: 10px 16px; }
+/* 수식 상자: 분수 안의 한글(위첨자·아래첨자 포함)이 잘리지 않게 위아래 여백을 넉넉히 둔다 */
+.readout.math { padding: 18px 16px; }
+.readout.math .katex-display { padding: 6px 0; margin: .3em 0; }
 /* 펼쳐 보는 상세 안내(details.fold): 접어 두면 한 줄, 펼치면 단계·그림·표가 나온다 */
 .fold { margin-top: 10px; }
 .fold > * + * { margin-top: 12px; }
