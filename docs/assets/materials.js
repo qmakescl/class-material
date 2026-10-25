@@ -150,5 +150,15 @@ window.MATERIALS = [
     practice: true,
     tags: ["인공지능", "사례분석", "딥러닝", "이미지분류", "신경망", "합성곱", "코딩에이전트"],
     date: "2026-10-11"
+  },
+  {
+    subject: "data-science",
+    label: "인터랙티브 실습",
+    title: "ggplot 을 이용한 시각화",
+    description: "cars 자료로 가장 기본적인 ggplot() 그림을 그려 구성요소와 기본값을 읽고, 구성요소별 함수, theme()의 구조와 사용자화, showtext의 font_add_google()과 Noto Sans KR로 Windows·macOS 어디서나 한글 쓰기까지 R 코드와 코딩 에이전트 프롬프트를 함께 보며 익힙니다.",
+    href: "data-science/ggplot-visualization.html",
+    practice: true,
+    tags: ["데이터과학", "시각화", "R", "ggplot2", "레이어문법", "테마", "한글글꼴"],
+    date: "2026-10-25"
   }
 ];

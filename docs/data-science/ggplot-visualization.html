@@ -1,0 +1,1599 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>ggplot 을 이용한 시각화 | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/ggplot-visualization.html">
+<meta name="description" content="cars 자료로 가장 기본적인 ggplot() 그림을 그려 구성요소와 기본값을 읽고, theme()의 구조와 사용자화, showtext로 한글 글꼴 쓰기까지 코딩 에이전트 프롬프트와 함께 익히는 데이터과학 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="ggplot 을 이용한 시각화 | Q의 아카이브">
+<meta property="og:description" content="cars 자료로 가장 기본적인 ggplot() 그림부터 theme() 사용자화, showtext 한글 글꼴까지 R 코드와 코딩 에이전트 프롬프트를 함께 보며 익힙니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/ggplot-visualization.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="데이터과학 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ggplot 을 이용한 시각화 | Q의 아카이브">
+<meta name="twitter:description" content="cars 자료로 가장 기본적인 ggplot() 그림부터 theme() 사용자화, showtext 한글 글꼴까지 R 코드와 코딩 에이전트 프롬프트를 함께 보며 익힙니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
+<link rel="stylesheet" href="../assets/material.css">
+<link rel="stylesheet" href="../assets/rlesson.css">
+<style>
+  /* 과목 강조색: 데이터과학. 흰 바탕 위 작은 글자와 링크에는 한 단계 어두운 색을 쓴다 */
+  :root { --accent: #0ea968; --accent-soft: #e6f8f0; --accent-dark: #087a4b;
+    /* 그림에서 고른 요소를 칠하는 색, 코드 상자의 낱말 색: 이 자료에서만 쓴다 */
+    --hl: var(--pos);
+    --tk-f: var(--r); --tk-s: #0d7a52; --tk-n: var(--warn); --tk-c: var(--muted); --tk-o: #9c2a76; }
+  main a { color: var(--accent-dark); }
+  .skip-link { background: var(--accent-dark); }
+
+  /* 머리말: 레이어 문법 계단 */
+  .intro { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 32px; align-items: end; }
+  .intro > * { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+  .layers { gap: 6px; font-family: var(--mono); font-size: 13.5px; }
+  .layers div { background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; display: flex; justify-content: space-between; gap: 12px; min-width: 0; }
+  .layers div span { color: var(--muted); font-family: var(--sans); font-size: 12.5px; white-space: nowrap; }
+  .layers code { background: none; padding: 0; }
+  .layers b { color: var(--accent-dark); font-weight: 700; }
+  .layers div:nth-child(2) { margin-left: 14px; } .layers div:nth-child(3) { margin-left: 28px; }
+  .layers div:nth-child(4) { margin-left: 42px; } .layers div:nth-child(5) { margin-left: 56px; } .layers div:nth-child(6) { margin-left: 70px; }
+
+  /* 설명·조작 | 그림 */
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 28px; align-items: start; }
+  .split > * { min-width: 0; }
+  .fig { margin: 0; position: sticky; top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+  .fig svg { display: block; width: 100%; height: auto; border-radius: 3px; }
+  .fig figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+  .two > * { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+
+  /* 구성요소 단추 */
+  .comps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .chip { appearance: none; font: inherit; font-size: 14px; text-align: left; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 8px 11px; cursor: pointer; display: flex; flex-direction: column; line-height: 1.35; }
+  .chip small { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+  .chip:hover { border-color: var(--accent); }
+  .chip[aria-pressed="true"] { background: var(--accent-dark); color: #fff; border-color: var(--accent-dark); }
+  .chip[aria-pressed="true"] small { color: inherit; opacity: .85; }
+  .detail { margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--hl); border-radius: 4px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .detail .t { font-weight: 700; }
+  .detail .warn { color: var(--hl); font-size: 14px; }
+  .badge { display: inline-block; font-size: 11.5px; font-family: var(--mono); font-weight: 500; border: 1px solid var(--line); border-radius: 3px; padding: 0 6px; color: var(--muted); vertical-align: middle; }
+
+  /* 조작 줄 */
+  .ctl { display: flex; flex-direction: column; gap: 12px; }
+  .opt { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .opt > .lbl { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--muted); min-width: 8.5em; }
+  .tog { appearance: none; font-family: var(--mono); font-size: 13px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  .tog:hover { border-color: var(--accent); }
+  .tog[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .ctl select { font-family: var(--mono); font-size: 13px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
+  .opt input[type=range] { width: 160px; }
+  .sw { width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--line); cursor: pointer; padding: 0; }
+  .sw[aria-pressed="true"] { outline: 2px solid var(--accent-dark); outline-offset: 2px; }
+
+  /* 프롬프트 뒤의 '확인할 것' 표 (07~09절) */
+  table.check td:first-child { font-weight: 600; width: 9.5em; }
+  /* 실제 R 출력 그림과 코드 카드 (03·04절) */
+  .gcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .gcards.pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gcard { margin: 0; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: var(--surface); min-width: 0; }
+  .gcard img { display: block; width: 100%; height: auto; border-radius: 3px; }
+  .gcard figcaption { font-size: 14px; }
+  .gcard .cb { margin-top: auto; }
+  .gcard .cb pre { font-size: 12.5px; }
+  /* 프롬프트 상자 목록 (01절) */
+  .prompts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .fig img { display: block; width: 100%; height: auto; border-radius: 3px; }
+  /* 코드 상자: 낱말 색. 설명 상자 안의 코드는 이름표 없이 */
+  .cb.bare pre { padding-top: 12px; }
+  .tk-f { color: var(--tk-f); } .tk-s { color: var(--tk-s); } .tk-n { color: var(--tk-n); } .tk-c { color: var(--tk-c); font-style: italic; } .tk-o { color: var(--tk-o); }
+
+  /* 표 */
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; }
+  .tbl-wrap table { font-size: 14px; }
+  .tbl-wrap th, .tbl-wrap td { padding: 9px 12px; }
+  .tbl-wrap th { background: var(--soft); font-weight: 600; }
+  .tbl-wrap tr:last-child td { border-bottom: 0; }
+  .ftbl td:first-child { white-space: nowrap; }
+
+  /* theme 요소 상속 트리 */
+  .etree { font-family: var(--mono); font-size: 12.5px; background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; overflow-x: auto; }
+  .etree ul { list-style: none; margin: 0; padding-left: 12px; border-left: 1px dashed var(--line); }
+  /* 요소 이름이 단어 중간에서 끊기지 않게 두 칸에 놓는다 */
+  .etree > ul { padding-left: 0; border: 0; display: grid; grid-template-columns: repeat(2, max-content); gap: 12px 24px; }
+  .etree li { margin: 1px 0; }
+  .node { appearance: none; font: inherit; background: none; border: 0; color: var(--ink); padding: 1px 6px; border-radius: 3px; cursor: pointer; text-align: left; white-space: nowrap; overflow-wrap: normal; word-break: normal; }
+  .node:hover { background: var(--accent-soft); }
+  .node[aria-pressed="true"] { background: var(--hl); color: #fff; }
+  .node.root { font-weight: 700; color: var(--accent-dark); }
+  .node.root[aria-pressed="true"] { color: #fff; }
+
+  /* 요소 함수 카드 */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+  .card { background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .card .efn { font-family: var(--mono); font-weight: 700; color: var(--accent-dark); font-size: 14.5px; }
+  .card p { font-size: 14px; color: var(--muted); }
+  .card .args { font-family: var(--mono); font-size: 12.5px; line-height: 1.6; overflow-wrap: anywhere; }
+
+  /* 테마 갤러리 */
+  .gal { display: flex; flex-direction: column; gap: 14px; }
+  .galgrp { display: flex; flex-direction: column; gap: 6px; }
+  .galgrp .pkg { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--muted); }
+
+  /* 실습 과제 상자 */
+  .callout.task { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 16px; padding: 14px 18px; }
+  .task .k { font-size: 12px; letter-spacing: .06em; font-weight: 700; color: var(--accent-dark); padding-top: 3px; }
+  .task ol { font-size: 15px; }
+
+  /* 그림 강조: 고른 요소 밖은 흐리게 */
+  svg.hlmode .pe:not(.hl) { opacity: .16; }
+  svg .pe { transition: opacity .2s; }
+  svg .pe.hl:is(rect, line, polyline, polygon, circle, path) { stroke: var(--hl); stroke-width: 2.4px; stroke-dasharray: none; }
+  svg text.pe.hl { fill: var(--hl); font-weight: 700; }
+
+  @media (max-width: 860px) {
+    .intro, .split, .two, .prompts, .gcards.pair { grid-template-columns: minmax(0, 1fr); }
+    .fig { position: static; }
+    .etree > ul { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 460px) {
+    .comps { grid-template-columns: minmax(0, 1fr); }
+    .layers div:nth-child(n) { margin-left: 0; }
+    .callout.task { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+<script defer src="../assets/annotate.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../index.html#data-science">← 처음으로</a>
+  <h1>ggplot 을 이용한<br>시각화</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#basic"><b>01</b><span>기본 ggplot()</span></a>
+    <a href="#anatomy"><b>02</b><span>구성요소</span></a>
+    <a href="#aes"><b>03</b><span>aes() 매핑</span></a>
+    <a href="#geoms"><b>04</b><span>geom 더하기</span></a>
+    <a href="#build"><b>05</b><span>지정하는 방법</span></a>
+    <a href="#object"><b>06</b><span>그림 객체 p</span></a>
+    <a href="#structure"><b>07</b><span>theme()의 구성</span></a>
+    <a href="#packages"><b>08</b><span>테마 패키지</span></a>
+    <a href="#custom"><b>09</b><span>theme 사용자화</span></a>
+    <a href="#hangul"><b>10</b><span>showtext 한글</span></a>
+    <a href="#refs"><b>—</b><span>참고문헌</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#데이터과학</span>
+    <span class="rail-tag">#시각화</span>
+    <span class="rail-tag">#R</span>
+    <span class="rail-tag">#ggplot2</span>
+    <span class="rail-tag">#레이어문법</span>
+    <span class="rail-tag">#테마</span>
+    <span class="rail-tag">#한글글꼴</span>
+  </div>
+  <footer>단추로 움직이는 그림은 브라우저에서 ggplot2의 모양을 흉내 낸 근사치입니다. 01·03·04절의 그림은 실제 R 출력입니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+<main id="content">
+<header class="panel">
+<div class="intro">
+  <div>
+    <div class="eyebrow">데이터 다루기 · 시각화</div>
+    <h2 class="page-title">ggplot 을 이용한 시각화</h2>
+    <p class="lede">R의 패키지 ggplot2 가 제공하는 ggplot() 을 이용해 시각화를 진행합시다. 코드 상자 옆에는 같은 일을 코딩 에이전트에게 시키는 프롬프트를 함께 두었으니, 코드 생성의 어려움보다 어떤 구성요소를 지정해서 도표를 그리도록 지시하는지 확인해 봅시다.</p>
+  </div>
+  <div class="layers" aria-label="레이어 문법">
+    <div><code><b>ggplot</b>(data, aes(...))</code><span>데이터 + 매핑</span></div>
+    <div><code>+ <b>geom_*</b>() / <b>stat_*</b>()</code><span>레이어</span></div>
+    <div><code>+ <b>scale_*</b>()</code><span>척도</span></div>
+    <div><code>+ <b>coord_*</b>() + <b>facet_*</b>()</code><span>좌표·분할</span></div>
+    <div><code>+ <b>labs</b>()</code><span>레이블</span></div>
+    <div><code>+ <b>theme</b>()</code><span>비데이터 요소</span></div>
+  </div>
+</div>
+<dl class="facts">
+<div><dt>예제 데이터</dt><dd>R 내장 자료 둘. 01절은 <code>cars</code>(자동차 50대의 속도와 제동 거리), 02절부터는 주로 <code>mtcars</code>(1974년 Motor Trend 잡지가 실은 자동차 32종의 무게 <code>wt</code>, 연비 <code>mpg</code>, 실린더 수 <code>cyl</code>, 변속 방식 <code>am</code>)를 씁니다.</dd></div>
+<div><dt>기준 버전</dt><dd>ggplot2 4.0(2025년 9월). 이 자료의 R 코드와 그림은 ggplot2 4.0.3, showtext 0.9.8에서 실행해 확인했습니다.</dd></div>
+<div><dt>그림</dt><dd>단추로 움직이는 그림(02·05·07~10절)은 배경·격자·축·글꼴을 브라우저에서 흉내 낸 근사치입니다. 01·03·04절의 그림은 R에서 실행해 저장한 실제 출력입니다.</dd></div>
+<div><dt>작업환경</dt><dd>R과 VS Code, 코딩 에이전트(Antigravity)를 아직 설치하지 않았다면 <a href="VScode-R-languageserver.html">VS Code에서 R 실행하기</a>를 먼저 따라 합니다.</dd></div>
+<div><dt>코딩 에이전트</dt><dd>R 코드를 직접 치지 않고 프롬프트를 코딩 에이전트에 붙여 넣어도 됩니다. 위젯이 만드는 코드 아래의 프롬프트도 설정을 바꾸면 함께 바뀝니다. 프롬프트로 생성한 코드를 실행해 보고 그림과 맞춰보며, 무엇을 지시할 수 있는지 확인해 봅시다.</dd></div>
+</dl>
+</header>
+
+<!-- 01 -->
+<section class="panel" id="basic">
+  <div class="section-head"><span class="section-num">01</span><h2>가장 기본적인 ggplot(): cars로 첫 그림</h2></div>
+  <p><code>cars</code>는 R에 기본으로 들어 있는 자료입니다. 1920년대에 자동차 50대가 달리던 속도(<code>speed</code>, 마일/시)와 그 속도에서 브레이크를 밟아 멈추기까지 달린 거리(<code>dist</code>, 피트)를 쟀습니다. 열이 둘뿐이어서 ggplot()이 무엇을 정하고 무엇을 알아서 채우는지 보기 좋습니다. 아래 코드는 데이터, 매핑, geom 세 가지만 적고 나머지는 모두 기본값에 맡깁니다.</p>
+  <div class="split">
+    <div class="ctl">
+      <div class="cb r"><span class="lang">R · 가장 짧은 ggplot()</span><pre data-code="basic"></pre><button type="button" class="copy">복사</button></div>
+      <div class="cb prompt"><span class="lang">프롬프트 · 같은 그림을 에이전트에게</span><pre>R 내장 자료 cars 로 x축에 speed, y축에 dist 를 놓은 산점도를 그리는 R 스크립트 scripts/01_cars.R 을 만들어 실행해 줘.
+- ggplot() 과 geom_point() 만 쓰고, 나머지 구성요소는 모두 기본값으로 둔다.
+- 그림은 ggsave() 로 output/figures/01_cars.png 에 7×4.5인치, 150 dpi PNG로 저장한다. 폴더가 없으면 만든다.</pre><button type="button" class="copy">복사</button></div>
+    </div>
+    <figure class="fig"><img src="../assets/images/ggplot/cars-basic.png" width="1050" height="675" alt="cars 자료의 속도(speed)와 제동 거리(dist) 산점도. 회색 패널에 흰 격자, 검은 점 50개, 축 제목은 변수 이름 speed와 dist">
+      <figcaption><span>왼쪽 코드를 R(ggplot2 4.0.3)에서 실행해 저장한 그림</span><span class="mono">theme_grey()</span></figcaption></figure>
+  </div>
+
+  <h3>코드 한 줄씩 읽기</h3>
+  <ol>
+    <li><code>library(ggplot2)</code>: 패키지를 불러옵니다. <code>library(tidyverse)</code>를 실행해도 ggplot2가 함께 불러와집니다.</li>
+    <li><code>ggplot(</code> … <code>)</code>: 그림을 그릴 판을 만듭니다. 인수가 여럿이므로 인수마다 한 줄씩 적었습니다. 여는 괄호부터 닫는 괄호까지만 실행하면 아무것도 없는 회색 판이 나옵니다.</li>
+    <li><code>data = cars</code>: 그릴 <b>데이터</b>를 정합니다.</li>
+    <li><code>mapping = aes(</code> … <code>)</code>: <b>미적 매핑</b>. 안쪽의 <code>x = speed</code>, <code>y = dist</code>처럼 인수마다 한 줄씩, 어느 열을 어느 위치에 놓을지 연결합니다. 축의 범위와 눈금은 척도가 이 매핑을 보고 정합니다.</li>
+    <li><code>) +</code>: 닫는 괄호 뒤의 <code>+</code>가 레이어나 설정을 더합니다. 줄 <b>끝</b>에 둡니다. 다음 줄 맨 앞에 두면 R은 앞 줄에서 명령이 끝났다고 보고, 뒤의 <code>+ geom_point()</code>를 따로 실행하다 오류를 냅니다.</li>
+    <li><code>geom_point()</code>: <b>기하 객체</b>. 행 하나를 점 하나로 그립니다. 인수를 주지 않았으므로 점의 색·크기·모양도 기본값(검정, 크기 1.5, 모양 19의 채운 원)입니다. ggplot2 4.0부터 이 값은 테마가 정합니다.</li>
+  </ol>
+
+  <h3>적지 않은 구성요소는 기본값이 채운다</h3>
+  <p>코드에는 세 가지만 적었지만 그림에는 02절에서 볼 구성요소가 모두 들어 있습니다. 적지 않은 것은 ggplot2가 아래 기본값으로 채웁니다.</p>
+  <div class="tbl-wrap">
+    <table class="ftbl">
+      <thead><tr><th>구성요소</th><th>이 코드에서</th><th>적지 않았을 때의 기본값</th><th>그림에서 보이는 곳</th></tr></thead>
+      <tbody>
+        <tr><td>data</td><td><code>cars</code></td><td>—</td><td>점 50개. 행 하나가 자동차 한 대</td></tr>
+        <tr><td>aes</td><td><code>x = speed, y = dist</code></td><td>색·크기·모양은 매핑하지 않음</td><td>점의 좌표(위치)</td></tr>
+        <tr><td>geom</td><td><code>geom_point()</code></td><td>—</td><td>검은 점</td></tr>
+        <tr><td>stat</td><td>적지 않음</td><td><code>"identity"</code>: 값을 계산 없이 그대로 씀</td><td>점 하나 = 행 하나</td></tr>
+        <tr><td>position</td><td>적지 않음</td><td><code>"identity"</code>: 겹쳐도 옮기지 않음</td><td>속도 13, 거리 34인 차가 두 대라 점 하나로 겹쳐 보임</td></tr>
+        <tr><td>scale</td><td>적지 않음</td><td><code>scale_x_continuous()</code>, <code>scale_y_continuous()</code>: 자료의 최솟값~최댓값에 양쪽 5% 여유</td><td>x축 눈금 5~25, y축 눈금 0~125</td></tr>
+        <tr><td>coord</td><td>적지 않음</td><td><code>coord_cartesian()</code>: 직교 좌표</td><td>가로·세로 축이 직각인 평면</td></tr>
+        <tr><td>facet</td><td>적지 않음</td><td><code>facet_null()</code>: 패널 하나</td><td>나뉘지 않은 한 장</td></tr>
+        <tr><td>guide</td><td>적지 않음</td><td>색 등을 매핑하지 않았으므로 범례 없음</td><td>축 눈금과 숫자만</td></tr>
+        <tr><td>labs</td><td>적지 않음</td><td>매핑한 열 이름</td><td>축 제목 <code>speed</code>, <code>dist</code>. 그림 제목은 없음</td></tr>
+        <tr><td>theme</td><td>적지 않음</td><td><code>theme_grey()</code>: 글자 11pt</td><td>회색 패널, 흰 격자선</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>기본값을 모두 적으면 아래 코드가 됩니다. 두 코드는 같은 그림을 그립니다(위와 같은 크기로 저장한 PNG 파일이 바이트까지 같습니다). 단, <code>theme_set()</code>으로 기본 테마를 바꿔 두었다면 마지막 줄 때문에 결과가 달라집니다.</p>
+  <div class="cb r"><span class="lang">R · 기본값을 모두 적은 코드</span><pre data-code="explicit"></pre><button type="button" class="copy">복사</button></div>
+
+  <h3>코딩 에이전트로 사용자화하기</h3>
+  <p>이 자료의 R 코드는 직접 쳐도 되고, 같은 일을 시키는 프롬프트를 코딩 에이전트(VS Code의 Antigravity 등)에 붙여 넣어도 됩니다. 에이전트가 코드를 쓰고 실행하면, 나는 바뀐 줄이 위 표의 어느 구성요소를 건드렸는지 확인합니다. 프롬프트에는 <b>무엇을 바꿀지</b>(구성요소), <b>무엇은 그대로 둘지</b>, <b>결과를 어떻게 보여 줄지</b>를 적습니다. AI에게 묻는 방법은 <a href="VScode-R-languageserver.html#s2">VS Code에서 R 실행하기</a>에도 있습니다.</p>
+  <p>실습 내내 지킬 규칙은 프롬프트마다 되풀이하지 않고 작업 폴더 맨 위의 <code>AGENTS.md</code> 파일에 적어 둡니다. Antigravity는 이 파일을 읽어 대화를 새로 시작해도 같은 규칙을 지킵니다. 이 과정의 결과물(그림, PDF, 정리한 자료)은 모두 작업 폴더 맨 위의 <code>output/</code> 폴더에 모읍니다. 그림은 <code>output/figures/</code>에 둡니다.</p>
+  <p>작업 폴더는 아래처럼 됩니다. <b>내가 준비하는 것</b>은 <code>AGENTS.md</code>(아래 상자를 붙여 넣어 저장)와, 03절부터 쓸 내 자료 파일(<code>data/</code>)뿐입니다. <code>scripts/</code>의 스크립트와 <code>output/</code>의 결과물은 프롬프트를 보내면 에이전트가 만듭니다. 스크립트와 그림 파일 이름 앞의 번호는 이 자료의 절 번호입니다.</p>
+  <pre class="tree">작업 폴더/
+├── AGENTS.md              ← 내가 만든다 (01절, 09절에서 덧붙인다)
+├── data/                  ← 내 자료를 넣어 둔다 (03절부터)
+│   └── mydata.csv
+├── scripts/               ← 에이전트가 만든다
+│   ├── 01_cars.R
+│   ├── 07_base_plot.R     ← 07~09절이 함께 쓰는 바탕 그림 p
+│   ├── theme_project.R    ← 09절의 공통 테마
+│   └── …
+├── output/
+│   └── figures/           ← 에이전트가 저장한다 (01_cars.png, 07_base.png, …)
+└── fonts/                 ← 인터넷이 막혔을 때만 (10절)</pre>
+  <div class="cb prompt"><span class="lang">AGENTS.md · 작업 폴더 맨 위에 새 파일로 저장</span>
+    <pre># 시각화를 위한 규칙
+
+이 폴더에서는 R과 ggplot2로 그림을 그린다.
+
+## 환경
+- 시각화는 ggplot2 로 하고, 한글 글꼴은 showtext 의 font_add_google() 로 Noto Sans KR 을 등록해 쓴다. 다른 패키지가 필요하면 먼저 이유를 말하고 내 허락을 받은 뒤 install.packages() 로 설치한다.
+- R 스크립트는 scripts/ 폴더에 01_cars.R 처럼 번호를 붙여 만들고, 작업 폴더 맨 위에서 터미널로 Rscript 를 써서 실행한다(Windows PowerShell 에서는 Rscript.exe).
+- 여러 스크립트가 함께 불러 쓰는 파일(바탕 그림, 공통 테마)은 프롬프트가 정한 이름 그대로 둔다(예: scripts/07_base_plot.R, scripts/theme_project.R).
+- 모든 결과물은 작업 폴더 맨 위의 output/ 폴더에 저장한다. 그림은 ggsave() 로 output/figures/ 폴더에 PNG로 저장한다. 폴더가 없으면 만든다.
+- 내 자료는 data/ 폴더에 둔다. data/ 의 원본 파일은 고치지 않는다.
+
+## 진행 방식
+- 내가 시킨 것만 바꾼다. 시키지 않은 구성요소(테마, 색, 축 범위 등)는 기본값이나 지금 상태 그대로 둔다.
+- 스크립트를 고치면 바뀐 줄을 보여 주고, 다시 실행해 그림을 저장한다.
+- 새로 쓴 함수마다 그 함수가 그림의 어느 구성요소(data, aes, geom, stat, position, scale, coord, facet, guide, labs, theme)를 바꾸는지 한 줄로 설명한다.
+- 확실하지 않은 함수나 인수는 지어내지 말고 확실하지 않다고 말한다.</pre>
+<button type="button" class="copy">복사</button></div>
+  <p>이 규칙은 실습하면서 늘려 갑니다. 09절에서는 프로젝트의 모든 그림이 같은 테마로 나오도록 "그림 모양" 규칙을 덧붙입니다. 파일을 저장했으면 첫 그림부터 시킵니다. 이후 프롬프트는 하나씩, 앞의 결과를 확인한 다음에 보냅니다. 한글 제목은 글꼴 설정(10절)이 필요할 수 있으므로 여기서는 영어로 붙입니다.</p>
+  <div class="prompts">
+    <div class="cb prompt"><span class="lang">프롬프트 0 · 규칙 확인과 첫 그림</span><pre>이 폴더의 AGENTS.md 를 읽고, 거기 적힌 규칙을 세 줄로 요약해 줘.
+그다음 scripts/01_cars.R 을 만들어 실행해 줘.
+- R 내장 자료 cars 로 x축에 speed, y축에 dist 를 놓은 산점도를 그린다.
+- ggplot() 과 geom_point() 만 쓰고, 나머지 구성요소는 모두 기본값으로 둔다.
+- 그림은 output/figures/01_cars.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
+    <div class="cb prompt"><span class="lang">프롬프트 1 · labs: 제목과 축 제목</span><pre>scripts/01_cars.R 의 그림에 제목과 축 제목을 붙여 줘.
+- 제목: Speed and stopping distance
+- x축: Speed (mph), y축: Stopping distance (ft)
+- 레이블만 더하고 다른 줄은 고치지 않는다.</pre><button type="button" class="copy">복사</button></div>
+    <div class="cb prompt"><span class="lang">프롬프트 2 · geom과 stat: 회귀직선</span><pre>scripts/01_cars.R 의 그림에 단순 선형회귀 직선을 더해 줘. 95% 신뢰대는 기본값대로 보이게 둔다.
+이 선과 띠가 cars 의 어떤 값을 계산해서 그린 것인지 한 문장으로 설명해 줘.</pre><button type="button" class="copy">복사</button></div>
+    <div class="cb prompt"><span class="lang">프롬프트 3 · position: 겹친 점</span><pre>speed 와 dist 가 똑같은 자동차가 있어 점이 겹친다. 겹친 점이 모두 보이도록 바꿔 줘.
+어떤 방법을 썼는지, 그 방법이 그림에 찍히는 점의 위치를 바꾸는지 설명해 줘.</pre><button type="button" class="copy">복사</button></div>
+    <div class="cb prompt"><span class="lang">프롬프트 4 · scale: 눈금과 범위</span><pre>x축 눈금을 5, 10, 15, 20, 25 로 두고, y축은 0에서 시작하게 해 줘.
+범위 밖의 자료를 지우는 방법은 쓰지 않는다. 어느 함수를 썼는지 알려 줘.</pre><button type="button" class="copy">복사</button></div>
+    <div class="cb prompt"><span class="lang">프롬프트 5 · theme: 바탕 테마와 글자 크기</span><pre>그림의 테마를 theme_minimal() 로 바꾸고 기본 글자 크기를 14 로 키워 줘.
+그다음 output/figures/01_cars_final.png 로 7×4.5인치, 300 dpi 로 다시 저장해 줘.</pre><button type="button" class="copy">복사</button></div>
+  </div>
+  <div class="callout task"><div class="k">실습</div>
+    <ol><li>짧은 코드와 기본값을 모두 적은 코드를 차례로 실행해 두 그림이 같은지 확인하세요.</li>
+      <li><code>+</code>를 다음 줄 맨 앞으로 옮겨 실행하고, 어떤 메시지가 나오는지 확인하세요.</li>
+      <li>프롬프트 1~5를 보낼 때마다 에이전트가 더한 함수가 위 표의 어느 구성요소인지 적어 보세요. 시키지 않은 구성요소를 바꾸지는 않았나요?</li></ol></div>
+</section>
+
+<!-- 02 -->
+<section class="panel" id="anatomy">
+  <div class="section-head"><span class="section-num">02</span><h2>ggplot 플롯의 구성요소</h2></div>
+  <p>01절의 cars 그림은 기본값만 썼습니다. 이제 색, 회귀선, 패널 분할, 제목이 모두 들어간 mtcars 그림 한 장에서 구성요소 전체를 나눠 봅니다. 그 가운데 미적 매핑(aes)과 기하 객체(geom)는 03·04절에서 더 자세히 봅니다. ggplot2는 Wilkinson의 Grammar of Graphics를 Wickham이 레이어 문법으로 재구성한 것입니다. 그림은 데이터·매핑·기하객체·통계변환으로 이루어진 <b>레이어</b>에 척도·좌표계·패싯·테마가 더해져 완성됩니다. 아래 구성요소를 눌러 그림의 어느 부분을 담당하는지 확인하세요.</p>
+  <div class="split">
+    <div>
+      <div class="comps" id="compList"></div>
+      <div class="detail" id="compDetail"></div>
+    </div>
+    <figure class="fig"><svg id="svgAnatomy" role="img" aria-label="mtcars 무게와 연비 산점도, 구성요소 강조"></svg>
+      <figcaption><span>강조된 부분이 선택한 구성요소가 만드는 영역</span><span class="mono">theme_grey()</span></figcaption></figure>
+  </div>
+  <div class="callout task"><div class="k">실습</div>
+    <ol><li>왼쪽 단추 가운데 <b>통계 변환</b>(<code>stat_*()</code>)을 눌러 보고, 그림에서 강조된 것 가운데 원자료에 없는 요소가 무엇인지 말해 보세요.</li>
+      <li><b>척도</b>(<code>scale_*()</code>)와 <b>가이드</b>(<code>guides()</code>)를 차례로 눌러 함께 강조되는 영역을 찾고, 둘의 역할 차이를 한 문장으로 정리하세요.</li>
+      <li>자신의 연구 자료로 그릴 그림 하나를 골라 data · aes · geom을 종이에 먼저 적어 보세요.</li></ol></div>
+</section>
+
+<!-- 03 -->
+<section class="panel" id="aes">
+  <div class="section-head"><span class="section-num">03</span><h2>aes(): 내 데이터를 미적 속성에 연결하기</h2></div>
+  <p><b>미적 속성</b>(aesthetics)은 위치(<code>x</code>, <code>y</code>), 색(<code>colour</code>), 채움색(<code>fill</code>), 크기(<code>size</code>), 모양(<code>shape</code>), 투명도(<code>alpha</code>), 선 종류(<code>linetype</code>)처럼 그림에서 눈으로 구별하는 성질입니다. <code>aes()</code>는 데이터의 <b>열</b>을 이 성질에 연결합니다. 같은 <code>colour</code>도 <code>aes()</code> 안에 쓰느냐 밖에 쓰느냐에 따라 뜻이 완전히 달라집니다. 아래 그림은 모두 R(ggplot2 4.0.3)에서 그대로 실행한 결과입니다.</p>
+
+  <h3>aes() 안과 밖</h3>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th></th><th><code>aes()</code> 안에 쓸 때</th><th><code>aes()</code> 밖(<code>geom_*()</code>의 인수)에 쓸 때</th></tr></thead>
+    <tbody>
+      <tr><td>무엇을 주나</td><td>데이터의 열(변수) 이름</td><td>고정값 하나. 예: <code>"steelblue"</code>, <code>2</code>, <code>0.5</code></td></tr>
+      <tr><td>점마다</td><td>그 행의 값에 따라 달라짐</td><td>모두 같음</td></tr>
+      <tr><td>척도와 범례</td><td>척도가 값을 색·크기로 바꾸고, 범례가 생김</td><td>척도도 범례도 없음</td></tr>
+      <tr><td>쓰는 곳</td><td><code>ggplot(mapping = aes(…))</code> 또는 <code>geom_*(aes(…))</code></td><td><code>geom_point(colour = "steelblue")</code></td></tr>
+    </tbody>
+  </table></div>
+  <div class="gcards pair">
+    <figure class="gcard"><img src="../assets/images/ggplot/aes-fixed.png" width="600" height="450" loading="lazy" alt="모든 점이 같은 파란색인 mtcars 무게와 연비 산점도, 범례 없음"><figcaption><b>aes() 밖: 고정값</b> 모든 점이 steelblue 한 색이고 범례가 없습니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(
+    x = wt,
+    y = mpg
+  )
+) +
+  geom_point(colour = "steelblue", size = 2)</pre><button type="button" class="copy">복사</button></div></figure>
+    <figure class="gcard"><img src="../assets/images/ggplot/aes-constant.png" width="600" height="450" loading="lazy" alt="모든 점이 주황빛 빨강이고 colour 범례에 steelblue 항목 하나가 있는 산점도"><figcaption><b>aes() 안: 자주 하는 실수</b> <code>"steelblue"</code>를 aes() 안에 쓰면 값이 "steelblue" 하나뿐인 범주형 변수로 읽힙니다. 점은 기본 팔레트의 첫 색(주황빛 빨강)으로 칠해지고, "steelblue" 항목 하나짜리 범례가 생깁니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(
+    x = wt,
+    y = mpg,
+    colour = "steelblue"
+  )
+) +
+  geom_point(size = 2)</pre><button type="button" class="copy">복사</button></div></figure>
+  </div>
+  <div class="callout caution"><p><strong>반대 실수도 있습니다.</strong> 열 이름을 aes() 밖에 쓰면(<code>geom_point(colour = cyl)</code>) R은 데이터 안이 아니라 작업 공간에서 <code>cyl</code>이라는 객체를 찾다가 <code>object 'cyl' not found</code> 오류를 냅니다. <b>열 이름은 aes() 안에, 고정값은 aes() 밖에</b> 둡니다.</p></div>
+
+  <h3>변수의 종류가 척도를 정한다</h3>
+  <p>같은 열이라도 R이 숫자로 아는지 범주로 아는지에 따라 척도와 범례가 달라집니다. mtcars의 <code>cyl</code>(실린더 수)은 4, 6, 8 세 값뿐인 범주지만 숫자로 저장되어 있어서, 그대로 넣으면 연속형 색 띠가 생기고 5나 7처럼 없는 값까지 눈금에 나옵니다. <code>factor(cyl)</code>로 바꾸면 구별되는 세 색이 됩니다.</p>
+  <div class="gcards pair">
+    <figure class="gcard"><img src="../assets/images/ggplot/aes-numeric.png" width="600" height="450" loading="lazy" alt="실린더 수에 따라 파란색 농도가 다른 산점도, 4에서 8까지의 연속형 색 띠 범례"><figcaption><b>colour = cyl (숫자)</b> 연속형 척도: 진한 파랑에서 밝은 파랑으로 가는 색 띠.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(
+    x = wt,
+    y = mpg,
+    colour = cyl
+  )
+) +
+  geom_point(size = 2)</pre><button type="button" class="copy">복사</button></div></figure>
+    <figure class="gcard"><img src="../assets/images/ggplot/aes-factor.png" width="600" height="450" loading="lazy" alt="실린더 4, 6, 8을 빨강, 초록, 파랑으로 나눈 산점도"><figcaption><b>colour = factor(cyl) (범주)</b> 범주형 척도: 구별되는 세 색과 항목 범례.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(
+    x = wt,
+    y = mpg,
+    colour = factor(cyl)
+  )
+) +
+  geom_point(size = 2)</pre><button type="button" class="copy">복사</button></div></figure>
+    <figure class="gcard"><img src="../assets/images/ggplot/aes-size.png" width="600" height="450" loading="lazy" alt="마력에 따라 점 크기가 다른 반투명 회색 산점도"><figcaption><b>size = hp (연속형)</b> 마력이 클수록 점이 커집니다. 점이 겹치므로 aes() 밖에서 alpha로 투명도를 고정했습니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(
+    x = wt,
+    y = mpg,
+    size = hp
+  )
+) +
+  geom_point(alpha = 0.6)</pre><button type="button" class="copy">복사</button></div></figure>
+    <figure class="gcard"><img src="../assets/images/ggplot/aes-shape.png" width="600" height="450" loading="lazy" alt="색은 실린더, 모양은 변속 방식으로 나눈 산점도, 범례 둘"><figcaption><b>colour와 shape 함께</b> 색은 실린더 수, 모양은 변속 방식(0 자동, 1 수동). 범례가 둘 생깁니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(
+    x = wt,
+    y = mpg,
+    colour = factor(cyl),
+    shape = factor(am)
+  )
+) +
+  geom_point(size = 2)</pre><button type="button" class="copy">복사</button></div></figure>
+  </div>
+  <div class="tbl-wrap"><table class="ftbl">
+    <thead><tr><th>미적 속성</th><th>연속형(숫자)</th><th>범주형</th><th>메모</th></tr></thead>
+    <tbody>
+      <tr><td>x, y</td><td>○</td><td>○</td><td>가장 잘 읽히는 속성. 가장 중요한 비교를 여기에 둔다</td></tr>
+      <tr><td>colour, fill</td><td>색 띠(그라데이션)</td><td>구별되는 색</td><td><code>colour</code>는 점·선의 색, <code>fill</code>은 막대·상자의 안쪽 색</td></tr>
+      <tr><td>size</td><td>○</td><td>권하지 않음</td><td>범주형을 넣으면 "Using size for a discrete variable is not advised." 경고</td></tr>
+      <tr><td>alpha</td><td>○</td><td>권하지 않음</td><td>겹친 점을 보이게 할 때는 aes() 밖에 고정값으로 많이 쓴다</td></tr>
+      <tr><td>shape</td><td>쓸 수 없음</td><td>○ (여섯 가지 안팎까지)</td><td>연속형을 넣으면 "A continuous variable cannot be mapped to the shape aesthetic." 오류</td></tr>
+      <tr><td>linetype</td><td>쓸 수 없음</td><td>○</td><td>선을 그리는 geom에서 쓴다. 연속형은 shape와 같은 오류</td></tr>
+      <tr><td>label</td><td colspan="2">글자로 쓸 열</td><td><code>geom_text()</code>, <code>geom_label()</code>이 그리는 글자</td></tr>
+      <tr><td>group</td><td>—</td><td>○</td><td>색을 나누지 않고 선·회귀선만 묶음별로 나눌 때</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>전체 매핑과 레이어 매핑</h3>
+  <p><code>ggplot()</code>의 <code>mapping</code>에 쓴 aes()는 뒤에 오는 <b>모든 레이어가 물려받습니다</b>. 한 레이어에만 쓰려면 그 <code>geom_*()</code> 안에 <code>aes()</code>를 둡니다. 아래 두 그림은 색 매핑을 둔 자리만 다르고, 회귀선의 수가 달라집니다.</p>
+  <div class="gcards pair">
+    <figure class="gcard"><img src="../assets/images/ggplot/aes-global.png" width="600" height="450" loading="lazy" alt="실린더별 색 점과 실린더별 회귀직선 세 개"><figcaption><b>색을 ggplot()에</b> 점과 회귀선이 모두 색을 물려받아 실린더별로 묶이고, 회귀선이 세 개가 됩니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(
+    x = wt,
+    y = mpg,
+    colour = factor(cyl)
+  )
+) +
+  geom_point(size = 2) +
+  geom_smooth(method = "lm", se = FALSE)</pre><button type="button" class="copy">복사</button></div></figure>
+    <figure class="gcard"><img src="../assets/images/ggplot/aes-layer.png" width="600" height="450" loading="lazy" alt="실린더별 색 점과 전체 자료로 그린 파란 회귀직선 하나"><figcaption><b>색을 geom_point()에만</b> 점만 색이 나뉘고, 회귀선은 32대 전체로 하나만 그려집니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(
+    x = wt,
+    y = mpg
+  )
+) +
+  geom_point(aes(colour = factor(cyl)), size = 2) +
+  geom_smooth(method = "lm", se = FALSE)</pre><button type="button" class="copy">복사</button></div></figure>
+  </div>
+
+  <h3>내 데이터에 적용하기</h3>
+  <ol class="steps">
+    <li><strong>열을 살펴본다.</strong> <code>str()</code>로 열 이름과 자료형을 보고, 열마다 서로 다른 값이 몇 개인지 확인합니다.</li>
+    <li><strong>연속형과 범주형을 가른다.</strong> 학년(1, 2, 3), 성별 코드(0, 1), 지역 번호처럼 <b>숫자로 적힌 범주</b>는 <code>factor()</code>로 바꿔야 범주형 척도가 됩니다.</li>
+    <li><strong>미적 속성을 고른다.</strong> 가장 중요한 비교를 위치(x, y)에, 그다음을 색에 둡니다. 색까지 써도 나눌 것이 남으면 모양이나 패널(<code>facet_wrap()</code>)을 씁니다. 한 그림에 미적 속성을 너무 많이 쓰면 오히려 읽기 어렵습니다.</li>
+    <li><strong>고정값은 밖에 둔다.</strong> 점 크기, 투명도처럼 모든 점에 같게 줄 값은 <code>geom_*()</code>의 인수로 적습니다.</li>
+    <li><strong>범례 제목을 고친다.</strong> 범례 제목은 매핑한 식(<code>factor(cyl)</code>)이 그대로 나오므로 <code>labs(colour = "실린더")</code>처럼 미적 속성 이름으로 바꿉니다.</li>
+  </ol>
+  <div class="prompts">
+    <div class="cb prompt"><span class="lang">프롬프트 · 내 자료 살펴보기</span><pre>data/ 폴더에 넣어 둔 내 자료 파일(예: data/mydata.csv)을 읽는 스크립트 scripts/03_mydata.R 을 만들어 실행해 줘.
+- 열 이름, 자료형, 서로 다른 값의 개수를 표로 보여 준다.
+- 각 열이 연속형인지 범주형인지 판단하고, 숫자로 적혀 있지만 범주인 열이 있으면 따로 알려 준다.
+- 그림은 아직 그리지 않는다.</pre><button type="button" class="copy">복사</button></div>
+    <div class="cb prompt"><span class="lang">프롬프트 · 미적 속성에 연결하기</span><pre>scripts/03_mydata.R 에 이어서, 앞에서 살펴본 내 자료로 산점도를 그려 줘.
+- [열1] 은 x, [열2] 는 y, [열3] 은 색(colour)으로 연결한다.
+- [열3] 이 숫자로 적힌 범주라면 factor() 로 바꾼다.
+- 점 크기 같은 고정값은 aes() 밖에 둔다.
+- 범례 제목은 [열3] 의 뜻을 알 수 있는 이름으로 바꾼다.
+- 각 미적 속성이 aes() 안인지 밖인지, 그래서 범례가 생기는지 한 줄씩 설명해 줘.
+- 그림은 output/figures/03_mydata.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
+  </div>
+  <div class="callout task"><div class="k">실습</div>
+    <ol><li>"aes() 안: 자주 하는 실수" 코드에서 <code>colour = "steelblue"</code>를 <code>geom_point()</code> 안으로 옮겨 실행하고, 범례가 어떻게 바뀌는지 확인하세요.</li>
+      <li><code>colour = cyl</code>과 <code>colour = factor(cyl)</code>의 범례를 비교하고, 내 자료에서 숫자로 적힌 범주 열을 하나 찾아 보세요.</li>
+      <li><code>shape = hp</code>로 실행해 어떤 메시지가 나오는지 읽고, 메시지가 권하는 대안을 적어 보세요.</li></ol></div>
+</section>
+
+<!-- 04 -->
+<section class="panel" id="geoms">
+  <div class="section-head"><span class="section-num">04</span><h2>geom_*(): 그림 요소 더하기</h2></div>
+  <p><code>geom_*()</code>은 데이터를 <b>무엇으로</b> 그릴지 정합니다. 점, 선, 막대, 상자처럼 그리는 모양마다 함수가 있고, 레이어 하나에 geom 하나가 들어갑니다. <code>+</code>로 더한 레이어는 앞의 레이어 위에 그려집니다. 어떤 geom을 쓸지는 <b>무엇을 보여 주려는지</b>와 <b>변수의 종류</b>로 정합니다. 아래 그림은 모두 R에서 그대로 실행한 결과입니다.</p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>보여 줄 것</th><th>geom</th><th>꼭 주어야 할 미적 속성</th><th>함께 쓰는 stat</th></tr></thead>
+    <tbody>
+      <tr><td>연속형 한 변수의 분포</td><td><code>geom_histogram()</code>, <code>geom_density()</code></td><td>x</td><td>bin, density: 개수·밀도(y)를 계산</td></tr>
+      <tr><td>범주별 개수</td><td><code>geom_bar()</code></td><td>x</td><td>count: 행의 수(y)를 셈</td></tr>
+      <tr><td>범주별로 이미 계산한 값</td><td><code>geom_col()</code></td><td>x, y</td><td>identity: y 값을 그대로</td></tr>
+      <tr><td>범주별 분포 비교</td><td><code>geom_boxplot()</code>, <code>geom_violin()</code></td><td>x(범주), y</td><td>boxplot, ydensity</td></tr>
+      <tr><td>두 연속형 변수의 관계</td><td><code>geom_point()</code>, <code>geom_jitter()</code></td><td>x, y</td><td>identity</td></tr>
+      <tr><td>추세</td><td><code>geom_smooth()</code></td><td>x, y</td><td>smooth: 회귀선과 신뢰대를 계산</td></tr>
+      <tr><td>시간에 따른 변화</td><td><code>geom_line()</code></td><td>x, y</td><td>identity: x 순서대로 이음</td></tr>
+      <tr><td>글자 주석</td><td><code>geom_text()</code>, <code>geom_label()</code></td><td>x, y, label</td><td>identity</td></tr>
+      <tr><td>기준선</td><td><code>geom_hline()</code>, <code>geom_vline()</code>, <code>geom_abline()</code></td><td>yintercept, xintercept, slope·intercept (보통 aes() 밖의 고정값)</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout caution"><p><strong>꼭 주어야 할 미적 속성이 빠지면 그림이 그려지지 않습니다.</strong> 예를 들어 <code>aes(x = mpg)</code>만 주고 <code>geom_point()</code>를 더하면 <code>`geom_point()` requires the following missing aesthetics: y.</code> 오류가 납니다. 히스토그램과 막대그래프는 stat이 y를 계산하므로 x만 주면 됩니다.</p></div>
+
+  <h3>한 변수의 분포</h3>
+  <div class="gcards pair">
+    <figure class="gcard"><img src="../assets/images/ggplot/geom-histogram.png" width="600" height="450" loading="lazy" alt="mtcars 연비의 히스토그램, 구간 폭 2"><figcaption><b>geom_histogram()</b> 연비를 2 mpg 폭의 구간으로 나눠 구간마다 차가 몇 대인지 막대로 그립니다. <code>binwidth</code>에 따라 모양이 크게 달라집니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(x = mpg)
+) +
+  geom_histogram(binwidth = 2)</pre><button type="button" class="copy">복사</button></div></figure>
+    <figure class="gcard"><img src="../assets/images/ggplot/geom-density.png" width="600" height="450" loading="lazy" alt="mtcars 연비의 밀도 곡선"><figcaption><b>geom_density()</b> 히스토그램을 매끄러운 곡선으로 바꾼 밀도 곡선입니다. 곡선 아래 넓이가 1입니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(x = mpg)
+) +
+  geom_density()</pre><button type="button" class="copy">복사</button></div></figure>
+  </div>
+  <h3>범주별 개수와 값: geom_bar()와 geom_col()</h3>
+  <p>둘 다 막대를 그리지만 막대 높이를 정하는 방법이 다릅니다. <code>geom_bar()</code>는 <b>행의 수를 세어</b> 높이로 쓰고, <code>geom_col()</code>은 <b>y에 준 값을 그대로</b> 씁니다. <code>geom_bar()</code>에 y까지 주면 <code>`stat_count()` must only have an x or y aesthetic.</code> 오류가 납니다.</p>
+  <div class="gcards pair">
+    <figure class="gcard"><img src="../assets/images/ggplot/geom-bar.png" width="600" height="450" loading="lazy" alt="실린더 4, 6, 8별 차의 대수 막대그래프"><figcaption><b>geom_bar(): 개수</b> 실린더 수별로 차가 몇 대인지(11, 7, 14대) 셉니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(x = factor(cyl))
+) +
+  geom_bar()</pre><button type="button" class="copy">복사</button></div></figure>
+    <figure class="gcard"><img src="../assets/images/ggplot/geom-col.png" width="600" height="450" loading="lazy" alt="실린더 4, 6, 8별 평균 연비 막대그래프"><figcaption><b>geom_col(): 값</b> 먼저 <code>aggregate()</code>로 실린더별 평균 연비를 구하고, 그 값을 막대 높이로 씁니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">mpg_by_cyl &lt;- aggregate(mpg ~ cyl, data = mtcars, FUN = mean)
+
+ggplot(
+  data = mpg_by_cyl,
+  mapping = aes(
+    x = factor(cyl),
+    y = mpg
+  )
+) +
+  geom_col()</pre><button type="button" class="copy">복사</button></div></figure>
+  </div>
+  <h3>범주별 분포 비교와 레이어 쌓기</h3>
+  <div class="gcards pair">
+    <figure class="gcard"><img src="../assets/images/ggplot/geom-boxplot.png" width="600" height="450" loading="lazy" alt="실린더 4, 6, 8별 연비 상자그림"><figcaption><b>geom_boxplot()</b> 상자는 사분위 범위, 가운데 선은 중앙값, 수염 밖의 점은 이상값 후보입니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(
+    x = factor(cyl),
+    y = mpg
+  )
+) +
+  geom_boxplot()</pre><button type="button" class="copy">복사</button></div></figure>
+    <figure class="gcard"><img src="../assets/images/ggplot/geom-box-jitter.png" width="600" height="450" loading="lazy" alt="실린더별 연비 상자그림 위에 개별 차를 흩뜨린 점"><figcaption><b>geom_boxplot() + geom_jitter()</b> 상자 위에 차 한 대 한 대를 점으로 겹칩니다. 점이 겹치지 않게 가로로만 흩뜨리고(<code>height = 0</code>), 같은 차가 두 번 그려지지 않게 상자그림의 이상값 점은 숨깁니다(<code>outlier.shape = NA</code>).</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(
+    x = factor(cyl),
+    y = mpg
+  )
+) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.15, height = 0)</pre><button type="button" class="copy">복사</button></div></figure>
+  </div>
+  <h3>두 변수의 관계, 시간, 주석</h3>
+  <div class="gcards pair">
+    <figure class="gcard"><img src="../assets/images/ggplot/geom-smooth.png" width="600" height="450" loading="lazy" alt="cars 속도와 제동 거리 산점도에 회귀직선과 회색 신뢰대"><figcaption><b>geom_point() + geom_smooth()</b> 01절의 cars 그림에 단순 선형회귀 직선과 95% 신뢰대를 더했습니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = cars,
+  mapping = aes(
+    x = speed,
+    y = dist
+  )
+) +
+  geom_point() +
+  geom_smooth(method = "lm")</pre><button type="button" class="copy">복사</button></div></figure>
+    <figure class="gcard"><img src="../assets/images/ggplot/geom-line.png" width="600" height="450" loading="lazy" alt="1967년부터 2015년까지 미국 실업자 수의 선그래프"><figcaption><b>geom_line()</b> ggplot2에 들어 있는 미국 경제 자료 <code>economics</code>(1967~2015년 월별)의 실업자 수(천 명)입니다. x 순서대로 점을 잇습니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = economics,
+  mapping = aes(
+    x = date,
+    y = unemploy
+  )
+) +
+  geom_line()</pre><button type="button" class="copy">복사</button></div></figure>
+    <figure class="gcard"><img src="../assets/images/ggplot/geom-text.png" width="600" height="450" loading="lazy" alt="mtcars 산점도의 점 위에 차 이름 글자"><figcaption><b>geom_text()</b> 차 이름을 <code>label</code>로 매핑했습니다. <code>check_overlap = TRUE</code>는 겹치는 글자를 빼고, <code>hjust = "inward"</code>는 가장자리 글자를 안쪽으로 붙입니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">mtcars2 &lt;- transform(mtcars, model = rownames(mtcars))
+
+ggplot(
+  data = mtcars2,
+  mapping = aes(
+    x = wt,
+    y = mpg,
+    label = model
+  )
+) +
+  geom_point() +
+  geom_text(size = 2.5, vjust = -0.7, hjust = "inward", check_overlap = TRUE)</pre><button type="button" class="copy">복사</button></div></figure>
+    <figure class="gcard"><img src="../assets/images/ggplot/geom-hline.png" width="600" height="450" loading="lazy" alt="mtcars 산점도에 평균 연비 높이의 가로 점선"><figcaption><b>geom_hline()</b> 전체 평균 연비(약 20.1 mpg)에 점선 기준선을 긋습니다. <code>yintercept</code>는 고정값이므로 aes() 밖에 씁니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = mtcars,
+  mapping = aes(
+    x = wt,
+    y = mpg
+  )
+) +
+  geom_point() +
+  geom_hline(yintercept = mean(mtcars$mpg), linetype = "dashed")</pre><button type="button" class="copy">복사</button></div></figure>
+  </div>
+  <div class="prompts">
+    <div class="cb prompt"><span class="lang">프롬프트 · geom 고르기</span><pre>scripts/03_mydata.R 에서 읽은 내 자료에서 [열1](범주형)에 따라 [열2](연속형)가 어떻게 다른지 보여 주고 싶다.
+- 어울리는 geom 후보를 세 가지 들고, 각각이 무엇을 잘 보여 주고 무엇을 감추는지 한 줄씩 설명해 줘.
+- 내가 고를 때까지 그림은 그리지 않는다.</pre><button type="button" class="copy">복사</button></div>
+    <div class="cb prompt"><span class="lang">프롬프트 · 레이어 쌓기</span><pre>scripts/04_box_points.R 을 만들어, 내 자료의 [열1] 별 [열2] 상자그림 위에 관측값 하나하나를 점으로 겹쳐 그려 줘. 앞에서 다른 geom 을 골랐더라도 이 실습은 상자그림으로 한다.
+- 점이 겹치지 않게 가로 방향으로만 조금 흩뜨린다. 세로 위치(값)는 바꾸지 않는다.
+- 같은 관측값이 두 번 그려지지 않게 상자그림의 이상값 점은 숨긴다.
+- 더한 레이어의 순서와, 순서를 바꾸면 무엇이 달라지는지 설명해 줘.
+- 그림은 output/figures/04_box_points.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
+  </div>
+  <div class="callout task"><div class="k">실습</div>
+    <ol><li>히스토그램의 <code>binwidth</code>를 1과 5로 바꿔 그리고, 분포의 모양이 어떻게 달라 보이는지 비교하세요.</li>
+      <li><code>geom_bar()</code> 그림에 <code>y = mpg</code>를 더해 실행하고, 나오는 메시지와 <code>geom_col()</code>을 써야 하는 까닭을 연결해 보세요.</li>
+      <li>"상자 + 점" 코드에서 두 geom의 순서를 바꾸면 무엇이 달라지는지 확인하세요.</li></ol></div>
+</section>
+
+<!-- 05 -->
+<section class="panel" id="build">
+  <div class="section-head"><span class="section-num">05</span><h2>구성요소를 ggplot에서 지정하는 방법</h2></div>
+  <p>각 구성요소에는 이름 규칙이 정해진 함수군이 대응합니다. 함수는 <code>+</code>로 쌓이고, 나중에 더한 같은 종류의 설정이 앞선 것을 덮어씁니다.</p>
+  <div class="tbl-wrap">
+    <table class="ftbl">
+      <thead><tr><th>구성요소</th><th>함수 패턴</th><th>예시</th><th>메모</th></tr></thead>
+      <tbody>
+        <tr><td>data</td><td><code>ggplot(data)</code>, <code>geom_*(data =)</code></td><td><code>ggplot(mtcars)</code></td><td>레이어마다 다른 데이터를 줄 수 있음</td></tr>
+        <tr><td>aes</td><td><code>aes()</code> 전역 / 레이어별</td><td><code>aes(colour = factor(cyl))</code></td><td>고정값은 aes 밖에: <code>geom_point(colour = "red")</code></td></tr>
+        <tr><td>geom</td><td><code>geom_*()</code></td><td><code>geom_point(size = 2)</code></td><td>레이어 하나 = geom 하나</td></tr>
+        <tr><td>stat</td><td><code>stat_*()</code>, <code>geom_*(stat =)</code></td><td><code>stat_summary(fun = mean)</code></td><td>geom_bar는 stat_count, geom_smooth는 stat_smooth</td></tr>
+        <tr><td>position</td><td><code>position_*()</code></td><td><code>geom_bar(position = "dodge")</code></td><td>겹침 조정: stack, dodge, jitter</td></tr>
+        <tr><td>scale</td><td><code>scale_&lt;aes&gt;_&lt;type&gt;()</code></td><td><code>scale_colour_brewer()</code>, <code>scale_y_log10()</code></td><td>limits는 범위 밖 데이터를 제거함</td></tr>
+        <tr><td>coord</td><td><code>coord_*()</code></td><td><code>coord_cartesian(ylim = c(10, 30))</code></td><td>데이터는 두고 화면만 확대</td></tr>
+        <tr><td>facet</td><td><code>facet_wrap()</code>, <code>facet_grid()</code></td><td><code>facet_wrap(~ am)</code></td><td><code>scales = "free_y"</code>로 축 독립</td></tr>
+        <tr><td>guide</td><td><code>guides()</code>, <code>guide_*()</code></td><td><code>guides(colour = guide_legend(nrow = 1))</code></td><td>범례·축의 모양</td></tr>
+        <tr><td>labs</td><td><code>labs()</code></td><td><code>labs(title = "…", x = "…")</code></td><td>aes 이름으로 범례 제목 지정</td></tr>
+        <tr><td>theme</td><td><code>theme_*()</code> + <code>theme()</code></td><td><code>theme(legend.position = "bottom")</code></td><td>07~09절에서 자세히</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="split">
+    <div class="ctl">
+      <h3>레이어를 하나씩 쌓아 보기</h3>
+      <div class="opt"><span class="lbl">매핑</span><button type="button" class="tog" data-b="color" aria-pressed="true">colour = factor(cyl)</button></div>
+      <div class="opt"><span class="lbl">geom</span><button type="button" class="tog" data-b="point" aria-pressed="true">geom_point()</button><button type="button" class="tog" data-b="smooth" aria-pressed="false">geom_smooth()</button></div>
+      <div class="opt"><label class="lbl" for="bPal">scale</label>
+        <select id="bPal"><option value="hue">기본 (hue)</option><option value="Set1">scale_colour_brewer("Set1")</option><option value="Dark2">scale_colour_brewer("Dark2")</option></select></div>
+      <div class="opt"><span class="lbl">facet · coord</span><button type="button" class="tog" data-b="facet" aria-pressed="false">facet_wrap(~ am)</button><button type="button" class="tog" data-b="coord" aria-pressed="false">coord_cartesian()</button></div>
+      <div class="opt"><span class="lbl">labs</span><button type="button" class="tog" data-b="labs" aria-pressed="false">labs()</button></div>
+      <div class="opt"><label class="lbl" for="bTheme">theme</label>
+        <select id="bTheme"><option value="grey">theme_grey() (기본)</option><option value="bw">theme_bw()</option><option value="minimal">theme_minimal()</option><option value="classic">theme_classic()</option></select>
+        <button type="button" class="tog" data-b="legendBottom" aria-pressed="false">legend 아래로</button></div>
+      <div class="cb r"><span class="lang">R</span><pre id="bCode"></pre><button type="button" class="copy">복사</button></div>
+      <div class="cb prompt"><span class="lang">프롬프트 · 지금 설정을 에이전트에게</span><pre id="bPrompt"></pre><button type="button" class="copy">복사</button></div>
+      <p class="note" id="bNote"></p>
+    </div>
+    <figure class="fig"><svg id="svgBuild" role="img" aria-label="레이어를 쌓아 만드는 산점도"></svg>
+      <figcaption><span>코드와 그림이 함께 바뀝니다</span><span class="mono">n = 32</span></figcaption></figure>
+  </div>
+  <div class="callout task"><div class="k">실습</div>
+    <ol><li><code>geom_smooth()</code>를 켠 상태에서 <code>colour</code> 매핑을 끄고 켜 보세요. 회귀선 개수가 왜 바뀌나요?</li>
+      <li><code>coord_cartesian(ylim = c(10, 30))</code> 대신 <code>scale_y_continuous(limits = c(10, 30))</code>를 쓰면 회귀선이 어떻게 달라질지 R에서 확인하세요.</li></ol></div>
+</section>
+
+<!-- 06 -->
+<section class="panel" id="object">
+  <div class="section-head"><span class="section-num">06</span><h2>그림 객체: ggplot()의 결과를 변수에 담기</h2></div>
+  <p>지금까지는 <code>ggplot()</code>부터 마지막 <code>geom_*()</code>까지 한 번에 실행해 바로 그림을 보았습니다. 사실 <code>ggplot()</code>은 그림을 그리는 함수가 아니라 <b>그림 객체</b>(ggplot 객체)를 만드는 함수입니다. 데이터, 매핑, 레이어, 테마 설정이 모두 이 객체 하나에 담기고, 그림은 이 객체를 <b>출력할 때</b> 그려집니다. 그래서 결과를 변수에 담아 두면 같은 그림을 다시 그리고, 저장하고, 요소를 더해 다른 그림을 만드는 데 쓸 수 있습니다. 07절부터 나오는 <code>p</code>가 바로 이 변수입니다.</p>
+  <div class="cb r"><span class="lang">R · 그림 객체 만들고 쓰기</span><pre data-code="object"></pre><button type="button" class="copy">복사</button></div>
+
+  <h3>그림 객체로 할 수 있는 일</h3>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>할 일</th><th>코드</th><th>메모</th></tr></thead>
+    <tbody>
+      <tr><td>만들기</td><td><code>p &lt;- ggplot(…) + geom_point()</code></td><td>변수에 담으면 그림이 그려지지 않습니다. 객체만 만들어집니다</td></tr>
+      <tr><td>출력하기</td><td><code>p</code> 또는 <code>print(p)</code></td><td>콘솔에서 한 줄씩 실행할 때는 이름만 적어도 그려집니다. 함수나 반복문 안, <code>source()</code>로 실행할 때는 <code>print(p)</code>를 적어야 그려집니다</td></tr>
+      <tr><td>저장하기</td><td><code>ggsave("output/figures/06_p.png", plot = p)</code></td><td><code>plot</code>을 빼면 마지막으로 만든 그림(<code>last_plot()</code>)이 저장되므로, 저장할 그림을 꼭 적습니다</td></tr>
+      <tr><td>기본 그림에 요소 더하기</td><td><code>p_line &lt;- p + geom_smooth(method = "lm")</code></td><td><code>p</code>는 그대로 두고 새 객체가 생깁니다. 같은 바탕 위에 여러 버전을 만들 때 씁니다</td></tr>
+      <tr><td>바꿔 두기</td><td><code>p &lt;- p + labs(x = "Speed (mph)")</code></td><td><code>p</code> 자체를 바꾸려면 결과를 다시 <code>p</code>에 담습니다</td></tr>
+      <tr><td>무엇인지 확인하기</td><td><code>class(p)</code></td><td>ggplot2 4.0에서는 <code>"ggplot2::ggplot"</code> 등이 나옵니다</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout caution"><p><strong><code>p + geom_smooth()</code>만 실행하면 p는 바뀌지 않습니다.</strong> 그림에는 회귀선이 보이지만 그것은 새로 만들어 바로 출력한 객체이고, <code>p</code>에는 여전히 점만 있습니다. 회귀선을 남기려면 <code>p_line &lt;- p + geom_smooth()</code>처럼 새 변수에 담거나 <code>p &lt;- …</code>로 다시 담습니다.</p>
+    <p><strong>스크립트를 <code>Rscript</code>로 실행할 때</strong> 맨 바깥에 <code>p</code>만 적어 두면 화면에 그림 창이 뜨지 않고 작업 폴더에 <code>Rplots.pdf</code>가 생깁니다. 그림은 <code>ggsave()</code>로 <code>output/</code>에 저장합니다.</p></div>
+  <div class="cb prompt"><span class="lang">프롬프트 · 그림 객체로 여러 버전 만들기</span><pre>scripts/06_objects.R 을 만들어 실행해 줘.
+- cars 로 x = speed, y = dist 인 산점도를 그림 객체 p 에 담는다.
+- p 에 단순 선형회귀 직선을 더한 그림은 p_line, p_line 에 제목을 더한 그림은 p_title 에 담는다. p 는 바꾸지 않는다.
+- 세 그림을 ggsave() 의 plot 인수로 하나씩 지정해 output/figures/06_p.png, 06_p_line.png, 06_p_title.png 로 저장한다.
+- 각 객체에 레이어가 몇 개 들어 있는지 출력해 p 가 바뀌지 않았음을 보여 줘.</pre><button type="button" class="copy">복사</button></div>
+  <div class="callout task"><div class="k">실습</div>
+    <ol><li><code>p + geom_smooth(method = "lm")</code>를 실행한 뒤 <code>p</code>를 다시 출력해, 회귀선이 남아 있는지 확인하세요.</li>
+      <li><code>for (i in 1:3) p</code>와 <code>for (i in 1:3) print(p)</code>를 차례로 실행해 무엇이 다른지 확인하세요.</li>
+      <li><code>ggsave()</code>에서 <code>plot =</code>을 빼고 저장한 뒤, 어떤 그림이 저장되었는지 열어 보세요.</li></ol></div>
+</section>
+
+<!-- 07 -->
+<section class="panel" id="structure">
+  <div class="section-head"><span class="section-num">07</span><h2>theme()의 구성</h2></div>
+  <p>theme은 데이터와 무관한 모든 잉크를 다룹니다. 설정 하나는 <b>요소 이름 = 요소 함수</b> 형태이고, 요소 이름은 점(.)으로 계층을 이룹니다. 하위 요소는 지정하지 않은 속성을 상위 요소에서 상속합니다.</p>
+  <div class="callout"><p><strong>테마는 프롬프트로 주문하고, 결과는 요소 이름으로 확인합니다.</strong> 테마에는 바꿀 수 있는 요소가 많아서 함수와 인수를 외워 코드로 쓰기보다 원하는 모양을 말로 주문하는 편이 쉽습니다. 다만 에이전트가 무엇을 바꿨는지 읽을 수 있어야 결과를 확인하고 다시 고칠 수 있습니다. 그래서 07~09절은 요소의 구조를 본 다음, 프롬프트로 바꾸고, 저장한 그림과 바뀐 줄을 확인하는 순서로 진행합니다. 프롬프트마다 붙은 &quot;확인할 것&quot;을 보며 결과를 직접 점검하세요.</p></div>
+
+  <h3>요소 함수 네 가지와 보조 함수</h3>
+  <div class="cards">
+    <div class="card"><span class="efn">element_text()</span><p>글자: 제목, 축 눈금 레이블, 범례 텍스트, strip</p><div class="args">family, face, colour, size, hjust, vjust, angle, lineheight, margin</div></div>
+    <div class="card"><span class="efn">element_line()</span><p>선: 격자, 축선, 눈금</p><div class="args">colour, linewidth, linetype, lineend, arrow</div></div>
+    <div class="card"><span class="efn">element_rect()</span><p>사각형: 배경, 테두리, 범례 키, strip 배경</p><div class="args">fill, colour, linewidth, linetype</div></div>
+    <div class="card"><span class="efn">element_blank()</span><p>그리지 않음. 공간도 차지하지 않습니다.</p><div class="args">인수 없음</div></div>
+    <div class="card"><span class="efn">rel() · margin() · unit()</span><p>상대 크기, 여백, 길이 단위</p><div class="args">size = rel(1.2)<br>margin(t, r, b, l, unit = "pt")<br>unit(1, "cm")</div></div>
+    <div class="card"><span class="efn">element_geom() <span class="badge">4.0</span></span><p>레이어 기본값(잉크·종이·강조색, 선 굵기, 글꼴)을 테마에서 지정</p><div class="args">theme(geom = element_geom(ink, paper, accent, linewidth, family, …))</div></div>
+  </div>
+
+  <div class="split">
+    <div class="ctl">
+      <h3>요소 상속 트리</h3>
+      <p class="note">요소를 누르면 그림에서 해당 부분과 그 요소에서 상속받는 하위 요소가 함께 강조됩니다. 트리는 ggplot2 4.0 기준입니다.</p>
+      <div class="opt"><label class="lbl" for="tBase">비교할 테마</label>
+        <select id="tBase"><option value="grey">theme_grey()</option><option value="bw">theme_bw()</option><option value="classic">theme_classic()</option><option value="minimal">theme_minimal()</option></select></div>
+      <div class="etree" id="tree"></div>
+      <div class="detail" id="treeDetail"></div>
+    </div>
+    <figure class="fig"><svg id="svgTree" role="img" aria-label="테마 요소 강조 그림"></svg>
+      <figcaption><span>빨간색: 선택한 요소의 영향 범위</span><span class="mono" id="treeTag">theme_grey()</span></figcaption></figure>
+  </div>
+
+  <div class="two">
+    <div>
+      <h3>요소가 아닌 설정</h3>
+      <p>모든 theme 인수가 요소 함수를 받는 것은 아닙니다. 위치·방향은 문자열, 간격은 <code>unit()</code>, 비율은 숫자를 받습니다.</p>
+      <div class="tbl-wrap"><table>
+        <tr><td><code>legend.position</code></td><td>"right", "bottom", "top", "left", "none", "inside"</td></tr>
+        <tr><td><code>legend.position.inside</code></td><td>c(0.9, 0.9) — 3.5.0부터 inside와 함께</td></tr>
+        <tr><td><code>plot.title.position</code></td><td>"panel"(기본) 또는 "plot"</td></tr>
+        <tr><td><code>panel.spacing</code></td><td>unit(1, "lines")</td></tr>
+        <tr><td><code>plot.margin</code></td><td>margin(10, 10, 10, 10)</td></tr>
+        <tr><td><code>aspect.ratio</code></td><td>1</td></tr>
+      </table></div>
+    </div>
+    <div>
+      <h3>테마를 적용하는 세 가지 범위</h3>
+      <div class="cb r"><span class="lang">R</span><pre data-code="scope"></pre><button type="button" class="copy">복사</button></div>
+      <p class="note">ggplot2 4.0(2025-09)부터 완성 테마가 <code>ink</code>, <code>paper</code>, <code>accent</code> 인수를 받고, <code>palette.colour.discrete</code>처럼 팔레트도 테마에서 지정할 수 있습니다. <code>theme_sub_legend()</code> 같은 <code>theme_sub_*()</code> 단축 함수도 추가되었습니다.</p>
+    </div>
+  </div>
+  <h3>프롬프트로 테마 요소 고치기</h3>
+  <p>먼저 07~09절에서 함께 쓸 바탕 그림을 그림 객체 <code>p</code>로 만듭니다(06절). <code>p</code>는 그것을 만든 스크립트 안에만 있으므로, 만드는 코드를 <code>scripts/07_base_plot.R</code> 한 파일에 두고 다른 스크립트는 이 파일을 <code>source()</code>로 불러 씁니다. 07절의 나머지 프롬프트는 <code>scripts/07_theme.R</code>에 이어서 보냅니다.</p>
+  <div class="prompts">
+    <div class="cb prompt"><span class="lang">프롬프트 0 · 바탕 그림 p 만들기</span><pre>바탕 그림을 만드는 파일과 그것을 쓰는 스크립트를 만들어 실행해 줘.
+- scripts/07_base_plot.R 에는 그림 객체 p 를 만드는 코드만 둔다: mtcars 로 x = wt, y = mpg 이고, 실린더 수 factor(cyl) 를 색으로 구분한 산점도. 제목은 Weight and fuel economy, 범례 제목은 Cylinders. 테마는 바꾸지 않는다(기본값).
+- scripts/07_theme.R 은 source("scripts/07_base_plot.R") 로 p 를 불러와 output/figures/07_base.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
+    <div class="cb prompt"><span class="lang">프롬프트 1 · 요소 이름으로 고치기</span><pre>p 의 테마를 두 가지만 고쳐 줘.
+- 보조 격자선(주 격자선 사이의 가는 선)만 지운다. 주 격자선은 남긴다.
+- 축 제목을 진한 회색으로 바꾼다.
+- 바꾼 설정마다 theme() 의 어느 요소인지, 그 요소가 어느 상위 요소에서 상속받는지 알려 줘.
+- 결과를 output/figures/07_elements.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
+  </div>
+  <div class="tbl-wrap"><table class="check"><thead><tr><th>확인할 것</th><th>어떻게 확인하나</th></tr></thead><tbody><tr><td>보조 격자선</td><td>07_base.png와 비교해 주 격자선 사이의 가는 흰 선만 사라졌는가. 굵은 주 격자선은 남아 있는가</td></tr><tr><td>바뀐 요소</td><td>에이전트가 쓴 요소가 위 트리의 <code>panel.grid.minor</code>, <code>axis.title</code>인가. 다른 요소(예: <code>panel.grid</code> 전체)를 지우지 않았는가</td></tr><tr><td>상속 설명</td><td><code>panel.grid.minor</code> → <code>panel.grid</code> → <code>line</code>, <code>axis.title</code> → <code>title</code> → <code>text</code>처럼 트리와 같은 순서로 설명했는가</td></tr></tbody></table></div>
+  <div class="prompts">
+    <div class="cb prompt"><span class="lang">프롬프트 2 · 상위 요소 하나로 한꺼번에</span><pre>p 의 모든 글자(제목, 축 제목, 눈금 글자, 범례)를 한 번에 조금 키우고 싶다.
+- 요소마다 따로 고치지 말고, 모든 글자가 물려받는 상위 요소 하나만 바꾼다.
+- 어느 요소를 바꿨는지, 그래서 어떤 하위 요소들이 함께 커지는지 알려 줘.
+- 결과를 output/figures/07_text_size.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
+    <div class="cb prompt"><span class="lang">프롬프트 3 · 스크립트 전체에 적용하기</span><pre>지금까지 고친 테마를 이 스크립트의 모든 그림에 기본으로 적용하고 싶다.
+- 그림마다 + theme() 을 붙이지 않고, 기본 테마를 한 번만 바꾸는 방법을 쓴다.
+- 그 방법으로 mtcars 의 hp 와 mpg 산점도를 하나 더 그려 output/figures/07_default_theme.png 로 저장하고, 새 그림에도 같은 테마가 적용됐는지 보여 줘.</pre><button type="button" class="copy">복사</button></div>
+  </div>
+  <div class="tbl-wrap"><table class="check"><thead><tr><th>확인할 것</th><th>어떻게 확인하나</th></tr></thead><tbody><tr><td>한꺼번에 커졌는가</td><td>07_text_size.png에서 제목, 축 제목, 눈금 글자, 범례 글자가 모두 함께 커졌는가. 서로의 크기 비율은 그대로인가</td></tr><tr><td>바꾼 요소</td><td><code>text</code> 요소 하나(또는 바탕 테마의 <code>base_size</code>)만 바꿨는가. <code>axis.text</code>, <code>plot.title</code> 등을 하나씩 고쳤다면 프롬프트를 어긴 것이다</td></tr><tr><td>기본 테마</td><td><code>theme_set()</code>이나 <code>theme_update()</code>를 썼는가. 새 그림 07_default_theme.png에 그림마다 <code>+ theme()</code>을 붙이지 않았는데도 같은 모양이 나오는가</td></tr></tbody></table></div>
+  <div class="callout task"><div class="k">실습</div>
+    <ol><li><code>theme_grey()</code>에서 <code>axis.line</code>을 눌러 보세요. 왜 아무것도 강조되지 않나요? <code>theme_classic()</code>으로 바꿔 비교하세요.</li>
+      <li><code>text</code> 노드를 누르고, <code>theme(text = element_text(family = "Noto Sans KR"))</code> 한 줄이 어디까지 영향을 주는지 설명하세요.</li></ol></div>
+</section>
+
+<!-- 08 -->
+<section class="panel" id="packages">
+  <div class="section-head"><span class="section-num">08</span><h2>내장 테마와 잘 알려진 테마 패키지</h2></div>
+  <p>완성 테마(complete theme)는 모든 요소를 한 번에 정의합니다. ggplot2 내장 테마 8종과 주요 확장 패키지의 대표 테마를 같은 그림에 적용해 비교합니다. 브라우저 재현은 배경·격자·축·글꼴의 근사치이며, 실제 출력은 R에서 확인하세요.</p>
+  <div class="split">
+    <div class="gal" id="gallery"></div>
+    <figure class="fig"><svg id="svgGal" role="img" aria-label="테마 비교 그림"></svg>
+      <figcaption><span id="galNote"></span><span class="mono" id="galTag"></span></figcaption></figure>
+  </div>
+  <div class="two">
+    <div class="ctl">
+      <div class="cb r"><span class="lang">R</span><pre id="galCode"></pre><button type="button" class="copy">복사</button></div>
+      <div class="cb prompt"><span class="lang">프롬프트 · 이 테마를 에이전트에게</span><pre id="galPrompt"></pre><button type="button" class="copy">복사</button></div>
+    </div>
+    <div class="detail" id="galDetail" style="margin-top:0;align-self:start"></div>
+  </div>
+  <h3>프롬프트로 테마 고르기</h3>
+  <p>위젯으로 모양을 훑어보았다면, 실제 그림을 용도에 맞게 비교하는 일은 에이전트에게 맡깁니다.</p>
+  <div class="cb prompt"><span class="lang">프롬프트 · 용도에 맞는 테마 비교하기</span><pre>학술지 투고용 그림에 어울리는 테마를 고르고 싶다.
+- scripts/08_compare.R 을 만들고, source("scripts/07_base_plot.R") 로 불러온 p 를 theme_bw(), theme_classic(), theme_minimal() 로 각각 바꿔 output/figures/08_bw.png, 08_classic.png, 08_minimal.png 로 저장한다.
+- 세 테마가 배경, 격자, 축선, 테두리에서 어떻게 다른지 표로 정리해 줘.
+- 흑백으로 인쇄했을 때 가장 읽기 쉬운 것을 하나 추천하고 이유를 말해 줘. 고르는 것은 내가 한다.</pre><button type="button" class="copy">복사</button></div>
+  <div class="tbl-wrap"><table class="check"><thead><tr><th>확인할 것</th><th>어떻게 확인하나</th></tr></thead><tbody><tr><td>세 파일</td><td>output/figures/에 08_bw.png, 08_classic.png, 08_minimal.png가 모두 생겼는가. 데이터와 색은 같고 테마만 다른가</td></tr><tr><td>차이 표</td><td>표에 적힌 차이(예: theme_classic은 격자가 없고 축선만 있다)가 세 그림에서 실제로 보이는가. 위 위젯의 같은 테마와도 비교한다</td></tr><tr><td>추천의 근거</td><td>추천 이유가 그림에서 확인할 수 있는 것(격자, 배경색, 테두리)에 근거하는가</td></tr></tbody></table></div>
+  <div class="callout task"><div class="k">실습</div>
+    <ol><li>학술지 투고용, 발표 슬라이드용, 보고서용으로 각각 어울리는 테마를 하나씩 고르고 이유를 적어 보세요.</li>
+      <li>고른 테마에 글자 크기와 글꼴(대부분 <code>base_size</code>, <code>base_family</code>)을 지정해 같은 그림을 다시 저장하세요.</li></ol></div>
+</section>
+
+<!-- 09 -->
+<section class="panel" id="custom">
+  <div class="section-head"><span class="section-num">09</span><h2>theme 사용자화</h2></div>
+  <p>완성 테마를 바탕으로 고치고 싶은 요소만 <code>theme()</code>으로 덮어쓰는 것이 기본 흐름입니다. 자주 쓰는 조합은 함수로 만들어 프로젝트 전체에 적용합니다.</p>
+  <div class="split">
+    <div class="ctl">
+      <h3>테마 편집기</h3>
+      <div class="opt"><label class="lbl" for="cBase">바탕 테마</label>
+        <select id="cBase"><option value="grey">theme_grey()</option><option value="bw">theme_bw()</option><option value="minimal" selected>theme_minimal()</option><option value="classic">theme_classic()</option><option value="light">theme_light()</option></select></div>
+      <div class="opt"><label class="lbl" for="cSize">base_size</label><input type="range" id="cSize" min="8" max="18" step="1" value="11"><span class="mono" id="cSizeV">11</span></div>
+      <div class="opt"><span class="lbl">plot.title</span><button type="button" class="tog" data-c="bold" aria-pressed="false">face = "bold"</button><button type="button" class="tog" data-c="titlePlot" aria-pressed="false">position = "plot"</button><button type="button" class="tog" data-c="center" aria-pressed="false">hjust = 0.5</button></div>
+      <div class="opt"><label class="lbl" for="cLeg">legend.position</label>
+        <select id="cLeg"><option value="right">"right"</option><option value="bottom">"bottom"</option><option value="top">"top"</option><option value="none">"none"</option></select></div>
+      <div class="opt"><span class="lbl">panel.grid</span><button type="button" class="tog" data-c="noMinor" aria-pressed="false">minor 지우기</button><button type="button" class="tog" data-c="noMajX" aria-pressed="false">major.x 지우기</button></div>
+      <div class="opt"><span class="lbl">axis</span><button type="button" class="tog" data-c="axisLine" aria-pressed="false">axis.line</button>
+        <select id="cAngle" aria-label="axis.text.x 각도"><option value="0">axis.text.x 0°</option><option value="45">45°</option><option value="90">90°</option></select></div>
+      <div class="opt"><span class="lbl">panel.background</span><span class="opt" id="cFill"></span></div>
+      <div class="cb r"><span class="lang">R</span><pre id="cCode"></pre><button type="button" class="copy">복사</button></div>
+      <div class="cb prompt"><span class="lang">프롬프트 · 이 테마 설정을 에이전트에게</span><pre id="cPrompt"></pre><button type="button" class="copy">복사</button></div>
+    </div>
+    <figure class="fig"><svg id="svgCustom" role="img" aria-label="사용자화한 테마 미리보기"></svg>
+      <figcaption><span>설정을 바꾸면 theme() 코드가 함께 갱신됩니다</span></figcaption></figure>
+  </div>
+
+  <div class="two">
+    <div>
+      <h3>나만의 테마 함수 만들기</h3>
+      <p>프로젝트에서 반복할 설정을 함수로 묶고 <code>theme_set()</code>으로 기본값을 바꿉니다. 인수로 <code>base_size</code>, <code>base_family</code>를 열어 두면 학술지·슬라이드별로 크기만 바꿔 재사용할 수 있습니다.</p>
+      <div class="cb r"><span class="lang">R</span><pre data-code="fn"></pre><button type="button" class="copy">복사</button></div>
+    </div>
+    <div>
+      <h3><code>+</code>와 <code>%+replace%</code>의 차이</h3>
+      <p><code>+ theme()</code>은 지정한 속성만 기존 요소에 병합합니다. <code>%+replace%</code>는 요소를 통째로 교체하므로 지정하지 않은 속성은 비어 있게 되고, 상위 요소의 값을 상속합니다.</p>
+      <div class="cb r"><span class="lang">R</span><pre data-code="replace"></pre><button type="button" class="copy">복사</button></div>
+      <p class="note">완성 테마를 처음부터 정의할 때는 <code>%+replace%</code>가 안전하고, 그림 하나를 다듬을 때는 <code>+ theme()</code>이 편합니다.</p>
+    </div>
+  </div>
+  <h3>프롬프트로 테마 주문하기</h3>
+  <p>위 편집기의 프롬프트는 설정 하나하나를 그대로 옮긴 것입니다. 실제로는 함수 이름을 몰라도 <b>원하는 모양과 용도</b>를 말하면 됩니다. 대신 에이전트가 어떤 설정을 골랐는지 목록으로 받아, 그림과 맞춰 확인합니다.</p>
+  <div class="prompts">
+    <div class="cb prompt"><span class="lang">프롬프트 1 · 말로 주문하기</span><pre>scripts/09_slide.R 을 만들어, source("scripts/07_base_plot.R") 로 불러온 p 를 발표 슬라이드용으로 다듬어 줘.
+- 강의실 뒤에서도 읽히게 글자를 크게 한다.
+- 배경은 흰색, 격자는 가로선만 옅게 남긴다.
+- 범례는 그림 아래로 옮긴다.
+- 제목은 굵게 하고 그림 왼쪽 끝에 맞춘다.
+- 바꾼 theme() 설정을 목록으로 보여 주고, 결과를 output/figures/09_slide.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
+    <div class="cb prompt"><span class="lang">프롬프트 2 · 한 요소만 다시 고치기</span><pre>scripts/09_slide.R 로 만든 09_slide.png 의 제목이 너무 크다.
+- 다른 설정은 그대로 두고 제목 크기만 조금 줄인다.
+- scripts/09_slide.R 의 바뀐 줄만 보여 주고, 결과를 output/figures/09_slide_v2.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
+  </div>
+  <div class="tbl-wrap"><table class="check"><thead><tr><th>확인할 것</th><th>어떻게 확인하나</th></tr></thead><tbody><tr><td>주문한 네 가지</td><td>09_slide.png에서 글자 크기, 흰 배경과 가로 격자만 남은 모습, 아래쪽 범례, 굵은 왼쪽 정렬 제목을 하나씩 확인했는가</td></tr><tr><td>설정 목록과 그림</td><td>에이전트가 보여 준 설정(예: <code>panel.grid.major.x = element_blank()</code>, <code>legend.position = &quot;bottom&quot;</code>)이 그림의 변화와 하나씩 맞는가. 목록에는 있는데 그림에 없거나, 그 반대인 것은 없는가</td></tr><tr><td>한 요소만</td><td>프롬프트 2에서 바뀐 줄이 <code>plot.title</code>의 크기 하나뿐인가. 09_slide.png와 09_slide_v2.png를 나란히 열어 제목 말고 달라진 곳이 없는가</td></tr></tbody></table></div>
+  <div class="cb prompt"><span class="lang">프롬프트 3 · 나만의 테마 함수로 만들기</span><pre>scripts/09_slide.R 의 테마 설정(09_slide_v2.png 의 모양)을 다른 그림에도 쓸 수 있게 함수로 만들어 줘.
+- 이름은 theme_slide() 로 하고 scripts/theme_slide.R 에 저장한다.
+- 기본 글자 크기를 base_size 인수로 받게 한다. 한글 그림에도 쓰도록 base_family 인수도 둔다.
+- 다른 스크립트에서 source() 로 불러와 쓰는 예를 보여 주고, base_size 를 18로 준 그림을 output/figures/09_slide_function.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
+  <div class="tbl-wrap"><table class="check"><thead><tr><th>확인할 것</th><th>어떻게 확인하나</th></tr></thead><tbody><tr><td>함수 파일</td><td>scripts/theme_slide.R이 생겼고, 그 안에 <code>theme_slide &lt;- function(base_size = …, base_family = …)</code>가 있는가</td></tr><tr><td>인수가 먹히는가</td><td>09_slide_function.png의 글자가 09_slide_v2.png보다 커졌는가. 나머지 모양(배경, 격자, 범례 위치)은 같은가</td></tr><tr><td>위의 예와 비교</td><td>바로 위 &quot;나만의 테마 함수 만들기&quot;의 <code>theme_lab()</code>과 구조가 어떻게 같고 다른지 설명할 수 있는가</td></tr></tbody></table></div>
+  <h3>프로젝트의 모든 그림을 같은 모양으로: AGENTS.md에 적어 두기</h3>
+  <p><code>theme_set()</code>은 그 R 세션 안에서만 기본 테마를 바꿉니다. 스크립트를 새로 만들거나 에이전트와 대화를 새로 시작하면 다시 기본 테마로 돌아갑니다. 프로젝트 폴더의 그림이 <b>모두 같은 모양</b>으로 나오게 하려면 두 가지를 해 둡니다.</p>
+  <ol class="steps">
+    <li><strong>잘 만든 테마를 파일 하나에 둔다.</strong> 앞에서 다듬은 테마를 <code>scripts/theme_project.R</code>의 함수 하나로 만들고(아래는 예입니다. 각자 다듬은 설정으로 바꿉니다), 파일 끝에서 <code>theme_set()</code>까지 실행하게 합니다. 그림을 그리는 스크립트는 이 파일을 <code>source()</code>로 불러오기만 하면 됩니다.
+      <div class="cb r"><span class="lang">R · scripts/theme_project.R 의 예</span><pre data-code="project"></pre><button type="button" class="copy">복사</button></div></li>
+    <li><strong>AGENTS.md에 규칙으로 적는다.</strong> 에이전트는 AGENTS.md를 대화마다 다시 읽으므로, 여기에 적어 두면 새 스크립트를 만들 때도 같은 테마 파일을 불러 쓰고 그림마다 테마를 따로 붙이지 않습니다. 아래 상자를 복사해 01절에서 만든 AGENTS.md 맨 아래에 <b>직접</b> 붙여 넣습니다(에이전트는 이 쪽을 볼 수 없습니다).
+      <div class="cb prompt"><span class="lang">AGENTS.md · 맨 아래에 덧붙이기</span><pre>## 그림 모양
+- 이 폴더의 모든 그림은 같은 테마를 쓴다. 테마는 scripts/theme_project.R 의 theme_project() 하나로 정한다.
+- 그림을 그리는 스크립트는 맨 위에서 source("scripts/theme_project.R") 를 실행한다. 이 파일이 theme_set(theme_project()) 까지 한다.
+- 그림마다 theme_*() 나 theme() 을 따로 붙이지 않는다. 그림 하나만 달라야 하면 먼저 이유를 말하고 내 허락을 받는다.
+- 테마를 바꿔야 하면 scripts/theme_project.R 만 고치고, 바뀐 줄을 보여 준다.
+- 그림은 ggsave() 로 width = 7, height = 4.5, dpi = 300 으로 저장한다.</pre><button type="button" class="copy">복사</button></div></li>
+  </ol>
+  <p class="note">한글 그림이라면 10절의 글꼴 설정(<code>font_add_google()</code>, <code>showtext_auto()</code>, <code>showtext_opts(dpi = 300)</code>)도 같은 파일에 두고, <code>base_family = "Noto Sans KR"</code>을 기본값으로 바꿉니다. 그러면 글꼴까지 프로젝트 전체에서 같아집니다.</p>
+  <div class="prompts">
+    <div class="cb prompt"><span class="lang">프롬프트 4 · 공통 테마 파일 만들기</span><pre>앞에서 만든 theme_slide() 를 이 프로젝트의 모든 그림에 쓸 공통 테마로 바꾸려 한다.
+- scripts/theme_project.R 에 theme_project(base_size, base_family) 함수를 만든다. 모양은 theme_slide() 와 같게 한다.
+- 파일 끝에서 theme_set(theme_project()) 를 실행하게 한다.
+- 다른 스크립트는 고치지 않는다. 만든 파일 전체를 보여 줘.</pre><button type="button" class="copy">복사</button></div>
+    <div class="cb prompt"><span class="lang">프롬프트 5 · 더한 규칙 확인하기</span><pre>AGENTS.md 맨 아래에 '그림 모양' 절을 내가 더했다. AGENTS.md 전체를 다시 읽고, 그림 모양 규칙을 세 줄로 요약해 줘.
+- 지금 scripts/ 에 있는 스크립트 가운데 이 규칙에 어긋나는 것이 있으면 고치지 말고 파일 이름과 어긋나는 점만 알려 줘.</pre><button type="button" class="copy">복사</button></div>
+  </div>
+  <div class="cb prompt"><span class="lang">프롬프트 6 · 새 대화에서: 규칙이 지켜지는지 확인하기</span><pre>scripts/09_rule_check.R 을 만들어 실행해 줘.
+- mtcars 로 x = hp, y = mpg, 실린더 수 factor(cyl) 를 색으로 구분한 산점도를 그린다. 제목은 Horsepower and fuel economy 로 단다.
+- 그림은 output/figures/09_rule_check.png 로 저장한다.
+- 이 스크립트를 쓸 때 AGENTS.md 의 어느 규칙을 따랐는지 알려 줘.</pre><button type="button" class="copy">복사</button></div>
+  <div class="tbl-wrap"><table class="check"><thead><tr><th>확인할 것</th><th>어떻게 확인하나</th></tr></thead><tbody><tr><td>테마 파일을 불러왔는가</td><td>scripts/09_rule_check.R 맨 위에 <code>source(&quot;scripts/theme_project.R&quot;)</code>가 있는가. 그림 코드에 <code>theme_minimal()</code>이나 <code>+ theme(…)</code>이 따로 붙지 않았는가</td></tr><tr><td>모양이 같은가</td><td>09_rule_check.png를 09_slide_v2.png와 나란히 열어 글자 크기, 배경, 격자, 범례 위치, 제목 모양이 같은가. 데이터만 다르고 테마는 같아야 한다</td></tr><tr><td>저장 크기</td><td><code>ggsave()</code>에 <code>width = 7, height = 4.5, dpi = 300</code>이 들어갔는가. 앞의 그림들과 파일의 가로·세로 픽셀이 같은가(2100 × 1350)</td></tr><tr><td>새 대화에서도</td><td>대화를 새로 시작한 뒤에도 에이전트가 따로 말하지 않았는데 위 규칙을 지켰는가. 지키지 않았다면 AGENTS.md가 작업 폴더 맨 위에 있는지, 파일 이름이 대문자인지 확인한다</td></tr></tbody></table></div>
+  <h3>예: APA 양식 그림을 프롬프트로 주문하기</h3>
+  <p>논문에 넣을 그림은 학술지가 정한 양식을 따릅니다. 심리학·교육학·사회과학에서 널리 쓰는 APA 7판은 그림을 이렇게 구성합니다(<a href="https://apastyle.apa.org/style-grammar-guidelines/tables-figures/figures" target="_blank" rel="noopener noreferrer">APA Style: Figures</a>).</p>
+  <div class="tbl-wrap"><table class="ftbl">
+    <thead><tr><th>구성</th><th>APA 7판의 요구</th><th>ggplot에서는</th></tr></thead>
+    <tbody>
+      <tr><td>번호</td><td>그림 위에 굵게: <b>Figure 1</b></td><td>그림 이미지 안이 아니라 <b>문서 본문</b>에 쓴다</td></tr>
+      <tr><td>제목</td><td>번호 다음 줄에 기울임꼴, 단어마다 첫 글자를 대문자로(Title Case)</td><td>문서 본문에 쓴다. 그림 안의 <code>labs(title = )</code>은 비운다</td></tr>
+      <tr><td>그림 안 글자</td><td>산세리프 글꼴, 8~14 pt</td><td>저장 폭을 인쇄 폭과 같게 두면 pt가 그대로 인쇄된다. <code>base_size</code> 10~11이면 가장 작은 눈금 글자가 8.0~8.8 pt</td></tr>
+      <tr><td>범례</td><td>그림 이미지 안에 두고, Title Case로 쓴다</td><td><code>labs(colour = "Cylinders")</code>, 항목 이름도 대문자로 시작</td></tr>
+      <tr><td>주석</td><td>필요할 때만 그림 아래에 둔다. <i>Note.</i>로 시작</td><td>문서 본문에 쓴다</td></tr>
+    </tbody>
+  </table></div>
+  <p>흰 배경, 격자 없는 패널, 단위를 적은 축 제목, 흑백 인쇄에서도 구별되는 기호는 APA가 직접 정한 규칙은 아니지만 학술지 그림에서 흔히 요구합니다. 이런 요구는 함수 이름을 몰라도 아래처럼 말로 주문할 수 있습니다. 결과를 받으면 확인할 것 표로 하나씩 점검합니다.</p>
+  <div class="cb prompt"><span class="lang">프롬프트 7 · APA 양식 그림 만들기</span><pre>scripts/09_apa.R 을 만들어, source("scripts/07_base_plot.R") 로 불러온 p 를 APA 7판 양식의 논문용 그림으로 다듬어 줘.
+- 그림 번호와 제목은 그림 이미지 안에 넣지 않는다. 그림의 제목은 지우고, 본문에 넣을 번호·제목·주석을 output/figures/09_apa_caption.md 에 따로 적는다.
+  · 번호: **Figure 1** (굵게)
+  · 제목: 다음 줄에 기울임꼴 Title Case 로, 예: *Fuel Economy by Vehicle Weight and Number of Cylinders*
+  · 주석: *Note.* 로 시작하고 자료의 출처(R 의 mtcars, 1974 Motor Trend)를 적는다.
+- 그림 안 글자는 산세리프 글꼴로 하고, 인쇄했을 때 가장 작은 글자가 8 pt 이상, 가장 큰 글자가 14 pt 이하가 되게 한다. 그림은 본문 폭 6.5인치, 높이 4인치로 저장해 글자 크기가 그대로 인쇄되게 한다.
+- 배경은 흰색, 격자는 없애고 x·y 축선만 남긴다.
+- 축 제목은 Title Case 로 단위를 적는다: Weight (1,000 lb), Fuel Economy (mpg).
+- 범례는 그림 이미지 안에 두고, 범례 제목과 항목을 Title Case 로 쓴다(예: Cylinders, 4 Cylinders).
+- 흑백으로 인쇄해도 집단을 구별할 수 있게 색과 함께 점 모양도 실린더 수에 따라 다르게 한다.
+- 그림은 output/figures/09_apa.png 로 300 dpi 로 저장한다.
+- 바꾼 설정마다 위의 어느 요구에 맞춘 것인지 한 줄씩 설명해 줘.</pre><button type="button" class="copy">복사</button></div>
+  <div class="tbl-wrap"><table class="check"><thead><tr><th>확인할 것</th><th>어떻게 확인하나</th></tr></thead><tbody><tr><td>번호와 제목</td><td>09_apa.png 안에 제목이 없는가. 09_apa_caption.md에 굵은 Figure 1, 다음 줄에 기울임꼴 Title Case 제목, 그림 아래에 둘 <i>Note.</i>가 따로 적혀 있는가</td></tr><tr><td>글자 크기</td><td><code>ggsave()</code>의 폭이 6.5, 높이가 4인가. 바탕 테마의 <code>base_size</code>가 10~11 정도여서 눈금 글자가 8 pt 이상인가. 글자 크기를 그림마다 따로 키우지 않았는가</td></tr><tr><td>글꼴</td><td>글꼴이 산세리프인가(기본 sans, Arial, Noto Sans KR 등). 세리프(명조) 계열을 쓰지 않았는가</td></tr><tr><td>배경·격자·축선</td><td>흰 배경에 격자가 없고 x·y 축선만 있는가. <code>theme_classic()</code>을 바탕으로 했다면 이 조건이 이미 맞는다</td></tr><tr><td>축 제목과 범례</td><td>축 제목에 단위가 있고 Title Case인가. 범례 제목과 항목이 대문자로 시작하는가. 색과 모양의 범례가 하나로 합쳐졌는가(두 미적 속성의 범례 제목이 같아야 합쳐진다). 범례가 그림 이미지 밖으로 잘리지 않았는가</td></tr><tr><td>흑백 인쇄</td><td>그림을 흑백으로 바꿔 열어도(예: 미리보기에서 흑백 필터, 흑백 인쇄 미리보기) 실린더 수를 점 모양으로 구별할 수 있는가</td></tr><tr><td>설명과 코드</td><td>에이전트가 말한 설정과 실제 코드가 맞는가. 프롬프트에 없는 구성요소(데이터, 축 범위 등)를 바꾸지 않았는가</td></tr></tbody></table></div>
+  <div class="prompts">
+    <div class="cb prompt"><span class="lang">프롬프트 8 · 한국어 논문 양식으로</span><pre>09_apa.R 을 바탕으로 한국어 학술지에 낼 그림을 하나 더 만들어 줘. 스크립트는 scripts/09_apa_ko.R 로 만든다.
+- 그림 안 글자는 한국어로 쓰고, 10절처럼 showtext 와 font_add_google("Noto Sans KR") 로 Noto Sans KR 을 쓴다.
+- 축 제목: 무게(1,000 lb), 연비(mpg). 범례 제목: 실린더 수, 항목: 4기통, 6기통, 8기통.
+- 번호와 제목은 output/figures/09_apa_ko_caption.md 에 따로 적는다: **그림 1**, 다음 줄에 제목, 그림 아래에 주.
+- 나머지 양식(크기, 글자 pt, 배경, 격자, 점 모양)은 09_apa.R 과 같게 하고, 그림은 output/figures/09_apa_ko.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
+    <div class="cb prompt"><span class="lang">프롬프트 9 · APA 양식을 공통 테마로</span><pre>09_apa.R 의 테마 설정을 이 프로젝트의 공통 테마로 쓰려 한다.
+- scripts/theme_project.R 의 theme_project() 를 09_apa.R 의 테마 설정과 같게 바꾼다. 점 모양 매핑처럼 데이터에 따라 달라지는 설정은 테마에 넣지 않는다.
+- AGENTS.md 의 '그림 모양' 절에서 저장 크기를 width = 6.5, height = 4, dpi = 300 으로 바꾼다. 다른 줄은 고치지 않는다.
+- 바뀐 줄을 모두 보여 주고, scripts/07_base_plot.R 의 p 를 새 공통 테마로 다시 그려 output/figures/09_apa_project.png 로 저장해 줘.</pre><button type="button" class="copy">복사</button></div>
+  </div>
+  <div class="tbl-wrap"><table class="check"><thead><tr><th>확인할 것</th><th>어떻게 확인하나</th></tr></thead><tbody><tr><td>한글 그림</td><td>09_apa_ko.png의 한글이 깨지지 않고 Noto Sans KR로 나오는가. 그림 크기, 배경, 격자, 점 모양이 09_apa.png와 같은가</td></tr><tr><td>테마와 매핑의 구분</td><td>theme_project()에 <code>theme()</code> 설정만 들어가고, 점 모양(<code>aes(shape = )</code>)처럼 데이터에 따른 설정은 그림 코드 쪽에 남았는가</td></tr><tr><td>규칙 파일</td><td>AGENTS.md에서 저장 크기 줄만 바뀌었는가. 09_apa_project.png의 픽셀 크기가 1950 × 1200(6.5 × 4인치, 300 dpi)인가</td></tr></tbody></table></div>
+  <p class="note">프롬프트 9를 보낸 뒤에는 에이전트가 만드는 모든 그림이 APA 양식 공통 테마와 6.5 × 4인치 저장 규칙을 따릅니다. 슬라이드용처럼 다른 모양이 필요하면 프롬프트에 그 까닭과 쓸 테마(예: <code>theme_slide()</code>)를 적습니다. AGENTS.md의 "그림 하나만 달라야 하면 먼저 이유를 말한다"는 조항이 그 경우입니다.</p>
+  <div class="callout task"><div class="k">실습</div>
+    <ol><li>편집기로 마음에 드는 조합을 만든 뒤 생성된 코드를 <code>theme_lab()</code> 함수 안에 옮겨 보세요.</li>
+      <li><code>theme_set(theme_lab())</code>을 스크립트 맨 위에 두고, 이미 만든 그림 3개가 한꺼번에 바뀌는지 확인하세요.</li></ol></div>
+</section>
+
+<!-- 10 -->
+<section class="panel" id="hangul">
+  <div class="section-head"><span class="section-num">10</span><h2>showtext로 한글 처리하기</h2></div>
+  <p>R 그래픽 장치는 장치마다 글꼴을 찾는 방식이 다릅니다. 한글 글꼴을 찾지 못한 장치에서는 한글이 네모(□)로 깨지거나 점으로 바뀌고, 같은 스크립트도 Windows와 macOS에서 다른 글꼴로 그려집니다. showtext는 글꼴 파일을 직접 읽어 글자를 도형으로 그려 넣으므로 장치와 운영체제에 상관없이 같은 결과를 얻습니다.</p>
+  <p>이 자료는 Google Fonts의 <b>Noto Sans KR</b>을 씁니다(showtext 0.9.8, ggplot2 4.0.3에서 확인). <code>font_add_google()</code>이 Google Fonts에서 글꼴 파일을 내려받아 R에 등록하므로, 컴퓨터에 글꼴을 따로 설치하지 않아도 Windows와 macOS에서 같은 이름 <code>"Noto Sans KR"</code>로 씁니다. 글꼴을 내려받아야 하므로 인터넷에 연결되어 있어야 합니다.</p>
+
+  <h3>준비 · 패키지 설치 (처음 한 번)</h3>
+  <div class="cb r"><span class="lang">R · 처음 한 번만</span><pre data-code="setup"></pre><button type="button" class="copy">복사</button></div>
+
+  <h3>스크립트마다: 글꼴 등록과 그림 저장</h3>
+  <div class="split">
+    <div class="ctl">
+      <p class="note">단계를 하나씩 끄면 무슨 일이 생기는지 그림과 설명이 함께 바뀝니다.</p>
+      <div class="opt"><span class="lbl">showtext</span><button type="button" class="tog" data-s="auto" aria-pressed="true">showtext_auto()</button></div>
+      <div class="opt"><span class="lbl">ggsave dpi=300</span><button type="button" class="tog" data-s="dpi" aria-pressed="true">showtext_opts(dpi = 300)</button></div>
+      <div class="opt"><label class="lbl" for="sHow">글꼴 지정</label>
+        <select id="sHow"><option value="base">theme_minimal(base_family = …)</option><option value="text">theme(text = element_text(family = …))</option></select></div>
+      <div class="cb r"><span class="lang">R</span><pre id="sCode"></pre><button type="button" class="copy">복사</button></div>
+      <div class="cb prompt"><span class="lang">프롬프트 · 한글 글꼴 설정을 에이전트에게</span><pre id="sPrompt"></pre><button type="button" class="copy">복사</button></div>
+      <p class="detail" id="sNote" style="margin-top:0"></p>
+    </div>
+    <figure class="fig"><svg id="svgShow" role="img" aria-label="한글 글꼴 처리 미리보기"></svg>
+      <figcaption><span>ggsave(dpi = 300) 결과를 흉내 낸 미리보기. Noto Sans KR이 이 컴퓨터에 없으면 비슷한 기본 글꼴로 보입니다</span></figcaption></figure>
+  </div>
+
+  <h3>자주 만나는 문제</h3>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>증상</th><th>원인</th><th>해결</th></tr></thead>
+    <tbody>
+      <tr><td>한글이 □□□ 또는 ...으로 보임</td><td>showtext를 켜지 않아 장치가 한글 글꼴을 찾지 못함. 예: 글꼴을 지정하지 않고 <code>pdf()</code>로 저장</td><td><code>font_add_google("Noto Sans KR")</code> 다음에 <code>showtext_auto()</code></td></tr>
+      <tr><td><code>pdf()</code> 저장이 "invalid font type" 오류로 멈춤</td><td>showtext를 켜지 않은 채 <code>"Noto Sans KR"</code>처럼 장치가 모르는 글꼴 이름을 씀</td><td><code>font_add_google()</code> 다음에 <code>showtext_auto()</code></td></tr>
+      <tr><td>한글은 나오는데 Noto Sans KR이 아님</td><td>showtext를 켜지 않아 PNG 장치(ragg)가 컴퓨터에 있는 다른 글꼴로 대신 그림</td><td><code>showtext_auto()</code>를 켰는지 확인</td></tr>
+      <tr><td><code>font_add_google()</code>에서 오류가 남</td><td>인터넷에 연결되어 있지 않거나 학교·회사 망이 Google Fonts를 막음</td><td>연결을 확인한다. 안 되면 아래 "인터넷이 없을 때"처럼 글꼴 파일로 등록</td></tr>
+      <tr><td>저장한 PNG의 글자가 매우 작음</td><td>showtext 기본 dpi(96)와 <code>ggsave(dpi = 300)</code>가 다름</td><td><code>showtext_opts(dpi = 300)</code>을 저장 dpi와 맞춤</td></tr>
+      <tr><td>축은 Noto Sans KR인데 점 레이블만 다른 글꼴</td><td><code>theme(text = element_text(family = ))</code>는 글자 요소에만 적용되고 <code>geom_text()</code>에는 전달되지 않아, 레이블은 showtext의 기본 글꼴(WenQuanYi Micro Hei)로 그려짐. ggplot2 3.5 이하에서는 <code>base_family</code>도 전달되지 않음</td><td>4.0 이상: 완성 테마의 <code>base_family</code>로 지정. 3.5 이하: <code>geom_text(family = "Noto Sans KR")</code></td></tr>
+      <tr><td>지정한 family 이름이 안 먹힘</td><td><code>font_add_google()</code>의 <code>family</code>로 붙인 이름과 다르게 씀</td><td><code>font_families()</code>로 등록된 이름 확인</td></tr>
+      <tr><td>PDF에서 글자가 선택·검색되지 않음</td><td>showtext는 글자를 도형(path)으로 그림</td><td>글자 검색이 필요한 PDF라면 showtext를 끄고 컴퓨터에 설치한 글꼴로 저장</td></tr>
+      <tr><td>R Markdown/Quarto에서 글자 크기가 이상함</td><td>청크마다 dpi가 다름</td><td>청크 옵션 <code>fig.showtext = TRUE</code></td></tr>
+    </tbody>
+  </table></div>
+  <div class="two">
+    <div>
+      <h3>인터넷이 없을 때: 글꼴 파일로 등록</h3>
+      <p>강의실 망이 막혀 있으면 <a href="https://fonts.google.com/noto/specimen/Noto+Sans+KR?lang=ko_Kore&amp;preview.script=Kore&amp;preview.lang=ko_Kore" target="_blank" rel="noopener noreferrer">Google Fonts의 Noto Sans KR 쪽</a>에서 미리 받아 둔 파일을 <code>font_add()</code>로 등록합니다. 압축을 풀어 나오는 <code>static</code> 폴더의 Regular·Bold 파일을 작업 폴더의 <code>fonts/</code>에 두고 씁니다. 굵은꼴 파일을 함께 주면 <code>face = "bold"</code>가 제대로 동작합니다.</p>
+      <div class="cb r"><span class="lang">R</span><pre data-code="local"></pre><button type="button" class="copy">복사</button></div>
+    </div>
+    <div>
+      <h3>다른 방법: 설치한 글꼴과 ragg 장치</h3>
+      <p>ragg 장치는 systemfonts로 컴퓨터에 설치된 글꼴을 직접 찾습니다. Noto Sans KR을 컴퓨터에 설치해 두었다면 showtext 없이도 PNG에 한글이 나옵니다. ggplot2의 <code>ggsave()</code>는 ragg가 설치되어 있으면 PNG를 ragg로 저장합니다.</p>
+      <div class="cb r"><span class="lang">R</span><pre data-code="ragg"></pre><button type="button" class="copy">복사</button></div>
+    </div>
+  </div>
+  <div class="callout task"><div class="k">실습</div>
+    <ol><li>글꼴을 지정하지 않은 한글 제목 그림을 <code>showtext_auto()</code> 없이 <code>pdf()</code>로 저장해 한글이 어떻게 보이는지 확인하세요. 이어서 <code>base_family = "Noto Sans KR"</code>을 넣고 다시 저장하면 어떤 메시지가 나오나요?</li>
+      <li>같은 그림을 dpi 300으로 저장하되 <code>showtext_opts(dpi = 300)</code>을 빼고 넣어 두 파일을 비교하세요.</li>
+      <li>09절에서 만든 <code>theme_lab()</code>으로 최종 그림을 저장하고, 다른 운영체제를 쓰는 사람과 결과를 비교하세요.</li></ol></div>
+</section>
+
+<section class="panel" id="refs">
+  <h3>참고문헌</h3>
+  <ol class="refs">
+    <li>Wilkinson, L. (2005). <i>The Grammar of Graphics</i> (2nd ed.). Springer.</li>
+    <li>Wickham, H. (2010). A layered grammar of graphics. <i>Journal of Computational and Graphical Statistics, 19</i>(1), 3–28.</li>
+    <li>Wickham, H., Navarro, D., &amp; Pedersen, T. L. <i>ggplot2: Elegant Graphics for Data Analysis</i> (3rd ed.). <a href="https://ggplot2-book.org" target="_blank" rel="noopener noreferrer">ggplot2-book.org</a></li>
+    <li>ggplot2 reference: Modify components of a theme (<code>theme()</code>), Complete themes. <a href="https://ggplot2.tidyverse.org/reference/theme.html" target="_blank" rel="noopener noreferrer">ggplot2.tidyverse.org</a></li>
+    <li>van den Brand, T. (2025). ggplot2 4.0.0. <i>Tidyverse blog</i>. <a href="https://tidyverse.org/blog/2025/09/ggplot2-4-0-0/" target="_blank" rel="noopener noreferrer">tidyverse.org</a></li>
+    <li>Qiu, Y. showtext: Using fonts more easily in R graphs. <a href="https://github.com/yixuan/showtext" target="_blank" rel="noopener noreferrer">github.com/yixuan/showtext</a></li>
+    <li>Google Fonts. Noto Sans KR. <a href="https://fonts.google.com/noto/specimen/Noto+Sans+KR" target="_blank" rel="noopener noreferrer">fonts.google.com</a></li>
+    <li>Arnold, J. B. ggthemes; Rudis, B. hrbrthemes; Wilke, C. O. cowplot; Kassambara, A. ggpubr; Dawson, C. ggprism; BBC Visual and Data Journalism, bbplot.</li>
+    <li>American Psychological Association. Figure setup. <i>APA Style</i>. <a href="https://apastyle.apa.org/style-grammar-guidelines/tables-figures/figures" target="_blank" rel="noopener noreferrer">apastyle.apa.org</a></li>
+    <li>Pedersen, T. L., &amp; Shemanarev, M. ragg: Graphic devices based on AGG. <a href="https://ragg.r-lib.org" target="_blank" rel="noopener noreferrer">ragg.r-lib.org</a></li>
+  </ol>
+</section>
+</main>
+
+<script>
+/* ---------- 자료: mtcars (name, wt, mpg, cyl, am) ---------- */
+const MT=[["Mazda RX4",2.62,21,6,1],["Mazda RX4 Wag",2.875,21,6,1],["Datsun 710",2.32,22.8,4,1],["Hornet 4 Drive",3.215,21.4,6,0],["Hornet Sportabout",3.44,18.7,8,0],["Valiant",3.46,18.1,6,0],["Duster 360",3.57,14.3,8,0],["Merc 240D",3.19,24.4,4,0],["Merc 230",3.15,22.8,4,0],["Merc 280",3.44,19.2,6,0],["Merc 280C",3.44,17.8,6,0],["Merc 450SE",4.07,16.4,8,0],["Merc 450SL",3.73,17.3,8,0],["Merc 450SLC",3.78,15.2,8,0],["Cadillac Fleetwood",5.25,10.4,8,0],["Lincoln Continental",5.424,10.4,8,0],["Chrysler Imperial",5.345,14.7,8,0],["Fiat 128",2.2,32.4,4,1],["Honda Civic",1.615,30.4,4,1],["Toyota Corolla",1.835,33.9,4,1],["Toyota Corona",2.465,21.5,4,0],["Dodge Challenger",3.52,15.5,8,0],["AMC Javelin",3.435,15.2,8,0],["Camaro Z28",3.84,13.3,8,0],["Pontiac Firebird",3.845,19.2,8,0],["Fiat X1-9",1.935,27.3,4,1],["Porsche 914-2",2.14,26,4,1],["Lotus Europa",1.513,30.4,4,1],["Ford Pantera L",3.17,15.8,8,1],["Ferrari Dino",2.77,19.7,6,1],["Maserati Bora",3.57,15,8,1],["Volvo 142E",2.78,21.4,4,1]];
+const PAL={hue:['#F8766D','#00BA38','#619CFF'],Set1:['#E41A1C','#377EB8','#4DAF4A'],Dark2:['#1B9E77','#D95F02','#7570B3']};
+const CYL=[4,6,8];
+const LABS={title:'무게가 늘수록 연비는 떨어진다',subtitle:'1974 Motor Trend 자동차 32종',caption:'자료: mtcars (R datasets)',x:'무게 (1,000 lbs)',y:'연비 (mpg)',col:'실린더'};
+const RAW={x:'wt',y:'mpg',col:'factor(cyl)'};
+/* 그림 안의 글꼴. 쪽에서 웹폰트를 불러오지 않으므로, 이 컴퓨터에 그 글꼴이 없으면 뒤의 기본 글꼴로 그린다 */
+const FONT={sans:"Pretendard,'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif",serif:"'Nanum Myeongjo','NanumMyeongjo',AppleMyungjo,Batang,serif",
+  noto:"'Noto Sans KR',sans-serif",fallback:"Georgia,'Times New Roman',serif"};
+
+/* ---------- 테마 정의 (근사) ---------- */
+const BASE={base:11,family:FONT.sans,plotBg:'#FFFFFF',panelBg:'#EBEBEB',border:null,borderW:1,
+  gMajX:'#FFFFFF',gMajY:'#FFFFFF',gMajW:1.1,gMinX:'#FFFFFF',gMinY:'#FFFFFF',gMinW:.55,gDash:null,
+  axLineX:null,axLineY:null,axLineW:1,ticks:'#333333',tickW:1,axText:'#4D4D4D',axFace:400,text:'#000000',axTitle:true,
+  titleRel:1.2,titleFace:400,titleHjust:0,titlePos:'panel',xTitleHjust:.5,yTitleHjust:.5,
+  legendPos:'right',keyBg:'#F2F2F2',legendBg:null,stripBg:'#D9D9D9',stripText:'#1A1A1A',stripBorder:null,angle:0,
+  ribbon:'#999999',smoothCol:'#3366FF',pointCol:'#000000'};
+const T=o=>Object.assign({},BASE,o);
+const TH={
+ grey:T({}),
+ bw:T({panelBg:'#FFFFFF',border:'#333333',gMajX:'#EBEBEB',gMajY:'#EBEBEB',gMinX:'#EBEBEB',gMinY:'#EBEBEB',keyBg:'#FFFFFF',stripBorder:'#333333'}),
+ minimal:T({panelBg:null,gMajX:'#EBEBEB',gMajY:'#EBEBEB',gMinX:'#EBEBEB',gMinY:'#EBEBEB',ticks:null,keyBg:null,stripBg:null}),
+ classic:T({panelBg:'#FFFFFF',gMajX:null,gMajY:null,gMinX:null,gMinY:null,axLineX:'#000000',axLineY:'#000000',keyBg:null,stripBg:'#FFFFFF',stripBorder:'#000000'}),
+ light:T({panelBg:'#FFFFFF',border:'#B3B3B3',gMajX:'#DEDEDE',gMajY:'#DEDEDE',gMinX:'#DEDEDE',gMinY:'#DEDEDE',gMajW:.8,gMinW:.4,ticks:'#B3B3B3',keyBg:'#FFFFFF',stripBg:'#B3B3B3',stripText:'#FFFFFF'}),
+ dark:T({panelBg:'#7F7F7F',gMajX:'#6B6B6B',gMajY:'#6B6B6B',gMinX:'#6B6B6B',gMinY:'#6B6B6B',keyBg:'#7F7F7F',stripBg:'#262626',stripText:'#E5E5E5',ribbon:'#CCCCCC'}),
+ linedraw:T({panelBg:'#FFFFFF',border:'#000000',gMajX:'#000000',gMajY:'#000000',gMinX:'#000000',gMinY:'#000000',gMajW:.25,gMinW:.12,ticks:'#000000',axText:'#000000',keyBg:'#FFFFFF',stripBg:'#000000',stripText:'#FFFFFF'}),
+ void:T({panelBg:null,gMajX:null,gMajY:null,gMinX:null,gMinY:null,ticks:null,axText:null,axTitle:false,keyBg:null,stripBg:null}),
+ economist:T({plotBg:'#D5E4EB',panelBg:null,gMajX:null,gMajY:'#FFFFFF',gMajW:1.8,gMinX:null,gMinY:null,axLineX:'#000000',ticks:'#000000',axText:'#000000',titleFace:700,legendPos:'top',keyBg:null,stripBg:'#C3D6DF'}),
+ fte:T({plotBg:'#F0F0F0',panelBg:'#F0F0F0',gMajX:'#D2D2D2',gMajY:'#D2D2D2',gMinX:null,gMinY:null,ticks:null,axTitle:false,titleFace:700,titleRel:1.5,legendPos:'bottom',keyBg:null,stripBg:null,axText:'#3C3C3C'}),
+ tufte:T({family:FONT.serif,panelBg:null,gMajX:null,gMajY:null,gMinX:null,gMinY:null,ticks:'#000000',axText:'#000000',keyBg:null,stripBg:null}),
+ wsj:T({plotBg:'#F8F2E4',panelBg:'#F8F2E4',gMajX:null,gMajY:'#000000',gMajW:1,gDash:'1.5 3',gMinX:null,gMinY:null,axLineX:'#000000',ticks:'#000000',axText:'#000000',axTitle:false,titleFace:700,titleRel:1.6,legendPos:'top',keyBg:null,stripBg:null}),
+ ipsum:T({panelBg:null,gMajX:'#CCCCCC',gMajY:'#CCCCCC',gMajW:.5,gMinX:'#CCCCCC',gMinY:'#CCCCCC',gMinW:.25,ticks:null,titleFace:700,titleRel:1.6,xTitleHjust:1,yTitleHjust:1,keyBg:null,stripBg:null}),
+ cowplot:T({base:14,panelBg:null,gMajX:null,gMajY:null,gMinX:null,gMinY:null,axLineX:'#000000',axLineY:'#000000',ticks:'#000000',axText:'#000000',titleFace:700,keyBg:null,stripBg:'#F2F2F2'}),
+ pubr:T({panelBg:null,gMajX:null,gMajY:null,gMinX:null,gMinY:null,axLineX:'#000000',axLineY:'#000000',ticks:'#000000',axText:'#000000',legendPos:'top',keyBg:null,stripBg:'#FFFFFF',stripBorder:'#000000'}),
+ prism:T({panelBg:null,gMajX:null,gMajY:null,gMinX:null,gMinY:null,axLineX:'#000000',axLineY:'#000000',axLineW:2.2,ticks:'#000000',tickW:2.2,axText:'#000000',axFace:700,titleFace:700,titleHjust:.5,keyBg:null,stripBg:null}),
+ bbc:T({panelBg:null,gMajX:null,gMajY:'#CBCBCB',gMinX:null,gMinY:null,ticks:null,axTitle:false,axText:'#222222',titleFace:700,titleRel:2,legendPos:'top',keyBg:null,stripBg:'#FFFFFF'})
+};
+
+/* ---------- SVG로 그리기 ---------- */
+const NS='http://www.w3.org/2000/svg';
+function E(tag,a,p){const e=document.createElementNS(NS,tag);for(const k in a){if(a[k]!=null&&a[k]!==false)e.setAttribute(k,a[k]);}if(p)p.appendChild(e);return e;}
+function tw(s,size){let w=0;for(const ch of s){const c=ch.codePointAt(0);w+=c>=0x1100?0.95:(ch===' '?0.3:(/[0-9]/.test(ch)?0.58:0.56));}return w*size;}
+let CLIP=0;
+/* 최소제곱 직선과 95% 신뢰대(t 분위수는 자유도별 근사) */
+function fit(xs,ys){const n=xs.length,mx=xs.reduce((a,b)=>a+b)/n,my=ys.reduce((a,b)=>a+b)/n;let sxx=0,sxy=0;for(let i=0;i<n;i++){sxx+=(xs[i]-mx)**2;sxy+=(xs[i]-mx)*(ys[i]-my);}const b=sxy/sxx,a=my-b*mx;let sse=0;for(let i=0;i<n;i++)sse+=(ys[i]-a-b*xs[i])**2;const df=n-2,s=df>0?Math.sqrt(sse/df):0;const tq=df>0?({1:12.71,2:4.30,3:3.18,4:2.78,5:2.57,6:2.45,7:2.36,8:2.31,9:2.26,10:2.23}[df]||(1.96+2.4/df)):0;return{a,b,mx,sxx,n,s,tq};}
+
+/* 요소마다 data-el(theme 요소 이름과 그 상위 요소), data-c(02절 구성요소)를 붙여 강조에 쓴다 */
+function render(svg,o){
+  const t=Object.assign({},BASE,o.theme||TH.grey);
+  const fam=o.family||t.family;
+  const S=t.base*1.3*(o.fontScale||1);
+  const cv=s=>o.tofu?s.replace(/[ᄀ-ᇿ㄰-㆏가-힣]/g,'□'):s;
+  const W=680,H=o.H||440;
+  svg.innerHTML='';svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const L=o.labs?LABS:RAW;
+  const pal=PAL[o.palette||'hue'];
+  const colOf=c=>o.color?pal[CYL.indexOf(c)]:t.pointCol;
+  const R=(x,y,w,h,a)=>E('rect',Object.assign({x,y,width:Math.max(0,w),height:Math.max(0,h),class:'pe'},a),svg);
+  const Ln=(x1,y1,x2,y2,a,p)=>E('line',Object.assign({x1,y1,x2,y2,class:'pe'},a),p||svg);
+  const Tx=(s,x,y,a,p)=>{const e=E('text',Object.assign({x,y,'font-family':fam,class:'pe'},a),p||svg);e.textContent=cv(s);return e;};
+  const M=12;
+  R(0,0,W,H,{fill:t.plotBg,'data-el':'rect plot.background','data-c':'theme'});
+  let top=M,bottom=H-M,left=M,right=W-M;
+  const titleS=S*t.titleRel,subS=S*.95,capS=S*.8,axS=S*.8,atS=S,legS=S*.8,strS=S*.8;
+  let titleY=null,subY=null,capY=null;
+  if(o.labs){top+=titleS;titleY=top;top+=6;top+=subS;subY=top;top+=10;bottom-=2;capY=bottom;bottom-=capS+8;}
+  const showLeg=o.color&&t.legendPos!=='none'&&(o.point||o.smooth);
+  let legW=0,legH=0,legTopY=0,legBotY=0;
+  if(showLeg){
+    if(t.legendPos==='right'){legW=Math.max(tw(cv(L.col),legS),26+tw('8',legS))+22;right-=legW;}
+    else{legH=legS*2.8;if(t.legendPos==='bottom'){bottom-=legH;legBotY=bottom;}else{legTopY=top;top+=legH;}}
+  }
+  const yTitleW=t.axTitle?atS*1.5:0, yTextW=t.axText?tw('35',axS)+6:0, tickL=t.ticks?4:0;
+  left+=yTitleW+yTextW+tickL;
+  const xTextH=t.axText?(t.angle===0?axS*1.35:t.angle===45?axS*1.9:axS*1.5+4):0;
+  const xTitleH=t.axTitle?atS*1.55:0;
+  bottom-=xTitleH+xTextH+tickL;
+  right-=8;
+  const facet=!!o.facet;
+  const panels=facet?[{am:0,lab:'자동 변속'},{am:1,lab:'수동 변속'}]:[{am:null}];
+  const stripH=facet?strS*1.9:0, gap=facet?12:0, pTop=top+stripH;
+  const pw=(right-left-gap*(panels.length-1))/panels.length;
+  const xd=[1.32,5.62], yd=o.ylim?[9,31]:[9.2,35.1];
+  const xb=[2,3,4,5], xm=[1.5,2.5,3.5,4.5,5.5];
+  const yb=o.ylim?[10,15,20,25,30]:[10,15,20,25,30,35], ym=o.ylim?[12.5,17.5,22.5,27.5]:[12.5,17.5,22.5,27.5,32.5];
+  const sy=v=>bottom-(v-yd[0])/(yd[1]-yd[0])*(bottom-pTop);
+  panels.forEach((P,i)=>{
+    const x0=left+i*(pw+gap), sx=v=>x0+(v-xd[0])/(xd[1]-xd[0])*pw;
+    if(t.panelBg)R(x0,pTop,pw,bottom-pTop,{fill:t.panelBg,'data-el':'rect panel.background','data-c':'theme coord'});
+    const gl=(key,c,w,vals,axis)=>{if(!c)return;vals.forEach(v=>{const a={stroke:c,'stroke-width':w,'stroke-dasharray':t.gDash,'data-el':'line panel.grid '+key,'data-c':'theme scale'};
+      if(axis==='x')Ln(sx(v),pTop,sx(v),bottom,a);else Ln(x0,sy(v),x0+pw,sy(v),a);});};
+    gl('panel.grid.minor panel.grid.minor.y',t.gMinY,t.gMinW,ym,'y');gl('panel.grid.minor panel.grid.minor.x',t.gMinX,t.gMinW,xm,'x');
+    gl('panel.grid.major panel.grid.major.y',t.gMajY,t.gMajW,yb,'y');gl('panel.grid.major panel.grid.major.x',t.gMajX,t.gMajW,xb,'x');
+    const id='clp'+(++CLIP);const cp=E('clipPath',{id},svg);E('rect',{x:x0,y:pTop,width:pw,height:bottom-pTop},cp);
+    const g=E('g',{'clip-path':`url(#${id})`},svg);
+    const sub=MT.filter(r=>P.am===null||r[4]===P.am);
+    if(o.point)sub.forEach(r=>E('circle',{cx:sx(r[1]),cy:sy(r[2]),r:3.1,fill:colOf(r[3]),class:'pe','data-el':'geom','data-c':'data aes geom'},g));
+    if(o.smooth){
+      const groups=o.color?CYL.map(c=>({c,rows:sub.filter(r=>r[3]===c)})):[{c:null,rows:sub}];
+      groups.forEach(G=>{if(G.rows.length<2)return;const xs=G.rows.map(r=>r[1]),ys=G.rows.map(r=>r[2]);const f=fit(xs,ys);
+        const lo=Math.min(...xs),hi=Math.max(...xs);const pts=[];for(let k=0;k<=30;k++){const x=lo+(hi-lo)*k/30;const yh=f.a+f.b*x;const se=f.n>2?f.s*Math.sqrt(1/f.n+(x-f.mx)**2/f.sxx):0;pts.push([x,yh,se*f.tq]);}
+        if(f.n>2){const up=pts.map(p=>`${sx(p[0]).toFixed(1)},${sy(p[1]+p[2]).toFixed(1)}`),dn=pts.slice().reverse().map(p=>`${sx(p[0]).toFixed(1)},${sy(p[1]-p[2]).toFixed(1)}`);
+          E('polygon',{points:up.concat(dn).join(' '),fill:t.ribbon,'fill-opacity':.4,class:'pe','data-el':'geom','data-c':'stat'},g);}
+        E('polyline',{points:pts.map(p=>`${sx(p[0]).toFixed(1)},${sy(p[1]).toFixed(1)}`).join(' '),fill:'none',stroke:G.c?colOf(G.c):t.smoothCol,'stroke-width':2,class:'pe','data-el':'geom','data-c':'geom stat'},g);});
+    }
+    if(o.annot&&!facet){[["코롤라",1.835,33.9,'start',8],["링컨 컨티넨탈",5.424,10.4,'end',-8]].forEach(a=>{
+      Tx(a[0],sx(a[1])+a[4],sy(a[2])+(a[3]==='start'?4:-6),{'font-size':S*.85,fill:'#222','text-anchor':a[3],'font-family':o.annotFamily||fam,'data-el':'geom','data-c':'geom'},g);});}
+    if(t.border)R(x0,pTop,pw,bottom-pTop,{fill:'none',stroke:t.border,'stroke-width':t.borderW,'data-el':'rect panel.border','data-c':'theme coord'});
+    if(facet){
+      if(t.stripBg||t.stripBorder)R(x0,top,pw,stripH,{fill:t.stripBg||'none',stroke:t.stripBorder,'stroke-width':t.stripBorder?1:null,'data-el':'rect strip.background strip.background.x','data-c':'facet theme'});
+      Tx(P.lab,x0+pw/2,top+stripH/2,{'font-size':strS,fill:t.stripText,'text-anchor':'middle','dominant-baseline':'central','data-el':'text strip.text strip.text.x','data-c':'facet'});
+    }
+    // x축
+    if(t.axLineX)Ln(x0,bottom,x0+pw,bottom,{stroke:t.axLineX,'stroke-width':t.axLineW,'data-el':'line axis.line axis.line.x','data-c':'coord guide theme'});
+    xb.forEach(v=>{const X=sx(v);
+      if(t.ticks)Ln(X,bottom,X,bottom+tickL,{stroke:t.ticks,'stroke-width':t.tickW,'data-el':'line axis.ticks axis.ticks.x','data-c':'scale guide'});
+      if(t.axText){const y=bottom+tickL+axS*1.05;const a={'font-size':axS,fill:t.axText,'font-weight':t.axFace,'text-anchor':t.angle===0?'middle':'end','data-el':'text axis.text axis.text.x','data-c':'scale guide'};
+        if(t.angle){a.transform=`rotate(${-t.angle} ${X} ${bottom+tickL+4})`;Tx(String(v),X+(t.angle===90?axS*.35:2),bottom+tickL+4+axS*.35,a);}else Tx(String(v),X,y,a);}
+    });
+    if(i===0){
+      if(t.axLineY)Ln(x0,pTop,x0,bottom,{stroke:t.axLineY,'stroke-width':t.axLineW,'data-el':'line axis.line axis.line.y','data-c':'coord guide theme'});
+      yb.forEach(v=>{const Y=sy(v);
+        if(t.ticks)Ln(x0-tickL,Y,x0,Y,{stroke:t.ticks,'stroke-width':t.tickW,'data-el':'line axis.ticks axis.ticks.y','data-c':'scale guide'});
+        if(t.axText)Tx(String(v),x0-tickL-3,Y,{'font-size':axS,fill:t.axText,'font-weight':t.axFace,'text-anchor':'end','dominant-baseline':'central','data-el':'text axis.text axis.text.y','data-c':'scale guide'});});
+    }
+  });
+  // 축 제목
+  if(t.axTitle){
+    const yT=bottom+tickL+xTextH+atS*1.05;
+    const xa=t.xTitleHjust===1?{x:right,an:'end'}:{x:(left+right)/2,an:'middle'};
+    Tx(L.x,xa.x,yT,{'font-size':atS,fill:t.text,'text-anchor':xa.an,'data-el':'text title axis.title axis.title.x','data-c':'labs'});
+    const yx=M+atS*.85, yy=t.yTitleHjust===1?pTop:(pTop+bottom)/2;
+    Tx(L.y,yx,yy,{'font-size':atS,fill:t.text,'text-anchor':t.yTitleHjust===1?'end':'middle',transform:`rotate(-90 ${yx} ${yy})`,'data-el':'text title axis.title axis.title.y','data-c':'labs'});
+  }
+  // 제목·부제·캡션 (4.0에서 부제와 캡션은 title이 아니라 text에서 바로 상속한다)
+  if(o.labs){
+    const tx0=t.titlePos==='plot'?M:left;
+    const tpos=t.titleHjust===.5?{x:(tx0+right)/2,an:'middle'}:{x:tx0,an:'start'};
+    Tx(LABS.title,tpos.x,titleY,{'font-size':titleS,fill:t.text,'font-weight':t.titleFace,'text-anchor':tpos.an,'data-el':'text title plot.title','data-c':'labs'});
+    Tx(LABS.subtitle,tpos.x,subY,{'font-size':subS,fill:t.text,'text-anchor':tpos.an,opacity:.8,'data-el':'text plot.subtitle','data-c':'labs'});
+    Tx(LABS.caption,W-M,capY,{'font-size':capS,fill:t.text,'text-anchor':'end','data-el':'text plot.caption','data-c':'labs'});
+  }
+  // 범례 (legend.key는 panel.background에서 상속한다)
+  if(showLeg){
+    const key=16, bgc=t.legendBg||t.plotBg;
+    const drawKey=(x,y,c)=>{
+      R(x,y,key,key,{fill:t.keyBg||'none','data-el':'rect panel.background legend.key','data-c':'guide'});
+      if(o.smooth){R(x,y+2,key,key-4,{fill:t.ribbon,'fill-opacity':.4,'data-el':'geom','data-c':'guide stat'});Ln(x,y+key/2,x+key,y+key/2,{stroke:c,'stroke-width':2,'data-el':'geom','data-c':'guide aes scale'});}
+      if(o.point)E('circle',{cx:x+key/2,cy:y+key/2,r:3.1,fill:c,class:'pe','data-el':'geom','data-c':'guide aes scale'},svg);
+    };
+    if(t.legendPos==='right'){
+      const lx=right+8+14, totalH=legS*1.6+3*(key+4);const ly=(pTop+bottom)/2-totalH/2;
+      R(lx-6,ly-6,legW-10,totalH+10,{fill:bgc,'data-el':'rect legend.background','data-c':'guide theme'});
+      Tx(L.col,lx,ly+legS*.9,{'font-size':S,fill:t.text,'data-el':'text title legend.title','data-c':'labs guide'});
+      CYL.forEach((c,k)=>{const y=ly+legS*1.6+k*(key+4);drawKey(lx,y,pal[k]);Tx(String(c),lx+key+6,y+key/2,{'font-size':legS,fill:t.text,'dominant-baseline':'central','data-el':'text legend.text','data-c':'scale guide'});});
+    }else{
+      const titleW=tw(cv(L.col),S)+10, itemW=key+6+tw('8',legS)+12, totalW=titleW+3*itemW;
+      const cy=(t.legendPos==='bottom'?legBotY:legTopY)+legH/2;
+      const lx=(left+right)/2-totalW/2;
+      R(lx-6,cy-key/2-5,totalW+8,key+10,{fill:bgc,'data-el':'rect legend.background','data-c':'guide theme'});
+      Tx(L.col,lx,cy,{'font-size':S,fill:t.text,'dominant-baseline':'central','data-el':'text title legend.title','data-c':'labs guide'});
+      CYL.forEach((c,k)=>{const x=lx+titleW+k*itemW;drawKey(x,cy-key/2,pal[k]);Tx(String(c),x+key+6,cy,{'font-size':legS,fill:t.text,'dominant-baseline':'central','data-el':'text legend.text','data-c':'scale guide'});});
+    }
+  }
+}
+function applyHL(svg,attr,key){
+  let n=0;svg.querySelectorAll('.pe').forEach(e=>{const v=(e.getAttribute('data-'+attr)||'').split(' ');const on=!!key&&v.includes(key);e.classList.toggle('hl',on);if(on)n++;});
+  svg.classList.toggle('hlmode',!!key);return n;
+}
+
+/* ---------- 코드 상자: 낱말 색과 복사 ---------- */
+function hl(code){
+  const s=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return s.replace(/(#[^\n]*)|("(?:[^"\\]|\\.)*"|`[^`]*`)|\b(\d+(?:\.\d+)?)\b|([A-Za-z_][\w.]*)(?=\()|(%\+replace%|&lt;-|\+|~|=|\|&gt;)/g,(m,c,str,num,fn,op)=>{
+    if(c)return`<span class="tk-c">${c}</span>`;if(str)return`<span class="tk-s">${str}</span>`;if(num)return`<span class="tk-n">${num}</span>`;if(fn)return`<span class="tk-f">${fn}</span>`;if(op)return`<span class="tk-o">${op}</span>`;return m;});
+}
+function setCode(id,code){const el=document.getElementById(id);el.innerHTML=hl(code);el.dataset.raw=code;}
+/* 프롬프트는 낱말 색 없이 그대로 쓴다. 줄 목록을 받아 '- '를 붙인다 */
+function setPrompt(id,head,items,tail){const el=document.getElementById(id);
+  const txt=[head,...items.map(x=>'- '+x),...(tail?[tail]:[])].join('\n');el.textContent=txt;el.dataset.raw=txt;}
+/* 위젯이 코드를 다시 쓰므로 누를 때의 코드(data-raw)를 복사한다. 숨긴 입력칸으로 먼저 복사해 http 미리보기에서도 되게 한다 */
+document.addEventListener('click',e=>{const b=e.target.closest('.cb .copy');if(!b)return;
+  const pre=b.closest('.cb').querySelector('pre');const raw=pre.dataset.raw||pre.textContent;
+  const done=()=>{b.textContent='복사됨';setTimeout(()=>b.textContent='복사',1400);};
+  const fb=()=>{const s=getSelection(),r=document.createRange();r.selectNodeContents(pre);s.removeAllRanges();s.addRange(r);b.textContent='선택됨';};
+  const ta=document.createElement('textarea');ta.value=raw;ta.setAttribute('readonly','');
+  ta.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;padding:0;border:0;opacity:0';
+  document.body.appendChild(ta);ta.focus({preventScroll:true});ta.select();ta.setSelectionRange(0,raw.length);
+  let ok=false;try{ok=document.execCommand('copy');}catch(_){}
+  document.body.removeChild(ta);b.focus({preventScroll:true});
+  if(ok){done();return;}
+  try{navigator.clipboard.writeText(raw).then(done,fb);}catch(_){fb();}});
+
+const STATIC={
+project:`# 이 프로젝트의 모든 그림이 함께 쓰는 테마
+library(ggplot2)
+
+theme_project <- function(base_size = 14, base_family = "") {
+  theme_minimal(
+    base_size = base_size,
+    base_family = base_family
+  ) +
+    theme(
+      plot.title = element_text(face = "bold"),
+      plot.title.position = "plot",
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor = element_blank(),
+      legend.position = "bottom"
+    )
+}
+
+# 이 파일을 source() 하면 이후 모든 그림의 기본 테마가 된다
+theme_set(theme_project())`,
+object:`library(ggplot2)
+
+# 1) 그림 객체 만들기: 변수에 담으면 그림은 아직 그려지지 않는다
+p <- ggplot(
+  data = cars,
+  mapping = aes(
+    x = speed,
+    y = dist
+  )
+) +
+  geom_point()
+
+# 2) 출력하기: 콘솔에서 한 줄씩 실행할 때 쓴다.
+#    Rscript로 스크립트 전체를 실행하면 이 두 줄 때문에 작업 폴더에 Rplots.pdf가 생긴다
+p            # 콘솔에서는 이름만 적어도 그려진다
+print(p)     # 함수·반복문 안이나 source()로 실행할 때는 print()가 필요하다
+
+# 3) 저장하기: 저장할 그림을 plot = 으로 꼭 적는다
+dir.create("output/figures", recursive = TRUE, showWarnings = FALSE)
+ggsave("output/figures/06_p.png", plot = p, width = 7, height = 4.5, dpi = 300)
+
+# 4) 기본 그림에 요소 더하기: p는 그대로 두고 새 객체가 생긴다
+p_line  <- p + geom_smooth(method = "lm")
+p_title <- p_line + labs(title = "Speed and stopping distance")
+
+ggsave("output/figures/06_p_title.png", plot = p_title, width = 7, height = 4.5, dpi = 300)`,
+basic:`library(ggplot2)
+
+ggplot(
+  data = cars,
+  mapping = aes(
+    x = speed,
+    y = dist
+  )
+) +
+  geom_point()`,
+explicit:`library(ggplot2)
+
+ggplot(
+  data = cars,
+  mapping = aes(
+    x = speed,
+    y = dist
+  )
+) +
+  geom_point(stat = "identity", position = "identity") +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  coord_cartesian() +
+  facet_null() +
+  labs(x = "speed", y = "dist") +
+  theme_grey()`,
+scope:`# 1) 그림 하나에만
+p + theme_bw()
+
+# 2) 세션 전체 기본값 바꾸기
+theme_set(theme_minimal(base_size = 12))
+
+# 3) 현재 기본 테마의 일부만 수정
+theme_update(legend.position = "bottom")
+
+# 4.0: 잉크·종이·강조색을 한 번에
+theme_grey(ink = "navy", paper = "cornsilk", accent = "tomato")`,
+fn:`theme_lab <- function(base_size = 12, base_family = "Noto Sans KR") {
+  theme_minimal(base_size = base_size,
+                base_family = base_family) %+replace%
+    theme(
+      plot.title = element_text(face = "bold", size = rel(1.3),
+                                hjust = 0, vjust = 1,
+                                margin = margin(b = 6)),
+      plot.title.position = "plot",
+      panel.grid.minor = element_blank(),
+      axis.title = element_text(colour = "grey30"),
+      legend.position = "bottom"
+    )
+}
+
+theme_set(theme_lab())          # 이후 모든 그림에 적용
+p + theme_lab(base_size = 16)   # 슬라이드용으로 키우기`,
+replace:`base <- theme_grey()
+
+# 병합: 굵게만 바뀌고 크기·여백은 유지
+base + theme(plot.title = element_text(face = "bold"))
+
+# 교체: plot.title이 face만 가진 새 요소가 됨
+#       size, hjust 등은 상위 요소(title → text)에서 상속
+base %+replace% theme(plot.title = element_text(face = "bold"))`,
+setup:`# 처음 한 번. sysfonts, showtextdb도 함께 설치된다
+install.packages("showtext", repos = "https://cloud.r-project.org/")
+
+library(showtext)
+font_add_google("Noto Sans KR")      # 인터넷에서 글꼴을 받아 등록한다
+font_families()                      # "Noto Sans KR"이 보이면 등록된 것이다`,
+local:`library(showtext)
+
+# 미리 받아 둔 글꼴 파일을 같은 이름으로 등록한다
+font_add("Noto Sans KR",
+         regular = "fonts/NotoSansKR-Regular.ttf",
+         bold    = "fonts/NotoSansKR-Bold.ttf")
+font_families()   # 등록 확인
+showtext_auto()`,
+ragg:`install.packages("ragg", repos = "https://cloud.r-project.org/")
+
+# 위 예제의 p 를 쓴다. 컴퓨터에 설치한 글꼴을 이름으로 바로 찾는다(showtext를 쓰지 않는다)
+showtext::showtext_auto(FALSE)   # 같은 세션에서 켜 두었다면 끈다
+p <- p + theme_minimal(base_family = "Noto Sans KR")
+dir.create("output/figures", recursive = TRUE, showWarnings = FALSE)
+
+ggsave("output/figures/10_ragg.png", p, device = ragg::agg_png,
+       width = 7, height = 4.5, dpi = 300)`
+};
+document.querySelectorAll('pre[data-code]').forEach(p=>{p.innerHTML=hl(STATIC[p.dataset.code]);p.dataset.raw=STATIC[p.dataset.code];});
+/* 03·04절 카드: 쪽에 적힌 코드에 낱말 색만 입힌다 */
+document.querySelectorAll('pre.hlr').forEach(p=>{const raw=p.textContent;p.innerHTML=hl(raw);p.dataset.raw=raw;});
+
+/* ---------- 01 구성요소 ---------- */
+const COMP=[
+ {k:'data',n:'데이터',s:'data',fn:'ggplot(data = mtcars)',d:'그릴 자료입니다. 한 행이 한 관측값인 데이터프레임(tidy data)을 넘깁니다. 점 하나가 자동차 한 대입니다.'},
+ {k:'aes',n:'미적 매핑',s:'aes()',fn:'aes(\n  x = wt,\n  y = mpg,\n  colour = factor(cyl)\n)',d:'변수를 x·y 위치, 색, 크기, 모양 같은 시각 속성에 연결합니다. 색을 매핑했기 때문에 범례가 자동으로 생겼습니다.'},
+ {k:'geom',n:'기하 객체',s:'geom_*()',fn:'geom_point(size = 2) +\ngeom_smooth(method = "lm")',d:'데이터를 점, 선, 막대 같은 도형으로 그립니다. 레이어 하나에 geom 하나가 있고, 더한 순서대로 위에 쌓입니다.'},
+ {k:'stat',n:'통계 변환',s:'stat_*()',fn:'geom_smooth(method = "lm")\n# 내부적으로 stat_smooth() 사용',d:'그리기 전에 데이터를 계산합니다. 회귀선과 95% 신뢰대는 원자료에 없는 값입니다. geom_bar()의 막대 높이(stat_count)도 같은 원리입니다.'},
+ {k:'scale',n:'척도',s:'scale_*()',fn:'scale_x_continuous(breaks = 2:5) +\nscale_colour_brewer(palette = "Set1")',d:'데이터 값을 화면 값으로 바꾸는 규칙입니다. 축 눈금 위치, 격자선 위치, 범례 항목과 색 팔레트를 결정합니다.'},
+ {k:'coord',n:'좌표계',s:'coord_*()',fn:'coord_cartesian(ylim = c(10, 30))\ncoord_flip(); coord_polar()',d:'x·y 척도를 평면에 배치하는 방식입니다. 패널의 모양, 확대 범위, 축선을 정합니다.'},
+ {k:'facet',n:'패싯',s:'facet_*()',fn:'facet_wrap(~ am)\nfacet_grid(rows = vars(am), cols = vars(vs))',d:'범주별로 데이터를 나눠 같은 축의 작은 그림 여러 장을 그립니다. 패널 위의 이름표가 strip입니다.'},
+ {k:'guide',n:'가이드',s:'guides()',fn:'guides(colour = guide_legend(nrow = 1))',d:'척도를 읽는 법을 알려주는 범례와 축입니다. 척도가 만들고 guides()로 모양을 조정합니다.'},
+ {k:'labs',n:'레이블',s:'labs()',fn:'labs(title = "...", subtitle = "...",\n     x = "...", y = "...",\n     colour = "실린더", caption = "...")',d:'제목, 부제, 축 제목, 범례 제목, 캡션입니다. 범례 제목은 매핑한 aes 이름(colour)으로 지정합니다.'},
+ {k:'theme',n:'테마',s:'theme()',fn:'theme_grey() +\ntheme(panel.grid.minor = element_blank())',d:'데이터와 무관한 모든 시각 요소: 배경, 격자, 글꼴, 여백, 범례 위치. 07절에서 자세히 봅니다.'}
+];
+const svgA=document.getElementById('svgAnatomy');
+function drawAnatomy(){render(svgA,{theme:TH.grey,color:true,point:true,smooth:true,facet:true,labs:true});}
+const cl=document.getElementById('compList');
+COMP.forEach(c=>{const b=document.createElement('button');b.className='chip';b.type='button';b.setAttribute('aria-pressed','false');b.dataset.k=c.k;b.innerHTML=`${c.n}<small>${c.s}</small>`;cl.appendChild(b);});
+function pickComp(k){const c=COMP.find(x=>x.k===k);cl.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));
+  applyHL(svgA,'c',k);const d=document.getElementById('compDetail');
+  d.innerHTML=`<div class="t">${c.n} <span class="badge">${c.s}</span></div><p>${c.d}</p><div class="cb r bare"><pre></pre></div>`;
+  d.querySelector('pre').innerHTML=hl(c.fn);}
+cl.addEventListener('click',e=>{const b=e.target.closest('.chip');if(b)pickComp(b.dataset.k);});
+
+/* ---------- 02 레이어 쌓기 ---------- */
+const B={color:true,point:true,smooth:false,facet:false,coord:false,labs:false,legendBottom:false,palette:'hue',theme:'grey'};
+const svgB=document.getElementById('svgBuild');
+function drawBuild(){
+  const th=Object.assign({},TH[B.theme]);if(B.legendBottom)th.legendPos='bottom';
+  render(svgB,{theme:th,color:B.color,point:B.point,smooth:B.smooth,facet:B.facet,ylim:B.coord,labs:B.labs,palette:B.color?B.palette:'hue'});
+  const L=[];L.push(`ggplot(\n  data = mtcars,\n  mapping = aes(\n    x = wt,\n    y = mpg${B.color?',\n    colour = factor(cyl)':''}\n  )\n)`);
+  if(B.point)L.push('  geom_point(size = 2)');
+  if(B.smooth)L.push('  geom_smooth(method = "lm")');
+  if(B.color&&B.palette!=='hue')L.push(`  scale_colour_brewer(palette = "${B.palette}")`);
+  if(B.facet)L.push('  facet_wrap(~ am, labeller = as_labeller(\n    c(`0` = "자동 변속", `1` = "수동 변속")))');
+  if(B.coord)L.push('  coord_cartesian(ylim = c(10, 30))');
+  if(B.labs)L.push('  labs(\n    title = "무게가 늘수록 연비는 떨어진다",\n    subtitle = "1974 Motor Trend 자동차 32종",\n    x = "무게 (1,000 lbs)", y = "연비 (mpg)",\n    colour = "실린더", caption = "자료: mtcars (R datasets)"\n  )');
+  if(B.theme!=='grey')L.push(`  theme_${B.theme}()`);
+  if(B.legendBottom)L.push('  theme(legend.position = "bottom")');
+  setCode('bCode',L.join(' +\n'));
+  const P=['x축은 wt(무게), y축은 mpg(연비)로 한다.'];
+  if(B.color)P.push('실린더 수 cyl 을 범주로 바꿔 색으로 구분한다.');
+  if(B.point)P.push('점을 크기 2로 그린다.');
+  if(B.smooth)P.push(`lm 회귀직선과 95% 신뢰대를 더한다.${B.color?' 실린더별로 따로 그린다.':''}`);
+  if(!B.point&&!B.smooth)P.push('점이나 선은 그리지 않고 축만 있는 빈 패널을 그린다.');
+  if(B.color&&B.palette!=='hue')P.push(`색 팔레트는 RColorBrewer 의 "${B.palette}" 를 쓴다.`);
+  if(B.facet)P.push('변속 방식 am 으로 패널을 나누고, 이름표는 0을 "자동 변속", 1을 "수동 변속"으로 단다.');
+  if(B.coord)P.push('y축은 10~30 만 확대해 보여 준다. 범위 밖의 점을 지우지 말고 화면만 확대한다.');
+  if(B.labs)P.push('제목 "무게가 늘수록 연비는 떨어진다", 부제 "1974 Motor Trend 자동차 32종", x축 "무게 (1,000 lbs)", y축 "연비 (mpg)", 범례 제목 "실린더", 캡션 "자료: mtcars (R datasets)"를 단다.');
+  if(B.theme!=='grey')P.push(`테마는 theme_${B.theme}() 를 쓴다.`);
+  if(B.legendBottom)P.push('범례는 그림 아래에 둔다.');
+  P.push('여기 적지 않은 구성요소는 모두 ggplot2 기본값으로 둔다.','그림은 output/figures/05_mtcars.png 로 저장한다.');
+  setPrompt('bPrompt','R 내장 자료 mtcars 로 아래 그림을 그리는 스크립트 scripts/05_mtcars.R 을 만들어 실행해 줘.',P,B.labs?'한글이 네모로 깨지면 고치지 말고 먼저 알려 줘.':'');
+  const notes=[];
+  if(!B.point&&!B.smooth)notes.push('geom이 없으면 ggplot()은 척도와 좌표계만 있는 빈 패널을 그립니다.');
+  if(B.smooth&&B.color)notes.push('colour를 매핑하면 데이터가 실린더별로 묶여(group) 회귀선이 세 개가 됩니다.');
+  if(B.smooth&&B.facet&&B.color)notes.push('수동 변속 8기통은 2대뿐이라 신뢰대를 계산할 수 없습니다. R에서도 경고가 납니다.');
+  if(B.coord)notes.push('coord_cartesian()은 데이터를 지우지 않고 화면만 확대합니다. 회귀선은 전체 데이터로 계산됩니다.');
+  if(B.labs)notes.push('한글 글꼴이 없는 그래픽 장치에서 한글 레이블을 그리려면 10절의 글꼴 설정이 필요합니다.');
+  if(B.legendBottom&&B.theme!=='grey')notes.push('theme()은 완성 테마 뒤에 와야 합니다. 순서를 바꾸면 theme_*()가 설정을 덮어씁니다.');
+  document.getElementById('bNote').textContent=notes.join(' ');
+}
+document.querySelectorAll('#build .tog[data-b]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.b;B[k]=!B[k];b.setAttribute('aria-pressed',B[k]);drawBuild();}));
+document.getElementById('bPal').addEventListener('change',e=>{B.palette=e.target.value;if(!B.color){B.color=true;document.querySelector('[data-b="color"]').setAttribute('aria-pressed','true');}drawBuild();});
+document.getElementById('bTheme').addEventListener('change',e=>{B.theme=e.target.value;drawBuild();});
+
+/* ---------- 03 요소 상속 트리 (ggplot2 4.0.3의 상속 관계) ---------- */
+const TREE=[
+ ['line',[['axis.line',[['axis.line.x'],['axis.line.y']]],['axis.ticks',[['axis.ticks.x'],['axis.ticks.y']]],['panel.grid',[['panel.grid.major',[['panel.grid.major.x'],['panel.grid.major.y']]],['panel.grid.minor',[['panel.grid.minor.x'],['panel.grid.minor.y']]]]]]],
+ ['rect',[['plot.background'],['panel.background',[['legend.key']]],['panel.border'],['strip.background'],['legend.background']]],
+ ['text',[['title',[['plot.title'],['axis.title',[['axis.title.x'],['axis.title.y']]],['legend.title']]],['plot.subtitle'],['plot.caption'],['axis.text',[['axis.text.x'],['axis.text.y']]],['legend.text'],['strip.text']]]
+];
+const TINFO={
+ line:['element_line','모든 선 요소의 뿌리입니다. 여기서 colour나 linewidth를 바꾸면 축선·눈금·격자에 모두 상속됩니다.','theme(line = element_line(colour = "grey40"))'],
+ rect:['element_rect','모든 사각형 요소의 뿌리입니다. 배경, 테두리, 범례 키, strip 배경이 상속받습니다.','theme(rect = element_rect(fill = "transparent"))'],
+ text:['element_text','모든 글자 요소의 뿌리입니다. 한글 글꼴을 한 번에 지정할 때 씁니다. 다만 geom_text()로 그린 점 레이블은 theme 요소가 아니어서 여기의 글꼴을 받지 않습니다.','theme(text = element_text(family = "Noto Sans KR", size = 12))'],
+ title:['element_text','그림 제목, 축 제목, 범례 제목을 묶는 중간 요소입니다. 부제·캡션과 눈금 레이블(axis.text)은 title이 아니라 text에서 바로 상속합니다.','theme(title = element_text(face = "bold"))'],
+ 'axis.line':['element_line','x·y 축선. theme_grey()와 theme_minimal()에서는 element_blank()입니다.','theme(axis.line = element_line(colour = "grey20"))'],
+ 'axis.ticks':['element_line','눈금 표시. 길이는 별도 인수 axis.ticks.length(unit)로 정합니다.','theme(axis.ticks.length = unit(-3, "pt"))'],
+ 'panel.grid':['element_line','패널 격자 전체.','theme(panel.grid = element_line(colour = "grey90"))'],
+ 'panel.grid.major':['element_line','눈금 위치(breaks)에 그어지는 주 격자.','theme(panel.grid.major = element_line(linewidth = 0.3))'],
+ 'panel.grid.minor':['element_line','눈금 사이(minor_breaks)의 보조 격자. 지우는 경우가 많습니다.','theme(panel.grid.minor = element_blank())'],
+ 'plot.background':['element_rect','그림 전체 배경.','theme(plot.background = element_rect(fill = "white", colour = NA))'],
+ 'panel.background':['element_rect','데이터가 그려지는 패널의 배경. theme_grey()의 회색이 여기입니다. 범례 키(legend.key)도 이 요소에서 상속합니다.','theme(panel.background = element_rect(fill = "grey97"))'],
+ 'panel.border':['element_rect','패널 테두리. 데이터 위에 그려지므로 fill = NA로 둡니다.','theme(panel.border = element_rect(fill = NA, colour = "grey30"))'],
+ 'strip.background':['element_rect','facet 이름표의 배경.','theme(strip.background = element_rect(fill = "grey20"))'],
+ 'legend.background':['element_rect','범례 전체 배경.','theme(legend.background = element_rect(fill = NA))'],
+ 'legend.key':['element_rect','범례 기호 뒤의 작은 사각형. rect가 아니라 panel.background에서 상속하므로 패널 배경을 바꾸면 함께 바뀝니다.','theme(legend.key = element_blank())'],
+ 'plot.title':['element_text','그림 제목. 위치 기준은 plot.title.position으로 정합니다.','theme(plot.title = element_text(face = "bold", size = rel(1.3)))'],
+ 'plot.subtitle':['element_text','부제. title이 아니라 text에서 바로 상속하므로 title을 굵게 해도 부제는 그대로입니다.','theme(plot.subtitle = element_text(colour = "grey40"))'],
+ 'plot.caption':['element_text','캡션. 기본 오른쪽 정렬(hjust = 1)이고, text에서 바로 상속합니다.','theme(plot.caption = element_text(hjust = 0))'],
+ 'axis.title':['element_text','축 제목.','theme(axis.title = element_text(size = rel(0.9)))'],
+ 'legend.title':['element_text','범례 제목.','theme(legend.title = element_blank())'],
+ 'axis.text':['element_text','눈금 레이블. title이 아니라 text에서 바로 상속합니다.','theme(axis.text = element_text(colour = "black"))'],
+ 'legend.text':['element_text','범례 항목 글자.','theme(legend.text = element_text(size = rel(0.9)))'],
+ 'strip.text':['element_text','facet 이름표 글자.','theme(strip.text = element_text(face = "bold", hjust = 0))']
+};
+function treeHTML(nodes,root){return '<ul>'+nodes.map(n=>`<li><button type="button" class="node${root?' root':''}" data-n="${n[0]}" aria-pressed="false">${n[0]}</button>${n[1]?treeHTML(n[1],false):''}</li>`).join('')+'</ul>';}
+const treeEl=document.getElementById('tree');treeEl.innerHTML=treeHTML(TREE,true);
+const svgT=document.getElementById('svgTree');let treeSel='panel.grid';
+const TNAME={grey:'theme_grey()',bw:'theme_bw()',classic:'theme_classic()',minimal:'theme_minimal()'};
+function drawTree(){const k=document.getElementById('tBase').value;document.getElementById('treeTag').textContent=TNAME[k];
+  render(svgT,{theme:TH[k],color:true,point:true,smooth:false,facet:true,labs:true});pickNode(treeSel);}
+function pickNode(n){treeSel=n;treeEl.querySelectorAll('.node').forEach(b=>b.setAttribute('aria-pressed',b.dataset.n===n));
+  const cnt=applyHL(svgT,'el',n);const parts=n.split('.');
+  let info=TINFO[n];if(!info){const par=parts.slice(0,-1).join('.');const pi=TINFO[par]||['',''];info=[pi[0],`${par}의 ${parts[parts.length-1]} 방향 요소. 지정하지 않으면 ${par}에서 상속합니다.`,`theme(${n} = ${pi[0]}(${pi[0]==='element_text'?'angle = 45, hjust = 1':'colour = "grey70"'}))`];}
+  const d=document.getElementById('treeDetail');
+  d.innerHTML=`<div class="t">${n} <span class="badge">${info[0]}()</span></div><p>${info[1]}</p>${cnt===0?'<p class="warn">현재 테마에서는 element_blank()이거나 그려지지 않는 요소입니다.</p>':''}<div class="cb r bare"><pre></pre></div>`;
+  d.querySelector('pre').innerHTML=hl(info[2]);}
+treeEl.addEventListener('click',e=>{const b=e.target.closest('.node');if(b)pickNode(b.dataset.n);});
+document.getElementById('tBase').addEventListener('change',drawTree);
+
+/* ---------- 04 테마 갤러리 ---------- */
+const GAL=[
+ {pkg:'ggplot2 내장',items:[
+  ['grey','theme_grey()','기본 테마. 회색 패널과 흰 격자는 데이터를 배경보다 앞에 두려는 설계입니다.'],
+  ['bw','theme_bw()','흰 패널에 테두리. 인쇄용 논문 그림에 무난합니다.'],
+  ['minimal','theme_minimal()','배경과 테두리를 걷어낸 최소 구성.'],
+  ['classic','theme_classic()','격자 없이 축선만. 전통적인 학술 그래프 모양.'],
+  ['light','theme_light()','옅은 회색 테두리와 격자.'],
+  ['dark','theme_dark()','어두운 패널. 밝은 색 데이터를 강조할 때.'],
+  ['linedraw','theme_linedraw()','검은 가는 선만으로 구성.'],
+  ['void','theme_void()','축과 격자까지 모두 제거. 지도나 다이어그램용.']]},
+ {pkg:'ggthemes',lib:'ggthemes',items:[
+  ['economist','theme_economist()','The Economist 지면 스타일. 하늘빛 배경과 가로 격자.'],
+  ['fte','theme_fivethirtyeight()','FiveThirtyEight 스타일. 축 제목을 숨기고 범례를 아래에 둡니다.'],
+  ['tufte','theme_tufte()','Tufte의 data-ink 원칙. 비데이터 잉크를 최소화하고 세리프 글꼴을 씁니다.'],
+  ['wsj','theme_wsj()','Wall Street Journal 스타일. 점선 가로 격자.']]},
+ {pkg:'기타 패키지',items:[
+  ['ipsum','hrbrthemes::theme_ipsum()','타이포그래피 중심. 큰 굵은 제목, 축 제목을 끝에 정렬. 기본 글꼴은 Arial Narrow입니다.','hrbrthemes'],
+  ['cowplot','cowplot::theme_cowplot()','출판용 깔끔한 축. 기본 글자 크기 14. 여러 그림 배치(plot_grid)와 함께 씁니다.','cowplot'],
+  ['pubr','ggpubr::theme_pubr()','논문 투고용. 축선과 상단 범례.','ggpubr'],
+  ['prism','ggprism::theme_prism()','GraphPad Prism 모양. 굵은 축선과 굵은 글자.','ggprism'],
+  ['bbc','bbplot::bbc_style()','BBC 그래픽 스타일. 축 제목 없이 큰 제목, 가로 격자. GitHub에서 설치합니다.','bbplot']]}
+];
+const galEl=document.getElementById('gallery');const svgG=document.getElementById('svgGal');
+GAL.forEach(g=>{const d=document.createElement('div');d.className='galgrp';d.innerHTML=`<div class="pkg">${g.pkg}</div><div class="opt">${g.items.map(i=>`<button type="button" class="tog" data-g="${i[0]}" aria-pressed="false">${i[1].replace(/^\w+::/,'')}</button>`).join('')}</div>`;galEl.appendChild(d);});
+function pickGal(k){let item,grp;GAL.forEach(g=>g.items.forEach(i=>{if(i[0]===k){item=i;grp=g;}}));
+  galEl.querySelectorAll('[data-g]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.g===k));
+  render(svgG,{theme:TH[k],color:true,point:true,smooth:true,labs:true});
+  document.getElementById('galTag').textContent=item[1];
+  document.getElementById('galNote').textContent=grp.pkg==='ggplot2 내장'?'ggplot2 내장 테마':'근사 재현 · 실제 글꼴·간격은 다를 수 있음';
+  const lib=item[3]||grp.lib;const fn=item[1].replace(/^\w+::/,'');
+  let code='';
+  if(lib==='bbplot')code='# install.packages("devtools", repos = "https://cloud.r-project.org/")\ndevtools::install_github("bbc/bbplot")\nlibrary(bbplot)\n\n';
+  else if(lib)code=`install.packages("${lib}", repos = "https://cloud.r-project.org/")\nlibrary(${lib})\n\n`;
+  code+='p <- ggplot(\n  data = mtcars,\n  mapping = aes(\n    x = wt,\n    y = mpg,\n    colour = factor(cyl)\n  )\n) +\n  geom_point(size = 2) +\n  geom_smooth(method = "lm")\n\n'+`p + ${fn}`;
+  if(k==='economist')code+=' + scale_colour_economist()';
+  if(k==='fte'||k==='wsj')code+=`  # 축 제목이 필요하면 + theme(axis.title = element_text())`;
+  setCode('galCode',code);
+  const GP=[];
+  if(lib==='bbplot')GP.push('bbplot 은 CRAN 에 없으므로 GitHub 의 bbc/bbplot 에서 설치한다. 설치가 되어 있으면 건너뛴다.');
+  else if(lib)GP.push(`${lib} 패키지가 설치되어 있지 않으면 설치부터 한다(설치 전에 내 허락을 받는다).`);
+  GP.push(`테마로 ${item[1]} 를 더한다.`);
+  if(k==='economist')GP.push('색도 같은 패키지의 The Economist 색 척도로 맞춘다.');
+  if(k==='fte'||k==='wsj')GP.push('이 테마는 축 제목을 숨긴다. 숨겨진 그대로 두고, 다시 보이게 하려면 어떻게 하는지만 알려 준다.');
+  GP.push('데이터, 매핑, geom 은 바꾸지 않는다.',`그림은 output/figures/08_theme_${k}.png 로 저장한다.`);
+  setPrompt('galPrompt',`scripts/08_theme_${k}.R 을 만들어, mtcars 로 x = wt, y = mpg, 실린더별 색, 점과 lm 회귀직선을 그린 그림 p 에 다른 테마를 입혀 줘.`,GP,'');
+  /* 글꼴 인수의 이름은 패키지마다 다르다: cowplot은 font_family, bbc_style()은 인수가 없다 */
+  const famTip=k==='bbc'?'<code>bbc_style()</code>은 인수를 받지 않습니다. 한글 그림이라면 뒤에 <code>+ theme(text = element_text(family = "Noto Sans KR"))</code>를 더해 글꼴을 바꾸세요.'
+    :k==='cowplot'?'<code>theme_cowplot()</code>은 글자 크기와 글꼴을 <code>font_size</code>, <code>font_family</code>로 받습니다. 한글 그림이라면 <code>theme_cowplot(font_family = "Noto Sans KR")</code>처럼 넘기세요.'
+    :`완성 테마는 대부분 <code>base_size</code>와 <code>base_family</code>를 받습니다. 한글 그림이라면 <code>${fn.replace(')','base_family = "Noto Sans KR")')}</code>처럼 글꼴을 넘기세요.`;
+  document.getElementById('galDetail').innerHTML=`<div class="t">${item[1]}</div><p>${item[2]}</p><p class="note">${famTip}</p>`;
+}
+galEl.addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(b)pickGal(b.dataset.g);});
+
+/* ---------- 05 테마 편집기 ---------- */
+const C={base:'minimal',size:11,bold:false,titlePlot:false,center:false,leg:'right',noMinor:false,noMajX:false,axisLine:false,angle:0,fill:'default'};
+const FILLS=[['default','기본값'],['#FFFFFF','white'],['#F4F6FA','#F4F6FA'],['#FBF7EF','#FBF7EF'],['#E8EEF3','#E8EEF3']];
+const fillEl=document.getElementById('cFill');
+FILLS.forEach(f=>{const b=document.createElement('button');b.type='button';b.className='sw';b.dataset.f=f[0];b.title=f[1];b.setAttribute('aria-label','panel.background '+f[1]);b.setAttribute('aria-pressed',f[0]==='default');
+  b.style.background=f[0]==='default'?'repeating-linear-gradient(45deg,#ddd 0 4px,#fff 4px 8px)':f[0];fillEl.appendChild(b);});
+const svgC=document.getElementById('svgCustom');
+function drawCustom(){
+  const t=Object.assign({},TH[C.base]);t.base=C.size;
+  if(C.bold)t.titleFace=700; if(C.titlePlot)t.titlePos='plot'; if(C.center)t.titleHjust=.5;
+  t.legendPos=C.leg; if(C.noMinor){t.gMinX=null;t.gMinY=null;} if(C.noMajX)t.gMajX=null;
+  if(C.axisLine){t.axLineX='#333333';t.axLineY='#333333';} t.angle=C.angle;
+  if(C.fill!=='default')t.panelBg=C.fill;
+  render(svgC,{theme:t,color:true,point:true,smooth:false,labs:true});
+  const a=[];
+  if(C.bold||C.center){const p=[];if(C.bold)p.push('face = "bold"');if(C.center)p.push('hjust = 0.5');a.push(`plot.title = element_text(${p.join(', ')})`);}
+  if(C.titlePlot)a.push('plot.title.position = "plot"');
+  if(C.leg!=='right')a.push(`legend.position = "${C.leg}"`);
+  if(C.noMinor)a.push('panel.grid.minor = element_blank()');
+  if(C.noMajX)a.push('panel.grid.major.x = element_blank()');
+  if(C.axisLine)a.push('axis.line = element_line(colour = "grey20")');
+  if(C.angle)a.push(`axis.text.x = element_text(angle = ${C.angle}, hjust = 1${C.angle===90?', vjust = 0.5':''})`);
+  if(C.fill!=='default')a.push(`panel.background = element_rect(fill = "${C.fill==='#FFFFFF'?'white':C.fill}", colour = NA)`);
+  let code=`p +\n  theme_${C.base}(${C.size!==11?`base_size = ${C.size}`:''})`;
+  if(a.length)code+=' +\n  theme(\n    '+a.join(',\n    ')+'\n  )';
+  setCode('cCode',code);
+  const CP=[`바탕 테마는 theme_${C.base}() 로 하고${C.size!==11?`, 기본 글자 크기를 ${C.size} 로 한다.`:', 글자 크기는 기본값으로 둔다.'}`];
+  if(C.bold||C.center)CP.push(C.bold&&C.center?'그림 제목을 굵게 하고 가운데로 정렬한다.':C.bold?'그림 제목을 굵게 한다.':'그림 제목을 가운데로 정렬한다.');
+  if(C.titlePlot)CP.push('제목을 패널이 아니라 그림 전체의 왼쪽 끝에 맞춘다.');
+  if(C.leg!=='right')CP.push({bottom:'범례는 그림 아래에 둔다.',top:'범례는 그림 위에 둔다.',none:'범례를 없앤다.'}[C.leg]);
+  if(C.noMinor)CP.push('보조 격자선(minor)을 지운다.');
+  if(C.noMajX)CP.push('세로로 그어진 주 격자선(x축 쪽)을 지운다.');
+  if(C.axisLine)CP.push('x·y 축선을 진한 회색으로 그린다.');
+  if(C.angle)CP.push(`x축 눈금 글자를 ${C.angle}도 돌리고, 글자 끝이 눈금에 맞게 정렬한다.`);
+  if(C.fill!=='default')CP.push(`패널 배경을 ${C.fill==='#FFFFFF'?'흰색':C.fill} 로 칠하고 테두리는 그리지 않는다.`);
+  CP.push('데이터와 레이어는 건드리지 말고 테마 설정만 바꾼다. 바꾼 설정마다 theme() 의 어느 요소인지 알려 준다.','바꾼 그림은 output/figures/09_custom.png 로 저장한다.');
+  setPrompt('cPrompt','scripts/09_custom.R 을 만들어, source("scripts/07_base_plot.R") 로 불러온 p 의 테마를 아래처럼 바꿔 줘.',CP,'');
+}
+document.querySelectorAll('#custom .tog[data-c]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.c;C[k]=!C[k];b.setAttribute('aria-pressed',C[k]);drawCustom();}));
+document.getElementById('cBase').addEventListener('change',e=>{C.base=e.target.value;drawCustom();});
+document.getElementById('cSize').addEventListener('input',e=>{C.size=+e.target.value;document.getElementById('cSizeV').textContent=C.size;drawCustom();});
+document.getElementById('cLeg').addEventListener('change',e=>{C.leg=e.target.value;drawCustom();});
+document.getElementById('cAngle').addEventListener('change',e=>{C.angle=+e.target.value;drawCustom();});
+fillEl.addEventListener('click',e=>{const b=e.target.closest('.sw');if(!b)return;C.fill=b.dataset.f;fillEl.querySelectorAll('.sw').forEach(x=>x.setAttribute('aria-pressed',x===b));drawCustom();});
+
+/* ---------- 07 showtext ---------- */
+const ST={auto:true,dpi:true,how:'base'};
+const svgS=document.getElementById('svgShow');
+function drawShow(){
+  const viaBase=ST.how==='base';
+  /* ggplot2 4.0: base_family는 element_geom()을 거쳐 geom_text()까지 가고, theme(text = )는 글자 요소에만 간다 */
+  render(svgS,{theme:TH.minimal,family:ST.auto?FONT.noto:FONT.fallback,color:true,point:true,labs:true,annot:true,annotFamily:ST.auto&&viaBase?FONT.noto:FONT.fallback,fontScale:ST.auto&&!ST.dpi?96/300:1});
+  const code=`library(ggplot2)
+library(showtext)                     # sysfonts·showtextdb 함께 불러온다
+
+${ST.auto?'':'# '}font_add_google("Noto Sans KR")        # Google Fonts에서 받아 등록한다
+${ST.auto?'':'# '}showtext_auto()                       # 이후 여는 모든 장치에 적용
+${ST.dpi?'':'# '}showtext_opts(dpi = 300)              # ggsave()의 dpi와 맞춘다
+
+# 점 레이블을 달 두 대
+lbl <- mtcars[c("Toyota Corolla", "Lincoln Continental"), ]
+lbl$name <- c("코롤라", "링컨 컨티넨탈")
+
+p <- ggplot(
+  data = mtcars,
+  mapping = aes(
+    x = wt,
+    y = mpg,
+    colour = factor(cyl)
+  )
+) +
+  geom_point(size = 2) +
+  geom_text(
+    data = lbl,
+    mapping = aes(label = name),
+    colour = "grey15",
+    hjust = "inward",          # 레이블이 패널 밖으로 잘리지 않게 안쪽으로 붙인다
+    vjust = "inward",
+    nudge_y = c(-0.8, 0.8)     # 점과 겹치지 않게: 코롤라는 아래로, 링컨은 위로
+  ) +
+  labs(title = "무게가 늘수록 연비는 떨어진다", colour = "실린더") +
+${viaBase?'  theme_minimal(base_family = "Noto Sans KR")':'  theme_minimal() +\n  theme(text = element_text(family = "Noto Sans KR"))'}
+
+# 결과물은 작업 폴더 맨 위의 output/ 에 모은다
+dir.create("output/figures", recursive = TRUE, showWarnings = FALSE)
+ggsave("output/figures/10_hangul.png", p, width = 7, height = 4.5, dpi = 300)`;
+  setCode('sCode',code);
+  setPrompt('sPrompt','scripts/10_hangul.R 을 만들어, 그림의 한글이 Windows 와 macOS 어디서 저장해도 깨지지 않도록 showtext 로 글꼴을 설정해 줘.',[
+    'showtext 가 설치되어 있지 않으면 설치부터 한다(설치 전에 내 허락을 받는다).',
+    'font_add_google() 로 Google Fonts 의 "Noto Sans KR" 을 같은 이름으로 등록하고, 모든 그림에 showtext 가 적용되게 한다.',
+    '그림은 ggsave() 로 output/figures/10_hangul.png 에 7×4.5인치, 300 dpi PNG로 저장하고, showtext 가 글자 크기를 계산하는 dpi 를 저장 dpi 와 맞춘다.',
+    '축·제목·범례 글자와 geom_text() 로 단 점 레이블이 모두 Noto Sans KR 로 나오게 한다.',
+    '점 레이블은 그림 밖으로 잘리거나 점과 겹치지 않게 둔다.'],
+    '글꼴을 내려받지 못하면 고치려 하지 말고 오류 메시지를 그대로 보여 줘.');
+  let msg;
+  if(!ST.auto)msg='showtext를 끄면 결과가 장치마다 달라집니다. ggsave()의 PNG(ragg)는 Noto Sans KR을 찾지 못해 컴퓨터에 있는 다른 글꼴로 대신 그립니다. pdf()는 "invalid font type" 오류로 멈추고, 글꼴을 지정하지 않은 채 pdf()로 저장하면 한글이 점(...)으로 바뀝니다.';
+  else if(!ST.dpi)msg='showtext는 기본 96 dpi로 글자 크기를 계산합니다. 300 dpi로 저장하면 글자가 약 1/3 크기로 줄어듭니다.';
+  else if(!viaBase)msg='theme(text = …)는 축·제목·범례 같은 글자 요소에만 적용되고 geom_text()에는 전달되지 않습니다. 그래서 점 레이블만 showtext의 기본 글꼴(WenQuanYi Micro Hei)로 그려집니다. 한글은 보이지만 Noto Sans KR과 모양이 다릅니다. 완성 테마의 base_family로 지정하거나 geom_text(family = "Noto Sans KR")를 따로 적습니다.';
+  else msg='글꼴 등록(font_add_google) → showtext_auto() → dpi 맞춤 → base_family 지정. 네 단계가 모두 갖춰진 상태입니다. ggplot2 4.0부터는 base_family가 element_geom()을 거쳐 geom_text()에도 전달됩니다. 3.5 이하에서는 geom_text(family = "Noto Sans KR")도 적어야 합니다.';
+  document.getElementById('sNote').textContent=msg;
+}
+document.querySelectorAll('#hangul .tog[data-s]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.s;ST[k]=!ST[k];b.setAttribute('aria-pressed',ST[k]);drawShow();}));
+document.getElementById('sHow').addEventListener('change',e=>{ST.how=e.target.value;drawShow();});
+
+/* ---------- 레일 목차: 지금 읽는 절 표시 ---------- */
+(()=>{const links=[...document.querySelectorAll('#rail-nav a')];
+  const obs=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting)links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+en.target.id));}),{rootMargin:'-25% 0px -65% 0px'});
+  links.forEach((l,i)=>{const t=document.querySelector(l.getAttribute('href'));if(t)obs.observe(t);if(i===0)l.classList.add('on');});})();
+
+/* ---------- 처음 그리기. 글꼴을 다 읽은 뒤 한 번 더 그려 글자 폭을 맞춘다 ---------- */
+function all(){drawAnatomy();pickComp(document.querySelector('#compList .chip[aria-pressed="true"]')?.dataset.k||'aes');drawBuild();drawTree();
+  pickGal(document.querySelector('#gallery [aria-pressed="true"]')?.dataset.g||'grey');drawCustom();drawShow();}
+all();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(all);
+</script>
+</body>
+</html>

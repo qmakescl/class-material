@@ -144,6 +144,10 @@ ol.refs{padding-left:20px;margin:0;font-size:14px;display:flex;flex-direction:co
   padding:10px 14px 0;color:var(--muted)}
 .cb.r .lang{color:var(--r)}
 .cb.py .lang{color:var(--py)}
+/* 코딩 에이전트에 붙여 넣는 프롬프트: 과목 강조색 띠, 긴 줄은 접어서 보인다 */
+.cb.prompt{border-top-color:var(--accent)}
+.cb.prompt .lang{color:var(--accent-dark,var(--accent))}
+.cb.prompt pre{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
 /* 복사 버튼: 스크립트가 코드 상자 오른쪽 위에 붙인다 (button.copy) */
 .cb{position:relative}
 .cb .copy{position:absolute;top:6px;right:8px;font-family:var(--mono);font-size:12px;font-weight:500;line-height:1;color:var(--muted);

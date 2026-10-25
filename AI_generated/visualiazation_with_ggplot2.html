@@ -1,0 +1,891 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ggplot2 시각화 해부</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Nanum+Myeongjo:wght@400;700;800&family=Nanum+Gothic:wght@400;700&family=Noto+Sans+KR:wght@400;700&family=Black+Han+Sans&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: 강의 노트형 단일 컬럼 + 섹션마다 [설명·조작 | 그림] 2분할, ggplot 기본 회색 패널을 모티프로 */
+:root{
+  --bg:#f4f5f7; --surface:#ffffff; --ink:#18202a; --muted:#566170; --line:#dbe0e7;
+  --panel:#ebebeb; --accent:#2c59c9; --accent-ink:#ffffff; --accent-soft:#e5ebf9;
+  --hl:#d9472b; --code-bg:#eef1f5;
+  --tk-f:#2c59c9; --tk-s:#0d7a52; --tk-n:#b14a00; --tk-c:#7b8595; --tk-o:#9c2a76;
+  --f-display:'Nanum Myeongjo','Noto Serif KR',serif;
+  --f-body:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,'IBM Plex Sans KR',monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#11151b; --surface:#192029; --ink:#e5e9ef; --muted:#9aa5b3; --line:#2b3440;
+  --panel:#262d37; --accent:#7ea2ff; --accent-ink:#0f1520; --accent-soft:#1f2a43;
+  --hl:#ff8a6e; --code-bg:#141a22;
+  --tk-f:#8fb0ff; --tk-s:#6fd3a5; --tk-n:#ffb27a; --tk-c:#7d8796; --tk-o:#f08fcf;
+  color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#11151b; --surface:#192029; --ink:#e5e9ef; --muted:#9aa5b3; --line:#2b3440;
+  --panel:#262d37; --accent:#7ea2ff; --accent-ink:#0f1520; --accent-soft:#1f2a43;
+  --hl:#ff8a6e; --code-bg:#141a22;
+  --tk-f:#8fb0ff; --tk-s:#6fd3a5; --tk-n:#ffb27a; --tk-c:#7d8796; --tk-o:#f08fcf;
+  color-scheme:dark; }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1140px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.3;margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* hero */
+.hero{padding-block:48px 28px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;align-items:end}
+.eyebrow{font-size:12.5px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;font-weight:600}
+.hero h1{font-size:clamp(34px,5vw,54px);font-weight:800;margin-top:10px;letter-spacing:-.01em}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero .lead{margin-top:16px;color:var(--muted);max-width:34em}
+.stack{display:flex;flex-direction:column;gap:6px;font-family:var(--f-mono);font-size:13.5px}
+.stack div{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:7px 12px;display:flex;justify-content:space-between;gap:12px;min-width:0}
+.stack div span:last-child{color:var(--muted);font-family:var(--f-body);font-size:12.5px;white-space:nowrap}
+.stack div:nth-child(1){margin-left:0}.stack div:nth-child(2){margin-left:14px}.stack div:nth-child(3){margin-left:28px}
+.stack div:nth-child(4){margin-left:42px}.stack div:nth-child(5){margin-left:56px}.stack div:nth-child(6){margin-left:70px}
+.stack b{color:var(--accent);font-weight:600}
+
+/* nav */
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px))}
+nav.toc .wrap{display:flex;gap:4px;overflow-x:auto;padding-block:8px;scrollbar-width:none}
+nav.toc a{white-space:nowrap;text-decoration:none;color:var(--muted);font-size:13.5px;padding:6px 12px;border-radius:999px}
+nav.toc a:hover{background:var(--accent-soft);color:var(--ink)}
+nav.toc a span{font-family:var(--f-mono);font-size:11.5px;margin-right:6px;color:var(--accent)}
+
+/* sections */
+.sec{padding-block:56px 8px;border-bottom:1px solid var(--line)}
+.sec-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 18px;margin-bottom:28px}
+.sec-no{font-family:var(--f-mono);font-size:13px;color:var(--accent);padding-top:10px}
+.sec-head h2{font-size:clamp(25px,3.2vw,34px);font-weight:800}
+.sec-head p{grid-column:2;color:var(--muted);max-width:44em;margin-top:6px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:28px;align-items:start}
+.split > *{min-width:0}
+.fig{margin:0;position:sticky;top:64px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}
+.fig svg{display:block;width:100%;height:auto;border-radius:3px}
+.fig figcaption{font-size:12.5px;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.note{font-size:13px;color:var(--muted)}
+h3{font-size:19px;font-weight:700;margin-bottom:10px}
+.prose{display:flex;flex-direction:column;gap:12px;max-width:42em}
+
+/* component list */
+.comps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.chip{appearance:none;font:inherit;font-size:13.5px;text-align:left;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:8px 11px;cursor:pointer;display:flex;flex-direction:column;gap:0;line-height:1.35}
+.chip small{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip[aria-pressed="true"] small{color:inherit;opacity:.8}
+.detail{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--hl);border-radius:4px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.detail .t{font-weight:700}
+.detail .warn{color:var(--hl);font-size:13px}
+
+/* code */
+pre.code{margin:0;background:var(--code-bg);border:1px solid var(--line);border-radius:5px;padding:14px 16px;overflow-x:auto;font-family:var(--f-mono);font-size:12.8px;line-height:1.65;position:relative;white-space:pre;tab-size:2}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:inherit;font-size:11.5px;background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:2px 9px;cursor:pointer}
+.copy:hover{color:var(--ink)}
+.tk-f{color:var(--tk-f)}.tk-s{color:var(--tk-s)}.tk-n{color:var(--tk-n)}.tk-c{color:var(--tk-c);font-style:italic}.tk-o{color:var(--tk-o)}
+.ln-new{background:var(--accent-soft);display:inline-block;width:100%}
+
+/* controls */
+.ctrls{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.row > label.lbl{font-size:13px;color:var(--muted);min-width:7.5em}
+.tog{appearance:none;font:inherit;font-size:13px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer;font-family:var(--f-mono)}
+.tog[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tog:hover{border-color:var(--accent)}
+select,input[type=range]{font:inherit;font-size:13px}
+select{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:4px 8px}
+input[type=range]{accent-color:var(--accent);width:150px}
+.sw{width:24px;height:24px;border-radius:4px;border:1px solid var(--line);cursor:pointer;padding:0}
+.sw[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:2px}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.04em;color:var(--muted);font-weight:600;background:var(--code-bg)}
+tr:last-child td{border-bottom:0}
+td code{white-space:nowrap}
+
+/* theme tree */
+.tree{font-family:var(--f-mono);font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+.tree ul{list-style:none;margin:0;padding-left:16px;border-left:1px dashed var(--line)}
+.tree > ul{padding-left:0;border:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tree li{margin:1px 0}
+.node{appearance:none;font:inherit;background:none;border:0;color:var(--ink);padding:1px 6px;border-radius:3px;cursor:pointer;text-align:left}
+.node:hover{background:var(--accent-soft)}
+.node[aria-pressed="true"]{background:var(--hl);color:#fff}
+.node.root{font-weight:600;color:var(--accent)}
+.node.root[aria-pressed="true"]{color:#fff}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card .fn{font-family:var(--f-mono);font-weight:600;color:var(--accent);font-size:14px}
+.card p{font-size:13.5px;color:var(--muted)}
+.card .args{font-family:var(--f-mono);font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.badge{display:inline-block;font-size:11px;font-family:var(--f-mono);border:1px solid var(--line);border-radius:3px;padding:0 6px;color:var(--muted);vertical-align:middle}
+
+.gal{display:flex;flex-direction:column;gap:14px}
+.galgrp{display:flex;flex-direction:column;gap:6px}
+.galgrp .pkg{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+
+.task{margin-top:28px;margin-bottom:40px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 16px}
+.task .k{font-size:12px;letter-spacing:.06em;font-weight:700;color:var(--accent);padding-top:2px}
+.task ol{margin:0;padding-left:1.2em;font-size:14px}
+.task ol li{margin:2px 0}
+
+.stack-gap{display:flex;flex-direction:column;gap:18px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.two > *{min-width:0}
+.refs{padding-block:48px 64px}
+.refs ol{font-size:13.5px;color:var(--muted);padding-left:1.4em;display:flex;flex-direction:column;gap:6px;max-width:60em}
+.refs i{color:var(--ink)}
+
+@media (max-width:860px){
+  .hero,.split,.two{grid-template-columns:minmax(0,1fr)}
+  .fig{position:static}
+  .tree > ul{grid-template-columns:minmax(0,1fr)}
+  .hero{padding-block:32px 20px;gap:24px}
+}
+@media (max-width:460px){
+  .comps{grid-template-columns:minmax(0,1fr)}
+  .sec-head{grid-template-columns:minmax(0,1fr)}
+  .sec-head p{grid-column:1}
+  .stack div:nth-child(n){margin-left:0}
+  .task{grid-template-columns:minmax(0,1fr)}
+}
+
+/* svg highlight */
+svg.hlmode .pe:not(.hl){opacity:.16}
+svg .pe{transition:opacity .2s}
+svg .pe.hl:is(rect,line,polyline,polygon,circle,path){stroke:var(--hl)!important;stroke-width:2.4px!important;stroke-dasharray:none!important}
+svg text.pe.hl{fill:var(--hl)!important;font-weight:700}
+@media (prefers-reduced-motion:reduce){ svg .pe{transition:none} html{scroll-behavior:auto} }
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <div class="eyebrow">R 데이터 시각화 과정 · 강의 자료</div>
+      <h1><em>ggplot2</em> 시각화 해부</h1>
+      <p class="lead">그림 한 장을 구성요소로 분해하고, 각 요소를 어떤 함수로 지정하는지 직접 눌러 보며 익힙니다. 뒤이어 theme()의 구조와 사용자화, showtext로 한글을 제대로 쓰는 방법까지 다룹니다. 예제 데이터는 R 내장 <code>mtcars</code>입니다.</p>
+    </div>
+    <div class="stack" aria-label="레이어 문법">
+      <div><code><b>ggplot</b>(data, aes(...))</code><span>데이터 + 매핑</span></div>
+      <div><code>+ <b>geom_*</b>() / <b>stat_*</b>()</code><span>레이어</span></div>
+      <div><code>+ <b>scale_*</b>()</code><span>척도</span></div>
+      <div><code>+ <b>coord_*</b>() + <b>facet_*</b>()</code><span>좌표·분할</span></div>
+      <div><code>+ <b>labs</b>()</code><span>레이블</span></div>
+      <div><code>+ <b>theme</b>()</code><span>비데이터 요소</span></div>
+    </div>
+  </header>
+</div>
+
+<nav class="toc" aria-label="목차"><div class="wrap">
+  <a href="#anatomy"><span>01</span>구성요소</a>
+  <a href="#build"><span>02</span>지정하는 방법</a>
+  <a href="#structure"><span>03</span>theme() 구조</a>
+  <a href="#packages"><span>04</span>테마 패키지</a>
+  <a href="#custom"><span>05</span>테마 사용자화</a>
+  <a href="#showtext"><span>06</span>showtext 한글</a>
+  <a href="#refs"><span>—</span>참고문헌</a>
+</div></nav>
+
+<main class="wrap">
+
+<!-- 01 -->
+<section class="sec" id="anatomy">
+  <div class="sec-head"><span class="sec-no">01</span><h2>ggplot 플롯의 구성요소</h2>
+    <p>ggplot2는 Wilkinson의 Grammar of Graphics를 Wickham이 레이어 문법으로 재구성한 것입니다. 그림은 데이터·매핑·기하객체·통계변환으로 이루어진 <b>레이어</b>에 척도·좌표계·패싯·테마가 더해져 완성됩니다. 아래 구성요소를 눌러 그림의 어느 부분을 담당하는지 확인하세요.</p></div>
+  <div class="split">
+    <div>
+      <div class="comps" id="compList"></div>
+      <div class="detail" id="compDetail"></div>
+    </div>
+    <figure class="fig"><svg id="svgAnatomy" role="img" aria-label="mtcars 무게와 연비 산점도, 구성요소 강조"></svg>
+      <figcaption><span>강조된 부분이 선택한 구성요소가 만드는 영역</span><span class="mono">theme_grey()</span></figcaption></figure>
+  </div>
+  <div class="task"><div class="k">실습</div>
+    <ol><li><code>stat</code>을 눌러 보고, 원자료에 없는 요소가 무엇인지 말해 보세요.</li>
+      <li><code>scale</code>과 <code>guide</code>가 겹치는 영역을 찾고, 둘의 역할 차이를 한 문장으로 정리하세요.</li>
+      <li>자신의 연구 자료로 그릴 그림 하나를 골라 data · aes · geom을 종이에 먼저 적어 보세요.</li></ol></div>
+</section>
+
+<!-- 02 -->
+<section class="sec" id="build">
+  <div class="sec-head"><span class="sec-no">02</span><h2>구성요소를 ggplot에서 지정하는 방법</h2>
+    <p>각 구성요소에는 이름 규칙이 정해진 함수군이 대응합니다. 함수는 <code>+</code>로 쌓이고, 나중에 더한 같은 종류의 설정이 앞선 것을 덮어씁니다.</p></div>
+  <div class="tbl-wrap" style="margin-bottom:28px">
+    <table>
+      <thead><tr><th>구성요소</th><th>함수 패턴</th><th>예시</th><th>메모</th></tr></thead>
+      <tbody>
+        <tr><td>data</td><td><code>ggplot(data)</code>, <code>geom_*(data =)</code></td><td><code>ggplot(mtcars)</code></td><td>레이어마다 다른 데이터를 줄 수 있음</td></tr>
+        <tr><td>aes</td><td><code>aes()</code> 전역 / 레이어별</td><td><code>aes(colour = factor(cyl))</code></td><td>고정값은 aes 밖에: <code>geom_point(colour = "red")</code></td></tr>
+        <tr><td>geom</td><td><code>geom_*()</code></td><td><code>geom_point(size = 2)</code></td><td>레이어 하나 = geom 하나</td></tr>
+        <tr><td>stat</td><td><code>stat_*()</code>, <code>geom_*(stat =)</code></td><td><code>stat_summary(fun = mean)</code></td><td>geom_bar는 stat_count, geom_smooth는 stat_smooth</td></tr>
+        <tr><td>position</td><td><code>position_*()</code></td><td><code>geom_bar(position = "dodge")</code></td><td>겹침 조정: stack, dodge, jitter</td></tr>
+        <tr><td>scale</td><td><code>scale_&lt;aes&gt;_&lt;type&gt;()</code></td><td><code>scale_colour_brewer()</code>, <code>scale_y_log10()</code></td><td>limits는 범위 밖 데이터를 제거함</td></tr>
+        <tr><td>coord</td><td><code>coord_*()</code></td><td><code>coord_cartesian(ylim = c(10, 30))</code></td><td>데이터는 두고 화면만 확대</td></tr>
+        <tr><td>facet</td><td><code>facet_wrap()</code>, <code>facet_grid()</code></td><td><code>facet_wrap(~ am)</code></td><td><code>scales = "free_y"</code>로 축 독립</td></tr>
+        <tr><td>guide</td><td><code>guides()</code>, <code>guide_*()</code></td><td><code>guides(colour = guide_legend(nrow = 1))</code></td><td>범례·축의 모양</td></tr>
+        <tr><td>labs</td><td><code>labs()</code></td><td><code>labs(title = "…", x = "…")</code></td><td>aes 이름으로 범례 제목 지정</td></tr>
+        <tr><td>theme</td><td><code>theme_*()</code> + <code>theme()</code></td><td><code>theme(legend.position = "bottom")</code></td><td>03~05에서 자세히</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="split">
+    <div class="ctrls">
+      <h3>레이어를 하나씩 쌓아 보기</h3>
+      <div class="row"><label class="lbl">매핑</label><button class="tog" data-b="color" aria-pressed="true">colour = factor(cyl)</button></div>
+      <div class="row"><label class="lbl">geom</label><button class="tog" data-b="point" aria-pressed="true">geom_point()</button><button class="tog" data-b="smooth" aria-pressed="false">geom_smooth()</button></div>
+      <div class="row"><label class="lbl" for="bPal">scale</label>
+        <select id="bPal"><option value="hue">기본 (hue)</option><option value="Set1">scale_colour_brewer("Set1")</option><option value="Dark2">scale_colour_brewer("Dark2")</option></select></div>
+      <div class="row"><label class="lbl">facet · coord</label><button class="tog" data-b="facet" aria-pressed="false">facet_wrap(~ am)</button><button class="tog" data-b="coord" aria-pressed="false">coord_cartesian()</button></div>
+      <div class="row"><label class="lbl">labs</label><button class="tog" data-b="labs" aria-pressed="false">labs()</button></div>
+      <div class="row"><label class="lbl" for="bTheme">theme</label>
+        <select id="bTheme"><option value="grey">theme_grey() (기본)</option><option value="bw">theme_bw()</option><option value="minimal">theme_minimal()</option><option value="classic">theme_classic()</option></select>
+        <button class="tog" data-b="legendBottom" aria-pressed="false">legend 아래로</button></div>
+      <div class="codebox"><pre class="code" id="bCode"></pre><button class="copy" data-copy="bCode">복사</button></div>
+      <p class="note" id="bNote"></p>
+    </div>
+    <figure class="fig"><svg id="svgBuild" role="img" aria-label="레이어를 쌓아 만드는 산점도"></svg>
+      <figcaption><span>코드와 그림이 함께 바뀝니다</span><span class="mono">n = 32</span></figcaption></figure>
+  </div>
+  <div class="task"><div class="k">실습</div>
+    <ol><li><code>geom_smooth()</code>를 켠 상태에서 <code>colour</code> 매핑을 끄고 켜 보세요. 회귀선 개수가 왜 바뀌나요?</li>
+      <li><code>coord_cartesian(ylim = c(10, 30))</code> 대신 <code>scale_y_continuous(limits = c(10, 30))</code>를 쓰면 회귀선이 어떻게 달라질지 R에서 확인하세요.</li></ol></div>
+</section>
+
+<!-- 03 -->
+<section class="sec" id="structure">
+  <div class="sec-head"><span class="sec-no">03</span><h2>theme()의 구성</h2>
+    <p>theme은 데이터와 무관한 모든 잉크를 다룹니다. 설정 하나는 <b>요소 이름 = 요소 함수</b> 형태이고, 요소 이름은 점(.)으로 계층을 이룹니다. 하위 요소는 지정하지 않은 속성을 상위 요소에서 상속합니다.</p></div>
+
+  <h3>요소 함수 네 가지와 보조 함수</h3>
+  <div class="cards" style="margin-bottom:28px">
+    <div class="card"><span class="fn">element_text()</span><p>글자: 제목, 축 눈금 레이블, 범례 텍스트, strip</p><div class="args">family, face, colour, size, hjust, vjust, angle, lineheight, margin</div></div>
+    <div class="card"><span class="fn">element_line()</span><p>선: 격자, 축선, 눈금</p><div class="args">colour, linewidth, linetype, lineend, arrow</div></div>
+    <div class="card"><span class="fn">element_rect()</span><p>사각형: 배경, 테두리, 범례 키, strip 배경</p><div class="args">fill, colour, linewidth, linetype</div></div>
+    <div class="card"><span class="fn">element_blank()</span><p>그리지 않음. 공간도 차지하지 않습니다.</p><div class="args">인수 없음</div></div>
+    <div class="card"><span class="fn">rel() · margin() · unit()</span><p>상대 크기, 여백, 길이 단위</p><div class="args">size = rel(1.2)<br>margin(t, r, b, l, unit = "pt")<br>unit(1, "cm")</div></div>
+    <div class="card"><span class="fn">element_geom() <span class="badge">4.0</span></span><p>레이어 기본값(잉크·종이·강조색, 선 굵기)을 테마에서 지정</p><div class="args">theme(geom = element_geom(ink, paper, accent, linewidth, …))</div></div>
+  </div>
+
+  <div class="split">
+    <div class="ctrls">
+      <h3>요소 상속 트리</h3>
+      <p class="note">요소를 누르면 그림에서 해당 부분과 그 요소에서 상속받는 하위 요소가 함께 강조됩니다.</p>
+      <div class="row"><label class="lbl" for="tBase">비교할 테마</label>
+        <select id="tBase"><option value="grey">theme_grey()</option><option value="bw">theme_bw()</option><option value="classic">theme_classic()</option><option value="minimal">theme_minimal()</option></select></div>
+      <div class="tree" id="tree"></div>
+      <div class="detail" id="treeDetail"></div>
+    </div>
+    <figure class="fig"><svg id="svgTree" role="img" aria-label="테마 요소 강조 그림"></svg>
+      <figcaption><span>빨간색: 선택한 요소의 영향 범위</span><span class="mono" id="treeTag">theme_grey()</span></figcaption></figure>
+  </div>
+
+  <div class="two" style="margin-top:32px">
+    <div class="prose">
+      <h3>요소가 아닌 설정</h3>
+      <p>모든 theme 인수가 요소 함수를 받는 것은 아닙니다. 위치·방향은 문자열, 간격은 <code>unit()</code>, 비율은 숫자를 받습니다.</p>
+      <div class="tbl-wrap"><table>
+        <tr><td><code>legend.position</code></td><td>"right", "bottom", "top", "left", "none", "inside"</td></tr>
+        <tr><td><code>legend.position.inside</code></td><td>c(0.9, 0.9) — 3.5.0부터 inside와 함께</td></tr>
+        <tr><td><code>plot.title.position</code></td><td>"panel"(기본) 또는 "plot"</td></tr>
+        <tr><td><code>panel.spacing</code></td><td>unit(1, "lines")</td></tr>
+        <tr><td><code>plot.margin</code></td><td>margin(10, 10, 10, 10)</td></tr>
+        <tr><td><code>aspect.ratio</code></td><td>1</td></tr>
+      </table></div>
+    </div>
+    <div class="prose">
+      <h3>테마를 적용하는 세 가지 범위</h3>
+      <div class="codebox"><pre class="code" data-code="scope"></pre><button class="copy">복사</button></div>
+      <p class="note">ggplot2 4.0(2025-09)부터 완성 테마가 <code>ink</code>, <code>paper</code>, <code>accent</code> 인수를 받고, <code>palette.colour.discrete</code>처럼 팔레트도 테마에서 지정할 수 있습니다. <code>theme_sub_legend()</code> 같은 <code>theme_sub_*()</code> 단축 함수도 추가되었습니다.</p>
+    </div>
+  </div>
+  <div class="task"><div class="k">실습</div>
+    <ol><li><code>theme_grey()</code>에서 <code>axis.line</code>을 눌러 보세요. 왜 아무것도 강조되지 않나요? <code>theme_classic()</code>으로 바꿔 비교하세요.</li>
+      <li><code>text</code> 노드를 누르고, <code>theme(text = element_text(family = "nanum"))</code> 한 줄이 어디까지 영향을 주는지 설명하세요.</li></ol></div>
+</section>
+
+<!-- 04 -->
+<section class="sec" id="packages">
+  <div class="sec-head"><span class="sec-no">04</span><h2>내장 테마와 잘 알려진 테마 패키지</h2>
+    <p>완성 테마(complete theme)는 모든 요소를 한 번에 정의합니다. ggplot2 내장 테마 8종과 주요 확장 패키지의 대표 테마를 같은 그림에 적용해 비교합니다. 브라우저 재현은 배경·격자·축·글꼴의 근사치이며, 실제 출력은 R에서 확인하세요.</p></div>
+  <div class="split">
+    <div class="gal" id="gallery"></div>
+    <figure class="fig"><svg id="svgGal" role="img" aria-label="테마 비교 그림"></svg>
+      <figcaption><span id="galNote"></span><span class="mono" id="galTag"></span></figcaption></figure>
+  </div>
+  <div class="two" style="margin-top:20px">
+    <div class="codebox"><pre class="code" id="galCode"></pre><button class="copy" data-copy="galCode">복사</button></div>
+    <div class="detail" id="galDetail" style="margin-top:0"></div>
+  </div>
+  <div class="task"><div class="k">실습</div>
+    <ol><li>학술지 투고용, 발표 슬라이드용, 보고서용으로 각각 어울리는 테마를 하나씩 고르고 이유를 적어 보세요.</li>
+      <li>고른 테마에 <code>base_size</code>와 <code>base_family</code>를 지정해 같은 그림을 다시 저장하세요.</li></ol></div>
+</section>
+
+<!-- 05 -->
+<section class="sec" id="custom">
+  <div class="sec-head"><span class="sec-no">05</span><h2>theme 사용자화</h2>
+    <p>완성 테마를 바탕으로 고치고 싶은 요소만 <code>theme()</code>으로 덮어쓰는 것이 기본 흐름입니다. 자주 쓰는 조합은 함수로 만들어 프로젝트 전체에 적용합니다.</p></div>
+  <div class="split">
+    <div class="ctrls">
+      <h3>테마 편집기</h3>
+      <div class="row"><label class="lbl" for="cBase">바탕 테마</label>
+        <select id="cBase"><option value="grey">theme_grey()</option><option value="bw">theme_bw()</option><option value="minimal" selected>theme_minimal()</option><option value="classic">theme_classic()</option><option value="light">theme_light()</option></select></div>
+      <div class="row"><label class="lbl" for="cSize">base_size</label><input type="range" id="cSize" min="8" max="18" step="1" value="11"><span class="mono" id="cSizeV">11</span></div>
+      <div class="row"><label class="lbl">plot.title</label><button class="tog" data-c="bold" aria-pressed="false">face = "bold"</button><button class="tog" data-c="titlePlot" aria-pressed="false">position = "plot"</button><button class="tog" data-c="center" aria-pressed="false">hjust = 0.5</button></div>
+      <div class="row"><label class="lbl" for="cLeg">legend.position</label>
+        <select id="cLeg"><option value="right">"right"</option><option value="bottom">"bottom"</option><option value="top">"top"</option><option value="none">"none"</option></select></div>
+      <div class="row"><label class="lbl">panel.grid</label><button class="tog" data-c="noMinor" aria-pressed="false">minor 지우기</button><button class="tog" data-c="noMajX" aria-pressed="false">major.x 지우기</button></div>
+      <div class="row"><label class="lbl">axis</label><button class="tog" data-c="axisLine" aria-pressed="false">axis.line</button>
+        <select id="cAngle" aria-label="axis.text.x 각도"><option value="0">axis.text.x 0°</option><option value="45">45°</option><option value="90">90°</option></select></div>
+      <div class="row"><label class="lbl">panel.background</label><span class="row" id="cFill"></span></div>
+      <div class="codebox"><pre class="code" id="cCode"></pre><button class="copy" data-copy="cCode">복사</button></div>
+    </div>
+    <figure class="fig"><svg id="svgCustom" role="img" aria-label="사용자화한 테마 미리보기"></svg>
+      <figcaption><span>설정을 바꾸면 theme() 코드가 함께 갱신됩니다</span></figcaption></figure>
+  </div>
+
+  <div class="two" style="margin-top:32px">
+    <div class="prose">
+      <h3>나만의 테마 함수 만들기</h3>
+      <p>프로젝트에서 반복할 설정을 함수로 묶고 <code>theme_set()</code>으로 기본값을 바꿉니다. 인수로 <code>base_size</code>, <code>base_family</code>를 열어 두면 학술지·슬라이드별로 크기만 바꿔 재사용할 수 있습니다.</p>
+      <div class="codebox"><pre class="code" data-code="fn"></pre><button class="copy">복사</button></div>
+    </div>
+    <div class="prose">
+      <h3><code>+</code>와 <code>%+replace%</code>의 차이</h3>
+      <p><code>+ theme()</code>은 지정한 속성만 기존 요소에 병합합니다. <code>%+replace%</code>는 요소를 통째로 교체하므로 지정하지 않은 속성은 비어 있게 되고, 상위 요소의 값을 상속합니다.</p>
+      <div class="codebox"><pre class="code" data-code="replace"></pre><button class="copy">복사</button></div>
+      <p class="note">완성 테마를 처음부터 정의할 때는 <code>%+replace%</code>가 안전하고, 그림 하나를 다듬을 때는 <code>+ theme()</code>이 편합니다.</p>
+    </div>
+  </div>
+  <div class="task"><div class="k">실습</div>
+    <ol><li>편집기로 마음에 드는 조합을 만든 뒤 생성된 코드를 <code>theme_lab()</code> 함수 안에 옮겨 보세요.</li>
+      <li><code>theme_set(theme_lab())</code>을 스크립트 맨 위에 두고, 이미 만든 그림 3개가 한꺼번에 바뀌는지 확인하세요.</li></ol></div>
+</section>
+
+<!-- 06 -->
+<section class="sec" id="showtext">
+  <div class="sec-head"><span class="sec-no">06</span><h2>showtext로 한글 처리하기</h2>
+    <p>R 그래픽 장치는 장치마다 글꼴을 찾는 방식이 다릅니다. 한글 글꼴이 없는 장치에서는 한글이 네모(□)로 깨지거나 점으로 바뀝니다. showtext는 글꼴 파일을 직접 읽어 글자를 도형으로 그려 넣으므로 장치와 운영체제에 상관없이 같은 결과를 얻습니다.</p></div>
+  <div class="split">
+    <div class="ctrls">
+      <h3>증상과 해결을 직접 켜 보기</h3>
+      <div class="row"><label class="lbl">showtext</label><button class="tog" data-s="auto" aria-pressed="true">showtext_auto()</button></div>
+      <div class="row"><label class="lbl" for="sFont">font_add_google</label>
+        <select id="sFont"><option value="nanum">Nanum Gothic</option><option value="noto">Noto Sans KR</option><option value="myeongjo">Nanum Myeongjo</option><option value="gowun">Gowun Dodum</option><option value="blackhan">Black Han Sans</option></select></div>
+      <div class="row"><label class="lbl">ggsave dpi=300</label><button class="tog" data-s="dpi" aria-pressed="true">showtext_opts(dpi = 300)</button></div>
+      <div class="row"><label class="lbl">geom_text</label><button class="tog" data-s="gfam" aria-pressed="true">family 지정</button></div>
+      <div class="codebox"><pre class="code" id="sCode"></pre><button class="copy" data-copy="sCode">복사</button></div>
+      <p class="detail" id="sNote" style="margin-top:0"></p>
+    </div>
+    <figure class="fig"><svg id="svgShow" role="img" aria-label="한글 글꼴 처리 미리보기"></svg>
+      <figcaption><span>ggsave("fig.png", dpi = 300) 결과를 흉내 낸 미리보기</span></figcaption></figure>
+  </div>
+
+  <div style="margin-top:32px" class="stack-gap">
+    <h3>자주 만나는 문제</h3>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>증상</th><th>원인</th><th>해결</th></tr></thead>
+      <tbody>
+        <tr><td>한글이 □□□ 또는 ..로 보임</td><td>장치가 한글 글꼴을 찾지 못함 (리눅스 서버, <code>pdf()</code> 장치 등)</td><td><code>font_add_google()</code> + <code>showtext_auto()</code></td></tr>
+        <tr><td>저장한 PNG의 글자가 매우 작음</td><td>showtext 기본 dpi(96)와 <code>ggsave(dpi = 300)</code> 불일치</td><td><code>showtext_opts(dpi = 300)</code>을 저장 dpi와 맞춤</td></tr>
+        <tr><td>축은 나눔고딕인데 점 레이블만 다른 글꼴</td><td><code>geom_text()</code>는 theme의 글꼴을 따르지 않음</td><td><code>geom_text(family = "nanum")</code> 또는 <code>update_geom_defaults("text", list(family = "nanum"))</code></td></tr>
+        <tr><td>지정한 family 이름이 안 먹힘</td><td>R 안에서 붙인 별칭과 다르게 씀</td><td><code>font_families()</code>로 등록된 이름 확인</td></tr>
+        <tr><td>PDF에서 글자가 선택·검색되지 않음</td><td>showtext는 글자를 도형(path)으로 그림</td><td>텍스트 검색이 필요하면 <code>cairo_pdf()</code>와 시스템 글꼴 사용</td></tr>
+        <tr><td>R Markdown/Quarto에서 글자 크기가 이상함</td><td>청크마다 dpi가 다름</td><td>청크 옵션 <code>fig.showtext = TRUE</code></td></tr>
+      </tbody>
+    </table></div>
+    <div class="two">
+      <div class="prose">
+        <h3>로컬 글꼴 파일 쓰기</h3>
+        <p>Pretendard처럼 Google Fonts에 없는 글꼴은 파일 경로로 등록합니다. 굵은꼴 파일을 함께 주면 <code>face = "bold"</code>가 제대로 동작합니다.</p>
+        <div class="codebox"><pre class="code" data-code="local"></pre><button class="copy">복사</button></div>
+      </div>
+      <div class="prose">
+        <h3>대안: ragg 장치</h3>
+        <p>ragg 장치는 systemfonts로 시스템에 설치된 글꼴을 직접 찾습니다. 컴퓨터에 한글 글꼴이 설치되어 있다면 showtext 없이도 PNG가 잘 나옵니다. RStudio에서는 Tools › Global Options › General › Graphics의 Backend를 AGG로 바꾸면 미리보기 창도 같은 방식으로 그립니다.</p>
+        <div class="codebox"><pre class="code" data-code="ragg"></pre><button class="copy">복사</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="task"><div class="k">실습</div>
+    <ol><li>실습 PC에서 <code>showtext_auto()</code> 없이 한글 제목 그림을 <code>pdf()</code>로 저장해 증상을 확인하세요.</li>
+      <li>같은 그림을 dpi 300으로 저장하되 <code>showtext_opts(dpi = 300)</code>을 빼고 넣어 두 파일을 비교하세요.</li>
+      <li>01~05에서 만든 <code>theme_lab()</code>의 <code>base_family</code>를 등록한 한글 글꼴로 바꿔 최종 그림을 저장하세요.</li></ol></div>
+</section>
+
+<section class="refs" id="refs">
+  <h3>참고문헌</h3>
+  <ol>
+    <li>Wilkinson, L. (2005). <i>The Grammar of Graphics</i> (2nd ed.). Springer.</li>
+    <li>Wickham, H. (2010). A layered grammar of graphics. <i>Journal of Computational and Graphical Statistics, 19</i>(1), 3–28.</li>
+    <li>Wickham, H., Navarro, D., &amp; Pedersen, T. L. <i>ggplot2: Elegant Graphics for Data Analysis</i> (3rd ed.). <a href="https://ggplot2-book.org" target="_blank" rel="noopener">ggplot2-book.org</a></li>
+    <li>ggplot2 reference: Modify components of a theme (<code>theme()</code>), Complete themes. <a href="https://ggplot2.tidyverse.org/reference/theme.html" target="_blank" rel="noopener">ggplot2.tidyverse.org</a></li>
+    <li>van den Brand, T. (2025). ggplot2 4.0.0. <i>Tidyverse blog</i>. <a href="https://tidyverse.org/blog/2025/09/ggplot2-4-0-0/" target="_blank" rel="noopener">tidyverse.org</a></li>
+    <li>Qiu, Y. showtext: Using fonts more easily in R graphs. <a href="https://github.com/yixuan/showtext" target="_blank" rel="noopener">github.com/yixuan/showtext</a></li>
+    <li>Arnold, J. B. ggthemes; Rudis, B. hrbrthemes; Wilke, C. O. cowplot; Kassambara, A. ggpubr; Dawson, C. ggprism; BBC Visual and Data Journalism, bbplot.</li>
+    <li>Pedersen, T. L., &amp; Shemanarev, M. ragg: Graphic devices based on AGG. <a href="https://ragg.r-lib.org" target="_blank" rel="noopener">ragg.r-lib.org</a></li>
+  </ol>
+</section>
+</main>
+
+<script>
+/* ---------- data: mtcars (name, wt, mpg, cyl, am) ---------- */
+const MT=[["Mazda RX4",2.62,21,6,1],["Mazda RX4 Wag",2.875,21,6,1],["Datsun 710",2.32,22.8,4,1],["Hornet 4 Drive",3.215,21.4,6,0],["Hornet Sportabout",3.44,18.7,8,0],["Valiant",3.46,18.1,6,0],["Duster 360",3.57,14.3,8,0],["Merc 240D",3.19,24.4,4,0],["Merc 230",3.15,22.8,4,0],["Merc 280",3.44,19.2,6,0],["Merc 280C",3.44,17.8,6,0],["Merc 450SE",4.07,16.4,8,0],["Merc 450SL",3.73,17.3,8,0],["Merc 450SLC",3.78,15.2,8,0],["Cadillac Fleetwood",5.25,10.4,8,0],["Lincoln Continental",5.424,10.4,8,0],["Chrysler Imperial",5.345,14.7,8,0],["Fiat 128",2.2,32.4,4,1],["Honda Civic",1.615,30.4,4,1],["Toyota Corolla",1.835,33.9,4,1],["Toyota Corona",2.465,21.5,4,0],["Dodge Challenger",3.52,15.5,8,0],["AMC Javelin",3.435,15.2,8,0],["Camaro Z28",3.84,13.3,8,0],["Pontiac Firebird",3.845,19.2,8,0],["Fiat X1-9",1.935,27.3,4,1],["Porsche 914-2",2.14,26,4,1],["Lotus Europa",1.513,30.4,4,1],["Ford Pantera L",3.17,15.8,8,1],["Ferrari Dino",2.77,19.7,6,1],["Maserati Bora",3.57,15,8,1],["Volvo 142E",2.78,21.4,4,1]];
+const PAL={hue:['#F8766D','#00BA38','#619CFF'],Set1:['#E41A1C','#377EB8','#4DAF4A'],Dark2:['#1B9E77','#D95F02','#7570B3']};
+const CYL=[4,6,8];
+const LABS={title:'무게가 늘수록 연비는 떨어진다',subtitle:'1974 Motor Trend 자동차 32종',caption:'자료: mtcars (R datasets)',x:'무게 (1,000 lbs)',y:'연비 (mpg)',col:'실린더'};
+const RAW={x:'wt',y:'mpg',col:'factor(cyl)'};
+const FONT={sans:"'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif",serif:"'Nanum Myeongjo',serif",
+  nanum:"'Nanum Gothic',sans-serif",noto:"'Noto Sans KR',sans-serif",myeongjo:"'Nanum Myeongjo',serif",gowun:"'Gowun Dodum',sans-serif",blackhan:"'Black Han Sans',sans-serif",
+  fallback:"Georgia,'Times New Roman',serif"};
+
+/* ---------- theme definitions (근사) ---------- */
+const BASE={base:11,family:FONT.sans,plotBg:'#FFFFFF',panelBg:'#EBEBEB',border:null,borderW:1,
+  gMajX:'#FFFFFF',gMajY:'#FFFFFF',gMajW:1.1,gMinX:'#FFFFFF',gMinY:'#FFFFFF',gMinW:.55,gDash:null,
+  axLineX:null,axLineY:null,axLineW:1,ticks:'#333333',tickW:1,axText:'#4D4D4D',axFace:400,text:'#000000',axTitle:true,
+  titleRel:1.2,titleFace:400,titleHjust:0,titlePos:'panel',xTitleHjust:.5,yTitleHjust:.5,
+  legendPos:'right',keyBg:'#F2F2F2',legendBg:null,stripBg:'#D9D9D9',stripText:'#1A1A1A',stripBorder:null,angle:0,
+  ribbon:'#999999',smoothCol:'#3366FF',pointCol:'#000000'};
+const T=o=>Object.assign({},BASE,o);
+const TH={
+ grey:T({}),
+ bw:T({panelBg:'#FFFFFF',border:'#333333',gMajX:'#EBEBEB',gMajY:'#EBEBEB',gMinX:'#EBEBEB',gMinY:'#EBEBEB',keyBg:'#FFFFFF',stripBorder:'#333333'}),
+ minimal:T({panelBg:null,gMajX:'#EBEBEB',gMajY:'#EBEBEB',gMinX:'#EBEBEB',gMinY:'#EBEBEB',ticks:null,keyBg:null,stripBg:null}),
+ classic:T({panelBg:'#FFFFFF',gMajX:null,gMajY:null,gMinX:null,gMinY:null,axLineX:'#000000',axLineY:'#000000',keyBg:null,stripBg:'#FFFFFF',stripBorder:'#000000'}),
+ light:T({panelBg:'#FFFFFF',border:'#B3B3B3',gMajX:'#DEDEDE',gMajY:'#DEDEDE',gMinX:'#DEDEDE',gMinY:'#DEDEDE',gMajW:.8,gMinW:.4,ticks:'#B3B3B3',keyBg:'#FFFFFF',stripBg:'#B3B3B3',stripText:'#FFFFFF'}),
+ dark:T({panelBg:'#7F7F7F',gMajX:'#6B6B6B',gMajY:'#6B6B6B',gMinX:'#6B6B6B',gMinY:'#6B6B6B',keyBg:'#7F7F7F',stripBg:'#262626',stripText:'#E5E5E5',ribbon:'#CCCCCC'}),
+ linedraw:T({panelBg:'#FFFFFF',border:'#000000',gMajX:'#000000',gMajY:'#000000',gMinX:'#000000',gMinY:'#000000',gMajW:.25,gMinW:.12,ticks:'#000000',axText:'#000000',keyBg:'#FFFFFF',stripBg:'#000000',stripText:'#FFFFFF'}),
+ void:T({panelBg:null,gMajX:null,gMajY:null,gMinX:null,gMinY:null,ticks:null,axText:null,axTitle:false,keyBg:null,stripBg:null}),
+ economist:T({plotBg:'#D5E4EB',panelBg:null,gMajX:null,gMajY:'#FFFFFF',gMajW:1.8,gMinX:null,gMinY:null,axLineX:'#000000',ticks:'#000000',axText:'#000000',titleFace:700,legendPos:'top',keyBg:null,stripBg:'#C3D6DF'}),
+ fte:T({plotBg:'#F0F0F0',panelBg:'#F0F0F0',gMajX:'#D2D2D2',gMajY:'#D2D2D2',gMinX:null,gMinY:null,ticks:null,axTitle:false,titleFace:700,titleRel:1.5,legendPos:'bottom',keyBg:null,stripBg:null,axText:'#3C3C3C'}),
+ tufte:T({family:FONT.serif,panelBg:null,gMajX:null,gMajY:null,gMinX:null,gMinY:null,ticks:'#000000',axText:'#000000',keyBg:null,stripBg:null}),
+ wsj:T({plotBg:'#F8F2E4',panelBg:'#F8F2E4',gMajX:null,gMajY:'#000000',gMajW:1,gDash:'1.5 3',gMinX:null,gMinY:null,axLineX:'#000000',ticks:'#000000',axText:'#000000',axTitle:false,titleFace:700,titleRel:1.6,legendPos:'top',keyBg:null,stripBg:null}),
+ ipsum:T({panelBg:null,gMajX:'#CCCCCC',gMajY:'#CCCCCC',gMajW:.5,gMinX:'#CCCCCC',gMinY:'#CCCCCC',gMinW:.25,ticks:null,titleFace:700,titleRel:1.6,xTitleHjust:1,yTitleHjust:1,keyBg:null,stripBg:null}),
+ cowplot:T({base:14,panelBg:null,gMajX:null,gMajY:null,gMinX:null,gMinY:null,axLineX:'#000000',axLineY:'#000000',ticks:'#000000',axText:'#000000',titleFace:700,keyBg:null,stripBg:'#F2F2F2'}),
+ pubr:T({panelBg:null,gMajX:null,gMajY:null,gMinX:null,gMinY:null,axLineX:'#000000',axLineY:'#000000',ticks:'#000000',axText:'#000000',legendPos:'top',keyBg:null,stripBg:'#FFFFFF',stripBorder:'#000000'}),
+ prism:T({panelBg:null,gMajX:null,gMajY:null,gMinX:null,gMinY:null,axLineX:'#000000',axLineY:'#000000',axLineW:2.2,ticks:'#000000',tickW:2.2,axText:'#000000',axFace:700,titleFace:700,titleHjust:.5,keyBg:null,stripBg:null}),
+ bbc:T({panelBg:null,gMajX:null,gMajY:'#CBCBCB',gMinX:null,gMinY:null,ticks:null,axTitle:false,axText:'#222222',titleFace:700,titleRel:2,legendPos:'top',keyBg:null,stripBg:'#FFFFFF'})
+};
+
+/* ---------- SVG renderer ---------- */
+const NS='http://www.w3.org/2000/svg';
+function E(tag,a,p){const e=document.createElementNS(NS,tag);for(const k in a){if(a[k]!=null&&a[k]!==false)e.setAttribute(k,a[k]);}if(p)p.appendChild(e);return e;}
+function tw(s,size){let w=0;for(const ch of s){const c=ch.codePointAt(0);w+=c>=0x1100?0.95:(ch===' '?0.3:(/[0-9]/.test(ch)?0.58:0.56));}return w*size;}
+let CLIP=0;
+function fit(xs,ys){const n=xs.length,mx=xs.reduce((a,b)=>a+b)/n,my=ys.reduce((a,b)=>a+b)/n;let sxx=0,sxy=0;for(let i=0;i<n;i++){sxx+=(xs[i]-mx)**2;sxy+=(xs[i]-mx)*(ys[i]-my);}const b=sxy/sxx,a=my-b*mx;let sse=0;for(let i=0;i<n;i++)sse+=(ys[i]-a-b*xs[i])**2;const df=n-2,s=df>0?Math.sqrt(sse/df):0;const tq=df>0?({1:12.71,2:4.30,3:3.18,4:2.78,5:2.57,6:2.45,7:2.36,8:2.31,9:2.26,10:2.23}[df]||(1.96+2.4/df)):0;return{a,b,mx,sxx,n,s,tq};}
+
+function render(svg,o){
+  const t=Object.assign({},BASE,o.theme||TH.grey);
+  const fam=o.family||t.family;
+  const S=t.base*1.3*(o.fontScale||1);
+  const cv=s=>o.tofu?s.replace(/[ᄀ-ᇿ㄰-㆏가-힣]/g,'□'):s;
+  const W=680,H=o.H||440;
+  svg.innerHTML='';svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const L=o.labs?LABS:RAW;
+  const pal=PAL[o.palette||'hue'];
+  const colOf=c=>o.color?pal[CYL.indexOf(c)]:t.pointCol;
+  const R=(x,y,w,h,a)=>E('rect',Object.assign({x,y,width:Math.max(0,w),height:Math.max(0,h),class:'pe'},a),svg);
+  const Ln=(x1,y1,x2,y2,a,p)=>E('line',Object.assign({x1,y1,x2,y2,class:'pe'},a),p||svg);
+  const Tx=(s,x,y,a,p)=>{const e=E('text',Object.assign({x,y,'font-family':fam,class:'pe'},a),p||svg);e.textContent=cv(s);return e;};
+  const M=12;
+  R(0,0,W,H,{fill:t.plotBg,'data-el':'rect plot.background','data-c':'theme'});
+  let top=M,bottom=H-M,left=M,right=W-M;
+  const titleS=S*t.titleRel,subS=S*.95,capS=S*.8,axS=S*.8,atS=S,legS=S*.8,strS=S*.8;
+  let titleY=null,subY=null,capY=null;
+  if(o.labs){top+=titleS;titleY=top;top+=6;top+=subS;subY=top;top+=10;bottom-=2;capY=bottom;bottom-=capS+8;}
+  const showLeg=o.color&&t.legendPos!=='none'&&(o.point||o.smooth);
+  let legW=0,legH=0,legTopY=0,legBotY=0;
+  if(showLeg){
+    if(t.legendPos==='right'){legW=Math.max(tw(cv(L.col),legS),26+tw('8',legS))+22;right-=legW;}
+    else{legH=legS*2.8;if(t.legendPos==='bottom'){bottom-=legH;legBotY=bottom;}else{legTopY=top;top+=legH;}}
+  }
+  const yTitleW=t.axTitle?atS*1.5:0, yTextW=t.axText?tw('35',axS)+6:0, tickL=t.ticks?4:0;
+  left+=yTitleW+yTextW+tickL;
+  const xTextH=t.axText?(t.angle===0?axS*1.35:t.angle===45?axS*1.9:axS*1.5+4):0;
+  const xTitleH=t.axTitle?atS*1.55:0;
+  bottom-=xTitleH+xTextH+tickL;
+  right-=8;
+  const facet=!!o.facet;
+  const panels=facet?[{am:0,lab:'자동 변속'},{am:1,lab:'수동 변속'}]:[{am:null}];
+  const stripH=facet?strS*1.9:0, gap=facet?12:0, pTop=top+stripH;
+  const pw=(right-left-gap*(panels.length-1))/panels.length;
+  const xd=[1.32,5.62], yd=o.ylim?[9,31]:[9.2,35.1];
+  const xb=[2,3,4,5], xm=[1.5,2.5,3.5,4.5,5.5];
+  const yb=o.ylim?[10,15,20,25,30]:[10,15,20,25,30,35], ym=o.ylim?[12.5,17.5,22.5,27.5]:[12.5,17.5,22.5,27.5,32.5];
+  const sy=v=>bottom-(v-yd[0])/(yd[1]-yd[0])*(bottom-pTop);
+  panels.forEach((P,i)=>{
+    const x0=left+i*(pw+gap), sx=v=>x0+(v-xd[0])/(xd[1]-xd[0])*pw;
+    if(t.panelBg)R(x0,pTop,pw,bottom-pTop,{fill:t.panelBg,'data-el':'rect panel.background','data-c':'theme coord'});
+    const gl=(key,c,w,vals,axis)=>{if(!c)return;vals.forEach(v=>{const a={stroke:c,'stroke-width':w,'stroke-dasharray':t.gDash,'data-el':'line panel.grid '+key,'data-c':'theme scale'};
+      if(axis==='x')Ln(sx(v),pTop,sx(v),bottom,a);else Ln(x0,sy(v),x0+pw,sy(v),a);});};
+    gl('panel.grid.minor panel.grid.minor.y',t.gMinY,t.gMinW,ym,'y');gl('panel.grid.minor panel.grid.minor.x',t.gMinX,t.gMinW,xm,'x');
+    gl('panel.grid.major panel.grid.major.y',t.gMajY,t.gMajW,yb,'y');gl('panel.grid.major panel.grid.major.x',t.gMajX,t.gMajW,xb,'x');
+    const id='clp'+(++CLIP);const cp=E('clipPath',{id},svg);E('rect',{x:x0,y:pTop,width:pw,height:bottom-pTop},cp);
+    const g=E('g',{'clip-path':`url(#${id})`},svg);
+    const sub=MT.filter(r=>P.am===null||r[4]===P.am);
+    if(o.point)sub.forEach(r=>E('circle',{cx:sx(r[1]),cy:sy(r[2]),r:3.1,fill:colOf(r[3]),class:'pe','data-el':'geom','data-c':'data aes geom'},g));
+    if(o.smooth){
+      const groups=o.color?CYL.map(c=>({c,rows:sub.filter(r=>r[3]===c)})):[{c:null,rows:sub}];
+      groups.forEach(G=>{if(G.rows.length<2)return;const xs=G.rows.map(r=>r[1]),ys=G.rows.map(r=>r[2]);const f=fit(xs,ys);
+        const lo=Math.min(...xs),hi=Math.max(...xs);const pts=[];for(let k=0;k<=30;k++){const x=lo+(hi-lo)*k/30;const yh=f.a+f.b*x;const se=f.n>2?f.s*Math.sqrt(1/f.n+(x-f.mx)**2/f.sxx):0;pts.push([x,yh,se*f.tq]);}
+        if(f.n>2){const up=pts.map(p=>`${sx(p[0]).toFixed(1)},${sy(p[1]+p[2]).toFixed(1)}`),dn=pts.slice().reverse().map(p=>`${sx(p[0]).toFixed(1)},${sy(p[1]-p[2]).toFixed(1)}`);
+          E('polygon',{points:up.concat(dn).join(' '),fill:t.ribbon,'fill-opacity':.4,class:'pe','data-el':'geom','data-c':'stat'},g);}
+        E('polyline',{points:pts.map(p=>`${sx(p[0]).toFixed(1)},${sy(p[1]).toFixed(1)}`).join(' '),fill:'none',stroke:G.c?colOf(G.c):t.smoothCol,'stroke-width':2,class:'pe','data-el':'geom','data-c':'geom stat'},g);});
+    }
+    if(o.annot&&!facet){[["코롤라",1.835,33.9,'start',8],["링컨 컨티넨탈",5.424,10.4,'end',-8]].forEach(a=>{
+      Tx(a[0],sx(a[1])+a[4],sy(a[2])+(a[3]==='start'?4:-6),{'font-size':S*.85,fill:'#222','text-anchor':a[3],'font-family':o.annotFamily||fam,'data-el':'geom','data-c':'geom'},g);});}
+    if(t.border)R(x0,pTop,pw,bottom-pTop,{fill:'none',stroke:t.border,'stroke-width':t.borderW,'data-el':'rect panel.border','data-c':'theme coord'});
+    if(facet){
+      if(t.stripBg||t.stripBorder)R(x0,top,pw,stripH,{fill:t.stripBg||'none',stroke:t.stripBorder,'stroke-width':t.stripBorder?1:null,'data-el':'rect strip.background strip.background.x','data-c':'facet theme'});
+      Tx(P.lab,x0+pw/2,top+stripH/2,{'font-size':strS,fill:t.stripText,'text-anchor':'middle','dominant-baseline':'central','data-el':'text strip.text strip.text.x','data-c':'facet'});
+    }
+    // x axis
+    if(t.axLineX)Ln(x0,bottom,x0+pw,bottom,{stroke:t.axLineX,'stroke-width':t.axLineW,'data-el':'line axis.line axis.line.x','data-c':'coord guide theme'});
+    xb.forEach(v=>{const X=sx(v);
+      if(t.ticks)Ln(X,bottom,X,bottom+tickL,{stroke:t.ticks,'stroke-width':t.tickW,'data-el':'line axis.ticks axis.ticks.x','data-c':'scale guide'});
+      if(t.axText){const y=bottom+tickL+axS*1.05;const a={'font-size':axS,fill:t.axText,'font-weight':t.axFace,'text-anchor':t.angle===0?'middle':'end','data-el':'text axis.text axis.text.x','data-c':'scale guide'};
+        if(t.angle){a.transform=`rotate(${-t.angle} ${X} ${bottom+tickL+4})`;Tx(String(v),X+(t.angle===90?axS*.35:2),bottom+tickL+4+axS*.35,a);}else Tx(String(v),X,y,a);}
+    });
+    if(i===0){
+      if(t.axLineY)Ln(x0,pTop,x0,bottom,{stroke:t.axLineY,'stroke-width':t.axLineW,'data-el':'line axis.line axis.line.y','data-c':'coord guide theme'});
+      yb.forEach(v=>{const Y=sy(v);
+        if(t.ticks)Ln(x0-tickL,Y,x0,Y,{stroke:t.ticks,'stroke-width':t.tickW,'data-el':'line axis.ticks axis.ticks.y','data-c':'scale guide'});
+        if(t.axText)Tx(String(v),x0-tickL-3,Y,{'font-size':axS,fill:t.axText,'font-weight':t.axFace,'text-anchor':'end','dominant-baseline':'central','data-el':'text axis.text axis.text.y','data-c':'scale guide'});});
+    }
+  });
+  // axis titles
+  if(t.axTitle){
+    const yT=bottom+tickL+xTextH+atS*1.05;
+    const xa=t.xTitleHjust===1?{x:right,an:'end'}:{x:(left+right)/2,an:'middle'};
+    Tx(L.x,xa.x,yT,{'font-size':atS,fill:t.text,'text-anchor':xa.an,'data-el':'text title axis.title axis.title.x','data-c':'labs'});
+    const yx=M+atS*.85, yy=t.yTitleHjust===1?pTop:(pTop+bottom)/2;
+    Tx(L.y,yx,yy,{'font-size':atS,fill:t.text,'text-anchor':t.yTitleHjust===1?'end':'middle',transform:`rotate(-90 ${yx} ${yy})`,'data-el':'text title axis.title axis.title.y','data-c':'labs'});
+  }
+  // titles
+  if(o.labs){
+    const tx0=t.titlePos==='plot'?M:left;
+    const tpos=t.titleHjust===.5?{x:(tx0+right)/2,an:'middle'}:{x:tx0,an:'start'};
+    Tx(LABS.title,tpos.x,titleY,{'font-size':titleS,fill:t.text,'font-weight':t.titleFace,'text-anchor':tpos.an,'data-el':'text title plot.title','data-c':'labs'});
+    Tx(LABS.subtitle,tpos.x,subY,{'font-size':subS,fill:t.text,'text-anchor':tpos.an,opacity:.8,'data-el':'text title plot.subtitle','data-c':'labs'});
+    Tx(LABS.caption,W-M,capY,{'font-size':capS,fill:t.text,'text-anchor':'end','data-el':'text title plot.caption','data-c':'labs'});
+  }
+  // legend
+  if(showLeg){
+    const key=16, bgc=t.legendBg||t.plotBg;
+    const drawKey=(x,y,c)=>{
+      R(x,y,key,key,{fill:t.keyBg||'none','data-el':'rect legend.key','data-c':'guide'});
+      if(o.smooth){if(t.ribbon&&true)R(x,y+2,key,key-4,{fill:t.ribbon,'fill-opacity':.4,'data-el':'geom','data-c':'guide stat'});Ln(x,y+key/2,x+key,y+key/2,{stroke:c,'stroke-width':2,'data-el':'geom','data-c':'guide aes scale'});}
+      if(o.point)E('circle',{cx:x+key/2,cy:y+key/2,r:3.1,fill:c,class:'pe','data-el':'geom','data-c':'guide aes scale'},svg);
+    };
+    if(t.legendPos==='right'){
+      const lx=right+8+14, totalH=legS*1.6+3*(key+4);const ly=(pTop+bottom)/2-totalH/2;
+      R(lx-6,ly-6,legW-10,totalH+10,{fill:bgc,'data-el':'rect legend.background','data-c':'guide theme'});
+      Tx(L.col,lx,ly+legS*.9,{'font-size':S,fill:t.text,'data-el':'text title legend.title','data-c':'labs guide'});
+      CYL.forEach((c,k)=>{const y=ly+legS*1.6+k*(key+4);drawKey(lx,y,pal[k]);Tx(String(c),lx+key+6,y+key/2,{'font-size':legS,fill:t.text,'dominant-baseline':'central','data-el':'text legend.text','data-c':'scale guide'});});
+    }else{
+      const titleW=tw(cv(L.col),S)+10, itemW=key+6+tw('8',legS)+12, totalW=titleW+3*itemW;
+      const cy=(t.legendPos==='bottom'?legBotY:legTopY)+legH/2;
+      const lx=(left+right)/2-totalW/2;
+      R(lx-6,cy-key/2-5,totalW+8,key+10,{fill:bgc,'data-el':'rect legend.background','data-c':'guide theme'});
+      Tx(L.col,lx,cy,{'font-size':S,fill:t.text,'dominant-baseline':'central','data-el':'text title legend.title','data-c':'labs guide'});
+      CYL.forEach((c,k)=>{const x=lx+titleW+k*itemW;drawKey(x,cy-key/2,pal[k]);Tx(String(c),x+key+6,cy,{'font-size':legS,fill:t.text,'dominant-baseline':'central','data-el':'text legend.text','data-c':'scale guide'});});
+    }
+  }
+}
+function applyHL(svg,attr,key){
+  let n=0;svg.querySelectorAll('.pe').forEach(e=>{const v=(e.getAttribute('data-'+attr)||'').split(' ');const on=!!key&&v.includes(key);e.classList.toggle('hl',on);if(on)n++;});
+  svg.classList.toggle('hlmode',!!key);return n;
+}
+
+/* ---------- code highlighter ---------- */
+function hl(code){
+  const s=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return s.replace(/(#[^\n]*)|("(?:[^"\\]|\\.)*"|`[^`]*`)|\b(\d+(?:\.\d+)?)\b|([A-Za-z_][\w.]*)(?=\()|(%\+replace%|&lt;-|\+|~|=|\|&gt;)/g,(m,c,str,num,fn,op)=>{
+    if(c)return`<span class="tk-c">${c}</span>`;if(str)return`<span class="tk-s">${str}</span>`;if(num)return`<span class="tk-n">${num}</span>`;if(fn)return`<span class="tk-f">${fn}</span>`;if(op)return`<span class="tk-o">${op}</span>`;return m;});
+}
+function setCode(id,code){const el=document.getElementById(id);el.innerHTML=hl(code);el.dataset.raw=code;}
+document.addEventListener('click',e=>{const b=e.target.closest('.copy');if(!b)return;const pre=b.dataset.copy?document.getElementById(b.dataset.copy):b.previousElementSibling;const raw=pre.dataset.raw||pre.textContent;
+  const done=()=>{b.textContent='복사됨';setTimeout(()=>b.textContent='복사',1400);};
+  try{navigator.clipboard.writeText(raw).then(done,()=>{selectEl(pre);b.textContent='선택됨';});}catch(_){selectEl(pre);}});
+function selectEl(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);}
+
+const STATIC={
+scope:`# 1) 그림 하나에만
+p + theme_bw()
+
+# 2) 세션 전체 기본값 바꾸기
+theme_set(theme_minimal(base_size = 12))
+
+# 3) 현재 기본 테마의 일부만 수정
+theme_update(legend.position = "bottom")
+
+# 4.0: 잉크·종이·강조색을 한 번에
+theme_grey(ink = "navy", paper = "cornsilk", accent = "tomato")`,
+fn:`theme_lab <- function(base_size = 12, base_family = "nanum") {
+  theme_minimal(base_size = base_size,
+                base_family = base_family) %+replace%
+    theme(
+      plot.title = element_text(face = "bold", size = rel(1.3),
+                                hjust = 0, vjust = 1,
+                                margin = margin(b = 6)),
+      plot.title.position = "plot",
+      panel.grid.minor = element_blank(),
+      axis.title = element_text(colour = "grey30"),
+      legend.position = "bottom"
+    )
+}
+
+theme_set(theme_lab())          # 이후 모든 그림에 적용
+p + theme_lab(base_size = 16)   # 슬라이드용으로 키우기`,
+replace:`base <- theme_grey()
+
+# 병합: 굵게만 바뀌고 크기·여백은 유지
+base + theme(plot.title = element_text(face = "bold"))
+
+# 교체: plot.title이 face만 가진 새 요소가 됨
+#       size, hjust 등은 상위 요소(title → text)에서 상속
+base %+replace% theme(plot.title = element_text(face = "bold"))`,
+local:`library(showtext)
+font_add("pretendard",
+         regular = "fonts/Pretendard-Regular.otf",
+         bold    = "fonts/Pretendard-Bold.otf")
+font_families()   # 등록 확인
+showtext_auto()`,
+ragg:`install.packages("ragg")
+
+ggsave("fig.png", p, device = ragg::agg_png,
+       width = 7, height = 4.5, dpi = 300)
+
+# 시스템 글꼴 이름을 그대로 사용
+p + theme_minimal(base_family = "Malgun Gothic")   # Windows
+p + theme_minimal(base_family = "AppleGothic")     # macOS`
+};
+document.querySelectorAll('pre[data-code]').forEach(p=>{p.innerHTML=hl(STATIC[p.dataset.code]);p.dataset.raw=STATIC[p.dataset.code];});
+
+/* ---------- 01 anatomy ---------- */
+const COMP=[
+ {k:'data',n:'데이터',s:'data',fn:'ggplot(data = mtcars)',d:'그릴 자료입니다. 한 행이 한 관측값인 데이터프레임(tidy data)을 넘깁니다. 점 하나가 자동차 한 대입니다.'},
+ {k:'aes',n:'미적 매핑',s:'aes()',fn:'aes(x = wt, y = mpg, colour = factor(cyl))',d:'변수를 x·y 위치, 색, 크기, 모양 같은 시각 속성에 연결합니다. 색을 매핑했기 때문에 범례가 자동으로 생겼습니다.'},
+ {k:'geom',n:'기하 객체',s:'geom_*()',fn:'geom_point(size = 2) +\ngeom_smooth(method = "lm")',d:'데이터를 점, 선, 막대 같은 도형으로 그립니다. 레이어 하나에 geom 하나가 있고, 더한 순서대로 위에 쌓입니다.'},
+ {k:'stat',n:'통계 변환',s:'stat_*()',fn:'geom_smooth(method = "lm")\n# 내부적으로 stat_smooth() 사용',d:'그리기 전에 데이터를 계산합니다. 회귀선과 95% 신뢰대는 원자료에 없는 값입니다. geom_bar()의 막대 높이(stat_count)도 같은 원리입니다.'},
+ {k:'scale',n:'척도',s:'scale_*()',fn:'scale_x_continuous(breaks = 2:5) +\nscale_colour_brewer(palette = "Set1")',d:'데이터 값을 화면 값으로 바꾸는 규칙입니다. 축 눈금 위치, 격자선 위치, 범례 항목과 색 팔레트를 결정합니다.'},
+ {k:'coord',n:'좌표계',s:'coord_*()',fn:'coord_cartesian(ylim = c(10, 30))\ncoord_flip(); coord_polar()',d:'x·y 척도를 평면에 배치하는 방식입니다. 패널의 모양, 확대 범위, 축선을 정합니다.'},
+ {k:'facet',n:'패싯',s:'facet_*()',fn:'facet_wrap(~ am)\nfacet_grid(rows = vars(am), cols = vars(vs))',d:'범주별로 데이터를 나눠 같은 축의 작은 그림 여러 장을 그립니다. 패널 위의 이름표가 strip입니다.'},
+ {k:'guide',n:'가이드',s:'guides()',fn:'guides(colour = guide_legend(nrow = 1))',d:'척도를 읽는 법을 알려주는 범례와 축입니다. 척도가 만들고 guides()로 모양을 조정합니다.'},
+ {k:'labs',n:'레이블',s:'labs()',fn:'labs(title = "...", subtitle = "...",\n     x = "...", y = "...",\n     colour = "실린더", caption = "...")',d:'제목, 부제, 축 제목, 범례 제목, 캡션입니다. 범례 제목은 매핑한 aes 이름(colour)으로 지정합니다.'},
+ {k:'theme',n:'테마',s:'theme()',fn:'theme_grey() +\ntheme(panel.grid.minor = element_blank())',d:'데이터와 무관한 모든 시각 요소: 배경, 격자, 글꼴, 여백, 범례 위치. 03장에서 자세히 봅니다.'}
+];
+const svgA=document.getElementById('svgAnatomy');
+function drawAnatomy(){render(svgA,{theme:TH.grey,color:true,point:true,smooth:true,facet:true,labs:true});}
+const cl=document.getElementById('compList');
+COMP.forEach(c=>{const b=document.createElement('button');b.className='chip';b.type='button';b.setAttribute('aria-pressed','false');b.dataset.k=c.k;b.innerHTML=`${c.n}<small>${c.s}</small>`;cl.appendChild(b);});
+function pickComp(k){const c=COMP.find(x=>x.k===k);cl.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));
+  applyHL(svgA,'c',k);const d=document.getElementById('compDetail');
+  d.innerHTML=`<div class="t">${c.n} <span class="badge">${c.s}</span></div><p>${c.d}</p><div class="codebox"><pre class="code"></pre></div>`;
+  const pre=d.querySelector('pre');pre.innerHTML=hl(c.fn);}
+cl.addEventListener('click',e=>{const b=e.target.closest('.chip');if(b)pickComp(b.dataset.k);});
+
+/* ---------- 02 builder ---------- */
+const B={color:true,point:true,smooth:false,facet:false,coord:false,labs:false,legendBottom:false,palette:'hue',theme:'grey'};
+const svgB=document.getElementById('svgBuild');
+function drawBuild(){
+  const th=Object.assign({},TH[B.theme]);if(B.legendBottom)th.legendPos='bottom';
+  render(svgB,{theme:th,color:B.color,point:B.point,smooth:B.smooth,facet:B.facet,ylim:B.coord,labs:B.labs,palette:B.color?B.palette:'hue'});
+  const L=[];L.push(`ggplot(mtcars, aes(x = wt, y = mpg${B.color?', colour = factor(cyl)':''}))`);
+  if(B.point)L.push('  geom_point(size = 2)');
+  if(B.smooth)L.push('  geom_smooth(method = "lm")');
+  if(B.color&&B.palette!=='hue')L.push(`  scale_colour_brewer(palette = "${B.palette}")`);
+  if(B.facet)L.push('  facet_wrap(~ am, labeller = as_labeller(\n    c(`0` = "자동 변속", `1` = "수동 변속")))');
+  if(B.coord)L.push('  coord_cartesian(ylim = c(10, 30))');
+  if(B.labs)L.push('  labs(\n    title = "무게가 늘수록 연비는 떨어진다",\n    subtitle = "1974 Motor Trend 자동차 32종",\n    x = "무게 (1,000 lbs)", y = "연비 (mpg)",\n    colour = "실린더", caption = "자료: mtcars (R datasets)"\n  )');
+  if(B.theme!=='grey')L.push(`  theme_${B.theme}()`);
+  if(B.legendBottom)L.push('  theme(legend.position = "bottom")');
+  setCode('bCode',L.join(' +\n'));
+  const notes=[];
+  if(!B.point&&!B.smooth)notes.push('geom이 없으면 ggplot()은 척도와 좌표계만 있는 빈 패널을 그립니다.');
+  if(B.smooth&&B.color)notes.push('colour를 매핑하면 데이터가 실린더별로 묶여(group) 회귀선이 세 개가 됩니다.');
+  if(B.smooth&&B.facet&&B.color)notes.push('수동 변속 8기통은 2대뿐이라 신뢰대를 계산할 수 없습니다. R에서도 경고가 납니다.');
+  if(B.coord)notes.push('coord_cartesian()은 데이터를 지우지 않고 화면만 확대합니다. 회귀선은 전체 데이터로 계산됩니다.');
+  if(B.labs)notes.push('한글 레이블을 R에서 그리려면 06장의 글꼴 설정이 필요합니다.');
+  if(B.legendBottom&&B.theme!=='grey')notes.push('theme()은 완성 테마 뒤에 와야 합니다. 순서를 바꾸면 theme_*()가 설정을 덮어씁니다.');
+  document.getElementById('bNote').textContent=notes.join(' ');
+}
+document.querySelectorAll('#build .tog[data-b]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.b;B[k]=!B[k];b.setAttribute('aria-pressed',B[k]);drawBuild();}));
+document.getElementById('bPal').addEventListener('change',e=>{B.palette=e.target.value;if(!B.color){B.color=true;document.querySelector('[data-b="color"]').setAttribute('aria-pressed','true');}drawBuild();});
+document.getElementById('bTheme').addEventListener('change',e=>{B.theme=e.target.value;drawBuild();});
+
+/* ---------- 03 theme tree ---------- */
+const TREE=[
+ ['line',[['axis.line',[['axis.line.x'],['axis.line.y']]],['axis.ticks',[['axis.ticks.x'],['axis.ticks.y']]],['panel.grid',[['panel.grid.major',[['panel.grid.major.x'],['panel.grid.major.y']]],['panel.grid.minor',[['panel.grid.minor.x'],['panel.grid.minor.y']]]]]]],
+ ['rect',[['plot.background'],['panel.background'],['panel.border'],['strip.background'],['legend.background'],['legend.key']]],
+ ['text',[['title',[['plot.title'],['plot.subtitle'],['plot.caption'],['axis.title',[['axis.title.x'],['axis.title.y']]],['legend.title']]],['axis.text',[['axis.text.x'],['axis.text.y']]],['legend.text'],['strip.text']]]
+];
+const TINFO={
+ line:['element_line','모든 선 요소의 뿌리입니다. 여기서 colour나 linewidth를 바꾸면 축선·눈금·격자에 모두 상속됩니다.','theme(line = element_line(colour = "grey40"))'],
+ rect:['element_rect','모든 사각형 요소의 뿌리입니다. 배경, 테두리, 범례 키, strip 배경이 상속받습니다.','theme(rect = element_rect(fill = "transparent"))'],
+ text:['element_text','모든 글자의 뿌리입니다. 한글 글꼴을 한 번에 지정할 때 씁니다.','theme(text = element_text(family = "nanum", size = 12))'],
+ title:['element_text','그림 제목, 축 제목, 범례 제목을 묶는 중간 요소입니다. 눈금 레이블(axis.text)은 포함하지 않습니다.','theme(title = element_text(face = "bold"))'],
+ 'axis.line':['element_line','x·y 축선. theme_grey()와 theme_minimal()에서는 element_blank()입니다.','theme(axis.line = element_line(colour = "grey20"))'],
+ 'axis.ticks':['element_line','눈금 표시. 길이는 별도 인수 axis.ticks.length(unit)로 정합니다.','theme(axis.ticks.length = unit(-3, "pt"))'],
+ 'panel.grid':['element_line','패널 격자 전체.','theme(panel.grid = element_line(colour = "grey90"))'],
+ 'panel.grid.major':['element_line','눈금 위치(breaks)에 그어지는 주 격자.','theme(panel.grid.major = element_line(linewidth = 0.3))'],
+ 'panel.grid.minor':['element_line','눈금 사이(minor_breaks)의 보조 격자. 지우는 경우가 많습니다.','theme(panel.grid.minor = element_blank())'],
+ 'plot.background':['element_rect','그림 전체 배경.','theme(plot.background = element_rect(fill = "white", colour = NA))'],
+ 'panel.background':['element_rect','데이터가 그려지는 패널의 배경. theme_grey()의 회색이 여기입니다.','theme(panel.background = element_rect(fill = "grey97"))'],
+ 'panel.border':['element_rect','패널 테두리. 데이터 위에 그려지므로 fill = NA로 둡니다.','theme(panel.border = element_rect(fill = NA, colour = "grey30"))'],
+ 'strip.background':['element_rect','facet 이름표의 배경.','theme(strip.background = element_rect(fill = "grey20"))'],
+ 'legend.background':['element_rect','범례 전체 배경.','theme(legend.background = element_rect(fill = NA))'],
+ 'legend.key':['element_rect','범례 기호 뒤의 작은 사각형.','theme(legend.key = element_blank())'],
+ 'plot.title':['element_text','그림 제목. 위치 기준은 plot.title.position으로 정합니다.','theme(plot.title = element_text(face = "bold", size = rel(1.3)))'],
+ 'plot.subtitle':['element_text','부제.','theme(plot.subtitle = element_text(colour = "grey40"))'],
+ 'plot.caption':['element_text','캡션. 기본 오른쪽 정렬(hjust = 1)입니다.','theme(plot.caption = element_text(hjust = 0))'],
+ 'axis.title':['element_text','축 제목.','theme(axis.title = element_text(size = rel(0.9)))'],
+ 'legend.title':['element_text','범례 제목.','theme(legend.title = element_blank())'],
+ 'axis.text':['element_text','눈금 레이블. title이 아니라 text에서 바로 상속합니다.','theme(axis.text = element_text(colour = "black"))'],
+ 'legend.text':['element_text','범례 항목 글자.','theme(legend.text = element_text(size = rel(0.9)))'],
+ 'strip.text':['element_text','facet 이름표 글자.','theme(strip.text = element_text(face = "bold", hjust = 0))']
+};
+function treeHTML(nodes,root){return '<ul>'+nodes.map(n=>`<li><button type="button" class="node${root?' root':''}" data-n="${n[0]}" aria-pressed="false">${n[0]}</button>${n[1]?treeHTML(n[1],false):''}</li>`).join('')+'</ul>';}
+const treeEl=document.getElementById('tree');treeEl.innerHTML=treeHTML(TREE,true);
+const svgT=document.getElementById('svgTree');let treeSel='panel.grid';
+const TNAME={grey:'theme_grey()',bw:'theme_bw()',classic:'theme_classic()',minimal:'theme_minimal()'};
+function drawTree(){const k=document.getElementById('tBase').value;document.getElementById('treeTag').textContent=TNAME[k];
+  render(svgT,{theme:TH[k],color:true,point:true,smooth:false,facet:true,labs:true});pickNode(treeSel);}
+function pickNode(n){treeSel=n;treeEl.querySelectorAll('.node').forEach(b=>b.setAttribute('aria-pressed',b.dataset.n===n));
+  const cnt=applyHL(svgT,'el',n);const parts=n.split('.');
+  let info=TINFO[n];if(!info){const par=parts.slice(0,-1).join('.');const pi=TINFO[par]||['',''];info=[pi[0],`${par}의 ${parts[parts.length-1]} 방향 요소. 지정하지 않으면 ${par}에서 상속합니다.`,`theme(${n} = ${pi[0]}(${pi[0]==='element_text'?'angle = 45, hjust = 1':'colour = "grey70"'}))`];}
+  const d=document.getElementById('treeDetail');
+  d.innerHTML=`<div class="t">${n} <span class="badge">${info[0]}()</span></div><p>${info[1]}</p>${cnt===0?'<p class="warn">현재 테마에서는 element_blank()이거나 그려지지 않는 요소입니다.</p>':''}<div class="codebox"><pre class="code"></pre></div>`;
+  d.querySelector('pre').innerHTML=hl(info[2]);}
+treeEl.addEventListener('click',e=>{const b=e.target.closest('.node');if(b)pickNode(b.dataset.n);});
+document.getElementById('tBase').addEventListener('change',drawTree);
+
+/* ---------- 04 gallery ---------- */
+const GAL=[
+ {pkg:'ggplot2 내장',items:[
+  ['grey','theme_grey()','기본 테마. 회색 패널과 흰 격자는 데이터를 배경보다 앞에 두려는 설계입니다.'],
+  ['bw','theme_bw()','흰 패널에 테두리. 인쇄용 논문 그림에 무난합니다.'],
+  ['minimal','theme_minimal()','배경과 테두리를 걷어낸 최소 구성.'],
+  ['classic','theme_classic()','격자 없이 축선만. 전통적인 학술 그래프 모양.'],
+  ['light','theme_light()','옅은 회색 테두리와 격자.'],
+  ['dark','theme_dark()','어두운 패널. 밝은 색 데이터를 강조할 때.'],
+  ['linedraw','theme_linedraw()','검은 가는 선만으로 구성.'],
+  ['void','theme_void()','축과 격자까지 모두 제거. 지도나 다이어그램용.']]},
+ {pkg:'ggthemes',lib:'ggthemes',items:[
+  ['economist','theme_economist()','The Economist 지면 스타일. 하늘빛 배경과 가로 격자.'],
+  ['fte','theme_fivethirtyeight()','FiveThirtyEight 스타일. 축 제목을 숨기고 범례를 아래에 둡니다.'],
+  ['tufte','theme_tufte()','Tufte의 data-ink 원칙. 비데이터 잉크를 최소화하고 세리프 글꼴을 씁니다.'],
+  ['wsj','theme_wsj()','Wall Street Journal 스타일. 점선 가로 격자.']]},
+ {pkg:'기타 패키지',items:[
+  ['ipsum','hrbrthemes::theme_ipsum()','타이포그래피 중심. 큰 굵은 제목, 축 제목을 끝에 정렬. 기본 글꼴은 Arial Narrow입니다.','hrbrthemes'],
+  ['cowplot','cowplot::theme_cowplot()','출판용 깔끔한 축. 기본 base_size 14. 여러 그림 배치(plot_grid)와 함께 씁니다.','cowplot'],
+  ['pubr','ggpubr::theme_pubr()','논문 투고용. 축선과 상단 범례.','ggpubr'],
+  ['prism','ggprism::theme_prism()','GraphPad Prism 모양. 굵은 축선과 굵은 글자.','ggprism'],
+  ['bbc','bbplot::bbc_style()','BBC 그래픽 스타일. 축 제목 없이 큰 제목, 가로 격자. GitHub에서 설치합니다.','bbplot']]}
+];
+const galEl=document.getElementById('gallery');const svgG=document.getElementById('svgGal');
+GAL.forEach(g=>{const d=document.createElement('div');d.className='galgrp';d.innerHTML=`<div class="pkg">${g.pkg}</div><div class="row">${g.items.map(i=>`<button type="button" class="tog" data-g="${i[0]}" aria-pressed="false">${i[1].replace(/^\w+::/,'')}</button>`).join('')}</div>`;galEl.appendChild(d);});
+function pickGal(k){let item,grp;GAL.forEach(g=>g.items.forEach(i=>{if(i[0]===k){item=i;grp=g;}}));
+  galEl.querySelectorAll('[data-g]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.g===k));
+  render(svgG,{theme:TH[k],color:true,point:true,smooth:true,labs:true});
+  document.getElementById('galTag').textContent=item[1];
+  document.getElementById('galNote').textContent=grp.pkg==='ggplot2 내장'?'ggplot2 내장 테마':'근사 재현 · 실제 글꼴·간격은 다를 수 있음';
+  const lib=item[3]||grp.lib;const fn=item[1].replace(/^\w+::/,'');
+  let code='';
+  if(lib==='bbplot')code='# install.packages("devtools")\ndevtools::install_github("bbc/bbplot")\nlibrary(bbplot)\n\n';
+  else if(lib)code=`install.packages("${lib}")\nlibrary(${lib})\n\n`;
+  code+='p <- ggplot(mtcars, aes(wt, mpg, colour = factor(cyl))) +\n  geom_point(size = 2) +\n  geom_smooth(method = "lm")\n\n'+`p + ${fn}`;
+  if(k==='economist')code+=' + scale_colour_economist()';
+  if(k==='fte'||k==='wsj')code+=`  # 축 제목이 필요하면 + theme(axis.title = element_text())`;
+  setCode('galCode',code);
+  document.getElementById('galDetail').innerHTML=`<div class="t">${item[1]}</div><p>${item[2]}</p><p class="note">모든 완성 테마는 <code>base_size</code>와 <code>base_family</code>를 받습니다. 한글 그림이라면 <code>${fn.replace(')','base_family = "nanum")')}</code>처럼 글꼴을 넘기세요.</p>`;
+}
+galEl.addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(b)pickGal(b.dataset.g);});
+
+/* ---------- 05 custom ---------- */
+const C={base:'minimal',size:11,bold:false,titlePlot:false,center:false,leg:'right',noMinor:false,noMajX:false,axisLine:false,angle:0,fill:'default'};
+const FILLS=[['default','기본값'],['#FFFFFF','white'],['#F4F6FA','#F4F6FA'],['#FBF7EF','#FBF7EF'],['#E8EEF3','#E8EEF3']];
+const fillEl=document.getElementById('cFill');
+FILLS.forEach(f=>{const b=document.createElement('button');b.type='button';b.className='sw';b.dataset.f=f[0];b.title=f[1];b.setAttribute('aria-label','panel.background '+f[1]);b.setAttribute('aria-pressed',f[0]==='default');
+  b.style.background=f[0]==='default'?'repeating-linear-gradient(45deg,#ddd 0 4px,#fff 4px 8px)':f[0];fillEl.appendChild(b);});
+const svgC=document.getElementById('svgCustom');
+function drawCustom(){
+  const t=Object.assign({},TH[C.base]);t.base=C.size;
+  if(C.bold)t.titleFace=700; if(C.titlePlot)t.titlePos='plot'; if(C.center)t.titleHjust=.5;
+  t.legendPos=C.leg; if(C.noMinor){t.gMinX=null;t.gMinY=null;} if(C.noMajX)t.gMajX=null;
+  if(C.axisLine){t.axLineX='#333333';t.axLineY='#333333';} t.angle=C.angle;
+  if(C.fill!=='default')t.panelBg=C.fill;
+  render(svgC,{theme:t,color:true,point:true,smooth:false,labs:true});
+  const a=[];
+  if(C.bold||C.center){const p=[];if(C.bold)p.push('face = "bold"');if(C.center)p.push('hjust = 0.5');a.push(`plot.title = element_text(${p.join(', ')})`);}
+  if(C.titlePlot)a.push('plot.title.position = "plot"');
+  if(C.leg!=='right')a.push(`legend.position = "${C.leg}"`);
+  if(C.noMinor)a.push('panel.grid.minor = element_blank()');
+  if(C.noMajX)a.push('panel.grid.major.x = element_blank()');
+  if(C.axisLine)a.push('axis.line = element_line(colour = "grey20")');
+  if(C.angle)a.push(`axis.text.x = element_text(angle = ${C.angle}, hjust = 1${C.angle===90?', vjust = 0.5':''})`);
+  if(C.fill!=='default')a.push(`panel.background = element_rect(fill = "${C.fill==='#FFFFFF'?'white':C.fill}", colour = NA)`);
+  let code=`p +\n  theme_${C.base}(${C.size!==11?`base_size = ${C.size}`:''})`;
+  if(a.length)code+=' +\n  theme(\n    '+a.join(',\n    ')+'\n  )';
+  setCode('cCode',code);
+}
+document.querySelectorAll('#custom .tog[data-c]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.c;C[k]=!C[k];b.setAttribute('aria-pressed',C[k]);drawCustom();}));
+document.getElementById('cBase').addEventListener('change',e=>{C.base=e.target.value;drawCustom();});
+document.getElementById('cSize').addEventListener('input',e=>{C.size=+e.target.value;document.getElementById('cSizeV').textContent=C.size;drawCustom();});
+document.getElementById('cLeg').addEventListener('change',e=>{C.leg=e.target.value;drawCustom();});
+document.getElementById('cAngle').addEventListener('change',e=>{C.angle=+e.target.value;drawCustom();});
+fillEl.addEventListener('click',e=>{const b=e.target.closest('.sw');if(!b)return;C.fill=b.dataset.f;fillEl.querySelectorAll('.sw').forEach(x=>x.setAttribute('aria-pressed',x===b));drawCustom();});
+
+/* ---------- 06 showtext ---------- */
+const SF={nanum:['Nanum Gothic','nanum'],noto:['Noto Sans KR','notosans'],myeongjo:['Nanum Myeongjo','myeongjo'],gowun:['Gowun Dodum','gowun'],blackhan:['Black Han Sans','blackhan']};
+const ST={auto:true,dpi:true,gfam:true,font:'nanum'};
+const svgS=document.getElementById('svgShow');
+function drawShow(){
+  const f=SF[ST.font];const fam=FONT[ST.font];
+  render(svgS,{theme:TH.minimal,family:fam,color:true,point:true,labs:true,annot:true,annotFamily:ST.gfam?fam:FONT.fallback,tofu:!ST.auto,fontScale:ST.auto&&!ST.dpi?96/300:1});
+  const code=`library(ggplot2)
+library(showtext)                     # sysfonts·showtextdb 함께 로드
+
+${ST.auto?'':'# '}font_add_google("${f[0]}", family = "${f[1]}")
+${ST.auto?'':'# '}showtext_auto()                       # 이후 모든 장치에 적용
+${ST.dpi?'':'# '}showtext_opts(dpi = 300)              # ggsave의 dpi와 맞춤
+
+p <- ggplot(mtcars, aes(wt, mpg, colour = factor(cyl))) +
+  geom_point(size = 2) +
+  geom_text(data = lbl, aes(label = name)${ST.gfam?`,\n            family = "${f[1]}"`:''}, colour = "grey15") +
+  labs(title = "무게가 늘수록 연비는 떨어진다", colour = "실린더") +
+  theme_minimal(base_family = "${f[1]}")
+
+ggsave("fig.png", p, width = 7, height = 4.5, dpi = 300)`;
+  setCode('sCode',code);
+  let msg;
+  if(!ST.auto)msg='showtext 없이 한글 글꼴이 없는 장치에서 저장하면 한글이 □로 바뀝니다. 숫자와 영문만 살아남습니다.';
+  else if(!ST.dpi)msg='showtext는 기본 96 dpi로 글자 크기를 계산합니다. 300 dpi로 저장하면 글자가 약 1/3 크기로 줄어듭니다.';
+  else if(!ST.gfam)msg='theme의 base_family는 geom_text()에 전달되지 않습니다. 점 레이블만 기본 글꼴로 그려졌습니다.';
+  else msg=`글꼴 등록 → showtext_auto() → dpi 맞춤 → theme과 geom_text 모두 family 지정. 네 단계가 모두 갖춰진 상태입니다. ${f[0]}의 R 내 이름은 "${f[1]}"입니다.`;
+  document.getElementById('sNote').textContent=msg;
+}
+document.querySelectorAll('#showtext .tog[data-s]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.s;ST[k]=!ST[k];b.setAttribute('aria-pressed',ST[k]);drawShow();}));
+document.getElementById('sFont').addEventListener('change',e=>{ST.font=e.target.value;drawShow();});
+
+/* ---------- init ---------- */
+function all(){drawAnatomy();pickComp(document.querySelector('#compList .chip[aria-pressed="true"]')?.dataset.k||'aes');drawBuild();drawTree();
+  pickGal(document.querySelector('#gallery [aria-pressed="true"]')?.dataset.g||'grey');drawCustom();drawShow();}
+all();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(all);
+</script>
+
+</body></html>

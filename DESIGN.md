@@ -183,7 +183,7 @@
 | 조각 | `.tag`, `.readout`(`.math`), `.metrics`, `.legend`, `.nav` |
 | 입력 | `.btn`(`.ghost`), `.controls`, `input[type=range]` |
 | 표·기타 | `table`/`th`/`td`/`td.n`, `details`, `pre`, `ol.refs` |
-| 코드 | 코드 상자 `.cb`(`.r` R, `.py` Python, 없으면 출력·셸) + 언어 이름표 `.lang` + 복사 버튼 `button.copy`(붙이는 스크립트는 쪽마다), 폴더 구조 `pre.tree` |
+| 코드 | 코드 상자 `.cb`(`.r` R, `.py` Python, `.prompt` 코딩 에이전트 프롬프트, 없으면 출력·셸) + 언어 이름표 `.lang` + 복사 버튼 `button.copy`(붙이는 스크립트는 쪽마다), 폴더 구조 `pre.tree` |
 | 그림 | 화면 갈무리 `figure.shot`(`img` + `figcaption`). 작은 대화상자 그림은 `.shot.natural`로 원래 크기를 유지 |
 | 절차·키 | 단계 안에 코드 상자와 그림을 넣는 절차 목록 `ol.steps`, 키보드 키 `kbd` |
 
@@ -412,6 +412,7 @@
 | 데이터로 세상을 읽을 때 조심할 것들 | 데이터과학 · 개념정리 · 통계해석 · 표본오차 · 평균으로의회귀 · 심슨의역설 · 선택편향 |
 | R과 Python 을 이용해 세상읽기 (묶음 8쪽 공통) | 데이터과학 · 사례분석 · R · Python · 공공데이터 · 데이터전처리 · 기술통계 |
 | VS Code에서 R 실행하기 | 데이터과학 · 개념정리 · R · VSCode · 작업환경 · 코딩에이전트 |
+| ggplot 을 이용한 시각화 | 데이터과학 · 시각화 · R · ggplot2 · 레이어문법 · 테마 · 한글글꼴 |
 
 ## 수식 표기 (KaTeX)
 

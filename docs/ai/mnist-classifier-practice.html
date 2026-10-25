@@ -71,6 +71,18 @@ canvas.px{image-rendering:pixelated;display:block;background:#fff}
 .kgrid{display:grid;grid-template-columns:repeat(3,48px);gap:3px}
 .kgrid div{height:48px;display:grid;place-items:center;border-radius:4px;font-family:var(--mono);font-size:12.5px;font-weight:600}
 
+/* 최대 풀링 그림 */
+.pool-view{display:flex;flex-wrap:wrap;gap:14px 18px;align-items:center}
+.pool-view figure{margin:0;display:flex;flex-direction:column;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.pool-view #pl-in{width:120px;height:120px;border:1px solid var(--line)}
+.pool-view #pl-fm,.pool-view #pl-out{width:min(208px,38vw);height:auto;aspect-ratio:1;border:1px solid var(--line);cursor:pointer;image-rendering:pixelated}
+.pool-view .op{font-size:22px;color:var(--muted)}
+.pgrid{display:grid;grid-template-columns:repeat(2,52px);gap:3px}
+.pgrid div{height:52px;display:grid;place-items:center;border-radius:4px;font-family:var(--mono);font-size:13px;border:2px solid transparent}
+.pgrid div.max{border-color:var(--pos);font-weight:700}
+.pool-ctl{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.pool-ctl input{max-width:260px}
+
 /* 숫자별 장 수 막대 */
 .countbars{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px;align-items:end;height:120px}
 .countbars div{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;height:100%;
@@ -355,15 +367,46 @@ opt = torch.optim.SGD(model.parameters(), lr=0.1)    # 옵티마이저: 경사�
   </div>
   <p class="note">필터 칸의 <span style="color:var(--pos);font-weight:700">주황</span>은 양수, <span style="color:var(--neg);font-weight:700">파랑</span>은 음수다. 특징 맵은 진할수록 그 자리에서 필터의 무늬와 많이 닮았다는 뜻이고, 음수는 0으로 바꿨다(ReLU). 필터가 가장자리 한 칸을 넘지 못하므로 28 − 3 + 1 = 26칸이 된다. </p>
   <p id="filter-msg"></p>
-  <h3>풀링과 모양 따라가기</h3>
-  <p><strong>최대 풀링</strong>(max pooling)은 특징 맵을 2 × 2칸씩 묶어 가장 큰 값만 남긴다. 크기는 절반이 되고, 무늬가 한 칸쯤 밀려도 결과가 비슷해진다. 합성곱과 풀링을 두 번 거친 뒤 마지막에만 펼쳐서 점수 10개를 낸다.</p>
+  <h3 id="pooling">풀링 — 특징 맵을 2 × 2씩 요약한다</h3>
+  <p>합성곱 뒤에는 대개 <strong>풀링</strong>(pooling) 층이 온다. 이 실습에서 쓰는 <strong>최대 풀링</strong>(max pooling)은 특징 맵을 겹치지 않는 2 × 2칸 묶음으로 나누고, 묶음마다 <strong>가장 큰 값 하나만</strong> 남긴다. 26 × 26 특징 맵이 13 × 13이 된다. 정해진 규칙대로 계산할 뿐이라 학습할 가중치가 없다(파라미터 0개).</p>
+  <p>아래는 위에서 고른 숫자와 필터의 특징 맵에 실제로 최대 풀링을 한 것이다. 풀링 결과나 특징 맵의 칸을 누르면, 그 값이 어느 2 × 2 묶음에서 왔는지 보인다. 입력을 옆으로 밀어 보며 특징 맵과 풀링 결과가 얼마나 달라지는지도 견줘 보자.</p>
+  <div class="pool-view">
+    <figure><canvas class="px" id="pl-in" width="28" height="28"></canvas><figcaption>입력 · 오른쪽으로 <b class="mono" id="pl-dxv">0</b>칸</figcaption></figure>
+    <span class="op" aria-hidden="true">→</span>
+    <figure><canvas id="pl-fm" width="208" height="208" aria-label="특징 맵 26 × 26, 누르면 2 × 2 묶음을 고른다"></canvas><figcaption>특징 맵 26 × 26</figcaption></figure>
+    <span class="op" aria-hidden="true">→</span>
+    <figure><canvas id="pl-out" width="208" height="208" aria-label="최대 풀링 결과 13 × 13, 누르면 칸을 고른다"></canvas><figcaption>최대 풀링 13 × 13</figcaption></figure>
+    <figure><div class="pgrid" id="pl-block"></div><figcaption id="pl-blockcap">고른 2 × 2 묶음</figcaption></figure>
+  </div>
+  <div class="pool-ctl">
+    <label for="pl-dx" class="note">입력을 오른쪽으로 민 칸 수 <b class="mono" id="pl-dxv2">0</b></label>
+    <input type="range" id="pl-dx" min="0" max="2" value="0" step="1">
+  </div>
+  <div class="metrics">
+    <div><span>특징 맵의 닮음 (밀기 전과 비교)</span><b id="pl-sim-fm">—</b></div>
+    <div><span>풀링 결과의 닮음 (밀기 전과 비교)</span><b id="pl-sim-pl">—</b></div>
+    <div><span>숫자 10개 × 필터 16개 조합 중 풀링 쪽이 더 닮은 경우 (반응이 없는 조합은 뺐다)</span><b id="pl-win">—</b></div>
+  </div>
+  <p class="note">닮음은 밀기 전과 민 뒤의 그림을 같은 자리끼리 견준 값(코사인 유사도, cosine similarity)이다. 1이면 무늬가 똑같고, 0이면 전혀 겹치지 않는다.</p>
+  <p id="pool-msg"></p>
+  <h4>왜 풀링을 쓰나</h4>
+  <table>
+    <tr><th>까닭</th><th>이 실습의 모형 ②에서</th></tr>
+    <tr><td>계산과 파라미터를 줄인다</td><td>풀링이 없으면 두 번째 합성곱 뒤의 특징 맵이 32 × 24 × 24 = 18,432칸이 되고, 마지막 선형 층의 파라미터가 18,432 × 10 + 10 = <strong>184,330개</strong>로 늘어난다. 풀링을 두 번 하면 32 × 5 × 5 = 800칸, 파라미터 <strong>8,010개</strong>다. 두 번째 합성곱이 필터를 대는 자리도 24 × 24 = 576곳에서 11 × 11 = 121곳으로 줄어든다.</td></tr>
+    <tr><td>조금 밀린 것에 덜 흔들린다</td><td>2 × 2 묶음 안에서 가장 큰 값이 어느 칸에 있든 남는 값은 같다. 위 그림에서 입력을 한 칸 밀면 특징 맵보다 풀링 결과가 밀기 전과 더 닮게 남는다. 다만 <strong>완전히 같아지지는 않는다</strong>. 07에서 모형 ②도 여러 칸 민 사진에서는 무너진 까닭이다.</td></tr>
+    <tr><td>다음 층이 더 넓게 본다</td><td>첫 합성곱의 필터 한 번은 입력의 3 × 3칸을 본다. 풀링 뒤 두 번째 합성곱의 3 × 3 필터는 입력의 <strong>8 × 8칸</strong>을 보게 된다(풀링이 없으면 5 × 5). 한 칸이 원래 사진에서 보는 범위를 수용 영역(receptive field)이라 한다. 그래서 두 번째 합성곱은 획 조각이 아니라 획을 조합한 더 큰 모양을 찾을 수 있다.</td></tr>
+    <tr><td>대신 버리는 것</td><td>2 × 2 묶음 안에서 무늬가 <strong>정확히 어느 칸</strong>에 있었는지, 그리고 가장 크지 않은 나머지 세 값이다. 숫자 분류처럼 "그 무늬가 근처에 있는가"만 중요할 때는 괜찮지만, 위치가 중요한 문제에서는 손해가 된다.</td></tr>
+  </table>
+  <p class="note">최대 대신 네 값의 평균을 남기는 평균 풀링(average pooling)도 있다. 무늬를 찾는 합성곱 뒤에는 "가장 강하게 반응한 곳이 있는가"를 남기는 최대 풀링을 흔히 쓴다. 풀링 대신 필터를 두 칸씩 건너뛰며 대는 합성곱(보폭 stride 2)으로 크기를 줄이는 모형도 있다.</p>
+  <h3>모양 따라가기</h3>
+  <p>모형 ②는 합성곱과 풀링을 두 번 거친 뒤 마지막에만 펼쳐서 점수 10개를 낸다. 층을 지날 때마다 모양과 파라미터 개수가 어떻게 바뀌는지 따라가 보자.</p>
   <table>
     <tr><th>층</th><th>나오는 모양</th><th>파라미터</th><th>하는 일</th></tr>
     <tr><td>입력</td><td><code>1 × 28 × 28</code></td><td class="n">—</td><td>흑백 사진 한 장</td></tr>
     <tr><td>합성곱 3 × 3, 필터 16개 + ReLU</td><td><code>16 × 26 × 26</code></td><td class="n">1 × 16 × 9 + 16 = 160</td><td>획의 가장자리 같은 작은 무늬를 찾는다</td></tr>
-    <tr><td>최대 풀링 2 × 2</td><td><code>16 × 13 × 13</code></td><td class="n">0</td><td>크기를 절반으로 줄인다</td></tr>
+    <tr><td>최대 풀링 2 × 2</td><td><code>16 × 13 × 13</code></td><td class="n">0</td><td>2 × 2마다 가장 큰 값만 남겨 크기를 절반으로 줄인다</td></tr>
     <tr><td>합성곱 3 × 3, 필터 32개 + ReLU</td><td><code>32 × 11 × 11</code></td><td class="n">16 × 32 × 9 + 32 = 4,640</td><td>작은 무늬를 조합한 더 큰 모양을 찾는다</td></tr>
-    <tr><td>최대 풀링 2 × 2</td><td><code>32 × 5 × 5</code></td><td class="n">0</td><td>11을 2로 나눈 몫이 5다</td></tr>
+    <tr><td>최대 풀링 2 × 2</td><td><code>32 × 5 × 5</code></td><td class="n">0</td><td>11을 2로 나눈 몫이 5다. 남는 한 줄은 버린다</td></tr>
     <tr><td>펼치기 (flatten)</td><td><code>800</code></td><td class="n">0</td><td>32 × 5 × 5 = 800</td></tr>
     <tr><td>선형 층 (linear layer, 완전연결 층)</td><td><code>10</code></td><td class="n">800 × 10 + 10 = 8,010</td><td>숫자 0~9의 점수</td></tr>
     <tr><td><strong>합계</strong></td><td></td><td class="n"><strong>12,810</strong></td><td>모형 ①(50,890개)의 약 4분의 1</td></tr>
@@ -655,6 +698,7 @@ function drawConv(){
   var c=$("cv-out").getContext("2d"),img=c.createImageData(26,26);
   for(var k=0;k<676;k++){var a=r.max?r.out[k]/r.max:0;for(var ch=0;ch<3;ch++)img.data[4*k+ch]=Math.round(255+(ACC[ch]-255)*a);img.data[4*k+3]=255;}
   c.putImageData(img,0,0);
+  PL.sel=-1;drawPool();
   [["cv-digits",CV.d],["cv-filters",CV.f]].forEach(function(p){Array.prototype.forEach.call($(p[0]).children,function(b,i){b.setAttribute("aria-pressed",String(i===p[1]));});});
 }
 D.picks.forEach(function(p,i){var b=document.createElement("button");b.type="button";b.setAttribute("aria-label","숫자 "+p.y);
@@ -663,6 +707,66 @@ D.picks.forEach(function(p,i){var b=document.createElement("button");b.type="but
 FW.forEach(function(f,i){var b=document.createElement("button");b.type="button";b.setAttribute("aria-label","필터 "+(i+1)+"번");
   var cv=document.createElement("canvas");cv.width=cv.height=3;cv.className="px";drawFilterThumb(cv,f);b.appendChild(cv);b.appendChild(document.createTextNode(i+1));
   b.addEventListener("click",function(){CV.f=i;drawConv();});$("cv-filters").appendChild(b);});
+/* ---------- 05 최대 풀링 ---------- */
+var PL={dx:0,sel:-1,cache:{}};
+function shiftPx(px,dx){var o=new Uint8Array(784);for(var y=0;y<28;y++)for(var x=dx;x<28;x++)o[y*28+x]=px[y*28+x-dx];return o;}
+/* 26 × 26 특징 맵을 2 × 2씩 묶어 가장 큰 값을 남긴다. arg 는 그 값이 나온 특징 맵 칸 */
+function maxPool(m){var out=new Float32Array(169),arg=new Int16Array(169);
+  for(var y=0;y<13;y++)for(var x=0;x<13;x++){var best=-1,bi=0;
+    for(var j=0;j<2;j++)for(var i=0;i<2;i++){var k=(2*y+j)*26+2*x+i;if(m[k]>best){best=m[k];bi=k;}}
+    out[y*13+x]=best;arg[y*13+x]=bi;}
+  return {out:out,arg:arg};}
+function cosSim(a,b){var s=0,na=0,nb=0;for(var i=0;i<a.length;i++){s+=a[i]*b[i];na+=a[i]*a[i];nb+=b[i]*b[i];}return na&&nb?s/Math.sqrt(na*nb):null;}
+/* 숫자 10개 × 필터 16개 모두에서, dx칸 민 뒤의 닮음을 특징 맵과 풀링 결과로 견준다(한 번만 계산) */
+function poolSummary(dx){
+  if(PL.cache[dx])return PL.cache[dx];
+  var win=0,tot=0,sf=0,sp=0;
+  D.picks.forEach(function(p){var a=pixels(p.px),b=shiftPx(a,dx);
+    FW.forEach(function(f,i){var m1=conv(a,f,FB[i]).out,m2=conv(b,f,FB[i]).out,cf=cosSim(m1,m2),cp=cosSim(maxPool(m1).out,maxPool(m2).out);
+      if(cf==null||cp==null)return;tot++;sf+=cf;sp+=cp;if(cp>cf)win++;});});
+  return (PL.cache[dx]={win:win,tot:tot,fm:sf/tot,pl:sp/tot});}
+function drawPool(){
+  var px=pixels(D.picks[CV.d].px),f=FW[CV.f],b=FB[CV.f];
+  var base=conv(px,f,b),pin=shiftPx(px,PL.dx),cur=conv(pin,f,b),pb=maxPool(base.out),pc=maxPool(cur.out);
+  var scale=base.max||cur.max||1;
+  if(PL.sel<0){var bi=0;for(var k=1;k<169;k++)if(pc.out[k]>pc.out[bi])bi=k;PL.sel=bi;}
+  drawDigit($("pl-in"),px,PL.dx);
+  $("pl-dxv").textContent=PL.dx;$("pl-dxv2").textContent=PL.dx;
+  var col=function(v){return mix(ACC,Math.min(1,v/scale));};
+  var sy=Math.floor(PL.sel/13),sx=PL.sel%13;
+  // 특징 맵 (한 칸 = 8px)과 고른 2 × 2 묶음
+  var c=$("pl-fm").getContext("2d");
+  for(var y=0;y<26;y++)for(var x=0;x<26;x++){c.fillStyle=col(cur.out[y*26+x]);c.fillRect(x*8,y*8,8,8);}
+  c.strokeStyle=css("--line");c.lineWidth=1;
+  for(var g=0;g<=26;g+=2){c.beginPath();c.moveTo(g*8+.5,0);c.lineTo(g*8+.5,208);c.moveTo(0,g*8+.5);c.lineTo(208,g*8+.5);c.stroke();}
+  c.strokeStyle=css("--pos");c.lineWidth=3;c.strokeRect(sx*16+1.5,sy*16+1.5,13,13);
+  var am=pc.arg[PL.sel];c.fillStyle=css("--pos");c.fillRect((am%26)*8+2,Math.floor(am/26)*8+2,4,4);
+  // 풀링 결과 (한 칸 = 16px)
+  var o=$("pl-out").getContext("2d");
+  for(var k2=0;k2<169;k2++){o.fillStyle=col(pc.out[k2]);o.fillRect((k2%13)*16,Math.floor(k2/13)*16,16,16);}
+  o.strokeStyle=css("--line");o.lineWidth=1;
+  for(var g2=0;g2<=13;g2++){o.beginPath();o.moveTo(g2*16+.5,0);o.lineTo(g2*16+.5,208);o.moveTo(0,g2*16+.5);o.lineTo(208,g2*16+.5);o.stroke();}
+  o.strokeStyle=css("--pos");o.lineWidth=3;o.strokeRect(sx*16+1.5,sy*16+1.5,13,13);
+  // 고른 묶음의 네 값
+  var cells=[];for(var j=0;j<2;j++)for(var i=0;i<2;i++){var kk=(2*sy+j)*26+2*sx+i;cells.push({v:cur.out[kk],max:kk===am&&cur.out[kk]>0});}
+  $("pl-block").innerHTML=cells.map(function(q){return "<div class=\""+(q.max?"max":"")+"\" style=\"background:"+col(q.v)+"\">"+q.v.toFixed(2)+"</div>";}).join("");
+  $("pl-blockcap").textContent=pc.out[PL.sel]>0?"고른 묶음 → 남는 값 "+pc.out[PL.sel].toFixed(2):"고른 묶음 → 넷 다 0이라 0이 남는다";
+  // 닮음
+  var cf=cosSim(base.out,cur.out),cp=cosSim(pb.out,pc.out),S=poolSummary(PL.dx||1);
+  var f3=function(v){return v==null?"—":v.toFixed(3);};
+  $("pl-sim-fm").textContent=PL.dx?f3(cf):"1.000";
+  $("pl-sim-pl").textContent=PL.dx?f3(cp):"1.000";
+  $("pl-win").textContent=S.win+" / "+S.tot+(PL.dx?"":" (1칸)");
+  $("pool-msg").innerHTML=PL.dx===0
+    ? "지금은 밀지 않은 입력이다. 풀링 결과의 칸 하나는 특징 맵의 2 × 2 묶음 하나를 대표하고, 주황 점이 그 묶음에서 가장 큰 칸이다. 슬라이더로 입력을 밀어 보자. 숫자 10개 × 필터 16개 조합 가운데 반응이 있는 "+S.tot+"가지에서 한 칸 밀었을 때의 닮음은 특징 맵이 평균 <strong>"+S.fm.toFixed(3)+"</strong>, 풀링 결과가 평균 <strong>"+S.pl.toFixed(3)+"</strong>이다."
+    : "입력을 "+PL.dx+"칸 밀자 지금 고른 숫자·필터에서 특징 맵의 닮음은 <strong>"+f3(cf)+"</strong>, 풀링 결과의 닮음은 <strong>"+f3(cp)+"</strong>이다. 반응이 있는 조합 "+S.tot+"가지 전체로는 특징 맵이 평균 "+S.fm.toFixed(3)+", 풀링 결과가 평균 "+S.pl.toFixed(3)+"이고, 그중 "+S.win+"가지에서 풀링 결과가 더 닮았다. 풀링은 흔들림을 줄여 주지만 없애지는 못한다. 밀린 거리가 커질수록 풀링 결과의 닮음도 함께 떨어진다.";
+}
+function pickPool(ev,cv){var r=cv.getBoundingClientRect(),x=Math.floor((ev.clientX-r.left)/r.width*13),y=Math.floor((ev.clientY-r.top)/r.height*13);
+  if(x<0||y<0||x>12||y>12)return;PL.sel=y*13+x;drawPool();}
+$("pl-fm").addEventListener("click",function(ev){pickPool(ev,this);});
+$("pl-out").addEventListener("click",function(ev){pickPool(ev,this);});
+$("pl-dx").addEventListener("input",function(){PL.dx=+this.value;drawPool();});
+
 drawConv();
 
 /* ---------- 07 비교, 혼동행렬, 오답 ---------- */
