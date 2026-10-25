@@ -617,7 +617,7 @@ ggplot(
         <tr><td>geom</td><td><code>geom_*()</code></td><td><code>geom_point(size = 2)</code></td><td>레이어 하나 = geom 하나</td></tr>
         <tr><td>stat</td><td><code>stat_*()</code>, <code>geom_*(stat =)</code></td><td><code>stat_summary(fun = mean)</code></td><td>geom_bar는 stat_count, geom_smooth는 stat_smooth</td></tr>
         <tr><td>position</td><td><code>position_*()</code></td><td><code>geom_bar(position = "dodge")</code></td><td>겹침 조정: stack, dodge, jitter</td></tr>
-        <tr><td>scale</td><td><code>scale_&lt;aes&gt;_&lt;type&gt;()</code></td><td><code>scale_colour_brewer()</code>, <code>scale_y_log10()</code></td><td>limits는 범위 밖 데이터를 제거함</td></tr>
+        <tr><td>scale</td><td><code>scale_&lt;aes&gt;_&lt;type&gt;()</code></td><td><code>scale_colour_brewer()</code>, <code>scale_y_log10()</code>, <code>scale_y_continuous(labels = scales::label_comma())</code></td><td>limits는 범위 밖 데이터를 제거함. 눈금 글자는 <code>labels</code>로(아래 예)</td></tr>
         <tr><td>coord</td><td><code>coord_*()</code></td><td><code>coord_cartesian(ylim = c(10, 30))</code></td><td>데이터는 두고 화면만 확대</td></tr>
         <tr><td>facet</td><td><code>facet_wrap()</code>, <code>facet_grid()</code></td><td><code>facet_wrap(~ am)</code></td><td><code>scales = "free_y"</code>로 축 독립</td></tr>
         <tr><td>guide</td><td><code>guides()</code>, <code>guide_*()</code></td><td><code>guides(colour = guide_legend(nrow = 1))</code></td><td>범례·축의 모양</td></tr>
@@ -626,6 +626,42 @@ ggplot(
       </tbody>
     </table>
   </div>
+  <h3>축 눈금 글자 바꾸기: 세 자리 쉼표</h3>
+  <p>축은 척도(<code>scale_x_*()</code>, <code>scale_y_*()</code>)가 만든다. 눈금의 위치는 <code>breaks</code>, 눈금에 적는 글자는 <code>labels</code> 인수다. <code>labels</code>에는 글자 벡터를 직접 줄 수도 있지만, 보통은 숫자를 글자로 바꾸는 <b>함수</b>를 준다. ggplot2와 함께 설치되는 scales 패키지에 그런 함수가 모여 있다. 1,000이 넘는 값에 세 자리 쉼표를 넣는 <code>scales::label_comma()</code>가 대표적이다. 04절의 실업자 수 자료로 비교한다.</p>
+  <div class="gcards pair">
+    <figure class="gcard"><img src="../assets/images/ggplot/scale-default.png" width="600" height="450" loading="lazy" alt="미국 실업자 수 선그래프, y축 눈금이 4000, 8000, 12000"><figcaption><b>기본 눈금</b> y축 눈금이 4000, 8000, 12000으로 찍힌다. 자릿수가 커질수록 한눈에 읽기 어렵다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = economics,
+  mapping = aes(
+    x = date,
+    y = unemploy
+  )
+) +
+  geom_line()</pre><button type="button" class="copy">복사</button></div></figure>
+    <figure class="gcard"><img src="../assets/images/ggplot/scale-comma.png" width="600" height="450" loading="lazy" alt="같은 선그래프, y축 눈금이 4,000, 8,000, 12,000이고 축 제목에 단위"><figcaption><b>labels = scales::label_comma()</b> 눈금이 4,000, 8,000, 12,000이 된다. 데이터는 그대로이고 글자만 바뀐다. <code>labs()</code>로 단위도 적었다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">ggplot(
+  data = economics,
+  mapping = aes(
+    x = date,
+    y = unemploy
+  )
+) +
+  geom_line() +
+  scale_y_continuous(labels = scales::label_comma()) +
+  labs(y = "실업자 수 (천 명)")</pre><button type="button" class="copy">복사</button></div></figure>
+  </div>
+  <div class="tbl-wrap"><table class="ftbl">
+    <thead><tr><th>눈금 글자</th><th>labels =</th><th>예</th></tr></thead>
+    <tbody>
+      <tr><td>세 자리 쉼표</td><td><code>scales::label_comma()</code></td><td>12,000</td></tr>
+      <tr><td>백분율</td><td><code>scales::label_percent()</code></td><td>0.25 → 25%</td></tr>
+      <tr><td>통화</td><td><code>scales::label_currency(prefix = "₩")</code></td><td>₩12,000</td></tr>
+      <tr><td>단위 붙이기</td><td><code>scales::label_number(suffix = " mg")</code></td><td>3,000 mg (쉼표는 <code>big.mark = ","</code>)</td></tr>
+      <tr><td>날짜 형식</td><td><code>scales::label_date("%Y년")</code></td><td>1970년 (x축이 날짜일 때)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="cb prompt"><span class="lang">프롬프트 · 눈금 글자를 에이전트에게</span><pre>04절의 실업자 수 선그래프(scripts/04_box_points.R 과 같은 폴더에 scripts/05_axis.R 로 만든다)에서 y축 눈금 글자를 고쳐 줘.
+- 1,000 이 넘는 값에 세 자리 쉼표를 넣는다. 데이터나 눈금 위치는 바꾸지 않고 글자만 바꾼다.
+- y축 제목에 단위(천 명)를 적는다.
+- 어느 구성요소(scale, labs)의 어느 인수를 썼는지 설명하고, 그림은 output/figures/05_axis_comma.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
   <div class="split">
     <div class="ctl">
       <h3>레이어를 하나씩 쌓아 보기</h3>

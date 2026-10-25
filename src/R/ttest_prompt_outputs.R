@@ -34,7 +34,14 @@ tab1 <- d %>%
             pre_m = mean(sodium_pre),  pre_sd = sd(sodium_pre),
             post_m = mean(sodium_post), post_sd = sd(sodium_post),
             diff_m = mean(diff),        diff_sd = sd(diff), .groups = "drop")
-cat("표 1\n"); print(as.data.frame(tab1), digits = 6)
+# 평균은 소수 첫째 자리, 표준편차는 둘째 자리(표준편차는 평균보다 한 자리 더 적는다)
+cat("표 1\n")
+# 1,000 이상에는 세 자리 쉼표를 넣는다. R의 검정 출력에는 쉼표가 없으므로 표를 만들 때 넣는다
+f1 <- function(x) formatC(x, format = "f", digits = 1, big.mark = ",")
+f2 <- function(x) formatC(x, format = "f", digits = 2, big.mark = ",")
+for (i in seq_len(nrow(tab1))) with(tab1[i, ], cat(sprintf(
+  "%s | n = %d | 사전 %s (%s) | 사후 %s (%s) | 변화 %s (%s)\n",
+  group, n, f1(pre_m), f2(pre_sd), f1(post_m), f2(post_sd), f1(diff_m), f2(diff_sd))))
 
 # ---- 표 2: 검정 결과 ----
 r1 <- t.test(d$sodium_pre, mu = 3000)
@@ -46,9 +53,9 @@ sp <- sqrt(sum((tab1$n - 1) * tab1$post_sd^2) / (sum(tab1$n) - 2))
 d2 <- (tab1$post_m[1] - tab1$post_m[2]) / sp
 g2 <- d2 * (1 - 3 / (4 * (sum(tab1$n) - 2) - 1))
 row <- function(name, r, es, es_name)
-  sprintf("%s | t = %.2f | df = %s | p = %.3f | CI [%.1f, %.1f] | %s = %.2f",
+  sprintf("%s | t = %.2f | df = %s | p = %.3f | CI [%s, %s] | %s = %.2f",
           name, r$statistic, format(round(unname(r$parameter), 2)), r$p.value,
-          r$conf.int[1], r$conf.int[2], es_name, es)
+          f1(r$conf.int[1]), f1(r$conf.int[2]), es_name, es)
 cat("\n표 2\n")
 cat(row("단일표본(사전 vs 3000)", r1, (mean(d$sodium_pre) - 3000) / sd(d$sodium_pre), "d"), "\n")
 cat(sprintf("등분산 검정 | F = %.3f | df = (%d, %d) | p = %.3f\n", vt$statistic, 23, 23, vt$p.value))

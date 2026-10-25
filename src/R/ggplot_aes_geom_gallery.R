@@ -1,4 +1,4 @@
-# docs/data-science/ggplot-visualization.html 03절(aes)과 04절(geom)의 그림을 만든다.
+# docs/data-science/ggplot-visualization.html 03절(aes), 04절(geom), 05절(축 눈금 글자)의 그림을 만든다.
 # 아래 codes 의 문자열을 그대로 실행해 그림을 저장하고, 같은 문자열을 JSON으로 내보낸다.
 # 쪽에 싣는 코드와 그림이 어긋나지 않게 하려는 것이다.
 # 저장소 맨 위에서 실행한다: Rscript src/R/ggplot_aes_geom_gallery.R [코드를 내보낼 JSON 경로]
@@ -156,6 +156,25 @@ ggplot(
 ) +
   geom_point() +
   geom_text(size = 2.5, vjust = -0.7, hjust = "inward", check_overlap = TRUE)',
+  # ---- 05절: 축 눈금 글자 ----
+  "scale-default" = 'ggplot(
+  data = economics,
+  mapping = aes(
+    x = date,
+    y = unemploy
+  )
+) +
+  geom_line()',
+  "scale-comma" = 'ggplot(
+  data = economics,
+  mapping = aes(
+    x = date,
+    y = unemploy
+  )
+) +
+  geom_line() +
+  scale_y_continuous(labels = scales::label_comma()) +
+  labs(y = "실업자 수 (천 명)")',
   "geom-hline" = 'ggplot(
   data = mtcars,
   mapping = aes(

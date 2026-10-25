@@ -461,14 +461,14 @@ cohens_d(edu$sodium_pre, edu$sodium_post, paired = TRUE)</pre></div>
 <section class="panel" id="report">
 <div class="section-head"><span class="section-num">06</span><h2>프롬프트로 결과 한 번에 만들기</h2></div>
 <p>위에서는 검정을 하나씩 했다. 보고서에 넣을 것은 결국 기술통계 요약표, 자료의 도표, 검정 결과표와 검정 도표, 그리고 결과 문장이다. 이것을 코딩 에이전트에게 한 번에 시키는 프롬프트가 아래에 있다. 표는 APA 양식(표 번호는 굵게, 제목은 다음 줄에 기울임꼴, 가로선만 쓰고 세로선은 쓰지 않음)으로 받는다. 프롬프트의 요점은 <b>숫자를 손으로 적지 말고 코드로 계산한 값을 그대로 넣게</b> 하고, 내가 R 출력과 대조할 수 있게 <b>코드를 함께 받는</b> 것이다.</p>
-<div class="cb prompt"><span class="lang">프롬프트 · 요약표·도표·검정 도표·결과 문장을 한 번에</span><pre>scripts/04.report.R 을 만들어 실행해 줘. 데이터는 dataset/working/sodium_clean.rds 를 read_rds() 로 읽는다(group 은 교육군·대조군 factor, diff = 사전 − 사후).
-1. 표 1 · 기술통계: 집단별로 n, 사전 M (SD), 사후 M (SD), 변화 M (SD)를 한 표로 만든다. 소수 첫째 자리까지.
-2. 표 2 · 검정 결과: 단일표본(사전 vs 3000), 등분산 검정(F), 독립표본(사후, 등분산 검정 결과에 따라 Student 또는 Welch), 대응표본(교육군 사전 vs 사후)을 행으로 두고 t(또는 F), df, p, 95% 신뢰구간, 효과크기(d, g, dz)를 열로 둔다. p 는 소수 셋째 자리, .001 보다 작으면 "&lt; .001".
+<div class="cb prompt"><span class="lang">프롬프트 · 요약표·도표·검정 도표·결과 문장을 한 번에</span><pre>scripts/03.ttest.R 에 이어서, 보고서에 넣을 표와 그림을 만드는 코드를 써서 실행해 줘. 데이터는 지금까지 쓴 d(데이터 준비 자료에서 읽고 다듬은 48명, group 은 교육군·대조군 factor, diff = 사전 − 사후)를 그대로 쓰고, 검정은 앞에서 만든 res1, vt, res2, res3 를 다시 쓴다. 데이터를 새로 읽지 않는다.
+1. 표 1 · 기술통계: 집단별로 n, 사전 M (SD), 사후 M (SD), 변화 M (SD)를 한 표로 만든다. 평균은 소수 첫째 자리, 표준편차는 소수 둘째 자리까지(표준편차는 평균보다 한 자리 더 적는다). 1,000 이상의 숫자에는 세 자리마다 쉼표를 넣는다(예: 3,194.6). R 의 검정 출력에는 쉼표가 없으므로 표를 만들 때 format(big.mark = ",") 이나 scales::comma() 로 넣는다.
+2. 표 2 · 검정 결과: 단일표본(사전 vs 3000), 등분산 검정(F), 독립표본(사후, 등분산 검정 결과에 따라 Student 또는 Welch), 대응표본(교육군 사전 vs 사후)을 행으로 두고 t(또는 F), df, p, 95% 신뢰구간, 효과크기(d, g, dz)를 열로 둔다. p 는 소수 셋째 자리, .001 보다 작으면 "&lt; .001". 신뢰구간처럼 1,000 이 넘는 값에도 세 자리 쉼표를 넣는다.
 3. 두 표는 APA 양식으로 Markdown 파일 output/tables.md 에 저장한다: "표 1"은 굵게, 제목은 다음 줄에 기울임꼴, 표 아래에 "주." 로 단위(mg/일)와 효과크기의 종류를 적는다.
 4. 그림 1: 집단별 사후 섭취량을 상자그림 위에 관측값 점을 겹쳐 그리고 평균을 표시한다. 격자 없는 흰 배경(theme_classic), 축 제목에 단위. output/fig1_box.png, 5×4 인치, 300 dpi.
 5. 그림 2: 독립표본 t 검정의 영가설 아래 t 분포를 그리고, 양측 5% 기각역과 관측한 t, p-value 에 해당하는 넓이를 색으로 구분해 표시한다. 제목에 p-value 를 적는다. output/fig2_ttest.png, 6×4 인치, 300 dpi.
-6. 독립표본 검정의 결과 문장을 APA 형식으로 쓴다: 집단별 M 과 SD, t(df), p, 평균 차이와 95% CI, 효과크기와 그 이름.
-- 모든 숫자는 코드로 계산한 값을 넣고 손으로 적지 않는다. 표의 숫자가 R 출력과 맞는지 내가 대조할 수 있게 검정 결과 객체(res1, vt, res2, res3)를 출력한다.
+6. 독립표본 검정의 결과 문장을 APA 형식으로 쓴다: 집단별 M 과 SD(자릿수와 쉼표는 표 1과 같게), t(df), p, 평균 차이와 95% CI, 효과크기와 그 이름.
+- 모든 숫자는 코드로 계산한 값을 넣고 손으로 적지 않는다. 표의 숫자가 R 출력과 맞는지 내가 대조할 수 있게 res1, vt, res2, res3 를 다시 출력한다.
 - 한글 글꼴은 데이터 준비 자료의 글꼴 설정을 따른다.</pre><button type="button" class="copy">복사</button></div>
 <h3>예: 이 프롬프트로 받게 될 결과</h3>
 <p>아래는 같은 요구를 R로 직접 만들어 본 것이다. 에이전트가 만든 결과는 이와 같아야 한다. 숫자는 위 절들의 R 출력과 같고, 글꼴과 세부 모양은 환경에 따라 조금 다를 수 있다.</p>
@@ -477,17 +477,17 @@ cohens_d(edu$sodium_pre, edu$sodium_post, paired = TRUE)</pre></div>
 <caption><b>표 1</b><br><i>집단별 교육 전·후 나트륨 섭취량의 기술통계</i></caption>
 <thead><tr><th>집단</th><th>n</th><th>사전 M (SD)</th><th>사후 M (SD)</th><th>변화 M (SD)</th></tr></thead>
 <tbody>
-<tr><td>교육군</td><td>24</td><td>3194.6 (690.4)</td><td>2901.3 (534.6)</td><td>293.3 (443.7)</td></tr>
-<tr><td>대조군</td><td>24</td><td>3254.6 (635.9)</td><td>3300.4 (752.7)</td><td>−45.8 (541.5)</td></tr>
+<tr><td>교육군</td><td>24</td><td>3,194.6 (690.41)</td><td>2,901.2 (534.56)</td><td>293.3 (443.69)</td></tr>
+<tr><td>대조군</td><td>24</td><td>3,254.6 (635.89)</td><td>3,300.4 (752.74)</td><td>−45.8 (541.50)</td></tr>
 </tbody></table>
-<p class="apa-note"><i>주.</i> 단위는 mg/일. 변화 = 사전 − 사후.</p>
+<p class="apa-note"><i>주.</i> 단위는 mg/일. 변화 = 사전 − 사후. 평균은 소수 첫째 자리, 표준편차는 소수 둘째 자리. 1,000 이상은 세 자리마다 쉼표. 교육군 사후 평균은 정확히 2,901.25인데, R의 <code>round()</code>와 <code>sprintf()</code>는 딱 가운데 값을 짝수 쪽으로 반올림하므로 2,901.2가 된다(실험판은 2901.3으로 보인다).</p>
 </div>
 <div class="scroll">
 <table class="apa">
 <caption><b>표 2</b><br><i>나트륨 섭취량에 대한 가설검정 결과</i></caption>
 <thead><tr><th>검정</th><th>비교</th><th>통계량</th><th>df</th><th>p</th><th>95% CI</th><th>효과크기</th></tr></thead>
 <tbody>
-<tr><td>단일표본 t</td><td>사전 vs 3000</td><td>t = 2.37</td><td>47</td><td>.022</td><td>[3033.7, 3415.4]</td><td>d = 0.34</td></tr>
+<tr><td>단일표본 t</td><td>사전 vs 3000</td><td>t = 2.37</td><td>47</td><td>.022</td><td>[3,033.7, 3,415.4]</td><td>d = 0.34</td></tr>
 <tr><td>등분산 F</td><td>사후, 교육군 vs 대조군</td><td>F = 0.50</td><td>23, 23</td><td>.108</td><td>[0.22, 1.17]</td><td>—</td></tr>
 <tr><td>독립표본 t (Student)</td><td>사후, 교육군 − 대조군</td><td>t = −2.12</td><td>46</td><td>.040</td><td>[−778.5, −19.8]</td><td>g = −0.60</td></tr>
 <tr><td>대응표본 t</td><td>교육군 사전 − 사후</td><td>t = 3.24</td><td>23</td><td>.004</td><td>[106.0, 480.7]</td><td>d<sub>z</sub> = 0.66</td></tr>
@@ -498,15 +498,16 @@ cohens_d(edu$sodium_pre, edu$sodium_post, paired = TRUE)</pre></div>
 <figure class="shot"><img src="../assets/images/ttest/apa-box.png" width="750" height="600" loading="lazy" alt="교육군과 대조군의 사후 나트륨 섭취량 상자그림. 관측값 점이 겹쳐 있고 흰 마름모가 평균이다"><figcaption><b>그림 1.</b> 집단별 사후 나트륨 섭취량(mg/일). 상자는 사분위 범위, 가운데 선은 중앙값, 흰 마름모는 평균, 점은 관측값.</figcaption></figure>
 <figure class="shot"><img src="../assets/images/ttest/apa-ttest.png" width="900" height="600" loading="lazy" alt="자유도 46의 t 분포. 양쪽 꼬리의 기각역이 주황, 관측한 t보다 극단적인 영역이 파랑으로 칠해져 있고 관측한 t = -2.12에 세로선"><figcaption><b>그림 2.</b> 독립표본 t 검정(Student)의 영가설 아래 t 분포(df = 46). 주황은 양측 5% 기각역, 파랑은 p-value에 해당하는 넓이, 굵은 세로선이 관측한 t = −2.12.</figcaption></figure>
 </div>
-<div class="callout"><p><strong>결과 문장(APA 형식).</strong> 교육이 끝난 뒤 교육군(<i>M</i> = 2901.3, <i>SD</i> = 534.6)의 나트륨 섭취량은 대조군(<i>M</i> = 3300.4, <i>SD</i> = 752.7)보다 낮았다, <i>t</i>(46) = −2.12, <i>p</i> = .040, 평균 차이 = −399.2 mg/일, 95% CI [−778.5, −19.8], Hedges의 <i>g</i> = −0.60.</p></div>
+<div class="callout"><p><strong>결과 문장(APA 형식).</strong> 교육이 끝난 뒤 교육군(<i>M</i> = 2,901.2, <i>SD</i> = 534.56)의 나트륨 섭취량은 대조군(<i>M</i> = 3,300.4, <i>SD</i> = 752.74)보다 낮았다, <i>t</i>(46) = −2.12, <i>p</i> = .040, 평균 차이 = −399.2 mg/일, 95% CI [−778.5, −19.8], Hedges의 <i>g</i> = −0.60.</p></div>
 <div class="scroll"><table class="check">
 <thead><tr><th>확인할 것</th><th>어떻게 확인하나</th></tr></thead>
 <tbody>
-<tr><td>표의 숫자</td><td>표 2의 t, df, p, 신뢰구간이 03~05절의 R 출력과 같은가. 표 1의 M, SD 가 04절 첫 코드의 집단별 요약과 같은가</td></tr>
+<tr><td>표의 숫자</td><td>표 2의 t, df, p, 신뢰구간이 03~05절의 R 출력과 같은가(쉼표만 다르다). 표 1의 M, SD 가 04절 첫 코드의 집단별 요약과 같은가. 1,000 이 넘는 값에 쉼표가 들어갔는가</td></tr>
 <tr><td>어느 검정인가</td><td>독립표본 행이 등분산 검정의 결과대로 Student 인가. 에이전트가 Welch 를 골랐다면 vt 의 p-value 를 어떻게 읽었는지 묻는다</td></tr>
 <tr><td>그림 2</td><td>세로선이 t = −2.12 에 있고, 기각역의 경계가 ±2.01 인가. 파란 넓이가 양쪽 꼬리에 모두 있는가(양측 검정)</td></tr>
 <tr><td>결과 문장</td><td>M, SD, t(df), p, 차이와 CI, 효과크기의 이름이 모두 들어 있는가. "유의했다"만 있고 효과크기가 빠지지 않았는가</td></tr>
-<tr><td>손으로 적은 숫자</td><td>코드에서 표로 숫자가 흘러가는가. 코드에 2901.3 같은 값이 직접 적혀 있으면 손으로 넣은 것이다</td></tr>
+<tr><td>손으로 적은 숫자</td><td>코드에서 표로 숫자가 흘러가는가. 코드에 2901.2 같은 값이 직접 적혀 있으면 손으로 넣은 것이다</td></tr>
+<tr><td>데이터</td><td>데이터를 새로 읽지 않고 d 를 그대로 썼는가. 새로 읽었다면 group 의 factor 와 diff 가 데이터 준비 자료와 같은지 확인한다</td></tr>
 </tbody></table></div>
 </section>
 
