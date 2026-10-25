@@ -2,9 +2,9 @@
 # 아래 codes 의 문자열을 그대로 실행해 그림을 저장하고, 같은 문자열을 JSON으로 내보낸다.
 # 쪽에 싣는 코드와 그림이 어긋나지 않게 하려는 것이다.
 # 저장소 맨 위에서 실행한다: Rscript src/R/ggplot_aes_geom_gallery.R [코드를 내보낼 JSON 경로]
-# 필요한 패키지: ggplot2(4.0 이상), ragg, jsonlite
+# 필요한 패키지: ggplot2(4.0 이상), dplyr, tibble, ragg, jsonlite
 
-library(ggplot2)
+suppressMessages({ library(ggplot2); library(dplyr); library(tibble) })   # 모두 library(tidyverse) 로 함께 불러온다
 
 out_dir <- file.path("docs", "assets", "images", "ggplot")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
@@ -100,7 +100,9 @@ codes <- list(
   mapping = aes(x = factor(cyl))
 ) +
   geom_bar()',
-  "geom-col" = 'mpg_by_cyl <- aggregate(mpg ~ cyl, data = mtcars, FUN = mean)
+  "geom-col" = 'mpg_by_cyl <- mtcars %>%
+  group_by(cyl) %>%
+  summarise(mpg = mean(mpg))
 
 ggplot(
   data = mpg_by_cyl,
@@ -144,7 +146,8 @@ ggplot(
 ) +
   geom_point() +
   geom_smooth(method = "lm")',
-  "geom-text" = 'mtcars2 <- transform(mtcars, model = rownames(mtcars))
+  "geom-text" = 'mtcars2 <- mtcars %>%
+  rownames_to_column("model")
 
 ggplot(
   data = mtcars2,

@@ -516,7 +516,9 @@
   mapping = aes(x = factor(cyl))
 ) +
   geom_bar()</pre><button type="button" class="copy">복사</button></div></figure>
-    <figure class="gcard"><img src="../assets/images/ggplot/geom-col.png" width="600" height="450" loading="lazy" alt="실린더 4, 6, 8별 평균 연비 막대그래프"><figcaption><b>geom_col(): 값</b> 먼저 <code>aggregate()</code>로 실린더별 평균 연비를 구하고, 그 값을 막대 높이로 씁니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">mpg_by_cyl &lt;- aggregate(mpg ~ cyl, data = mtcars, FUN = mean)
+    <figure class="gcard"><img src="../assets/images/ggplot/geom-col.png" width="600" height="450" loading="lazy" alt="실린더 4, 6, 8별 평균 연비 막대그래프"><figcaption><b>geom_col(): 값</b> 먼저 <code>group_by()</code>와 <code>summarise()</code>로 실린더별 평균 연비를 구하고, 그 값을 막대 높이로 씁니다. 두 함수는 <code>library(tidyverse)</code>로 함께 불러오는 dplyr의 것입니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">mpg_by_cyl &lt;- mtcars %&gt;%
+  group_by(cyl) %&gt;%
+  summarise(mpg = mean(mpg))
 
 ggplot(
   data = mpg_by_cyl,
@@ -566,7 +568,8 @@ ggplot(
   )
 ) +
   geom_line()</pre><button type="button" class="copy">복사</button></div></figure>
-    <figure class="gcard"><img src="../assets/images/ggplot/geom-text.png" width="600" height="450" loading="lazy" alt="mtcars 산점도의 점 위에 차 이름 글자"><figcaption><b>geom_text()</b> 차 이름을 <code>label</code>로 매핑했습니다. <code>check_overlap = TRUE</code>는 겹치는 글자를 빼고, <code>hjust = "inward"</code>는 가장자리 글자를 안쪽으로 붙입니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">mtcars2 &lt;- transform(mtcars, model = rownames(mtcars))
+    <figure class="gcard"><img src="../assets/images/ggplot/geom-text.png" width="600" height="450" loading="lazy" alt="mtcars 산점도의 점 위에 차 이름 글자"><figcaption><b>geom_text()</b> mtcars의 차 이름은 열이 아니라 행 이름이어서 <code>rownames_to_column()</code>으로 열로 만든 뒤 <code>label</code>로 매핑했습니다. <code>check_overlap = TRUE</code>는 겹치는 글자를 빼고, <code>hjust = "inward"</code>는 가장자리 글자를 안쪽으로 붙입니다.</figcaption><div class="cb r"><span class="lang">R</span><pre class="hlr">mtcars2 &lt;- mtcars %&gt;%
+  rownames_to_column("model")
 
 ggplot(
   data = mtcars2,
