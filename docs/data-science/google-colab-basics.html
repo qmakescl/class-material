@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Google Colab 사용하기 | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/google-colab-basics.html">
+<meta name="description" content="웹 브라우저에서 Python과 R 노트북을 쓰는 Google Colab의 시작 방법, 화면 구성, 런타임 연결, 셀 실행과 터미널을 안내하는 데이터과학 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="Google Colab 사용하기 | Q의 아카이브">
+<meta property="og:description" content="Google Colab에서 새 노트를 열고 화면 구성, 런타임 연결, 셀 실행과 터미널을 익힙니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/google-colab-basics.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="데이터과학 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Google Colab 사용하기 | Q의 아카이브">
+<meta name="twitter:description" content="Google Colab에서 새 노트를 열고 화면 구성, 런타임 연결, 셀 실행과 터미널을 익힙니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
+<link rel="stylesheet" href="../assets/material.css">
+<link rel="stylesheet" href="../assets/rlesson.css">
+<style>
+  /* 과목 강조색: 데이터과학. 흰 바탕 위 작은 글자와 링크에는 한 단계 어두운 색을 쓴다 */
+  :root { --accent: #0ea968; --accent-soft: #e6f8f0; --accent-dark: #087a4b; }
+  main a { color: var(--accent-dark); }
+  .skip-link { background: var(--accent-dark); }
+  #screen td b { white-space: nowrap; }
+</style>
+<script defer src="../assets/annotate.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../index.html#data-science">← 처음으로</a>
+  <h1>Google Colab<br>사용하기</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#start"><b>01</b><span>시작하기</span></a>
+    <a href="#screen"><b>02</b><span>화면 구성</span></a>
+    <a href="#runtime"><b>03</b><span>런타임 연결</span></a>
+    <a href="#cells"><b>04</b><span>코드 셀과 텍스트 셀</span></a>
+    <a href="#terminal"><b>05</b><span>터미널</span></a>
+    <a href="#use"><b>06</b><span>노트북 작성해 보기</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#데이터과학</span>
+    <span class="rail-tag">#개념정리</span>
+    <span class="rail-tag">#작업환경</span>
+    <span class="rail-tag">#GoogleColab</span>
+    <span class="rail-tag">#주피터노트북</span>
+    <span class="rail-tag">#GPU</span>
+  </div>
+  <footer>화면은 2026년 10월 31일 기준입니다. Colab이 바뀌면 메뉴와 제공 자원이 달라질 수 있습니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+<main id="content">
+<header class="panel">
+<div class="eyebrow">데이터 다루기 · 작업환경</div>
+<h2 class="page-title">Google Colab 사용하기</h2>
+<p class="lede">Google Colab은 Google의 컴퓨팅 자원으로 Python과 R의 Jupyter Notebook을 쓰는 웹 기반 코드·문서 작성 도구다. 설치 없이 브라우저에서 바로 쓸 수 있고, 무료 계정으로도 GPU를 쓸 수 있다.</p>
+<dl class="facts">
+<div><dt>주소</dt><dd><a href="https://colab.research.google.com/" target="_blank" rel="noopener noreferrer">colab.research.google.com</a></dd></div>
+<div><dt>쓸 수 있는 언어</dt><dd>런타임 설정에 따라 Python 또는 R</dd></div>
+<div><dt>파일 저장 위치</dt><dd>Google Drive의 “Colab Notebooks” 폴더(기본값)</dd></div>
+</dl>
+</header>
+
+<section class="panel" id="start">
+<div class="section-head"><span class="section-num">01</span><h2>시작하기</h2></div>
+<p>첫 화면에서 <b>+ 새 노트</b>를 누르면 Colab Notebook 창이 열린다.</p>
+<figure class="shot"><img src="../assets/images/colab/colab-home.png" width="1415" height="918" loading="lazy" alt="Colab 첫 화면. 왼쪽 위에 새 노트와 노트 업로드 단추가 있고 아래에 예시 노트북 카드가 있다."><figcaption>Colab의 첫 화면 (2026. 10. 31)</figcaption></figure>
+<p>노트북을 활성화하면 Google의 컴퓨팅 환경에 임의의 가상머신(Virtual Machine, VM)이 만들어지고, 이것이 독립된 컴퓨터 한 대처럼 작동한다. 런타임 설정에 따라 GPU, RAM, 디스크 등을 할당받는다. 무료 계정은 지속 시간이 일정하지 않지만 다음 정도의 자원을 제공한다.</p>
+<div class="scroll"><table>
+<thead><tr><th>자원</th><th>무료 계정의 제공 수준</th></tr></thead>
+<tbody>
+<tr><td>GPU</td><td>T4, VRAM 약 15GB</td></tr>
+<tr><td>시스템 RAM</td><td>약 12GB</td></tr>
+<tr><td>디스크</td><td>약 100GB</td></tr>
+</tbody></table></div>
+<figure class="shot natural"><img src="../assets/images/colab/colab-free-gpu.png" width="356" height="292" loading="lazy" alt="GPU 백엔드의 리소스 표시. 시스템 RAM 12.7GB, GPU RAM 15.0GB, 디스크 112.6GB."><figcaption>무료 계정으로 GPU를 쓸 때의 리소스 표시</figcaption></figure>
+</section>
+
+<section class="panel" id="screen">
+<div class="section-head"><span class="section-num">02</span><h2>화면 구성</h2></div>
+<figure class="shot"><img src="../assets/images/colab/colab-screen.png" width="1415" height="918" loading="lazy" alt="새 노트북 화면. 파일 제목, 상단 메뉴, 노트북 메뉴, 연결, 좌측 사이드바, 작업 영역, 변수와 터미널, Gemini 창에 0번부터 7번까지 번호가 붙어 있다."><figcaption>번호는 아래 표의 항목을 가리킨다. 개인 정보는 가렸다.</figcaption></figure>
+<div class="scroll"><table>
+<thead><tr><th>번호</th><th>영역</th><th>하는 일</th></tr></thead>
+<tbody>
+<tr><td>⓪</td><td><b>파일 제목</b></td><td>눌러서 파일 이름을 바꾼다. 기본 저장 위치는 Google Drive의 “Colab Notebooks”다.</td></tr>
+<tr><td>①</td><td><b>상단 메뉴</b></td><td>파일, 셀, 런타임 작동 환경 등을 다루는 기본 메뉴다.</td></tr>
+<tr><td>②</td><td><b>노트북 메뉴</b></td><td>명령어 바로가기, 코드 셀과 텍스트 셀 추가, 실행 단추가 있다.</td></tr>
+<tr><td>③</td><td><b>연결</b></td><td>연결 정보를 보여 주고, 현재 런타임 변경과 Google의 다른 환경 연결 등을 지원한다. <a href="#runtime">03절</a>에서 다룬다.</td></tr>
+<tr><td>④</td><td><b>좌측 사이드바</b></td><td>텍스트 목차, 찾기, 코드 스니펫(미리 만든 코드 조각), Secrets(환경 변수 설정), 파일, 데이터 탐색기 등을 접고 펴는 사이드바다. 파일 항목은 현재 런타임이 제공하는 드라이브 경로를 보여 주며, Google Drive를 별도 경로로 연결할 수 있다.</td></tr>
+<tr><td>⑤</td><td><b>작업 영역</b></td><td>셀 단위로 실행하는 파일 편집기다. <a href="#cells">04절</a>에서 다룬다.</td></tr>
+<tr><td>⑥</td><td><b>변수와 터미널</b></td><td>현재 만들어진 변수를 확인하고 런타임의 셸(터미널)을 연다. <a href="#terminal">05절</a>에서 다룬다.</td></tr>
+<tr><td>⑦</td><td><b>Gemini</b></td><td>Colab 안에서 쓰는 AI 대화 창이다. 질문을 하거나 코드 작성의 도움을 받는다.</td></tr>
+</tbody></table></div>
+</section>
+
+<section class="panel" id="runtime">
+<div class="section-head"><span class="section-num">03</span><h2>런타임 연결</h2></div>
+<p>화면 오른쪽 위의 연결 영역에서 RAM과 디스크 사용량을 확인하고, 옆의 화살표로 메뉴를 연다. GPU를 쓰거나 언어를 바꾸려면 이 메뉴의 <b>런타임 유형 변경</b>을 고른다. <b>리소스 보기</b>를 고르면 <a href="#start">01절</a>의 리소스 표시를 볼 수 있다.</p>
+<figure class="shot natural"><img src="../assets/images/colab/colab-connect.png" width="556" height="654" loading="lazy" alt="연결 메뉴. 호스팅된 런타임에 연결, 런타임 유형 변경, Google Cloud 런타임에 연결, SSH로 연결, 로컬 런타임에 연결, 리소스 보기, 세션 관리, 런타임 연결 해제 및 삭제 등의 항목이 있다."><figcaption>연결했을 때의 자원 확인과 연결 메뉴</figcaption></figure>
+</section>
+
+<section class="panel" id="cells">
+<div class="section-head"><span class="section-num">04</span><h2>코드 셀과 텍스트 셀</h2></div>
+<h3>코드 셀</h3>
+<p>런타임 설정에 따라 Python이나 R 코드를 입력하고 셀 단위로 실행한다. 셀 앞의 실행 단추를 누르거나 다음 단축키를 쓴다.</p>
+<figure class="shot natural"><img src="../assets/images/colab/colab-code-cell.png" width="701" height="148" loading="lazy" alt="코드 셀. 왼쪽의 실행 단추가 강조되어 있고 아래에 코드 셀과 텍스트 셀을 추가하는 단추가 있다."><figcaption>셀 앞의 실행 단추와 셀 추가 단추</figcaption></figure>
+<div class="scroll"><table>
+<thead><tr><th>단축키</th><th>실행한 뒤</th></tr></thead>
+<tbody>
+<tr><td><kbd>Ctrl</kbd> (<kbd>Command</kbd>) + <kbd>Enter</kbd></td><td>현재 셀에 머문다</td></tr>
+<tr><td><kbd>Shift</kbd> + <kbd>Enter</kbd></td><td>다음 셀로 이동한다</td></tr>
+<tr><td><kbd>Alt</kbd> (<kbd>Option</kbd>) + <kbd>Enter</kbd></td><td>다음 셀을 새로 만든다</td></tr>
+</tbody></table></div>
+<h3>텍스트 셀</h3>
+<p>Markdown 문법으로 글을 입력한다. 더블클릭하거나 <kbd>Enter</kbd>를 눌러 수정한다.</p>
+<figure class="shot natural"><img src="../assets/images/colab/colab-text-cell.png" width="668" height="127" loading="lazy" alt="편집 중인 텍스트 셀. 위에 서식 도구 모음이 있고 오른쪽에 미리 보기가 있다."><figcaption>텍스트 셀의 편집 화면</figcaption></figure>
+</section>
+
+<section class="panel" id="terminal">
+<div class="section-head"><span class="section-num">05</span><h2>터미널</h2></div>
+<p>화면 아래쪽의 <b>터미널</b>을 누르면 런타임의 셸이 열린다. 아래 화면에서는 작업 경로 <code>/content</code>에서 <code>ls -al</code>과 <code>pwd</code>를 실행했다. 옆의 <b>변수</b>는 현재 만들어진 변수를 보여 준다.</p>
+<figure class="shot"><img src="../assets/images/colab/colab-terminal.png" width="1415" height="918" loading="lazy" alt="오른쪽 창에 터미널이 열려 있고 /content 경로에서 ls -al과 pwd를 실행한 결과가 보인다."><figcaption>터미널을 열고 사용하는 화면</figcaption></figure>
+</section>
+
+<section class="panel" id="use">
+<div class="section-head"><span class="section-num">06</span><h2>노트북 작성해 보기</h2></div>
+<p>텍스트 셀 하나와 Python 코드 셀 하나로 된 노트북을 만든다. 아래는 완성한 노트북에서 두 셀을 각각 실행한 뒤, 첫 번째 셀을 더블클릭해 편집 화면으로 들어온 모습이다.</p>
+<figure class="shot"><img src="../assets/images/colab/colab-use-overview.png" width="1415" height="918" loading="lazy" alt="helloColab.ipynb 노트북. 첫 번째 텍스트 셀은 왼쪽에 Markdown 원문, 오른쪽에 미리 보기가 보이고, 두 번째 코드 셀에는 import pandas as pd가 실행되어 있다."><figcaption>완성한 노트북. 첫 번째 셀은 편집 중이다.</figcaption></figure>
+<ol class="steps">
+<li><strong>노트북 이름을 바꾼다.</strong> 파일 제목을 눌러 <code>helloColab.ipynb</code>로 고친다.
+<figure class="shot"><img src="../assets/images/colab/colab-use-rename.png" width="358" height="161" loading="lazy" alt="파일 제목 입력란에 helloColab.ipynb를 입력한 화면."><figcaption>파일 제목 고치기</figcaption></figure></li>
+<li><strong>첫 번째 셀로 텍스트 셀을 넣는다.</strong> 처음부터 있는 코드 셀의 사각형 위쪽 가운데에 마우스를 올리면, 그 앞에 넣을 새 셀을 고르는 단추가 나온다. <b>텍스트</b>를 고른다.
+<figure class="shot"><img src="../assets/images/colab/colab-use-add-text.png" width="986" height="391" loading="lazy" alt="코드 셀 위쪽에 코드와 텍스트 단추가 나타나 있고 텍스트 단추에 텍스트 셀 추가 안내가 보인다."><figcaption>코드 셀 위쪽에 나타나는 셀 추가 단추</figcaption></figure></li>
+<li><strong>아래 내용을 입력한다.</strong> Markdown 문법으로 직접 입력하거나 위쪽의 편집 도구를 쓴다. 어떻게 표시되는지는 오른쪽 미리 보기에서 확인한다.
+<div class="cb"><span class="lang">Markdown</span><pre>## pandas 이용하기
+
+`import` 를 통해 pandas 모듈을 불러옵니다. 이때 코드에서 pandas 를 pd 로 줄여 부르기 위해 as pd 를 붙입니다.</pre></div>
+<figure class="shot"><img src="../assets/images/colab/colab-use-markdown.png" width="1407" height="624" loading="lazy" alt="텍스트 셀 편집 화면. 왼쪽에 Markdown 원문, 오른쪽에 제목과 문단으로 표시된 미리 보기가 있다."><figcaption>왼쪽은 입력한 Markdown, 오른쪽은 미리 보기</figcaption></figure></li>
+<li><strong>아래쪽 코드 셀에 코드를 입력하고 실행한다.</strong>
+<div class="cb py"><span class="lang">Python</span><pre>import pandas as pd</pre></div>
+<figure class="shot"><img src="../assets/images/colab/colab-use-code.png" width="1409" height="640" loading="lazy" alt="코드 셀을 실행하는 중인 화면. 실행 단추가 돌아가고 오른쪽 위에 연결 중이 표시되어 있다."><figcaption>실행하는 중. 런타임이 연결되어 있지 않으면 오른쪽 위에 “연결 중”이 보인다. 이 그림과 다음 그림의 코드는 <code>as ps</code>로 찍혔지만, 위 코드처럼 <code>as pd</code>로 입력한다.</figcaption></figure></li>
+<li><strong>결과를 확인한다.</strong> 오류가 없으면 셀 앞에 초록색 체크 표시가 나온다.
+<figure class="shot"><img src="../assets/images/colab/colab-use-ok.png" width="1408" height="601" loading="lazy" alt="코드 셀 앞에 초록색 체크와 실행 시간이 표시되어 있다."><figcaption>오류가 없을 때</figcaption></figure>
+오류가 있으면 셀 아래에 오류 메시지가 나온다. 아래 그림은 <code>as</code>를 <code>a</code>로 잘못 입력한 예다.
+<figure class="shot"><img src="../assets/images/colab/colab-use-error.png" width="1406" height="642" loading="lazy" alt="import pandas a pd를 실행해 셀 아래에 SyntaxError: invalid syntax 메시지가 나온 화면."><figcaption>오류가 있을 때</figcaption></figure></li>
+</ol>
+</section>
+</main>
+
+<script src="../assets/rlesson.js"></script>
+</body>
+</html>

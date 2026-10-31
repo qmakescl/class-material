@@ -179,5 +179,15 @@ window.MATERIALS = [
     href: "data-science/nvm-node-agent-skills.html",
     tags: ["데이터과학", "개념정리", "작업환경", "코딩에이전트", "Node.js", "nvm", "에이전트스킬"],
     date: "2026-10-30"
+  },
+  {
+    subject: "data-science",
+    label: "작업환경 안내",
+    title: "Google Colab 사용하기",
+    description: "웹 브라우저에서 Python과 R 노트북을 쓰는 Google Colab의 시작 방법과 화면 구성, 런타임 연결, 코드 셀과 텍스트 셀, 터미널을 그림과 함께 익히고 첫 노트북을 직접 작성해 봅니다.",
+    href: "data-science/google-colab-basics.html",
+    practice: true,
+    tags: ["데이터과학", "개념정리", "작업환경", "GoogleColab", "주피터노트북", "GPU"],
+    date: "2026-10-31"
   }
 ];

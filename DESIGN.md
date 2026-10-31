@@ -415,6 +415,7 @@
 | VS Code에서 R 실행하기 | 데이터과학 · 개념정리 · R · VSCode · 작업환경 · 코딩에이전트 |
 | nvm과 Node.js, 에이전트 스킬 설치하기 | 데이터과학 · 개념정리 · 작업환경 · 코딩에이전트 · Node.js · nvm · 에이전트스킬 |
 | ggplot 을 이용한 시각화 | 데이터과학 · 시각화 · R · ggplot2 · 레이어문법 · 테마 · 한글글꼴 |
+| Google Colab 사용하기 | 데이터과학 · 개념정리 · 작업환경 · GoogleColab · 주피터노트북 · GPU |
 
 ## 수식 표기 (KaTeX)
 
