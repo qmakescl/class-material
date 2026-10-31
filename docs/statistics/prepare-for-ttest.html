@@ -738,49 +738,23 @@ write_csv(d_long, "dataset/working/sodium_long.csv")
 
 <section class="panel" id="s5">
 <div class="section-head"><span class="section-num">05</span><h2>그림을 그려 output에 저장하기</h2></div>
-<p>그림의 제목이나 축 이름에 쓴 한글이 네모로 나오면 한글 글꼴을 준비해야 한다. 아래를 펼쳐 따라 한다.</p>
+<p>그림의 제목이나 축 이름에 쓴 한글이 네모로 나오면 showtext로 한글 글꼴을 설정한다. 아래를 펼쳐 따라 한다.</p>
 <details class="fold" id="korean-font">
-<summary>그림에 쓸 한글 글꼴 준비하기: extrafont와 KoPub 서체</summary>
-<p>ggplot2의 기본 글꼴에는 한글이 없어서 제목이나 축 이름의 한글이 네모로 나올 수 있다. extrafont 패키지로 컴퓨터에 설치된 글꼴을 R에 등록하고, 그림의 기본 글꼴을 한글 글꼴로 바꾼다.</p>
-<h4>extrafont로 글꼴을 등록하고 지정하기</h4>
-<p><strong>글꼴 등록.</strong> 컴퓨터마다 한 번만 한다. 몇 분 걸린다. 끝나면 R 터미널을 닫고 새로 연다.</p>
-<div class="cb r"><span class="lang">R · 처음 한 번만</span><pre>library(extrafont)
-font_import(prompt = FALSE)   # 컴퓨터의 트루타입 글꼴을 찾아 R에 등록한다</pre></div>
-<p><strong>글꼴 불러오기와 지정.</strong> R을 새로 켤 때마다 그림을 그리기 전에 실행한다. 운영체제에 맞는 쪽을 쓴다.</p>
-<div class="cb r"><span class="lang">R · Windows</span><pre>library(extrafont)
-loadfonts(device = "win", quiet = TRUE)    # 등록한 글꼴을 화면 그림 장치에 연결한다
-fonts()                                    # 쓸 수 있는 글꼴 이름. "Malgun Gothic"이 있는지 본다
+<summary>그림에 쓸 한글 글꼴 준비하기: showtext와 Noto Sans KR</summary>
+<p>ggplot2의 기본 글꼴로는 제목이나 축 이름의 한글이 네모로 나올 수 있다. showtext 패키지는 글꼴 파일을 직접 읽어 글자를 그림에 그려 넣으므로, Windows와 macOS에서 같은 글꼴로 같은 그림을 얻는다. 글꼴은 Google Fonts의 Noto Sans KR을 쓴다. 컴퓨터에 글꼴을 따로 설치하지 않아도 된다.</p>
+<h4>패키지 설치</h4>
+<p>컴퓨터마다 한 번만 한다. <a href="../data-science/VScode-R-languageserver.html">VS Code에서 R 실행하기</a>를 따라 했다면 이미 설치되어 있다.</p>
+<div class="cb r"><span class="lang">R · 처음 한 번만</span><pre>install.packages("showtext", repos = "https://cloud.r-project.org/")</pre></div>
+<h4>글꼴 등록과 지정</h4>
+<p>R을 새로 켤 때마다 그림을 그리기 전에 실행한다. 스크립트 맨 앞의 <code>library()</code> 줄 아래에 적어 둔다. 인터넷 연결이 필요하다.</p>
+<div class="cb r"><span class="lang">R</span><pre>library(showtext)
 
-theme_set(theme_gray(base_family = "Malgun Gothic"))   # 이후 모든 그림의 글꼴: 맑은 고딕</pre></div>
-<div class="cb r"><span class="lang">R · macOS</span><pre>library(extrafont)
-loadfonts(quiet = TRUE)                    # 등록한 글꼴을 PDF 그림 장치에 연결한다
-fonts()                                    # 쓸 수 있는 글꼴 이름. "AppleGothic"이 있는지 본다
+font_add_google("Noto Sans KR")   # Google Fonts에서 글꼴을 받아 등록한다
+showtext_auto()                   # 이후의 그림에 showtext를 켠다
+showtext_opts(dpi = 300)          # ggsave()의 dpi와 맞춘다
 
-theme_set(theme_gray(base_family = "AppleGothic"))     # 이후 모든 그림의 글꼴: 애플고딕</pre></div>
-<div class="callout caution"><p><strong>글꼴 이름은 <code>fonts()</code>가 보여 주는 그대로 적는다.</strong> 목록에 없는 이름을 쓰면 경고가 나오고 한글이 다시 깨진다. extrafont는 트루타입(.ttf) 글꼴만 등록하므로, 다른 한글 글꼴을 쓰려면 .ttf 파일을 설치한 뒤 <code>font_import()</code>를 다시 실행한다.</p></div>
-<h4>KoPub 서체 쓰기</h4>
-<p>운영체제의 기본 글꼴 대신, 한국출판인회의가 무료로 배포하는 KoPubWorld 서체(돋움체, 바탕체)를 쓸 수 있다. Windows와 macOS에서 같은 글꼴로 그림을 그리게 되므로 수강생끼리 결과물의 모양이 같아진다. 논문이나 보고서에 넣을 그림에도 쓸 수 있다.</p>
-<ol>
-<li><strong>내려받기.</strong> <a href="https://www.kopus.org/biz-electronic-font2/" target="_blank" rel="noopener noreferrer">한국출판인회의의 KoPub 서체 페이지</a>에서 사용자 정보를 입력하고 <strong>TTF</strong> 압축 파일을 받는다. extrafont는 OTF 파일을 등록하지 못하므로 OTF가 아니라 TTF를 받아야 한다.</li>
-<li><strong>설치.</strong> 압축을 풀고 글꼴 파일을 설치한다.
-  <ul>
-  <li>Windows: 글꼴 파일을 모두 선택하고 마우스 오른쪽 버튼을 눌러 <em>모든 사용자용으로 설치</em>를 고른다. 그냥 <em>설치</em>를 누르면 글꼴이 사용자 개인 폴더에 들어가 extrafont가 찾지 못한다.</li>
-  <li>macOS: 글꼴 파일을 두 번 눌러 열고 <em>서체 설치</em>를 누른다.</li>
-  </ul></li>
-<li><strong>R에 등록.</strong> 새로 설치한 글꼴만 골라 등록한다. 끝나면 R 터미널을 닫고 새로 연다.</li>
-</ol>
-<div class="cb r"><span class="lang">R · KoPub 설치 후 한 번만</span><pre>library(extrafont)
-font_import(pattern = "KoPub", prompt = FALSE)   # 파일 이름에 KoPub이 들어간 글꼴만 등록한다</pre></div>
-<p><strong>글꼴 지정.</strong> 등록된 이름을 확인하고, 그 이름을 그대로 <code>base_family</code>에 적는다.</p>
-<div class="cb r"><span class="lang">R</span><pre>library(extrafont)
-loadfonts(device = "win", quiet = TRUE)      # Windows. macOS는 loadfonts(quiet = TRUE)
-
-grep("KoPub", fonts(), value = TRUE)         # 등록된 KoPub 글꼴의 이름을 확인한다
-
-# 위에서 확인한 이름을 그대로 적는다. 아래는 돋움체 Medium의 예
-theme_set(theme_gray(base_family = "KoPubWorldDotum Medium"))</pre></div>
-<div class="callout caution"><p><strong>이름이 다르면 확인한 쪽을 따른다.</strong> 글꼴 이름은 굵기(Light, Medium, Bold)마다 따로 등록되고, 서체 판에 따라 표기가 조금씩 다를 수 있다. <code>grep()</code>의 결과에 아무것도 나오지 않으면 글꼴이 등록되지 않은 것이다. TTF 파일을 받았는지, Windows에서 모든 사용자용으로 설치했는지 확인하고 <code>font_import()</code>를 다시 실행한다.</p>
-<p>KoPub 서체는 상업적 이용을 포함해 무료로 쓸 수 있지만, 글꼴 파일을 고치거나 다른 사람에게 다시 배포하는 것은 허용되지 않는다. 수강생은 각자 내려받는다.</p></div>
+theme_set(theme_gray(base_family = "Noto Sans KR"))   # 이후 모든 그림의 글꼴</pre></div>
+<div class="callout caution"><p><strong>이름은 <code>font_add_google()</code>에 적은 그대로 쓴다.</strong> <code>base_family</code>의 이름이 다르면 다른 글꼴로 그려지거나 한글이 깨진다. <code>font_families()</code>로 등록된 이름을 확인한다. 저장한 PNG의 글자가 너무 작으면 <code>showtext_opts(dpi = )</code>와 <code>ggsave(dpi = )</code>의 값이 같은지 본다. 인터넷이 없을 때와 그 밖의 문제는 <a href="../data-science/ggplot-visualization.html#hangul">ggplot 자료의 showtext 절</a>을 본다.</p></div>
 </details>
 
 

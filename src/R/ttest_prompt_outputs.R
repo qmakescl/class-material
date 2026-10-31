@@ -91,7 +91,7 @@ p_t <- ggplot(grid, aes(t, dens)) +
            label = sprintf("임계값 ±%.2f", crit)) +
   labs(x = sprintf("t (df = %d)", df2), y = "밀도",
        title = sprintf("영가설 아래의 t 분포와 관측한 t: p = %.3f", r2$p.value),
-       subtitle = "주황: 기각역(양측 5%), 파랑: p-value") +
+       subtitle = "주황: 유의수준 0.05의 양측 기각역, 파랑: p-value") +
   theme_classic(base_size = 12)
 ggsave(file.path(out_dir, "apa-ttest.png"), p_t, device = ragg::agg_png,
        width = 6, height = 4, dpi = 150)

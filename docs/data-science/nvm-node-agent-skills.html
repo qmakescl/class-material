@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>nvm과 Node.js, 에이전트 스킬 설치하기 | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/nvm-node-agent-skills.html">
+<meta name="description" content="macOS·Linux의 nvm과 Windows의 NVM for Windows 2.0으로 Node.js 24를 설치하고, Antigravity에서 쓸 docx 스킬을 설치하는 과정을 안내하는 데이터과학 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="nvm과 Node.js, 에이전트 스킬 설치하기 | Q의 아카이브">
+<meta property="og:description" content="nvm으로 Node.js 24를 설치하고, 코딩 에이전트가 Word 보고서를 만들 때 쓸 docx 스킬을 설치합니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/nvm-node-agent-skills.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="데이터과학 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="nvm과 Node.js, 에이전트 스킬 설치하기 | Q의 아카이브">
+<meta name="twitter:description" content="nvm으로 Node.js 24를 설치하고, 코딩 에이전트가 Word 보고서를 만들 때 쓸 docx 스킬을 설치합니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
+<link rel="stylesheet" href="../assets/material.css">
+<link rel="stylesheet" href="../assets/rlesson.css">
+<style>
+  /* 과목 강조색: 데이터과학. 흰 바탕 위 작은 글자와 링크에는 한 단계 어두운 색을 쓴다 */
+  :root { --accent: #0ea968; --accent-soft: #e6f8f0; --accent-dark: #087a4b; }
+  main a { color: var(--accent-dark); }
+  .skip-link { background: var(--accent-dark); }
+  .fold > summary { color: var(--accent-dark); }
+</style>
+<script defer src="../assets/annotate.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../index.html#data-science">← 처음으로</a>
+  <h1>nvm과 Node.js,<br>에이전트 스킬</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#why"><b>01</b><span>무엇을 왜 설치하나</span></a>
+    <a href="#mac"><b>02</b><span>macOS·Linux: nvm</span></a>
+    <a href="#win"><b>03</b><span>Windows: NVM for Windows</span></a>
+    <a href="#skill"><b>04</b><span>docx 스킬 설치</span></a>
+    <a href="#use"><b>05</b><span>스킬 쓰기와 문제 해결</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#데이터과학</span>
+    <span class="rail-tag">#개념정리</span>
+    <span class="rail-tag">#작업환경</span>
+    <span class="rail-tag">#코딩에이전트</span>
+    <span class="rail-tag">#Node.js</span>
+    <span class="rail-tag">#nvm</span>
+    <span class="rail-tag">#에이전트스킬</span>
+  </div>
+  <footer>명령은 VS Code의 터미널에 한 줄씩 붙여 넣어 실행합니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+<main id="content">
+<header class="panel">
+<div class="eyebrow">데이터 다루기 · 작업환경</div>
+<h2 class="page-title">nvm과 Node.js, 에이전트 스킬 설치하기</h2>
+<p class="lede">코딩 에이전트(Antigravity)가 Word 보고서를 잘 만들도록 docx 스킬을 설치한다. 스킬 설치 명령과 스킬이 쓰는 코드가 Node.js로 돌아가므로, 버전 관리 도구 nvm으로 Node.js 24를 먼저 설치한다. 컴퓨터마다 한 번만 하면 되고, 스킬은 작업 폴더마다 한 번 설치한다.</p>
+<dl class="facts">
+<div><dt>설치하는 것</dt><dd>nvm(macOS·Linux) 또는 NVM for Windows 2.0(Windows), Node.js 24, docx 스킬</dd></div>
+<div><dt>먼저 해 둘 것</dt><dd>VS Code와 Antigravity 확장. 아직이면 <a href="VScode-R-languageserver.html">VS Code에서 R 실행하기</a>를 먼저 따라 한다.</dd></div>
+<div><dt>이 환경을 쓰는 자료</dt><dd><a href="../statistics/anova-with-r.html">분산분석: 일원배치에서 혼합 설계까지</a>의 결과보고서</dd></div>
+</dl>
+</header>
+
+<section class="panel" id="why">
+<div class="section-head"><span class="section-num">01</span><h2>무엇을 왜 설치하나</h2></div>
+<div class="scroll"><table>
+<thead><tr><th>이름</th><th>하는 일</th><th>왜 필요한가</th></tr></thead>
+<tbody>
+<tr><td><b>Node.js</b></td><td>JavaScript 프로그램을 컴퓨터에서 실행한다</td><td>스킬 설치 명령 <code>npx</code>와 docx 스킬이 Word 파일을 만드는 코드가 Node.js로 돌아간다</td></tr>
+<tr><td><b>nvm</b></td><td>Node.js의 여러 버전을 설치하고 바꿔 쓴다</td><td>관리자 권한 없이 설치하고, 버전 문제가 생기면 쉽게 바꿀 수 있다</td></tr>
+<tr><td><b>에이전트 스킬</b></td><td>에이전트가 특정 작업을 할 때 읽는 지침과 도구를 묶은 폴더다</td><td>docx 스킬이 있으면 에이전트가 Word 문서의 표, 그림, 서식을 다루는 절차를 그대로 따른다</td></tr>
+</tbody></table></div>
+<p>운영체제에 맞는 절만 따라 한 뒤 <a href="#skill">04절</a>로 간다.</p>
+</section>
+
+<section class="panel" id="mac">
+<div class="section-head"><span class="section-num">02</span><h2>macOS·Linux: nvm과 Node.js 24</h2></div>
+<ol class="steps">
+<li><strong>nvm을 설치한다.</strong> 터미널에서 실행한다.
+<div class="cb"><span class="lang">터미널</span><pre>curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh | bash</pre></div></li>
+<li><strong>터미널을 새로 열고 확인한다.</strong> <code>nvm</code>이 출력되면 된다. <code>which nvm</code>은 쓰지 않는다. nvm은 프로그램 파일이 아니라 셸 함수라서 설치되어 있어도 아무것도 나오지 않는다.
+<div class="cb"><span class="lang">터미널</span><pre>command -v nvm</pre></div></li>
+<li><strong>Node.js 24를 설치하고 기본값으로 정한다.</strong>
+<div class="cb"><span class="lang">터미널</span><pre>nvm install 24
+nvm alias default 24</pre></div></li>
+<li><strong>버전을 확인한다.</strong> <code>node -v</code>가 <code>v24</code>로 시작하면 된다.
+<div class="cb"><span class="lang">터미널</span><pre>node -v
+npx -v</pre></div></li>
+</ol>
+<details class="fold">
+<summary>macOS에서 nvm: command not found가 나오면</summary>
+<p>macOS의 기본 셸은 zsh이고 nvm은 <code>~/.zshrc</code>에 설정을 적는다. 이 파일이 없으면 만든 뒤 설치 명령을 다시 실행한다.</p>
+<div class="cb"><span class="lang">터미널</span><pre>touch ~/.zshrc</pre></div>
+<p>그래도 안 되면 <code>~/.zshrc</code> 끝에 아래 두 줄을 넣고 터미널을 새로 연다.</p>
+<div class="cb"><span class="lang">~/.zshrc</span><pre>export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] &amp;&amp; \. "$NVM_DIR/nvm.sh"</pre></div>
+</details>
+</section>
+
+<section class="panel" id="win">
+<div class="section-head"><span class="section-num">03</span><h2>Windows: NVM for Windows 2.0과 Node.js 24</h2></div>
+<p>Windows용은 macOS·Linux의 nvm과 다른 프로젝트다. 2.0부터 저장소가 <a href="https://github.com/nvm-windows/nvm" target="_blank" rel="noopener noreferrer">github.com/nvm-windows/nvm</a>으로 옮겨졌다. 예전 안내에 나오는 <code>coreybutler/nvm-windows</code>의 1.x 설치 파일을 받지 않도록 주의한다.</p>
+<ol class="steps">
+<li><strong>설치 파일을 내려받는다.</strong> <a href="https://github.com/nvm-windows/nvm/releases/latest" target="_blank" rel="noopener noreferrer">최신 안정 버전 페이지</a>의 Assets에서 고른다. 대부분의 PC는 x64이고, ARM 노트북이면 arm64다. 버전 2.0.1이면 파일 이름은 다음과 같다. 이름에 beta가 들어간 시험판은 받지 않는다.
+<div class="cb out"><span class="lang">내려받을 파일</span><pre>nvm-2.0.1-x64-setup.exe      일반 PC (Intel, AMD)
+nvm-2.0.1-arm64-setup.exe    ARM 노트북</pre></div></li>
+<li><strong>일반 사용자 권한으로 실행한다.</strong> "관리자 권한으로 실행"을 쓰지 않는다. 관리자로 설치하면 내 계정이 아니라 관리자 계정에 설정된다. 설치 중 권한 확인 창이 떠도 거부해도 동작에는 문제가 없다.</li>
+<li><strong>PowerShell이나 VS Code 터미널을 새로 열고 Node.js 24를 설치한다.</strong> <code>nvm use 24</code>가 이 버전을 기본값으로 정한다.
+<div class="cb"><span class="lang">PowerShell</span><pre>nvm install 24
+nvm use 24</pre></div></li>
+<li><strong>버전을 확인한다.</strong> <code>node -v</code>가 <code>v24</code>로 시작하면 된다.
+<div class="cb"><span class="lang">PowerShell</span><pre>node -v
+npx -v
+nvm default</pre></div></li>
+</ol>
+<div class="callout caution"><p><strong>이미 Node.js가 설치되어 있다면.</strong> 설치 마법사가 기존 Node.js를 어떻게 할지 물을 수 있으니 안내를 읽고 고른다. 설치 뒤 문제가 있으면 <code>nvm doctor</code>로 점검한다. NVM for Windows 1.x를 쓰고 있었다면 설치 파일이 2.0으로 옮겨 준다.</p></div>
+</section>
+
+<section class="panel" id="skill">
+<div class="section-head"><span class="section-num">04</span><h2>docx 스킬 설치</h2></div>
+<p>스킬은 <a href="https://skills.sh" target="_blank" rel="noopener noreferrer">skills.sh</a>에서 찾을 수 있다. 여기서는 Anthropic이 공개한 <a href="https://skills.sh/anthropics/skills/docx" target="_blank" rel="noopener noreferrer">docx 스킬</a>을 설치한다.</p>
+<ol class="steps">
+<li><strong>작업 폴더를 VS Code로 열고 터미널을 연다.</strong> 스킬은 지금 폴더에 설치되므로, 분석을 할 폴더에서 실행한다.</li>
+<li><strong>설치 명령을 실행한다.</strong>
+<div class="cb"><span class="lang">터미널</span><pre>npx skills add https://github.com/anthropics/skills --skill docx</pre></div></li>
+<li><strong>질문에 답한다.</strong> 처음 실행하면 <code>skills</code> 패키지를 설치할지 묻는다. <code>y</code>를 누른다. 어느 에이전트에 설치할지 물으면 <b>Antigravity</b>를 고른다. 설치 범위를 물으면 이 폴더(Project)를 고른다.</li>
+<li><strong>설치를 확인한다.</strong> 목록에 docx가 보이고, 작업 폴더에 <code>.agents/skills/docx/SKILL.md</code>가 생기면 된다.
+<div class="cb"><span class="lang">터미널</span><pre>npx skills list</pre></div></li>
+</ol>
+<details class="fold">
+<summary>질문 없이 한 번에 설치하려면</summary>
+<p>에이전트를 지정하고 확인을 건너뛴다.</p>
+<div class="cb"><span class="lang">터미널</span><pre>npx skills add https://github.com/anthropics/skills --skill docx -a antigravity -y</pre></div>
+<p>모든 작업 폴더에서 쓰려면 <code>-g</code>를 더한다. 이때는 <code>~/.gemini/antigravity/skills/</code>에 설치된다.</p>
+</details>
+<pre class="tree">작업 폴더/
+├── .agents/
+│   └── skills/
+│       └── docx/
+│           ├── SKILL.md      에이전트가 읽는 지침
+│           ├── LICENSE.txt   이용 조건
+│           └── scripts/      문서를 다루는 도구
+└── skills-lock.json          설치한 스킬의 기록</pre>
+<div class="callout caution"><p><strong>스킬은 에이전트의 권한으로 실행된다.</strong> 설치 도구도 사용 전에 검토하라고 안내한다. 믿을 수 있는 곳의 스킬만 설치하고, <code>SKILL.md</code>를 한 번 읽어 본다. docx 스킬의 이용 조건은 오픈 소스가 아니라 <code>LICENSE.txt</code>를 따르므로, 저장소를 공개한다면 이 폴더를 함께 올려도 되는지 먼저 확인한다.</p></div>
+</section>
+
+<section class="panel" id="use">
+<div class="section-head"><span class="section-num">05</span><h2>스킬 쓰기와 문제 해결</h2></div>
+<p>Antigravity의 대화를 새로 시작하고, 스킬을 쓰라고 적어 시킨다. 아래 프롬프트로 설치를 시험한다.</p>
+<div class="cb prompt"><span class="lang">프롬프트 · 설치 시험</span><pre>.agents/skills/docx 의 docx 스킬을 읽고, 그 안내대로 output/report/test.docx 를 만들어 줘.
+- 제목 한 줄, 문단 한 개, 가로선만 있는 2행 2열 표 한 개를 넣는다.
+- 어떤 스킬을 읽었는지와, 설치가 더 필요했던 것이 있는지 알려 준다.</pre></div>
+<div class="scroll"><table>
+<thead><tr><th>증상</th><th>원인</th><th>해결</th></tr></thead>
+<tbody>
+<tr><td><code>node</code>나 <code>npx</code>를 찾을 수 없다</td><td>설치 전에 열어 둔 터미널이다</td><td>터미널을 새로 연다. VS Code도 다시 시작한다</td></tr>
+<tr><td><code>node -v</code>가 24가 아니다</td><td>다른 버전이 기본값이다</td><td>macOS·Linux는 <code>nvm alias default 24</code>, Windows는 <code>nvm use 24</code></td></tr>
+<tr><td><code>npx skills</code>가 실행되지 않는다</td><td>Node.js 버전이 낮다. <code>skills</code>는 22.20 이상이 필요하다</td><td>위와 같이 24로 바꾼다</td></tr>
+<tr><td>에이전트가 스킬을 쓰지 않는다</td><td>설치 전에 시작한 대화이거나 다른 폴더를 열었다</td><td>스킬을 설치한 폴더를 열고 대화를 새로 시작한다. 프롬프트에 경로를 적는다</td></tr>
+<tr><td><code>Cannot find module 'docx'</code></td><td>스킬이 쓰는 JavaScript 패키지가 없다</td><td>스킬의 안내대로 작업 폴더에서 <code>npm install docx</code>를 실행한다</td></tr>
+<tr><td><code>soffice</code>나 <code>pdftoppm</code>이 없다는 메시지</td><td>완성한 문서를 그림으로 바꿔 살피는 도구(LibreOffice, Poppler)가 없다</td><td>문서는 만들어진다. 에이전트에게 이 점검을 건너뛰게 하고, Word로 직접 열어 확인한다</td></tr>
+</tbody></table></div>
+<h3>확인 범위</h3>
+<p>스킬 설치 명령은 macOS의 임시 폴더에서 비대화 방식(<code>-a antigravity -y</code>)으로 실행해 위 구조로 설치되는 것을 확인했다. 이때 Node.js는 22.22였다. 스킬이 쓰는 <code>docx</code> 패키지로 가로선 표, 기울임꼴, 그림이 든 Word 파일이 만들어지는 것도 확인했다. nvm과 NVM for Windows의 명령은 공식 문서(2026년 10월 기준)를 옮긴 것으로, 이 자료를 쓰며 Windows와 Linux에서 직접 실행하지는 않았다. Antigravity가 스킬을 실제로 불러오는 것도 직접 확인하지 않았으니, 위 설치 시험 프롬프트로 확인한다.</p>
+</section>
+
+<section class="panel" id="refs">
+<h3>참고 자료</h3>
+<ol class="refs">
+<li>nvm-sh. <em>nvm</em>. <a href="https://github.com/nvm-sh/nvm" target="_blank" rel="noopener noreferrer">github.com/nvm-sh/nvm</a></li>
+<li>NVM for Windows. <em>Documentation</em>. <a href="https://docs.nvm-windows.com" target="_blank" rel="noopener noreferrer">docs.nvm-windows.com</a></li>
+<li>Vercel Labs. <em>skills</em>. <a href="https://github.com/vercel-labs/skills" target="_blank" rel="noopener noreferrer">github.com/vercel-labs/skills</a></li>
+<li>Anthropic. <em>docx skill</em>. <a href="https://github.com/anthropics/skills/tree/main/skills/docx" target="_blank" rel="noopener noreferrer">github.com/anthropics/skills</a></li>
+</ol>
+</section>
+</main>
+
+<script src="../assets/rlesson.js"></script>
+</body>
+</html>

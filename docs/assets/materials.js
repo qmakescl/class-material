@@ -160,5 +160,24 @@ window.MATERIALS = [
     practice: true,
     tags: ["데이터과학", "시각화", "R", "ggplot2", "레이어문법", "테마", "한글글꼴"],
     date: "2026-10-25"
+  },
+  {
+    subject: "statistics",
+    label: "R 실습",
+    title: "분산분석: 일원배치에서 혼합 설계까지",
+    description: "세 개 이상의 평균을 비교할 때 왜 분산을 나누는지 제곱합 분해 그림으로 확인하고, R 내장 자료로 일원배치·이원배치·반복측정·혼합 설계의 가정 점검, 분산분석표, 사후검정과 교호작용을 R 코드와 코딩 에이전트 프롬프트로 따라 합니다.",
+    href: "statistics/anova-with-r.html",
+    practice: true,
+    tags: ["통계", "사례분석", "R", "분산분석", "가설검정", "사후검정", "반복측정"],
+    date: "2026-10-30"
+  },
+  {
+    subject: "data-science",
+    label: "작업환경 안내",
+    title: "nvm과 Node.js, 에이전트 스킬 설치하기",
+    description: "macOS·Linux의 nvm과 Windows의 NVM for Windows 2.0으로 Node.js 24를 설치하고, 코딩 에이전트 Antigravity가 Word 보고서를 만들 때 쓸 docx 스킬을 설치합니다.",
+    href: "data-science/nvm-node-agent-skills.html",
+    tags: ["데이터과학", "개념정리", "작업환경", "코딩에이전트", "Node.js", "nvm", "에이전트스킬"],
+    date: "2026-10-30"
   }
 ];

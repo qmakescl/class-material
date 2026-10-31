@@ -1,0 +1,959 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>분산분석 교안</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: 단일 읽기 컬럼(본문 ~70자) + 넓은 그림 영역, 상단 고정 섹션 내비 */
+:root{
+  --bg:#f7f8f9; --surface:#ffffff; --ink:#18222e; --muted:#5b6774; --line:#d9dee4;
+  --accent:#1f5f8b; --accent-soft:#e3eef6; --warn:#a4561a; --warn-soft:#f8ece1; --ok:#2c7a57; --ok-soft:#e2f2ea;
+  --code-bg:#f0f2f5; --code-ink:#1d2733; --code-cm:#6c7a88; --code-fn:#1f5f8b;
+  --g1:#2f6fb0; --g2:#c46a1f; --g3:#2f8a63; --g4:#8a52b8;
+  --f-display:"Hahmlet","Nanum Myeongjo",Georgia,serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12171d; --surface:#1a2129; --ink:#e4e9ee; --muted:#9aa6b2; --line:#2e3843;
+  --accent:#7db4de; --accent-soft:#1d3346; --warn:#e3a06a; --warn-soft:#3a2a1d; --ok:#74c8a0; --ok-soft:#1b3328;
+  --code-bg:#0f1419; --code-ink:#d8e0e8; --code-cm:#7d8b98; --code-fn:#8cc4ec;
+  --g1:#6aa6e0; --g2:#e69a55; --g3:#5cc293; --g4:#b78ae0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12171d; --surface:#1a2129; --ink:#e4e9ee; --muted:#9aa6b2; --line:#2e3843;
+  --accent:#7db4de; --accent-soft:#1d3346; --warn:#e3a06a; --warn-soft:#3a2a1d; --ok:#74c8a0; --ok-soft:#1b3328;
+  --code-bg:#0f1419; --code-ink:#d8e0e8; --code-cm:#7d8b98; --code-fn:#8cc4ec;
+  --g1:#6aa6e0; --g2:#e69a55; --g3:#5cc293; --g4:#b78ae0; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.75;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{padding-block:48px 28px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600}
+h1{font-family:var(--f-display);font-size:clamp(30px,5vw,44px);line-height:1.2;margin:.3em 0 .4em;text-wrap:balance;font-weight:700}
+h2{font-family:var(--f-display);font-size:clamp(24px,3.6vw,31px);line-height:1.3;margin:0 0 .5em;text-wrap:balance}
+h3{font-size:19px;margin:2.2em 0 .5em;line-height:1.4;font-weight:600}
+h4{font-size:16px;margin:1.6em 0 .3em;font-weight:600}
+p,li{max-width:70ch}
+.lead{font-size:17.5px;color:var(--muted);max-width:66ch;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.chip{font-family:var(--f-mono);font-size:12.5px;border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:2px 8px;color:var(--muted)}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+nav.toc .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.toc a{white-space:nowrap;padding:11px 12px;font-size:14px;color:var(--muted);text-decoration:none;border-bottom:2px solid transparent}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--ink);border-bottom-color:var(--accent);outline:none}
+section.part{padding-block:56px 24px;border-bottom:1px solid var(--line)}
+.partno{font-family:var(--f-mono);font-size:13px;color:var(--accent);letter-spacing:.06em}
+a{color:var(--accent)}
+.math{font-family:var(--f-mono);font-size:14.5px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 16px;overflow-x:auto;white-space:pre;line-height:1.7;max-width:100%}
+code.i{font-family:var(--f-mono);font-size:.88em;background:var(--code-bg);padding:1px 5px;border-radius:3px}
+.note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;margin:18px 0;max-width:72ch;border-radius:0 6px 6px 0}
+.note.warn{border-color:var(--warn);background:var(--warn-soft)}
+.note.ok{border-color:var(--ok);background:var(--ok-soft)}
+.note p{margin:.2em 0}
+.note strong:first-child{display:block;font-size:13px;letter-spacing:.06em;margin-bottom:2px}
+.tbl{overflow-x:auto;margin:14px 0;max-width:100%}
+table{border-collapse:collapse;font-size:14.5px;font-variant-numeric:tabular-nums;min-width:100%}
+th,td{padding:7px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{font-weight:600;color:var(--muted);font-size:13px;border-bottom:1.5px solid var(--ink)}
+th:first-child,td:first-child{text-align:left}
+tr.sig td{background:var(--accent-soft)}
+caption{caption-side:top;text-align:left;font-size:13px;color:var(--muted);padding-bottom:6px}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;margin:18px 0}
+.fig svg{display:block;width:100%;height:auto;overflow:visible}
+.figcap{font-size:13.5px;color:var(--muted);margin-top:8px;max-width:none}
+.ctrls{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.ctrls button{font:inherit;font-size:13.5px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.ctrls button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.ctrls button:focus-visible,.copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.readout{font-family:var(--f-mono);font-size:13.5px;background:var(--bg);border:1px dashed var(--line);border-radius:6px;padding:10px 12px;margin-top:10px;white-space:pre-wrap}
+.grid2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:760px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.code{position:relative;margin:14px 0}
+.code pre{background:var(--code-bg);color:var(--code-ink);border:1px solid var(--line);border-radius:8px;padding:16px;overflow-x:auto;font-family:var(--f-mono);font-size:13.2px;line-height:1.6;margin:0;max-height:620px}
+.code .cm{color:var(--code-cm);font-style:italic}
+.code .fn{color:var(--code-fn);border-bottom:1px dotted var(--code-fn);cursor:help;font-weight:600}
+.code .label{font-size:12px;color:var(--muted);letter-spacing:.06em;margin-bottom:4px}
+.copy{position:absolute;top:26px;right:8px;font:inherit;font-size:12px;padding:3px 10px;border-radius:4px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.prompt pre{white-space:pre-wrap;font-family:var(--f-body);font-size:14.2px;line-height:1.7;background:var(--surface);border-left:3px solid var(--warn)}
+#tip{position:fixed;z-index:30;max-width:340px;background:var(--ink);color:var(--bg);border-radius:6px;padding:10px 12px;font-size:13px;line-height:1.55;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+#tip b{font-family:var(--f-mono)}
+#tip .k{opacity:.7;font-size:11.5px;letter-spacing:.05em;display:block;margin-top:5px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin-top:6px}
+.legend span::before{content:"";display:inline-block;width:12px;height:3px;background:var(--c);margin-right:6px;vertical-align:middle}
+.steps{counter-reset:s;padding-left:0;list-style:none}
+.steps li{counter-increment:s;padding-left:34px;position:relative;margin:.5em 0}
+.steps li::before{content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:600;text-align:center;line-height:24px}
+.refs li{font-size:14.5px;margin:.35em 0}
+footer{padding-block:28px 60px;color:var(--muted);font-size:13.5px}
+svg text{fill:var(--muted);font-family:var(--f-body);font-size:12px}
+svg .ax{stroke:var(--line)}
+svg .ink{fill:var(--ink)}
+@media (prefers-reduced-motion:no-preference){svg .anim{transition:opacity .35s ease}}
+</style>
+
+<div id="tip" hidden></div>
+
+<header class="top"><div class="wrap">
+  <div class="eyebrow">R 가설검정 · 평균 비교의 확장</div>
+  <h1>분산분석(ANOVA) 교안</h1>
+  <p class="lead">세 개 이상의 평균을 한 번에 비교할 때, 왜 "평균"이 아니라 "분산"을 나누는지를 일원배치에서 먼저 확인합니다. 같은 논리를 이원배치, 반복측정, 혼합 설계로 넓혀 갑니다. 모든 수치는 R 내장 데이터셋으로 계산했습니다.</p>
+  <div class="chips"><span class="chip">PlantGrowth · 일원배치</span><span class="chip">ToothGrowth · 이원배치</span><span class="chip">ChickWeight · 반복측정·혼합</span><span class="chip">tidyverse · %&gt;%</span></div>
+</div></header>
+
+<nav class="toc" aria-label="섹션"><div class="wrap">
+  <a href="#oneway">1 일원배치</a><a href="#twoway">2 이원배치</a><a href="#rm">3 반복측정</a><a href="#mixed">4 1요인+반복측정</a><a href="#refs">참고문헌</a>
+</div></nav>
+
+<main class="wrap">
+
+<!-- ===================== 1. ONE-WAY ===================== -->
+<section class="part" id="oneway">
+  <div class="partno">PART 1</div>
+  <h2>일원배치 분산분석</h2>
+  <p>t 검정은 두 평균을 비교합니다. 집단이 셋 이상이면 쌍마다 t 검정을 반복하고 싶어지지만, 세 집단이면 3번, 다섯 집단이면 10번의 검정이 필요하고 그만큼 1종 오류가 쌓입니다. α = .05로 독립인 검정 3번을 하면 하나라도 잘못 기각할 확률은 1 − 0.95³ ≈ .143입니다. 분산분석은 "모든 집단 평균이 같다"는 하나의 가설을 F 통계량 하나로 검정합니다.</p>
+
+  <h3>1.1 예제 데이터와 가설</h3>
+  <p><code class="i">PlantGrowth</code>는 대조군(ctrl)과 두 처리(trt1, trt2)에서 기른 식물의 건조 중량(weight)을 집단마다 10개씩 기록한 데이터입니다(Dobson, 1983).</p>
+  <div class="math">H₀ : μ_ctrl = μ_trt1 = μ_trt2
+H₁ : 적어도 한 집단의 평균이 다르다
+
+모형 :  y_ij = μ + τ_j + ε_ij ,   ε_ij ~ N(0, σ²) 독립
+         (j = 1,…,k 집단,  i = 1,…,n_j 관측)</div>
+  <p>모형의 가정은 세 가지입니다. ① 관측의 독립성, ② 각 집단 안의 오차가 정규분포, ③ 모든 집단의 오차 분산 σ²가 같음(등분산성). 독립성은 연구 설계로 확보하고, 정규성과 등분산성은 자료로 점검합니다.</p>
+
+  <div class="tbl"><table>
+    <caption>표 1. 집단별 기술통계 (weight)</caption>
+    <thead><tr><th>집단</th><th>n</th><th>평균</th><th>표준편차</th><th>분산</th></tr></thead>
+    <tbody>
+      <tr><td>ctrl</td><td>10</td><td>5.032</td><td>0.583</td><td>0.340</td></tr>
+      <tr><td>trt1</td><td>10</td><td>4.661</td><td>0.794</td><td>0.630</td></tr>
+      <tr><td>trt2</td><td>10</td><td>5.526</td><td>0.443</td><td>0.196</td></tr>
+      <tr><td><strong>전체</strong></td><td>30</td><td>5.073</td><td>0.701</td><td>0.492</td></tr>
+    </tbody></table></div>
+
+  <h3>1.2 각 집단의 분산 동질성 검정</h3>
+  <p>F 검정의 분모는 집단 내 분산을 <em>합쳐서</em>(pooled) 하나의 σ² 추정치로 씁니다. 이 합치기가 정당하려면 집단마다 분산이 같아야 합니다. 등분산 검정의 가설은 다음과 같습니다.</p>
+  <div class="math">H₀ : σ²_ctrl = σ²_trt1 = σ²_trt2      (등분산)
+H₁ : 적어도 한 집단의 분산이 다르다</div>
+  <ul>
+    <li><strong>Levene 검정</strong>: 각 관측값이 자기 집단의 중심에서 떨어진 절대편차 |y<sub>ij</sub> − ỹ<sub>j</sub>|를 새 변수로 만들고, 그 편차에 일원배치 분산분석을 적용합니다. 분산이 큰 집단일수록 절대편차의 평균이 큽니다. R의 <code class="i">car::leveneTest()</code>는 기본값으로 중앙값을 중심으로 쓰는 Brown–Forsythe 변형(center = median)을 사용해 정규성 위반에 덜 민감합니다.</li>
+    <li><strong>Bartlett 검정</strong>: 집단 분산의 로그를 비교하는 우도비 기반 검정입니다. 정규성이 성립하면 검정력이 높지만, 정규성에서 벗어나면 등분산이어도 쉽게 기각합니다.</li>
+  </ul>
+  <div class="tbl"><table>
+    <caption>표 2. 등분산성과 정규성 점검</caption>
+    <thead><tr><th>검정</th><th>통계량</th><th>자유도</th><th>p</th><th>판단</th></tr></thead>
+    <tbody>
+      <tr><td>Levene (center = median)</td><td>F = 1.119</td><td>2, 27</td><td>.341</td><td>등분산 유지</td></tr>
+      <tr><td>Bartlett</td><td>K² = 2.879</td><td>2</td><td>.237</td><td>등분산 유지</td></tr>
+      <tr><td>Shapiro–Wilk (잔차)</td><td>W = 0.966</td><td>–</td><td>.438</td><td>정규성 유지</td></tr>
+    </tbody></table></div>
+  <div class="note ok"><strong>이 교안의 판단</strong><p>두 검정 모두 p &gt; .05이므로 등분산 가정을 유지하고, 합동 분산을 쓰는 고전적 F 검정을 그대로 진행합니다. trt1의 분산(0.630)이 trt2(0.196)의 약 3.2배이지만, 표본이 작을 때 이 정도 차이는 우연으로 충분히 생깁니다. 집단 크기가 같으면 F 검정은 분산 차이에 비교적 강건합니다.</p></div>
+  <div class="note warn"><strong>등분산이 기각되면</strong><p>Welch의 일원배치 분산분석 <code class="i">oneway.test(weight ~ group, var.equal = FALSE)</code>을 쓰고, 사후검정은 Games–Howell 방법(<code class="i">rstatix::games_howell_test()</code>)으로 바꿉니다.</p></div>
+
+  <h3>1.3 분산을 자유도에 따라 분해하기</h3>
+  <p>분산분석의 핵심은 모든 관측값의 편차를 두 조각으로 쪼개는 항등식입니다. 하나는 "집단이 달라서 생긴 차이", 다른 하나는 "같은 집단 안에서도 생기는 차이"입니다.</p>
+  <div class="math">(y_ij − ȳ)  =  (ȳ_j − ȳ)  +  (y_ij − ȳ_j)
+  전체 편차      집단 간 편차      집단 내 편차
+
+제곱해서 모두 더하면 교차항이 0이 되어
+SST  =  SSB  +  SSW          14.258 = 3.766 + 10.492
+df :  N−1 = (k−1) + (N−k)       29  =   2   +   27</div>
+  <p>아래 그림에서 단계를 바꿔 가며 확인하세요. 점 하나를 누르면 그 관측값의 편차가 두 조각으로 나뉘는 계산이 나옵니다.</p>
+
+  <div class="fig">
+    <div class="ctrls" role="group" aria-label="분해 단계" id="dc-ctrls">
+      <button type="button" id="dc-b0" data-m="0" aria-pressed="false">① 전체 평균선</button>
+      <button type="button" id="dc-b1" data-m="1" aria-pressed="false">② 집단 평균과 개별값</button>
+      <button type="button" id="dc-b2" data-m="2" aria-pressed="false">③ 집단 평균 − 전체 평균</button>
+      <button type="button" id="dc-b3" data-m="3" aria-pressed="false">④ 개별값 − 집단 평균</button>
+      <button type="button" id="dc-b4" data-m="4" aria-pressed="true">⑤ 모두</button>
+    </div>
+    <div class="grid2">
+      <div><svg id="decomp" viewBox="0 0 560 380" role="img" aria-label="PlantGrowth 분산 분해 산점도"></svg></div>
+      <div>
+        <svg id="ssbar" viewBox="0 0 300 250" role="img" aria-label="제곱합 분해 막대"></svg>
+        <div class="readout" id="dc-read">점을 누르면 편차 분해가 여기에 나옵니다.</div>
+      </div>
+    </div>
+    <p class="figcap" id="dc-cap"></p>
+  </div>
+
+  <h4>자유도와 평균제곱, F</h4>
+  <p>제곱합은 더하는 항의 개수가 많을수록 커지므로, 자유도로 나누어 "편차 하나당 평균 크기"인 평균제곱(MS)으로 바꿉니다. 집단 간 자유도가 k − 1인 이유는 k개의 집단 평균이 전체 평균을 중심으로 합이 0이 되도록 묶여 있기 때문이고, 집단 내 자유도가 N − k인 이유는 각 집단에서 평균을 하나씩 추정하느라 자유도를 하나씩 쓰기 때문입니다.</p>
+  <div class="math">MSB = SSB / (k−1) = 3.766 / 2  = 1.883
+MSW = SSW / (N−k) = 10.492 / 27 = 0.389   (= 합동분산 σ̂²)
+F   = MSB / MSW   = 4.846   ~  F(2, 27)  (H₀ 하에서)</div>
+  <p>H₀가 참이면 MSB와 MSW는 모두 σ²를 추정하므로 F는 1 근처에 있습니다. 집단 평균이 다르면 MSB에 처리효과 n Σ τ<sub>j</sub>² / (k − 1)가 더해져 F가 커집니다.</p>
+
+  <div class="tbl"><table>
+    <caption>표 3. 일원배치 분산분석표</caption>
+    <thead><tr><th>요인</th><th>df</th><th>SS</th><th>MS</th><th>F</th><th>p</th><th>η²</th></tr></thead>
+    <tbody>
+      <tr class="sig"><td>group (집단 간)</td><td>2</td><td>3.766</td><td>1.883</td><td>4.846</td><td>.0159</td><td>.264</td></tr>
+      <tr><td>Residuals (집단 내)</td><td>27</td><td>10.492</td><td>0.389</td><td></td><td></td><td></td></tr>
+      <tr><td>Total</td><td>29</td><td>14.258</td><td></td><td></td><td></td><td></td></tr>
+    </tbody></table></div>
+
+  <div class="fig">
+    <svg id="fdist1" viewBox="0 0 640 230" role="img" aria-label="F(2,27) 분포와 관측 F"></svg>
+    <p class="figcap">H₀ 하의 F(2, 27) 분포. 임계값 F<sub>.05</sub> = 3.354, 관측값 F = 4.846의 오른쪽 꼬리 면적이 p = .0159입니다. 효과크기 η² = SSB / SST = .264로, 중량 변동의 약 26%가 처리 차이로 설명됩니다.</p>
+  </div>
+
+  <h3>1.4 사후 검정 (Post Hoc)</h3>
+  <p>F 검정이 유의하다는 것은 "적어도 하나는 다르다"까지만 말해 줍니다. 어느 쌍이 다른지는 사후 검정으로 확인합니다. 여러 쌍을 동시에 비교하므로 가족단위 오류율(FWER)을 α로 묶어 두는 방법을 씁니다.</p>
+  <ul>
+    <li><strong>Tukey HSD</strong>: 모든 쌍 비교. 스튜던트화 범위분포 q를 써서 FWER을 정확히 α로 맞춥니다. 등분산·같은 표본 크기에서 표준적인 선택입니다.</li>
+    <li><strong>Bonferroni</strong>: 각 비교의 p에 비교 횟수 m을 곱합니다. 단순하지만 보수적입니다.</li>
+    <li><strong>Dunnett</strong>: 모든 처리를 대조군 하나와만 비교할 때 사용합니다.</li>
+  </ul>
+  <div class="tbl"><table>
+    <caption>표 4. Tukey HSD 결과 (95% 동시신뢰구간)</caption>
+    <thead><tr><th>비교</th><th>평균차</th><th>하한</th><th>상한</th><th>p adj</th></tr></thead>
+    <tbody>
+      <tr><td>trt1 − ctrl</td><td>−0.371</td><td>−1.062</td><td>0.320</td><td>.391</td></tr>
+      <tr><td>trt2 − ctrl</td><td>0.494</td><td>−0.197</td><td>1.185</td><td>.198</td></tr>
+      <tr class="sig"><td>trt2 − trt1</td><td>0.865</td><td>0.174</td><td>1.556</td><td>.012</td></tr>
+    </tbody></table></div>
+  <div class="fig">
+    <svg id="tukey" viewBox="0 0 640 170" role="img" aria-label="Tukey 동시신뢰구간"></svg>
+    <p class="figcap">0을 지나지 않는 구간은 trt2 − trt1 하나뿐입니다. 두 처리 모두 대조군과는 유의하게 다르지 않지만, 처리끼리는 trt2가 trt1보다 평균 0.865 무겁습니다.</p>
+  </div>
+  <div class="note"><strong>결과 보고 예시</strong><p>처리에 따라 식물 건조 중량의 평균이 유의하게 달랐다, F(2, 27) = 4.85, p = .016, η² = .26. Tukey HSD 사후검정 결과 trt2(M = 5.53)가 trt1(M = 4.66)보다 유의하게 무거웠고(p = .012), 두 처리와 대조군(M = 5.03) 사이의 차이는 유의하지 않았다.</p></div>
+
+  <h3>1.5 전체 과정을 위한 R 코드</h3>
+  <p>코드에서 밑줄이 그어진 함수 이름에 마우스를 올리면(모바일은 탭) 목적, 인수, 반환값이 나옵니다.</p>
+  <div class="code"><div class="label">oneway_anova.R</div><button class="copy" type="button">복사</button><pre><code class="r">options(repos = c(CRAN = "https://cloud.r-project.org/"))
+# install.packages(c("tidyverse", "car", "rstatix", "extrafont"))
+library(tidyverse)
+library(car)
+library(rstatix)
+
+dir.create("dataset/raw", recursive = TRUE, showWarnings = FALSE)
+dir.create("dataset/working", recursive = TRUE, showWarnings = FALSE)
+dir.create("output", showWarnings = FALSE)
+
+# 1) 데이터 준비 ----------------------------------------------------
+write_csv(PlantGrowth, "dataset/raw/plantgrowth.csv")
+pg <- read_csv("dataset/raw/plantgrowth.csv") %>%
+  mutate(group = factor(group, levels = c("ctrl", "trt1", "trt2")))
+
+# 2) 집단별 기술통계 --------------------------------------------------
+desc <- pg %>%
+  group_by(group) %>%
+  summarise(n = n(), mean = mean(weight), sd = sd(weight), var = var(weight))
+desc
+write_csv(desc, "output/oneway_desc.csv")
+
+# 3) 등분산 검정 -----------------------------------------------------
+leveneTest(weight ~ group, data = pg)            # center = median (Brown-Forsythe)
+bartlett.test(weight ~ group, data = pg)
+
+# 4) 분산분석 --------------------------------------------------------
+fit <- aov(weight ~ group, data = pg)
+summary(fit)
+shapiro.test(residuals(fit))                       # 잔차 정규성
+eta_squared(fit)                                   # rstatix: η²
+
+# 5) 사후 검정 -------------------------------------------------------
+TukeyHSD(fit)
+pg %>% tukey_hsd(weight ~ group)                   # 같은 결과를 tibble로
+
+# 6) 분산 분해 시각화 -------------------------------------------------
+gm <- mean(pg$weight)
+pg_plot <- pg %>%
+  group_by(group) %>%
+  mutate(gmean = mean(weight)) %>%
+  ungroup() %>%
+  mutate(x = as.numeric(group) + runif(n(), -0.25, 0.25))
+
+p_decomp <- ggplot(pg_plot, aes(x = x, y = weight, colour = group)) +
+  geom_hline(yintercept = gm, linetype = "dashed") +                     # 전체 평균
+  geom_segment(aes(xend = x, y = gmean, yend = weight), alpha = 0.5) +   # 집단 내 편차
+  geom_segment(aes(x = as.numeric(group) - 0.32, xend = as.numeric(group) + 0.32,
+                   y = gmean, yend = gmean), linewidth = 1.2) +          # 집단 평균
+  geom_segment(aes(x = as.numeric(group) + 0.36, xend = as.numeric(group) + 0.36,
+                   y = gm, yend = gmean), linewidth = 1.4,
+               arrow = arrow(length = unit(0.15, "cm"))) +              # 집단 간 편차
+  geom_point(size = 2.4) +
+  scale_x_continuous(breaks = 1:3, labels = levels(pg$group)) +
+  labs(x = "집단", y = "건조 중량", title = "SST = SSB + SSW") +
+  theme_minimal(base_family = "KoPubDotum Medium")
+ggsave("output/oneway_decomposition.png", p_decomp, width = 7, height = 4.5, dpi = 300)</code></pre></div>
+
+  <h3>1.6 코딩 에이전트용 프롬프트</h3>
+  <p>VS Code의 코딩 에이전트에 그대로 붙여 넣어 같은 분석을 재현하게 하는 프롬프트입니다. 데이터셋과 집단 변수만 바꾸면 다른 자료에도 쓸 수 있습니다.</p>
+  <div class="code prompt"><div class="label">PROMPT · 일원배치</div><button class="copy" type="button">복사</button><pre>R로 일원배치 분산분석을 수행하는 스크립트 oneway_anova.R을 작성하고 실행해 줘.
+
+[환경 규칙]
+- VS Code에서 실행하는 R 스크립트. 패키지 저장소는 https://cloud.r-project.org/
+- 데이터 처리와 시각화는 tidyverse, 파이프는 %&gt;% 사용
+- 원자료는 dataset/raw/, 가공 자료는 dataset/working/, 표·그림은 output/에 저장
+- ggplot 한글은 extrafont로 등록한 KoPub 서체(KoPubDotum Medium) 사용
+
+[데이터]
+- R 내장 PlantGrowth (종속변수 weight, 집단 group: ctrl, trt1, trt2)
+- dataset/raw/plantgrowth.csv로 저장한 뒤 다시 읽어 분석
+
+[분석 순서]
+1. 집단별 n, 평균, 표준편차, 분산, 95% 신뢰구간 표 → output/oneway_desc.csv
+2. 등분산 검정: car::leveneTest(center = median)와 bartlett.test. 결과를 하나의 표(검정명, 통계량, 자유도, p, 판단)로 정리
+   - p ≥ .05면 aov()로 고전적 F 검정, p &lt; .05면 oneway.test(var.equal = FALSE)와 Games-Howell로 분기하는 코드를 if문으로 작성
+3. aov() 결과로 분산분석표(요인, df, SS, MS, F, p)와 η² 출력 → output/oneway_anova_table.csv
+4. 잔차 Shapiro-Wilk 검정과 잔차 Q-Q plot
+5. TukeyHSD 결과 표(비교, 평균차, 하한, 상한, p adj) → output/oneway_tukey.csv
+
+[시각화 → output/에 PNG, 300dpi]
+- oneway_decomposition.png: x축 집단(지터 적용 개별점), 전체 평균 점선, 집단 평균 가로선, 집단 평균−전체 평균 화살표(집단 간 편차), 개별값−집단 평균 세로선(집단 내 편차). 부제에 SST = SSB + SSW 수치와 df 29 = 2 + 27 표기
+- oneway_ss_bar.png: SSB와 SSW를 쌓은 가로 막대 하나, 각 조각에 SS·df·MS 라벨
+- oneway_fdist.png: H₀ 하의 F(2, 27) 밀도곡선, 임계값 세로선, 관측 F 위치와 p-value 영역 음영
+- oneway_tukey.png: Tukey 95% 동시신뢰구간 forest plot, 0 기준선
+
+[출력]
+- 콘솔에 knitr::kable로 표 4개를 차례로 출력
+- 마지막에 APA 형식 결과 보고 문장 한 단락을 출력(F, df, p, η², 유의한 사후 비교)</pre></div>
+</section>
+
+<!-- ===================== 2. TWO-WAY ===================== -->
+<section class="part" id="twoway">
+  <div class="partno">PART 2</div>
+  <h2>이원배치 분산분석</h2>
+  <p>요인이 둘이면 각 요인의 주효과와 함께, 한 요인의 효과가 다른 요인의 수준에 따라 달라지는지(교호작용)를 함께 검정합니다. <code class="i">ToothGrowth</code>는 기니피그 60마리에게 비타민 C를 보충 방법(supp: 오렌지주스 OJ, 아스코르브산 VC) 2가지와 용량(dose: 0.5, 1, 2 mg/day) 3가지로 나누어 준 뒤 상아질 세포 길이(len)를 잰 2 × 3 균형 설계입니다(칸마다 n = 10).</p>
+  <div class="math">y_ijk = μ + α_i + β_j + (αβ)_ij + ε_ijk
+   α_i : supp 주효과     β_j : dose 주효과     (αβ)_ij : 교호작용
+
+SST = SS_supp + SS_dose + SS_supp×dose + SS_error
+df :  59  =    1    +    2     +      2       +   54</div>
+
+  <h3>2.1 분산의 구성 시각화</h3>
+  <p>일원배치에서 SSB 하나였던 "설명된 변동"이 이원배치에서는 세 조각으로 나뉩니다. 균형 설계에서는 이 세 조각이 서로 직교하므로 분해가 유일합니다. 불균형 설계에서는 제곱합의 유형(Type I/II/III)에 따라 값이 달라집니다.</p>
+  <div class="fig">
+    <svg id="ss2" viewBox="0 0 640 200" role="img" aria-label="이원배치 제곱합 구성"></svg>
+    <p class="figcap">전체 제곱합 3452.2 중 용량이 70.3%, 보충 방법이 5.9%, 교호작용이 3.1%, 오차가 20.6%를 차지합니다. 막대 위 숫자는 각 조각의 자유도입니다.</p>
+  </div>
+  <div class="tbl"><table>
+    <caption>표 5. 칸별 평균(표준편차), len</caption>
+    <thead><tr><th>supp \ dose</th><th>0.5</th><th>1</th><th>2</th><th>행 평균</th></tr></thead>
+    <tbody>
+      <tr><td>OJ</td><td>13.23 (4.46)</td><td>22.70 (3.91)</td><td>26.06 (2.66)</td><td>20.66</td></tr>
+      <tr><td>VC</td><td>7.98 (2.75)</td><td>16.77 (2.52)</td><td>26.14 (4.80)</td><td>16.96</td></tr>
+      <tr><td>열 평균</td><td>10.61</td><td>19.74</td><td>26.10</td><td>18.81</td></tr>
+    </tbody></table></div>
+  <div class="tbl"><table>
+    <caption>표 6. 이원배치 분산분석표 (Levene F(5, 54) = 1.709, p = .148 → 등분산 유지)</caption>
+    <thead><tr><th>요인</th><th>df</th><th>SS</th><th>MS</th><th>F</th><th>p</th><th>부분 η²</th></tr></thead>
+    <tbody>
+      <tr class="sig"><td>supp</td><td>1</td><td>205.35</td><td>205.35</td><td>15.57</td><td>.0002</td><td>.224</td></tr>
+      <tr class="sig"><td>dose</td><td>2</td><td>2426.43</td><td>1213.22</td><td>92.00</td><td>&lt; .0001</td><td>.773</td></tr>
+      <tr class="sig"><td>supp × dose</td><td>2</td><td>108.32</td><td>54.16</td><td>4.11</td><td>.0219</td><td>.132</td></tr>
+      <tr><td>Residuals</td><td>54</td><td>712.11</td><td>13.19</td><td></td><td></td><td></td></tr>
+    </tbody></table></div>
+
+  <h3>2.2 교호작용</h3>
+  <p>교호작용이 없으면 두 요인의 효과는 더해지기만 합니다(가법 모형). 그러면 용량에 따른 평균 변화선이 보충 방법별로 평행합니다. 아래에서 "가법 모형 예측"을 누르면 교호작용 항을 뺐을 때의 예측값 μ̂ + α̂<sub>i</sub> + β̂<sub>j</sub>가 그려집니다. 관측 평균과의 차이가 교호작용 효과 (αβ)<sub>ij</sub>입니다.</p>
+  <div class="fig">
+    <div class="ctrls" role="group" aria-label="교호작용 보기">
+      <button type="button" id="ix-obs" aria-pressed="true">관측 칸 평균</button>
+      <button type="button" id="ix-add" aria-pressed="false">가법 모형 예측</button>
+      <button type="button" id="ix-both" aria-pressed="false">겹쳐 보기</button>
+    </div>
+    <svg id="inter" viewBox="0 0 640 330" role="img" aria-label="교호작용 도표"></svg>
+    <div class="legend"><span style="--c:var(--g2)">OJ (오렌지주스)</span><span style="--c:var(--g1)">VC (아스코르브산)</span></div>
+    <p class="figcap">저용량(0.5, 1)에서는 OJ가 VC보다 5~6 길지만, 2 mg에서는 두 방법의 차이가 사라집니다. 선이 수렴하는 이 모양이 유의한 교호작용(p = .022)의 실체입니다.</p>
+  </div>
+  <p>교호작용이 유의하면 주효과만으로 결론을 내리면 안 됩니다. "OJ가 VC보다 낫다"는 supp 주효과는 2 mg에서는 성립하지 않기 때문입니다. 대신 한 요인의 수준마다 다른 요인의 효과를 따로 보는 <strong>단순 주효과(simple main effect)</strong> 분석을 합니다. 오차항은 전체 모형의 MSE(13.19, df = 54)를 그대로 씁니다.</p>
+  <div class="tbl"><table>
+    <caption>표 7. 용량별 supp 단순 주효과 (합동 오차 MSE = 13.19)</caption>
+    <thead><tr><th>dose</th><th>OJ − VC</th><th>F(1, 54)</th><th>p</th><th>Bonferroni p</th></tr></thead>
+    <tbody>
+      <tr class="sig"><td>0.5</td><td>5.25</td><td>10.45</td><td>.0021</td><td>.0063</td></tr>
+      <tr class="sig"><td>1</td><td>5.93</td><td>13.33</td><td>.0006</td><td>.0018</td></tr>
+      <tr><td>2</td><td>−0.08</td><td>0.00</td><td>.961</td><td>1.000</td></tr>
+    </tbody></table></div>
+  <div class="note"><strong>해석 순서</strong><p>① 교호작용부터 본다 → ② 유의하면 교호작용 도표와 단순 주효과로 해석한다 → ③ 유의하지 않으면 주효과를 해석하고, 수준이 셋 이상인 요인은 Tukey 사후검정을 한다.</p></div>
+
+  <h3>2.3 R 코드</h3>
+  <div class="code"><div class="label">twoway_anova.R</div><button class="copy" type="button">복사</button><pre><code class="r">library(tidyverse)
+library(car)
+library(rstatix)
+
+tg <- ToothGrowth %>%
+  mutate(dose = factor(dose), supp = factor(supp, levels = c("OJ", "VC")))
+
+# 칸별 기술통계
+tg %>% group_by(supp, dose) %>% summarise(n = n(), mean = mean(len), sd = sd(len))
+
+# 등분산(6개 칸)
+leveneTest(len ~ supp * dose, data = tg)
+
+# 이원배치 분산분석 (균형 설계: Type I = II = III)
+fit2 <- aov(len ~ supp * dose, data = tg)
+summary(fit2)
+tg %>% anova_test(len ~ supp * dose)      # 부분 η²(pes)는 effect.size = "pes"
+
+# 교호작용 도표
+p_int <- tg %>%
+  group_by(supp, dose) %>%
+  summarise(m = mean(len), se = sd(len) / sqrt(n()), .groups = "drop") %>%
+  ggplot(aes(x = dose, y = m, colour = supp, group = supp)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = m - se, ymax = m + se), width = 0.08) +
+  labs(x = "용량 (mg/day)", y = "평균 len (±SE)", colour = "보충 방법") +
+  theme_minimal(base_family = "KoPubDotum Medium")
+ggsave("output/twoway_interaction.png", p_int, width = 6.5, height = 4.2, dpi = 300)
+
+# 단순 주효과: 용량별 supp 효과 (전체 모형의 오차항 사용)
+model <- lm(len ~ supp * dose, data = tg)
+tg %>%
+  group_by(dose) %>%
+  anova_test(len ~ supp, error = model) %>%
+  adjust_pvalue(method = "bonferroni")</code></pre></div>
+
+  <h3>2.4 코딩 에이전트용 프롬프트</h3>
+  <div class="code prompt"><div class="label">PROMPT · 이원배치</div><button class="copy" type="button">복사</button><pre>R로 이원배치 분산분석 스크립트 twoway_anova.R을 작성하고 실행해 줘.
+(환경 규칙은 일원배치와 같음: cloud.r-project.org, tidyverse와 %&gt;%, dataset/raw·working, output/, KoPub 서체)
+
+[데이터] R 내장 ToothGrowth. 종속변수 len, 요인 supp(OJ, VC)와 dose(0.5, 1, 2를 factor로 변환)
+
+[분석 순서]
+1. 2×3 칸별 n, 평균, 표준편차 표와 행·열 주변평균 표 → output/twoway_cell_means.csv
+2. 6개 칸에 대한 Levene 검정(center = median)
+3. aov(len ~ supp * dose) 분산분석표(df, SS, MS, F, p, 부분 η²) → output/twoway_anova_table.csv
+   - 설계가 불균형일 경우를 대비해 car::Anova(type = 3)와 contr.sum 대비 설정 코드도 주석으로 함께 제시
+4. 교호작용이 유의하면: dose 수준별 supp 단순 주효과(전체 모형 오차항 사용, Bonferroni 보정)와 supp 수준별 dose 단순 주효과 + emmeans 쌍별 비교
+   교호작용이 유의하지 않으면: 주효과 해석과 dose에 대한 Tukey HSD
+
+[시각화 → output/, 300dpi]
+- twoway_ss_composition.png: SS_supp, SS_dose, SS_interaction, SS_error를 쌓은 가로 막대 하나. 각 조각에 비율(%)과 df 라벨
+- twoway_interaction.png: x축 dose, 선 색 supp, 평균 ± SE. 같은 그림에 가법 모형 예측값(행평균 + 열평균 − 전체평균)을 점선으로 겹쳐 교호작용 크기를 보이게
+- twoway_cells_box.png: 칸별 상자그림 + 지터 점
+
+[출력] 각 표를 knitr::kable로 출력하고, 교호작용을 중심으로 한 APA 형식 결과 문단을 출력</pre></div>
+</section>
+
+<!-- ===================== 3. REPEATED MEASURES ===================== -->
+<section class="part" id="rm">
+  <div class="partno">PART 3</div>
+  <h2>반복측정 분산분석 (Repeated Measures)</h2>
+  <p>같은 개체를 여러 시점이나 조건에서 반복해서 측정하면 관측이 더 이상 독립이 아닙니다. 대신 개체마다 다른 기본 수준(무거운 병아리는 모든 시점에서 무겁다)을 따로 떼어낼 수 있어서, 오차가 작아지고 검정력이 커집니다.</p>
+  <p>예제는 <code class="i">ChickWeight</code>에서 21일 동안 12번 모두 측정된 병아리 45마리의 6일, 12일, 18일 체중(g)입니다.</p>
+  <div class="math">y_it = μ + π_i + τ_t + ε_it         π_i : 개체 효과,  τ_t : 시점 효과
+
+SST  = SS_subject + SS_time + SS_error
+505,647 = 126,865 + 310,957 + 67,825
+df: 134 =   44    +    2    +    88</div>
+
+  <h3>3.1 개체 변동을 떼어내면 무엇이 달라지나</h3>
+  <div class="fig">
+    <svg id="rmss" viewBox="0 0 640 210" role="img" aria-label="독립집단 분석과 반복측정 분석의 제곱합 비교"></svg>
+    <p class="figcap">같은 자료를 독립 세 집단으로 잘못 분석하면 개체 간 변동 126,865가 오차에 섞여 F(2, 132) = 105.4가 됩니다. 반복측정 분석은 이를 떼어내어 오차가 67,825로 줄고 F(2, 88) = 201.7이 됩니다.</p>
+  </div>
+
+  <h3>3.2 구형성 가정 (Sphericity)</h3>
+  <p>반복측정 F 검정은 <strong>모든 시점 쌍의 차이 점수 분산이 같다</strong>는 구형성 가정을 필요로 합니다. 독립 설계의 등분산 가정이 반복측정에서 바뀐 모습입니다. 구형성이 깨지면 F가 실제보다 커져 1종 오류가 늘어납니다.</p>
+  <div class="math">구형성 :  Var(y_t1 − y_t2)  가 모든 시점 쌍 (t1, t2)에서 동일</div>
+  <div class="grid2">
+    <div class="fig" style="margin:0">
+      <svg id="sph" viewBox="0 0 400 220" role="img" aria-label="시점 쌍별 차이 점수 분산"></svg>
+      <p class="figcap">차이 점수 분산이 670에서 2,805까지 4배 넘게 벌어집니다. 성장하면서 개체 간 격차가 커지는 자료에서 흔한 모습입니다.</p>
+    </div>
+    <div class="tbl" style="margin:0"><table>
+      <caption>표 8. 시점별 분산·공분산 행렬</caption>
+      <thead><tr><th></th><th>6일</th><th>12일</th><th>18일</th></tr></thead>
+      <tbody>
+        <tr><td>6일</td><td>70.2</td><td>215.9</td><td>293.8</td></tr>
+        <tr><td>12일</td><td>215.9</td><td>1031.9</td><td>1602.9</td></tr>
+        <tr><td>18일</td><td>293.8</td><td>1602.9</td><td>3322.7</td></tr>
+      </tbody></table>
+      <p class="figcap">Var(차이) = Var(A) + Var(B) − 2Cov(A, B)<br>12−6: 70.2 + 1031.9 − 431.8 = 670.3</p>
+    </div>
+  </div>
+  <ul>
+    <li><strong>Mauchly 검정</strong>: H₀는 구형성 성립. 여기서는 W = 0.296, χ²(2) ≈ 52, p &lt; .001로 기각됩니다.</li>
+    <li><strong>보정</strong>: 구형성에서 벗어난 정도를 ε(1이면 완벽, 최솟값 1/(k−1) = 0.5)으로 추정하고 F의 두 자유도에 ε를 곱합니다. Greenhouse–Geisser ε = 0.587, Huynh–Feldt ε = 0.593. ε &lt; .75이면 GG, 그 이상이면 HF를 쓰는 것이 일반적인 권고입니다.</li>
+  </ul>
+  <div class="tbl"><table>
+    <caption>표 9. 반복측정 분산분석표</caption>
+    <thead><tr><th>요인</th><th>df</th><th>SS</th><th>MS</th><th>F</th><th>p</th><th>GG 보정 df</th><th>p<sub>GG</sub></th><th>ges</th></tr></thead>
+    <tbody>
+      <tr class="sig"><td>Time</td><td>2, 88</td><td>310,957</td><td>155,478</td><td>201.73</td><td>&lt; .001</td><td>1.17, 51.6</td><td>&lt; .001</td><td>.615</td></tr>
+      <tr><td>Error(Time)</td><td>88</td><td>67,825</td><td>770.7</td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody></table></div>
+
+  <h3>3.3 평균 변화 도표로 읽는 유의한 결과</h3>
+  <div class="fig">
+    <div class="ctrls" role="group" aria-label="평균 변화 도표 보기">
+      <button type="button" id="rm-mean" aria-pressed="true">평균 ± 95% CI</button>
+      <button type="button" id="rm-sp" aria-pressed="false">개체별 궤적 함께</button>
+    </div>
+    <svg id="rmplot" viewBox="0 0 640 340" role="img" aria-label="시점별 평균 변화 도표"></svg>
+    <p class="figcap">평균은 74.9 → 132.8 → 192.4 g으로 거의 직선으로 늘어납니다. 개체별 궤적을 켜면 대부분의 선이 같은 방향으로 올라가면서 기울기가 제각각임을 볼 수 있습니다. 이 기울기 차이가 구형성 위반의 원인입니다.</p>
+  </div>
+  <p>유의한 시점 효과는 "세 시점 평균이 모두 같지는 않다"는 뜻입니다. 도표에서 평균이 단조 증가하고 신뢰구간이 겹치지 않으므로, 대응표본 t 검정 사후비교로 모든 인접·비인접 쌍이 다른지 확인합니다.</p>
+  <div class="tbl"><table>
+    <caption>표 10. 대응표본 t 사후비교 (Bonferroni)</caption>
+    <thead><tr><th>비교</th><th>평균 차이</th><th>t(44)</th><th>p adj</th><th>Hedges g</th></tr></thead>
+    <tbody>
+      <tr class="sig"><td>12일 − 6일</td><td>57.9</td><td>15.00</td><td>&lt; .001</td><td>2.45</td></tr>
+      <tr class="sig"><td>18일 − 6일</td><td>117.6</td><td>14.89</td><td>&lt; .001</td><td>2.83</td></tr>
+      <tr class="sig"><td>18일 − 12일</td><td>59.6</td><td>11.80</td><td>&lt; .001</td><td>1.27</td></tr>
+    </tbody></table></div>
+  <div class="note"><strong>결과 보고 예시</strong><p>Mauchly 검정에서 구형성 가정이 기각되어(W = 0.30, p &lt; .001) Greenhouse–Geisser 보정을 적용하였다. 체중은 시점에 따라 유의하게 증가하였다, F(1.17, 51.6) = 201.73, p &lt; .001, η²<sub>G</sub> = .62. Bonferroni 보정 대응표본 t 검정 결과 모든 시점 쌍의 차이가 유의하였다(모두 p &lt; .001).</p></div>
+  <div class="note warn"><strong>시간 효과의 모양까지 보고 싶다면</strong><p>시점이 순서형이면 다항 대비(선형·2차)로 "직선적으로 증가하는가, 증가가 둔화되는가"를 검정할 수 있습니다. 측정 시점이 개체마다 다르거나 결측이 많으면 반복측정 ANOVA 대신 선형혼합모형(<code class="i">lme4::lmer</code>)이 적합합니다.</p></div>
+
+  <h3>3.4 R 코드</h3>
+  <div class="code"><div class="label">rm_anova.R</div><button class="copy" type="button">복사</button><pre><code class="r">library(tidyverse)
+library(rstatix)
+
+# 12번 모두 측정된 병아리만, 6·12·18일
+chick <- ChickWeight %>%
+  as_tibble() %>%
+  group_by(Chick) %>%
+  filter(n() == 12) %>%
+  ungroup() %>%
+  filter(Time %in% c(6, 12, 18)) %>%
+  mutate(Chick = factor(as.character(Chick)), Time = factor(Time), Diet = factor(Diet))
+write_csv(chick, "dataset/working/chick_6_12_18.csv")
+
+# 시점별 기술통계
+chick %>% group_by(Time) %>% get_summary_stats(weight, type = "mean_sd")
+
+# 반복측정 분산분석 + Mauchly + GG/HF
+res_rm <- anova_test(data = chick, dv = weight, wid = Chick, within = Time)
+res_rm                                       # $ANOVA, $`Mauchly's Test for Sphericity`, $`Sphericity Corrections`
+get_anova_table(res_rm, correction = "auto") # 구형성 기각 시 자동으로 GG 적용
+
+# 사후비교
+chick %>% pairwise_t_test(weight ~ Time, paired = TRUE, p.adjust.method = "bonferroni")
+
+# 평균 변화 도표
+p_rm <- ggplot(chick, aes(x = Time, y = weight)) +
+  geom_line(aes(group = Chick), colour = "grey70", alpha = 0.5) +
+  stat_summary(fun.data = mean_cl_normal, geom = "errorbar", width = 0.1, linewidth = 0.9) +
+  stat_summary(fun = mean, geom = "line", aes(group = 1), linewidth = 1.2) +
+  stat_summary(fun = mean, geom = "point", size = 3) +
+  labs(x = "일령 (일)", y = "체중 (g)", title = "평균 ± 95% CI와 개체별 궤적") +
+  theme_minimal(base_family = "KoPubDotum Medium")
+ggsave("output/rm_mean_change.png", p_rm, width = 6.5, height = 4.2, dpi = 300)</code></pre></div>
+
+  <h3>3.5 코딩 에이전트용 프롬프트</h3>
+  <div class="code prompt"><div class="label">PROMPT · 반복측정</div><button class="copy" type="button">복사</button><pre>R로 일원 반복측정 분산분석 스크립트 rm_anova.R을 작성하고 실행해 줘.
+(환경 규칙: cloud.r-project.org, tidyverse와 %&gt;%, dataset/raw·working, output/, KoPub 서체)
+
+[데이터] R 내장 ChickWeight
+- 12번 모두 측정된 병아리만 남기고 Time이 6, 12, 18인 행만 사용(45마리 × 3시점)
+- Chick은 순서 없는 factor로, Time도 factor로 변환. dataset/working/chick_6_12_18.csv 저장
+- long 형식과 wide 형식(Chick × Time) 두 가지를 모두 만들어 둘 것
+
+[분석 순서]
+1. 시점별 n, 평균, 표준편차, 95% CI 표 → output/rm_desc.csv
+2. 시점 간 분산·공분산 행렬, 모든 시점 쌍의 차이 점수 분산 표 → output/rm_sphericity_check.csv
+3. rstatix::anova_test(wid = Chick, within = Time)로 분산분석, Mauchly 검정(W, p), GG·HF ε와 보정 df, 보정 p를 하나의 표로 → output/rm_anova_table.csv
+   - ε &lt; .75이면 GG, 아니면 HF를 채택하는 규칙을 코드로 구현하고 채택 결과를 출력
+4. SS 분해표: SST = SS_subject + SS_time + SS_error와 각 df
+5. Bonferroni 대응표본 t 사후비교(평균차, t, df, p adj, Hedges g) → output/rm_posthoc.csv
+
+[시각화 → output/, 300dpi]
+- rm_mean_change.png: 개체별 궤적(옅은 회색) + 시점별 평균선 + 95% CI 막대
+- rm_diff_variance.png: 시점 쌍별 차이 점수 분산 막대(구형성 점검용), 평균 수준을 점선으로
+- rm_ss_compare.png: 같은 자료를 독립집단으로 본 경우(SS_time | SS_within)와 반복측정으로 본 경우(SS_time | SS_subject | SS_error)의 쌓은 막대 두 개, 각 F 값 표기
+
+[출력] 표를 knitr::kable로 출력하고, 구형성 판단과 보정을 포함한 APA 형식 결과 문단 출력</pre></div>
+</section>
+
+<!-- ===================== 4. MIXED ===================== -->
+<section class="part" id="mixed">
+  <div class="partno">PART 4</div>
+  <h2>1요인과 반복측정 (혼합 설계)</h2>
+  <p>개체 간 요인 하나와 개체 내(반복측정) 요인 하나가 함께 있는 설계입니다. 분할구획(split-plot) 설계라고도 합니다. 여기서는 사료(Diet, 4종, 개체 간)와 일령(Time, 3시점, 개체 내)을 함께 봅니다. 사료별 병아리 수는 16, 10, 10, 9마리로 불균형입니다.</p>
+  <div class="math">SST = [ SS_Diet + SS_S/Diet ]                + [ SS_Time + SS_Diet×Time + SS_Time×S/Diet ]
+        개체 간 변동 (df 44 = 3 + 41)           개체 내 변동 (df 90 = 2 + 6 + 82)
+
+Diet 의 F       = MS_Diet / MS_S/Diet                   (분모 df 41)
+Time, Diet×Time = MS_effect / MS_Time×S/Diet            (분모 df 82)</div>
+  <p>두 종류의 효과가 서로 다른 오차항으로 검정된다는 점이 핵심입니다. 개체 간 요인은 "같은 사료 안의 개체 차이"와 비교하고, 개체 내 효과는 "개체마다 다른 시간 변화"와 비교합니다.</p>
+
+  <h3>4.1 가정 점검</h3>
+  <div class="tbl"><table>
+    <caption>표 11. 혼합 설계의 가정</caption>
+    <thead><tr><th>가정</th><th>검정</th><th>결과</th><th>판단</th></tr></thead>
+    <tbody>
+      <tr><td>시점별 사료 집단 등분산</td><td>Levene (6·12·18일)</td><td>p = .210 · .175 · .278</td><td>유지</td></tr>
+      <tr><td>공분산 행렬의 집단 간 동질성</td><td>Box's M</td><td>표본이 작아 민감, 참고만</td><td>–</td></tr>
+      <tr><td>구형성 (개체 내 효과)</td><td>Mauchly</td><td>W = 0.311, p &lt; .001</td><td>기각 → GG ε = 0.592</td></tr>
+    </tbody></table></div>
+
+  <h3>4.2 분산분석 결과</h3>
+  <div class="tbl"><table>
+    <caption>표 12. 혼합 설계 분산분석표 (개체 내 효과는 GG 보정 병기)</caption>
+    <thead><tr><th>요인</th><th>df</th><th>SS</th><th>F</th><th>p</th><th>GG 보정 df</th><th>p<sub>GG</sub></th><th>ges</th></tr></thead>
+    <tbody>
+      <tr class="sig"><td>Diet (개체 간)</td><td>3, 41</td><td>34,519</td><td>5.11</td><td>.004</td><td>–</td><td>–</td><td>.191</td></tr>
+      <tr class="sig"><td>Time (개체 내)</td><td>2, 82</td><td>310,957</td><td>234.96</td><td>&lt; .001</td><td>1.18, 48.6</td><td>&lt; .001</td><td>.680</td></tr>
+      <tr class="sig"><td>Diet × Time</td><td>6, 82</td><td>13,563</td><td>3.42</td><td>.005</td><td>3.55, 48.6</td><td>.019</td><td>.085</td></tr>
+    </tbody></table></div>
+
+  <div class="fig">
+    <div class="ctrls" role="group" aria-label="사료 선택">
+      <button type="button" id="mx-all" aria-pressed="true">전체 사료</button>
+      <button type="button" class="mxd" data-d="1" id="mx-d1" aria-pressed="false">Diet 1</button>
+      <button type="button" class="mxd" data-d="2" id="mx-d2" aria-pressed="false">Diet 2</button>
+      <button type="button" class="mxd" data-d="3" id="mx-d3" aria-pressed="false">Diet 3</button>
+      <button type="button" class="mxd" data-d="4" id="mx-d4" aria-pressed="false">Diet 4</button>
+    </div>
+    <svg id="mxplot" viewBox="0 0 640 340" role="img" aria-label="사료별 평균 변화 도표"></svg>
+    <div class="legend"><span style="--c:var(--g1)">Diet 1 (n=16)</span><span style="--c:var(--g2)">Diet 2 (n=10)</span><span style="--c:var(--g3)">Diet 3 (n=10)</span><span style="--c:var(--g4)">Diet 4 (n=9)</span></div>
+    <p class="figcap">6일에는 Diet 4가 가장 무겁지만 18일에는 Diet 3이 앞섭니다. 기울기가 사료마다 다르다는 것이 Diet × Time 교호작용입니다. 사료를 하나 고르면 그 사료 병아리들의 개별 궤적이 나옵니다. 오차 막대는 ±1 SE입니다.</p>
+  </div>
+  <p>교호작용이 유의하므로 시점마다 사료 효과를 따로 봅니다(단순 주효과). 각 시점의 일원배치 결과는 다음과 같습니다.</p>
+  <div class="tbl"><table>
+    <caption>표 13. 시점별 Diet 단순 주효과</caption>
+    <thead><tr><th>시점</th><th>Diet 1</th><th>Diet 2</th><th>Diet 3</th><th>Diet 4</th><th>F(3, 41)</th><th>p</th></tr></thead>
+    <tbody>
+      <tr class="sig"><td>6일</td><td>67.7</td><td>75.4</td><td>77.9</td><td>83.7</td><td>15.02</td><td>&lt; .001</td></tr>
+      <tr class="sig"><td>12일</td><td>114.4</td><td>131.3</td><td>144.4</td><td>154.1</td><td>4.29</td><td>.010</td></tr>
+      <tr class="sig"><td>18일</td><td>160.5</td><td>187.7</td><td>233.1</td><td>209.2</td><td>4.40</td><td>.009</td></tr>
+    </tbody></table></div>
+  <div class="note warn"><strong>보정이 결론을 바꾸는 경우</strong><p>같은 자료에서 시점을 4·8·12·16일로 잡으면 Diet × Time의 보정 전 p = .009가 GG 보정 후 p = .056이 됩니다. 구형성이 크게 깨진 자료에서 보정 없이 보고하면 교호작용을 잘못 주장하게 됩니다. 수업에서 시점만 바꿔 직접 확인해 보세요.</p></div>
+  <div class="note"><strong>결과 보고 예시</strong><p>구형성 가정이 기각되어(W = 0.31, p &lt; .001) 개체 내 효과에 Greenhouse–Geisser 보정을 적용하였다. 사료의 주효과, F(3, 41) = 5.11, p = .004, η²<sub>G</sub> = .19, 일령의 주효과, F(1.18, 48.6) = 234.96, p &lt; .001, η²<sub>G</sub> = .68, 사료 × 일령 교호작용, F(3.55, 48.6) = 3.42, p = .019, η²<sub>G</sub> = .09가 모두 유의하였다. 사료 간 체중 차이는 일령에 따라 달랐으며, 18일에는 Diet 3이 가장 무거웠다.</p></div>
+
+  <h3>4.3 R 코드</h3>
+  <div class="code"><div class="label">mixed_anova.R</div><button class="copy" type="button">복사</button><pre><code class="r">library(tidyverse)
+library(rstatix)
+
+chick <- read_csv("dataset/working/chick_6_12_18.csv") %>%
+  mutate(Chick = factor(Chick), Time = factor(Time), Diet = factor(Diet))
+
+# 가정 점검
+chick %>% group_by(Time) %>% levene_test(weight ~ Diet)
+box_m(chick %>% pivot_wider(names_from = Time, values_from = weight) %>%
+        select(`6`, `12`, `18`), chick %>% distinct(Chick, Diet) %>% pull(Diet))
+
+# 혼합 설계 분산분석
+res_mix <- anova_test(data = chick, dv = weight, wid = Chick,
+                      between = Diet, within = Time)
+res_mix
+get_anova_table(res_mix, correction = "GG")
+
+# 단순 주효과: 시점별 Diet 효과
+chick %>% group_by(Time) %>% anova_test(dv = weight, wid = Chick, between = Diet) %>%
+  adjust_pvalue(method = "bonferroni")
+chick %>% group_by(Time) %>% emmeans_test(weight ~ Diet, p.adjust.method = "bonferroni")
+
+# 단순 주효과: 사료별 Time 효과
+chick %>% group_by(Diet) %>% anova_test(dv = weight, wid = Chick, within = Time) %>%
+  get_anova_table(correction = "GG")
+
+# 사료별 평균 변화 도표
+p_mix <- chick %>%
+  group_by(Diet, Time) %>%
+  summarise(m = mean(weight), se = sd(weight) / sqrt(n()), .groups = "drop") %>%
+  ggplot(aes(x = Time, y = m, colour = Diet, group = Diet)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2.8) +
+  geom_errorbar(aes(ymin = m - se, ymax = m + se), width = 0.08) +
+  labs(x = "일령 (일)", y = "평균 체중 (±SE)", colour = "사료") +
+  theme_minimal(base_family = "KoPubDotum Medium")
+ggsave("output/mixed_profile.png", p_mix, width = 6.5, height = 4.2, dpi = 300)</code></pre></div>
+
+  <h3>4.4 코딩 에이전트용 프롬프트</h3>
+  <div class="code prompt"><div class="label">PROMPT · 혼합 설계</div><button class="copy" type="button">복사</button><pre>R로 개체 간 요인 1개 + 반복측정 요인 1개의 혼합 설계 분산분석 스크립트 mixed_anova.R을 작성하고 실행해 줘.
+(환경 규칙: cloud.r-project.org, tidyverse와 %&gt;%, dataset/raw·working, output/, KoPub 서체)
+
+[데이터] dataset/working/chick_6_12_18.csv (없으면 ChickWeight에서 12회 완측 병아리, Time 6·12·18로 생성)
+- 개체 간 요인 Diet(4수준, 불균형 16·10·10·9), 개체 내 요인 Time(3수준), 개체 ID Chick
+
+[분석 순서]
+1. Diet × Time 칸별 n, 평균, 표준편차, SE 표 → output/mixed_cell_means.csv
+2. 가정 점검 표: 시점별 Levene 검정, Box's M, Mauchly 검정과 GG·HF ε → output/mixed_assumptions.csv
+3. rstatix::anova_test(between = Diet, within = Time) 분산분석표: 각 효과의 df, SS, F, p, 보정 df, 보정 p, ges
+   - 개체 간 효과와 개체 내 효과의 오차항이 다르다는 것을 보여 주는 SS 분해표(SS_Diet, SS_S/Diet, SS_Time, SS_Diet×Time, SS_Time×S/Diet)도 별도로 계산 → output/mixed_anova_table.csv
+4. 교호작용이 유의하면: 시점별 Diet 단순 주효과 + emmeans 쌍별 비교(Bonferroni), 사료별 Time 단순 주효과(GG 보정)
+5. 민감도 분석: 시점을 4·8·12·16일로 바꿔 같은 분석을 반복하고 교호작용의 보정 전·후 p를 비교 표로
+
+[시각화 → output/, 300dpi]
+- mixed_profile.png: x축 Time, 색 Diet, 평균 ± SE 선 그래프
+- mixed_spaghetti.png: Diet별 facet으로 개체 궤적 + 굵은 평균선
+- mixed_ss_partition.png: 개체 간 / 개체 내로 나뉜 SS 분해를 두 묶음의 쌓은 막대로
+
+[출력] 표를 knitr::kable로 출력하고, 구형성 보정과 교호작용 해석을 포함한 APA 형식 결과 문단 출력</pre></div>
+</section>
+
+<section class="part" id="refs">
+  <h2>참고문헌</h2>
+  <ol class="refs">
+    <li>Bartlett, M. S. (1937). Properties of sufficiency and statistical tests. <em>Proceedings of the Royal Society of London A, 160</em>, 268–282.</li>
+    <li>Brown, M. B., &amp; Forsythe, A. B. (1974). Robust tests for the equality of variances. <em>Journal of the American Statistical Association, 69</em>(346), 364–367.</li>
+    <li>Crampton, E. W. (1947). The growth of the odontoblast of the incisor teeth as a criterion of vitamin C intake of the guinea pig. <em>The Journal of Nutrition, 33</em>(5), 491–504. (ToothGrowth)</li>
+    <li>Crowder, M. J., &amp; Hand, D. J. (1990). <em>Analysis of Repeated Measures</em>. Chapman &amp; Hall. (ChickWeight)</li>
+    <li>Dobson, A. J. (1983). <em>An Introduction to Statistical Modelling</em>. Chapman &amp; Hall. (PlantGrowth)</li>
+    <li>Fox, J., &amp; Weisberg, S. (2019). <em>An R Companion to Applied Regression</em> (3rd ed.). Sage. (car 패키지)</li>
+    <li>Greenhouse, S. W., &amp; Geisser, S. (1959). On methods in the analysis of profile data. <em>Psychometrika, 24</em>(2), 95–112.</li>
+    <li>Huynh, H., &amp; Feldt, L. S. (1976). Estimation of the Box correction for degrees of freedom from sample data in randomized block and split-plot designs. <em>Journal of Educational Statistics, 1</em>(1), 69–82.</li>
+    <li>Kassambara, A. (2023). <em>rstatix: Pipe-friendly framework for basic statistical tests</em> [R package]. https://CRAN.R-project.org/package=rstatix</li>
+    <li>Levene, H. (1960). Robust tests for equality of variances. In I. Olkin (Ed.), <em>Contributions to Probability and Statistics</em> (pp. 278–292). Stanford University Press.</li>
+    <li>Mauchly, J. W. (1940). Significance test for sphericity of a normal n-variate distribution. <em>The Annals of Mathematical Statistics, 11</em>(2), 204–209.</li>
+    <li>Maxwell, S. E., Delaney, H. D., &amp; Kelley, K. (2018). <em>Designing Experiments and Analyzing Data</em> (3rd ed.). Routledge.</li>
+    <li>Navarro, D. (2019). <em>Learning Statistics with R</em> (ver. 0.6). Ch. 14 Comparing several means; Ch. 16 Factorial ANOVA.</li>
+    <li>Olejnik, S., &amp; Algina, J. (2003). Generalized eta and omega squared statistics. <em>Psychological Methods, 8</em>(4), 434–447.</li>
+    <li>Tukey, J. W. (1949). Comparing individual means in the analysis of variance. <em>Biometrics, 5</em>(2), 99–114.</li>
+  </ol>
+</section>
+</main>
+<footer><div class="wrap">수치는 R 내장 데이터셋(PlantGrowth, ToothGrowth, ChickWeight)으로 계산했습니다. ChickWeight 분석은 12회 모두 측정된 45마리, 6·12·18일 자료입니다.</div></footer>
+
+<script>
+(()=>{
+const NS="http://www.w3.org/2000/svg";
+const $=s=>document.querySelector(s);
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e}
+const lin=(d0,d1,r0,r1)=>v=>r0+(v-d0)/(d1-d0)*(r1-r0);
+const fmt=(v,d=3)=>(v<0?"−":"")+Math.abs(v).toFixed(d);
+const GC=["var(--g1)","var(--g2)","var(--g3)","var(--g4)"];
+function yAxis(svg,y,ticks,x0,x1,fmtT){ticks.forEach(t=>{el("line",{x1:x0,x2:x1,y1:y(t),y2:y(t),class:"ax","stroke-width":1},svg);el("text",{x:x0-8,y:y(t)+4,"text-anchor":"end"},svg,fmtT?fmtT(t):t)})}
+
+/* ---------- data ---------- */
+const PG=[["ctrl",4.17],["ctrl",5.58],["ctrl",5.18],["ctrl",6.11],["ctrl",4.5],["ctrl",4.61],["ctrl",5.17],["ctrl",4.53],["ctrl",5.33],["ctrl",5.14],["trt1",4.81],["trt1",4.17],["trt1",4.41],["trt1",3.59],["trt1",5.87],["trt1",3.83],["trt1",6.03],["trt1",4.89],["trt1",4.32],["trt1",4.69],["trt2",6.31],["trt2",5.12],["trt2",5.54],["trt2",5.5],["trt2",5.37],["trt2",5.29],["trt2",4.92],["trt2",6.15],["trt2",5.8],["trt2",5.26]];
+const CH=[[1,1,64,106,171],[2,1,72,122,187],[3,1,67,115,187],[4,1,67,102,154],[5,1,60,141,199],[6,1,74,141,160],[7,1,71,146,250],[9,1,68,90,100],[10,1,63,89,112],[11,1,84,168,184],[12,1,62,119,185],[13,1,60,71,81],[14,1,79,164,248],[17,1,72,98,123],[19,1,62,82,120],[20,1,58,77,107],[21,2,86,217,307],[22,2,77,108,148],[23,2,73,127,163],[24,2,74,70,72],[25,2,78,146,231],[26,2,74,136,205],[27,2,73,115,163],[28,2,73,145,207],[29,2,74,134,230],[30,2,72,115,151],[31,3,73,123,204],[32,3,82,159,263],[33,3,77,137,146],[34,3,85,164,294],[35,3,87,201,332],[36,3,76,145,227],[37,3,68,103,157],[38,3,74,128,232],[39,3,78,130,214],[40,3,79,154,262],[41,4,85,155,184],[42,4,84,160,234],[43,4,96,184,198],[45,4,78,135,174],[46,4,82,144,210],[47,4,79,148,185],[48,4,80,154,261],[49,4,85,152,203],[50,4,84,155,234]];
+
+/* ---------- 1. decomposition ---------- */
+const groups=["ctrl","trt1","trt2"];
+const gm=PG.reduce((s,d)=>s+d[1],0)/PG.length;
+const gmeans=groups.map(g=>{const v=PG.filter(d=>d[0]===g).map(d=>d[1]);return v.reduce((a,b)=>a+b,0)/v.length});
+let dcMode=4, dcSel=null;
+const caps=["모든 관측값이 하나의 전체 평균 ȳ = 5.073 주위에 흩어져 있습니다. 이 흩어짐 전체가 SST입니다.",
+"집단마다 평균(굵은 가로선)이 따로 있습니다. 집단을 알면 예측이 전체 평균보다 나아집니다.",
+"집단 평균이 전체 평균에서 떨어진 거리(화살표)가 집단 간 편차입니다. 제곱해 집단 크기 10을 곱해 더하면 SSB = 3.766.",
+"개별값이 자기 집단 평균에서 떨어진 거리(세로선)가 집단 내 편차입니다. 모두 제곱해 더하면 SSW = 10.492.",
+"두 종류의 편차를 함께 보면 (y − ȳ) = (ȳⱼ − ȳ) + (y − ȳⱼ) 관계가 점마다 성립합니다."];
+function drawDecomp(){
+  const svg=$("#decomp");svg.innerHTML="";
+  const L=48,R=548,T=14,B=344;const y=lin(3.4,6.5,B,T);
+  yAxis(svg,y,[3.5,4,4.5,5,5.5,6,6.5],L,R,t=>t.toFixed(1));
+  el("text",{x:14,y:(T+B)/2,transform:`rotate(-90 14 ${(T+B)/2})`,"text-anchor":"middle"},svg,"weight");
+  const cx=i=>L+(i+0.5)*(R-L)/3;
+  groups.forEach((g,i)=>el("text",{x:cx(i),y:B+24,"text-anchor":"middle",class:"ink","font-weight":"600"},svg,g));
+  const show={grand:true,gmean:dcMode>=1,betw:dcMode===2||dcMode===4,within:dcMode===3||dcMode===4};
+  // within lines
+  let idx={ctrl:0,trt1:0,trt2:0};
+  const pts=PG.map((d,k)=>{const gi=groups.indexOf(d[0]);const j=idx[d[0]]++;const x=cx(gi)-62+j*(124/9);return{x,yv:d[1],gi,k}});
+  if(show.within) pts.forEach(p=>el("line",{x1:p.x,x2:p.x,y1:y(gmeans[p.gi]),y2:y(p.yv),stroke:GC[p.gi],"stroke-width":1.3,opacity:.55},svg));
+  if(dcMode===0) pts.forEach(p=>el("line",{x1:p.x,x2:p.x,y1:y(gm),y2:y(p.yv),stroke:"var(--muted)","stroke-width":1,opacity:.45},svg));
+  el("line",{x1:L,x2:R,y1:y(gm),y2:y(gm),stroke:"var(--ink)","stroke-dasharray":"6 4","stroke-width":1.4},svg);
+  el("text",{x:R,y:y(gm)-6,"text-anchor":"end",class:"ink"},svg,"전체 평균 ȳ = "+gm.toFixed(3));
+  if(show.gmean) groups.forEach((g,i)=>{el("line",{x1:cx(i)-72,x2:cx(i)+72,y1:y(gmeans[i]),y2:y(gmeans[i]),stroke:GC[i],"stroke-width":3.2},svg);
+    el("text",{x:cx(i)-74,y:y(gmeans[i])+4,"text-anchor":"end",fill:GC[i],style:"fill:"+GC[i]},svg,gmeans[i].toFixed(3))});
+  if(show.betw) groups.forEach((g,i)=>{const x=cx(i)+80;const y0=y(gm),y1=y(gmeans[i]);
+    el("line",{x1:x,x2:x,y1:y0,y2:y1,stroke:GC[i],"stroke-width":4},svg);
+    const dir=y1<y0?-1:1;el("path",{d:`M${x-6} ${y1-dir*7} L${x} ${y1} L${x+6} ${y1-dir*7}`,fill:"none",stroke:GC[i],"stroke-width":2.5},svg);
+    el("text",{x:x+8,y:(y0+y1)/2+4,style:"fill:"+GC[i],"font-weight":"600"},svg,fmt(gmeans[i]-gm,3))});
+  pts.forEach(p=>{const c=el("circle",{cx:p.x,cy:y(p.yv),r:dcSel===p.k?7:5,fill:GC[p.gi],stroke:dcSel===p.k?"var(--ink)":"var(--surface)","stroke-width":dcSel===p.k?2.5:1.2,tabindex:0,style:"cursor:pointer"},svg);
+    el("title",{},c,`${PG[p.k][0]}: ${p.yv}`);
+    const pick=()=>{dcSel=p.k;readout(p);drawDecomp()};c.addEventListener("click",pick);c.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick()}})});
+  $("#dc-cap").textContent=caps[dcMode];
+}
+function readout(p){const gmj=gmeans[p.gi];
+  $("#dc-read").textContent=`${groups[p.gi]} 관측값 y = ${p.yv.toFixed(2)}\n전체 편차    y − ȳ   = ${fmt(p.yv-gm)}\n집단 간 편차 ȳⱼ − ȳ  = ${fmt(gmj-gm)}\n집단 내 편차 y − ȳⱼ  = ${fmt(p.yv-gmj)}\n검산: ${fmt(gmj-gm)} + ${fmt(p.yv-gmj)} = ${fmt(p.yv-gm)}`}
+document.querySelectorAll("#dc-ctrls button").forEach(b=>b.addEventListener("click",()=>{dcMode=+b.dataset.m;document.querySelectorAll("#dc-ctrls button").forEach(x=>x.setAttribute("aria-pressed",x===b));drawDecomp()}));
+function drawSSbar(){const svg=$("#ssbar");const W=280,x0=10;const sst=14.258,ssb=3.766,ssw=10.492;const s=v=>v/sst*W;
+  el("text",{x:x0,y:16,class:"ink","font-weight":"600"},svg,"SST = 14.258   (df 29)");
+  el("rect",{x:x0,y:24,width:W,height:30,fill:"var(--muted)",opacity:.35,rx:3},svg);
+  el("text",{x:x0,y:84,class:"ink","font-weight":"600"},svg,"= SSB + SSW");
+  el("rect",{x:x0,y:92,width:s(ssb),height:30,fill:"var(--accent)",rx:3},svg);
+  el("rect",{x:x0+s(ssb)+2,y:92,width:s(ssw)-2,height:30,fill:"var(--warn)",opacity:.75,rx:3},svg);
+  el("text",{x:x0,y:142},svg,"SSB 3.766 · df 2");
+  el("text",{x:x0+W,y:142,"text-anchor":"end"},svg,"SSW 10.492 · df 27");
+  el("text",{x:x0,y:176,class:"ink"},svg,"MSB = 3.766 / 2 = 1.883");
+  el("text",{x:x0,y:198,class:"ink"},svg,"MSW = 10.492 / 27 = 0.389");
+  el("text",{x:x0,y:226,class:"ink","font-weight":"600","font-size":"15"},svg,"F = 1.883 / 0.389 = 4.846")}
+
+/* ---------- F distribution ---------- */
+function lgamma(z){const g=7,c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  if(z<0.5)return Math.log(Math.PI/Math.sin(Math.PI*z))-lgamma(1-z);z-=1;let x=c[0];for(let i=1;i<g+2;i++)x+=c[i]/(z+i);const t=z+g+0.5;return 0.5*Math.log(2*Math.PI)+(z+0.5)*Math.log(t)-t+Math.log(x)}
+function fpdf(x,a,b){if(x<=0)return 0;return Math.exp(lgamma((a+b)/2)-lgamma(a/2)-lgamma(b/2)+(a/2)*Math.log(a/b)+(a/2-1)*Math.log(x)-((a+b)/2)*Math.log(1+a*x/b))}
+function drawF(id,a,b,Fobs,crit,p,xmax){const svg=$(id);const L=40,R=620,T=14,B=196;const x=lin(0,xmax,L,R);
+  const N=300,ys=[];let ym=0;for(let i=0;i<=N;i++){const xv=0.01+i*(xmax-0.01)/N;const v=fpdf(xv,a,b);ys.push([xv,v]);ym=Math.max(ym,v)}
+  const y=lin(0,ym*1.1,B,T);
+  el("line",{x1:L,x2:R,y1:B,y2:B,stroke:"var(--muted)"},svg);
+  for(let t=0;t<=xmax;t++)el("text",{x:x(t),y:B+16,"text-anchor":"middle"},svg,t);
+  const pts=ys.map(([xv,v])=>`${x(xv)},${y(v)}`).join(" ");
+  const tail=ys.filter(([xv])=>xv>=Fobs);el("path",{d:`M${x(Fobs)},${B} L`+tail.map(([xv,v])=>`${x(xv)},${y(v)}`).join(" L")+` L${x(xmax)},${B} Z`,fill:"var(--warn)",opacity:.45},svg);
+  el("polyline",{points:pts,fill:"none",stroke:"var(--ink)","stroke-width":2},svg);
+  el("line",{x1:x(crit),x2:x(crit),y1:T+10,y2:B,stroke:"var(--muted)","stroke-dasharray":"4 3"},svg);
+  el("text",{x:x(crit)-4,y:T+20,"text-anchor":"end"},svg,`임계값 ${crit.toFixed(3)}`);
+  el("line",{x1:x(Fobs),x2:x(Fobs),y1:T+30,y2:B,stroke:"var(--warn)","stroke-width":2.2},svg);
+  el("text",{x:x(Fobs)+6,y:T+40,style:"fill:var(--warn)","font-weight":"600"},svg,`관측 F = ${Fobs.toFixed(3)}, p = ${p}`);
+  el("text",{x:R,y:T+4,"text-anchor":"end"},svg,`F(${a}, ${b})`)}
+
+/* ---------- Tukey ---------- */
+function drawTukey(){const svg=$("#tukey");const rows=[["trt1 − ctrl",-0.371,-1.0622,0.3202],["trt2 − ctrl",0.494,-0.1972,1.1852],["trt2 − trt1",0.865,0.1738,1.5562]];
+  const L=110,R=620;const x=lin(-1.2,1.7,L,R);
+  [-1,-0.5,0,0.5,1,1.5].forEach(t=>{el("line",{x1:x(t),x2:x(t),y1:8,y2:132,class:"ax"},svg);el("text",{x:x(t),y:150,"text-anchor":"middle"},svg,t)});
+  el("line",{x1:x(0),x2:x(0),y1:8,y2:132,stroke:"var(--ink)","stroke-width":1.4},svg);
+  rows.forEach((r,i)=>{const yy=30+i*42;const sig=r[2]>0;const c=sig?"var(--warn)":"var(--accent)";
+    el("text",{x:L-12,y:yy+4,"text-anchor":"end",class:"ink"},svg,r[0]);
+    el("line",{x1:x(r[2]),x2:x(r[3]),y1:yy,y2:yy,stroke:c,"stroke-width":3},svg);
+    [r[2],r[3]].forEach(v=>el("line",{x1:x(v),x2:x(v),y1:yy-7,y2:yy+7,stroke:c,"stroke-width":2},svg));
+    el("circle",{cx:x(r[1]),cy:yy,r:5.5,fill:c},svg)});
+  el("text",{x:(L+R)/2,y:166,"text-anchor":"middle"},svg,"평균 차이 (95% 동시신뢰구간)")}
+
+/* ---------- 2-way SS ---------- */
+function stackBar(svg,y0,h,parts,L,W,total){let acc=0;parts.forEach(p=>{const w=p.v/total*W;el("rect",{x:L+acc,y:y0,width:Math.max(w-2,1),height:h,fill:p.c,opacity:p.o||1,rx:2},svg);
+  if(w>48){el("text",{x:L+acc+w/2,y:y0+h/2+4,"text-anchor":"middle",style:"fill:var(--surface)","font-weight":"600"},svg,p.lab)}
+  p._x=L+acc+w/2;acc+=w});return parts}
+function drawSS2(){const svg=$("#ss2");const L=20,W=600,tot=3452.21;
+  const parts=[{v:205.35,c:"var(--g2)",lab:"supp",df:1},{v:2426.43,c:"var(--accent)",lab:"dose 70.3%",df:2},{v:108.32,c:"var(--g4)",lab:"",df:2},{v:712.11,c:"var(--warn)",o:.75,lab:"오차 20.6%",df:54}];
+  el("text",{x:L,y:20,class:"ink","font-weight":"600"},svg,"SST = 3452.2  (df 59)");
+  stackBar(svg,48,44,parts,L,W,tot);
+  parts.forEach(p=>el("text",{x:p._x,y:42,"text-anchor":"middle"},svg,"df "+p.df));
+  const lab=[["supp 205.4 (5.9%)",parts[0]._x],["supp×dose 108.3 (3.1%)",parts[2]._x]];
+  lab.forEach(([t,xx],i)=>{el("line",{x1:xx,x2:xx,y1:94,y2:112+i*22,stroke:"var(--muted)"},svg);el("text",{x:xx+4,y:116+i*22},svg,t)});
+  el("text",{x:L,y:178},svg,"설명된 변동 = 205.4 + 2426.4 + 108.3 = 2740.1 (79.4%)   ·   MSE = 712.1 / 54 = 13.19")}
+
+/* ---------- interaction ---------- */
+const cell={OJ:[13.23,22.70,26.06],VC:[7.98,16.77,26.14]};
+const add={OJ:[12.455,21.585,27.95],VC:[8.755,17.885,24.25]};
+let ixMode="obs";
+function drawInter(){const svg=$("#inter");svg.innerHTML="";const L=56,R=600,T=16,B=286;const y=lin(5,30,B,T);const xs=[0,1,2].map(i=>L+60+i*(R-L-120)/2);
+  yAxis(svg,y,[5,10,15,20,25,30],L,R);
+  ["0.5","1","2"].forEach((t,i)=>el("text",{x:xs[i],y:B+22,"text-anchor":"middle",class:"ink"},svg,t+" mg"));
+  el("text",{x:16,y:(T+B)/2,transform:`rotate(-90 16 ${(T+B)/2})`,"text-anchor":"middle"},svg,"평균 len");
+  const col={OJ:"var(--g2)",VC:"var(--g1)"};
+  const line=(arr,c,dash,lab)=>{el("polyline",{points:arr.map((v,i)=>`${xs[i]},${y(v)}`).join(" "),fill:"none",stroke:c,"stroke-width":dash?2:3,"stroke-dasharray":dash?"7 5":"",class:"anim"},svg);
+    arr.forEach((v,i)=>el("circle",{cx:xs[i],cy:y(v),r:dash?4:5.5,fill:dash?"var(--surface)":c,stroke:c,"stroke-width":2},svg))};
+  if(ixMode!=="add"){["OJ","VC"].forEach(s=>line(cell[s],col[s],false))}
+  if(ixMode!=="obs"){["OJ","VC"].forEach(s=>line(add[s],col[s],true))}
+  if(ixMode==="both"){["OJ","VC"].forEach(s=>cell[s].forEach((v,i)=>{const d=v-add[s][i];el("line",{x1:xs[i]+(s==="OJ"?10:-10),x2:xs[i]+(s==="OJ"?10:-10),y1:y(v),y2:y(add[s][i]),stroke:col[s],"stroke-width":1.5,opacity:.8},svg);
+    el("text",{x:xs[i]+(s==="OJ"?14:-14),y:(y(v)+y(add[s][i]))/2+4,"text-anchor":s==="OJ"?"start":"end",style:"fill:"+col[s]},svg,(d>0?"+":"")+fmt(d,2))}))}
+  const msg={obs:"실선: 관측된 칸 평균",add:"점선: 교호작용이 없다고 가정한 예측 (두 선이 평행)",both:"실선 − 점선 = 교호작용 효과 (αβ)ᵢⱼ"};
+  el("text",{x:R,y:T+4,"text-anchor":"end",class:"ink"},svg,msg[ixMode])}
+[["#ix-obs","obs"],["#ix-add","add"],["#ix-both","both"]].forEach(([s,m])=>$(s).addEventListener("click",()=>{ixMode=m;["#ix-obs","#ix-add","#ix-both"].forEach(q=>$(q).setAttribute("aria-pressed",q===s));drawInter()}));
+
+/* ---------- RM SS compare ---------- */
+function drawRMSS(){const svg=$("#rmss");const L=130,W=480,tot=505647;
+  el("text",{x:L-10,y:46,"text-anchor":"end",class:"ink"},svg,"독립집단으로 보면");
+  el("text",{x:L-10,y:126,"text-anchor":"end",class:"ink"},svg,"반복측정으로 보면");
+  const a=stackBar(svg,26,34,[{v:310957,c:"var(--accent)",lab:"SS_time 310,957"},{v:194690,c:"var(--warn)",o:.75,lab:"SS_within 194,690"}],L,W,tot);
+  const b=stackBar(svg,106,34,[{v:310957,c:"var(--accent)",lab:"SS_time 310,957"},{v:126865,c:"var(--muted)",o:.6,lab:"SS_subject"},{v:67825,c:"var(--warn)",o:.75,lab:"SS_error"}],L,W,tot);
+  el("text",{x:L+W,y:18,"text-anchor":"end"},svg,"F(2, 132) = 105.4");
+  el("text",{x:L+W,y:98,"text-anchor":"end"},svg,"F(2, 88) = 201.7");
+  el("text",{x:b[1]._x,y:160,"text-anchor":"middle"},svg,"126,865 · df 44");
+  el("text",{x:b[2]._x,y:160,"text-anchor":"middle"},svg,"67,825 · df 88");
+  el("text",{x:L,y:196},svg,"개체 간 변동을 떼어내면 오차 MS가 1,475 → 771로 줄어듭니다.")}
+
+/* ---------- sphericity ---------- */
+function drawSph(){const svg=$("#sph");const v=[["12 − 6",670.3],["18 − 6",2805.3],["18 − 12",1148.8]];const L=70,B=180,T=20;const y=lin(0,3000,B,T);
+  yAxis(svg,y,[0,1000,2000,3000],L,390,t=>t.toLocaleString());
+  const mean=v.reduce((s,d)=>s+d[1],0)/3;
+  v.forEach((d,i)=>{const x=L+30+i*105;el("rect",{x,y:y(d[1]),width:62,height:B-y(d[1]),fill:"var(--accent)",opacity:.85,rx:2},svg);
+    el("text",{x:x+31,y:y(d[1])-6,"text-anchor":"middle",class:"ink","font-weight":"600"},svg,d[1].toLocaleString());
+    el("text",{x:x+31,y:B+18,"text-anchor":"middle"},svg,d[0]+"일")});
+  el("line",{x1:L,x2:390,y1:y(mean),y2:y(mean),stroke:"var(--warn)","stroke-dasharray":"5 4","stroke-width":1.6},svg);
+  el("text",{x:390,y:y(mean)-6,"text-anchor":"end",style:"fill:var(--warn)"},svg,"평균 "+Math.round(mean).toLocaleString());
+  el("text",{x:14,y:(T+B)/2,transform:`rotate(-90 14 ${(T+B)/2})`,"text-anchor":"middle"},svg,"Var(차이 점수)")}
+
+/* ---------- RM mean plot ---------- */
+function stats(arr){const n=arr.length,m=arr.reduce((a,b)=>a+b,0)/n;const sd=Math.sqrt(arr.reduce((a,b)=>a+(b-m)**2,0)/(n-1));return{n,m,sd,se:sd/Math.sqrt(n)}}
+const tcrit=n=>({45:2.0154,16:2.1314,10:2.2622,9:2.306})[n]||1.96;
+let rmSp=false;
+function drawRM(){const svg=$("#rmplot");svg.innerHTML="";const L=60,R=600,T=16,B=296;const y=lin(50,340,B,T);const xs=[0,1,2].map(i=>L+70+i*(R-L-140)/2);
+  yAxis(svg,y,[50,100,150,200,250,300],L,R);
+  ["6일","12일","18일"].forEach((t,i)=>el("text",{x:xs[i],y:B+22,"text-anchor":"middle",class:"ink"},svg,t));
+  el("text",{x:16,y:(T+B)/2,transform:`rotate(-90 16 ${(T+B)/2})`,"text-anchor":"middle"},svg,"체중 (g)");
+  if(rmSp) CH.forEach(c=>el("polyline",{points:[2,3,4].map((k,i)=>`${xs[i]},${y(c[k])}`).join(" "),fill:"none",stroke:"var(--muted)","stroke-width":1,opacity:.4},svg));
+  const S=[2,3,4].map(k=>stats(CH.map(c=>c[k])));
+  el("polyline",{points:S.map((s,i)=>`${xs[i]},${y(s.m)}`).join(" "),fill:"none",stroke:"var(--accent)","stroke-width":3},svg);
+  S.forEach((s,i)=>{const h=tcrit(45)*s.se;el("line",{x1:xs[i],x2:xs[i],y1:y(s.m-h),y2:y(s.m+h),stroke:"var(--accent)","stroke-width":2.5},svg);
+    [s.m-h,s.m+h].forEach(v=>el("line",{x1:xs[i]-9,x2:xs[i]+9,y1:y(v),y2:y(v),stroke:"var(--accent)","stroke-width":2.5},svg));
+    el("circle",{cx:xs[i],cy:y(s.m),r:6,fill:"var(--accent)",stroke:"var(--surface)","stroke-width":2},svg);
+    el("text",{x:xs[i]+14,y:y(s.m)+4,class:"ink","font-weight":"600"},svg,`${s.m.toFixed(1)} [${(s.m-h).toFixed(1)}, ${(s.m+h).toFixed(1)}]`)})}
+[["#rm-mean",false],["#rm-sp",true]].forEach(([s,v])=>$(s).addEventListener("click",()=>{rmSp=v;$("#rm-mean").setAttribute("aria-pressed",!v);$("#rm-sp").setAttribute("aria-pressed",v);drawRM()}));
+
+/* ---------- mixed profile ---------- */
+let mxD=0;
+function drawMx(){const svg=$("#mxplot");svg.innerHTML="";const L=60,R=600,T=16,B=296;const y=lin(50,340,B,T);const xs=[0,1,2].map(i=>L+70+i*(R-L-140)/2);
+  yAxis(svg,y,[50,100,150,200,250,300],L,R);
+  ["6일","12일","18일"].forEach((t,i)=>el("text",{x:xs[i],y:B+22,"text-anchor":"middle",class:"ink"},svg,t));
+  el("text",{x:16,y:(T+B)/2,transform:`rotate(-90 16 ${(T+B)/2})`,"text-anchor":"middle"},svg,"체중 (g)");
+  if(mxD) CH.filter(c=>c[1]===mxD).forEach(c=>el("polyline",{points:[2,3,4].map((k,i)=>`${xs[i]},${y(c[k])}`).join(" "),fill:"none",stroke:GC[mxD-1],"stroke-width":1.2,opacity:.45},svg));
+  [1,2,3,4].forEach(d=>{const sub=CH.filter(c=>c[1]===d);const S=[2,3,4].map(k=>stats(sub.map(c=>c[k])));const off=(d-2.5)*7;
+    const dim=mxD&&mxD!==d;const c=GC[d-1];const op=dim?.18:1;
+    el("polyline",{points:S.map((s,i)=>`${xs[i]+off},${y(s.m)}`).join(" "),fill:"none",stroke:c,"stroke-width":2.6,opacity:op},svg);
+    S.forEach((s,i)=>{el("line",{x1:xs[i]+off,x2:xs[i]+off,y1:y(s.m-s.se),y2:y(s.m+s.se),stroke:c,"stroke-width":2,opacity:op},svg);
+      el("circle",{cx:xs[i]+off,cy:y(s.m),r:4.5,fill:c,opacity:op},svg)});
+    if(!dim)el("text",{x:xs[2]+off+12,y:y(S[2].m)+4,style:"fill:"+c,"font-weight":"600"},svg,"Diet "+d+"  "+S[2].m.toFixed(1))})}
+document.querySelectorAll("#mx-all,.mxd").forEach(b=>b.addEventListener("click",()=>{mxD=b.dataset.d?+b.dataset.d:0;document.querySelectorAll("#mx-all,.mxd").forEach(x=>x.setAttribute("aria-pressed",x===b));drawMx()}));
+
+/* ---------- code: comments, tooltips, copy ---------- */
+const FN={
+ "library":["패키지를 현재 세션에 불러옵니다.","package (필수): 패키지 이름","없음(부수효과로 함수 사용 가능)"],
+ "options":["R 전역 설정을 바꿉니다. 여기서는 패키지 저장소 지정.","repos: CRAN 저장소 URL","이전 설정값 리스트(보이지 않음)"],
+ "dir.create":["폴더를 만듭니다.","path (필수), recursive: 상위 폴더까지, showWarnings","성공 여부 논리값(보이지 않음)"],
+ "write_csv":["데이터프레임을 CSV로 저장합니다(readr).","x (필수): 데이터, file (필수): 경로","입력 데이터를 그대로 반환(보이지 않음)"],
+ "read_csv":["CSV 파일을 tibble로 읽습니다(readr).","file (필수): 경로, col_types: 열 형식","tibble"],
+ "mutate":["열을 새로 만들거나 바꿉니다(dplyr).","데이터 (필수), 이름 = 식 …","같은 행 수의 tibble"],
+ "factor":["범주형 변수로 바꿉니다. 수준 순서를 지정할 수 있습니다.","x (필수), levels: 수준 순서","factor 벡터"],
+ "group_by":["이후 연산을 집단별로 하도록 묶습니다(dplyr).","데이터 (필수), 묶을 변수 …","grouped tibble"],
+ "summarise":["집단마다 한 행으로 요약합니다(dplyr).","데이터 (필수), 이름 = 요약식 …; .groups","요약 tibble"],
+ "leveneTest":["Levene 등분산 검정. 기본 center = median(Brown–Forsythe).","formula y ~ group (필수), data, center","분산분석표 형식(Df, F value, Pr(>F))"],
+ "bartlett.test":["Bartlett 등분산 검정. 정규성에 민감합니다.","formula (필수), data","htest 객체(K-squared, df, p-value)"],
+ "aov":["분산분석 모형을 적합합니다(lm 기반).","formula y ~ 요인 (필수), data","aov 객체 → summary()로 분산분석표"],
+ "summary":["모형 객체를 요약합니다. aov에는 분산분석표를 출력합니다.","object (필수)","summary 객체(Df, Sum Sq, Mean Sq, F, Pr)"],
+ "shapiro.test":["Shapiro–Wilk 정규성 검정.","x (필수): 수치 벡터(3~5000개)","htest 객체(W, p-value)"],
+ "residuals":["모형의 잔차를 뽑습니다.","object (필수): 적합된 모형","수치 벡터"],
+ "eta_squared":["η² 효과크기를 계산합니다(rstatix).","model (필수): aov 객체","요인별 η² 이름 붙은 벡터"],
+ "TukeyHSD":["Tukey 정직유의차 사후검정(모든 쌍).","x (필수): aov 객체, which, conf.level","TukeyHSD 객체(diff, lwr, upr, p adj)"],
+ "tukey_hsd":["Tukey HSD를 tibble로 반환합니다(rstatix).","data (필수), formula (필수)","tibble(group1, group2, estimate, conf.low, conf.high, p.adj)"],
+ "ggplot":["ggplot2 그림을 시작합니다.","data (필수), mapping = aes()","ggplot 객체(+로 레이어 추가)"],
+ "aes":["변수를 x, y, colour 같은 시각 속성에 연결합니다.","x, y, colour, group …","매핑 객체"],
+ "geom_hline":["수평선을 그립니다.","yintercept (필수), linetype","레이어"],
+ "geom_segment":["두 점을 잇는 선분을 그립니다.","x, y, xend, yend (필수), arrow","레이어"],
+ "geom_point":["점을 찍습니다.","size, colour, alpha","레이어"],
+ "geom_line":["점을 선으로 잇습니다. group으로 선을 나눕니다.","group, linewidth","레이어"],
+ "geom_errorbar":["오차막대를 그립니다.","ymin, ymax (필수), width","레이어"],
+ "stat_summary":["y를 x별로 요약해 그립니다.","fun 또는 fun.data(예: mean_cl_normal), geom","레이어"],
+ "ggsave":["그림을 파일로 저장합니다.","filename (필수), plot, width, height, dpi","파일 경로(보이지 않음)"],
+ "theme_minimal":["간결한 테마. base_family로 한글 글꼴 지정.","base_size, base_family","theme 객체"],
+ "anova_test":["분산분석을 수행합니다(rstatix). 반복측정이면 Mauchly·GG·HF를 함께 반환합니다.","data, dv, wid, between, within, 또는 formula; error: 오차항으로 쓸 모형","anova_test 객체(ANOVA 표 + 구형성 결과)"],
+ "get_anova_table":["anova_test 결과에서 표를 뽑고 구형성 보정을 적용합니다.","x (필수), correction: auto·GG·HF·none","tibble 분산분석표"],
+ "pairwise_t_test":["쌍별 t 검정과 다중비교 보정(rstatix).","data, formula (필수), paired, p.adjust.method","tibble(group1, group2, statistic, p, p.adj)"],
+ "emmeans_test":["추정주변평균 기반 쌍별 비교(rstatix).","data, formula (필수), p.adjust.method","tibble(비교, statistic, df, p.adj)"],
+ "adjust_pvalue":["p 값 열에 다중비교 보정을 적용합니다.","data (필수), method: bonferroni·holm …","p.adj 열이 붙은 tibble"],
+ "get_summary_stats":["기술통계를 계산합니다(rstatix).","data, 변수, type: mean_sd·full …","tibble(n, mean, sd …)"],
+ "levene_test":["Levene 검정의 tidy 버전(rstatix).","data, formula (필수), center","tibble(df1, df2, statistic, p)"],
+ "box_m":["Box's M 검정: 집단별 공분산 행렬의 동질성.","data (필수): 반복측정 열들(wide), group (필수)","tibble(statistic, p.value)"],
+ "pivot_wider":["long 자료를 wide로 바꿉니다(tidyr).","names_from, values_from (필수)","wide tibble"],
+ "filter":["조건을 만족하는 행만 남깁니다(dplyr).","데이터 (필수), 조건식 …","tibble"],
+ "lm":["선형모형을 적합합니다.","formula (필수), data","lm 객체"],
+ "as_tibble":["데이터프레임을 tibble로 바꿉니다.","x (필수)","tibble"]
+};
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+document.querySelectorAll("code.r").forEach(c=>{
+  const raw=c.textContent;
+  c.innerHTML=raw.split("\n").map(line=>{let q=0,cut=-1;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'||ch==="`")q^=1;if(ch==="#"&&!q){cut=i;break}}
+    const body=cut>=0?line.slice(0,cut):line,cm=cut>=0?line.slice(cut):"";
+    const b=esc(body).replace(/\b([A-Za-z_][A-Za-z0-9_.]*)\(/g,(m,n)=>FN[n]?`<span class="fn" tabindex="0" data-fn="${n}">${n}</span>(`:m);
+    return b+(cm?`<span class="cm">${esc(cm)}</span>`:"")}).join("\n");
+});
+const tip=$("#tip");
+function showTip(t){const f=FN[t.dataset.fn];tip.innerHTML=`<b>${t.dataset.fn}()</b><br>${f[0]}<span class="k">인수</span>${f[1]}<span class="k">반환</span>${f[2]}`;tip.hidden=false;
+  const r=t.getBoundingClientRect();const w=Math.min(340,innerWidth-24);tip.style.maxWidth=w+"px";let left=Math.min(Math.max(12,r.left),innerWidth-w-12);tip.style.left=left+"px";
+  const h=tip.offsetHeight;tip.style.top=(r.bottom+8+h>innerHeight?r.top-h-8:r.bottom+8)+"px"}
+document.addEventListener("mouseover",e=>{const t=e.target.closest(".fn");if(t)showTip(t)});
+document.addEventListener("mouseout",e=>{if(e.target.closest(".fn"))tip.hidden=true});
+document.addEventListener("focusin",e=>{const t=e.target.closest(".fn");if(t)showTip(t)});
+document.addEventListener("focusout",e=>{if(e.target.closest(".fn"))tip.hidden=true});
+document.addEventListener("click",e=>{const t=e.target.closest(".fn");if(t){showTip(t)}else if(!e.target.closest("#tip"))tip.hidden=true});
+addEventListener("scroll",()=>{tip.hidden=true},{passive:true});
+document.querySelectorAll(".copy").forEach(b=>b.addEventListener("click",()=>{const pre=b.parentElement.querySelector("pre");const txt=pre.textContent;
+  const done=()=>{b.textContent="복사됨";setTimeout(()=>b.textContent="복사",1600)};
+  const fallback=()=>{const r=document.createRange();r.selectNodeContents(pre);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="선택됨 · Ctrl+C"};
+  try{navigator.clipboard.writeText(txt).then(done,fallback)}catch(e){fallback()}}));
+
+drawDecomp();drawSSbar();drawF("#fdist1",2,27,4.846,3.354,".0159",8);drawTukey();drawSS2();drawInter();drawRMSS();drawSph();drawRM();drawMx();
+})();
+</script>
+
+</body></html>

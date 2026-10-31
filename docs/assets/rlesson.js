@@ -1,8 +1,10 @@
-/* R 실습 자료 세 쪽이 함께 쓰는 스크립트
-   (data-science/VScode-R-languageserver.html, statistics/prepare-for-ttest.html, statistics/mean-test-with-r.html)
+/* R 실습 자료 네 쪽이 함께 쓰는 스크립트
+   (data-science/VScode-R-languageserver.html, statistics/prepare-for-ttest.html, statistics/mean-test-with-r.html,
+    statistics/anova-with-r.html)
    - 함수 도움말 사전(FN)과 풍선 도움말, 코드 상자의 주석 색·복사 버튼, 레일 목차의 현재 위치 표시,
      주소의 #이름이 가리키는 펼침 상자 열기.
-   - 쪽의 본문 뒤, 그 쪽 고유의 스크립트 앞에 불러온다. FN, esc, wrapFns 는 뒤따르는 스크립트(실험판)가 그대로 쓴다. */
+   - 쪽의 본문 뒤, 그 쪽 고유의 스크립트 앞에 불러온다. FN, esc, wrapFns 는 뒤따르는 스크립트(실험판)가 그대로 쓴다.
+   - 한 쪽에만 나오는 함수의 도움말은 그 쪽이 이 스크립트보다 앞에서 window.FN_EXTRA 에 같은 꼴로 두면 FN 에 합쳐진다. */
 
 /* ── 함수 도움말 사전: [인수, 1 필수 / 0 선택 / 2 사실상 필수, 설명] ── */
 const FN={
@@ -117,11 +119,11 @@ const FN={
   args:[['title',0,'그림 제목'],['x',0,'가로축 이름. NULL이면 지운다'],['y',0,'세로축 이름']],ret:'이름표 설정. <code>+</code>로 그림에 더한다.'},
 'ggsave':{pkg:'ggplot2',sig:'ggsave(filename, plot = last_plot(), width, height, dpi = 300)',why:'그림을 파일로 저장한다. 확장자(.png, .pdf 등)에 따라 형식이 정해진다.',
   args:[['filename',1,'저장할 파일 경로'],['plot',0,'저장할 그림. 기본값은 마지막에 그린 그림'],['width',0,'너비(인치)'],['height',0,'높이(인치)'],['dpi',0,'해상도. 기본값 300']],ret:'저장한 파일 경로(화면에는 보이지 않는다).'},
-'font_import':{pkg:'extrafont',sig:'font_import(paths = NULL, pattern = NULL, prompt = TRUE)',why:'컴퓨터에 설치된 트루타입 글꼴을 찾아 R에 등록한다. 컴퓨터마다 한 번만 하면 된다.',
-  args:[['paths',0,'글꼴을 찾을 폴더. 기본값은 시스템 글꼴 폴더'],['pattern',0,'등록할 글꼴 파일 이름에 들어 있어야 할 글자. 기본값은 모든 글꼴'],['prompt',0,'진행할지 묻는 질문을 띄울지. 기본값 TRUE. FALSE면 묻지 않고 바로 진행한다']],ret:'없음. 등록 과정이 화면에 출력된다.'},
-'loadfonts':{pkg:'extrafont',sig:'loadfonts(device = "pdf", quiet = FALSE)',why:'등록해 둔 글꼴을 그림 장치에 연결한다. R을 새로 켤 때마다 실행한다.',
-  args:[['device',0,'연결할 그림 장치. "pdf"(기본값), "postscript", "win"(Windows 화면)'],['quiet',0,'진행 메시지를 숨길지. 기본값 FALSE']],ret:'없음.'},
-'fonts':{pkg:'extrafont',sig:'fonts()',why:'등록된 글꼴의 이름을 확인한다. <code>base_family</code>에는 여기 나온 이름을 그대로 적는다.',args:[],ret:'글꼴 이름이 담긴 문자형 벡터.'},
+'font_add_google':{pkg:'sysfonts',sig:'font_add_google(name, family)',why:'Google Fonts에서 글꼴을 내려받아 R에 등록한다. 인터넷 연결이 필요하다.',
+  args:[['name',1,'Google Fonts의 글꼴 이름'],['family',0,'R에서 부를 이름. 기본값은 name과 같다']],ret:'없음(등록된 글꼴 정보를 보이지 않게 돌려준다).'},
+'font_families':{pkg:'sysfonts',sig:'font_families()',why:'등록된 글꼴의 이름을 확인한다. <code>base_family</code>에는 여기 나온 이름을 그대로 적는다.',args:[],ret:'글꼴 이름이 담긴 문자형 벡터.'},
+'showtext_auto':{pkg:'showtext',sig:'showtext_auto(enable)',why:'이후의 그림에 showtext를 켠다. 글자를 도형으로 그려 넣어 운영체제와 상관없이 한글이 같게 나온다.',args:[['enable',0,'켤지 끌지. 기본값 TRUE']],ret:'없음.'},
+'showtext_opts':{pkg:'showtext',sig:'showtext_opts(dpi)',why:'showtext의 설정을 바꾼다. ggsave()의 dpi와 맞추지 않으면 저장한 그림의 글자 크기가 달라진다.',args:[['dpi',0,'글자를 그릴 해상도. 기본값 96']],ret:'없음.'},
 'grep':{pkg:'base',sig:'grep(pattern, x, value = FALSE)',why:'문자형 벡터에서 특정 글자가 들어 있는 원소를 찾는다.',
   args:[['pattern',1,'찾을 글자(정규표현식)'],['x',1,'찾을 대상인 문자형 벡터'],['value',0,'TRUE면 찾은 원소 자체를, FALSE(기본값)면 그 위치 번호를 돌려준다']],ret:'value = TRUE이면 문자형 벡터, 아니면 정수 벡터.'},
 'normalizePath':{pkg:'base',sig:'normalizePath(path)',why:'경로를 줄임 없는 전체 경로로 바꿔 보여 준다.',args:[['path',1,'경로 문자열']],ret:'전체 경로 문자열. Windows에서는 역슬래시가 두 개씩 표시된다.'},
@@ -155,6 +157,8 @@ const FN={
   args:[['x',1,'숫자 벡터. 또는 <code>값 ~ 집단</code> 꼴의 공식'],['y',0,'두 번째 숫자 벡터'],['data',0,'공식을 쓸 때의 데이터프레임'],['ci',0,'신뢰수준. 기본값 0.95']],
   ret:'한 행짜리 데이터프레임. 열은 <code>Hedges_g</code>, <code>CI</code>, <code>CI_low</code>, <code>CI_high</code>.'}
 };
+/* 쪽이 이 스크립트보다 앞에서 window.FN_EXTRA 에 둔 함수 도움말을 합친다(그 쪽의 코드에만 나오는 함수) */
+Object.assign(FN, window.FN_EXTRA || {});
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const wrapFns=h=>h.replace(/([A-Za-z_][A-Za-z0-9._]*)(?=\()/g,m=>FN.hasOwnProperty(m)?`<span class="fn" tabindex="0" data-fn="${m}">${m}</span>`:m);
 

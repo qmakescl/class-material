@@ -1,5 +1,6 @@
-/* R 실습 자료 세 쪽이 함께 쓰는 스타일
-   (data-science/VScode-R-languageserver.html, statistics/prepare-for-ttest.html, statistics/mean-test-with-r.html)
+/* R 실습 자료 네 쪽이 함께 쓰는 스타일
+   (data-science/VScode-R-languageserver.html, statistics/prepare-for-ttest.html, statistics/mean-test-with-r.html,
+    statistics/anova-with-r.html)
    data-science/ggplot-visualization.html 도 이 파일을 불러 쓰지만 rlesson.js 는 쓰지 않는다
    (위젯이 코드 상자를 다시 쓰므로 복사·낱말 색을 쪽에서 직접 한다).
    - 본문·박스·레일·표·코드 상자(.cb)·절차(.steps)·갈무리(.shot)는 material.css 가 맡는다.

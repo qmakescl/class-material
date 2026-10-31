@@ -196,10 +196,10 @@ Rscript.exe scripts/02.prepare_datasets.R     # 프로젝트 루트에서, 스�
 <p><strong>R을 새 버전으로 올리면</strong> 설치 폴더 이름(<code>R-4.x.x</code>)이 바뀐다. Path에 넣은 경로도 새 폴더로 고친다.</p></div>
 </details>
 <ol start="5">
-<li><strong>패키지 설치.</strong> 아래 한 줄을 R에서 한 번만 실행한다. 패키지를 내려받는 저장소는 <code>repos</code> 인수로 <code>https://cloud.r-project.org/</code>를 지정한다. 저장소를 고르라는 창이 뜨지 않고, 가까운 서버로 자동 연결된다. <code>type = "binary"</code>는 운영체제에 맞게 미리 만들어 둔 설치 파일(바이너리)만 받으라는 뜻이다(아래 설명 참고). <code>languageserver</code>는 VS Code가 자동완성과 도움말을 띄우는 데 쓴다. <code>tidyverse</code>는 데이터를 읽고 다듬고 그리는 패키지 묶음이고(Excel을 읽는 <code>readxl</code>도 함께 설치된다), <code>writexl</code>은 Excel 저장, <code>effectsize</code>는 효과크기 계산, <code>extrafont</code>는 그림에 한글 글꼴을 쓰는 데 쓴다. 설치에 몇 분 걸린다.</li>
+<li><strong>패키지 설치.</strong> 아래 한 줄을 R에서 한 번만 실행한다. 패키지를 내려받는 저장소는 <code>repos</code> 인수로 <code>https://cloud.r-project.org/</code>를 지정한다. 저장소를 고르라는 창이 뜨지 않고, 가까운 서버로 자동 연결된다. <code>type = "binary"</code>는 운영체제에 맞게 미리 만들어 둔 설치 파일(바이너리)만 받으라는 뜻이다(아래 설명 참고). <code>languageserver</code>는 VS Code가 자동완성과 도움말을 띄우는 데 쓴다. <code>tidyverse</code>는 데이터를 읽고 다듬고 그리는 패키지 묶음이고(Excel을 읽는 <code>readxl</code>도 함께 설치된다), <code>writexl</code>은 Excel 저장, <code>effectsize</code>는 효과크기 계산, <code>showtext</code>는 그림에 한글 글꼴을 쓰는 데 쓴다. 설치에 몇 분 걸린다.</li>
 </ol>
 <div class="cb r"><span class="lang">R · 처음 한 번만</span><pre>install.packages(
-  c("languageserver", "tidyverse", "writexl", "effectsize", "extrafont"),
+  c("languageserver", "tidyverse", "writexl", "effectsize", "showtext"),
   repos = "https://cloud.r-project.org/",
   type = "binary"
 )</pre></div>
