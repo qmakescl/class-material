@@ -46,7 +46,7 @@ for (i in seq_len(nrow(tab1))) with(tab1[i, ], cat(sprintf(
 # ---- 표 2: 검정 결과 ----
 r1 <- t.test(d$sodium_pre, mu = 3000)
 vt <- var.test(sodium_post ~ group, data = d)
-r2 <- t.test(sodium_post ~ group, data = d, var.equal = vt$p.value >= 0.05)
+r2 <- t.test(sodium_post ~ group, data = d, var.equal = vt$p.value >= 0.05, alternative = "less")
 edu <- d %>% filter(group == "교육군")
 r3 <- t.test(edu$sodium_pre, edu$sodium_post, paired = TRUE)
 sp <- sqrt(sum((tab1$n - 1) * tab1$post_sd^2) / (sum(tab1$n) - 2))
@@ -59,7 +59,7 @@ row <- function(name, r, es, es_name)
 cat("\n표 2\n")
 cat(row("단일표본(사전 vs 3000)", r1, (mean(d$sodium_pre) - 3000) / sd(d$sodium_pre), "d"), "\n")
 cat(sprintf("등분산 검정 | F = %.3f | df = (%d, %d) | p = %.3f\n", vt$statistic, 23, 23, vt$p.value))
-cat(row("독립표본(사후, 교육군 vs 대조군)", r2, g2, "g"), "\n")
+cat(row("독립표본(사후, 교육군 < 대조군, 한쪽)", r2, g2, "g"), "\n")
 cat(row("대응표본(교육군 사전 vs 사후)", r3, mean(edu$diff) / sd(edu$diff), "dz"), "\n")
 
 # ---- 도표 1: 집단별 사후 섭취량, 상자 + 점 ----
@@ -74,24 +74,22 @@ ggsave(file.path(out_dir, "apa-box.png"), p_box, device = ragg::agg_png,
 
 # ---- 도표 2: 가설검정 도표 (독립표본 Student t 검정) ----
 t_obs <- unname(r2$statistic); df2 <- unname(r2$parameter)
-crit <- qt(0.975, df2)
+crit <- qt(0.95, df2)
 grid <- data.frame(t = seq(-4.5, 4.5, length.out = 601))
 grid$dens <- dt(grid$t, df2)
 p_t <- ggplot(grid, aes(t, dens)) +
   geom_area(data = subset(grid, t <= -crit), fill = "#ffb020", alpha = 0.5) +
-  geom_area(data = subset(grid, t >=  crit), fill = "#ffb020", alpha = 0.5) +
-  geom_area(data = subset(grid, t <= -abs(t_obs)), fill = "#2f6fed", alpha = 0.5) +
-  geom_area(data = subset(grid, t >=  abs(t_obs)), fill = "#2f6fed", alpha = 0.5) +
+  geom_area(data = subset(grid, t <= t_obs), fill = "#2f6fed", alpha = 0.5) +
   geom_line() +
-  geom_vline(xintercept = c(-crit, crit), linetype = "dashed") +
+  geom_vline(xintercept = -crit, linetype = "dashed") +
   geom_vline(xintercept = t_obs, linewidth = 1) +
   annotate("text", x = t_obs, y = max(grid$dens) * 0.95, hjust = 1.1,
            label = sprintf("관측한 t = %.2f", t_obs)) +
-  annotate("text", x = crit, y = max(grid$dens) * 0.6, hjust = -0.1,
-           label = sprintf("임계값 ±%.2f", crit)) +
+  annotate("text", x = t_obs, y = max(grid$dens) * 0.8, hjust = 1.1,
+           label = sprintf("임계값(점선) -%.2f", crit)) +
   labs(x = sprintf("t (df = %d)", df2), y = "밀도",
-       title = sprintf("영가설 아래의 t 분포와 관측한 t: p = %.3f", r2$p.value),
-       subtitle = "주황: 유의수준 0.05의 양측 기각역, 파랑: p-value") +
+       title = sprintf("영가설 하(under H0)의 t 분포와 관측한 t: p-value = %.3f", r2$p.value),
+       subtitle = "주황: 유의수준 0.05의 왼쪽 기각역, 파랑: 한쪽 검정의 p-value") +
   theme_classic(base_size = 12)
 ggsave(file.path(out_dir, "apa-ttest.png"), p_t, device = ragg::agg_png,
        width = 6, height = 4, dpi = 150)

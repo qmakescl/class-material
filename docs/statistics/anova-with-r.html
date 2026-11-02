@@ -184,7 +184,7 @@
 </tbody></table></div>
 <div class="fig">
   <svg id="fdist1" viewBox="0 0 640 230" role="img" aria-label="F(2,27) 분포와 관측 F"></svg>
-  <p class="figcap">영가설 아래의 F(2, 27) 분포. 임계값(critical value) F<sub>.05</sub> = 3.354, 관측값 F = 4.846의 오른쪽 꼬리 면적이 p = .0159다. 효과크기(effect size) \(\eta^2 = \mathit{SSB}/\mathit{SST} = .264\)로, 중량 변동의 약 26%가 처리 차이로 설명된다.</p>
+  <p class="figcap">영가설 하(under \(H_0\))의 F(2, 27) 분포. 임계값(critical value) F<sub>.05</sub> = 3.354, 관측값 F = 4.846의 오른쪽 꼬리 면적이 p = .0159다. 효과크기(effect size) \(\eta^2 = \mathit{SSB}/\mathit{SST} = .264\)로, 중량 변동의 약 26%가 처리 차이로 설명된다.</p>
 </div>
 
 <h3>사후검정 (post hoc)</h3>
@@ -262,7 +262,7 @@
 4. 표 4 · 사후검정: 어느 집단끼리 다른지 Tukey HSD 와 Bonferroni 두 방법으로 모두 비교한다. 비교 쌍을 행으로 두고 평균 차이와, 방법별 95% 신뢰구간과 보정한 p 를 열로 둔다. 두 방법의 결론이 같은지 표 아래 "주."에 적고, 이 자료처럼 집단 크기가 같을 때와 다를 때 Tukey 방법이 어떻게 달라지는지도 한 문장으로 적는다. output/oneway_posthoc.csv 에 저장한다.
 5. 그림 1: 분산 분해 그림. 집단마다 개별 관측값을 점으로 찍고, 전체 평균을 점선으로, 집단 평균을 가로선으로 그린다. 전체 평균에서 집단 평균까지(집단 간 차이)는 화살표로, 집단 평균에서 각 관측값까지(집단 내 차이)는 세로선으로 표시한다. 부제에 전체 제곱합이 두 조각으로 나뉘는 값과 자유도를 적는다. output/oneway_decomposition.png, 7×4.5 인치, 300 dpi.
 6. 그림 2: 집단 간 제곱합과 집단 내 제곱합을 쌓은 가로 막대 하나. 조각마다 제곱합, 자유도, 평균제곱을 적는다. output/oneway_ss_bar.png, 6×3 인치, 300 dpi.
-7. 그림 3: 영가설 아래의 F 분포를 그리고, 임계값과 관측한 F, p 값에 해당하는 넓이를 표시한다. output/oneway_fdist.png, 6×4 인치, 300 dpi.
+7. 그림 3: 영가설 하(under H0)의 F 분포를 그리고, 임계값과 관측한 F, p 값에 해당하는 넓이를 표시한다. output/oneway_fdist.png, 6×4 인치, 300 dpi.
 8. 그림 4: 두 사후검정 방법의 95% 신뢰구간을 비교 쌍마다 나란히 놓고, 차이가 0 인 곳에 기준선을 긋는다. output/oneway_posthoc.png, 6×4 인치, 300 dpi.
 9. 그림 5: 잔차의 정규성을 눈으로 보는 QQ 그림. output/oneway_qq.png, 5×5 인치, 300 dpi.
 10. 결과 문장을 APA 형식으로 쓴다: F 와 두 자유도, p, 효과크기, 집단별 평균과 표준편차, 유의한 사후 비교와 사용한 방법. 이어서 그 결과가 실제로 무엇을 뜻하는지 쉬운 말로 한 문단 쓴다.
