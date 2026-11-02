@@ -48,7 +48,7 @@ r1 <- t.test(d$sodium_pre, mu = 3000)
 vt <- var.test(sodium_post ~ group, data = d)
 r2 <- t.test(sodium_post ~ group, data = d, var.equal = vt$p.value >= 0.05, alternative = "less")
 edu <- d %>% filter(group == "교육군")
-r3 <- t.test(edu$sodium_pre, edu$sodium_post, paired = TRUE)
+r3 <- t.test(edu$sodium_pre, edu$sodium_post, paired = TRUE, alternative = "greater")
 sp <- sqrt(sum((tab1$n - 1) * tab1$post_sd^2) / (sum(tab1$n) - 2))
 d2 <- (tab1$post_m[1] - tab1$post_m[2]) / sp
 g2 <- d2 * (1 - 3 / (4 * (sum(tab1$n) - 2) - 1))
@@ -60,7 +60,7 @@ cat("\n표 2\n")
 cat(row("단일표본(사전 vs 3000)", r1, (mean(d$sodium_pre) - 3000) / sd(d$sodium_pre), "d"), "\n")
 cat(sprintf("등분산 검정 | F = %.3f | df = (%d, %d) | p = %.3f\n", vt$statistic, 23, 23, vt$p.value))
 cat(row("독립표본(사후, 교육군 < 대조군, 한쪽)", r2, g2, "g"), "\n")
-cat(row("대응표본(교육군 사전 vs 사후)", r3, mean(edu$diff) / sd(edu$diff), "dz"), "\n")
+cat(row("대응표본(교육군 사전 > 사후, 한쪽)", r3, mean(edu$diff) / sd(edu$diff), "dz"), "\n")
 
 # ---- 도표 1: 집단별 사후 섭취량, 상자 + 점 ----
 p_box <- ggplot(d, aes(x = group, y = sodium_post)) +
