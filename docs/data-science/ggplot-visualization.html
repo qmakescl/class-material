@@ -126,6 +126,34 @@
   .galgrp { display: flex; flex-direction: column; gap: 6px; }
   .galgrp .pkg { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--muted); }
 
+  /* 12절: 그림 요소 이름 지도 */
+  .pm-fig { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .pm-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; font-size: 13px; color: var(--muted); }
+  .pm-wrap { position: relative; }
+  #pmSvg { display: block; width: 100%; height: auto; touch-action: manipulation; }
+  #pmSvg * { pointer-events: none; }
+  #pmSvg .pm-hit { pointer-events: all; cursor: help; }
+  #pmSvg .pm-hits { pointer-events: stroke; cursor: help; }
+  #pmSvg.pm-act .pm-el:not(.pm-on) { opacity: .3; }
+  #pmSvg .pm-on .v-area { fill: var(--hl); fill-opacity: .4; }
+  #pmSvg .pm-on .v-line { stroke: var(--hl); stroke-width: 3; }
+  #pmSvg .pm-on .v-text { fill: var(--hl); font-weight: 700; }
+  #pmSvg .pm-on circle { fill: var(--hl); }
+  .pm-names text { font-family: var(--mono); font-size: 10px; font-weight: 600; fill: #0b3d2a; paint-order: stroke; stroke: #fff; stroke-width: 3px; stroke-linejoin: round; }
+  .pm-tag { position: absolute; z-index: 5; pointer-events: none; font-family: var(--mono); font-size: 13px; font-weight: 700; color: #fff; background: var(--ink); border-radius: 4px; padding: 3px 8px; white-space: nowrap; }
+  #pmDetail { margin-top: 0; min-height: 216px; }
+  #pmDetail .nm { font-family: var(--mono); font-size: 17px; font-weight: 700; color: var(--accent-dark); overflow-wrap: anywhere; }
+  #pmDetail dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: 14px; }
+  #pmDetail dt { color: var(--muted); }
+  #pmDetail dd { margin: 0; min-width: 0; }
+  .pm-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px 20px; }
+  .pm-group h4 { margin: 0 0 6px; font-size: 13.5px; }
+  .pm-group div { display: flex; flex-wrap: wrap; gap: 4px; }
+  .pm-btn { appearance: none; font-family: var(--mono); font-size: 12.5px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 3px 7px; cursor: pointer; }
+  .pm-btn:hover, .pm-btn.cur { border-color: var(--accent-dark); background: var(--accent-soft); }
+  .pm-btn[aria-pressed="true"] { background: var(--hl); border-color: var(--hl); color: #fff; }
+  .pm-rule { font-family: var(--mono); font-size: 15px; font-weight: 600; }
+
   /* 실습 과제 상자 */
   .callout.task { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 16px; padding: 14px 18px; }
   .task .k { font-size: 12px; letter-spacing: .06em; font-weight: 700; color: var(--accent-dark); padding-top: 3px; }
@@ -167,6 +195,7 @@
     <a href="#custom"><b>09</b><span>theme 사용자화</span></a>
     <a href="#hangul"><b>10</b><span>showtext 한글</span></a>
     <a href="#gallery-site"><b>11</b><span>R Graph Gallery</span></a>
+    <a href="#map"><b>12</b><span>한 장으로 보는 이름</span></a>
     <a href="#refs"><b>—</b><span>참고문헌</span></a>
   </nav>
   <div class="rail-tags" aria-label="태그">
@@ -1033,6 +1062,58 @@ ggplot(
 - 그림은 output/figures/11_gallery.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
 </section>
 
+<section class="panel" id="map">
+  <div class="section-head"><span class="section-num">12</span><h2>정리: 한 장으로 보는 그림 요소의 이름</h2></div>
+  <p>그림을 고치려면 고칠 곳의 이름을 알아야 합니다. 아래 그림은 05~09절에 나온 요소를 한 장에 모은 것입니다. <b>마우스를 올리면</b> 그 자리의 ggplot 이름이 나타나고, 그림 아래에 요소 함수, 상속 관계, 고치는 코드가 나옵니다. 누르면 그 요소가 고정되고, 터치 화면에서는 눌러서 봅니다.</p>
+  <figure class="pm-fig">
+    <div class="pm-bar">
+      <span>빗금은 실제 그림에는 보이지 않는 여백입니다. 잘 보이도록 실제보다 크게 그렸습니다.</span>
+      <button type="button" class="tog" id="pmAll" aria-pressed="false">이름 모두 보기</button>
+    </div>
+    <div class="pm-wrap" id="pmWrap">
+      <svg id="pmSvg" viewBox="0 0 760 520" role="img" aria-label="mtcars 자동차 32종의 무게와 연비를 변속기별 두 패널로 나눈 산점도. 플롯 배경과 여백, 제목, 패널, 격자선, 축, 스트립, 범례의 위치를 보여 준다. 같은 이름 목록이 그림 아래 단추로도 있다."></svg>
+      <div class="pm-tag" id="pmTag" hidden></div>
+    </div>
+    <figcaption class="pm-bar"><span>자료: mtcars(R datasets) 32종의 실제 값. 이름을 보이려고 <code>axis.line</code>과 <code>panel.border</code>를 켠 그림입니다(<code>theme_grey()</code> 기본값에서는 둘 다 꺼져 있습니다).</span></figcaption>
+  </figure>
+  <div class="detail" id="pmDetail" aria-live="polite"></div>
+  <div class="pm-groups" id="pmList"></div>
+
+  <h3>이름 읽는 법</h3>
+  <p>이름은 대개 <b>영역.부품.방향</b> 순서로 이어집니다. 뒤를 덜어 내면 그 요소가 상속받는 윗 요소가 되므로(07절), 한 번에 넓게 고칠 수도 있습니다.</p>
+  <p class="pm-rule"><code>axis</code> . <code>ticks</code> . <code>x</code></p>
+  <div class="tbl-wrap"><table class="ftbl">
+    <thead><tr><th>앞부분</th><th>영역</th><th>뒤에 붙는 부품</th></tr></thead>
+    <tbody>
+      <tr><td><code>plot.</code></td><td>그림 전체</td><td><code>background</code>, <code>margin</code>, <code>title</code>, <code>subtitle</code>, <code>caption</code></td></tr>
+      <tr><td><code>panel.</code></td><td>자료가 그려지는 칸</td><td><code>background</code>, <code>border</code>, <code>grid.major</code>, <code>grid.minor</code>, <code>spacing</code></td></tr>
+      <tr><td><code>axis.</code></td><td>축</td><td><code>title</code>, <code>text</code>, <code>ticks</code>, <code>line</code></td></tr>
+      <tr><td><code>strip.</code></td><td>패널 이름표</td><td><code>background</code>, <code>text</code></td></tr>
+      <tr><td><code>legend.</code></td><td>범례</td><td><code>background</code>, <code>margin</code>, <code>key</code>, <code>title</code>, <code>text</code>, <code>box.spacing</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>상자처럼 겹쳐 있는 구조</h3>
+  <p>그림은 상자 안에 상자가 든 모양입니다. 맨 바깥 <code>plot.background</code> 안쪽으로 <code>plot.margin</code>만큼 띄우고, 그 안에 제목, 패널, 축, 범례가 놓입니다. 범례도 <code>legend.background</code> 안쪽에 <code>legend.margin</code>을 두는 같은 구조입니다. 상자 사이의 거리를 정하는 이름과 글자 둘레의 여백은 다음과 같이 씁니다.</p>
+  <ul>
+    <li>상자 사이: <code>panel.spacing</code>(패널 사이), <code>legend.box.spacing</code>(패널 영역과 범례 사이), <code>axis.ticks.length</code>(눈금 길이)</li>
+    <li>상자 안쪽: <code>plot.margin</code>, <code>legend.margin</code>은 <code>margin(위, 오른쪽, 아래, 왼쪽)</code> 순서로 적습니다.</li>
+    <li>글자 둘레: <code>element_text(margin = margin(t = 10))</code>처럼 글자 요소의 인수로 줍니다. 축 제목을 축에서 떼어 놓을 때 씁니다.</li>
+  </ul>
+
+  <h3>같은 그림을 R로 그리기</h3>
+  <div class="cb r"><span class="lang">R</span><pre id="mapCode"></pre><button type="button" class="copy">복사</button></div>
+
+  <div class="cb prompt"><span class="lang">프롬프트 · 요소를 말로 짚어 고치기</span><pre>scripts/07_base_plot.R 의 그림을 고쳐서 scripts/12_names.R 로 저장해 줘.
+- 세로 방향 보조 격자선을 없애고, 가로 방향 주 격자선은 연한 회색으로 한다.
+- 패널 배경은 흰색으로 하고, 왼쪽 축과 아래쪽 축에 검은 축선을 넣는다.
+- 축 제목을 눈금 글자에서 조금 더 떼어 놓는다.
+- 범례 배경에 연한 회색 테두리를 두르고, 범례와 패널 사이를 조금 넓힌다.
+- 어떤 요소를 고쳤는지 ggplot 이름과 함께 표로 알려 줘. 내가 말한 곳과 다른 요소를 고쳤다면 그 이유도 적어 줘.
+- 그림은 output/figures/12_names.png 로 저장한다.</pre><button type="button" class="copy">복사</button></div>
+  <p>프롬프트에는 그림에서 보이는 대로 "세로 방향 보조 격자선"이라고 적으면 됩니다. 돌아온 코드에서 <code>panel.grid.minor.x</code>를 찾아 맞게 고쳤는지 확인하는 데 위 그림의 이름을 쓰세요.</p>
+</section>
+
 <section class="panel" id="refs">
   <h3>참고문헌</h3>
   <ol class="refs">
@@ -1663,6 +1744,189 @@ ggsave("output/figures/10_hangul.png", p, width = 7, height = 4.5, dpi = 300)`;
 }
 document.querySelectorAll('#hangul .tog[data-s]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.s;ST[k]=!ST[k];b.setAttribute('aria-pressed',ST[k]);drawShow();}));
 document.getElementById('sHow').addEventListener('change',e=>{ST.how=e.target.value;drawShow();});
+
+/* ---------- 12절: 그림 요소 이름 지도. 점은 mtcars 실제 값, 나머지는 손으로 배치한 SVG ---------- */
+(()=>{
+  /* 이름, 우리말, 요소 함수, 상속(왼쪽이 바로 위), 코드, 프롬프트에서 부르는 말 */
+  const I=(k,ko,fn,inh,code,say,note)=>({k,ko,fn,inh,code,say,note});
+  const GROUPS=[
+   ['그림 전체 plot',[
+    I('plot.background','그림 전체의 배경','element_rect()','rect','theme(plot.background = element_rect(fill = "grey95"))','그림 전체 배경'),
+    I('plot.margin','그림 바깥 여백','margin()','margins','theme(plot.margin = margin(10, 20, 10, 10))','그림 바깥 여백','위, 오른쪽, 아래, 왼쪽 순서입니다.'),
+    I('plot.title','제목','element_text()','title → text','theme(plot.title = element_text(face = "bold", size = 16))','그림 제목'),
+    I('plot.subtitle','부제','element_text()','text','theme(plot.subtitle = element_text(colour = "grey40"))','부제'),
+    I('plot.caption','캡션','element_text()','text','theme(plot.caption = element_text(hjust = 0))','그림 아래 출처 글(캡션)')]],
+   ['패널 panel',[
+    I('panel.background','패널 배경','element_rect()','rect','theme(panel.background = element_rect(fill = "white"))','패널 배경'),
+    I('panel.border','패널 테두리','element_rect()','rect','theme(panel.border = element_rect(fill = NA, colour = "black"))','패널 테두리','자료 위에 그려지므로 fill = NA 가 필요합니다. theme_grey() 기본값은 꺼짐입니다.'),
+    I('panel.grid.major.x','세로 방향 주 격자선','element_line()','panel.grid.major → panel.grid → line','theme(panel.grid.major.x = element_blank())','세로 방향 주 격자선','x축 눈금에서 올라가는 세로선이라 이름 끝이 x입니다.'),
+    I('panel.grid.major.y','가로 방향 주 격자선','element_line()','panel.grid.major → panel.grid → line','theme(panel.grid.major.y = element_line(colour = "grey80"))','가로 방향 주 격자선','y축 눈금에서 뻗어 나가는 가로선이라 이름 끝이 y입니다.'),
+    I('panel.grid.minor.x','세로 방향 보조 격자선','element_line()','panel.grid.minor → panel.grid → line','theme(panel.grid.minor.x = element_blank())','세로 방향 보조 격자선'),
+    I('panel.grid.minor.y','가로 방향 보조 격자선','element_line()','panel.grid.minor → panel.grid → line','theme(panel.grid.minor.y = element_blank())','가로 방향 보조 격자선'),
+    I('panel.spacing','패널 사이 간격','unit()','spacing','theme(panel.spacing = unit(1, "lines"))','패널 사이 간격','한 방향만 고칠 때는 panel.spacing.x, panel.spacing.y 를 씁니다.')]],
+   ['축 axis',[
+    I('axis.title.x','x축 제목','element_text()','axis.title → title → text','theme(axis.title.x = element_text(margin = margin(t = 10)))','x축 제목','글자는 labs(x = ...)로 정하고, 모양은 여기서 정합니다.'),
+    I('axis.title.y','y축 제목','element_text()','axis.title → title → text','theme(axis.title.y = element_text(margin = margin(r = 10)))','y축 제목','글자는 labs(y = ...)로 정하고, 모양은 여기서 정합니다.'),
+    I('axis.text.x','x축 눈금 글자','element_text()','axis.text → text','theme(axis.text.x = element_text(angle = 45, hjust = 1))','x축 눈금 글자','쉼표처럼 글자의 내용을 바꾸는 일은 스케일이 맡습니다(05절).'),
+    I('axis.text.y','y축 눈금 글자','element_text()','axis.text → text','theme(axis.text.y = element_text(colour = "black"))','y축 눈금 글자','쉼표처럼 글자의 내용을 바꾸는 일은 스케일이 맡습니다(05절).'),
+    I('axis.ticks.x','x축 눈금 표시','element_line()','axis.ticks → line','theme(axis.ticks.x = element_blank())','x축 눈금 표시'),
+    I('axis.ticks.y','y축 눈금 표시','element_line()','axis.ticks → line','theme(axis.ticks.y = element_line(colour = "black"))','y축 눈금 표시'),
+    I('axis.ticks.length','눈금 표시의 길이','unit()','spacing','theme(axis.ticks.length = unit(4, "pt"))','눈금 표시의 길이','음수를 주면 눈금이 패널 안쪽으로 들어갑니다.'),
+    I('axis.line.x','x축 선','element_line()','axis.line → line','theme(axis.line.x = element_line(colour = "black"))','아래쪽 축선','theme_grey() 기본값은 꺼짐입니다.'),
+    I('axis.line.y','y축 선','element_line()','axis.line → line','theme(axis.line.y = element_line(colour = "black"))','왼쪽 축선','theme_grey() 기본값은 꺼짐입니다.')]],
+   ['패널 이름표 strip',[
+    I('strip.background.x','패널 이름표 배경','element_rect()','strip.background → rect','theme(strip.background.x = element_rect(fill = "grey90"))','패널 이름표 배경','패널을 나누었을 때만 생깁니다(facet).'),
+    I('strip.text.x','패널 이름표 글자','element_text()','strip.text → text','theme(strip.text.x = element_text(face = "bold"))','패널 이름표 글자','패널을 나누었을 때만 생깁니다(facet).')]],
+   ['범례 legend',[
+    I('legend.background','범례 배경','element_rect()','rect','theme(legend.background = element_rect(colour = "grey70"))','범례 배경','범례의 자리는 legend.position 으로 정합니다.'),
+    I('legend.margin','범례 안쪽 여백','margin()','margins','theme(legend.margin = margin(6, 6, 6, 6))','범례 안쪽 여백'),
+    I('legend.key','범례 기호 칸','element_rect()','panel.background → rect','theme(legend.key = element_rect(fill = "white"))','범례 기호의 배경','칸의 크기는 legend.key.size 로 정합니다.'),
+    I('legend.title','범례 제목','element_text()','title → text','theme(legend.title = element_text(face = "bold"))','범례 제목','글자는 labs(colour = ...)로 정합니다.'),
+    I('legend.text','범례 항목 글자','element_text()','text','theme(legend.text = element_text(size = 9))','범례 항목 글자'),
+    I('legend.box.spacing','패널 영역과 범례 사이','unit()','spacing','theme(legend.box.spacing = unit(20, "pt"))','범례와 패널 사이 간격')]],
+   ['테마 요소가 아닌 것',[
+    I('geom_point()','자료를 그린 레이어',null,null,'geom_point(size = 3)','자료의 점','테마가 아니라 레이어입니다. 자료를 나타내는 모양은 geom 쪽에서 고칩니다(04절).')]]
+  ];
+  const ITEMS=Object.fromEntries(GROUPS.flatMap(g=>g[1]).map(i=>[i.k,i]));
+
+  const svg=document.getElementById('pmSvg'),wrap=document.getElementById('pmWrap'),tag=document.getElementById('pmTag');
+  const det=document.getElementById('pmDetail'),list=document.getElementById('pmList');
+  const FAM=FONT.sans;
+  const G=k=>E('g',{class:'pm-el','data-k':k},svg);
+  const R=(p,x,y,w,h,a)=>E('rect',Object.assign({x,y,width:w,height:h,class:'v-area pm-hit'},a),p);
+  const L=(p,x1,y1,x2,y2,c,w,hit)=>{E('line',{x1,y1,x2,y2,stroke:c,'stroke-width':w,class:'v-line'},p);
+    E('line',{x1,y1,x2,y2,stroke:'transparent','stroke-width':hit,class:'pm-hit'},p);};
+  const Tx=(p,s,x,y,sz,a)=>{const e=E('text',Object.assign({x,y,'font-size':sz,'font-family':FAM,fill:'#000',class:'v-text pm-hit'},a),p);e.textContent=s;return e;};
+
+  /* 자리: 왼쪽 패널 86~337, 오른쪽 패널 359~610, 위 104, 아래 410 */
+  const W=760,H=520,M=18,PT=104,PB=410,ST=80,PW=251,X0=[86,359];
+  const xd=[1.32,5.62],yd=[9.2,35.1];
+  const sx=(i,v)=>X0[i]+(v-xd[0])/(xd[1]-xd[0])*PW, sy=v=>PB-(v-yd[0])/(yd[1]-yd[0])*(PB-PT);
+  const defs=E('defs',{},svg),pat=E('pattern',{id:'pmHatch',width:7,height:7,patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'},defs);
+  E('line',{x1:0,y1:0,x2:0,y2:7,stroke:'#9aa3af','stroke-width':1},pat);
+  const HATCH='url(#pmHatch)';
+
+  R(G('plot.background'),0,0,W,H,{fill:'#fff'});
+  E('path',{d:`M0 0H${W}V${H}H0Z M${M} ${M}V${H-M}H${W-M}V${M}Z`,'fill-rule':'evenodd',fill:HATCH,class:'v-area pm-hit'},G('plot.margin'));
+  Tx(G('plot.title'),'무게가 늘수록 연비는 떨어진다',86,44,17);
+  Tx(G('plot.subtitle'),'1974 Motor Trend 자동차 32종',86,66,13,{fill:'#333'});
+
+  let g=G('panel.background');X0.forEach(x=>R(g,x,PT,PW,PB-PT,{fill:'#EBEBEB'}));
+  R(G('panel.spacing'),337,ST,22,PB-ST,{fill:HATCH});
+  const grid=(k,vals,axis,w,hit)=>{const g=G(k);vals.forEach(v=>[0,1].forEach(i=>{
+    if(axis==='x')L(g,sx(i,v),PT,sx(i,v),PB,'#fff',w,hit);else L(g,X0[i],sy(v),X0[i]+PW,sy(v),'#fff',w,hit);}));};
+  grid('panel.grid.minor.y',[12.5,17.5,22.5,27.5,32.5],'y',.7,6);
+  grid('panel.grid.minor.x',[1.5,2.5,3.5,4.5,5.5],'x',.7,6);
+  grid('panel.grid.major.y',[10,15,20,25,30,35],'y',1.5,7);
+  grid('panel.grid.major.x',[2,3,4,5],'x',1.5,7);
+
+  g=G('geom_point()');
+  MT.forEach(r=>E('circle',{cx:sx(r[4],r[1]),cy:sy(r[2]),r:4,fill:PAL.hue[CYL.indexOf(r[3])],class:'pm-hit'},g));
+
+  g=G('panel.border');X0.forEach(x=>{E('rect',{x,y:PT,width:PW,height:PB-PT,fill:'none',stroke:'#555','stroke-width':1,class:'v-line'},g);
+    E('rect',{x,y:PT,width:PW,height:PB-PT,fill:'none',stroke:'transparent','stroke-width':7,class:'pm-hits'},g);});
+  g=G('strip.background.x');X0.forEach(x=>R(g,x,ST,PW,PT-ST,{fill:'#D9D9D9'}));
+  g=G('strip.text.x');['자동 변속','수동 변속'].forEach((s,i)=>Tx(g,s,X0[i]+PW/2,96,12.5,{'text-anchor':'middle',fill:'#1A1A1A'}));
+
+  /* 눈금 길이는 눈금 사이의 띠에 올리면 잡히게 한다. 띠 위에 축선과 눈금을 얹는다 */
+  g=G('axis.ticks.length');X0.forEach(x=>R(g,x,PB+2,PW,5,{fill:'transparent'}));R(g,80,PT,4,PB-PT,{fill:'transparent'});
+  L(G('axis.line.y'),X0[0],PT,X0[0],PB,'#000',1.6,5);
+  g=G('axis.line.x');X0.forEach(x=>L(g,x,PB,x+PW,PB,'#000',1.6,4));
+  g=G('axis.ticks.y');[10,15,20,25,30,35].forEach(v=>L(g,80,sy(v),X0[0],sy(v),'#333',1.2,7));
+  g=G('axis.ticks.x');[0,1].forEach(i=>[2,3,4,5].forEach(v=>L(g,sx(i,v),PB,sx(i,v),PB+6,'#333',1.2,7)));
+  g=G('axis.text.y');[10,15,20,25,30,35].forEach(v=>Tx(g,String(v),76,sy(v)+4,11.5,{'text-anchor':'end',fill:'#4D4D4D'}));
+  g=G('axis.text.x');[0,1].forEach(i=>[2,3,4,5].forEach(v=>Tx(g,String(v),sx(i,v),431,11.5,{'text-anchor':'middle',fill:'#4D4D4D'})));
+  Tx(G('axis.title.x'),'무게 (1,000 lbs)',348,460,14,{'text-anchor':'middle'});
+  Tx(G('axis.title.y'),'연비 (mpg)',36,257,14,{'text-anchor':'middle',transform:'rotate(-90 36 257)'});
+  Tx(G('plot.caption'),'자료: mtcars (R datasets)',610,492,11.5,{'text-anchor':'end'});
+
+  /* 범례: 바깥 상자, 안쪽 여백, 내용 순서로 */
+  R(G('legend.box.spacing'),610,PT,24,PB-PT,{fill:HATCH});
+  R(G('legend.background'),634,190,108,122,{fill:'#fff',stroke:'#c7ccd3'});
+  E('path',{d:'M634 190H742V312H634Z M642 198V304H734V198Z','fill-rule':'evenodd',fill:HATCH,class:'v-area pm-hit'},G('legend.margin'));
+  Tx(G('legend.title'),'실린더',642,216,13);
+  g=G('legend.key');CYL.forEach((c,k)=>{const y=226+k*25;R(g,642,y,22,22,{fill:'#EBEBEB'});E('circle',{cx:653,cy:y+11,r:4,fill:PAL.hue[k]},g);});
+  g=G('legend.text');CYL.forEach((c,k)=>Tx(g,String(c),672,241+k*25,11.5));
+
+  /* 이름 모두 보기: 자리를 손으로 잡았다. 좁은 곳의 요소는 가까운 빈 곳에 화살표를 붙여 적는다 */
+  const names=E('g',{class:'pm-names',display:'none'},svg);
+  [['plot.margin',24,13],['plot.background',734,44,'end'],['plot.title',342,44],['plot.subtitle',312,66],
+   ['↓ strip.background.x',470,76],['strip.text.x',242,96],
+   ['panel.border',333,117,'end'],['panel.grid.major.x',130,134],['panel.grid.minor.x',216,158],
+   ['panel.background',606,180,'end'],['panel.grid.major.y',606,279,'end'],['panel.grid.minor.y',606,368,'end'],
+   ['← axis.text.y',90,300],['← axis.ticks.y',90,320],['← axis.ticks.length',90,340],['← axis.line.y',90,360],
+   ['↓ axis.line.x',365,404],['↓ axis.ticks.x',365,386],['axis.text.x',310,431],['axis.title.x',405,460],['plot.caption',475,492,'end'],
+   ['legend.background',742,184,'end'],['↑ legend.margin',640,325],['↑ legend.title',640,339],['↑ legend.key',640,353],['↑ legend.text',640,367]
+  ].forEach(([s,x,y,a])=>{E('text',{x,y,'text-anchor':a||'start'},names).textContent=s;});
+  [['panel.spacing',352,257],['legend.box.spacing',626,257],['axis.title.y',36,170]].forEach(([s,x,y])=>{
+    E('text',{x,y,'text-anchor':'middle',transform:`rotate(-90 ${x} ${y})`},names).textContent=s;});
+  const allBtn=document.getElementById('pmAll');
+  allBtn.addEventListener('click',()=>{const on=allBtn.getAttribute('aria-pressed')!=='true';allBtn.setAttribute('aria-pressed',on);names.setAttribute('display',on?'inline':'none');});
+
+  /* 이름 단추 목록: 키보드와 작은 화면에서도 모든 요소에 닿게 한다 */
+  list.innerHTML=GROUPS.map(([t,its])=>`<div class="pm-group"><h4>${t}</h4><div>${its.map(i=>`<button type="button" class="pm-btn" data-k="${i.k}" aria-pressed="false">${i.k}</button>`).join('')}</div></div>`).join('');
+
+  const INTRO='<div class="t">그림 위에 마우스를 올려 보세요</div><p>그 자리의 ggplot 이름과 고치는 코드가 여기에 나옵니다. 아래 단추로 골라도 됩니다.</p>';
+  let pinned=null;
+  function detail(k){const i=ITEMS[k];
+    det.innerHTML=`<div class="nm">${i.k}</div><div class="t">${i.ko}</div><dl>${i.fn?`<dt>요소 함수</dt><dd><code>${i.fn}</code></dd><dt>상속</dt><dd><code>${i.inh}</code></dd>`:''}<dt>프롬프트에서</dt><dd>${i.say}</dd></dl><div class="cb r bare"><pre>${hl(i.code)}</pre><button type="button" class="copy">복사</button></div>${i.note?`<p>${i.note}</p>`:''}`;}
+  function mark(k){svg.classList.toggle('pm-act',!!k);
+    svg.querySelectorAll('.pm-el').forEach(e=>e.classList.toggle('pm-on',e.dataset.k===k));
+    list.querySelectorAll('.pm-btn').forEach(b=>b.classList.toggle('cur',b.dataset.k===k));}
+  function place(x,y){const w=wrap.clientWidth;tag.hidden=false;
+    const tw=tag.offsetWidth;tag.style.left=Math.max(0,Math.min(w-tw,x-tw/2))+'px';tag.style.top=Math.max(0,y-34)+'px';}
+  /* (x,y)가 없으면 단추에서 고른 것이므로 요소 위쪽 가운데에 이름을 붙인다 */
+  function show(k,x,y){mark(k);detail(k);tag.textContent=k;
+    if(x==null){const a=wrap.getBoundingClientRect(),bs=[...svg.querySelectorAll('.pm-el')].filter(e=>e.dataset.k===k).map(e=>e.getBoundingClientRect());
+      const b=bs[0];x=b.left+b.width/2-a.left;y=b.top-a.top;}
+    place(x,y);}
+  function clear(){mark(null);tag.hidden=true;}
+  const elAt=t=>t.closest&&t.closest('.pm-el');
+  const pos=e=>{const a=wrap.getBoundingClientRect();return[e.clientX-a.left,e.clientY-a.top];};
+  const rest=()=>{if(pinned)show(pinned);else clear();};
+  svg.addEventListener('pointermove',e=>{const g=elAt(e.target);if(g)show(g.dataset.k,...pos(e));else rest();});
+  svg.addEventListener('pointerleave',rest);
+  const setPin=k=>{pinned=pinned===k?null:k;list.querySelectorAll('.pm-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===pinned));};
+  svg.addEventListener('click',e=>{const g=elAt(e.target);if(!g)return;setPin(g.dataset.k);if(pinned)show(pinned,...pos(e));else show(g.dataset.k,...pos(e));});
+  const btn=e=>e.target.closest('.pm-btn');
+  list.addEventListener('click',e=>{const b=btn(e);if(!b)return;setPin(b.dataset.k);if(pinned)show(pinned);else show(b.dataset.k);});
+  ['pointerover','focusin'].forEach(t=>list.addEventListener(t,e=>{const b=btn(e);if(b)show(b.dataset.k);}));
+  ['pointerout','focusout'].forEach(t=>list.addEventListener(t,e=>{if(btn(e))rest();}));
+  det.innerHTML=INTRO;
+
+  setCode('mapCode',`library(tidyverse)
+library(showtext)
+
+font_add_google("Noto Sans KR", "Noto Sans KR")
+showtext_auto()
+
+mtcars2 <- mtcars %>%
+  mutate(am = factor(am, levels = c(0, 1), labels = c("자동 변속", "수동 변속")))
+
+ggplot(
+  data = mtcars2,
+  mapping = aes(
+    x = wt,
+    y = mpg,
+    colour = factor(cyl)
+  )
+) +
+  geom_point(size = 2) +
+  facet_wrap(vars(am)) +
+  labs(
+    title = "무게가 늘수록 연비는 떨어진다",
+    subtitle = "1974 Motor Trend 자동차 32종",
+    caption = "자료: mtcars (R datasets)",
+    x = "무게 (1,000 lbs)",
+    y = "연비 (mpg)",
+    colour = "실린더"
+  ) +
+  theme_grey(base_family = "Noto Sans KR") +
+  theme(
+    panel.border = element_rect(fill = NA, colour = "grey30"),  # 기본값에서는 꺼져 있다
+    axis.line = element_line(colour = "black")                  # 기본값에서는 꺼져 있다
+  )`);
+})();
 
 /* ---------- 레일 목차: 지금 읽는 절 표시 ---------- */
 (()=>{const links=[...document.querySelectorAll('#rail-nav a')];
