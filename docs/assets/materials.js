@@ -189,5 +189,14 @@ window.MATERIALS = [
     practice: true,
     tags: ["데이터과학", "개념정리", "작업환경", "GoogleColab", "주피터노트북", "GPU"],
     date: "2026-10-31"
+  },
+  {
+    subject: "data-science",
+    label: "작업환경 안내",
+    title: "노트북에서 R 스크립트로",
+    description: "Jupyter 노트북으로 R을 써 온 사람이 languageserver와 R 확장으로 VS Code와 R을 연결하고, 노트북 없이 R 스크립트를 코딩 에이전트가 터미널에서 실행하도록 작업 방식을 바꿉니다.",
+    href: "data-science/jupyter-to-r-script.html",
+    tags: ["데이터과학", "개념정리", "R", "VSCode", "작업환경", "코딩에이전트", "주피터노트북"],
+    date: "2026-11-04"
   }
 ];

@@ -63,6 +63,7 @@
 <div><dt>설치하는 것</dt><dd>R, VS Code, R 확장(REditorSupport)과 <code>languageserver</code> 패키지, Google Antigravity 확장. 노트북 없이 <code>.R</code> 스크립트만 쓴다.</dd></div>
 <div><dt>운영체제</dt><dd>Windows와 macOS. Windows는 터미널에서 <code>R.exe</code>를 바로 실행하도록 PATH에 등록하는 방법까지 다룬다.</dd></div>
 <div><dt>이 환경을 쓰는 자료</dt><dd><a href="../statistics/prepare-for-ttest.html">R을 이용한 평균검정</a>. 폴더를 열고 첫 스크립트를 실행하는 것부터 시작한다.</dd></div>
+<div><dt>노트북을 쓰던 경우</dt><dd>Jupyter 노트북으로 R 환경을 이미 만들었다면 처음부터 다시 설치하지 말고 <a href="jupyter-to-r-script.html">노트북에서 R 스크립트로</a>로 작업 방식을 바꾼 뒤, 아래 <a href="#packages">패키지 설치</a>만 한다.</dd></div>
 <div><dt>함수 도움말</dt><dd>코드에서 점선 밑줄이 있는 함수 이름에 마우스를 올리면(휴대폰은 누르면) 목적, 인수, 반환값이 나타난다.</dd></div>
 </dl>
 </header>
@@ -128,7 +129,7 @@
   <li><strong>패널(Panel)</strong> - 편집기 아래쪽에 있는 추가 작업 공간이다. 기본적으로 프로그램 실행 결과, 디버깅 정보, 오류와 경고, 내장 터미널 등이 표시된다. 세로 공간을 더 넓게 사용하고 싶다면 패널을 화면의 왼쪽이나 오른쪽으로 옮길 수도 있다.</li>
 </ul>
 </details></li>
-<li><strong>R 확장 설치.</strong> VS Code 왼쪽의 확장(Extensions) 아이콘을 누르거나 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>(macOS는 <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>)를 누른다. <code>R</code>을 검색해 게시자가 <code>REditorSupport</code>인 확장을 설치한다.
+<li id="r-extension"><strong>R 확장 설치.</strong> VS Code 왼쪽의 확장(Extensions) 아이콘을 누르거나 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>(macOS는 <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>)를 누른다. <code>R</code>을 검색해 게시자가 <code>REditorSupport</code>인 확장을 설치한다.
 <details class="fold">
 <summary>R 확장 설치 방법 자세히 보기</summary>
 <ol>
@@ -142,7 +143,7 @@
 <figure class="shot natural"><img src="../assets/images/vscode-setup/r-extension-icon.png" width="341" height="299" loading="lazy" alt="활동 표시줄 맨 아래에 생긴 R 아이콘이 붉은 테두리로 표시된 화면"><figcaption>활동 표시줄에 생긴 R 확장 프로그램 아이콘</figcaption></figure></li>
 </ol>
 </details></li>
-<li><strong>Google Antigravity 확장 설치.</strong> 같은 확장 화면에서 <code>Google Antigravity</code>를 검색해 게시자가 <code>Google</code>인 확장을 설치한다. 설치가 끝나면 왼쪽 막대에 생긴 Antigravity 아이콘을 눌러 Google 계정으로 로그인한다. 설치부터 응답 확인까지의 순서는 아래를 펼쳐 본다.
+<li id="antigravity"><strong>Google Antigravity 확장 설치.</strong> 같은 확장 화면에서 <code>Google Antigravity</code>를 검색해 게시자가 <code>Google</code>인 확장을 설치한다. 설치가 끝나면 왼쪽 막대에 생긴 Antigravity 아이콘을 눌러 Google 계정으로 로그인한다. 설치부터 응답 확인까지의 순서는 아래를 펼쳐 본다.
 <details class="fold">
 <summary>Antigravity 확장 설치와 연결 자세히 보기</summary>
 <p>Google Antigravity는 Google의 AI 코딩 에이전트다. VS Code용 확장을 설치하면 편집기 옆에 에이전트 창이 생기고, 열어 둔 폴더의 파일을 읽고 고치는 일을 대화로 시킬 수 있다.</p>
@@ -196,7 +197,7 @@ Rscript.exe scripts/02.prepare_datasets.R     # 프로젝트 루트에서, 스�
 <p><strong>R을 새 버전으로 올리면</strong> 설치 폴더 이름(<code>R-4.x.x</code>)이 바뀐다. Path에 넣은 경로도 새 폴더로 고친다.</p></div>
 </details>
 <ol start="5">
-<li><strong>패키지 설치.</strong> 아래 한 줄을 R에서 한 번만 실행한다. 패키지를 내려받는 저장소는 <code>repos</code> 인수로 <code>https://cloud.r-project.org/</code>를 지정한다. 저장소를 고르라는 창이 뜨지 않고, 가까운 서버로 자동 연결된다. <code>type = "binary"</code>는 운영체제에 맞게 미리 만들어 둔 설치 파일(바이너리)만 받으라는 뜻이다(아래 설명 참고). <code>languageserver</code>는 VS Code가 자동완성과 도움말을 띄우는 데 쓴다. <code>tidyverse</code>는 데이터를 읽고 다듬고 그리는 패키지 묶음이고(Excel을 읽는 <code>readxl</code>도 함께 설치된다), <code>writexl</code>은 Excel 저장, <code>effectsize</code>는 효과크기 계산, <code>showtext</code>는 그림에 한글 글꼴을 쓰는 데 쓴다. 설치에 몇 분 걸린다.</li>
+<li id="packages"><strong>패키지 설치.</strong> 아래 한 줄을 R에서 한 번만 실행한다. 패키지를 내려받는 저장소는 <code>repos</code> 인수로 <code>https://cloud.r-project.org/</code>를 지정한다. 저장소를 고르라는 창이 뜨지 않고, 가까운 서버로 자동 연결된다. <code>type = "binary"</code>는 운영체제에 맞게 미리 만들어 둔 설치 파일(바이너리)만 받으라는 뜻이다(아래 설명 참고). <code>languageserver</code>는 VS Code가 자동완성과 도움말을 띄우는 데 쓴다. <code>tidyverse</code>는 데이터를 읽고 다듬고 그리는 패키지 묶음이고(Excel을 읽는 <code>readxl</code>도 함께 설치된다), <code>writexl</code>은 Excel 저장, <code>effectsize</code>는 효과크기 계산, <code>showtext</code>는 그림에 한글 글꼴을 쓰는 데 쓴다. 설치에 몇 분 걸린다.</li>
 </ol>
 <div class="cb r"><span class="lang">R · 처음 한 번만</span><pre>install.packages(
   c("languageserver", "tidyverse", "writexl", "effectsize", "showtext"),

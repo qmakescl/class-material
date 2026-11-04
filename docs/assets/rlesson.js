@@ -1,6 +1,6 @@
 /* R 실습 자료 네 쪽이 함께 쓰는 스크립트
    (data-science/VScode-R-languageserver.html, statistics/prepare-for-ttest.html, statistics/mean-test-with-r.html,
-    statistics/anova-with-r.html)
+    statistics/anova-with-r.html, data-science/jupyter-to-r-script.html)
    - 함수 도움말 사전(FN)과 풍선 도움말, 코드 상자의 주석 색·복사 버튼, 레일 목차의 현재 위치 표시,
      주소의 #이름이 가리키는 펼침 상자 열기.
    - 쪽의 본문 뒤, 그 쪽 고유의 스크립트 앞에 불러온다. FN, esc, wrapFns 는 뒤따르는 스크립트(실험판)가 그대로 쓴다.
