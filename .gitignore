@@ -14,3 +14,9 @@ datasets/kbo_dashboard.sqlite3
 
 # MNIST 원본 — prepare_mnist_bridge.py 가 없으면 내려받는다
 datasets/mnist/*.gz
+
+# 범주형 자료의 가설검정 — 원자료와 국민건강영양조사 추출본(재배포 불가)
+# 배포용 사고 샘플은 docs/downlodable/서울-사망교통사고-2025.csv (src/R/categorical_sample_data.R)
+datasets/categorical/*.sas7bdat
+datasets/categorical/taas_2024_seoul_deaths.xlsx
+datasets/categorical/knhanes24_body_sample.csv

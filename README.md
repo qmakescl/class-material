@@ -59,6 +59,27 @@ uv run python src/python/build_temperature_dataset.py
 Surface Temperature Analysis (GISTEMP), version 4. NASA Goddard Institute for
 Space Studies.
 
+## 범주형 자료의 가설검정 실습 데이터
+
+`src/R/categorical_sample_data.R`가 `datasets/categorical/`의 원자료로 실습용
+자료를 만듭니다. 원자료는 저장소에 올리지 않습니다(`.gitignore`).
+
+- 서울 사망 교통사고: TAAS에서 받은 `taas_2024_seoul_deaths.xlsx`(파일 이름과
+  달리 2025년 1~12월 발생 211건)에서 실습에 쓰는 15개 열만 남겨
+  `docs/downlodable/서울-사망교통사고-2025.csv`(UTF-8, BOM)로 배포합니다.
+- 국민건강영양조사 2024: 기본 DB `hn24_all.sas7bdat`에서 19세 이상의 McNemar
+  실습 변수만 뽑아 `datasets/categorical/knhanes24_body_sample.csv`로 둡니다.
+  재배포가 금지된 자료라 배포하지 않습니다. 같은 폴더의 `hn24_24rc.sas7bdat`는
+  24시간 회상 식품섭취 자료라 쓰지 않습니다.
+
+`src/R/categorical_check.R`는 `docs/statistics/categorical-test-with-r.html`
+본문의 수치를 다시 계산해 콘솔에 출력합니다.
+
+```sh
+Rscript src/R/categorical_sample_data.R
+Rscript src/R/categorical_check.R
+```
+
 ## KBO 2025 타석 탐색 대시보드 (로컬 전용)
 
 `src/python/kbo_dashboard/`에 있는 로컬 전용 도구로, Hugging Face
