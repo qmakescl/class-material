@@ -198,5 +198,15 @@ window.MATERIALS = [
     href: "data-science/jupyter-to-r-script.html",
     tags: ["데이터과학", "개념정리", "R", "VSCode", "작업환경", "코딩에이전트", "주피터노트북"],
     date: "2026-11-04"
+  },
+  {
+    subject: "statistics",
+    label: "R 실습",
+    title: "범주형 자료의 가설검정",
+    description: "도로교통공단 사망 교통사고와 국민건강영양조사 자료로 적합도·독립성 검정, Fisher 정확검정, 표준화 잔차, McNemar 검정을 따라가며, 코딩 에이전트 프롬프트로 분석 코드를 만들고 만들어진 코드와 결과에서 무엇을 확인할지 익힙니다.",
+    href: "statistics/categorical-test-with-r.html",
+    practice: true,
+    tags: ["통계", "사례분석", "R", "가설검정", "범주형자료", "카이제곱검정", "효과크기"],
+    date: "2026-11-08"
   }
 ];

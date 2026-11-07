@@ -89,3 +89,6 @@ main td code { white-space: nowrap; }
 .series li > a:hover, .series li > a:focus-visible { color: var(--accent-dark, var(--accent)); }
 .series li.here { background: var(--ink); border-color: var(--ink); }
 .series li.here > span, .series li.here b { color: #fff; }
+
+/* 프롬프트 구성요소 표와 "무엇을 확인하나" 표: 첫 열(항목 이름)을 굵게, 한 줄로 */
+table.parts td:first-child, table.check td:first-child { font-weight: 600; white-space: nowrap; }

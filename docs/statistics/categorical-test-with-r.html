@@ -1,0 +1,1155 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>범주형 자료의 가설검정 | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/statistics/categorical-test-with-r.html">
+<meta name="description" content="결과변수가 범주일 때의 가설검정을 도로교통공단 사망 교통사고와 국민건강영양조사 자료로 따라가며, 적합도·독립성 검정, Fisher 정확검정, 표준화 잔차, McNemar 검정을 코딩 에이전트 프롬프트와 R 코드로 확인하는 통계 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="범주형 자료의 가설검정 | Q의 아카이브">
+<meta property="og:description" content="적합도·독립성 검정, Fisher 정확검정, 표준화 잔차, McNemar 검정을 코딩 에이전트 프롬프트로 분석 코드를 만들고, 만들어진 코드에서 무엇을 확인할지까지 따라 합니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/statistics/categorical-test-with-r.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="통계 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="범주형 자료의 가설검정 | Q의 아카이브">
+<meta name="twitter:description" content="적합도·독립성 검정, Fisher 정확검정, 표준화 잔차, McNemar 검정을 코딩 에이전트 프롬프트로 분석 코드를 만들고, 만들어진 코드에서 무엇을 확인할지까지 따라 합니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
+<meta name="twitter:image:alt" content="통계 자료 아이콘">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/material.css">
+<link rel="stylesheet" href="../assets/rlesson.css">
+<style>
+  /* 이 자료의 위젯: χ² 탐색기, 이항 분포, 2 × 2 계산기, McNemar 계산기 */
+  :root { --tail: #e0772a; --tail-soft: rgb(224 119 42 / 28%); }
+  .lab { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .lab-head { background: var(--accent-soft); padding: 10px 18px; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+  .lab-head strong { font-size: 15px; }
+  .lab-head span { font-size: 13.5px; color: var(--muted); }
+  .lab-body { padding: 16px 18px 18px; display: grid; gap: 14px; }
+  .lab-body .figcap { font-size: 13.5px; color: var(--muted); margin: 0; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; }
+  .presets .btn { font-size: 13.5px; padding: 6px 12px; }
+  .numin { width: 96px; font-family: var(--mono); font-size: 14px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); }
+  .plot { display: block; width: 100%; height: auto; }
+  .plot .axis { stroke: var(--muted); stroke-width: 1; fill: none; }
+  .plot .tick { fill: var(--muted); font-family: var(--mono); font-size: 11px; }
+  .plot .curve { stroke: var(--ink); stroke-width: 2; fill: none; }
+  .plot .tailfill { fill: var(--tail-soft); stroke: none; }
+  .plot .stat { stroke: var(--tail); stroke-width: 2.2; }
+  .plot .crit { stroke: var(--pos); stroke-width: 1.2; stroke-dasharray: 4 4; }
+  .plot .lbl { fill: var(--ink); font-family: var(--sans); font-size: 12px; font-weight: 600; }
+  .plot .lblw { fill: var(--pos); font-family: var(--sans); font-size: 11px; font-weight: 600; }
+  .plot .bar { fill: var(--line); }
+  .plot .bar.hit { fill: var(--tail); }
+  .plot .norm { stroke: var(--accent); stroke-width: 2; fill: none; }
+  /* 계산 결과 칸: 공통 .readout(한 줄 mono 상자)과 이름이 겹치지 않게 .outs 로 둔다 */
+  .outs { display: flex; flex-wrap: wrap; gap: 10px 26px; font-size: 14px; }
+  .outs div { display: grid; }
+  .outs .k { font-size: 12.5px; color: var(--muted); }
+  .outs .v { font-family: var(--mono); font-size: 16px; font-variant-numeric: tabular-nums; }
+  .outs .v.sig { color: var(--tail); font-weight: 700; }
+  .grid22 { display: grid; grid-template-columns: auto repeat(2, minmax(84px, 1fr)) auto; font-size: 14px; max-width: 520px; }
+  .grid22 > div { padding: 6px 8px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 6px; }
+  .grid22 .h { color: var(--muted); font-size: 12.5px; font-weight: 700; }
+  .grid22 .numin { width: 78px; }
+  .grid22 .e { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .grid22 .e.low { color: var(--pos); font-weight: 700; }
+  .grid22 .tot { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+  .warnline { color: var(--pos); font-size: 14px; margin: 0; }
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; }
+  .flow .step { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 4px 10px; }
+  .flow .arr { color: var(--muted); }
+  .more { font-size: 14px; color: var(--muted); }
+  .blank { letter-spacing: .1em; color: var(--muted); }
+  @media (max-width: 640px) { .lab-body { padding: 12px; } .grid22 .numin { width: 64px; } }
+</style>
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+<script defer src="../assets/annotate.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../index.html#statistics">← 처음으로</a>
+  <h1>범주형 자료의<br>가설검정</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#tables"><b>01</b><span>범주형 자료와 분할표</span></a>
+    <a href="#data"><b>02</b><span>데이터 준비</span></a>
+    <a href="#gof"><b>03</b><span>단일 비율과 적합도</span></a>
+    <a href="#independence"><b>04</b><span>두 비율과 독립성</span></a>
+    <a href="#fisher"><b>05</b><span>가정 점검과 Fisher</span></a>
+    <a href="#residuals"><b>06</b><span>표준화 잔차</span></a>
+    <a href="#mcnemar"><b>07</b><span>McNemar 검정</span></a>
+    <a href="#report"><b>08</b><span>보고와 로지스틱 회귀</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#통계</span>
+    <span class="rail-tag">#사례분석</span>
+    <span class="rail-tag">#R</span>
+    <span class="rail-tag">#가설검정</span>
+    <span class="rail-tag">#범주형자료</span>
+    <span class="rail-tag">#카이제곱검정</span>
+    <span class="rail-tag">#효과크기</span>
+  </div>
+  <footer>절마다 개념 → 프롬프트 → 펼쳐 보는 R 코드 → 확인할 것의 순서다. 코드에서 점선 밑줄이 있는 함수 이름에 마우스를 올리면 도움말이 나온다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+<main id="content">
+<header class="panel">
+<div class="eyebrow">R을 이용한 가설검정 · 범주형 자료</div>
+<h2 class="page-title">범주형 자료의 가설검정</h2>
+<p class="lede">평균 비교에서 익힌 "단일 표본 → 독립 두 집단 → 대응표본"의 틀을 그대로 가져와, 결과변수가 범주일 때 무엇이 바뀌는지 따라간다. 검정통계량은 t에서 χ²로, 기준 분포는 t분포에서 χ²·이항·초기하분포로, 효과크기는 Cohen's d에서 w, h, φ, V, g와 오즈비로 바뀐다. 절마다 개념을 먼저 정리하고, 분석 코드를 만들게 하는 코딩 에이전트 프롬프트를 둔 뒤, 비교해 볼 R 코드를 펼침 상자에 넣고, 만들어진 코드와 결과에서 무엇을 확인할지를 표로 정리했다.</p>
+<dl class="facts">
+<div><dt>도구</dt><dd>R과 tidyverse, haven, janitor, effectsize, showtext, VS Code의 코딩 에이전트. 설치는 <a href="../data-science/VScode-R-languageserver.html">VS Code에서 R 실행하기</a>에, 스크립트를 실행하는 방법은 <a href="prepare-for-ttest.html#s1">t 검정을 위한 데이터 준비</a>에 있다.</dd></div>
+<div><dt>예제 데이터</dt><dd>도로교통공단 「사망 교통사고 정보」(사고 1건 = 1행, 공공데이터포털)와 국민건강영양조사 원시자료(조사 대상자 1명 = 1행, 각자 신청)</dd></div>
+<div><dt>다루는 검정</dt><dd>단일 비율·적합도, 두 비율 비교·독립성, Fisher 정확검정, 표준화 잔차, McNemar 검정, 그리고 로지스틱 회귀와의 연결</dd></div>
+<div><dt>앞서 볼 자료</dt><dd>평균 비교는 <a href="mean-test-with-r.html">모집단 평균에 대한 가설검정</a>, 검정의 논리는 <a href="hypothesis-testing.html">통계적 가설검정</a>에서 다루었다.</dd></div>
+<div><dt>효과크기</dt><dd>Cohen's w, h, g, φ 계수, Cramér's V, 위험비, 오즈비</dd></div>
+<div><dt>함수 도움말</dt><dd>코드에서 점선 밑줄이 있는 함수 이름에 마우스를 올리면(휴대폰은 누르면) 목적, 인수, 반환값이 나타난다.</dd></div>
+</dl>
+</header>
+
+<!-- ===================== 01 ===================== -->
+<section class="panel" id="tables">
+<div class="section-head"><span class="section-num">01</span><h2>범주형 자료와 분할표</h2></div>
+<p>범주형 변수는 값이 "어느 칸에 속하는가"만 알려 준다. 순서가 없는 <strong>명목척도</strong>(사고유형, 성별)와 순서가 있는 <strong>서열척도</strong>(체형인식 5단계)로 나뉜다. 이 자료의 검정은 모두 명목척도를 가정한다. 서열 정보를 쓰는 방법(선형 추세 검정 등)은 다루지 않는다.</p>
+<p>범주형 자료 분석의 출발점은 <strong>빈도</strong>다. 평균 비교에서 개별 관측값을 그대로 썼다면, 여기서는 관측을 칸별로 세어 만든 표가 분석 대상이다.</p>
+<div class="flow" aria-label="자료 형태 변환 흐름">
+  <span class="step">원자료 (한 행 = 사고 1건)</span><span class="arr">→</span>
+  <span class="step">빈도표 (변수 1개)</span><span class="arr">→</span>
+  <span class="step">분할표 (변수 2개, r × c)</span>
+</div>
+
+<h3>평균 비교와의 대응</h3>
+<div class="scroll"><table>
+<thead><tr><th>평균 비교</th><th>이 자료</th><th>R 함수</th><th>효과크기</th></tr></thead>
+<tbody>
+<tr><td>단일표본 t</td><td>단일 비율 검정, 적합도 검정 (<a href="#gof">03</a>)</td><td><code>binom.test()</code>, <code>prop.test()</code>, <code>chisq.test()</code></td><td>Cohen's h, Cohen's w</td></tr>
+<tr><td>독립표본 t</td><td>두 비율 비교, 독립성·동질성 검정, Fisher 정확검정 (<a href="#independence">04</a>–<a href="#residuals">06</a>)</td><td><code>prop.test()</code>, <code>chisq.test()</code>, <code>fisher.test()</code></td><td>위험비, 오즈비, φ, Cramér's V</td></tr>
+<tr><td>대응표본 t</td><td>McNemar 검정 (<a href="#mcnemar">07</a>)</td><td><code>mcnemar.test()</code></td><td>Cohen's g, 대응 오즈비</td></tr>
+</tbody></table></div>
+
+<h3>같은 표를 만드는 세 가지 방법</h3>
+<p>같은 표를 만드는 방법이 여럿인 이유는 결과 객체의 <strong>형태</strong>가 다르기 때문이다. tidyverse의 <code>count()</code>는 데이터프레임을 돌려주어 그림과 가공에 편하고, base R의 <code>table()</code>·<code>xtabs()</code>는 검정 함수가 바로 받는 table 객체를 돌려준다. janitor의 <code>tabyl()</code>은 행 비율과 빈도를 함께 보는 교차표를 만든다. 프롬프트에는 이 함수들을 적지 않는다. "주야별로 비율과 건수를 함께 보여 주는 교차표"처럼 보고 싶은 모양을 말로 적으면 에이전트가 고른다.</p>
+<div class="callout"><p><strong>요점.</strong> <code>chisq.test()</code>는 받은 객체의 모양으로 검정을 고른다. 1차원 빈도표를 주면 적합도 검정, 2차원 분할표를 주면 독립성 검정을 한다(LSR 12.6). 그래서 에이전트가 만든 코드에서는 "지금 어떤 모양의 표를 넘기는가"를 항상 확인한다.</p></div>
+
+<h3>사용 데이터</h3>
+<div class="scroll"><table>
+<thead><tr><th>절</th><th>데이터</th><th>단위</th><th>구하는 방법</th></tr></thead>
+<tbody>
+<tr><td>02–06, 08</td><td>도로교통공단 사망 교통사고 정보</td><td>사망사고 1건 = 1행</td><td>공공데이터포털 파일데이터. 내려받기·재배포 자유. 강사가 <code>dataset/raw/</code>에 넣어 나눠 준다</td></tr>
+<tr><td>07</td><td>국민건강영양조사(KNHANES) 원시자료</td><td>조사 대상자 1명 = 1행</td><td>질병관리청 누리집에서 이용자 등록·요청 후 각자 내려받는다. <strong>재배포 불가</strong></td></tr>
+</tbody></table></div>
+<div class="callout"><p><strong>이 자료의 뼈대.</strong> 개념 설명의 순서는 Navarro의 <em>Learning Statistics with R</em>(LSR) 12장(Categorical data analysis)을 따른다. 절 끝의 "더 읽기"에 대응 절 번호를 적었다. LSR이 다루지 않는 단일 비율 정확검정, 위험비·오즈비, 표준화 잔차는 Agresti(2019)로 보완했다.</p></div>
+</section>
+
+<!-- ===================== 02 ===================== -->
+<section class="panel" id="data">
+<div class="section-head"><span class="section-num">02</span><h2>데이터 준비</h2></div>
+<h3>폴더 구조</h3>
+<p>폴더 구조는 <a href="prepare-for-ttest.html#s1">t 검정을 위한 데이터 준비</a>와 같다. 원자료는 <code>dataset/raw/</code>, 가공 자료는 <code>dataset/working/</code>, 표와 그림은 <code>output/</code>, 에이전트가 만든 스크립트는 <code>scripts/</code>에 둔다.</p>
+<pre class="tree">categorical-tests/
+├── scripts/              # 에이전트가 만든 R 스크립트
+├── dataset/
+│   ├── raw/              # 내려받은 원본. 손대지 않음
+│   │   ├── fatal_accidents_2024.csv
+│   │   └── knhanes/HN23_ALL.sas7bdat
+│   └── working/          # 정리한 분석용 파일 (.rds)
+└── output/               # 표(CSV)와 그림(PNG)</pre>
+
+<h3>도로교통공단 사망 교통사고 정보</h3>
+<p>공공데이터포털(data.go.kr)에서 "도로교통공단 사망 교통사고 정보"를 검색해 최신 연도 파일을 내려받는다. 사망사고 한 건이 한 행이고, 발생 일시·주야·요일·사고유형·도로형태·발생 지역 같은 범주형 열이 들어 있다. 공공기관 CSV는 대개 <strong>CP949(EUC-KR)</strong>로 저장되어 있어, 인코딩을 지정하지 않으면 한글이 깨진다. 열 이름은 연도마다 조금씩 다를 수 있으므로, 프롬프트는 에이전트가 열 이름을 먼저 보여 주고 확인받게 한다.</p>
+<p>범주의 순서는 직접 정해 두어야 표와 그림이 의도한 순서로 나온다. 그리고 정한 순서는 CSV로 저장하면 사라진다. 다시 읽으면 글자 순서로 정렬되기 때문이다. 그래서 정리한 자료는 R 전용 형식(.rds)으로 저장한다.</p>
+
+<h3>국민건강영양조사 원시자료</h3>
+<p>국민건강영양조사 누리집(knhanes.kdca.go.kr)의 원시자료 메뉴에서 이용자 등록과 요청서 작성을 거쳐 내려받는다. 자료는 연도별로 SAS(<code>.sas7bdat</code>)와 SPSS(<code>.sav</code>) 형식으로 제공된다. <a href="#mcnemar">07</a>에서 쓸 두 판정은 같은 사람에게서 나온 것이다. 하나는 본인이 생각하는 체형(주관적 체형인식, <code>BO1</code>)이고, 다른 하나는 검진에서 잰 체질량지수(<code>HE_BMI</code>)다.</p>
+<div class="callout caution"><p><strong>수강생 각자 신청.</strong> 국민건강영양조사 원시자료는 이용 조건상 제3자에게 다시 나눠 줄 수 없다. 수업 전에 수강생 각자 신청하도록 안내하고, 정리한 <code>working/</code> 파일도 공유하지 않는다. 변수명과 응답 코드는 해당 연도 「원시자료 이용지침서」로 반드시 확인한다.</p></div>
+
+<h3 id="data-parts">프롬프트의 구성요소</h3>
+<p>이 자료의 프롬프트는 한 문단의 지시, 번호 항목, 끝의 공통 규칙으로 되어 있다. 프롬프트에는 함수 이름이나 계산식을 적지 않고 <b>무엇을 어떤 기준으로 보고 싶은지를 말로 적는다</b>. 어떤 함수로 계산할지는 에이전트가 정하므로 코드를 몰라도 쓸 수 있다. 그리고 <b>숫자를 손으로 적지 말고 코드로 계산한 값을 그대로 쓰게</b> 하고, 내가 대조할 수 있게 <b>원래 출력을 함께 받는다</b>. 뒤의 프롬프트도 모두 같은 틀이다.</p>
+<div class="scroll"><table class="parts">
+<thead><tr><th>구성요소</th><th>적는 것</th><th>왜 적나</th></tr></thead>
+<tbody>
+<tr><td>첫 문단</td><td>할 일, 스크립트 경로, 쓸 자료, 무엇을 보는 분석인지</td><td>무엇을 끝까지 할지 정하고 자료를 추측하지 않게 한다. 다른 자료에 쓸 때는 이 문단을 바꾼다</td></tr>
+<tr><td>확인받기</td><td>"열 이름을 먼저 보여 주고 확인받은 다음 진행"</td><td>열 이름이 연도마다 다를 수 있는 자료에서 에이전트가 이름을 지어내지 않게 한다</td></tr>
+<tr><td>"표 N · 이름:" 항목</td><td>표의 행과 열, 쓸 검정의 이름, 판단 규칙, 저장 파일</td><td>보고서에 넣을 표를 하나씩 지정한다. 보정 여부처럼 결과가 갈리는 선택은 둘 다 적게 한다</td></tr>
+<tr><td>"그림 N:" 항목</td><td>그림의 요소, 파일 이름, 크기, 해상도</td><td>"그림을 그려 줘"보다 구체적으로 적어야 원하는 그림이 나온다</td></tr>
+<tr><td>결과 문장 항목</td><td>APA 형식의 결과 문장</td><td>문장에 꼭 들어갈 값(통계량, 자유도, N, p, 효과크기)을 정한다</td></tr>
+<tr><td>끝의 <code>-</code> 규칙</td><td>코드로 계산한 숫자, 자릿수, 패키지와 글꼴, 코드 주석</td><td>모든 항목에 공통인 규칙을 한곳에 둔다. 숫자를 손으로 적지 못하게 하는 것이 핵심이다</td></tr>
+</tbody></table></div>
+
+<h3>프롬프트로 만들기</h3>
+<p>VS Code의 코딩 에이전트에 붙여 넣어 두 자료를 정리하는 스크립트를 만들게 한다. 에이전트가 열 이름을 보여 주며 확인을 요청하면, 아래 "무엇을 확인하나" 표의 첫 두 줄을 보고 답한다.</p>
+<div class="cb prompt"><span class="lang">프롬프트 · 데이터 준비</span><pre>범주형 자료의 가설검정에 쓸 두 자료를 정리하는 스크립트 scripts/cat_prepare.R 을 새로 써서 실행해 줘. 원자료는 dataset/raw/ 에 있고 손대지 않는다. 정리한 자료는 dataset/working/ 에 범주의 순서가 그대로 남는 R 전용 형식(.rds)으로 저장한다.
+1. 사망 교통사고: dataset/raw/fatal_accidents_2024.csv 는 도로교통공단 사망 교통사고 정보로, 사고 한 건이 한 행이다. 공공기관 파일이라 한글 인코딩이 CP949 일 수 있으니 한글이 깨지지 않게 읽는다. 읽은 뒤 열 이름과 앞쪽 값을 먼저 보여 주고, 주야, 요일, 사고유형 대분류, 발생 시도에 해당하는 열이 무엇인지 나에게 확인받은 다음 진행한다.
+2. 그 네 열로 분석용 자료를 만든다. 주야는 주간, 야간 순서로, 요일은 월요일부터 일요일 순서로 둔다. 사고유형은 대분류를 쓰되 한 해 30건이 안 되는 유형은 '기타'로 묶는다. 사고유형 대분류가 차대사람이면 '차대사람', 아니면 '그 외'인 보행자사고 변수를 만들고 '차대사람'을 앞에 둔다. dataset/working/acc_clean.rds 로 저장한다.
+3. 사고유형별 건수를 묶기 전과 후로 나란히 보여 주고, 묶은 뒤에도 '기타'가 30건 미만이면 알려 준다. 열마다 결측 수를 보여 주고, 정해 둔 순서에 없는 값이 있어서 결측으로 바뀐 것이 있으면 알려 준다.
+4. 주야별로 보행자사고의 비율과 건수를 함께 보여 주는 교차표를 출력한다.
+5. 국민건강영양조사: dataset/raw/knhanes/HN23_ALL.sas7bdat 는 질병관리청에서 내려받은 원시자료다. 19세 이상이고, 주관적 체형인식(BO1) 응답이 1~5 이고, 체질량지수(HE_BMI)가 있는 사람만 남긴다. 체형인식 4(약간 비만)와 5(매우 비만)를 '비만', 나머지를 '비만 아님'으로 하는 인식비만 변수와, 체질량지수 25 이상을 '비만'으로 하는 측정비만 변수를 만든다. 두 변수 모두 '비만'을 앞에 둔다. 성별, 나이, 검진조사 가중치(wt_itvex)도 남긴다. 걸러 내기 전과 후의 사람 수를 보여 주고 dataset/working/kn_body.rds 로 저장한다.
+- 변수 이름과 응답 코드는 해당 연도 원시자료 이용지침서에서 확인해야 한다고 나에게 알려 준다. 국민건강영양조사 파일과 정리한 파일은 다른 곳에 올리거나 공유하지 않는다.
+- 데이터 처리에는 tidyverse 를 쓴다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
+- 어떤 처리를 했는지, 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 설명해 준다.</pre></div>
+<div class="callout"><p><strong>코드는 달라도 된다.</strong> 생성한 코드는 실행할 때마다, 에이전트마다 다를 수 있다. 변수 이름, 함수 선택, 줄 수가 달라도 틀린 것이 아니다. 판단의 기준은 코드의 모양이 아니라 "무엇을 확인하나" 표의 항목과 결과의 숫자다. 아래 펼침 상자의 코드는 에이전트가 만든 스크립트와 나란히 놓고 읽는 비교용이다. 이 기준은 뒤의 모든 절에 같다.</p></div>
+<details class="fold" id="data-code">
+<summary>펼쳐 보기: 제공한 R 코드 · scripts/cat_prepare.R</summary>
+<p>열 이름(<code>주야</code>, <code>요일</code>, <code>사고유형_대분류</code>, <code>발생지시도</code>)은 2024년 파일 기준이다. 받은 파일의 열 이름이 다르면 그에 맞춘다.</p>
+<div class="cb r"><span class="lang">R · cat_prepare.R</span><pre>options(repos = c(CRAN = "https://cloud.r-project.org/"))
+# install.packages(c("tidyverse", "haven", "janitor", "effectsize", "showtext"))
+library(tidyverse)
+library(haven)     # SAS 파일 읽기 (국민건강영양조사)
+library(janitor)   # 보기 좋은 교차표
+
+dir.create("dataset/working", recursive = TRUE, showWarnings = FALSE)
+dir.create("output", showWarnings = FALSE)
+
+# 1) 사망 교통사고: 공공기관 CSV는 대개 CP949로 저장되어 있다 -------------
+acc_raw &lt;- read_csv("dataset/raw/fatal_accidents_2024.csv",
+                    locale = locale(encoding = "CP949"))
+glimpse(acc_raw)                    # 열 이름이 아래 코드와 같은지 먼저 본다
+count(acc_raw, 사고유형_대분류)     # 묶기 전 유형별 건수
+
+acc &lt;- acc_raw %&gt;%
+  transmute(
+    주야 = factor(주야, levels = c("주", "야")),
+    요일 = factor(요일, levels = c("월", "화", "수", "목", "금", "토", "일")),
+    # 한 해 30건이 안 되는 유형은 '기타'로 묶는다 (05절에서 이유를 다룬다)
+    사고유형 = fct_lump_min(사고유형_대분류, min = 30, other_level = "기타"),
+    보행자사고 = factor(if_else(사고유형_대분류 == "차대사람", "차대사람", "그 외"),
+                        levels = c("차대사람", "그 외")),
+    발생지시도
+  )
+count(acc, 사고유형)                # 묶은 뒤 건수. '기타'가 여전히 아주 적은지 본다
+colSums(is.na(acc))                 # 정해 둔 수준에 없는 값은 factor()에서 NA가 된다
+
+# 보기 좋은 교차표: 행 비율 + 빈도
+acc %&gt;%
+  tabyl(주야, 보행자사고) %&gt;%
+  adorn_percentages("row") %&gt;%
+  adorn_pct_formatting(digits = 1) %&gt;%
+  adorn_ns()
+
+write_rds(acc, "dataset/working/acc_clean.rds")   # factor 순서가 그대로 남는다
+
+# 2) 국민건강영양조사: 각자 신청해 받은 파일. 공유하지 않는다 --------------
+kn_raw &lt;- read_sas("dataset/raw/knhanes/HN23_ALL.sas7bdat")
+
+kn &lt;- kn_raw %&gt;%
+  filter(age &gt;= 19, BO1 %in% 1:5, !is.na(HE_BMI)) %&gt;%   # 성인, 응답 1~5만 (8·9는 비해당·모름)
+  transmute(
+    인식비만 = factor(if_else(BO1 &gt;= 4, "비만", "비만 아님"),       # 4 약간 비만, 5 매우 비만
+                      levels = c("비만", "비만 아님")),
+    측정비만 = factor(if_else(HE_BMI &gt;= 25, "비만", "비만 아님"),   # 대한비만학회 기준 BMI 25
+                      levels = c("비만", "비만 아님")),
+    sex, age, wt_itvex
+  )
+nrow(kn_raw)                        # 걸러 내기 전
+nrow(kn)                            # 걸러 낸 뒤
+write_rds(kn, "dataset/working/kn_body.rds")      # 개인 작업용. 공유 금지</pre></div>
+</details>
+<h4>무엇을 확인하나</h4>
+<div class="scroll"><table class="check">
+<thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
+<tbody>
+<tr><td>한글</td><td>출력에서 열 이름과 값(주, 야, 월, 차대사람 …)의 한글이 깨지지 않았는가. 깨졌다면 인코딩을 지정하지 않고 읽은 것이다.</td></tr>
+<tr><td>열 확인</td><td>에이전트가 열 이름을 보여 주고 확인을 받았는가. 없는 열 이름을 지어내 오류를 피해 가지 않았는가.</td></tr>
+<tr><td>결측</td><td>주야와 요일에 결측이 0인가. 결측이 생겼다면 원자료의 표기(예: "주간", "월요일")가 정해 둔 순서의 값과 달라서 바뀐 것이다. 원자료의 값을 보여 달라고 해서 맞춘다.</td></tr>
+<tr><td>범주 순서</td><td>출력의 수준 순서가 주 → 야, 월 → 일, 차대사람 → 그 외, 비만 → 비만 아님인가. 뒤 절의 표 방향과 오즈비의 분자·분모가 이 순서로 정해진다.</td></tr>
+<tr><td>묶기</td><td>묶기 전과 후의 건수 합계가 같은가. '기타'에 어떤 유형이 들어갔는가. '기타'가 여전히 30건 미만이면 05절의 가정 점검에서 다시 다룬다.</td></tr>
+<tr><td>저장 형식</td><td>정리한 파일이 <code>.rds</code>인가. CSV로 저장했다면 다시 읽을 때 범주 순서가 가나다순으로 바뀐다.</td></tr>
+<tr><td>걸러 내기 순서</td><td>체형인식 응답 1~5만 남기는 일이 '비만' 판정보다 먼저인가. 순서가 바뀌면 8(비해당)·9(모름)가 "4 이상"에 걸려 '비만'으로 들어간다. 걸러 낸 뒤 사람 수가 줄었는지로 확인한다.</td></tr>
+<tr><td>공유 금지</td><td>국민건강영양조사 파일이 <code>dataset/</code> 밖이나 공유 폴더에 복사되지 않았는가.</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ===================== 03 ===================== -->
+<section class="panel" id="gof">
+<div class="section-head"><span class="section-num">03</span><h2>단일 비율과 적합도 검정</h2></div>
+<div class="callout caution"><p><strong>먼저 생각할 문제: 전수 자료에 검정을 하는가.</strong> 사망 교통사고 자료는 표본이 아니라 그해 경찰에 접수된 사망사고 <strong>전체</strong>다. 그런데도 검정을 하는 근거는, 올해의 사고 건수를 "요일별 사고 발생 확률이라는 생성 과정"에서 나온 하나의 실현값으로 보는 데 있다(초모집단 관점). 이때 검정이 답하는 질문은 "올해 숫자가 같았는가"가 아니라 "사고를 만드는 과정이 요일에 따라 다르다고 볼 증거가 있는가"다. 수업에서 이 해석을 먼저 짚고 넘어간다.</p></div>
+
+<h3>적합도 검정의 논리</h3>
+<p>범주가 \(k\)개인 변수에 대해 영가설(null hypothesis, 귀무가설)이 각 범주의 확률 \(p_1, \dots, p_k\)를 정해 주면, 표본크기 \(N\)에서 기대도수는 \(E_i = N p_i\)다. 관측도수 \(O_i\)와의 차이를 모은 통계량이 Pearson χ²다.</p>
+<div class="readout math">
+\[X^2 = \sum_{i=1}^{k} \frac{(O_i - E_i)^2}{E_i} \;\sim\; \chi^2_{k-1} \quad (\text{근사, under } H_0)\]
+</div>
+<p>자유도가 \(k-1\)인 이유는, 총합 \(N\)이 정해지면 마지막 칸의 도수가 나머지에 의해 결정되기 때문이다. 평균 비교에서 표본분산의 자유도가 \(n-1\)이었던 것과 같은 논리다.</p>
+<div class="callout"><p><strong>손계산 예제 (LSR 12.1의 카드 예제).</strong> 200명이 카드 무늬 하나씩을 골랐더니 클로버 35, 다이아 51, 하트 64, 스페이드 50이었다. 네 무늬가 같은 확률이라면 기대도수는 모두 50이다.</p>
+<div class="readout math">\[X^2 = \frac{(35-50)^2 + (51-50)^2 + (64-50)^2 + (50-50)^2}{50} = \frac{225 + 1 + 196 + 0}{50} = 8.44\]</div>
+<p>자유도 3에서 \(p = .038\)이다. 아래 탐색기의 "카드 예제" 단추로 확인한다. 이 수치는 교재의 손계산용 예제다.</p></div>
+
+<div class="lab" id="lab-chi">
+  <div class="lab-head"><strong>χ² 분포 탐색기</strong><span>영가설 하(under \(H_0\))의 분포, 관측 통계량의 위치, 오른쪽 꼬리 확률</span></div>
+  <div class="lab-body">
+    <div class="ctrls">
+      <div class="ctrl"><label for="chi-df">자유도 <output id="chi-df-out">3</output></label><input type="range" id="chi-df" min="1" max="20" step="1" value="3"></div>
+      <div class="ctrl"><label for="chi-x">관측 χ²</label><input class="numin" type="number" id="chi-x" min="0" step="0.01" value="8.44"></div>
+    </div>
+    <div class="presets">
+      <button class="btn ghost" type="button" data-df="3" data-x="8.44">카드 예제</button>
+      <button class="btn ghost" type="button" data-df="6" data-x="12.59">요일 · 경계값</button>
+      <button class="btn ghost" type="button" data-df="1" data-x="3.31">마녀 예제 (Yates)</button>
+    </div>
+    <svg class="plot" id="chi-svg" viewBox="0 0 640 260" role="img" aria-label="카이제곱 분포 곡선과 관측 통계량 위치"></svg>
+    <div class="outs">
+      <div><span class="k">p값 P(χ² ≥ x)</span><span class="v" id="chi-p">-</span></div>
+      <div><span class="k">α = .05 임계값</span><span class="v" id="chi-crit">-</span></div>
+      <div><span class="k">판정 (α = .05)</span><span class="v" id="chi-dec">-</span></div>
+    </div>
+    <p class="figcap">요일 적합도 검정은 자유도 6이다. 에이전트가 만든 결과의 χ²와 자유도를 넣으면 R이 낸 p값과 같아야 한다.</p>
+  </div>
+</div>
+
+<h3>더 정교한 영가설</h3>
+<p>"요일마다 사고 확률이 같다"를 \(p_i = 1/7\)로 쓰면 한 가지를 놓친다. 한 해의 요일 수는 같지 않다. 365일이면 한 요일이, 윤년이면 두 요일이 53번 나온다. "<strong>하루당</strong> 사고 확률이 같다"를 영가설로 삼으려면 요일별 일수에 비례한 확률을 쓴다. 영가설을 말로 정확히 쓰는 연습으로 좋다(LSR 12.1.8). 2024년은 윤년이라 월요일과 화요일이 53일이다.</p>
+
+<h3>단일 비율: 야간 사고는 절반인가</h3>
+<p>범주가 두 개뿐이면 적합도 검정은 단일 비율 검정과 같아진다. 이때는 이항분포로 <strong>정확한</strong> p값을 구할 수 있다(이항 정확검정, Clopper–Pearson 신뢰구간). 정규근사 검정은 같은 질문에 연속성 보정을 한 근사로 답하며, 그 통계량은 자유도 1인 χ²와 같다. 효과크기 Cohen's h는 비율을 아크사인 변환한 척도에서의 차이다.</p>
+<div class="readout math">\[h = 2\arcsin\sqrt{\hat{p}} - 2\arcsin\sqrt{p_0}\]</div>
+
+<div class="lab" id="lab-binom">
+  <div class="lab-head"><strong>이항 정확분포와 정규근사</strong><span>n을 줄이면 두 p값이 언제 어긋나는지 보기</span></div>
+  <div class="lab-body">
+    <div class="ctrls">
+      <div class="ctrl"><label for="bn-n">n <output id="bn-n-out">40</output></label><input type="range" id="bn-n" min="5" max="200" step="1" value="40"></div>
+      <div class="ctrl"><label for="bn-p">영가설의 p₀ <output id="bn-p-out">0.50</output></label><input type="range" id="bn-p" min="0.05" max="0.95" step="0.01" value="0.5"></div>
+      <div class="ctrl"><label for="bn-x">관측 성공 수 x <output id="bn-x-out">27</output></label><input type="range" id="bn-x" min="0" max="40" step="1" value="27"></div>
+    </div>
+    <svg class="plot" id="bn-svg" viewBox="0 0 640 240" role="img" aria-label="이항분포 막대와 정규근사 곡선"></svg>
+    <div class="outs">
+      <div><span class="k">정확검정 p</span><span class="v" id="bn-pe">-</span></div>
+      <div><span class="k">정규근사 p (보정)</span><span class="v" id="bn-pa">-</span></div>
+      <div><span class="k">np₀ · n(1−p₀)</span><span class="v" id="bn-np">-</span></div>
+      <div><span class="k">Cohen's h</span><span class="v" id="bn-h">-</span></div>
+    </div>
+    <p class="figcap">주황 막대는 관측값보다 확률이 같거나 작은 값들로, 이들의 합이 정확검정의 양측 p값이다. 파란 곡선은 \(N(np_0,\ np_0(1-p_0))\) 근사다. 분포 계산기이며 특정 자료가 아니다.</p>
+  </div>
+</div>
+
+<h3>프롬프트로 만들기</h3>
+<div class="cb prompt"><span class="lang">프롬프트 · 적합도와 단일 비율</span><pre>dataset/working/acc_clean.rds 에 정리해 둔 사망 교통사고 자료로 적합도 검정과 단일 비율 검정을 하는 스크립트 scripts/cat_gof.R 을 새로 써서 실행해 줘. 자료는 한 해의 사망사고 전체다.
+1. 표 1 · 요일별 건수: 요일마다 관측 건수, 영가설에서 기대하는 건수, 관측이 기대에서 얼마나 벗어났는지 보여 주는 Pearson 잔차를 열로 둔다. 영가설은 "일곱 요일의 사고 확률이 모두 같다"이다. output/gof_day.csv 에 저장한다.
+2. 위 영가설로 Pearson 카이제곱 적합도 검정을 하고 통계량, 자유도, p값, 효과크기 Cohen's w 와 그 95% 신뢰구간을 보여 준다.
+3. 영가설을 "하루당 사고 확률이 같다"로 바꾸어 다시 검정한다. 자료 연도의 달력에서 요일마다 날이 며칠인지 세고, 그 일수에 비례하는 확률을 영가설로 쓴다. 요일별 일수를 보여 주고, 두 영가설의 결과를 나란히 비교한다.
+4. 표 2 · 야간 사고 비율: 야간 사고의 비율이 절반인지 검정한다. 이항분포를 쓰는 정확검정과 연속성 보정을 한 정규근사 검정을 행으로 두고, 비율, 95% 신뢰구간, p값을 열로 둔다. 효과크기 Cohen's h 도 구한다. output/gof_night.csv 에 저장한다.
+5. 그림 1: 요일별 관측 건수를 막대로 그리고, 영가설의 기대 건수를 점선 가로선으로 겹친다. output/gof_day.png, 6×4 인치, 300 dpi.
+6. 결과 문장을 APA 형식으로 두 개 쓴다(적합도, 단일 비율). 통계량과 자유도, N, p, 효과크기와 신뢰구간, 어느 쪽이 더 많은지를 넣는다.
+- 모든 숫자는 코드로 계산한 값을 쓰고 손으로 적지 않는다. 끝나면 저장한 파일의 경로를 알려 주고, 표의 숫자를 내가 대조할 수 있도록 분석 결과의 원래 출력을 보여 준다.
+- 통계량은 소수 둘째 자리까지 쓴다. p값은 앞의 0 을 빼고 소수 셋째 자리까지, .001 보다 작으면 "&lt; .001"로 쓴다.
+- 데이터 처리와 그림에는 tidyverse 를 쓴다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
+- 그림의 한글은 showtext 로 Noto Sans KR 글꼴을 쓴다.
+- 어떤 방법으로 분석했는지, 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 설명해 준다.</pre></div>
+<details class="fold" id="gof-code">
+<summary>펼쳐 보기: 제공한 R 코드 · scripts/cat_gof.R</summary>
+<div class="cb r"><span class="lang">R · cat_gof.R</span><pre>library(tidyverse)
+library(effectsize)   # 효과크기와 신뢰구간
+library(showtext)
+
+font_add_google("Noto Sans KR")   # 한글 글꼴: Google Fonts에서 받아 등록
+showtext_auto()
+showtext_opts(dpi = 300)          # ggsave()의 dpi와 맞춘다
+
+acc &lt;- read_rds("dataset/working/acc_clean.rds")
+
+# 1) 요일 적합도 검정: 영가설 '일곱 요일의 확률이 모두 1/7' --------------
+obs_day &lt;- table(acc$요일)        # 1차원 빈도표 → chisq.test()는 적합도 검정
+obs_day
+gof &lt;- chisq.test(obs_day, p = rep(1/7, 7))
+gof                               # X-squared, df = 6, p-value
+gof$expected                      # 기대도수: 모두 N/7
+gof$residuals                     # (O - E) / sqrt(E): 어느 요일이 기대에서 벗어났는가
+cohens_w(obs_day, p = rep(1/7, 7))   # 효과크기 w와 신뢰구간
+
+gof_tab &lt;- tibble(요일 = names(obs_day), 관측 = as.numeric(obs_day),
+                  기대 = as.numeric(gof$expected), 잔차 = as.numeric(gof$residuals))
+write_csv(gof_tab, "output/gof_day.csv")
+
+# 2) 더 정교한 영가설: 요일별 일수에 비례 -------------------------------
+yr &lt;- 2024
+days &lt;- tibble(날짜 = seq(as.Date(paste0(yr, "-01-01")),
+                          as.Date(paste0(yr, "-12-31")), by = "day")) %&gt;%
+  mutate(요일번호 = wday(날짜, week_start = 1)) %&gt;%   # 1 = 월요일
+  count(요일번호)
+days                                                 # 2024년은 월·화가 53일
+chisq.test(obs_day, p = days$n / sum(days$n))
+
+# 3) 단일 비율: 야간 사고는 절반인가 ------------------------------------
+n_night &lt;- sum(acc$주야 == "야")
+n_all   &lt;- nrow(acc)
+binom.test(n_night, n_all, p = 0.5)   # 정확검정 + Clopper-Pearson 신뢰구간
+prop.test(n_night, n_all, p = 0.5)    # 정규근사 (= 자유도 1인 χ² 검정)
+
+# Cohen's h: 비율을 아크사인 변환한 척도에서의 차이
+p_hat &lt;- n_night / n_all
+2 * asin(sqrt(p_hat)) - 2 * asin(sqrt(0.5))
+
+# 4) 그림: 관측 막대 + 기대 건수 점선 -----------------------------------
+p_day &lt;- gof_tab %&gt;%
+  mutate(요일 = factor(요일, levels = levels(acc$요일))) %&gt;%
+  ggplot(aes(x = 요일, y = 관측)) +
+  geom_col(fill = "grey70") +
+  geom_hline(yintercept = n_all / 7, linetype = "dashed") +   # 기대 건수 N/7
+  labs(x = NULL, y = "사망사고 건수", title = "요일별 사망사고: 관측과 기대") +
+  theme_minimal(base_family = "Noto Sans KR")
+ggsave("output/gof_day.png", p_day, width = 6, height = 4, dpi = 300)</pre></div>
+</details>
+<h4>무엇을 확인하나</h4>
+<div class="scroll"><table class="check">
+<thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
+<tbody>
+<tr><td>검정의 종류</td><td>출력 첫 줄이 "Chi-squared test for given probabilities"인가. 2차원 표를 넘겼다면 독립성 검정이 되어 질문이 달라진다.</td></tr>
+<tr><td>기대도수</td><td>일곱 요일의 기대 건수가 모두 같고, 합이 전체 건수 N과 같은가. 자유도가 6인가.</td></tr>
+<tr><td>손계산 대조</td><td>에이전트에게 "같은 방법으로 카드 예제(35, 51, 64, 50)도 돌려 줘"라고 한다. χ² = 8.44, 자유도 3, <i>p</i> = .038이 나와야 한다.</td></tr>
+<tr><td>일수 비례 영가설</td><td>요일별 일수의 합이 그해 날수(2024년은 366)이고, 53일인 요일이 맞는가. 기대 건수가 요일마다 조금씩 달라졌는가.</td></tr>
+<tr><td>단일 비율</td><td>정확검정과 정규근사의 p값이 큰 표본에서 거의 같은가. 정규근사 결과의 통계량 이름이 X-squared(자유도 1)로 나오는 것을 확인한다.</td></tr>
+<tr><td>Cohen's h의 부호</td><td>야간 비율이 절반보다 작으면 h가 음수인가. 위의 이항 위젯에 n, x를 넣어 h를 대조할 수 있다(n이 200을 넘으면 비율만 맞춰 본다).</td></tr>
+<tr><td>탐색기 대조</td><td>결과의 χ²와 자유도를 χ² 분포 탐색기에 넣었을 때 p값이 같은가.</td></tr>
+<tr><td>손으로 적은 숫자</td><td>결과 문장과 CSV의 숫자가 출력과 같은가. 코드에 결과값이 직접 적혀 있지 않은가.</td></tr>
+</tbody></table></div>
+<p class="more">더 읽기: LSR 12.1 · Agresti (2019) 1.4절 · 이항분포는 Blitzstein &amp; Hwang (2019) 3장</p>
+</section>
+
+<!-- ===================== 04 ===================== -->
+<section class="panel" id="independence">
+<div class="section-head"><span class="section-num">04</span><h2>두 비율 비교와 독립성 검정</h2></div>
+<h3>독립성인가, 동질성인가</h3>
+<p>같은 \(r \times c\) 분할표와 같은 χ² 계산을 쓰지만, 자료를 모은 방식에 따라 영가설의 표현이 다르다.</p>
+<div class="scroll"><table>
+<thead><tr><th></th><th>독립성 검정</th><th>동질성 검정</th></tr></thead>
+<tbody>
+<tr><td>고정된 것</td><td>전체 \(N\)만</td><td>집단(행)별 표본크기</td></tr>
+<tr><td>영가설</td><td>두 변수가 서로 독립: \(p_{ij} = p_{i\cdot}\, p_{\cdot j}\)</td><td>모든 집단에서 열 범주의 분포가 같음</td></tr>
+<tr><td>예</td><td>사망사고 전체를 주야 × 사고유형으로 교차</td><td>남녀를 각각 정한 수만큼 뽑아 흡연 여부 비교</td></tr>
+</tbody></table></div>
+<p>기대도수는 두 경우 모두 \(E_{ij} = (\text{행 합})(\text{열 합})/N\)이고, 자유도는 \((r-1)(c-1)\)이다.</p>
+
+<h3>2 × 2: 야간에 보행자 사망사고 비율이 다른가</h3>
+<p>주야(행) × 보행자사고(열) 표에서 주간과 야간의 '차대사람' 비율을 비교한다. 두 비율 검정과 2 × 2 독립성 검정은 같은 검정이다. 효과의 크기는 세 가지로 본다.</p>
+<div class="readout math">\[\text{위험비} = \frac{a/(a+b)}{c/(c+d)}, \qquad \text{오즈비} = \frac{a\,d}{b\,c}, \qquad \varphi = \frac{ad - bc}{\sqrt{(a+b)(c+d)(a+c)(b+d)}}, \quad \varphi^2 = \frac{X^2}{N}\]</div>
+<div class="callout"><p><strong>연속성 보정 (LSR 12.3).</strong> 2 × 2 표에서 R은 기본으로 Yates 보정을 적용해 각 칸의 \(|O-E|\)에서 0.5를 뺀다. 이산분포를 연속 χ²로 근사할 때 생기는 차이를 줄이려는 것이지만, 대체로 검정을 보수적으로 만든다. 그래서 프롬프트는 보정한 결과와 하지 않은 결과를 모두 받게 하고, 보고할 때 어느 쪽인지 밝힌다.</p></div>
+
+<div class="lab" id="lab-22">
+  <div class="lab-head"><strong>2 × 2 분할표 계산기</strong><span>칸 값을 바꾸면 기대도수 · χ² · Fisher p · 효과크기가 다시 계산된다</span></div>
+  <div class="lab-body">
+    <div class="presets">
+      <button class="btn ghost" type="button" data-t="3,3,10,0">LSR 마녀 예제 (손계산용, 16명)</button>
+    </div>
+    <div class="grid22" role="group" aria-label="2 × 2 표 입력">
+      <div class="h"></div><div class="h" id="g-c1">열 1</div><div class="h" id="g-c2">열 2</div><div class="h">행 합</div>
+      <div class="h" id="g-r1">행 1</div>
+      <div><input class="numin" type="number" id="t-a" min="0" step="1" aria-label="1행 1열"><span class="e" id="e-a"></span></div>
+      <div><input class="numin" type="number" id="t-b" min="0" step="1" aria-label="1행 2열"><span class="e" id="e-b"></span></div>
+      <div class="tot" id="r1"></div>
+      <div class="h" id="g-r2">행 2</div>
+      <div><input class="numin" type="number" id="t-c" min="0" step="1" aria-label="2행 1열"><span class="e" id="e-c"></span></div>
+      <div><input class="numin" type="number" id="t-d" min="0" step="1" aria-label="2행 2열"><span class="e" id="e-d"></span></div>
+      <div class="tot" id="r2"></div>
+      <div class="h">열 합</div><div class="tot" id="c1"></div><div class="tot" id="c2"></div><div class="tot" id="nn"></div>
+    </div>
+    <p class="figcap">괄호 안은 기대도수다. 5 미만이면 붉게 표시된다. 에이전트가 만든 2 × 2 표의 네 칸을 넣으면 R 출력과 대조할 수 있다.</p>
+    <div class="outs">
+      <div><span class="k">Pearson χ² (보정 없음)</span><span class="v" id="o-x2">-</span></div>
+      <div><span class="k">p</span><span class="v" id="o-p">-</span></div>
+      <div><span class="k">Yates 보정 χ²</span><span class="v" id="o-x2y">-</span></div>
+      <div><span class="k">p (Yates)</span><span class="v" id="o-py">-</span></div>
+      <div><span class="k">Fisher 정확 p</span><span class="v" id="o-pf">-</span></div>
+    </div>
+    <div class="outs">
+      <div><span class="k">φ</span><span class="v" id="o-phi">-</span></div>
+      <div><span class="k">오즈비 (ad/bc)</span><span class="v" id="o-or">-</span></div>
+      <div><span class="k">위험비 (행 1 / 행 2)</span><span class="v" id="o-rr">-</span></div>
+    </div>
+    <p class="warnline" id="o-warn" hidden></p>
+  </div>
+</div>
+
+<h3>r × c: 주야에 따라 사고유형 분포가 다른가</h3>
+<p>열이 셋 이상이면 효과크기는 Cramér's V로 본다. \(k = \min(r, c)\)일 때 \(V = \sqrt{X^2 / (N(k-1))}\)이고, 2 × 2에서는 \(|\varphi|\)와 같다.</p>
+<div class="callout"><p><strong>effectsize의 기본값 두 가지.</strong> <code>cramers_v()</code>는 최근 버전에서 편향 보정을 기본으로 하고, 신뢰구간도 기본이 단측(<code>alternative = "greater"</code>)이다. V는 0 아래로 내려갈 수 없어서 상한이 1인 구간을 보고하는 것이 관례이기 때문이다. 다른 소프트웨어 결과와 비교할 때는 이 두 설정을 먼저 맞춘다. 그래서 프롬프트는 보정한 값과 하지 않은 값을 모두 받는다.</p></div>
+
+<h3>프롬프트로 만들기</h3>
+<div class="cb prompt"><span class="lang">프롬프트 · 두 비율과 독립성</span><pre>dataset/working/acc_clean.rds 의 사망 교통사고 자료로 두 비율 비교와 독립성 검정을 하는 스크립트 scripts/cat_independence.R 을 새로 써서 실행해 줘.
+1. 표 1 · 주야 × 보행자사고: 행은 주간, 야간, 열은 차대사람, 그 외로 둔 2×2 분할표에 칸마다 건수와 행 비율을 함께 적는다. output/ind_2x2.csv 에 저장한다.
+2. 표 2 · 2×2 검정: 주간과 야간의 차대사람 비율이 같은지 검정한다. 연속성 보정을 한 카이제곱 검정과 하지 않은 검정을 행으로 두고 통계량, 자유도, p값을 열로 둔다. 효과크기로 위험비, 오즈비, φ 계수와 각각의 95% 신뢰구간을 함께 적는다. 위험비와 오즈비는 주간을 분자, 야간을 분모로 두고, 그 방향을 표 아래 "주."에 적는다. output/ind_2x2_test.csv 에 저장한다.
+3. 표 3 · 주야 × 사고유형: 같은 자료로 주야와 사고유형의 독립성 검정을 한다. 칸마다 기대도수를 먼저 보여 주고, 기대도수가 5 미만인 칸이 있으면 알려 준다. 효과크기 Cramér's V 는 편향 보정을 한 값과 하지 않은 값을 모두 적는다. output/ind_rc.csv 에 저장한다.
+4. 그림 1: 주간과 야간 각각에서 사고유형이 차지하는 비율을 100% 누적 막대로 그린다. output/ind_type_bar.png, 6×4 인치, 300 dpi.
+5. 결과 문장을 APA 형식으로 두 개 쓴다(2×2, 주야 × 사고유형). 주간과 야간의 비율, 통계량과 자유도, N, p, 보정 여부, 효과크기와 신뢰구간을 넣는다.
+- 모든 숫자는 코드로 계산한 값을 쓰고 손으로 적지 않는다. 끝나면 저장한 파일의 경로를 알려 주고, 표의 숫자를 내가 대조할 수 있도록 분석 결과의 원래 출력을 보여 준다.
+- 통계량은 소수 둘째 자리까지 쓴다. p값은 앞의 0 을 빼고 소수 셋째 자리까지, .001 보다 작으면 "&lt; .001"로 쓴다.
+- 데이터 처리와 그림에는 tidyverse 를 쓴다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
+- 그림의 한글은 showtext 로 Noto Sans KR 글꼴을 쓴다.
+- 어떤 방법으로 분석했는지, 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 설명해 준다.</pre></div>
+<details class="fold" id="independence-code">
+<summary>펼쳐 보기: 제공한 R 코드 · scripts/cat_independence.R</summary>
+<div class="cb r"><span class="lang">R · cat_independence.R</span><pre>library(tidyverse)
+library(effectsize)
+library(showtext)
+
+font_add_google("Noto Sans KR")
+showtext_auto()
+showtext_opts(dpi = 300)
+
+acc &lt;- read_rds("dataset/working/acc_clean.rds")
+
+# 1) 2 × 2: 주야 × 보행자사고 -------------------------------------------
+tab22 &lt;- table(acc$주야, acc$보행자사고)   # 행: 주, 야 / 열: 차대사람, 그 외
+tab22
+row_p &lt;- prop.table(tab22, margin = 1)     # 행 비율: 주간·야간 각각의 '차대사람' 비율
+row_p
+
+prop.test(tab22)                    # 첫 열('차대사람')을 성공으로 두 비율 비교
+chisq.test(tab22)                   # 같은 검정 (2 × 2에서는 Yates 보정이 기본)
+chisq.test(tab22, correct = FALSE)  # 보정 없음
+
+row_p["주", "차대사람"] / row_p["야", "차대사람"]   # 위험비를 직접: 주간 / 야간
+riskratio(tab22)                    # 위험비와 신뢰구간 (방향을 위 값과 대조)
+oddsratio(tab22)                    # 오즈비 (a·d) / (b·c): 주간 대 야간
+phi(tab22)                          # φ 계수
+
+# 2) r × c: 주야 × 사고유형 ---------------------------------------------
+tab_rc &lt;- table(acc$주야, acc$사고유형)
+ind &lt;- chisq.test(tab_rc)
+ind
+ind$expected                        # 모든 칸이 충분히 큰지 먼저 확인
+cramers_v(tab_rc)                   # 최근 버전 기본: 편향 보정(adjust = TRUE)한 V
+cramers_v(tab_rc, adjust = FALSE)   # 고전적 V (LSR 12.4의 정의)
+
+# 3) 그림: 주간·야간의 사고유형 구성 -----------------------------------
+p_type &lt;- acc %&gt;%
+  count(주야, 사고유형) %&gt;%
+  ggplot(aes(x = 주야, y = n, fill = 사고유형)) +
+  geom_col(position = "fill") +     # 막대마다 합을 100%로 맞춘 누적 막대
+  labs(x = NULL, y = "비율", title = "주간과 야간의 사고유형 구성") +
+  theme_minimal(base_family = "Noto Sans KR")
+ggsave("output/ind_type_bar.png", p_type, width = 6, height = 4, dpi = 300)</pre></div>
+</details>
+<h4>무엇을 확인하나</h4>
+<div class="scroll"><table class="check">
+<thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
+<tbody>
+<tr><td>행 비율</td><td>표 1의 행 비율이 행마다 합해서 1(100%)인가. 열 비율이나 전체 비율로 나누지 않았는가.</td></tr>
+<tr><td>같은 검정</td><td>두 비율 검정의 결과와 보정한 카이제곱 검정의 통계량·p값이 같은가. 같지 않다면 하나는 보정을 하지 않은 것이다.</td></tr>
+<tr><td>보정 표기</td><td>표 2와 결과 문장에 보정 여부가 적혀 있는가.</td></tr>
+<tr><td>φ와 χ²</td><td>φ를 제곱해 N을 곱하면 보정 없는 χ²와 같은가. 다르면 φ에 편향 보정이 들어간 것이니 출력에 adjusted 표기가 있는지 본다.</td></tr>
+<tr><td>위험비와 오즈비의 방향</td><td>위험비가 표 1의 행 비율 두 개(주간 ÷ 야간)를 나눈 값과 같은가. 2 × 2 계산기에 네 칸을 넣어 오즈비, 위험비, χ², Fisher p를 대조한다. 1보다 작고 큰 것이 결과 문장의 "어느 쪽이 높았다"와 맞는가.</td></tr>
+<tr><td>기대도수</td><td>주야 × 사고유형 표의 기대도수에 5 미만인 칸이 있는가. 있다면 R의 경고("Chi-squared approximation may be incorrect")를 에이전트가 숨기지 않고 알렸는가. 05절로 이어진다.</td></tr>
+<tr><td>Cramér's V</td><td>보정한 V와 보정하지 않은 V가 둘 다 있고 이름이 구별되는가. 보정하지 않은 V가 \(\sqrt{X^2 / N}\)(이 표는 행이 둘이라 k − 1 = 1)과 같은가.</td></tr>
+<tr><td>그림</td><td>막대가 주간·야간마다 100%로 맞춰져 있는가. 범례의 사고유형 순서와 한글이 바른가.</td></tr>
+</tbody></table></div>
+<p class="more">더 읽기: LSR 12.2–12.4 · Agresti (2019) 2.2–2.4절</p>
+</section>
+
+<!-- ===================== 05 ===================== -->
+<section class="panel" id="fisher">
+<div class="section-head"><span class="section-num">05</span><h2>가정 점검과 Fisher 정확검정</h2></div>
+<h3>χ² 검정의 두 가정</h3>
+<ol>
+<li><strong>관측의 독립.</strong> 한 관측이 한 칸에만 들어가고, 관측끼리 서로 영향을 주지 않아야 한다. 같은 사람을 두 번 세면 이 가정이 깨지며, 이때는 <a href="#mcnemar">07</a>의 McNemar 검정을 쓴다(LSR 12.5).</li>
+<li><strong>기대도수가 충분히 큼.</strong> 흔히 "모든 기대도수 5 이상"을 기준으로 쓴다. 출처인 Cochran의 원래 권고는 "기대도수 1 미만인 칸이 없고, 5 미만인 칸이 20%를 넘지 않음"에 가깝다. Campbell(2007)의 모의실험은 2 × 2 표에서 이 규칙이 생각보다 보수적이라는 점을 보였다.</li>
+</ol>
+<p>데이터 준비에서 드문 사고유형을 '기타'로 묶은 이유가 여기 있다. 한 해에 몇 건 안 되는 유형을 그대로 두면 기대도수가 1 근처로 떨어져 χ² 근사가 무너진다. 범주 통합은 이론적으로 말이 되는 경우에만 하고, 통합한 사실을 보고한다. 묶은 뒤에도 '기타'가 아주 적다면 묶는 것만으로는 해결되지 않으므로, 그 범주를 분석에서 빼거나 다른 범주와 합칠지 정하고 그 결정을 보고한다.</p>
+
+<h3>Fisher 정확검정</h3>
+<p>행 합과 열 합을 고정하면 2 × 2 표에서 한 칸의 값이 정해질 때 나머지가 모두 정해지고, 그 칸의 분포는 <strong>초기하분포</strong>다. Fisher 검정은 검정통계량 없이, 관측된 표와 같거나 더 극단적인 표가 나올 확률을 직접 더한다(LSR 12.7).</p>
+<div class="readout math">\[P(a \mid \text{행·열 합}) = \frac{\binom{a+b}{a}\binom{c+d}{c}}{\binom{N}{a+c}}\]</div>
+<p>LSR의 마녀 예제(행복함 × 화형 중, 16명)에서 보정 χ² 검정은 경고와 함께 \(p = .069\)를 내지만, Fisher 검정은 \(p = .036\)이다. <a href="#lab-22">2 × 2 계산기</a>의 "LSR 마녀 예제" 단추로 두 값을 나란히 확인한다. r × c 표에서 기대도수가 작을 때는 행·열 합을 고정한 표를 많이 만들어 보는 몬테카를로 p값을 쓸 수 있다.</p>
+<div class="callout caution"><p><strong>오즈비 값이 다를 때.</strong> Fisher 검정이 보고하는 오즈비는 조건부 최대가능도 추정치라, 표본 오즈비 \(ad/bc\)와 조금 다르다. 둘 중 무엇을 보고했는지 밝힌다.</p></div>
+
+<h3>프롬프트로 만들기</h3>
+<div class="cb prompt"><span class="lang">프롬프트 · 작은 표와 Fisher 정확검정</span><pre>dataset/working/acc_clean.rds 의 사망 교통사고 자료에서 기대도수가 작은 표를 다루는 스크립트 scripts/cat_fisher.R 을 새로 써서 실행해 줘.
+1. 제주 지역의 사고만 골라 주야 × 보행자사고 2×2 표를 만든다. 지역 이름이 자료에 어떻게 적혀 있는지 먼저 확인하고, 고른 사고가 몇 건인지 보여 준다.
+2. 표 1 · 작은 표의 검정: 칸마다 기대도수를 먼저 보여 준다. 연속성 보정을 한 카이제곱 검정과 Fisher 정확검정을 행으로 두고 p값, 오즈비와 95% 신뢰구간을 열로 둔다. 카이제곱 검정에서 나오는 경고가 있으면 숨기지 말고 그대로 보여 준다. Fisher 검정의 오즈비가 표본 오즈비와 어떻게 다른지 표 아래 "주."에 적는다. output/fisher_jeju.csv 에 저장한다.
+3. 표 2 · 요일 × 사고유형: 전체 자료로 요일 × 사고유형 표를 만들고, 기대도수가 5 미만인 칸과 1 미만인 칸의 수와 비율을 센다. 일반 카이제곱 검정의 p값과, 1만 번 모의실험으로 구하는 몬테카를로 p값을 나란히 둔다. 모의실험은 다시 실행해도 같은 결과가 나오게 난수 시드를 고정하고, 시드 값을 표 아래 "주."에 적는다. output/fisher_day_type.csv 에 저장한다.
+4. 기대도수 기준(5 미만 칸이 20%를 넘지 않고 1 미만 칸이 없음)으로 보아 어느 검정 결과를 보고해야 하는지 한 문단으로 쓴다.
+- 모든 숫자는 코드로 계산한 값을 쓰고 손으로 적지 않는다. 끝나면 저장한 파일의 경로를 알려 주고, 표의 숫자를 내가 대조할 수 있도록 분석 결과의 원래 출력을 보여 준다.
+- 통계량은 소수 둘째 자리까지 쓴다. p값은 앞의 0 을 빼고 소수 셋째 자리까지, .001 보다 작으면 "&lt; .001"로 쓴다.
+- 데이터 처리에는 tidyverse 를 쓴다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
+- 어떤 방법으로 분석했는지, 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 설명해 준다.</pre></div>
+<details class="fold" id="fisher-code">
+<summary>펼쳐 보기: 제공한 R 코드 · scripts/cat_fisher.R</summary>
+<div class="cb r"><span class="lang">R · cat_fisher.R</span><pre>library(tidyverse)
+
+acc &lt;- read_rds("dataset/working/acc_clean.rds")
+
+# 1) 한 지역만 떼어 보면: 제주 ------------------------------------------
+count(acc, 발생지시도)               # 지역 이름의 표기부터 확인
+tab_small &lt;- acc %&gt;%
+  filter(발생지시도 == "제주") %&gt;%
+  with(table(주야, 보행자사고))
+tab_small
+chisq.test(tab_small)$expected      # 기대도수부터 확인 → 경고가 뜨는지 보기
+chisq.test(tab_small)               # 비교용: 보정 χ² 근사
+fisher.test(tab_small)              # 정확 p, 조건부 최대가능도 오즈비와 신뢰구간
+
+# 2) r × c 표에서 기대도수가 작을 때: 몬테카를로 p값 ----------------------
+tab_dt &lt;- table(acc$요일, acc$사고유형)
+e_dt &lt;- chisq.test(tab_dt)$expected
+mean(e_dt &lt; 5)                      # 기대도수 5 미만 칸의 비율
+sum(e_dt &lt; 1)                       # 기대도수 1 미만 칸의 수
+
+chisq.test(tab_dt)                  # 일반 χ² 근사
+set.seed(2024)                      # 다시 실행해도 같은 결과
+chisq.test(tab_dt, simulate.p.value = TRUE, B = 10000)</pre></div>
+</details>
+<h4>무엇을 확인하나</h4>
+<div class="scroll"><table class="check">
+<thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
+<tbody>
+<tr><td>고른 사고 수</td><td>제주 사고가 0건이 아닌가. 지역 이름이 "제주특별자치도"처럼 다르게 적혀 있으면 0건이 되고 표가 비어 버린다.</td></tr>
+<tr><td>기대도수 먼저</td><td>검정보다 기대도수를 먼저 보여 주었는가. 5 미만인 칸이 있을 때 R의 경고가 출력에 그대로 남아 있는가.</td></tr>
+<tr><td>계산기 대조</td><td>제주 표의 네 칸을 <a href="#lab-22">2 × 2 계산기</a>에 넣었을 때 Fisher p와 보정 χ²의 p가 R 출력과 같은가.</td></tr>
+<tr><td>오즈비의 종류</td><td>Fisher 검정의 오즈비가 계산기의 \(ad/bc\)와 조금 다른가. 보고서에 어느 오즈비를 썼는지 적혀 있는가.</td></tr>
+<tr><td>몬테카를로</td><td>모의 횟수가 1만 번이고 시드가 고정되어 있는가. 스크립트를 두 번 실행해 p값이 같은지 본다. 출력에 "simulated p-value (based on 10000 replicates)"가 있고 자유도가 NA인 것은 정상이다.</td></tr>
+<tr><td>판단 문단</td><td>5 미만 칸의 비율과 1 미만 칸의 수가 출력과 같고, 그 기준으로 보고할 검정을 고른 이유가 맞는가.</td></tr>
+</tbody></table></div>
+<p class="more">더 읽기: LSR 12.5, 12.7 · Campbell (2007) · 초기하분포는 Blitzstein &amp; Hwang (2019) 3장</p>
+</section>
+
+<!-- ===================== 06 ===================== -->
+<section class="panel" id="residuals">
+<div class="section-head"><span class="section-num">06</span><h2>사후 분석: 표준화 잔차</h2></div>
+<p>r × c 표의 χ² 검정이 유의하면 "어딘가 다르다"까지만 알 수 있다. 어느 칸이 차이를 만들었는지는 <strong>표준화 잔차</strong>(adjusted residual)로 본다. 영가설 하(under \(H_0\))에서 근사적으로 표준정규분포를 따르므로, 절댓값이 2(정확히는 1.96)를 넘는 칸을 기대보다 유난히 많거나 적은 칸으로 읽는다.</p>
+<div class="readout math">\[r_{ij} = \frac{O_{ij} - E_{ij}}{\sqrt{E_{ij}\,(1 - p_{i\cdot})(1 - p_{\cdot j})}}\]</div>
+<p>적합도 검정에서 본 Pearson 잔차 \((O - E)/\sqrt{E}\)와는 분모가 다르다. 칸이 많으면 우연히 2를 넘는 칸이 생기기 쉬우므로, 칸 수 \(m\)으로 Bonferroni 보정한 기준 \(z_{1-\alpha/(2m)}\)을 함께 본다. 요일 7개 × 사고유형 3개이면 \(m = 21\)로 기준은 약 3.04, 사고유형 4개이면 \(m = 28\)로 약 3.12다.</p>
+<div class="callout"><p><strong>해석 연습.</strong> 잔차 히트맵에서 주말·평일, 차대사람·차량단독의 패턴을 찾고, 그 패턴이 03절의 요일 적합도 결과와 어떻게 이어지는지 말로 설명해 본다. 표준화 잔차는 "건수가 많다"가 아니라 "독립이라면 기대할 건수보다 많다"는 뜻이라는 점을 놓치기 쉽다.</p></div>
+
+<h3>프롬프트로 만들기</h3>
+<div class="cb prompt"><span class="lang">프롬프트 · 표준화 잔차</span><pre>dataset/working/acc_clean.rds 의 사망 교통사고 자료로, 요일 × 사고유형 독립성 검정 뒤 어느 칸이 차이를 만드는지 표준화 잔차(adjusted residual)로 보는 스크립트 scripts/cat_residuals.R 을 새로 써서 실행해 줘.
+1. 요일 × 사고유형 독립성 검정의 결과(통계량, 자유도, p값)를 먼저 보여 준다.
+2. 표 1 · 표준화 잔차: 요일을 행, 사고유형을 열로 하는 표에 칸마다 표준화 잔차를 소수 둘째 자리까지 적는다. Pearson 잔차가 아니라 표준화 잔차인지 확인해 알려 준다.
+3. 칸이 많아 우연히 큰 잔차가 나올 수 있으므로, 칸의 수로 Bonferroni 보정한 기준값(유의수준 .05, 양측)을 구해 보여 주고, 그 기준을 넘는 칸을 표시한다. output/stdres_day_type.csv 에 저장한다.
+4. 그림 1: 표준화 잔차 히트맵. 가로는 사고유형, 세로는 요일로 두고, 0 을 흰색으로 해서 양수와 음수를 서로 다른 색으로 칠한다. 칸마다 잔차를 숫자로 적고, 기준을 넘는 칸은 굵은 글씨로 쓴다. 부제에 굵은 글씨의 뜻과 기준값을 적는다. output/stdres_day_type.png, 7×5 인치, 300 dpi.
+5. 기준을 넘는 칸을 쉬운 말로 해석하는 한 문단을 쓴다. "건수가 많다"가 아니라 "독립이라면 기대할 건수보다 많다(적다)"는 뜻으로 쓴다.
+- 모든 숫자는 코드로 계산한 값을 쓰고 손으로 적지 않는다. 끝나면 저장한 파일의 경로를 알려 주고, 표의 숫자를 내가 대조할 수 있도록 분석 결과의 원래 출력을 보여 준다.
+- 데이터 처리와 그림에는 tidyverse 를 쓴다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
+- 그림의 한글은 showtext 로 Noto Sans KR 글꼴을 쓴다.
+- 어떤 방법으로 분석했는지, 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 설명해 준다.</pre></div>
+<details class="fold" id="residuals-code">
+<summary>펼쳐 보기: 제공한 R 코드 · scripts/cat_residuals.R</summary>
+<div class="cb r"><span class="lang">R · cat_residuals.R</span><pre>library(tidyverse)
+library(showtext)
+
+font_add_google("Noto Sans KR")
+showtext_auto()
+showtext_opts(dpi = 300)
+
+acc &lt;- read_rds("dataset/working/acc_clean.rds")
+
+ind_dt &lt;- chisq.test(table(acc$요일, acc$사고유형))
+ind_dt                                  # 먼저 독립성 검정 결과
+round(ind_dt$stdres, 2)                 # 표준화 잔차 ($residuals는 Pearson 잔차)
+
+m &lt;- length(ind_dt$stdres)              # 칸의 수
+cut_bonf &lt;- qnorm(1 - 0.05 / (2 * m))   # 21칸이면 약 3.04, 28칸이면 약 3.12
+cut_bonf
+
+res_df &lt;- as.data.frame(ind_dt$stdres) %&gt;%
+  rename(요일 = Var1, 사고유형 = Var2, 잔차 = Freq) %&gt;%
+  mutate(기준초과 = abs(잔차) &gt; cut_bonf)
+write_csv(res_df, "output/stdres_day_type.csv")
+
+g &lt;- ggplot(res_df, aes(x = 사고유형, y = 요일, fill = 잔차)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = sprintf("%.1f", 잔차),
+                fontface = if_else(기준초과, "bold", "plain")),
+            family = "Noto Sans KR") +
+  scale_fill_gradient2(low = "#2F6FA6", mid = "white", high = "#C0563B", midpoint = 0) +
+  labs(title = "요일 × 사고유형 표준화 잔차",
+       subtitle = sprintf("굵은 숫자: Bonferroni 보정 기준 %.2f를 넘는 칸", cut_bonf),
+       x = NULL, y = NULL, fill = "표준화 잔차") +
+  theme_minimal(base_family = "Noto Sans KR")
+ggsave("output/stdres_day_type.png", g, width = 7, height = 5, dpi = 300)</pre></div>
+</details>
+<h4>무엇을 확인하나</h4>
+<div class="scroll"><table class="check">
+<thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
+<tbody>
+<tr><td>잔차의 종류</td><td>표준화 잔차를 썼는가, Pearson 잔차를 썼는가. 코드를 다 읽지 못해도 된다. 에이전트에게 "어느 잔차인지, 분모가 무엇인지 설명해 줘"라고 묻는다. 숫자로도 대조할 수 있다: 같은 방법을 04절의 주야 × 보행자사고 2 × 2 표에 돌려 달라고 하면, 표준화 잔차는 네 칸의 절댓값이 모두 같고 그 제곱이 보정 없는 χ²와 같다.</td></tr>
+<tr><td>기준값</td><td>칸의 수가 요일 7 × 사고유형 수와 같은가. 기준값이 21칸이면 약 3.04, 28칸이면 약 3.12인가. 1.96을 그대로 쓰지 않았는가.</td></tr>
+<tr><td>표시</td><td>CSV의 "기준 초과" 칸과 그림의 굵은 숫자가 같은 칸인가.</td></tr>
+<tr><td>색</td><td>0이 흰색이고 양수와 음수가 다른 색인가. 범례의 가운데가 0인가.</td></tr>
+<tr><td>해석 문장</td><td>"건수가 많다"가 아니라 "독립이라면 기대할 건수보다 많다"로 썼는가. 부호(많다·적다)가 잔차의 부호와 맞는가.</td></tr>
+</tbody></table></div>
+<p class="more">더 읽기: Agresti (2019) 2.4.5절 (LSR에는 이 내용이 없다)</p>
+</section>
+
+<!-- ===================== 07 ===================== -->
+<section class="panel" id="mcnemar">
+<div class="section-head"><span class="section-num">07</span><h2>대응 범주 자료: McNemar 검정</h2></div>
+<h3>왜 독립성 검정을 쓰면 안 되는가</h3>
+<p>국민건강영양조사의 성인 응답자 한 사람마다 두 판정이 있다. 본인이 비만이라고 생각하는가(인식), 그리고 BMI 25 이상인가(측정). 이 두 판정으로 2 × 2 표를 만들면 한 사람이 한 칸에 들어가지만, 행과 열이 <strong>같은 사람의 두 측정</strong>이다. 질문도 독립성 검정과 다르다.</p>
+<div class="scroll"><table>
+<thead><tr><th></th><th>측정: 비만</th><th>측정: 비만 아님</th></tr></thead>
+<tbody>
+<tr><td>인식: 비만</td><td>a (일치)</td><td><strong>b</strong> (과대 인식)</td></tr>
+<tr><td>인식: 비만 아님</td><td><strong>c</strong> (과소 인식)</td><td>d (일치)</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>독립성 검정</strong>은 "인식과 측정이 관련 있는가"를 묻는다. 같은 사람의 두 판정이니 관련이 있는 것은 당연해서, 대개 아주 작은 p가 나오고 별 정보가 없다.</li>
+<li><strong>McNemar 검정</strong>은 "인식 비만 비율 \((a+b)/N\)과 측정 비만 비율 \((a+c)/N\)이 같은가"를 묻는다(주변 동질성). 두 비율의 차이는 \((b-c)/N\)이므로, 정보는 <strong>엇갈린 칸 b와 c에만</strong> 있다.</li>
+</ul>
+<div class="readout math">\[X^2 = \frac{(|b - c| - 1)^2}{b + c} \;\sim\; \chi^2_1 \quad (\text{근사, under } H_0), \qquad H_0:\ b \text{와 } c \text{가 나올 가능성이 같음}\]</div>
+<p>영가설 하(under \(H_0\))에서 엇갈린 \(b+c\)명 중 b에 속할 수는 이항분포 \(\text{Bin}(b+c,\ 0.5)\)를 따르므로 정확검정도 할 수 있다. Fagerland 등(2013)은 작은 표본에서 이 정확 조건부 검정이 지나치게 보수적이므로 mid-p나 보정 없는 근사 검정을 권한다. 효과크기 Cohen's g는 \(|b/(b+c) - 0.5|\)이고, 대응 오즈비는 \(b/c\)다.</p>
+
+<div class="lab" id="lab-mc">
+  <div class="lab-head"><strong>McNemar 계산기</strong><span>a·d를 바꿔도 검정 결과는 그대로라는 점을 확인해 본다</span></div>
+  <div class="lab-body">
+    <div class="presets">
+      <button class="btn ghost" type="button" data-m="5,25,5,65">LSR 12.8 광고 예제 (손계산용, 100명)</button>
+    </div>
+    <div class="ctrls">
+      <div class="ctrl"><label for="m-a">a (둘 다 예)</label><input class="numin" type="number" id="m-a" min="0" step="1"></div>
+      <div class="ctrl"><label for="m-b">b (행만 예)</label><input class="numin" type="number" id="m-b" min="0" step="1"></div>
+      <div class="ctrl"><label for="m-c">c (열만 예)</label><input class="numin" type="number" id="m-c" min="0" step="1"></div>
+      <div class="ctrl"><label for="m-d">d (둘 다 아니오)</label><input class="numin" type="number" id="m-d" min="0" step="1"></div>
+    </div>
+    <div class="outs">
+      <div><span class="k">행 기준 비율 (a+b)/N</span><span class="v" id="m-p1">-</span></div>
+      <div><span class="k">열 기준 비율 (a+c)/N</span><span class="v" id="m-p2">-</span></div>
+      <div><span class="k">McNemar χ² (보정)</span><span class="v" id="m-x2">-</span></div>
+      <div><span class="k">p</span><span class="v" id="m-p">-</span></div>
+      <div><span class="k">보정 없음 p</span><span class="v" id="m-pn">-</span></div>
+      <div><span class="k">정확 p (이항)</span><span class="v" id="m-pe">-</span></div>
+    </div>
+    <div class="outs">
+      <div><span class="k">Cohen's g</span><span class="v" id="m-g">-</span></div>
+      <div><span class="k">대응 오즈비 b / c</span><span class="v" id="m-or">-</span></div>
+    </div>
+    <p class="figcap">광고 예제는 교재의 손계산용 수치다(보정 χ² = 12.03, p = .0005). 자기 분석 결과의 네 칸을 넣으면 R 출력과 대조할 수 있다.</p>
+  </div>
+</div>
+
+<div class="callout caution"><p><strong>복합표본설계와 가중치.</strong> 국민건강영양조사는 층화·집락 추출과 가중치를 쓰는 복합표본조사다. 이 절의 분석은 가중치를 무시한 단순 검정으로, 검정의 구조를 익히기 위한 교육용 단순화다. 모집단 추정치를 보고하려면 <code>survey</code> 패키지로 설계를 지정하고 가중치(<code>wt_itvex</code> 등)를 적용해야 하며, 이는 질병관리청 이용지침서의 권고이기도 하다.</p></div>
+
+<h3>같은 표, 다른 질문 (LSR 12.9)</h3>
+<p>LSR은 같은 사람이 카드를 두 번 고른 4 × 4 표에 독립성 검정과 McNemar 검정을 모두 적용해, 결과가 다르게 나오는 것을 보여 준다. 첫 번째 선택이 두 번째 선택과 관련 있는가(독립성)와, 두 번째 선택의 무늬 분포가 첫 번째와 달라졌는가(주변 동질성)는 다른 질문이기 때문이다. 체형 자료에서도 두 검정을 나란히 돌려, 각 p값이 무엇에 대한 답인지 문장으로 써 본다.</p>
+
+<h3>프롬프트로 만들기</h3>
+<div class="cb prompt"><span class="lang">프롬프트 · McNemar 검정</span><pre>dataset/working/kn_body.rds 에 정리해 둔 국민건강영양조사 자료로, 같은 사람의 두 판정(스스로 비만이라고 생각하는가, 체질량지수로 비만인가)을 비교하는 스크립트 scripts/cat_mcnemar.R 을 새로 써서 실행해 줘. 한 사람이 두 번 판정되었으므로 대응 자료로 다룬다.
+1. 표 1 · 인식 × 측정: 행은 인식(비만, 비만 아님), 열은 측정(비만, 비만 아님)으로 둔 2×2 표에 건수를 적는다. 두 판정이 엇갈린 두 칸 가운데 어느 칸이 과대 인식(인식은 비만, 측정은 비만 아님)이고 어느 칸이 과소 인식인지 표 아래 "주."에 적는다.
+2. 인식 비만 비율과 측정 비만 비율을 각각 구하고, 두 비율의 차이도 보여 준다.
+3. 표 2 · McNemar 검정: 연속성 보정을 한 McNemar 검정, 보정하지 않은 검정, 엇갈린 사람만으로 하는 정확 이항검정을 행으로 두고 통계량, 자유도, p값을 열로 둔다. 효과크기 Cohen's g 와, 과대 인식 수를 과소 인식 수로 나눈 대응 오즈비를 함께 적는다. output/mcnemar.csv 에 저장한다.
+4. 비교: 같은 표에 독립성 검정도 하고, 두 검정이 각각 어떤 질문에 답하는지 한 문장씩 쓴다.
+5. 결과 문장을 APA 형식으로 쓴다. 두 비율, 통계량과 자유도, N, p, 효과크기를 넣는다. 그 아래에 이 분석은 표본 가중치와 복합표본설계를 무시한 교육용 단순 분석이라는 점을 적는다.
+- 개인 단위 자료를 output 폴더에 저장하지 않는다. 표와 요약값만 저장한다.
+- 모든 숫자는 코드로 계산한 값을 쓰고 손으로 적지 않는다. 끝나면 저장한 파일의 경로를 알려 주고, 표의 숫자를 내가 대조할 수 있도록 분석 결과의 원래 출력을 보여 준다.
+- 통계량은 소수 둘째 자리까지 쓴다. p값은 앞의 0 을 빼고 소수 셋째 자리까지, .001 보다 작으면 "&lt; .001"로 쓴다.
+- 데이터 처리에는 tidyverse 를 쓴다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
+- 어떤 방법으로 분석했는지, 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 설명해 준다.</pre></div>
+<details class="fold" id="mcnemar-code">
+<summary>펼쳐 보기: 제공한 R 코드 · scripts/cat_mcnemar.R</summary>
+<div class="cb r"><span class="lang">R · cat_mcnemar.R</span><pre>library(tidyverse)
+library(effectsize)
+
+kn &lt;- read_rds("dataset/working/kn_body.rds")
+
+tab_mc &lt;- table(인식 = kn$인식비만, 측정 = kn$측정비만)
+tab_mc
+
+# 두 주변 비율: 같은 사람들의 두 판정
+rowSums(tab_mc) / sum(tab_mc)   # 인식 비만 비율 (a + b) / N
+colSums(tab_mc) / sum(tab_mc)   # 측정 비만 비율 (a + c) / N
+
+mcnemar.test(tab_mc)                    # 연속성 보정 포함 (기본)
+mcnemar.test(tab_mc, correct = FALSE)   # 보정 없음
+
+n_b &lt;- tab_mc["비만", "비만 아님"]      # 과대 인식: 인식 비만, 측정 비만 아님
+n_c &lt;- tab_mc["비만 아님", "비만"]      # 과소 인식: 인식 비만 아님, 측정 비만
+binom.test(n_b, n_b + n_c, p = 0.5)     # 정확 McNemar: 엇갈린 사람만 쓴다
+
+cohens_g(tab_mc)                        # 효과크기 g = |b/(b+c) − 0.5|
+n_b / n_c                               # 대응 오즈비
+
+# 비교: 같은 표에 독립성 검정을 하면? (다른 질문에 대한 답)
+chisq.test(tab_mc)</pre></div>
+</details>
+<h4>무엇을 확인하나</h4>
+<div class="scroll"><table class="check">
+<thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
+<tbody>
+<tr><td>엇갈린 칸</td><td>과대 인식과 과소 인식으로 적은 칸이 표의 행·열 이름과 맞는가. 행과 열을 바꿔 놓으면 b와 c가 뒤바뀌어 대응 오즈비가 역수가 된다.</td></tr>
+<tr><td>두 비율의 차이</td><td>인식 비율 − 측정 비율이 (b − c) / N과 같은가.</td></tr>
+<tr><td>계산기 대조</td><td>네 칸을 <a href="#lab-mc">McNemar 계산기</a>에 넣었을 때 보정 χ², 보정 없음 p, 정확 p, g, 대응 오즈비가 R 출력과 같은가. a나 d를 바꿔도 검정 결과가 그대로인지도 본다.</td></tr>
+<tr><td>정확검정의 n</td><td>정확 이항검정의 시행 수가 전체 N이 아니라 b + c인가.</td></tr>
+<tr><td>독립성 검정과의 구별</td><td>독립성 검정의 p가 아주 작게 나와도 그것을 "인식과 측정의 비율이 다르다"로 쓰지 않았는가. 두 검정의 질문을 한 문장씩 구별해 썼는가.</td></tr>
+<tr><td>가중치 문구</td><td>결과 문장 아래에 가중치와 복합표본설계를 무시했다는 문구가 있는가.</td></tr>
+<tr><td>개인 자료</td><td><code>output/</code>에 사람 단위 자료가 저장되지 않았는가. 표와 요약값만 있어야 한다.</td></tr>
+</tbody></table></div>
+<p class="more">더 읽기: LSR 12.8–12.9 · Fagerland, Lydersen &amp; Laake (2013)</p>
+</section>
+
+<!-- ===================== 08 ===================== -->
+<section class="panel" id="report">
+<div class="section-head"><span class="section-num">08</span><h2>결과 보고와 로지스틱 회귀 예고</h2></div>
+<h3>보고 양식</h3>
+<p>검정 이름, 통계량과 자유도, 표본크기, p값, 효과크기와 신뢰구간, 그리고 방향(어느 쪽이 더 큰가)을 함께 적는다. 빈칸은 각자 분석한 결과로 채운다. 프롬프트에서 받은 결과 문장이 이 양식의 항목을 모두 담고 있는지 대조한다.</p>
+<div class="callout">
+<p><strong>적합도.</strong> 요일별 사망 교통사고 건수는 균등분포에서 벗어났다, χ²(6, <i>N</i> = <span class="blank">___</span>) = <span class="blank">___</span>, <i>p</i> = <span class="blank">___</span>, Cohen's <i>w</i> = <span class="blank">___</span> [95% CI <span class="blank">___</span>, <span class="blank">___</span>]. Pearson 잔차 기준으로 <span class="blank">___</span>요일이 기대보다 많았다.</p>
+<p><strong>독립성 (2 × 2).</strong> 차대사람 사고의 비율은 야간(<span class="blank">___</span>%)이 주간(<span class="blank">___</span>%)보다 높았다, χ²(1, <i>N</i> = <span class="blank">___</span>) = <span class="blank">___</span> (Yates 보정), <i>p</i> = <span class="blank">___</span>, 위험비 = <span class="blank">___</span> [95% CI <span class="blank">___</span>, <span class="blank">___</span>].</p>
+<p><strong>McNemar.</strong> 스스로 비만이라고 인식한 비율(<span class="blank">___</span>%)은 BMI 기준 비만 비율(<span class="blank">___</span>%)과 달랐다, McNemar χ²(1, <i>N</i> = <span class="blank">___</span>) = <span class="blank">___</span>, <i>p</i> = <span class="blank">___</span>, Cohen's <i>g</i> = <span class="blank">___</span>.</p>
+</div>
+<div class="callout caution"><p><strong>효과크기 해석 기준에 대해.</strong> Cohen(1988)의 w = .1/.3/.5, h = .2/.5/.8, g = .05/.15/.25를 작음·중간·큼으로 부르는 관례가 있지만, Cohen 스스로 다른 근거가 없을 때 쓰는 임시 기준이라고 밝혔다. 교통안전이나 공중보건에서는 "작은" 효과도 대상 인구가 크면 실질적 의미가 크다. <code>interpret_cramers_v()</code> 같은 함수의 출력은 출발점으로만 쓴다.</p></div>
+
+<h3>다음 단계: 로지스틱 회귀</h3>
+<p>2 × 2 표의 오즈비는 로지스틱 회귀에서 이분형 설명변수 하나를 넣었을 때의 \(\exp(\beta_1)\)과 같다. 분할표 검정은 설명변수가 하나뿐이고 범주형일 때의 특수한 경우이며, 연속형 공변량을 넣거나 여러 변수를 동시에 통제하려면 로지스틱 회귀로 넘어간다(James 외, 2013, 4.3절).</p>
+<div class="readout math">\[\log\frac{P(\text{차대사람})}{1 - P(\text{차대사람})} = \beta_0 + \beta_1 \cdot \text{야간}, \qquad \exp(\beta_1) = \text{야간 대 주간의 오즈비}\]</div>
+<p>표에서 계산한 오즈비 \(ad/bc\)는 첫 행(주간)을 분자에 두므로 "주간 대 야간"이다. 회귀에서는 첫 수준(주간)이 기준 범주가 되어 \(\exp(\beta_1)\)이 "야간 대 주간"이다. 그래서 두 값은 서로 역수로 나온다. 이 차이를 직접 확인하는 것이 로지스틱 회귀로 넘어가는 좋은 연결 고리가 된다.</p>
+
+<h3>프롬프트로 만들기</h3>
+<div class="cb prompt"><span class="lang">프롬프트 · 오즈비와 로지스틱 회귀</span><pre>dataset/working/acc_clean.rds 의 사망 교통사고 자료로, 2×2 표의 오즈비와 로지스틱 회귀를 비교하는 스크립트 scripts/cat_logistic.R 을 새로 써서 실행해 줘.
+1. 차대사람 사고인지 여부를 반응으로, 주야를 설명변수로 하는 로지스틱 회귀를 적합하고 계수표를 보여 준다. 기준 범주는 주간으로 둔다.
+2. 표 1 · 오즈비 비교: 회귀 계수에서 구한 야간 대 주간의 오즈비와 95% 신뢰구간, 주야 × 보행자사고 2×2 표에서 구한 표본 오즈비와 95% 신뢰구간을 나란히 둔다. 두 값이 같은지, 역수인지, 왜 그런지 표 아래 "주."에 적는다. 회귀의 신뢰구간을 어떤 방법으로 구했는지도 적는다. output/logistic_or.csv 에 저장한다.
+3. 표 2 · 검정 비교: 모형의 가능도비 카이제곱 검정과, 같은 2×2 표의 연속성 보정을 하지 않은 Pearson 카이제곱 검정의 통계량, 자유도, p값을 나란히 둔다. 두 통계량이 왜 비슷하지만 같지는 않은지 한 문장으로 적는다.
+- 모든 숫자는 코드로 계산한 값을 쓰고 손으로 적지 않는다. 끝나면 저장한 파일의 경로를 알려 주고, 표의 숫자를 내가 대조할 수 있도록 분석 결과의 원래 출력을 보여 준다.
+- 통계량은 소수 둘째 자리까지 쓴다. p값은 앞의 0 을 빼고 소수 셋째 자리까지, .001 보다 작으면 "&lt; .001"로 쓴다.
+- 데이터 처리에는 tidyverse 를 쓴다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
+- 어떤 방법으로 분석했는지, 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 설명해 준다.</pre></div>
+<details class="fold" id="report-code">
+<summary>펼쳐 보기: 제공한 R 코드 · scripts/cat_logistic.R</summary>
+<div class="cb r"><span class="lang">R · cat_logistic.R</span><pre>library(tidyverse)
+library(effectsize)
+
+acc &lt;- read_rds("dataset/working/acc_clean.rds")
+
+# 반응: 차대사람이면 TRUE(1). 주야의 첫 수준(주간)이 기준 범주다
+fit &lt;- glm(보행자사고 == "차대사람" ~ 주야, family = binomial, data = acc)
+summary(fit)
+exp(coef(fit))               # '주야야' 계수: 야간 대 주간의 오즈비
+exp(confint(fit))            # 그 신뢰구간 (프로파일 가능도)
+
+tab22 &lt;- table(acc$주야, acc$보행자사고)
+oddsratio(tab22)             # 표의 오즈비 ad/bc: 주간 대 야간 → 위 값의 역수
+
+anova(fit, test = "Chisq")   # 가능도비 χ² 검정
+chisq.test(tab22, correct = FALSE)   # 비교: Pearson χ² (보정 없음)</pre></div>
+</details>
+<h4>무엇을 확인하나</h4>
+<div class="scroll"><table class="check">
+<thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
+<tbody>
+<tr><td>기준 범주</td><td>계수표의 설명변수 이름이 "주야야"(야간)인가. "주야주"로 나오면 기준 범주가 야간으로 바뀐 것이다. 데이터 준비의 범주 순서를 확인한다.</td></tr>
+<tr><td>역수 관계</td><td>회귀의 오즈비와 표의 오즈비를 곱하면 1인가(반올림 오차 정도는 괜찮다). 1이 아니라면 둘 중 하나가 다른 표나 다른 반응 범주로 계산된 것이다.</td></tr>
+<tr><td>신뢰구간의 방법</td><td>회귀의 신뢰구간이 프로파일 가능도인지 Wald인지 적혀 있는가. 두 방법은 큰 표본에서 거의 같지만 같지는 않다.</td></tr>
+<tr><td>두 χ²</td><td>가능도비 χ²와 보정 없는 Pearson χ²가 자유도 1로 비슷하지만 똑같지는 않은가. 똑같다면 같은 검정을 두 번 돌린 것이 아닌지 묻는다.</td></tr>
+<tr><td>04절과의 대조</td><td>표의 오즈비가 04절 결과의 오즈비와 같은가.</td></tr>
+</tbody></table></div>
+</section>
+
+<section class="panel" id="scope">
+<h3>확인 범위</h3>
+<p>이 쪽에 실린 수치는 교재의 손계산 예제(카드 χ² = 8.44, <i>p</i> = .038 / 마녀 예제 보정 χ² = 3.31, <i>p</i> = .069, Fisher <i>p</i> = .036 / 광고 예제 McNemar χ² = 12.03, <i>p</i> = .0005)와 Bonferroni 기준값(21칸 3.04, 28칸 3.12), 2024년 요일별 일수뿐이며, 모두 R 4.x로 다시 계산해 같음을 확인했다. 사망 교통사고와 국민건강영양조사의 결과 수치는 싣지 않았다. 원자료는 각자 내려받아야 하고 열 이름이 연도마다 다를 수 있기 때문이다. 제공한 R 코드는 문법 검사를 거쳤으며, 열 이름은 받은 파일에 맞춰야 한다. 쪽 안의 계산기와 탐색기는 넣은 값으로 쪽의 스크립트가 직접 계산한다.</p>
+</section>
+
+<section class="panel" id="refs">
+<h3>참고문헌</h3>
+<ol class="refs">
+<li>Agresti, A. (2019). <em>An introduction to categorical data analysis</em> (3rd ed.). Wiley.</li>
+<li>Ben-Shachar, M. S., Lüdecke, D., &amp; Makowski, D. (2020). effectsize: Estimation of effect size indices and standardized parameters. <em>Journal of Open Source Software, 5</em>(56), 2815.</li>
+<li>Blitzstein, J. K., &amp; Hwang, J. (2019). <em>Introduction to probability</em> (2nd ed.). CRC Press.</li>
+<li>Campbell, I. (2007). Chi-squared and Fisher–Irwin tests of two-by-two tables with small sample recommendations. <em>Statistics in Medicine, 26</em>(19), 3661–3675.</li>
+<li>Cohen, J. (1988). <em>Statistical power analysis for the behavioral sciences</em> (2nd ed.). Lawrence Erlbaum.</li>
+<li>Fagerland, M. W., Lydersen, S., &amp; Laake, P. (2013). The McNemar test for binary matched-pairs data: Mid-p and asymptotic are better than exact conditional. <em>BMC Medical Research Methodology, 13</em>, 91.</li>
+<li>James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2013). <em>An introduction to statistical learning: With applications in R</em>. Springer. (4장 Classification)</li>
+<li>Kweon, S., Kim, Y., Jang, M., et al. (2014). Data resource profile: The Korea National Health and Nutrition Examination Survey (KNHANES). <em>International Journal of Epidemiology, 43</em>(1), 69–77.</li>
+<li>Navarro, D. J. (2019). <em>Learning statistics with R: A tutorial for psychology students and other beginners</em> (Version 0.6.1). (12장 Categorical data analysis)</li>
+</ol>
+<h3>데이터 출처</h3>
+<ul>
+<li>도로교통공단, 「사망 교통사고 정보」, 공공데이터포털 (<a href="https://www.data.go.kr" target="_blank" rel="noopener">data.go.kr</a>). 경찰이 조사·처리한 교통사고 중 사망사고, 교통사고분석시스템(TAAS) 기반.</li>
+<li>질병관리청, 「국민건강영양조사 원시자료」 (<a href="https://knhanes.kdca.go.kr" target="_blank" rel="noopener">knhanes.kdca.go.kr</a>). 연도별 원시자료 이용지침서 참조.</li>
+</ul>
+</section>
+
+<nav class="nav pager" aria-label="자료 이동"><a href="mean-test-with-r.html"><span>이전</span>모집단 평균에 대한 가설검정</a><a href="../index.html#statistics"><span>다음</span>통계 자료 목록</a></nav>
+</main>
+
+<script>
+/* 이 쪽의 코드에만 나오는 함수 도움말. rlesson.js 가 공용 사전에 합쳐 쓴다. */
+window.FN_EXTRA = {
+'options':{pkg:'base',sig:'options(...)',why:'R 전역 설정을 바꾼다. 여기서는 패키지를 내려받을 저장소(CRAN 미러)를 지정한다.',args:[['...',2,'<code>이름 = 값</code> 꼴의 설정. <code>repos</code>는 패키지 저장소 주소']],ret:'바꾸기 전의 설정값 목록(보이지 않게 돌려준다).'},
+'read_sas':{pkg:'haven',sig:'read_sas(data_file, col_select = NULL)',why:'SAS 데이터 파일(.sas7bdat)을 읽는다. 국민건강영양조사 원시자료를 읽을 때 쓴다.',args:[['data_file',1,'파일 경로'],['col_select',0,'읽을 열만 고를 때']],ret:'tibble. 값 라벨은 labelled 형식으로 남는다.'},
+'transmute':{pkg:'dplyr',sig:'transmute(.data, ...)',why:'새로 계산한 열과 적은 열만 남긴다. <code>mutate()</code>와 달리 나머지 열은 버린다.',args:[['.data',1,'파이프로 넘겨받는 데이터프레임'],['...',2,'<code>이름 = 계산식</code> 또는 그대로 남길 열 이름']],ret:'적은 열만 있는 데이터프레임.'},
+'fct_lump_min':{pkg:'forcats',sig:'fct_lump_min(f, min, other_level = "Other")',why:'빈도가 min보다 적은 수준을 하나로 묶는다.',args:[['f',1,'factor 또는 문자형 벡터'],['min',1,'남길 최소 빈도'],['other_level',0,'묶은 수준의 이름. 기본값 "Other"']],ret:'factor.'},
+'if_else':{pkg:'dplyr',sig:'if_else(condition, true, false)',why:'조건에 따라 두 값 가운데 하나를 고른다. 두 값의 자료형이 같아야 한다.',args:[['condition',1,'논리값 벡터'],['true',1,'조건이 TRUE일 때의 값'],['false',1,'조건이 FALSE일 때의 값']],ret:'condition과 길이가 같은 벡터.'},
+'colSums':{pkg:'base',sig:'colSums(x)',why:'열마다 합을 구한다. <code>is.na()</code>와 함께 쓰면 열마다 결측 수가 된다.',args:[['x',1,'행렬, 표, 데이터프레임']],ret:'열 이름이 붙은 숫자 벡터.'},
+'rowSums':{pkg:'base',sig:'rowSums(x)',why:'행마다 합을 구한다.',args:[['x',1,'행렬, 표, 데이터프레임']],ret:'행 이름이 붙은 숫자 벡터.'},
+'tabyl':{pkg:'janitor',sig:'tabyl(dat, var1, var2)',why:'보기 좋은 빈도표·교차표를 데이터프레임으로 만든다. adorn_ 함수로 비율과 빈도를 덧붙인다.',args:[['dat',1,'데이터프레임'],['var1',1,'행 변수'],['var2',0,'열 변수. 있으면 교차표']],ret:'tabyl(데이터프레임).'},
+'adorn_percentages':{pkg:'janitor',sig:'adorn_percentages(dat, denominator = "row")',why:'tabyl의 빈도를 비율로 바꾼다.',args:[['dat',1,'tabyl'],['denominator',0,'"row"(행 비율, 기본값), "col", "all"']],ret:'비율이 담긴 tabyl.'},
+'adorn_pct_formatting':{pkg:'janitor',sig:'adorn_pct_formatting(dat, digits = 1)',why:'비율을 % 글자로 바꿔 보여 준다.',args:[['dat',1,'tabyl'],['digits',0,'소수 자릿수. 기본값 1']],ret:'tabyl.'},
+'adorn_ns':{pkg:'janitor',sig:'adorn_ns(dat)',why:'% 옆에 원래 빈도를 괄호로 붙인다.',args:[['dat',1,'tabyl']],ret:'tabyl.'},
+'table':{pkg:'base',sig:'table(..., useNA = "no")',why:'범주별 빈도표(변수 1개)나 분할표(변수 2개)를 만든다. 검정 함수에 바로 넣을 수 있다.',args:[['...',1,'범주형 벡터. <code>이름 = 벡터</code>로 쓰면 표의 차원 이름이 된다'],['useNA',0,'결측도 셀지. 기본값 "no"']],ret:'table 객체.'},
+'prop.table':{pkg:'base',sig:'prop.table(x, margin = NULL)',why:'표의 빈도를 비율로 바꾼다.',args:[['x',1,'table'],['margin',0,'1이면 행 비율, 2이면 열 비율, 생략하면 전체 비율']],ret:'비율이 담긴 table.'},
+'chisq.test':{pkg:'stats',sig:'chisq.test(x, p, correct = TRUE, simulate.p.value = FALSE, B = 2000)',why:'Pearson χ² 검정. 1차원 빈도표를 넣으면 적합도 검정, 2차원 분할표를 넣으면 독립성 검정을 한다.',args:[['x',1,'빈도 벡터·빈도표 또는 분할표'],['p',0,'적합도 검정의 영가설 확률. 합이 1. 기본값은 모두 같음'],['correct',0,'2 × 2 표에서 Yates 연속성 보정. 기본값 TRUE'],['simulate.p.value',0,'TRUE면 몬테카를로 p값'],['B',0,'모의 반복 수. 기본값 2000']],ret:'검정 결과 리스트(htest). <code>$statistic</code> χ², <code>$parameter</code> 자유도, <code>$p.value</code>, <code>$expected</code> 기대도수, <code>$residuals</code> Pearson 잔차, <code>$stdres</code> 표준화 잔차.'},
+'cohens_w':{pkg:'effectsize',sig:'cohens_w(x, p, ci = 0.95)',why:'적합도·독립성 χ²의 효과크기 w와 신뢰구간을 구한다.',args:[['x',1,'빈도표 또는 분할표'],['p',0,'적합도 검정의 영가설 확률'],['ci',0,'신뢰수준. 기본값 0.95']],ret:'한 행짜리 데이터프레임: 추정치와 CI.'},
+'seq':{pkg:'base',sig:'seq(from, to, by)',why:'수열이나 날짜열을 만든다.',args:[['from',1,'시작값'],['to',1,'끝값'],['by',0,'간격. 날짜면 "day"처럼 쓴다']],ret:'벡터.'},
+'as.Date':{pkg:'base',sig:'as.Date(x)',why:'"2024-01-01" 같은 글자를 날짜로 바꾼다.',args:[['x',1,'날짜 글자']],ret:'Date 벡터.'},
+'paste0':{pkg:'base',sig:'paste0(...)',why:'여러 값을 빈칸 없이 이어 글자 하나로 만든다.',args:[['...',1,'이을 값들']],ret:'문자형 벡터.'},
+'wday':{pkg:'lubridate',sig:'wday(x, week_start, label = FALSE)',why:'날짜의 요일 번호를 구한다. tidyverse와 함께 불러와진다.',args:[['x',1,'날짜'],['week_start',0,'1이면 월요일이 1'],['label',0,'TRUE면 요일 이름']],ret:'정수 또는 factor.'},
+'binom.test':{pkg:'stats',sig:'binom.test(x, n, p = 0.5, alternative = "two.sided")',why:'단일 비율의 정확 이항검정. McNemar의 정확검정에도 쓴다.',args:[['x',1,'성공 수'],['n',1,'시행 수'],['p',0,'영가설의 비율. 기본값 0.5'],['alternative',0,'대안가설의 방향. "two.sided"(기본값), "less", "greater"']],ret:'검정 결과 리스트(htest). <code>$p.value</code>, <code>$conf.int</code>(Clopper–Pearson), <code>$estimate</code>.'},
+'prop.test':{pkg:'stats',sig:'prop.test(x, n, p = NULL, correct = TRUE)',why:'비율 검정(정규근사). 비율 하나 또는 여러 집단의 비율을 비교한다. 통계량은 χ²로 나온다.',args:[['x',1,'성공 수 벡터, 또는 성공·실패 두 열의 표'],['n',0,'시행 수 벡터. x가 표면 생략'],['p',0,'영가설의 비율'],['correct',0,'연속성 보정. 기본값 TRUE']],ret:'검정 결과 리스트(htest). <code>$statistic</code> χ², <code>$p.value</code>, <code>$estimate</code>, <code>$conf.int</code>.'},
+'asin':{pkg:'base',sig:'asin(x)',why:'아크사인. Cohen의 h를 계산할 때 비율을 변환한다.',args:[['x',1,'−1과 1 사이의 숫자']],ret:'라디안 단위의 숫자.'},
+'riskratio':{pkg:'effectsize',sig:'riskratio(x, ci = 0.95, log = FALSE)',why:'2 × 2 표의 위험비(두 비율의 비)와 신뢰구간을 구한다.',args:[['x',1,'2 × 2 분할표'],['ci',0,'신뢰수준. 기본값 0.95'],['log',0,'TRUE면 로그 척도']],ret:'한 행짜리 데이터프레임: 추정치와 CI.'},
+'oddsratio':{pkg:'effectsize',sig:'oddsratio(x, ci = 0.95, log = FALSE)',why:'2 × 2 표의 표본 오즈비 ad/bc와 신뢰구간을 구한다.',args:[['x',1,'2 × 2 분할표'],['ci',0,'신뢰수준. 기본값 0.95'],['log',0,'TRUE면 로그 오즈비']],ret:'한 행짜리 데이터프레임: 추정치와 CI.'},
+'phi':{pkg:'effectsize',sig:'phi(x, adjust = FALSE, ci = 0.95)',why:'2 × 2 표의 φ 계수와 신뢰구간을 구한다.',args:[['x',1,'2 × 2 분할표'],['adjust',0,'편향 보정 여부'],['ci',0,'신뢰수준']],ret:'한 행짜리 데이터프레임.'},
+'cramers_v':{pkg:'effectsize',sig:'cramers_v(x, adjust = TRUE, ci = 0.95, alternative = "greater")',why:'r × c 표의 Cramér\'s V와 신뢰구간을 구한다.',args:[['x',1,'분할표'],['adjust',0,'편향 보정. 최근 버전 기본값 TRUE'],['alternative',0,'신뢰구간의 방향. 기본값 "greater"(상한 1인 단측 구간)']],ret:'한 행짜리 데이터프레임.'},
+'with':{pkg:'base',sig:'with(data, expr)',why:'데이터프레임의 열 이름을 그대로 쓰면서 식을 계산한다. 파이프 뒤에 쓰면 넘겨받은 자료가 data가 된다.',args:[['data',1,'데이터프레임'],['expr',1,'계산할 식. 예: <code>table(주야, 보행자사고)</code>']],ret:'식의 결과.'},
+'fisher.test':{pkg:'stats',sig:'fisher.test(x, alternative = "two.sided", simulate.p.value = FALSE)',why:'분할표의 Fisher 정확검정(초기하분포). 기대도수가 작을 때 χ² 근사 대신 쓴다.',args:[['x',1,'분할표'],['alternative',0,'2 × 2 표에서 대안가설의 방향'],['simulate.p.value',0,'큰 r × c 표에서 몬테카를로 p값']],ret:'검정 결과 리스트(htest). <code>$p.value</code>, 2 × 2이면 <code>$estimate</code>(조건부 최대가능도 오즈비)와 <code>$conf.int</code>.'},
+'set.seed':{pkg:'base',sig:'set.seed(seed)',why:'난수의 시작점을 고정한다. 다시 실행해도 같은 모의 결과가 나온다.',args:[['seed',1,'정수 하나']],ret:'없음.'},
+'as.data.frame':{pkg:'base',sig:'as.data.frame(x)',why:'표(table)를 긴 모양의 데이터프레임으로 바꾼다. 열은 Var1, Var2, Freq가 된다.',args:[['x',1,'table 또는 행렬']],ret:'데이터프레임.'},
+'rename':{pkg:'dplyr',sig:'rename(.data, ...)',why:'열 이름을 바꾼다.',args:[['.data',1,'데이터프레임'],['...',2,'<code>새이름 = 옛이름</code>']],ret:'데이터프레임.'},
+'qnorm':{pkg:'stats',sig:'qnorm(p)',why:'표준정규분포의 분위수. Bonferroni 보정 기준값을 구할 때 쓴다.',args:[['p',1,'누적확률']],ret:'숫자.'},
+'abs':{pkg:'base',sig:'abs(x)',why:'절댓값.',args:[['x',1,'숫자 벡터']],ret:'숫자 벡터.'},
+'sprintf':{pkg:'base',sig:'sprintf(fmt, ...)',why:'숫자를 정한 자릿수의 글자로 만든다. "%.1f"는 소수 첫째 자리.',args:[['fmt',1,'서식 글자'],['...',1,'넣을 값']],ret:'문자형 벡터.'},
+'geom_tile':{pkg:'ggplot2',sig:'geom_tile(color)',why:'칸을 색으로 채운 타일 그림(히트맵)을 그린다.',args:[['color',0,'칸 테두리 색']],ret:'ggplot 레이어.'},
+'geom_text':{pkg:'ggplot2',sig:'geom_text(mapping, family)',why:'그림 위에 글자를 쓴다.',args:[['mapping',1,'aes(label = 표시할 값). fontface도 연결할 수 있다'],['family',0,'글꼴 이름']],ret:'ggplot 레이어.'},
+'scale_fill_gradient2':{pkg:'ggplot2',sig:'scale_fill_gradient2(low, mid, high, midpoint = 0)',why:'가운데 값을 기준으로 두 방향으로 갈라지는 채움 색 척도.',args:[['low',0,'음수 쪽 색'],['mid',0,'가운데 색'],['high',0,'양수 쪽 색'],['midpoint',0,'가운데 값. 기본값 0']],ret:'ggplot 척도.'},
+'geom_col':{pkg:'ggplot2',sig:'geom_col(position = "stack", fill)',why:'값의 크기만큼 막대를 그린다.',args:[['position',0,'"stack"(쌓기), "fill"(막대마다 100%로 맞춤), "dodge"(나란히)'],['fill',0,'막대 색']],ret:'ggplot 레이어.'},
+'geom_hline':{pkg:'ggplot2',sig:'geom_hline(yintercept, linetype)',why:'y 값이 일정한 가로선을 긋는다.',args:[['yintercept',1,'선을 그을 y 값'],['linetype',0,'선 모양. "dashed"는 점선']],ret:'ggplot 레이어.'},
+'theme_minimal':{pkg:'ggplot2',sig:'theme_minimal(base_size, base_family)',why:'배경과 테두리를 뺀 간결한 테마. base_family로 한글 글꼴을 지정한다.',args:[['base_size',0,'기본 글자 크기'],['base_family',0,'글꼴 이름']],ret:'테마 객체.'},
+'as.numeric':{pkg:'base',sig:'as.numeric(x)',why:'숫자형으로 바꾼다. 표에서 이름표를 뗀 숫자만 꺼낼 때 쓴다.',args:[['x',1,'바꿀 값']],ret:'숫자 벡터.'},
+'mcnemar.test':{pkg:'stats',sig:'mcnemar.test(x, correct = TRUE)',why:'대응 범주 자료의 McNemar 검정(주변 동질성).',args:[['x',1,'같은 대상의 두 판정으로 만든 정방 분할표'],['correct',0,'2 × 2 연속성 보정. 기본값 TRUE']],ret:'검정 결과 리스트(htest). <code>$statistic</code>, <code>$parameter</code> 자유도, <code>$p.value</code>.'},
+'cohens_g':{pkg:'effectsize',sig:'cohens_g(x, ci = 0.95)',why:'대응 2 × 2 표의 효과크기 g = |b/(b+c) − 0.5|를 구한다.',args:[['x',1,'정방 분할표'],['ci',0,'신뢰수준']],ret:'한 행짜리 데이터프레임.'},
+'glm':{pkg:'stats',sig:'glm(formula, family, data)',why:'일반화선형모형. family = binomial이면 로지스틱 회귀다.',args:[['formula',1,'<code>반응 ~ 설명변수</code>'],['family',1,'binomial'],['data',2,'데이터프레임']],ret:'glm 객체. <code>summary()</code>, <code>coef()</code>, <code>anova()</code>로 본다.'},
+'coef':{pkg:'stats',sig:'coef(object)',why:'모형의 계수를 꺼낸다.',args:[['object',1,'적합한 모형']],ret:'이름 붙은 숫자 벡터.'},
+'exp':{pkg:'base',sig:'exp(x)',why:'지수함수. 로지스틱 회귀의 계수(로그 오즈비)를 오즈비로 바꾼다.',args:[['x',1,'숫자']],ret:'숫자.'},
+'confint':{pkg:'stats',sig:'confint(object, level = 0.95)',why:'계수의 신뢰구간. glm에서는 프로파일 가능도 구간을 구한다.',args:[['object',1,'적합한 모형'],['level',0,'신뢰수준. 기본값 0.95']],ret:'하한·상한 두 열의 행렬.'},
+'anova':{pkg:'stats',sig:'anova(object, test)',why:'모형의 이탈도 분석표. test = "Chisq"면 가능도비 χ² 검정을 한다.',args:[['object',1,'glm 객체'],['test',0,'"Chisq"']],ret:'anova 표.'},
+'interpret_cramers_v':{pkg:'effectsize',sig:'interpret_cramers_v(es, rules)',why:'V 값에 관례적인 크기 이름(작음, 중간 등)을 붙인다.',args:[['es',1,'V 값'],['rules',0,'기준의 이름']],ret:'이름표 글자.'}
+};
+</script>
+<script src="../assets/rlesson.js"></script>
+<script>
+/* 이 쪽의 위젯 네 개: χ² 탐색기, 이항 정확분포와 정규근사, 2 × 2 계산기, McNemar 계산기.
+   rlesson.js 의 전역 이름(FN, esc, tip …)과 겹치지 않도록 즉시 실행 함수 안에 둔다. */
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+
+  /* ---------- 수치 함수 ---------- */
+  function lgamma(x) {
+    const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
+    let y = x, t = x + 5.5; t -= (x + 0.5) * Math.log(t);
+    let s = 1.000000000190015;
+    for (let j = 0; j < 6; j++) s += c[j] / ++y;
+    return -t + Math.log(2.5066282746310005 * s / x);
+  }
+  function gammaQcf(a, x) {
+    let b = x + 1 - a, c = 1 / 1e-300, d = 1 / b, h = d;
+    for (let i = 1; i < 500; i++) {
+      const an = -i * (i - a); b += 2;
+      d = an * d + b; if (Math.abs(d) < 1e-300) d = 1e-300;
+      c = b + an / c; if (Math.abs(c) < 1e-300) c = 1e-300;
+      d = 1 / d; const del = d * c; h *= del; if (Math.abs(del - 1) < 1e-14) break;
+    }
+    return Math.exp(-x + a * Math.log(x) - lgamma(a)) * h;
+  }
+  function gammaP(a, x) {
+    if (x <= 0) return 0;
+    if (x < a + 1) {
+      let ap = a, sum = 1 / a, del = sum;
+      for (let n = 0; n < 500; n++) { ap++; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-14) break; }
+      return sum * Math.exp(-x + a * Math.log(x) - lgamma(a));
+    }
+    return 1 - gammaQcf(a, x);
+  }
+  const gammaQ = (a, x) => x <= 0 ? 1 : (x < a + 1 ? 1 - gammaP(a, x) : gammaQcf(a, x));
+  const chiUpper = (x, k) => gammaQ(k / 2, x / 2);
+  const chiPdf = (x, k) => x <= 0 ? 0 : Math.exp((k / 2 - 1) * Math.log(x) - x / 2 - (k / 2) * Math.LN2 - lgamma(k / 2));
+  function chiCrit(k, alpha) {
+    let lo = 0, hi = 200;
+    for (let i = 0; i < 100; i++) { const m = (lo + hi) / 2; if (chiUpper(m, k) > alpha) lo = m; else hi = m; }
+    return (lo + hi) / 2;
+  }
+  const lfact = n => n < 2 ? 0 : lgamma(n + 1);
+  const lch = (n, k) => lfact(n) - lfact(k) - lfact(n - k);
+  function binomPmf(i, n, p) {
+    if (p <= 0) return i === 0 ? 1 : 0;
+    if (p >= 1) return i === n ? 1 : 0;
+    return Math.exp(lch(n, i) + i * Math.log(p) + (n - i) * Math.log(1 - p));
+  }
+  function binomTwoSided(x, n, p) {
+    const px = binomPmf(x, n, p); let s = 0;
+    for (let i = 0; i <= n; i++) { const q = binomPmf(i, n, p); if (q <= px * (1 + 1e-7)) s += q; }
+    return Math.min(1, s);
+  }
+  const fmtP = p => !isFinite(p) ? "-" : (p < 0.0001 ? "< .0001" : p.toFixed(4).replace(/^0/, ""));
+  const setSig = (id, p) => $(id).classList.toggle("sig", p < 0.05);
+
+  /* ---------- 위젯 1: χ² 탐색기 ---------- */
+  (() => {
+    const dfIn = $("chi-df"), xIn = $("chi-x"), svg = $("chi-svg");
+    function draw() {
+      const k = +dfIn.value, x = Math.max(0, +xIn.value || 0);
+      $("chi-df-out").textContent = k;
+      const crit = chiCrit(k, 0.05);
+      const xmax = Math.max(k + 4 * Math.sqrt(2 * k) + 4, x * 1.15, crit * 1.15);
+      const W = 640, T = 18, L = 44, R = 16, B = 34, H = 260, pw = W - L - R, ph = H - T - B;
+      const pts = [];
+      for (let i = 0; i <= 240; i++) { const xv = xmax * i / 240; pts.push([xv, chiPdf(Math.max(xv, xmax * 0.002), k)]); }
+      let ycap = 0;
+      pts.forEach(q => { if (q[0] > xmax * 0.02 || k > 2) ycap = Math.max(ycap, q[1]); });
+      const ymax = (k <= 2 ? Math.min(ycap * 1.6, 1.2) : ycap * 1.12) || 1;
+      const sx = v => L + pw * v / xmax, sy = v => T + ph - ph * Math.min(v, ymax) / ymax;
+      const d = pts.map((q, j) => (j ? "L" : "M") + sx(q[0]).toFixed(1) + " " + sy(q[1]).toFixed(1)).join(" ");
+      let tail = "M" + sx(Math.min(x, xmax)).toFixed(1) + " " + sy(0).toFixed(1);
+      pts.forEach(q => { if (q[0] >= x) tail += " L" + sx(q[0]).toFixed(1) + " " + sy(q[1]).toFixed(1); });
+      tail += " L" + sx(xmax).toFixed(1) + " " + sy(0).toFixed(1) + " Z";
+      let ticks = "";
+      const step = xmax > 60 ? 20 : xmax > 30 ? 10 : xmax > 12 ? 5 : 2;
+      for (let t = 0; t <= xmax + 1e-9; t += step) {
+        ticks += `<line class="axis" x1="${sx(t)}" x2="${sx(t)}" y1="${T + ph}" y2="${T + ph + 5}"/><text class="tick" x="${sx(t)}" y="${T + ph + 19}" text-anchor="middle">${t}</text>`;
+      }
+      const xs = sx(Math.min(x, xmax)), xc = sx(crit), pv = chiUpper(x, k);
+      const anchor = xs > W - 140 ? "end" : "start", off = anchor === "end" ? -6 : 6;
+      svg.innerHTML = (x <= xmax ? `<path class="tailfill" d="${tail}"/>` : "") +
+        `<path class="curve" d="${d}"/>` +
+        `<line class="axis" x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}"/>` + ticks +
+        `<line class="crit" x1="${xc}" x2="${xc}" y1="${T}" y2="${T + ph}"/>` +
+        `<text class="lblw" x="${xc + 4}" y="${T + 10}">임계값 ${crit.toFixed(2)}</text>` +
+        `<line class="stat" x1="${xs}" x2="${xs}" y1="${T + 16}" y2="${T + ph}"/>` +
+        `<text class="lbl" x="${xs + off}" y="${T + 30}" text-anchor="${anchor}">χ² = ${x.toFixed(2)}</text>` +
+        `<text class="tick" x="${W - R}" y="${T + ph + 32}" text-anchor="end">χ² (df = ${k})</text>`;
+      $("chi-p").textContent = fmtP(pv); setSig("chi-p", pv);
+      $("chi-crit").textContent = crit.toFixed(3);
+      $("chi-dec").textContent = pv < 0.05 ? "영가설 기각" : "영가설 기각 못 함";
+    }
+    dfIn.addEventListener("input", draw); xIn.addEventListener("input", draw);
+    document.querySelectorAll("#lab-chi [data-df]").forEach(b => b.addEventListener("click", () => { dfIn.value = b.dataset.df; xIn.value = b.dataset.x; draw(); }));
+    draw();
+  })();
+
+  /* ---------- 위젯 2: 이항 정확분포와 정규근사 ---------- */
+  (() => {
+    const nIn = $("bn-n"), pIn = $("bn-p"), xIn = $("bn-x"), svg = $("bn-svg");
+    function draw() {
+      const n = +nIn.value, p = +pIn.value;
+      xIn.max = n; if (+xIn.value > n) xIn.value = n;
+      const x = +xIn.value;
+      $("bn-n-out").textContent = n; $("bn-p-out").textContent = p.toFixed(2); $("bn-x-out").textContent = x;
+      const W = 640, H = 240, L = 20, R = 16, T = 14, B = 30, pw = W - L - R, ph = H - T - B;
+      const px = binomPmf(x, n, p), pm = [];
+      let ymax = 0;
+      for (let i = 0; i <= n; i++) { pm.push(binomPmf(i, n, p)); ymax = Math.max(ymax, pm[i]); }
+      const mu = n * p, sd = Math.sqrt(n * p * (1 - p));
+      ymax = Math.max(ymax, 1 / (sd * Math.sqrt(2 * Math.PI))) * 1.1;
+      const bw = pw / (n + 1), sy = v => T + ph - ph * v / ymax;
+      let h = "";
+      for (let i = 0; i <= n; i++) {
+        const hit = pm[i] <= px * (1 + 1e-7);
+        h += `<rect class="bar${hit ? " hit" : ""}" x="${(L + i * bw + bw * 0.12).toFixed(1)}" y="${sy(pm[i]).toFixed(1)}" width="${Math.max(0.6, bw * 0.76).toFixed(1)}" height="${(T + ph - sy(pm[i])).toFixed(1)}"/>`;
+      }
+      let d = "";
+      for (let i = 0; i <= 200; i++) {
+        const xv = -0.5 + (n + 1) * i / 200, yv = Math.exp(-0.5 * ((xv - mu) / sd) ** 2) / (sd * Math.sqrt(2 * Math.PI));
+        d += (i ? "L" : "M") + (L + (xv + 0.5) * bw).toFixed(1) + " " + sy(yv).toFixed(1);
+      }
+      h += `<path class="norm" d="${d}"/><line class="axis" x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}"/>`;
+      const step = n > 100 ? 20 : n > 40 ? 10 : n > 15 ? 5 : 1;
+      for (let i = 0; i <= n; i += step) h += `<text class="tick" x="${(L + (i + 0.5) * bw).toFixed(1)}" y="${T + ph + 16}" text-anchor="middle">${i}</text>`;
+      const xs = L + (x + 0.5) * bw;
+      h += `<line class="stat" x1="${xs}" x2="${xs}" y1="${T}" y2="${T + ph}"/>`;
+      svg.innerHTML = h;
+      const pe = binomTwoSided(x, n, p);
+      const yates = Math.min(0.5, Math.abs(x - n * p));
+      const pa = chiUpper((Math.abs(x - n * p) - yates) ** 2 / (n * p * (1 - p)), 1);
+      $("bn-pe").textContent = fmtP(pe); setSig("bn-pe", pe);
+      $("bn-pa").textContent = fmtP(pa); setSig("bn-pa", pa);
+      $("bn-np").textContent = (n * p).toFixed(1) + " · " + (n * (1 - p)).toFixed(1);
+      $("bn-h").textContent = (2 * Math.asin(Math.sqrt(x / n)) - 2 * Math.asin(Math.sqrt(p))).toFixed(3);
+    }
+    [nIn, pIn, xIn].forEach(el => el.addEventListener("input", draw));
+    draw();
+  })();
+
+  /* ---------- 위젯 3: 2 × 2 계산기 ---------- */
+  (() => {
+    const ids = ["a", "b", "c", "d"], inp = {};
+    ids.forEach(k => { inp[k] = $("t-" + k); });
+    const labels = { "3,3,10,0": ["행복하지 않음", "행복함", "화형 아님", "화형 중"] };
+    function setLabels(l) { $("g-r1").textContent = l[0]; $("g-r2").textContent = l[1]; $("g-c1").textContent = l[2]; $("g-c2").textContent = l[3]; }
+    function fisher(a, b, c, d) {
+      const r1 = a + b, r2 = c + d, c1 = a + c, n = r1 + r2;
+      const lo = Math.max(0, c1 - r2), hi = Math.min(r1, c1);
+      const lp = x => lch(r1, x) + lch(r2, c1 - x) - lch(n, c1);
+      const pobs = lp(a); let s = 0;
+      for (let x = lo; x <= hi; x++) { const v = lp(x); if (v <= pobs + 1e-7) s += Math.exp(v); }
+      return Math.min(1, s);
+    }
+    function calc() {
+      const v = ids.map(k => Math.max(0, Math.round(+inp[k].value || 0)));
+      const [a, b, c, d] = v, r1 = a + b, r2 = c + d, c1 = a + c, c2 = b + d, n = r1 + r2;
+      $("r1").textContent = r1; $("r2").textContent = r2; $("c1").textContent = c1; $("c2").textContent = c2; $("nn").textContent = n;
+      const warn = $("o-warn"), outs = ["o-x2", "o-p", "o-x2y", "o-py", "o-pf", "o-phi", "o-or", "o-rr"];
+      if (!r1 || !r2 || !c1 || !c2) {
+        outs.forEach(id => { $(id).textContent = "-"; });
+        ids.forEach(k => { $("e-" + k).textContent = ""; });
+        warn.hidden = false; warn.textContent = "행 합이나 열 합이 0이면 검정을 할 수 없다.";
+        return;
+      }
+      const E = [r1 * c1 / n, r1 * c2 / n, r2 * c1 / n, r2 * c2 / n];
+      let low = 0, x2 = 0, x2y = 0, yates = Infinity;
+      for (let i = 0; i < 4; i++) yates = Math.min(yates, Math.abs(v[i] - E[i]));
+      yates = Math.min(0.5, yates);
+      for (let i = 0; i < 4; i++) {
+        x2 += (v[i] - E[i]) ** 2 / E[i];
+        x2y += (Math.abs(v[i] - E[i]) - yates) ** 2 / E[i];
+        const e = $("e-" + ids[i]);
+        e.textContent = "(" + E[i].toFixed(1) + ")"; e.classList.toggle("low", E[i] < 5);
+        if (E[i] < 5) low++;
+      }
+      const p = chiUpper(x2, 1), py = chiUpper(x2y, 1), pf = fisher(a, b, c, d);
+      const phi = (a * d - b * c) / Math.sqrt(r1 * r2 * c1 * c2);
+      const or = (b * c === 0) ? (a * d === 0 ? NaN : Infinity) : a * d / (b * c);
+      const rr = (c === 0) ? (a === 0 ? NaN : Infinity) : (a / r1) / (c / r2);
+      const show = q => isNaN(q) ? "정의 안 됨" : (isFinite(q) ? q.toFixed(3) : "∞ (0인 칸)");
+      $("o-x2").textContent = x2.toFixed(3); $("o-p").textContent = fmtP(p); setSig("o-p", p);
+      $("o-x2y").textContent = x2y.toFixed(3); $("o-py").textContent = fmtP(py); setSig("o-py", py);
+      $("o-pf").textContent = fmtP(pf); setSig("o-pf", pf);
+      $("o-phi").textContent = phi.toFixed(3); $("o-or").textContent = show(or); $("o-rr").textContent = show(rr);
+      if (low) { warn.hidden = false; warn.textContent = "기대도수 5 미만인 칸이 " + low + "개다. χ² 근사보다 Fisher 정확검정 결과를 우선 본다."; }
+      else warn.hidden = true;
+    }
+    function load(str) {
+      str.split(",").forEach((x, i) => { inp[ids[i]].value = x; });
+      setLabels(labels[str] || ["행 1", "행 2", "열 1", "열 2"]);
+      calc();
+    }
+    ids.forEach(k => inp[k].addEventListener("input", () => { setLabels(["행 1", "행 2", "열 1", "열 2"]); calc(); }));
+    document.querySelectorAll("#lab-22 [data-t]").forEach(b => b.addEventListener("click", () => load(b.dataset.t)));
+    load("3,3,10,0");
+  })();
+
+  /* ---------- 위젯 4: McNemar 계산기 ---------- */
+  (() => {
+    const ids = ["a", "b", "c", "d"], inp = {};
+    ids.forEach(k => { inp[k] = $("m-" + k); });
+    const set = (id, v) => { $(id).textContent = v; };
+    function calc() {
+      const a = Math.max(0, +inp.a.value || 0), b = Math.max(0, Math.round(+inp.b.value || 0)),
+            c = Math.max(0, Math.round(+inp.c.value || 0)), d = Math.max(0, +inp.d.value || 0);
+      const n = a + b + c + d;
+      set("m-p1", n ? ((a + b) / n * 100).toFixed(1) + "%" : "-");
+      set("m-p2", n ? ((a + c) / n * 100).toFixed(1) + "%" : "-");
+      if (b + c === 0) { ["m-x2", "m-p", "m-pn", "m-pe", "m-g", "m-or"].forEach(id => set(id, "-")); return; }
+      const x2 = (Math.abs(b - c) - 1) ** 2 / (b + c), x2n = (b - c) ** 2 / (b + c);
+      const p = chiUpper(x2, 1), pn = chiUpper(x2n, 1), pe = binomTwoSided(b, b + c, 0.5);
+      set("m-x2", x2.toFixed(3)); set("m-p", fmtP(p)); set("m-pn", fmtP(pn)); set("m-pe", fmtP(pe));
+      setSig("m-p", p); setSig("m-pn", pn); setSig("m-pe", pe);
+      set("m-g", Math.abs(b / (b + c) - 0.5).toFixed(3));
+      set("m-or", c === 0 ? "∞" : (b / c).toFixed(3));
+    }
+    function load(str) { str.split(",").forEach((x, i) => { inp[ids[i]].value = x; }); calc(); }
+    ids.forEach(k => inp[k].addEventListener("input", calc));
+    document.querySelectorAll("#lab-mc [data-m]").forEach(btn => btn.addEventListener("click", () => load(btn.dataset.m)));
+    load("5,25,5,65");
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1181 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>범주형 자료의 가설검정</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Noto+Serif+KR:wght@600;700&display=swap">
+<script>
+window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] }, svg: { fontCache: 'global' } };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js" defer></script>
+<style>
+/* Layout: 강의 교안. 데스크톱은 왼쪽 고정 목차 + 본문 1단, 휴대폰은 목차를 접어 본문 위에 둔다. */
+:root {
+  --paper: #F5F7FA;
+  --panel: #FFFFFF;
+  --ink: #17202B;
+  --muted: #5B6676;
+  --rule: #D7DDE5;
+  --accent: #1E5C8A;
+  --accent-soft: #E3EDF5;
+  --tail: #C4741F;
+  --tail-soft: rgba(196,116,31,.28);
+  --warn: #B13A3A;
+  --warn-soft: #F8E4E2;
+  --code-bg: #EDF0F4;
+  --code-ink: #1D2733;
+  --code-fn: #1E5C8A;
+  --code-cm: #6B7584;
+  --curve: #17202B;
+  --f-display: "Noto Serif KR", "Nanum Myeongjo", "Apple SD Gothic Neo", serif;
+  --f-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-mono: "JetBrains Mono", "D2Coding", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #11151B; --panel: #171C23; --ink: #E2E7ED; --muted: #9AA5B4; --rule: #2B333E;
+    --accent: #79AEDA; --accent-soft: #1C2A38; --tail: #E3A253; --tail-soft: rgba(227,162,83,.30);
+    --warn: #E57373; --warn-soft: #3A2224; --code-bg: #1B212A; --code-ink: #D9E0E8;
+    --code-fn: #8CC0EA; --code-cm: #7D8898; --curve: #E2E7ED; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #11151B; --panel: #171C23; --ink: #E2E7ED; --muted: #9AA5B4; --rule: #2B333E;
+  --accent: #79AEDA; --accent-soft: #1C2A38; --tail: #E3A253; --tail-soft: rgba(227,162,83,.30);
+  --warn: #E57373; --warn-soft: #3A2224; --code-bg: #1B212A; --code-ink: #D9E0E8;
+  --code-fn: #8CC0EA; --code-cm: #7D8898; --curve: #E2E7ED; color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.75;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+.shell { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px; }
+@media (max-width: 900px) { .shell { grid-template-columns: minmax(0, 1fr); gap: 0; } }
+
+/* 표지 */
+.masthead { grid-column: 1 / -1; padding-block: 48px 28px; border-bottom: 1px solid var(--rule); display: grid; gap: 14px; }
+.eyebrow { font-size: 13px; letter-spacing: .08em; color: var(--muted); font-weight: 500; }
+h1 { font-family: var(--f-display); font-size: clamp(30px, 5vw, 46px); line-height: 1.25; margin: 0; text-wrap: balance; font-weight: 700; }
+.lede { max-width: 68ch; color: var(--muted); margin: 0; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-size: 13px; padding: 2px 10px; border: 1px solid var(--rule); border-radius: 999px; color: var(--muted); background: var(--panel); }
+.chip.draft { color: var(--warn); border-color: var(--warn); }
+
+/* 목차 */
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; padding-top: 32px; font-size: 14px; }
+nav.toc ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 2px; }
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 4px 10px; border-left: 2px solid transparent; }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--ink); border-left-color: var(--accent); outline: none; }
+nav.toc .n { font-family: var(--f-mono); font-size: 12px; margin-right: 6px; color: var(--accent); }
+.toc-mobile { display: none; }
+@media (max-width: 900px) {
+  nav.toc { display: none; }
+  .toc-mobile { display: block; margin-top: 20px; background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 6px 14px; }
+  .toc-mobile summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
+  .toc-mobile ol { padding-left: 20px; margin: 4px 0 10px; }
+  .toc-mobile a { color: var(--ink); }
+}
+
+/* 본문 */
+main { min-width: 0; padding-top: 16px; }
+section.ch { padding-block: 40px 8px; border-bottom: 1px solid var(--rule); }
+section.ch:last-of-type { border-bottom: 0; }
+h2 { font-family: var(--f-display); font-size: 27px; line-height: 1.35; margin: 0 0 18px; text-wrap: balance; display: flex; gap: 14px; align-items: baseline; font-weight: 700; }
+h2 .num { font-family: var(--f-mono); font-size: 15px; color: var(--accent); font-weight: 600; flex: none; }
+h3 { font-size: 19px; margin: 32px 0 10px; font-weight: 600; text-wrap: balance; }
+h4 { font-size: 16px; margin: 22px 0 6px; font-weight: 600; }
+p, ul, ol { max-width: 70ch; }
+p { margin: 0 0 14px; }
+ul, ol { padding-left: 22px; margin: 0 0 14px; }
+li { margin-bottom: 4px; }
+a { color: var(--accent); }
+strong { font-weight: 600; }
+.small { font-size: 14px; color: var(--muted); }
+code { font-family: var(--f-mono); font-size: .88em; background: var(--code-bg); color: var(--code-ink); padding: 1px 5px; border-radius: 4px; }
+
+/* 표 */
+.tablewrap { overflow-x: auto; margin: 6px 0 18px; }
+table { border-collapse: collapse; font-size: 14.5px; min-width: 100%; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: 13px; letter-spacing: .02em; border-bottom: 1.5px solid var(--ink); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--f-mono); font-size: 13.5px; }
+
+/* 상자 */
+.box { border: 1px solid var(--rule); background: var(--panel); border-radius: 8px; padding: 16px 20px; margin: 18px 0; max-width: 78ch; }
+.box > :last-child { margin-bottom: 0; }
+.box .label { font-size: 12px; letter-spacing: .08em; font-weight: 600; color: var(--accent); margin-bottom: 6px; display: block; }
+.box.caution { border-color: var(--warn); background: var(--warn-soft); }
+.box.caution .label { color: var(--warn); }
+.box.read .label { color: var(--muted); }
+
+/* 코드 */
+.code { position: relative; margin: 10px 0 18px; }
+.code pre { margin: 0; background: var(--code-bg); color: var(--code-ink); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font-family: var(--f-mono); font-size: 13.5px; line-height: 1.65; }
+.code pre code { background: none; padding: 0; font-size: inherit; }
+.code .copy { position: absolute; top: 8px; right: 8px; font: 500 12px var(--f-body); background: var(--panel); color: var(--muted); border: 1px solid var(--rule); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+.code .copy:hover, .code .copy:focus-visible { color: var(--ink); border-color: var(--accent); outline: none; }
+.cm { color: var(--code-cm); font-style: italic; }
+.fn { color: var(--code-fn); border-bottom: 1px dotted var(--code-fn); cursor: help; font-weight: 600; }
+.fn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+code .fn { font-weight: 500; }
+
+/* 풍선 도움말 */
+#tip { position: fixed; z-index: 50; max-width: min(380px, calc(100vw - 32px)); background: var(--panel); color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.18); padding: 12px 14px; font-size: 13.5px; line-height: 1.55; pointer-events: none; }
+#tip .t-name { font-family: var(--f-mono); font-weight: 600; color: var(--accent); }
+#tip .t-sec { font-size: 11.5px; letter-spacing: .06em; color: var(--muted); margin-top: 8px; font-weight: 600; }
+#tip ul { margin: 2px 0 0; padding-left: 16px; }
+#tip li { margin: 0; }
+#tip .req { color: var(--warn); font-size: 11.5px; font-weight: 600; }
+#tip .opt { color: var(--muted); font-size: 11.5px; }
+
+/* 인터랙티브 위젯 */
+.lab { border: 1px solid var(--accent); border-radius: 10px; background: var(--panel); margin: 22px 0; overflow: hidden; }
+.lab-head { background: var(--accent-soft); padding: 10px 18px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
+.lab-head strong { font-size: 15px; }
+.lab-head span { font-size: 13px; color: var(--muted); }
+.lab-body { padding: 16px 18px 18px; display: grid; gap: 14px; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 22px; align-items: end; }
+.ctl { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.ctl input[type="number"] { width: 96px; font: 500 14px var(--f-mono); padding: 5px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); }
+.ctl input[type="range"] { width: 180px; accent-color: var(--accent); }
+.ctl output { font-family: var(--f-mono); color: var(--ink); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { font: 500 13px var(--f-body); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); cursor: pointer; }
+.btn:hover, .btn:focus-visible { border-color: var(--accent); outline: none; }
+.plot { width: 100%; max-width: 100%; height: auto; display: block; }
+.plot .axis { stroke: var(--muted); stroke-width: 1; fill: none; }
+.plot .tick { fill: var(--muted); font: 11px var(--f-mono); }
+.plot .curve { stroke: var(--curve); stroke-width: 2; fill: none; }
+.plot .tailfill { fill: var(--tail-soft); stroke: none; }
+.plot .stat { stroke: var(--tail); stroke-width: 2.2; }
+.plot .crit { stroke: var(--warn); stroke-width: 1.2; stroke-dasharray: 4 4; }
+.plot .lbl { fill: var(--ink); font: 600 12px var(--f-body); }
+.plot .lblw { fill: var(--warn); font: 500 11px var(--f-body); }
+.plot .bar { fill: var(--rule); }
+.plot .bar.hit { fill: var(--tail); }
+.plot .norm { stroke: var(--accent); stroke-width: 2; fill: none; }
+.readout { display: flex; flex-wrap: wrap; gap: 10px 26px; font-size: 14px; }
+.readout div { display: grid; }
+.readout .k { font-size: 12px; color: var(--muted); }
+.readout .v { font-family: var(--f-mono); font-size: 16px; font-variant-numeric: tabular-nums; }
+.readout .v.sig { color: var(--tail); font-weight: 600; }
+.grid22 { display: grid; grid-template-columns: auto repeat(2, minmax(70px, 1fr)) auto; gap: 0; font-size: 14px; max-width: 460px; }
+.grid22 > div { padding: 6px 8px; border-bottom: 1px solid var(--rule); display: flex; align-items: center; }
+.grid22 .h { color: var(--muted); font-size: 12.5px; font-weight: 600; }
+.grid22 input { width: 78px; font: 500 14px var(--f-mono); padding: 4px 6px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); }
+.grid22 .e { font-family: var(--f-mono); font-size: 12px; color: var(--muted); margin-left: 6px; }
+.grid22 .e.low { color: var(--warn); font-weight: 600; }
+.grid22 .tot { font-family: var(--f-mono); font-size: 13px; color: var(--muted); }
+.warnline { color: var(--warn); font-size: 13.5px; }
+.flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; margin: 8px 0 16px; }
+.flow span.step { border: 1px solid var(--rule); background: var(--panel); border-radius: 6px; padding: 4px 10px; }
+.flow span.arr { color: var(--muted); }
+.mj { overflow-x: auto; max-width: 100%; margin: 6px 0 14px; }
+footer.refs ol { font-size: 14.5px; }
+footer.refs li { margin-bottom: 8px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+section.ch { scroll-margin-top: 16px; }
+</style>
+
+<div class="shell">
+  <header class="masthead">
+    <div class="eyebrow">대학원 · R로 하는 통계적 가설검정 · 범주형 자료 편</div>
+    <h1>범주형 자료의 가설검정</h1>
+    <p class="lede">평균 비교 교안에서 익힌 "단일 표본 → 독립 두 집단 → 대응표본"의 틀을 그대로 가져와, 결과변수가 범주일 때 무엇이 바뀌는지 따라갑니다. 검정통계량은 t에서 χ²로, 기준 분포는 t분포에서 χ²·이항·초기하분포로, 효과크기는 Cohen's d에서 w, h, φ, V, g와 오즈비로 바뀝니다.</p>
+    <div class="meta">
+      <span class="chip draft">초안 v0.1</span>
+      <span class="chip">R · VS Code · tidyverse</span>
+      <span class="chip">effectsize</span>
+      <span class="chip">도로교통공단 사망교통사고 · 국민건강영양조사</span>
+    </div>
+    <details class="toc-mobile">
+      <summary>목차</summary>
+      <ol>
+        <li><a href="#ch0">들어가며</a></li>
+        <li><a href="#ch1">범주형 자료와 분할표</a></li>
+        <li><a href="#ch2">작업환경 확인</a></li>
+        <li><a href="#ch3">데이터 불러오기</a></li>
+        <li><a href="#ch4">단일 비율과 적합도 검정</a></li>
+        <li><a href="#ch5">두 비율 비교와 독립성 검정</a></li>
+        <li><a href="#ch6">가정 점검과 Fisher 정확검정</a></li>
+        <li><a href="#ch7">사후 분석: 표준화 잔차</a></li>
+        <li><a href="#ch8">대응 범주 자료: McNemar 검정</a></li>
+        <li><a href="#ch9">결과 보고와 로지스틱 회귀 예고</a></li>
+        <li><a href="#refs">참고문헌</a></li>
+      </ol>
+    </details>
+  </header>
+
+  <nav class="toc" aria-label="목차">
+    <ol>
+      <li><a href="#ch0"><span class="n">00</span>들어가며</a></li>
+      <li><a href="#ch1"><span class="n">01</span>분할표</a></li>
+      <li><a href="#ch2"><span class="n">02</span>작업환경</a></li>
+      <li><a href="#ch3"><span class="n">03</span>데이터 불러오기</a></li>
+      <li><a href="#ch4"><span class="n">04</span>단일 비율·적합도</a></li>
+      <li><a href="#ch5"><span class="n">05</span>두 비율·독립성</a></li>
+      <li><a href="#ch6"><span class="n">06</span>가정·Fisher</a></li>
+      <li><a href="#ch7"><span class="n">07</span>표준화 잔차</a></li>
+      <li><a href="#ch8"><span class="n">08</span>McNemar</a></li>
+      <li><a href="#ch9"><span class="n">09</span>보고·로지스틱</a></li>
+      <li><a href="#refs"><span class="n">R</span>참고문헌</a></li>
+    </ol>
+  </nav>
+
+  <main>
+  <!-- ===================== 0 ===================== -->
+  <section class="ch" id="ch0">
+    <h2><span class="num">00</span>들어가며</h2>
+    <h3>학습 목표</h3>
+    <ol>
+      <li>원자료(한 행 = 한 관측)를 빈도표·분할표로 바꾸고, 각 검정 함수가 요구하는 객체를 만들 수 있다.</li>
+      <li>적합도·독립성·동질성 검정의 귀무가설을 구분하고, 기대도수와 χ² 통계량을 손으로 계산해 R 결과와 맞춰 볼 수 있다.</li>
+      <li>정확검정(이항·Fisher)과 근사검정(χ²)의 관계를 이해하고, 기대도수가 작을 때 대안을 고를 수 있다.</li>
+      <li>같은 사람에게서 나온 두 범주 판정에 McNemar 검정을 적용하고, 독립성 검정과의 차이를 설명할 수 있다.</li>
+      <li><code>effectsize</code> 패키지로 효과크기와 신뢰구간을 구해 결과를 보고할 수 있다.</li>
+    </ol>
+
+    <h3>평균 비교 교안과의 대응</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>평균 비교 교안</th><th>이 교안</th><th>주요 함수</th><th>효과크기</th></tr></thead>
+      <tbody>
+        <tr><td>단일 표본 t</td><td>단일 비율 검정, 적합도 검정 (4장)</td><td><code>binom.test</code>, <code>prop.test</code>, <code>chisq.test(p =)</code></td><td>Cohen's h, Cohen's w</td></tr>
+        <tr><td>독립 두 표본 t</td><td>두 비율 비교, 독립성·동질성 검정, Fisher 정확검정 (5–7장)</td><td><code>prop.test</code>, <code>chisq.test</code>, <code>fisher.test</code></td><td>위험비, 오즈비, φ, Cramér's V</td></tr>
+        <tr><td>대응표본 t</td><td>McNemar 검정 (8장)</td><td><code>mcnemar.test</code></td><td>Cohen's g, 대응 오즈비</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>사용 데이터</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>장</th><th>데이터</th><th>단위</th><th>입수 방법</th></tr></thead>
+      <tbody>
+        <tr><td>3–7장</td><td>도로교통공단 사망 교통사고 정보</td><td>사망사고 1건 = 1행</td><td>공공데이터포털 파일데이터, 내려받기·재배포 자유. 강사가 <code>dataset/raw/</code>에 넣어 배포</td></tr>
+        <tr><td>8장</td><td>국민건강영양조사(KNHANES) 원시자료</td><td>조사 대상자 1명 = 1행</td><td>질병관리청 누리집에서 이용자 등록·요청 후 각자 내려받기. <strong>재배포 불가</strong></td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="box read">
+      <span class="label">이 교안의 뼈대</span>
+      <p>개념 설명의 순서는 Navarro의 <em>Learning Statistics with R</em> 12장(Categorical data analysis)을 따릅니다. 각 절 끝의 "더 읽기"에 대응 절 번호를 적었습니다. LSR이 다루지 않는 단일 비율 정확검정, 위험비·오즈비, 표준화 잔차는 Agresti(2019)로 보완했습니다.</p>
+    </div>
+  </section>
+
+  <!-- ===================== 1 ===================== -->
+  <section class="ch" id="ch1">
+    <h2><span class="num">01</span>범주형 자료와 분할표</h2>
+    <p>범주형 변수는 값이 "어느 칸에 속하는가"만 알려 줍니다. 순서가 없는 <strong>명목척도</strong>(사고유형, 성별)와 순서가 있는 <strong>서열척도</strong>(체형인식 5단계)로 나뉩니다. 이 교안의 검정은 모두 명목척도를 가정합니다. 서열 정보를 쓰는 방법(선형 추세 검정 등)은 범위 밖입니다.</p>
+    <p>범주형 자료 분석의 출발점은 <strong>빈도</strong>입니다. 평균 비교에서 개별 관측값을 그대로 썼다면, 여기서는 관측을 칸별로 세어 만든 표가 분석 대상입니다.</p>
+
+    <div class="flow" aria-label="자료 형태 변환 흐름">
+      <span class="step">원자료 (한 행 = 사고 1건)</span><span class="arr">→</span>
+      <span class="step">빈도표 (변수 1개)</span><span class="arr">→</span>
+      <span class="step">분할표 (변수 2개, r × c)</span>
+    </div>
+
+    <h3>세 가지 표 만들기 방법</h3>
+    <p>같은 표를 만드는 방법이 여럿인 이유는, 결과 객체의 <strong>형태</strong>가 다르기 때문입니다. tidyverse의 <code>count()</code>는 데이터프레임을 돌려주어 그림과 가공에 편하고, base R의 <code>table()</code>·<code>xtabs()</code>는 검정 함수가 바로 받는 <code>table</code> 객체를 돌려줍니다.</p>
+    <div class="code"><pre><code># 데이터프레임 형태: 그림, 가공용
+acc %>% count(주야, 사고유형)
+
+# table 객체: 검정 함수 입력용
+table(acc$주야, acc$사고유형)
+xtabs(~ 주야 + 사고유형, data = acc)
+
+# 보기 좋은 교차표 (행 비율 + 빈도)
+acc %>%
+  tabyl(주야, 사고유형) %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns()</code></pre></div>
+
+    <div class="box">
+      <span class="label">요점</span>
+      <p><code>chisq.test()</code>는 받은 객체의 모양으로 검정을 고릅니다. 1차원 빈도표를 주면 적합도 검정, 2차원 분할표를 주면 독립성 검정을 합니다(LSR 12.6). 그래서 "지금 어떤 모양의 객체를 넘기는가"를 항상 확인해야 합니다.</p>
+    </div>
+  </section>
+
+  <!-- ===================== 2 ===================== -->
+  <section class="ch" id="ch2">
+    <h2><span class="num">02</span>작업환경 확인</h2>
+    <p>VS Code와 R 설치, Antigravity 확장, Windows의 PATH 설정, KoPub 글꼴 등록은 평균 비교 교안의 작업환경 장을 그대로 따릅니다. 여기서는 이번 교안에 추가로 필요한 패키지만 설치합니다.</p>
+    <div class="code"><pre><code>pkgs <- c("tidyverse", "readxl", "haven", "janitor", "effectsize", "extrafont")
+new_pkgs <- pkgs[!pkgs %in% installed.packages()[, "Package"]]
+if (length(new_pkgs) > 0) {
+  install.packages(new_pkgs, repos = "https://cloud.r-project.org/")
+}
+
+library(tidyverse)   # 데이터 다루기와 시각화
+library(readxl)      # Excel 읽기
+library(haven)       # SAS·SPSS 파일 읽기 (국민건강영양조사)
+library(janitor)     # 교차표 정리
+library(effectsize)  # 효과크기와 신뢰구간
+library(extrafont)   # ggplot 한글 글꼴
+
+loadfonts(device = "win", quiet = TRUE)   # macOS·Linux는 device 인수를 빼고 실행
+theme_set(theme_minimal(base_family = "KoPubWorldDotum Medium"))  # fonttable()로 실제 이름 확인</code></pre></div>
+
+    <h3>폴더 구조</h3>
+    <div class="code"><pre><code>categorical-tests/
+├── categorical.R
+├── dataset/
+│   ├── raw/          # 내려받은 원본. 손대지 않음
+│   │   ├── fatal_accidents_2024.csv
+│   │   └── knhanes/HN23_ALL.sas7bdat
+│   └── working/      # 정리한 분석용 파일
+└── output/           # 그림 파일</code></pre></div>
+  </section>
+
+  <!-- ===================== 3 ===================== -->
+  <section class="ch" id="ch3">
+    <h2><span class="num">03</span>데이터 불러오기</h2>
+
+    <h3>3.1 도로교통공단 사망 교통사고 정보</h3>
+    <p>공공데이터포털(data.go.kr)에서 "도로교통공단 사망 교통사고 정보"를 검색해 최신 연도 파일을 내려받습니다. 사망사고 한 건이 한 행이고, 발생 일시·주야·요일·사고유형·도로형태·발생 지역 등의 범주형 열이 들어 있습니다. 공공기관 CSV는 대개 <strong>CP949(EUC-KR)</strong>로 저장되어 있어, 인코딩을 지정하지 않으면 한글이 깨집니다.</p>
+    <div class="code"><pre><code>acc_raw <- read_csv("dataset/raw/fatal_accidents_2024.csv",
+                    locale = locale(encoding = "CP949"))
+glimpse(acc_raw)
+
+# Excel로 받았다면
+# acc_raw <- read_excel("dataset/raw/fatal_accidents_2024.xlsx", sheet = 1)</code></pre></div>
+
+    <p>열 이름은 연도마다 조금씩 다를 수 있으니 <code>glimpse()</code> 결과를 보고 아래 코드를 맞춥니다. 범주의 순서는 <code>factor()</code>로 직접 정해 두어야 표와 그림이 의도한 순서로 나옵니다.</p>
+    <div class="code"><pre><code>acc <- acc_raw %>%
+  select(주야, 요일, 사고유형_대분류, 발생지시도) %>%
+  mutate(
+    주야 = factor(주야, levels = c("주", "야")),
+    요일 = factor(요일, levels = c("월", "화", "수", "목", "금", "토", "일")),
+    # 철길건널목처럼 아주 드문 유형은 '기타'로 묶음 (6장에서 이유를 다룸)
+    사고유형 = fct_lump_min(사고유형_대분류, min = 30, other_level = "기타"),
+    보행자사고 = factor(if_else(사고유형_대분류 == "차대사람", "차대사람", "그 외"),
+                        levels = c("차대사람", "그 외"))
+  )
+
+write_csv(acc, "dataset/working/acc_clean.csv")</code></pre></div>
+
+    <h3>3.2 국민건강영양조사 원시자료</h3>
+    <p>국민건강영양조사 누리집(knhanes.kdca.go.kr)의 원시자료 메뉴에서 이용자 등록과 요청서 작성을 거쳐 내려받습니다. 자료는 연도별로 SAS(<code>.sas7bdat</code>)와 SPSS(<code>.sav</code>) 형식으로 제공되므로 <code>haven</code>으로 읽습니다.</p>
+    <div class="box caution">
+      <span class="label">수강생 각자 신청</span>
+      <p>국민건강영양조사 원시자료는 이용 조건상 제3자에게 다시 나눠 줄 수 없습니다. 수업 전에 수강생 각자 신청하도록 안내하고, 정리한 <code>working/</code> 파일도 공유하지 않습니다. 변수명과 응답 코드는 해당 연도 「원시자료 이용지침서」로 반드시 확인합니다.</p>
+    </div>
+    <p>8장에서 쓸 두 판정은 같은 사람에게서 나온 것입니다. 하나는 본인이 생각하는 체형(주관적 체형인식, <code>BO1</code>)이고, 다른 하나는 검진에서 잰 체질량지수(<code>HE_BMI</code>)입니다.</p>
+    <div class="code"><pre><code>kn_raw <- read_sas("dataset/raw/knhanes/HN23_ALL.sas7bdat")
+
+kn <- kn_raw %>%
+  filter(age >= 19, BO1 %in% 1:5, !is.na(HE_BMI)) %>%   # 성인, 응답 1~5만 (8·9는 비해당·모름)
+  transmute(
+    인식비만 = factor(if_else(BO1 >= 4, "비만", "비만 아님"),       # 4 약간 비만, 5 매우 비만
+                      levels = c("비만", "비만 아님")),
+    측정비만 = factor(if_else(HE_BMI >= 25, "비만", "비만 아님"),   # 대한비만학회 기준 BMI 25
+                      levels = c("비만", "비만 아님")),
+    sex, age, wt_itvex
+  )
+
+write_csv(kn, "dataset/working/kn_body.csv")   # 개인 작업용. 공유 금지</code></pre></div>
+  </section>
+
+  <!-- ===================== 4 ===================== -->
+  <section class="ch" id="ch4">
+    <h2><span class="num">04</span>단일 비율과 적합도 검정</h2>
+
+    <div class="box caution">
+      <span class="label">먼저 생각할 문제: 전수 자료에 검정을 하는가</span>
+      <p>사망교통사고 자료는 표본이 아니라 그해 경찰에 접수된 사망사고 <strong>전체</strong>입니다. 그런데도 검정을 하는 근거는, 올해의 사고 건수를 "요일별 사고 발생 확률이라는 생성 과정"에서 나온 하나의 실현값으로 보는 데 있습니다(초모집단 관점). 이때 검정이 답하는 질문은 "올해 숫자가 같았는가"가 아니라 "사고를 만드는 과정이 요일에 따라 다르다고 볼 증거가 있는가"입니다. 수업에서 이 해석을 먼저 짚고 넘어갑니다.</p>
+    </div>
+
+    <h3>4.1 적합도 검정의 논리</h3>
+    <p>범주가 \(k\)개인 변수에 대해 귀무가설이 각 범주의 확률 \(p_1, \dots, p_k\)를 정해 주면, 표본크기 \(N\)에서 기대도수는 \(E_i = N p_i\)입니다. 관측도수 \(O_i\)와의 차이를 모은 통계량이 Pearson χ²입니다.</p>
+    <div class="mj">\[ X^2 = \sum_{i=1}^{k} \frac{(O_i - E_i)^2}{E_i} \;\; \overset{H_0}{\approx} \;\; \chi^2_{k-1} \]</div>
+    <p>자유도가 \(k-1\)인 이유는, 총합 \(N\)이 정해지면 마지막 칸의 도수가 나머지에 의해 결정되기 때문입니다. 평균 비교에서 표본분산의 자유도가 \(n-1\)이었던 것과 같은 논리입니다.</p>
+
+    <div class="box">
+      <span class="label">손계산 예제 (LSR 12.1의 카드 자료)</span>
+      <p>200명이 카드 무늬 하나씩을 골랐더니 클로버 35, 다이아 51, 하트 64, 스페이드 50이었습니다. 네 무늬가 같은 확률이라면 기대도수는 모두 50입니다.</p>
+      <div class="mj">\[ X^2 = \frac{(35-50)^2 + (51-50)^2 + (64-50)^2 + (50-50)^2}{50} = \frac{225 + 1 + 196 + 0}{50} = 8.44 \]</div>
+      <p>자유도 3에서 \(p = .0377\)입니다. 아래 χ² 분포 탐색기에 자유도 3, 통계량 8.44를 넣어 확인해 보세요.</p>
+    </div>
+
+    <!-- 위젯 1: chi-square explorer -->
+    <div class="lab" id="lab-chi">
+      <div class="lab-head"><strong>χ² 분포 탐색기</strong><span>H₀ 아래의 분포, 관측 통계량의 위치, 오른쪽 꼬리 확률</span></div>
+      <div class="lab-body">
+        <div class="controls">
+          <label class="ctl" for="chi-df">자유도 <output id="chi-df-out">3</output>
+            <input type="range" id="chi-df" min="1" max="20" step="1" value="3">
+          </label>
+          <label class="ctl" for="chi-x">관측 χ²
+            <input type="number" id="chi-x" min="0" step="0.01" value="8.44">
+          </label>
+          <div class="btnrow">
+            <button class="btn" type="button" data-df="3" data-x="8.44">카드 예제</button>
+            <button class="btn" type="button" data-df="6" data-x="12.59">요일 · 경계값</button>
+            <button class="btn" type="button" data-df="1" data-x="3.31">마녀 예제 (Yates)</button>
+          </div>
+        </div>
+        <svg class="plot" id="chi-svg" viewBox="0 0 640 260" role="img" aria-label="카이제곱 분포 곡선과 관측 통계량 위치"></svg>
+        <div class="readout">
+          <div><span class="k">p-value P(χ² ≥ x)</span><span class="v" id="chi-p">-</span></div>
+          <div><span class="k">α = .05 임계값</span><span class="v" id="chi-crit">-</span></div>
+          <div><span class="k">판정 (α = .05)</span><span class="v" id="chi-dec">-</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h3>4.2 R로 하기: 사망사고는 요일마다 고르게 일어나는가</h3>
+    <div class="code"><pre><code>obs_day <- table(acc$요일)
+obs_day
+
+gof <- chisq.test(obs_day, p = rep(1/7, 7))
+gof               # X-squared, df = 6, p-value
+gof$expected      # 기대도수: 모두 N/7
+gof$residuals     # (O - E) / sqrt(E): 어느 요일이 기대에서 벗어났는가
+
+cohens_w(obs_day, p = rep(1/7, 7))   # 효과크기 w와 신뢰구간</code></pre></div>
+
+    <div class="box">
+      <span class="label">더 정교한 귀무가설</span>
+      <p>한 해의 요일 수는 같지 않습니다. 365일이면 한 요일이, 윤년이면 두 요일이 53번 나옵니다. "하루당 사고 확률이 같다"를 귀무가설로 삼으려면 요일별 일수에 비례한 확률을 <code>p</code>에 넣습니다. 귀무가설을 말로 정확히 쓰는 연습으로 좋습니다(LSR 12.1.8).</p>
+      <div class="code"><pre><code>yr <- 2024
+days <- tibble(날짜 = seq(as.Date(paste0(yr, "-01-01")),
+                          as.Date(paste0(yr, "-12-31")), by = "day")) %>%
+  mutate(요일번호 = wday(날짜, week_start = 1)) %>%   # 1 = 월요일
+  count(요일번호)
+
+chisq.test(obs_day, p = days$n / sum(days$n))</code></pre></div>
+    </div>
+
+    <h3>4.3 단일 비율: 야간 사고는 절반인가</h3>
+    <p>범주가 두 개뿐이면 적합도 검정은 단일 비율 검정과 같아집니다. 이때는 이항분포로 <strong>정확한</strong> p-value를 구할 수 있습니다. <code>prop.test()</code>는 같은 질문을 정규근사(연속성 보정 포함)로 답합니다.</p>
+    <div class="code"><pre><code>n_night <- sum(acc$주야 == "야")
+n_all   <- nrow(acc)
+
+binom.test(n_night, n_all, p = 0.5)   # 정확검정 + Clopper-Pearson 신뢰구간
+prop.test(n_night, n_all, p = 0.5)    # 정규근사 (= 자유도 1인 χ² 검정)
+
+# Cohen's h: 비율을 아크사인 변환한 척도에서의 차이
+p_hat <- n_night / n_all
+h <- 2 * asin(sqrt(p_hat)) - 2 * asin(sqrt(0.5))
+h</code></pre></div>
+
+    <!-- 위젯 2: binomial vs normal -->
+    <div class="lab" id="lab-binom">
+      <div class="lab-head"><strong>이항 정확분포와 정규근사</strong><span>n을 줄이면 두 p-value가 언제 어긋나는지 보기</span></div>
+      <div class="lab-body">
+        <div class="controls">
+          <label class="ctl" for="bn-n">n <output id="bn-n-out">40</output>
+            <input type="range" id="bn-n" min="5" max="200" step="1" value="40">
+          </label>
+          <label class="ctl" for="bn-p">H₀의 p₀ <output id="bn-p-out">0.50</output>
+            <input type="range" id="bn-p" min="0.05" max="0.95" step="0.01" value="0.5">
+          </label>
+          <label class="ctl" for="bn-x">관측 성공 수 x <output id="bn-x-out">27</output>
+            <input type="range" id="bn-x" min="0" max="40" step="1" value="27">
+          </label>
+        </div>
+        <svg class="plot" id="bn-svg" viewBox="0 0 640 240" role="img" aria-label="이항분포 막대와 정규근사 곡선"></svg>
+        <div class="readout">
+          <div><span class="k">binom.test p (정확)</span><span class="v" id="bn-pe">-</span></div>
+          <div><span class="k">prop.test p (근사, 보정)</span><span class="v" id="bn-pa">-</span></div>
+          <div><span class="k">np₀ · n(1−p₀)</span><span class="v" id="bn-np">-</span></div>
+          <div><span class="k">Cohen's h</span><span class="v" id="bn-h">-</span></div>
+        </div>
+        <p class="small" style="margin:0">주황 막대는 관측값보다 확률이 같거나 작은 값들로, 이들의 합이 <code>binom.test</code>의 양측 p-value입니다. 파란 곡선은 \(N(np_0,\, np_0(1-p_0))\) 근사입니다.</p>
+      </div>
+    </div>
+    <p class="small">더 읽기: LSR 12.1 · Agresti (2019) 1.4절 · 이항분포는 Blitzstein &amp; Hwang (2019) 3장</p>
+  </section>
+
+  <!-- ===================== 5 ===================== -->
+  <section class="ch" id="ch5">
+    <h2><span class="num">05</span>두 비율 비교와 독립성 검정</h2>
+
+    <h3>5.1 독립성인가, 동질성인가</h3>
+    <p>같은 \(r \times c\) 분할표와 같은 χ² 계산을 쓰지만, 자료를 모은 방식에 따라 귀무가설의 표현이 다릅니다.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th></th><th>독립성 검정</th><th>동질성 검정</th></tr></thead>
+      <tbody>
+        <tr><td>고정된 것</td><td>전체 \(N\)만</td><td>집단(행)별 표본크기</td></tr>
+        <tr><td>H₀</td><td>두 변수가 서로 독립: \(p_{ij} = p_{i\cdot}\, p_{\cdot j}\)</td><td>모든 집단에서 열 범주의 분포가 같음</td></tr>
+        <tr><td>이 교안의 예</td><td>사망사고 전체를 주야 × 사고유형으로 교차</td><td>(예) 남녀 각 1,000명을 뽑아 흡연 여부 비교</td></tr>
+      </tbody>
+    </table></div>
+    <p>기대도수는 두 경우 모두 \(E_{ij} = \dfrac{(\text{행 합})(\text{열 합})}{N}\)이고, 자유도는 \((r-1)(c-1)\)입니다.</p>
+
+    <h3>5.2 2 × 2: 야간에 보행자 사망사고 비율이 다른가</h3>
+    <div class="code"><pre><code>tab22 <- table(acc$주야, acc$보행자사고)
+tab22
+prop.table(tab22, margin = 1)    # 행 비율: 주간·야간 각각의 '차대사람' 비율
+
+prop.test(tab22)                 # 첫 열('차대사람')을 성공으로 두 비율 비교
+chisq.test(tab22)                # 같은 검정 (2 × 2에서는 Yates 보정이 기본)
+chisq.test(tab22, correct = FALSE)
+
+riskratio(tab22)                 # 위험비: 주간 비율 / 야간 비율
+oddsratio(tab22)                 # 오즈비: (a·d) / (b·c)
+phi(tab22)                       # φ 계수</code></pre></div>
+
+    <div class="box">
+      <span class="label">연속성 보정 (LSR 12.3)</span>
+      <p>2 × 2 표에서 R은 기본으로 Yates 보정을 적용해 각 칸의 \(|O-E|\)에서 0.5를 뺍니다. 이산분포를 연속 χ²로 근사할 때 생기는 차이를 줄이려는 것이지만, 대체로 검정을 보수적으로 만듭니다. 보정 여부를 결과 보고에 밝혀 둡니다.</p>
+    </div>
+
+    <!-- 위젯 3: 2x2 -->
+    <div class="lab" id="lab-22">
+      <div class="lab-head"><strong>2 × 2 분할표 계산기</strong><span>칸 값을 바꾸면 기대도수 · χ² · Fisher p · 효과크기가 다시 계산됩니다</span></div>
+      <div class="lab-body">
+        <div class="btnrow">
+          <button class="btn" type="button" data-t="620,980,710,690">예시: 큰 표본 (가상 수치)</button>
+          <button class="btn" type="button" data-t="3,3,10,0">LSR 마녀 예제 (작은 표본)</button>
+          <button class="btn" type="button" data-t="9,6,4,8">예시: 한 지역만 (가상 수치)</button>
+        </div>
+        <div class="grid22" role="group" aria-label="2 by 2 표 입력">
+          <div class="h"></div><div class="h" id="g-c1">열 1</div><div class="h" id="g-c2">열 2</div><div class="h">행 합</div>
+          <div class="h" id="g-r1">행 1</div>
+          <div><input type="number" id="t-a" min="0" step="1" aria-label="1행 1열"><span class="e" id="e-a"></span></div>
+          <div><input type="number" id="t-b" min="0" step="1" aria-label="1행 2열"><span class="e" id="e-b"></span></div>
+          <div class="tot" id="r1"></div>
+          <div class="h" id="g-r2">행 2</div>
+          <div><input type="number" id="t-c" min="0" step="1" aria-label="2행 1열"><span class="e" id="e-c"></span></div>
+          <div><input type="number" id="t-d" min="0" step="1" aria-label="2행 2열"><span class="e" id="e-d"></span></div>
+          <div class="tot" id="r2"></div>
+          <div class="h">열 합</div><div class="tot" id="c1"></div><div class="tot" id="c2"></div><div class="tot" id="nn"></div>
+        </div>
+        <p class="small" style="margin:0">괄호 안은 기대도수입니다. 5 미만이면 빨갛게 표시됩니다.</p>
+        <div class="readout">
+          <div><span class="k">Pearson χ² (보정 없음)</span><span class="v" id="o-x2">-</span></div>
+          <div><span class="k">p</span><span class="v" id="o-p">-</span></div>
+          <div><span class="k">Yates 보정 χ²</span><span class="v" id="o-x2y">-</span></div>
+          <div><span class="k">p (Yates)</span><span class="v" id="o-py">-</span></div>
+          <div><span class="k">Fisher 정확 p</span><span class="v" id="o-pf">-</span></div>
+        </div>
+        <div class="readout">
+          <div><span class="k">φ</span><span class="v" id="o-phi">-</span></div>
+          <div><span class="k">오즈비 (ad/bc)</span><span class="v" id="o-or">-</span></div>
+          <div><span class="k">위험비 (행1 / 행2)</span><span class="v" id="o-rr">-</span></div>
+        </div>
+        <p class="warnline" id="o-warn" hidden></p>
+      </div>
+    </div>
+
+    <h3>5.3 r × c: 주야에 따라 사고유형 분포가 다른가</h3>
+    <div class="code"><pre><code>tab_rc <- table(acc$주야, acc$사고유형)
+ind <- chisq.test(tab_rc)
+ind
+ind$expected        # 모든 칸이 충분히 큰지 먼저 확인
+
+cramers_v(tab_rc)                  # 기본: 편향 보정(adjust = TRUE)한 V
+cramers_v(tab_rc, adjust = FALSE)  # 고전적 V (LSR 12.4의 정의)</code></pre></div>
+    <div class="box">
+      <span class="label">effectsize의 기본값 두 가지</span>
+      <p><code>cramers_v()</code>는 최근 버전에서 편향 보정을 기본으로 하고, 신뢰구간도 기본이 단측(<code>alternative = "greater"</code>)입니다. V는 0 아래로 내려갈 수 없어서 상한이 1인 구간을 보고하는 것이 관례이기 때문입니다. 다른 소프트웨어 결과와 비교할 때 이 두 설정을 먼저 맞춥니다.</p>
+    </div>
+    <p class="small">더 읽기: LSR 12.2–12.4 · Agresti (2019) 2.2–2.4절</p>
+  </section>
+
+  <!-- ===================== 6 ===================== -->
+  <section class="ch" id="ch6">
+    <h2><span class="num">06</span>가정 점검과 Fisher 정확검정</h2>
+    <h3>6.1 χ² 검정의 두 가정</h3>
+    <ol>
+      <li><strong>관측의 독립.</strong> 한 관측이 한 칸에만 들어가고, 관측끼리 서로 영향을 주지 않아야 합니다. 같은 사람을 두 번 세면 이 가정이 깨지며, 이때는 8장의 McNemar 검정을 씁니다(LSR 12.5).</li>
+      <li><strong>기대도수가 충분히 큼.</strong> 흔히 "모든 기대도수 5 이상"을 기준으로 씁니다. 출처인 Cochran의 원래 권고는 "기대도수 1 미만인 칸이 없고, 5 미만인 칸이 20%를 넘지 않음"에 가깝습니다. Campbell(2007)의 모의실험은 2 × 2 표에서 이 규칙이 생각보다 보수적이라는 점을 보였습니다.</li>
+    </ol>
+    <p>3장에서 철길건널목 사고를 '기타'로 묶은 이유가 여기 있습니다. 한 해에 몇 건 안 되는 유형을 그대로 두면 기대도수가 1 근처로 떨어져 χ² 근사가 무너집니다. 범주 통합은 이론적으로 말이 되는 경우에만 하고, 통합한 사실을 보고합니다.</p>
+
+    <h3>6.2 Fisher 정확검정</h3>
+    <p>행 합과 열 합을 고정하면 2 × 2 표에서 한 칸의 값이 정해질 때 나머지가 모두 정해지고, 그 칸의 분포는 <strong>초기하분포</strong>입니다. Fisher 검정은 검정통계량 없이, 관측된 표와 같거나 더 극단적인 표가 나올 확률을 직접 더합니다(LSR 12.7).</p>
+    <div class="mj">\[ P(a \mid \text{행·열 합}) = \frac{\binom{a+b}{a}\binom{c+d}{c}}{\binom{N}{a+c}} \]</div>
+    <p>LSR의 마녀 예제(행복함 × 화형 중, 16명)에서 <code>chisq.test()</code>는 경고와 함께 Yates 보정 \(p = .069\)를 내지만, Fisher 검정은 \(p = .036\)입니다. 5장 계산기의 "LSR 마녀 예제" 버튼으로 두 값을 나란히 확인해 보세요.</p>
+
+    <h3>6.3 R로 하기: 한 지역만 떼어 보면</h3>
+    <div class="code"><pre><code>tab_small <- acc %>%
+  filter(발생지시도 == "제주") %>%
+  with(table(주야, 보행자사고))
+
+tab_small
+chisq.test(tab_small)$expected      # 기대도수부터 확인 → 경고가 뜨는지 보기
+
+fisher.test(tab_small)              # 정확 p, 조건부 최대가능도 오즈비와 신뢰구간
+
+# r × c 표에서 기대도수가 작을 때: 몬테카를로 p-value
+chisq.test(table(acc$요일, acc$사고유형), simulate.p.value = TRUE, B = 10000)</code></pre></div>
+    <div class="box caution">
+      <span class="label">오즈비 값이 다를 때</span>
+      <p><code>fisher.test()</code>가 보고하는 오즈비는 조건부 최대가능도 추정치라, 표본 오즈비 \(ad/bc\)(<code>oddsratio()</code>의 값)와 조금 다릅니다. 둘 중 무엇을 보고했는지 밝힙니다.</p>
+    </div>
+    <p class="small">더 읽기: LSR 12.5, 12.7 · Campbell (2007) · 초기하분포는 Blitzstein &amp; Hwang (2019) 3장</p>
+  </section>
+
+  <!-- ===================== 7 ===================== -->
+  <section class="ch" id="ch7">
+    <h2><span class="num">07</span>사후 분석: 표준화 잔차</h2>
+    <p>r × c 표의 χ² 검정이 유의하면 "어딘가 다르다"까지만 알 수 있습니다. 어느 칸이 차이를 만들었는지는 <strong>표준화 잔차</strong>(adjusted residual)로 봅니다. H₀ 아래에서 근사적으로 표준정규분포를 따르므로, 절댓값이 2(정확히는 1.96)를 넘는 칸을 기대보다 유난히 많거나 적은 칸으로 읽습니다.</p>
+    <div class="mj">\[ r_{ij} = \frac{O_{ij} - E_{ij}}{\sqrt{E_{ij}\,(1 - p_{i\cdot})(1 - p_{\cdot j})}} \]</div>
+    <p>칸이 많으면 우연히 2를 넘는 칸이 생기기 쉬우므로, 칸 수 \(m\)으로 Bonferroni 보정한 기준 \(z_{1-\alpha/(2m)}\)을 함께 봅니다.</p>
+    <div class="code"><pre><code>ind_dt <- chisq.test(table(acc$요일, acc$사고유형))
+round(ind_dt$stdres, 2)
+
+m <- length(ind_dt$stdres)
+cut_bonf <- qnorm(1 - 0.05 / (2 * m))   # 칸이 21개면 약 3.03
+cut_bonf
+
+res_df <- as.data.frame(ind_dt$stdres) %>%
+  rename(요일 = Var1, 사고유형 = Var2, 잔차 = Freq)
+
+g <- ggplot(res_df, aes(x = 사고유형, y = 요일, fill = 잔차)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = sprintf("%.1f", 잔차),
+                fontface = if_else(abs(잔차) > cut_bonf, "bold", "plain"))) +
+  scale_fill_gradient2(low = "#2F6FA6", mid = "white", high = "#C0563B", midpoint = 0) +
+  labs(title = "요일 × 사고유형 표준화 잔차",
+       subtitle = "굵은 숫자: Bonferroni 보정 기준을 넘는 칸",
+       x = NULL, y = NULL, fill = "표준화 잔차")
+
+ggsave("output/stdres_day_type.png", g, width = 7, height = 5, dpi = 300)</code></pre></div>
+    <div class="box">
+      <span class="label">해석 연습</span>
+      <p>잔차 히트맵에서 주말·평일, 차대사람·차량단독의 패턴을 찾고, 그 패턴이 4장의 요일 적합도 결과와 어떻게 이어지는지 말로 설명해 봅니다. 표준화 잔차는 "건수가 많다"가 아니라 "독립이라면 기대할 건수보다 많다"는 뜻이라는 점을 놓치기 쉽습니다.</p>
+    </div>
+    <p class="small">더 읽기: Agresti (2019) 2.4.5절 (LSR에는 이 내용이 없습니다)</p>
+  </section>
+
+  <!-- ===================== 8 ===================== -->
+  <section class="ch" id="ch8">
+    <h2><span class="num">08</span>대응 범주 자료: McNemar 검정</h2>
+    <h3>8.1 왜 독립성 검정을 쓰면 안 되는가</h3>
+    <p>국민건강영양조사의 성인 응답자 한 사람마다 두 판정이 있습니다. 본인이 비만이라고 생각하는가(인식), 그리고 BMI 25 이상인가(측정). 이 두 판정으로 2 × 2 표를 만들면 한 사람이 한 칸에 들어가지만, 행과 열이 <strong>같은 사람의 두 측정</strong>입니다. 질문도 독립성 검정과 다릅니다.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th></th><th class="num">측정: 비만</th><th class="num">측정: 비만 아님</th></tr></thead>
+      <tbody>
+        <tr><td>인식: 비만</td><td class="num">a (일치)</td><td class="num"><strong>b</strong> (과대 인식)</td></tr>
+        <tr><td>인식: 비만 아님</td><td class="num"><strong>c</strong> (과소 인식)</td><td class="num">d (일치)</td></tr>
+      </tbody>
+    </table></div>
+    <ul>
+      <li><strong>독립성 검정</strong>은 "인식과 측정이 관련 있는가"를 묻습니다. 같은 사람의 두 판정이니 관련이 있는 것은 당연해서, 대개 아주 작은 p가 나오고 별 정보가 없습니다.</li>
+      <li><strong>McNemar 검정</strong>은 "인식 비만 비율 \((a+b)/N\)과 측정 비만 비율 \((a+c)/N\)이 같은가"를 묻습니다(주변 동질성). 두 비율의 차이는 \((b-c)/N\)이므로, 정보는 <strong>불일치 칸 b와 c에만</strong> 있습니다.</li>
+    </ul>
+    <div class="mj">\[ X^2 = \frac{(|b - c| - 1)^2}{b + c} \;\overset{H_0}{\approx}\; \chi^2_1, \qquad H_0:\; b \text{와 } c \text{가 나올 가능성이 같음} \]</div>
+    <p>H₀ 아래에서 불일치한 \(b+c\)명 중 b에 속할 수는 이항분포 \(\text{Bin}(b+c,\, 0.5)\)를 따르므로, <code>binom.test()</code>로 정확검정도 할 수 있습니다. Fagerland 등(2013)은 작은 표본에서 이 정확 조건부 검정이 지나치게 보수적이므로 mid-p나 보정 없는 근사 검정을 권합니다.</p>
+
+    <!-- 위젯 4: McNemar -->
+    <div class="lab" id="lab-mc">
+      <div class="lab-head"><strong>McNemar 계산기</strong><span>a·d를 바꿔도 검정 결과는 그대로라는 점을 확인해 보세요</span></div>
+      <div class="lab-body">
+        <div class="btnrow">
+          <button class="btn" type="button" data-m="5,25,5,65">LSR 12.8 광고 예제 (가상 자료)</button>
+          <button class="btn" type="button" data-m="1200,180,620,2900">예시: 체형 인식 (가상 수치)</button>
+        </div>
+        <div class="controls">
+          <label class="ctl" for="m-a">a (둘 다 예) <input type="number" id="m-a" min="0" step="1"></label>
+          <label class="ctl" for="m-b">b (행만 예) <input type="number" id="m-b" min="0" step="1"></label>
+          <label class="ctl" for="m-c">c (열만 예) <input type="number" id="m-c" min="0" step="1"></label>
+          <label class="ctl" for="m-d">d (둘 다 아니오) <input type="number" id="m-d" min="0" step="1"></label>
+        </div>
+        <div class="readout">
+          <div><span class="k">행 기준 비율 (a+b)/N</span><span class="v" id="m-p1">-</span></div>
+          <div><span class="k">열 기준 비율 (a+c)/N</span><span class="v" id="m-p2">-</span></div>
+          <div><span class="k">McNemar χ² (보정)</span><span class="v" id="m-x2">-</span></div>
+          <div><span class="k">p</span><span class="v" id="m-p">-</span></div>
+          <div><span class="k">보정 없음 p</span><span class="v" id="m-pn">-</span></div>
+          <div><span class="k">정확 p (이항)</span><span class="v" id="m-pe">-</span></div>
+        </div>
+        <div class="readout">
+          <div><span class="k">Cohen's g</span><span class="v" id="m-g">-</span></div>
+          <div><span class="k">대응 오즈비 b / c</span><span class="v" id="m-or">-</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h3>8.2 R로 하기</h3>
+    <div class="code"><pre><code>tab_mc <- table(인식 = kn$인식비만, 측정 = kn$측정비만)
+tab_mc
+
+# 두 주변 비율 비교
+rowSums(tab_mc) / sum(tab_mc)   # 인식 비만 비율
+colSums(tab_mc) / sum(tab_mc)   # 측정 비만 비율
+
+mcnemar.test(tab_mc)                    # 연속성 보정 포함 (기본)
+mcnemar.test(tab_mc, correct = FALSE)
+
+b <- tab_mc["비만", "비만 아님"]        # 과대 인식
+c <- tab_mc["비만 아님", "비만"]        # 과소 인식
+binom.test(b, b + c, p = 0.5)          # 정확 McNemar
+
+cohens_g(tab_mc)                        # 효과크기 g = |b/(b+c) − 0.5|
+b / c                                   # 대응 오즈비
+
+# 비교: 같은 표에 독립성 검정을 하면? (다른 질문에 대한 답)
+chisq.test(tab_mc)</code></pre></div>
+
+    <div class="box caution">
+      <span class="label">복합표본설계와 가중치</span>
+      <p>국민건강영양조사는 층화·집락 추출과 가중치를 쓰는 복합표본조사입니다. 위 분석은 가중치를 무시한 단순 검정으로, 검정의 구조를 익히기 위한 교육용 단순화입니다. 모집단 추정치를 보고하려면 <code>survey</code> 패키지로 설계를 지정하고 가중치(<code>wt_itvex</code> 등)를 적용해야 하며, 이는 질병관리청 이용지침서의 권고이기도 합니다.</p>
+    </div>
+
+    <h3>8.3 같은 표, 다른 질문 (LSR 12.9)</h3>
+    <p>LSR은 같은 사람이 카드를 두 번 고른 4 × 4 표에 독립성 검정과 McNemar 검정을 모두 적용해, 결과가 다르게 나오는 것을 보여 줍니다. 첫 번째 선택이 두 번째 선택과 관련 있는가(독립성)와, 두 번째 선택의 무늬 분포가 첫 번째와 달라졌는가(주변 동질성)는 다른 질문이기 때문입니다. 체형 자료에서도 두 검정을 나란히 돌려, 각 p-value가 무엇에 대한 답인지 문장으로 써 보게 합니다.</p>
+    <p class="small">더 읽기: LSR 12.8–12.9 · Fagerland, Lydersen &amp; Laake (2013)</p>
+  </section>
+
+  <!-- ===================== 9 ===================== -->
+  <section class="ch" id="ch9">
+    <h2><span class="num">09</span>결과 보고와 로지스틱 회귀 예고</h2>
+    <h3>9.1 보고 양식</h3>
+    <p>검정 이름, 통계량과 자유도, 표본크기, p-value, 효과크기와 신뢰구간, 그리고 방향(어느 쪽이 더 큰가)을 함께 적습니다. 빈칸은 각자 분석한 결과로 채웁니다.</p>
+    <div class="box">
+      <span class="label">적합도</span>
+      <p>요일별 사망교통사고 건수는 균등분포에서 벗어났다, χ²(6, N = ___) = ___, p = ___, Cohen's w = ___ [95% CI ___, ___]. 표준화 잔차 기준으로 ___요일이 기대보다 많았다.</p>
+      <span class="label">독립성 (2 × 2)</span>
+      <p>차대사람 사고의 비율은 야간(___%)이 주간(___%)보다 높았다, χ²(1, N = ___) = ___ (Yates 보정), p = ___, 위험비 = ___ [95% CI ___, ___].</p>
+      <span class="label">McNemar</span>
+      <p>스스로 비만이라고 인식한 비율(___%)은 BMI 기준 비만 비율(___%)과 달랐다, McNemar χ²(1, N = ___) = ___, p = ___, Cohen's g = ___.</p>
+    </div>
+    <div class="box caution">
+      <span class="label">효과크기 해석 기준에 대해</span>
+      <p>Cohen(1988)의 w = .1/.3/.5, h = .2/.5/.8, g = .05/.15/.25를 작음·중간·큼으로 부르는 관례가 있지만, Cohen 스스로 다른 근거가 없을 때 쓰는 임시 기준이라고 밝혔습니다. 교통안전이나 공중보건에서는 "작은" 효과도 대상 인구가 크면 실질적 의미가 큽니다. <code>interpret_cramers_v()</code> 같은 함수의 출력은 출발점으로만 씁니다.</p>
+    </div>
+
+    <h3>9.2 다음 단계: 로지스틱 회귀</h3>
+    <p>2 × 2 표의 오즈비는 로지스틱 회귀에서 이분형 설명변수 하나를 넣었을 때의 \(\exp(\beta_1)\)과 같습니다. 분할표 검정은 설명변수가 하나뿐이고 범주형일 때의 특수한 경우이며, 연속형 공변량을 넣거나 여러 변수를 동시에 통제하려면 로지스틱 회귀로 넘어갑니다(James 외, 2013, 4.3절).</p>
+    <div class="code"><pre><code>fit <- glm(보행자사고 == "차대사람" ~ 주야, family = binomial, data = acc)
+summary(fit)
+exp(coef(fit))   # '주야야' 계수: 야간 대 주간의 오즈비
+
+oddsratio(tab22) # 주간 대 야간의 오즈비 → 위 값의 역수
+anova(fit, test = "Chisq")   # 가능도비 χ² 검정: 독립성 검정과 비슷한 값</code></pre></div>
+    <p>두 오즈비가 서로 역수로 나오는 것은 기준 범주가 반대이기 때문입니다. 표에서는 첫 행(주간)이, <code>glm()</code>에서는 첫 수준(주간)이 기준이지만 비교 방향이 뒤집혀 있습니다. 이 차이를 직접 확인하는 것이 로지스틱 회귀 차시로 넘어가는 좋은 연결 고리가 됩니다.</p>
+  </section>
+
+  <!-- ===================== refs ===================== -->
+  <footer class="refs ch" id="refs" style="padding-block:40px 8px">
+    <h2><span class="num">R</span>참고문헌</h2>
+    <ol>
+      <li>Agresti, A. (2019). <em>An introduction to categorical data analysis</em> (3rd ed.). Wiley.</li>
+      <li>Ben-Shachar, M. S., Lüdecke, D., &amp; Makowski, D. (2020). effectsize: Estimation of effect size indices and standardized parameters. <em>Journal of Open Source Software, 5</em>(56), 2815.</li>
+      <li>Blitzstein, J. K., &amp; Hwang, J. (2019). <em>Introduction to probability</em> (2nd ed.). CRC Press.</li>
+      <li>Campbell, I. (2007). Chi-squared and Fisher–Irwin tests of two-by-two tables with small sample recommendations. <em>Statistics in Medicine, 26</em>(19), 3661–3675.</li>
+      <li>Cohen, J. (1988). <em>Statistical power analysis for the behavioral sciences</em> (2nd ed.). Lawrence Erlbaum.</li>
+      <li>Fagerland, M. W., Lydersen, S., &amp; Laake, P. (2013). The McNemar test for binary matched-pairs data: Mid-p and asymptotic are better than exact conditional. <em>BMC Medical Research Methodology, 13</em>, 91.</li>
+      <li>James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2013). <em>An introduction to statistical learning: With applications in R</em>. Springer. (4장 Classification)</li>
+      <li>Kweon, S., Kim, Y., Jang, M., et al. (2014). Data resource profile: The Korea National Health and Nutrition Examination Survey (KNHANES). <em>International Journal of Epidemiology, 43</em>(1), 69–77.</li>
+      <li>Navarro, D. J. (2019). <em>Learning statistics with R: A tutorial for psychology students and other beginners</em> (Version 0.6.1). (12장 Categorical data analysis)</li>
+    </ol>
+    <h3>데이터 출처</h3>
+    <ul>
+      <li>도로교통공단, 「사망 교통사고 정보」, 공공데이터포털 (<a href="https://www.data.go.kr" target="_blank" rel="noopener">data.go.kr</a>). 경찰 조사·처리 교통사고 중 인적 피해 사고, 교통사고분석시스템(TAAS) 기반.</li>
+      <li>질병관리청, 「국민건강영양조사 원시자료」 (<a href="https://knhanes.kdca.go.kr" target="_blank" rel="noopener">knhanes.kdca.go.kr</a>). 연도별 원시자료 이용지침서 참조.</li>
+    </ul>
+  </footer>
+  </main>
+</div>
+<div id="tip" hidden role="tooltip"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- 함수 풍선 도움말 사전 ---------- */
+  var FN = {
+    "read_csv": { p: "CSV 파일을 tibble로 읽습니다 (readr).", a: [["file", 1, "파일 경로"], ["locale", 0, "인코딩 등 지역 설정. 공공데이터는 locale(encoding = \"CP949\")"], ["col_types", 0, "열 형식 직접 지정"]], r: "tibble (데이터프레임)" },
+    "locale": { p: "readr 읽기 함수의 지역 설정을 만듭니다.", a: [["encoding", 0, "문자 인코딩. 기본 UTF-8"]], r: "locale 객체" },
+    "read_excel": { p: "Excel(.xls/.xlsx) 시트를 읽습니다 (readxl).", a: [["path", 1, "파일 경로"], ["sheet", 0, "시트 이름 또는 번호"], ["range", 0, "읽을 셀 범위"]], r: "tibble" },
+    "read_sas": { p: "SAS 데이터 파일(.sas7bdat)을 읽습니다 (haven).", a: [["data_file", 1, "파일 경로"], ["col_select", 0, "읽을 열만 고르기"]], r: "tibble. 값 라벨은 labelled 형식으로 보존" },
+    "glimpse": { p: "열 이름, 형식, 앞부분 값을 가로로 훑어봅니다.", a: [["x", 1, "데이터프레임"]], r: "x를 그대로 (출력이 목적)" },
+    "select": { p: "필요한 열만 고릅니다 (dplyr).", a: [["...", 1, "열 이름 또는 선택 도우미"]], r: "고른 열만 남은 데이터프레임" },
+    "mutate": { p: "새 열을 만들거나 기존 열을 바꿉니다 (dplyr).", a: [["...", 1, "이름 = 계산식"]], r: "열이 추가·수정된 데이터프레임" },
+    "transmute": { p: "새로 계산한 열만 남깁니다 (dplyr).", a: [["...", 1, "이름 = 계산식"]], r: "지정한 열만 있는 데이터프레임" },
+    "filter": { p: "조건에 맞는 행만 남깁니다 (dplyr).", a: [["...", 1, "논리 조건"]], r: "행이 줄어든 데이터프레임" },
+    "rename": { p: "열 이름을 바꿉니다 (dplyr).", a: [["...", 1, "새이름 = 옛이름"]], r: "데이터프레임" },
+    "count": { p: "범주 조합별 행 수를 셉니다 (dplyr).", a: [["x", 1, "데이터프레임 (파이프로 전달)"], ["...", 0, "묶을 변수"], ["sort", 0, "TRUE면 많은 순 정렬"]], r: "변수 열 + n 열을 가진 데이터프레임" },
+    "table": { p: "범주별 빈도표·분할표를 만듭니다 (base).", a: [["...", 1, "범주형 벡터 1개(빈도표) 또는 2개(분할표)"], ["useNA", 0, "결측 포함 여부"]], r: "table 객체 (검정 함수에 바로 넣을 수 있음)" },
+    "xtabs": { p: "공식(formula)으로 분할표를 만듭니다 (stats).", a: [["formula", 1, "~ 행변수 + 열변수"], ["data", 1, "데이터프레임"]], r: "xtabs/table 객체" },
+    "tabyl": { p: "보기 좋은 교차표를 만듭니다 (janitor).", a: [["dat", 1, "데이터프레임"], ["var1, var2", 1, "행·열 변수"]], r: "tabyl 데이터프레임 (adorn_* 함수로 꾸밈)" },
+    "adorn_percentages": { p: "tabyl의 빈도를 비율로 바꿉니다.", a: [["denominator", 0, "\"row\", \"col\", \"all\""]], r: "비율이 담긴 tabyl" },
+    "adorn_pct_formatting": { p: "비율을 % 문자열로 표시합니다.", a: [["digits", 0, "소수 자릿수"]], r: "tabyl" },
+    "adorn_ns": { p: "% 옆에 원래 빈도를 괄호로 붙입니다.", a: [], r: "tabyl" },
+    "factor": { p: "범주형 변수와 수준 순서를 정합니다.", a: [["x", 1, "벡터"], ["levels", 0, "수준의 순서"]], r: "factor" },
+    "fct_lump_min": { p: "빈도가 min 미만인 수준을 하나로 묶습니다 (forcats).", a: [["f", 1, "factor"], ["min", 1, "최소 빈도"], ["other_level", 0, "묶은 수준의 이름"]], r: "factor" },
+    "if_else": { p: "조건에 따라 두 값 중 하나를 고릅니다 (dplyr, 형식 엄격).", a: [["condition", 1, "논리 벡터"], ["true", 1, "참일 때 값"], ["false", 1, "거짓일 때 값"]], r: "벡터" },
+    "write_csv": { p: "데이터프레임을 UTF-8 CSV로 저장합니다 (readr).", a: [["x", 1, "데이터프레임"], ["file", 1, "저장 경로"]], r: "x를 보이지 않게 반환" },
+    "chisq.test": { p: "Pearson χ² 검정. 1차원 표면 적합도, 2차원 표면 독립성 검정을 합니다.", a: [["x", 1, "빈도 벡터 또는 분할표"], ["p", 0, "적합도 검정의 귀무 확률 (합 1)"], ["correct", 0, "2 × 2에서 Yates 보정, 기본 TRUE"], ["simulate.p.value", 0, "몬테카를로 p-value 사용"], ["B", 0, "모의 반복 수"]], r: "htest 리스트: $statistic, $parameter(df), $p.value, $expected, $residuals, $stdres" },
+    "binom.test": { p: "단일 비율의 정확 이항검정.", a: [["x", 1, "성공 수 (또는 성공·실패 길이 2 벡터)"], ["n", 1, "시행 수 (x가 길이 2면 생략)"], ["p", 0, "귀무 비율, 기본 0.5"], ["alternative", 0, "\"two.sided\", \"less\", \"greater\""]], r: "htest: $p.value, $conf.int (Clopper-Pearson), $estimate" },
+    "prop.test": { p: "비율 검정(정규근사). 1개 비율 또는 여러 집단 비율 비교.", a: [["x", 1, "성공 수 벡터, 또는 성공·실패 2열 행렬/표"], ["n", 0, "시행 수 벡터 (x가 표면 생략)"], ["p", 0, "귀무 비율"], ["correct", 0, "연속성 보정, 기본 TRUE"]], r: "htest: $statistic(χ²), $p.value, $estimate, $conf.int" },
+    "fisher.test": { p: "분할표의 Fisher 정확검정 (초기하분포).", a: [["x", 1, "분할표"], ["alternative", 0, "2 × 2에서 방향 지정"], ["simulate.p.value", 0, "큰 r × c 표에서 모의 p-value"]], r: "htest: $p.value, 2 × 2이면 $estimate(조건부 MLE 오즈비)와 $conf.int" },
+    "mcnemar.test": { p: "대응 범주 자료의 McNemar 검정 (주변 동질성).", a: [["x", 1, "정방 분할표 (같은 대상의 두 판정)"], ["correct", 0, "2 × 2 연속성 보정, 기본 TRUE"]], r: "htest: $statistic, $parameter(df), $p.value" },
+    "cohens_w": { p: "적합도·독립성 χ²의 효과크기 w (effectsize).", a: [["x", 1, "빈도표 또는 분할표"], ["p", 0, "적합도 검정의 귀무 확률"], ["ci", 0, "신뢰수준, 기본 .95"]], r: "effectsize 데이터프레임: 추정치, CI" },
+    "cramers_v": { p: "r × c 표의 Cramér's V (effectsize).", a: [["x", 1, "분할표"], ["adjust", 0, "편향 보정, 기본 TRUE"], ["alternative", 0, "기본 \"greater\" (단측 CI)"]], r: "effectsize 데이터프레임" },
+    "phi": { p: "2 × 2 표의 φ 계수 (effectsize).", a: [["x", 1, "2 × 2 분할표"], ["adjust", 0, "편향 보정"]], r: "effectsize 데이터프레임" },
+    "oddsratio": { p: "2 × 2 표의 표본 오즈비 (ad/bc)와 CI (effectsize).", a: [["x", 1, "2 × 2 분할표"], ["log", 0, "로그 오즈비로 보고"]], r: "effectsize 데이터프레임" },
+    "riskratio": { p: "2 × 2 표의 위험비 (행1 비율 / 행2 비율)와 CI.", a: [["x", 1, "2 × 2 분할표 (첫 열이 사건)"], ["log", 0, "로그 척도"]], r: "effectsize 데이터프레임" },
+    "cohens_g": { p: "대응 2 × 2 표의 효과크기 g = |b/(b+c) − 0.5| (effectsize).", a: [["x", 1, "정방 분할표"]], r: "effectsize 데이터프레임" },
+    "interpret_cramers_v": { p: "V 값에 관례적 크기 라벨을 붙입니다.", a: [["v", 1, "V 값"], ["rules", 0, "기준 이름"]], r: "라벨 문자열" },
+    "prop.table": { p: "표를 비율로 바꿉니다 (base).", a: [["x", 1, "table"], ["margin", 0, "1 = 행 비율, 2 = 열 비율, 생략 = 전체"]], r: "비율 table" },
+    "rowSums": { p: "행 합계를 구합니다.", a: [["x", 1, "행렬·표"]], r: "숫자 벡터" },
+    "colSums": { p: "열 합계를 구합니다.", a: [["x", 1, "행렬·표"]], r: "숫자 벡터" },
+    "qnorm": { p: "표준정규분포의 분위수.", a: [["p", 1, "누적확률"]], r: "숫자" },
+    "wday": { p: "날짜의 요일 번호를 구합니다 (lubridate).", a: [["x", 1, "날짜"], ["week_start", 0, "1이면 월요일 = 1"], ["label", 0, "TRUE면 요일 이름"]], r: "정수 또는 factor" },
+    "tibble": { p: "데이터프레임을 만듭니다.", a: [["...", 1, "이름 = 벡터"]], r: "tibble" },
+    "seq": { p: "수열·날짜열을 만듭니다.", a: [["from, to", 1, "시작과 끝"], ["by", 0, "간격 (\"day\" 등)"]], r: "벡터" },
+    "ggplot": { p: "그래프를 시작합니다 (ggplot2).", a: [["data", 1, "데이터프레임"], ["mapping", 1, "aes(x, y, fill …)"]], r: "ggplot 객체 (+로 층을 쌓음)" },
+    "geom_tile": { p: "칸을 색으로 채운 타일 그림.", a: [["color", 0, "칸 테두리 색"]], r: "ggplot 층" },
+    "geom_text": { p: "그림 위에 글자를 씁니다.", a: [["aes(label)", 1, "표시할 값"]], r: "ggplot 층" },
+    "scale_fill_gradient2": { p: "중앙값을 기준으로 갈라지는 색 척도.", a: [["low, mid, high", 0, "양 끝과 중간 색"], ["midpoint", 0, "중앙 기준값"]], r: "ggplot 척도" },
+    "labs": { p: "제목·축·범례 이름을 정합니다.", a: [["title, x, y, fill", 0, "각 라벨"]], r: "ggplot 층" },
+    "ggsave": { p: "그림을 파일로 저장합니다.", a: [["filename", 1, "저장 경로 (output/ 아래)"], ["plot", 0, "ggplot 객체, 기본 마지막 그림"], ["width, height, dpi", 0, "크기와 해상도"]], r: "파일 경로를 보이지 않게 반환" },
+    "glm": { p: "일반화선형모형. family = binomial이면 로지스틱 회귀.", a: [["formula", 1, "반응 ~ 설명변수"], ["family", 1, "binomial"], ["data", 1, "데이터프레임"]], r: "glm 객체: coef(), summary(), anova()로 확인" },
+    "anova": { p: "모형의 이탈도 분석표. test = \"Chisq\"면 가능도비 검정.", a: [["object", 1, "glm 객체"], ["test", 0, "\"Chisq\""]], r: "anova 표" },
+    "install.packages": { p: "CRAN에서 패키지를 설치합니다.", a: [["pkgs", 1, "패키지 이름 벡터"], ["repos", 0, "저장소. 이 강의는 https://cloud.r-project.org/"]], r: "없음 (설치가 목적)" },
+    "library": { p: "설치된 패키지를 불러옵니다.", a: [["package", 1, "패키지 이름"]], r: "없음" },
+    "loadfonts": { p: "extrafont에 등록한 글꼴을 그래픽 장치에 불러옵니다.", a: [["device", 0, "Windows는 \"win\""], ["quiet", 0, "메시지 숨김"]], r: "없음" },
+    "theme_set": { p: "이후 모든 ggplot의 기본 테마를 정합니다.", a: [["new", 1, "테마 객체"]], r: "이전 테마" },
+    "theme_minimal": { p: "배경이 없는 간결한 테마.", a: [["base_family", 0, "글꼴 이름"]], r: "테마 객체" },
+    "summary": { p: "객체를 요약합니다. glm이면 계수표.", a: [["object", 1, "요약할 객체"]], r: "요약 객체" },
+    "exp": { p: "지수함수. 로지스틱 계수를 오즈비로 바꿀 때 씁니다.", a: [["x", 1, "숫자"]], r: "숫자" },
+    "coef": { p: "모형 계수를 꺼냅니다.", a: [["object", 1, "모형"]], r: "이름 붙은 숫자 벡터" }
+  };
+
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  var names = Object.keys(FN).sort(function (a, b) { return b.length - a.length; })
+    .map(function (n) { return n.replace(/\./g, "\\."); });
+  var fnRe = new RegExp("(^|[^\\w.])(" + names.join("|") + ")(?=\\()", "g");
+
+  function markFns(html) {
+    return html.replace(fnRe, function (m, pre, name) {
+      return pre + '<span class="fn" tabindex="0" data-fn="' + name + '">' + name + "</span>";
+    });
+  }
+  // 코드 블록: 주석 분리 후 함수 표시
+  document.querySelectorAll(".code pre code").forEach(function (el) {
+    var lines = el.textContent.split("\n").map(function (line) {
+      var idx = -1, inS = false, q = "";
+      for (var i = 0; i < line.length; i++) {
+        var ch = line[i];
+        if (inS) { if (ch === q) inS = false; }
+        else if (ch === '"' || ch === "'") { inS = true; q = ch; }
+        else if (ch === "#") { idx = i; break; }
+      }
+      var code = idx >= 0 ? line.slice(0, idx) : line;
+      var cm = idx >= 0 ? line.slice(idx) : "";
+      return markFns(esc(code)) + (cm ? '<span class="cm">' + esc(cm) + "</span>" : "");
+    });
+    el.innerHTML = lines.join("\n");
+  });
+  // 본문 인라인 코드
+  document.querySelectorAll("main p code, main li code, main td code").forEach(function (el) {
+    var t = el.textContent;
+    var name = t.replace(/\(.*$/, "");
+    if (FN[name]) el.innerHTML = '<span class="fn" tabindex="0" data-fn="' + name + '">' + esc(name) + "</span>" + esc(t.slice(name.length));
+  });
+
+  // 복사 버튼
+  document.querySelectorAll(".code").forEach(function (box) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "copy"; b.textContent = "복사";
+    b.addEventListener("click", function () {
+      var txt = box.querySelector("pre").innerText;
+      var done = function () { b.textContent = "복사됨"; setTimeout(function () { b.textContent = "복사"; }, 1400); };
+      try {
+        navigator.clipboard.writeText(txt).then(done, function () { selectPre(); });
+      } catch (e) { selectPre(); }
+      function selectPre() {
+        var r = document.createRange(); r.selectNodeContents(box.querySelector("pre"));
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        b.textContent = "선택됨 · Ctrl+C";
+      }
+    });
+    box.appendChild(b);
+  });
+
+  // 풍선 도움말
+  var tip = document.getElementById("tip");
+  function showTip(el) {
+    var d = FN[el.getAttribute("data-fn")]; if (!d) return;
+    var h = '<div class="t-name">' + esc(el.getAttribute("data-fn")) + "()</div><div>" + esc(d.p) + "</div>";
+    if (d.a.length) {
+      h += '<div class="t-sec">인수</div><ul>' + d.a.map(function (x) {
+        return "<li><code>" + esc(x[0]) + "</code> " + (x[1] ? '<span class="req">필수</span>' : '<span class="opt">선택</span>') + " " + esc(x[2]) + "</li>";
+      }).join("") + "</ul>";
+    }
+    h += '<div class="t-sec">반환값</div><div>' + esc(d.r) + "</div>";
+    tip.innerHTML = h; tip.hidden = false;
+    var r = el.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+    var left = Math.min(Math.max(16, r.left), window.innerWidth - tw - 16);
+    var top = r.bottom + 8;
+    if (top + th > window.innerHeight - 8) top = Math.max(8, r.top - th - 8);
+    tip.style.left = left + "px"; tip.style.top = top + "px";
+  }
+  function hideTip() { tip.hidden = true; }
+  document.addEventListener("mouseover", function (e) { var t = e.target.closest && e.target.closest(".fn"); if (t) showTip(t); });
+  document.addEventListener("mouseout", function (e) { var t = e.target.closest && e.target.closest(".fn"); if (t) hideTip(); });
+  document.addEventListener("focusin", function (e) { if (e.target.classList && e.target.classList.contains("fn")) showTip(e.target); });
+  document.addEventListener("focusout", function (e) { if (e.target.classList && e.target.classList.contains("fn")) hideTip(); });
+  document.addEventListener("click", function (e) { var t = e.target.closest && e.target.closest(".fn"); if (t) showTip(t); else hideTip(); });
+  window.addEventListener("scroll", hideTip, { passive: true });
+
+  /* ---------- 수치 함수 ---------- */
+  function lgamma(x) {
+    var c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
+    var y = x, t = x + 5.5; t -= (x + 0.5) * Math.log(t);
+    var s = 1.000000000190015;
+    for (var j = 0; j < 6; j++) s += c[j] / ++y;
+    return -t + Math.log(2.5066282746310005 * s / x);
+  }
+  function gammaP(a, x) {
+    if (x <= 0) return 0;
+    if (x < a + 1) {
+      var ap = a, sum = 1 / a, del = sum;
+      for (var n = 0; n < 500; n++) { ap++; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-14) break; }
+      return sum * Math.exp(-x + a * Math.log(x) - lgamma(a));
+    }
+    return 1 - gammaQcf(a, x);
+  }
+  function gammaQcf(a, x) {
+    var b = x + 1 - a, c = 1 / 1e-300, d = 1 / b, h = d;
+    for (var i = 1; i < 500; i++) {
+      var an = -i * (i - a); b += 2;
+      d = an * d + b; if (Math.abs(d) < 1e-300) d = 1e-300;
+      c = b + an / c; if (Math.abs(c) < 1e-300) c = 1e-300;
+      d = 1 / d; var del = d * c; h *= del; if (Math.abs(del - 1) < 1e-14) break;
+    }
+    return Math.exp(-x + a * Math.log(x) - lgamma(a)) * h;
+  }
+  function gammaQ(a, x) { if (x <= 0) return 1; return x < a + 1 ? 1 - gammaP(a, x) : gammaQcf(a, x); }
+  function chiUpper(x, k) { return gammaQ(k / 2, x / 2); }
+  function chiPdf(x, k) { if (x <= 0) return 0; return Math.exp((k / 2 - 1) * Math.log(x) - x / 2 - (k / 2) * Math.LN2 - lgamma(k / 2)); }
+  function chiCrit(k, alpha) {
+    var lo = 0, hi = 200;
+    for (var i = 0; i < 100; i++) { var m = (lo + hi) / 2; if (chiUpper(m, k) > alpha) lo = m; else hi = m; }
+    return (lo + hi) / 2;
+  }
+  function lchoose(n, k) { return lgamma(n + 1) - lgamma(k + 1) - lgamma(n - k + 1); }
+  function lfact(n) { return n < 2 ? 0 : lgamma(n + 1); }
+  function lch(n, k) { return lfact(n) - lfact(k) - lfact(n - k); }
+  function binomPmf(i, n, p) {
+    if (p <= 0) return i === 0 ? 1 : 0; if (p >= 1) return i === n ? 1 : 0;
+    return Math.exp(lch(n, i) + i * Math.log(p) + (n - i) * Math.log(1 - p));
+  }
+  function binomTwoSided(x, n, p) {
+    var px = binomPmf(x, n, p), s = 0;
+    for (var i = 0; i <= n; i++) { var q = binomPmf(i, n, p); if (q <= px * (1 + 1e-7)) s += q; }
+    return Math.min(1, s);
+  }
+  function fmtP(p) {
+    if (!isFinite(p)) return "-";
+    if (p < 0.0001) return "< .0001";
+    return p.toFixed(4).replace(/^0/, "");
+  }
+  function fmt(x, d) { return isFinite(x) ? x.toFixed(d) : "∞"; }
+  function svgEl(svg, h) { svg.innerHTML = h; }
+
+  /* ---------- 위젯 1: χ² 탐색기 ---------- */
+  (function () {
+    var dfIn = document.getElementById("chi-df"), xIn = document.getElementById("chi-x");
+    var svg = document.getElementById("chi-svg");
+    function draw() {
+      var k = +dfIn.value, x = Math.max(0, +xIn.value || 0);
+      document.getElementById("chi-df-out").textContent = k;
+      var crit = chiCrit(k, 0.05);
+      var xmax = Math.max(k + 4 * Math.sqrt(2 * k) + 4, x * 1.15, crit * 1.15);
+      var W = 640, H = 260, L = 44, R = 16, T = 18, B = 34, pw = W - L - R, ph = H - T - B;
+      var N = 240, pts = [], ymax = 0, i, xv, yv;
+      for (i = 0; i <= N; i++) { xv = xmax * i / N; yv = chiPdf(Math.max(xv, xmax * 0.002), k); pts.push([xv, yv]); }
+      var ycap = 0;
+      pts.forEach(function (q) { if (q[0] > xmax * 0.02 || k > 2) ycap = Math.max(ycap, q[1]); });
+      ymax = (k <= 2 ? Math.min(ycap * 1.6, 1.2) : ycap * 1.12) || 1;
+      function sx(v) { return L + pw * v / xmax; }
+      function sy(v) { return T + ph - ph * Math.min(v, ymax) / ymax; }
+      var d = pts.map(function (q, j) { return (j ? "L" : "M") + sx(q[0]).toFixed(1) + " " + sy(q[1]).toFixed(1); }).join(" ");
+      var tail = "M" + sx(Math.min(x, xmax)).toFixed(1) + " " + sy(0).toFixed(1);
+      pts.forEach(function (q) { if (q[0] >= x) tail += " L" + sx(q[0]).toFixed(1) + " " + sy(q[1]).toFixed(1); });
+      tail += " L" + sx(xmax).toFixed(1) + " " + sy(0).toFixed(1) + " Z";
+      var ticks = "", step = xmax > 60 ? 20 : xmax > 30 ? 10 : xmax > 12 ? 5 : 2;
+      for (var t = 0; t <= xmax + 1e-9; t += step) {
+        ticks += '<line class="axis" x1="' + sx(t) + '" x2="' + sx(t) + '" y1="' + (T + ph) + '" y2="' + (T + ph + 5) + '"/>' +
+          '<text class="tick" x="' + sx(t) + '" y="' + (T + ph + 19) + '" text-anchor="middle">' + t + "</text>";
+      }
+      var xs = sx(Math.min(x, xmax)), xc = sx(crit);
+      var pv = chiUpper(x, k);
+      var anchor = xs > W - 140 ? "end" : "start", off = anchor === "end" ? -6 : 6;
+      svgEl(svg,
+        (x <= xmax ? '<path class="tailfill" d="' + tail + '"/>' : "") +
+        '<path class="curve" d="' + d + '"/>' +
+        '<line class="axis" x1="' + L + '" x2="' + (W - R) + '" y1="' + (T + ph) + '" y2="' + (T + ph) + '"/>' + ticks +
+        '<line class="crit" x1="' + xc + '" x2="' + xc + '" y1="' + T + '" y2="' + (T + ph) + '"/>' +
+        '<text class="lblw" x="' + (xc + 4) + '" y="' + (T + 10) + '">임계값 ' + crit.toFixed(2) + "</text>" +
+        '<line class="stat" x1="' + xs + '" x2="' + xs + '" y1="' + (T + 16) + '" y2="' + (T + ph) + '"/>' +
+        '<text class="lbl" x="' + (xs + off) + '" y="' + (T + 30) + '" text-anchor="' + anchor + '">χ² = ' + x.toFixed(2) + "</text>" +
+        '<text class="tick" x="' + (W - R) + '" y="' + (T + ph + 32) + '" text-anchor="end">χ² (df = ' + k + ")</text>");
+      document.getElementById("chi-p").textContent = fmtP(pv);
+      document.getElementById("chi-p").classList.toggle("sig", pv < 0.05);
+      document.getElementById("chi-crit").textContent = crit.toFixed(3);
+      document.getElementById("chi-dec").textContent = pv < 0.05 ? "H₀ 기각" : "H₀ 기각 못 함";
+    }
+    dfIn.addEventListener("input", draw); xIn.addEventListener("input", draw);
+    document.querySelectorAll("#lab-chi [data-df]").forEach(function (b) {
+      b.addEventListener("click", function () { dfIn.value = b.dataset.df; xIn.value = b.dataset.x; draw(); });
+    });
+    draw();
+  })();
+
+  /* ---------- 위젯 2: 이항 vs 정규 ---------- */
+  (function () {
+    var nIn = document.getElementById("bn-n"), pIn = document.getElementById("bn-p"), xIn = document.getElementById("bn-x");
+    var svg = document.getElementById("bn-svg");
+    function draw() {
+      var n = +nIn.value, p = +pIn.value;
+      xIn.max = n; if (+xIn.value > n) xIn.value = n;
+      var x = +xIn.value;
+      document.getElementById("bn-n-out").textContent = n;
+      document.getElementById("bn-p-out").textContent = p.toFixed(2);
+      document.getElementById("bn-x-out").textContent = x;
+      var W = 640, H = 240, L = 20, R = 16, T = 14, B = 30, pw = W - L - R, ph = H - T - B;
+      var px = binomPmf(x, n, p), pm = [], ymax = 0, i;
+      for (i = 0; i <= n; i++) { pm.push(binomPmf(i, n, p)); ymax = Math.max(ymax, pm[i]); }
+      var mu = n * p, sd = Math.sqrt(n * p * (1 - p));
+      ymax = Math.max(ymax, 1 / (sd * Math.sqrt(2 * Math.PI))) * 1.1;
+      var bw = pw / (n + 1), h = "";
+      function sy(v) { return T + ph - ph * v / ymax; }
+      for (i = 0; i <= n; i++) {
+        var hit = pm[i] <= px * (1 + 1e-7);
+        h += '<rect class="bar' + (hit ? " hit" : "") + '" x="' + (L + i * bw + bw * 0.12).toFixed(1) + '" y="' + sy(pm[i]).toFixed(1) +
+          '" width="' + Math.max(0.6, bw * 0.76).toFixed(1) + '" height="' + (T + ph - sy(pm[i])).toFixed(1) + '"/>';
+      }
+      var d = "";
+      for (i = 0; i <= 200; i++) {
+        var xv = -0.5 + (n + 1) * i / 200, yv = Math.exp(-0.5 * Math.pow((xv - mu) / sd, 2)) / (sd * Math.sqrt(2 * Math.PI));
+        d += (i ? "L" : "M") + (L + (xv + 0.5) * bw).toFixed(1) + " " + sy(yv).toFixed(1);
+      }
+      h += '<path class="norm" d="' + d + '"/>';
+      h += '<line class="axis" x1="' + L + '" x2="' + (W - R) + '" y1="' + (T + ph) + '" y2="' + (T + ph) + '"/>';
+      var step = n > 100 ? 20 : n > 40 ? 10 : n > 15 ? 5 : 1;
+      for (i = 0; i <= n; i += step) h += '<text class="tick" x="' + (L + (i + 0.5) * bw).toFixed(1) + '" y="' + (T + ph + 16) + '" text-anchor="middle">' + i + "</text>";
+      var xs = L + (x + 0.5) * bw;
+      h += '<line class="stat" x1="' + xs + '" x2="' + xs + '" y1="' + T + '" y2="' + (T + ph) + '"/>';
+      svgEl(svg, h);
+      var pe = binomTwoSided(x, n, p);
+      var yates = Math.min(0.5, Math.abs(x - n * p));
+      var x2 = Math.pow(Math.abs(x - n * p) - yates, 2) / (n * p * (1 - p));
+      var pa = chiUpper(x2, 1);
+      var hh = 2 * Math.asin(Math.sqrt(x / n)) - 2 * Math.asin(Math.sqrt(p));
+      document.getElementById("bn-pe").textContent = fmtP(pe);
+      document.getElementById("bn-pa").textContent = fmtP(pa);
+      document.getElementById("bn-pe").classList.toggle("sig", pe < 0.05);
+      document.getElementById("bn-pa").classList.toggle("sig", pa < 0.05);
+      document.getElementById("bn-np").textContent = (n * p).toFixed(1) + " · " + (n * (1 - p)).toFixed(1);
+      document.getElementById("bn-h").textContent = hh.toFixed(3);
+    }
+    [nIn, pIn, xIn].forEach(function (el) { el.addEventListener("input", draw); });
+    draw();
+  })();
+
+  /* ---------- 위젯 3: 2 x 2 ---------- */
+  (function () {
+    var ids = ["a", "b", "c", "d"], inp = {};
+    ids.forEach(function (k) { inp[k] = document.getElementById("t-" + k); });
+    var labels = {
+      "620,980,710,690": ["주간", "야간", "차대사람", "그 외"],
+      "3,3,10,0": ["행복하지 않음", "행복함", "화형 아님", "화형 중"],
+      "9,6,4,8": ["주간", "야간", "차대사람", "그 외"]
+    };
+    function setLabels(l) {
+      document.getElementById("g-r1").textContent = l[0]; document.getElementById("g-r2").textContent = l[1];
+      document.getElementById("g-c1").textContent = l[2]; document.getElementById("g-c2").textContent = l[3];
+    }
+    function fisher(a, b, c, d) {
+      var r1 = a + b, r2 = c + d, c1 = a + c, n = r1 + r2;
+      var lo = Math.max(0, c1 - r2), hi = Math.min(r1, c1);
+      function lp(x) { return lch(r1, x) + lch(r2, c1 - x) - lch(n, c1); }
+      var pobs = lp(a), s = 0;
+      for (var x = lo; x <= hi; x++) { var v = lp(x); if (v <= pobs + 1e-7) s += Math.exp(v); }
+      return Math.min(1, s);
+    }
+    function calc() {
+      var a = Math.max(0, Math.round(+inp.a.value || 0)), b = Math.max(0, Math.round(+inp.b.value || 0)),
+          c = Math.max(0, Math.round(+inp.c.value || 0)), d = Math.max(0, Math.round(+inp.d.value || 0));
+      var r1 = a + b, r2 = c + d, c1 = a + c, c2 = b + d, n = r1 + r2;
+      document.getElementById("r1").textContent = r1; document.getElementById("r2").textContent = r2;
+      document.getElementById("c1").textContent = c1; document.getElementById("c2").textContent = c2;
+      document.getElementById("nn").textContent = n;
+      var warn = document.getElementById("o-warn");
+      var outs = ["o-x2", "o-p", "o-x2y", "o-py", "o-pf", "o-phi", "o-or", "o-rr"];
+      if (!r1 || !r2 || !c1 || !c2) {
+        outs.forEach(function (id) { document.getElementById(id).textContent = "-"; });
+        ids.forEach(function (k) { document.getElementById("e-" + k).textContent = ""; });
+        warn.hidden = false; warn.textContent = "행 합이나 열 합이 0이면 검정을 할 수 없습니다.";
+        return;
+      }
+      var O = [a, b, c, d], E = [r1 * c1 / n, r1 * c2 / n, r2 * c1 / n, r2 * c2 / n];
+      var low = 0, x2 = 0, x2y = 0, yates = Infinity, i;
+      for (i = 0; i < 4; i++) yates = Math.min(yates, Math.abs(O[i] - E[i]));
+      yates = Math.min(0.5, yates);
+      for (i = 0; i < 4; i++) {
+        x2 += Math.pow(O[i] - E[i], 2) / E[i];
+        x2y += Math.pow(Math.abs(O[i] - E[i]) - yates, 2) / E[i];
+        var e = document.getElementById("e-" + ids[i]);
+        e.textContent = "(" + E[i].toFixed(1) + ")";
+        e.classList.toggle("low", E[i] < 5);
+        if (E[i] < 5) low++;
+      }
+      var p = chiUpper(x2, 1), py = chiUpper(x2y, 1), pf = fisher(a, b, c, d);
+      var phi = (a * d - b * c) / Math.sqrt(r1 * r2 * c1 * c2);
+      var or = (b * c === 0) ? (a * d === 0 ? NaN : Infinity) : a * d / (b * c);
+      var rr = (c === 0) ? (a === 0 ? NaN : Infinity) : (a / r1) / (c / r2);
+      document.getElementById("o-x2").textContent = x2.toFixed(3);
+      document.getElementById("o-p").textContent = fmtP(p);
+      document.getElementById("o-x2y").textContent = x2y.toFixed(3);
+      document.getElementById("o-py").textContent = fmtP(py);
+      document.getElementById("o-pf").textContent = fmtP(pf);
+      [["o-p", p], ["o-py", py], ["o-pf", pf]].forEach(function (q) { document.getElementById(q[0]).classList.toggle("sig", q[1] < 0.05); });
+      document.getElementById("o-phi").textContent = phi.toFixed(3);
+      document.getElementById("o-or").textContent = isNaN(or) ? "정의 안 됨" : (isFinite(or) ? or.toFixed(3) : "∞ (0인 칸)");
+      document.getElementById("o-rr").textContent = isNaN(rr) ? "정의 안 됨" : (isFinite(rr) ? rr.toFixed(3) : "∞ (0인 칸)");
+      if (low) { warn.hidden = false; warn.textContent = "기대도수 5 미만인 칸이 " + low + "개입니다. χ² 근사보다 Fisher 정확검정 결과를 우선 봅니다."; }
+      else warn.hidden = true;
+    }
+    function load(str) {
+      var v = str.split(",");
+      ids.forEach(function (k, i) { inp[k].value = v[i]; });
+      setLabels(labels[str] || ["행 1", "행 2", "열 1", "열 2"]);
+      calc();
+    }
+    ids.forEach(function (k) { inp[k].addEventListener("input", function () { setLabels(["행 1", "행 2", "열 1", "열 2"]); calc(); }); });
+    document.querySelectorAll("#lab-22 [data-t]").forEach(function (b) { b.addEventListener("click", function () { load(b.dataset.t); }); });
+    load("620,980,710,690");
+  })();
+
+  /* ---------- 위젯 4: McNemar ---------- */
+  (function () {
+    var ids = ["a", "b", "c", "d"], inp = {};
+    ids.forEach(function (k) { inp[k] = document.getElementById("m-" + k); });
+    function calc() {
+      var a = Math.max(0, +inp.a.value || 0), b = Math.max(0, Math.round(+inp.b.value || 0)),
+          c = Math.max(0, Math.round(+inp.c.value || 0)), d = Math.max(0, +inp.d.value || 0);
+      var n = a + b + c + d;
+      var set = function (id, v) { document.getElementById(id).textContent = v; };
+      set("m-p1", n ? ((a + b) / n * 100).toFixed(1) + "%" : "-");
+      set("m-p2", n ? ((a + c) / n * 100).toFixed(1) + "%" : "-");
+      if (b + c === 0) { ["m-x2", "m-p", "m-pn", "m-pe", "m-g", "m-or"].forEach(function (id) { set(id, "-"); }); return; }
+      var x2 = Math.pow(Math.abs(b - c) - 1, 2) / (b + c);
+      var x2n = Math.pow(b - c, 2) / (b + c);
+      var p = chiUpper(x2, 1), pn = chiUpper(x2n, 1), pe = binomTwoSided(b, b + c, 0.5);
+      set("m-x2", x2.toFixed(3)); set("m-p", fmtP(p)); set("m-pn", fmtP(pn)); set("m-pe", fmtP(pe));
+      [["m-p", p], ["m-pn", pn], ["m-pe", pe]].forEach(function (q) { document.getElementById(q[0]).classList.toggle("sig", q[1] < 0.05); });
+      set("m-g", Math.abs(b / (b + c) - 0.5).toFixed(3));
+      set("m-or", c === 0 ? "∞" : (b / c).toFixed(3));
+    }
+    ids.forEach(function (k) { inp[k].addEventListener("input", calc); });
+    document.querySelectorAll("#lab-mc [data-m]").forEach(function (btn) {
+      btn.addEventListener("click", function () { var v = btn.dataset.m.split(","); ids.forEach(function (k, i) { inp[k].value = v[i]; }); calc(); });
+    });
+    var v0 = "5,25,5,65".split(","); ids.forEach(function (k, i) { inp[k].value = v0[i]; }); calc();
+  })();
+})();
+</script>
+
+</body></html>
