@@ -54,6 +54,19 @@
   /* 프롬프트 구성요소와 확인할 것 */
   table.parts td:first-child, table.check td:first-child { font-weight: 600; white-space: nowrap; }
   table.parts td:first-child code { font-weight: 600; }
+  /* 보고서용 APA 표: 가로선만, 표 번호는 굵게, 제목은 기울임꼴 */
+  table.apa { border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); margin: 6px 0 0; background: var(--surface); }
+  table.apa caption { caption-side: top; text-align: left; padding: 0 0 8px; line-height: 1.5; color: var(--ink); font-size: 15px; }
+  table.apa th { border-bottom: 1px solid var(--ink); color: var(--ink); font-weight: 500; text-align: center; white-space: nowrap; }
+  table.apa td { border-bottom: 0; text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  table.apa th:first-child, table.apa td:first-child { text-align: left; }
+  table.apa tr.last td { border-bottom: 0; }
+  table.apa tr.total td { border-top: 1px solid var(--line); }
+  table.apa td.ph { white-space: normal; text-align: left; vertical-align: middle; }
+  table.stat.steps td { text-align: left; }
+  table.stat.steps td:nth-last-child(-n+2) { text-align: right; }
+  table.stat.steps th:nth-child(2) { text-align: left; }
+  .apa-note { font-size: 13.5px; color: var(--muted); margin: 8px 0 0; }
   @media (max-width: 640px) { .fig { padding: 12px 12px 10px; } }
 </style>
 <script defer src="../assets/katex/katex.min.js"></script>
@@ -92,12 +105,22 @@
 <p class="lede">분산분석(analysis of variance, ANOVA)은 세 개 이상의 평균(mean)을 한 번에 비교하는 방법이다. 왜 "평균"이 아니라 "분산(variance)"을 나누는지를 일원배치에서 먼저 확인한다. 같은 논리를 이원배치, 반복측정, 혼합 설계로 넓혀 간다. 설계마다 가정을 점검하고, 분산분석표를 읽고, 유의하면 사후검정이나 단순 주효과로 내려가는 순서를 같은 틀로 반복한다. 모든 수치는 R 내장 데이터셋으로 계산했고, 절마다 프롬프트의 구성요소를 먼저 설명하고, 분석과 APA 형식의 Word 결과보고서를 맡기는 프롬프트를 둔 뒤, 비교해 볼 R 코드와 확인할 것을 정리했다.</p>
 <dl class="facts">
 <div><dt>도구</dt><dd>R과 tidyverse, car, rstatix, showtext, VS Code. 결과보고서에는 <a href="../data-science/nvm-node-agent-skills.html">Node.js 24와 docx 스킬</a>도 쓴다. 설치는 <a href="../data-science/VScode-R-languageserver.html">VS Code에서 R 실행하기</a>에, 스크립트를 한 줄씩 실행하는 방법은 <a href="prepare-for-ttest.html#s1">t 검정을 위한 데이터 준비</a>에 있다.</dd></div>
-<div><dt>예제 데이터</dt><dd>R 내장 <code>PlantGrowth</code>(일원배치), <code>ToothGrowth</code>(이원배치), <code>ChickWeight</code>(반복측정·혼합). 모두 실제 실험 자료다.</dd></div>
+<div><dt>예제 데이터</dt><dd>R 내장 <code>PlantGrowth</code>(일원배치), <code>ToothGrowth</code>(이원배치), <code>ChickWeight</code>(반복측정·혼합). 모두 실제 실험 자료다. 자세한 내용은 <a href="#data">아래 표</a>에 있다.</dd></div>
 <div><dt>다루는 설계</dt><dd>일원배치, 이원배치(교호작용), 일원 반복측정(구형성), 개체 간 요인 1개 + 반복측정 요인 1개의 혼합 설계</dd></div>
 <div><dt>앞서 볼 자료</dt><dd>두 평균의 비교는 <a href="mean-test-with-r.html">모집단 평균에 대한 가설검정</a>, 검정의 논리는 <a href="hypothesis-testing.html">통계적 가설검정</a>에서 다루었다.</dd></div>
 <div><dt>효과크기</dt><dd>\(\eta^2\), 부분 \(\eta^2\), 일반화 \(\eta^2\)(ges), 사후비교의 Hedges g</dd></div>
 <div><dt>함수 도움말</dt><dd>코드에서 점선 밑줄이 있는 함수 이름에 마우스를 올리면(휴대폰은 누르면) 목적, 인수, 반환값이 나타난다.</dd></div>
 </dl>
+<h3 id="data">이 자료에서 쓰는 데이터</h3>
+<p>네 자료 모두 R을 설치하면 함께 들어 있는 실제 실험·조사 자료여서 따로 내려받지 않아도 된다. R 콘솔에 자료 이름(예: <code>PlantGrowth</code>)을 치면 내용을, <code>?PlantGrowth</code>를 치면 설명을 볼 수 있다.</p>
+<div class="scroll"><table class="parts">
+<thead><tr><th>자료</th><th>쓰는 절</th><th>무엇을 잰 자료인가</th><th>변수</th><th>크기</th></tr></thead>
+<tbody>
+<tr><td><code>PlantGrowth</code></td><td><a href="#oneway">01 일원배치</a></td><td>대조군과 두 가지 처리에서 기른 식물의 수확량을 건조 중량으로 비교한 실험(Dobson, 1983)</td><td><code>weight</code> 건조 중량, <code>group</code> 집단(ctrl, trt1, trt2)</td><td>30개체, 집단마다 10</td></tr>
+<tr><td><code>ToothGrowth</code></td><td><a href="#twoway">02 이원배치</a></td><td>기니피그 60마리에게 비타민 C를 보충 방법 2가지와 용량 3가지로 나누어 주고 상아질 세포(치아를 자라게 하는 세포)의 길이를 잰 실험(Crampton, 1947)</td><td><code>len</code> 세포 길이, <code>supp</code> 보충 방법(OJ 오렌지주스, VC 아스코르브산), <code>dose</code> 용량(0.5, 1, 2 mg/일)</td><td>60마리, 6칸에 10마리씩</td></tr>
+<tr><td><code>ChickWeight</code></td><td><a href="#rm">03 반복측정</a>, <a href="#mixed">04 혼합 설계</a></td><td>병아리 50마리를 네 가지 사료로 나누어 기르며 태어난 날부터 21일까지 체중을 거듭 잰 실험(Crowder &amp; Hand, 1990)</td><td><code>weight</code> 체중(g), <code>Time</code> 태어난 뒤 날수(0, 2, …, 20, 21일), <code>Chick</code> 병아리 번호, <code>Diet</code> 사료(1~4)</td><td>578행. 이 자료에서는 12번 모두 측정된 45마리(사료별 16, 10, 10, 9)의 6·12·18일만 쓴다</td></tr>
+<tr><td><code>mtcars</code></td><td><a href="#ss-types">02절 펼침 상자</a></td><td>1974년 미국 자동차 잡지 <i>Motor Trend</i>에 실린 자동차 32종의 성능 자료(Henderson &amp; Velleman, 1981)</td><td><code>mpg</code> 연비(마일/갤런), <code>am</code> 변속기(0 자동, 1 수동), <code>cyl</code> 기통 수(4, 6, 8) 외 8개</td><td>32대. 칸마다 대수가 달라 제곱합 유형의 차이를 보이는 데 쓴다</td></tr>
+</tbody></table></div>
 </header>
 
 <section class="panel" id="oneway">
@@ -145,10 +168,10 @@
 <p>분산분석의 핵심은 모든 관측값의 편차를 두 조각으로 쪼개는 항등식이다. 하나는 "집단이 달라서 생긴 차이", 다른 하나는 "같은 집단 안에서도 생기는 차이"다.</p>
 <div class="readout math">
 \[\underbrace{(y_{ij} - \bar{y})}_{\text{전체 편차}} = \underbrace{(\bar{y}_j - \bar{y})}_{\text{집단 간 편차}} + \underbrace{(y_{ij} - \bar{y}_j)}_{\text{집단 내 편차}}\]
-\[\text{제곱해서 모두 더하면 교차항이 0이 되어}\qquad \mathit{SST} = \mathit{SSB} + \mathit{SSW} \qquad 14.258 = 3.766 + 10.492\]
+\[\text{제곱해서 모두 더하면 교차항이 0이 되어}\qquad \mathit{SST} = \mathit{SSTrt} + \mathit{SSE} \qquad 14.258 = 3.766 + 10.492\]
 \[\mathit{df}:\quad N - 1 = (k - 1) + (N - k) \qquad 29 = 2 + 27\]
 </div>
-<p>아래 그림에서 단계를 바꿔 가며 확인한다. 점 하나를 누르면 그 관측값의 편차가 두 조각으로 나뉘는 계산이 나온다.</p>
+<p>\(\mathit{SSTrt}\)는 요인, 곧 처리(treatment)에 의한 변동이고 \(\mathit{SSE}\)는 오차(error)에 의한 변동이다. 평균제곱도 같은 방식으로 \(\mathit{MSTrt}\), \(\mathit{MSE}\)로 쓴다. 아래 그림에서 단계를 바꿔 가며 확인한다. 점 하나를 누르면 그 관측값의 편차가 두 조각으로 나뉘는 계산이 나온다.</p>
 <div class="fig">
   <div class="modes" role="group" aria-label="분해 단계" id="dc-ctrls">
     <button type="button" data-m="0" aria-pressed="false">① 전체 평균선</button>
@@ -170,10 +193,10 @@
 <h4>자유도와 평균제곱, F</h4>
 <p>제곱합(sum of squares, SS)은 더하는 항의 개수가 많을수록 커지므로, 자유도(degrees of freedom, df)로 나누어 "편차 하나당 평균 크기"인 평균제곱(MS)으로 바꾼다. 집단 간 자유도가 \(k - 1\)인 이유는 k개의 집단 평균(group mean)이 전체 평균(grand mean)을 중심으로 합이 0이 되도록 묶여 있기 때문이고, 집단 내 자유도가 \(N - k\)인 이유는 각 집단에서 평균을 하나씩 추정하느라 자유도를 하나씩 쓰기 때문이다.</p>
 <div class="readout math">
-\[\mathit{MSB} = \frac{\mathit{SSB}}{k - 1} = \frac{3.766}{2} = 1.883, \qquad \mathit{MSW} = \frac{\mathit{SSW}}{N - k} = \frac{10.492}{27} = 0.389\ (= \hat{\sigma}^2,\ \text{합동분산})\]
-\[F = \frac{\mathit{MSB}}{\mathit{MSW}} = 4.846 \;\sim\; F(2,\ 27) \quad (\text{under } H_0)\]
+\[\mathit{MSTrt} = \frac{\mathit{SSTrt}}{k - 1} = \frac{3.766}{2} = 1.883, \qquad \mathit{MSE} = \frac{\mathit{SSE}}{N - k} = \frac{10.492}{27} = 0.389\ (= \hat{\sigma}^2,\ \text{합동분산})\]
+\[F = \frac{\mathit{MSTrt}}{\mathit{MSE}} = 4.846 \;\sim\; F(2,\ 27) \quad (\text{under } H_0)\]
 </div>
-<p>영가설이 참이면 MSB와 MSW는 모두 \(\sigma^2\)을 추정하므로 F는 1 근처에 있다. 집단 평균이 다르면 MSB에 처리효과(treatment effect) \(n \sum_j \tau_j^2 / (k - 1)\)가 더해져 F가 커진다.</p>
+<p>영가설이 참이면 MSTrt와 MSE는 모두 \(\sigma^2\)을 추정하므로 F는 1 근처에 있다. 집단 평균이 다르면 MSTrt에 처리효과(treatment effect) \(n \sum_j \tau_j^2 / (k - 1)\)가 더해져 F가 커진다.</p>
 <div class="scroll"><table class="stat">
 <caption>표 3. 일원배치 분산분석표(ANOVA table)</caption>
 <thead><tr><th>요인</th><th>df</th><th>SS</th><th>MS</th><th>F</th><th>p</th><th>η²</th></tr></thead>
@@ -184,7 +207,7 @@
 </tbody></table></div>
 <div class="fig">
   <svg id="fdist1" viewBox="0 0 640 230" role="img" aria-label="F(2,27) 분포와 관측 F"></svg>
-  <p class="figcap">영가설 하(under \(H_0\))의 F(2, 27) 분포. 임계값(critical value) F<sub>.05</sub> = 3.354, 관측값 F = 4.846의 오른쪽 꼬리 면적이 p = .0159다. 효과크기(effect size) \(\eta^2 = \mathit{SSB}/\mathit{SST} = .264\)로, 중량 변동의 약 26%가 처리 차이로 설명된다.</p>
+  <p class="figcap">영가설 하(under \(H_0\))의 F(2, 27) 분포. 임계값(critical value) F<sub>.05</sub> = 3.354, 관측값 F = 4.846의 오른쪽 꼬리 면적이 p = .0159다. 효과크기(effect size) \(\eta^2 = \mathit{SSTrt}/\mathit{SST} = .264\)로, 중량 변동의 약 26%가 처리 차이로 설명된다.</p>
 </div>
 
 <h3>사후검정 (post hoc)</h3>
@@ -203,26 +226,12 @@
   <p class="figcap">Tukey HSD의 95% 동시신뢰구간(confidence interval, CI). 0을 지나지 않는 구간은 trt2 − trt1 하나뿐이다. 두 처리 모두 대조군과는 유의하게 다르지 않지만, 처리끼리는 trt2가 trt1보다 평균 0.865 무겁다. 표 4의 Bonferroni 구간도 같은 결론이고, 폭은 조금 더 넓다.</p>
 </div>
 
-<h4>계산 과정: Tukey HSD</h4>
-<p>두 평균의 차이를 평균의 표준오차(standard error, SE)로 나눈 q가 스튜던트화 범위분포(studentized range distribution)를 따른다는 것을 이용한다. 이 분포는 집단이 k개일 때 가장 큰 평균과 가장 작은 평균의 차이를 다루므로, 모든 쌍을 비교해도 가족단위 오류율이 \(\alpha\)로 유지된다. 평균 차이(mean difference)가 임계 차이(critical difference) HSD보다 크면 유의하다.</p>
-<div class="readout math">
-\[q = \frac{|\bar{y}_a - \bar{y}_b|}{\sqrt{\mathit{MSW}/n}} = \frac{0.865}{\sqrt{0.3886/10}} = \frac{0.865}{0.1971} = 4.39\]
-\[\mathit{HSD} = q_{.05;\,k,\,N-k}\sqrt{\mathit{MSW}/n} = 3.506 \times 0.1971 = 0.691 \qquad (\text{trt2} - \text{trt1}:\ 0.865 \pm 0.691 = [0.174,\ 1.556])\]
-</div>
-<h4>계산 과정: Bonferroni</h4>
-<p>합동 분산으로 쌍마다 t 검정을 한 뒤, p에 비교 횟수 m을 곱한다. 1을 넘으면 1로 둔다. 신뢰구간에는 \(\alpha\)를 m으로 나눈 임계값을 쓴다. 여기서는 세 쌍이므로 m = 3이다.</p>
-<div class="readout math">
-\[t = \frac{\bar{y}_a - \bar{y}_b}{\sqrt{\mathit{MSW}\,(1/n_a + 1/n_b)}} = \frac{0.865}{\sqrt{0.3886 \times 0.2}} = \frac{0.865}{0.2788} = 3.10, \qquad \mathit{df} = 27\]
-\[p = .0045 \quad\Rightarrow\quad p_{\text{adj}} = 3 \times .0045 = .013, \qquad t_{.05/(2 \times 3);\,27} \times 0.2788 = 2.552 \times 0.2788 = 0.712\]
-</div>
-<p>같은 쌍의 구간 반폭이 Tukey는 0.691, Bonferroni는 0.712다. 모든 쌍을 비교할 때는 Tukey가 조금 더 좁아 검정력이 높다. 대신 Bonferroni는 비교의 종류와 수를 가리지 않고 쓸 수 있다.</p>
-
 <h4>어떤 사후검정을 언제 쓰나</h4>
 <div class="scroll"><table class="methods">
 <caption>표 4-1. 사후검정 방법의 선택. 마지막 열은 PlantGrowth의 trt2 − trt1에 대한 보정 p다</caption>
 <thead><tr><th>방법</th><th>언제 쓰나</th><th>계산의 핵심</th><th>R</th><th>p adj</th></tr></thead>
 <tbody>
-<tr><td><b>Tukey HSD</b></td><td>등분산, 반복수가 같고, 모든 쌍 비교</td><td>\(q = |\bar{y}_a - \bar{y}_b| / \sqrt{\mathit{MSW}/n}\)를 범위분포와 비교</td><td><code>TukeyHSD()</code></td><td>.012</td></tr>
+<tr><td><b>Tukey HSD</b></td><td>등분산, 반복수가 같고, 모든 쌍 비교</td><td>\(q = |\bar{y}_a - \bar{y}_b| / \sqrt{\mathit{MSE}/n}\)를 범위분포와 비교</td><td><code>TukeyHSD()</code></td><td>.012</td></tr>
 <tr><td><b>Tukey-Kramer</b></td><td>등분산, 반복수가 다르고, 모든 쌍 비교</td><td>분모의 \(1/n\)을 \(\tfrac{1}{2}(1/n_a + 1/n_b)\)로 바꾼다. 반복수가 같으면 HSD와 같다</td><td><code>TukeyHSD()</code> (자동 적용)</td><td>.012</td></tr>
 <tr><td><b>Bonferroni</b></td><td>미리 정한 몇 개의 비교, 또는 어떤 비교든 간단히 보정할 때. 비교가 많으면 지나치게 보수적(conservative)이다</td><td>\(p_{\text{adj}} = \min(m \times p,\ 1)\)</td><td><code>pairwise.t.test()</code></td><td>.013</td></tr>
 <tr><td><b>Holm</b></td><td>Bonferroni를 쓸 자리에 언제나 쓸 수 있고 검정력이 더 높다</td><td>p를 작은 순으로 놓고 \(m, m-1, \dots\)을 차례로 곱한다(순서가 뒤집히지 않게 누적 최댓값을 취한다)</td><td><code>pairwise.t.test()</code>에 <code>"holm"</code></td><td>.013</td></tr>
@@ -232,49 +241,88 @@
 </tbody></table></div>
 <p>고르는 순서는 다음과 같다. 등분산이 기각되면 Games-Howell을 쓴다. 등분산이 유지되면 비교의 범위를 본다. 모든 쌍이면 Tukey(반복수가 다르면 Tukey-Kramer), 대조군과의 비교만이면 Dunnett, 미리 정한 몇 개의 비교이면 Bonferroni나 Holm, 데이터를 보고 떠올린 대비이면 Scheffé다. 방법은 결과를 보기 전에 정하고, 어느 방법을 썼는지 보고한다.</p>
 
+<details class="fold" id="posthoc-calc">
+<summary>펼쳐 보기: 계산 과정 (Tukey HSD, Bonferroni, 반복수가 다를 때의 Tukey-Kramer)</summary>
+<h4>Tukey HSD</h4>
+<p>두 평균의 차이를 평균의 표준오차(standard error, SE)로 나눈 q가 스튜던트화 범위분포(studentized range distribution)를 따른다는 것을 이용한다. 이 분포는 집단이 k개일 때 가장 큰 평균과 가장 작은 평균의 차이를 다루므로, 모든 쌍을 비교해도 가족단위 오류율이 \(\alpha\)로 유지된다. 평균 차이(mean difference)가 임계 차이(critical difference) HSD보다 크면 유의하다.</p>
+<div class="readout math">
+\[q = \frac{|\bar{y}_a - \bar{y}_b|}{\sqrt{\mathit{MSE}/n}} = \frac{0.865}{\sqrt{0.3886/10}} = \frac{0.865}{0.1971} = 4.39\]
+\[\mathit{HSD} = q_{.05;\,k,\,N-k}\sqrt{\mathit{MSE}/n} = 3.506 \times 0.1971 = 0.691\]
+\[\text{trt2} - \text{trt1}:\quad 0.865 \pm 0.691 = [0.174,\ 1.556]\]
+</div>
+<h4>Bonferroni</h4>
+<p>합동 분산으로 쌍마다 t 검정을 한 뒤, p에 비교 횟수 m을 곱한다. 1을 넘으면 1로 둔다. 신뢰구간에는 \(\alpha\)를 m으로 나눈 임계값을 쓴다. 여기서는 세 쌍이므로 m = 3이다.</p>
+<div class="readout math">
+\[t = \frac{\bar{y}_a - \bar{y}_b}{\sqrt{\mathit{MSE}\,(1/n_a + 1/n_b)}} = \frac{0.865}{\sqrt{0.3886 \times 0.2}} = \frac{0.865}{0.2788} = 3.10, \qquad \mathit{df} = 27\]
+\[p = .0045 \quad\Rightarrow\quad p_{\text{adj}} = 3 \times .0045 = .013, \qquad t_{.05/(2 \times 3);\,27} \times 0.2788 = 2.552 \times 0.2788 = 0.712\]
+</div>
+<p>같은 쌍의 구간 반폭이 Tukey는 0.691, Bonferroni는 0.712다. 모든 쌍을 비교할 때는 Tukey가 조금 더 좁아 검정력이 높다. 대신 Bonferroni는 비교의 종류와 수를 가리지 않고 쓸 수 있다.</p>
 <h4>반복수가 다를 때: Tukey-Kramer</h4>
 <p>집단 크기가 다르면 쌍마다 평균의 정밀도가 달라지므로 분모를 쌍마다 따로 계산한다. R의 <code>TukeyHSD()</code>는 반복수가 다르면 이 식을 자동으로 쓰므로 코드는 그대로다. 04절의 <code>ChickWeight</code> 18일 체중으로 보면 사료별 병아리 수가 16, 10, 10, 9마리로 다르다. <i>MSE</i> = 2697.1(df = 41)이고, Diet 3과 Diet 1의 차이는 72.6이다.</p>
 <div class="readout math">
 \[q = \frac{|\bar{y}_a - \bar{y}_b|}{\sqrt{\dfrac{\mathit{MSE}}{2}\left(\dfrac{1}{n_a} + \dfrac{1}{n_b}\right)}} = \frac{72.6}{\sqrt{\dfrac{2697.1}{2}\left(\dfrac{1}{10} + \dfrac{1}{16}\right)}} = \frac{72.6}{14.80} = 4.90\]
 \[q_{.05;\,4,\,41} = 3.787, \qquad 72.6 \pm 3.787 \times 14.80 = [16.5,\ 128.7], \qquad p_{\text{adj}} = .0066\]
 </div>
-<div class="callout"><p><strong>결과 보고 예시.</strong> 처리에 따라 식물 건조 중량의 평균이 유의하게 달랐다, <i>F</i>(2, 27) = 4.85, <i>p</i> = .016, η² = .26. Tukey HSD 사후검정 결과 trt2(<i>M</i> = 5.53)가 trt1(<i>M</i> = 4.66)보다 유의하게 무거웠고(<i>p</i> = .012), 두 처리와 대조군(<i>M</i> = 5.03) 사이의 차이는 유의하지 않았다. Bonferroni 보정에서도 결론은 같았다(trt2 − trt1, <i>p</i> = .013).</p></div>
-
-<h3 id="oneway-parts">프롬프트의 구성요소</h3>
-<p>프롬프트는 한 문단의 지시와 번호 항목, 공통 규칙으로 되어 있다. 보고서에 넣을 것을 표와 그림마다 하나씩 적는 것이 요점이다. 프롬프트에는 함수 이름이나 계산식을 적지 않고 <b>무엇을 어떤 기준으로 보고 싶은지를 말로 적는다</b>. 어떤 함수로 계산할지는 에이전트가 정하므로, 코드를 몰라도 쓸 수 있다. 그리고 <b>숫자를 손으로 적지 말고 코드로 계산한 값을 그대로 넣게</b> 하고, 내가 R 출력과 대조할 수 있게 <b>원래 출력과 스크립트를 함께 받는다</b>. 뒤의 세 프롬프트도 같은 틀이다. 양식은 <a href="mean-test-with-r.html#report">프롬프트로 결과 한 번에 만들기</a>와 같다.</p>
-<div class="scroll"><table class="parts">
-<thead><tr><th>구성요소</th><th>이 프롬프트에 적은 것</th><th>왜 적나</th></tr></thead>
+</details>
+<div class="callout"><p><strong>결과 보고 예시.</strong> 처리에 따라 식물 건조 중량의 평균이 유의하게 달랐다, <i>F</i>(2, 27) = 4.85, <i>p</i> = .016, η² = .26. Tukey HSD 사후검정 결과 trt2(<i>M</i> = 5.53)가 trt1(<i>M</i> = 4.66)보다 유의하게 무거웠고(<i>p</i> = .012), 두 처리와 대조군(<i>M</i> = 5.03) 사이의 차이는 유의하지 않았다. Bonferroni 보정에서도 결론은 같았다(trt2 − trt1, <i>p</i> = .013).</p>
+<p>보고서에는 분산분석표와 사후검정을 한 표로 정리한다. 아래는 APA 양식의 예다(표 번호는 보고서 안의 번호).</p>
+<div class="scroll">
+<table class="apa">
+<caption><b>표 1</b><br><i>처리에 따른 식물 건조 중량의 일원배치 분산분석과 사후검정</i></caption>
+<thead><tr><th>변동원</th><th><i>SS</i></th><th><i>df</i></th><th><i>MS</i></th><th><i>F</i></th><th><i>p</i></th><th>η²</th><th>사후검정 (Tukey HSD)</th></tr></thead>
 <tbody>
-<tr><td>첫 문단</td><td>할 일, 스크립트 경로, 자료, 무엇을 비교하는 분석인지, 자료 저장</td><td>무엇을 끝까지 할지 정하고, 자료를 추측하지 않게 한다. 다른 자료에 쓸 때는 이 문단을 바꾼다</td></tr>
-<tr><td>"표 N · 이름:" 항목</td><td>표마다 행과 열, 쓸 분석 방법의 이름, 판단 규칙, 저장 파일</td><td>보고서에 넣을 표를 하나씩 지정한다. 등분산 분기처럼 판단이 필요한 곳은 규칙까지 적는다</td></tr>
-<tr><td>"그림 N:" 항목</td><td>그림의 요소, 파일 이름, 크기, 해상도</td><td>"그림을 그려 줘"보다 구체적으로 적어야 원하는 그림이 나온다</td></tr>
-<tr><td>결과 문장 항목</td><td>APA 형식의 결과 문단과 쉬운 말의 해석</td><td>결과 문장에 꼭 들어갈 값을 정한다</td></tr>
-<tr><td>Word 보고서 항목</td><td>파일 경로, docx 스킬, 표와 그림의 APA 양식</td><td>여러 결과를 한 문서로 모으고, 콘솔 출력으로 끝나지 않게 한다</td></tr>
-<tr><td>끝의 <code>-</code> 규칙</td><td>코드로 계산한 숫자, 자릿수와 표기, 영어 병기, 패키지와 글꼴, 코드 주석</td><td>모든 항목에 공통인 규칙을 한곳에 둔다. 숫자를 손으로 적지 못하게 하는 것이 핵심이다</td></tr>
+<tr><td>집단 간 (처리)</td><td>3.77</td><td>2</td><td>1.88</td><td>4.85</td><td>.016</td><td>.26</td><td class="ph" rowspan="3">trt1 &lt; trt2</td></tr>
+<tr><td>집단 내 (오차)</td><td>10.49</td><td>27</td><td>0.39</td><td></td><td></td><td></td></tr>
+<tr class="total"><td>전체</td><td>14.26</td><td>29</td><td></td><td></td><td></td><td></td></tr>
+</tbody></table>
+<p class="apa-note"><i>주.</i> 집단별 <i>M</i> (<i>SD</i>): ctrl 5.03 (0.58), trt1 4.66 (0.79), trt2 5.53 (0.44), 각 <i>n</i> = 10. 사후검정은 Tukey HSD, 유의수준 .05. trt2 − trt1 = 0.87, <i>p</i> = .012이고 나머지 쌍은 유의하지 않았다. Bonferroni 보정에서도 결론이 같았다.</p>
+</div>
+</div>
+
+<p>프롬프트는 <b>필수</b>와 <b>부가</b>로 나뉜다. 필수 프롬프트만으로 기초 통계량, 분석 결과 표, 주요 그림이 든 보고서가 완성된다. 부가 프롬프트는 필요한 항목만 골라 이어서 붙인다. 함수 이름이나 계산식은 적지 않고 <b>무엇을 어떤 기준으로 보고 싶은지를 말로 적는다</b>. 그래서 코드를 몰라도 쓸 수 있다. 숫자는 손으로 적지 말고 코드로 계산한 값을 그대로 넣게 하고, 대조할 수 있게 원래 출력을 함께 받는다. 양식은 <a href="mean-test-with-r.html#report">프롬프트로 결과 한 번에 만들기</a>와 같다.</p>
+<details class="fold" id="oneway-parts">
+<summary>펼쳐 보기: 프롬프트의 구성요소</summary>
+<div class="scroll"><table class="parts">
+<thead><tr><th>구분</th><th>구성요소</th><th>이 프롬프트에 적은 것</th></tr></thead>
+<tbody>
+<tr><td>필수</td><td>첫 문단</td><td>할 일, 스크립트 경로, 자료, 무엇을 비교하는 분석인지</td></tr>
+<tr><td>필수</td><td>기초 통계량</td><td>표 1 · 집단별 사례 수, 평균, 표준편차, 신뢰구간</td></tr>
+<tr><td>필수</td><td>분석 통계 정리</td><td>표 2 · 등분산에 따라 고른 분산분석의 표와 Tukey HSD 결론을 한 표로</td></tr>
+<tr><td>필수</td><td>도표</td><td>그림 1 · 집단별 상자그림과 평균</td></tr>
+<tr><td>필수</td><td>결과 문장과 Word 보고서</td><td>APA 형식 문장, 쉬운 말의 해석, docx 스킬로 만든 보고서</td></tr>
+<tr><td>필수</td><td>공통 규칙</td><td>코드로 계산한 숫자, CSV 저장, 설치 전 허락</td></tr>
+<tr><td>부가</td><td>한글</td><td>그림의 한글 글꼴</td></tr>
+<tr><td>부가</td><td>상세 표</td><td>가정 점검, Tukey와 Bonferroni의 신뢰구간</td></tr>
+<tr><td>부가</td><td>설명 그림</td><td>분산 분해, 제곱합 막대, 영가설 아래 F 분포, 사후검정 그림, 잔차 QQ 그림</td></tr>
+<tr><td>부가</td><td>표기와 주석</td><td>숫자와 용어 표기, 코드 주석</td></tr>
 </tbody></table></div>
+</details>
 <h3>프롬프트로 만들기</h3>
 <p>VS Code의 코딩 에이전트에 붙여 넣어 분석 스크립트와 결과보고서 <code>output/report/oneway_report.docx</code>를 만들게 하는 프롬프트다. 먼저 이 프롬프트를 실행하고, 그다음 아래 제공한 코드와 비교한다. 데이터셋과 집단 변수만 바꾸면 다른 자료에도 쓸 수 있다. 보고서는 Word 문서(docx)이고 양식은 APA 스타일을 따른다.</p>
 <div class="callout"><p><strong>시작하기 전에.</strong> 보고서는 코딩 에이전트의 docx 스킬로 만든다. 처음이라면 <a href="../data-science/nvm-node-agent-skills.html">nvm과 Node.js, 에이전트 스킬 설치하기</a>를 따라 Node.js 24와 스킬을 작업 폴더에 설치한다.</p></div>
-<div class="cb prompt"><span class="lang">프롬프트 · 일원배치</span><pre>R 내장 자료 PlantGrowth 로 일원배치 분산분석을 하는 스크립트 scripts/oneway_anova.R 을 새로 써서 실행하고, 보고서에 넣을 표와 그림을 만들어 줘. 처리에 따라 식물의 건조 중량(weight)이 다른지 보는 분석이고, 집단(group)은 대조군 ctrl, 처리 trt1, trt2 순서로 둔다. 자료는 dataset/raw/plantgrowth.csv 로 저장한 뒤 다시 읽어 쓴다.
-1. 표 1 · 기술통계: 집단별 사례 수, 평균, 표준편차, 평균의 95% 신뢰구간을 한 표로 만든다. 평균은 소수 둘째 자리, 표준편차는 소수 셋째 자리까지 쓴다. output/oneway_desc.csv 에 저장한다.
-2. 표 2 · 가정 점검: 집단의 분산이 같은지 보는 Levene 검정과 Bartlett 검정, 잔차가 정규분포를 따르는지 보는 Shapiro-Wilk 검정을 행으로 두고 통계량, 자유도, p, 판단을 열로 둔다. Levene 검정은 평균보다 이상값에 덜 민감한 중앙값 기준으로 한다. output/oneway_assumptions.csv 에 저장한다. 등분산 가정이 유지되면 일반적인 일원배치 분산분석을, 기각되면 Welch 분산분석과 Games-Howell 사후검정을 하도록 결과에 따라 자동으로 갈라지게 한다.
-3. 표 3 · 분산분석표: 요인, 자유도, 제곱합, 평균제곱, F, p, 효과크기 η² 를 열로 둔다. output/oneway_anova_table.csv 에 저장한다.
-4. 표 4 · 사후검정: 어느 집단끼리 다른지 Tukey HSD 와 Bonferroni 두 방법으로 모두 비교한다. 비교 쌍을 행으로 두고 평균 차이와, 방법별 95% 신뢰구간과 보정한 p 를 열로 둔다. 두 방법의 결론이 같은지 표 아래 "주."에 적고, 이 자료처럼 집단 크기가 같을 때와 다를 때 Tukey 방법이 어떻게 달라지는지도 한 문장으로 적는다. output/oneway_posthoc.csv 에 저장한다.
-5. 그림 1: 분산 분해 그림. 집단마다 개별 관측값을 점으로 찍고, 전체 평균을 점선으로, 집단 평균을 가로선으로 그린다. 전체 평균에서 집단 평균까지(집단 간 차이)는 화살표로, 집단 평균에서 각 관측값까지(집단 내 차이)는 세로선으로 표시한다. 부제에 전체 제곱합이 두 조각으로 나뉘는 값과 자유도를 적는다. output/oneway_decomposition.png, 7×4.5 인치, 300 dpi.
-6. 그림 2: 집단 간 제곱합과 집단 내 제곱합을 쌓은 가로 막대 하나. 조각마다 제곱합, 자유도, 평균제곱을 적는다. output/oneway_ss_bar.png, 6×3 인치, 300 dpi.
-7. 그림 3: 영가설 하(under H0)의 F 분포를 그리고, 임계값과 관측한 F, p 값에 해당하는 넓이를 표시한다. output/oneway_fdist.png, 6×4 인치, 300 dpi.
-8. 그림 4: 두 사후검정 방법의 95% 신뢰구간을 비교 쌍마다 나란히 놓고, 차이가 0 인 곳에 기준선을 긋는다. output/oneway_posthoc.png, 6×4 인치, 300 dpi.
-9. 그림 5: 잔차의 정규성을 눈으로 보는 QQ 그림. output/oneway_qq.png, 5×5 인치, 300 dpi.
-10. 결과 문장을 APA 형식으로 쓴다: F 와 두 자유도, p, 효과크기, 집단별 평균과 표준편차, 유의한 사후 비교와 사용한 방법. 이어서 그 결과가 실제로 무엇을 뜻하는지 쉬운 말로 한 문단 쓴다.
-11. 위의 표와 그림, 결과 문장을 Word 파일 output/report/oneway_report.docx 하나에 차례로 넣는다. 파일은 작업 폴더에 설치한 docx 스킬을 읽고 그 안내대로 만든다. 스킬이 없으면 다른 방법으로 만들지 말고 나에게 알려 준다. 표와 그림은 APA 양식으로 넣는다: "표 1"은 굵게, 제목은 다음 줄에 기울임꼴, 세로선 없이 가로선만 쓰고, 표 아래에 "주."로 단위와 약어, 보정 방법을 적는다. 그림도 "그림 1"은 굵게, 제목은 다음 줄에 기울임꼴로 쓰고 그림을 문서 안에 넣는다.
-- 모든 숫자는 코드로 계산한 값을 넣고 손으로 적지 않는다. 표의 값은 output 폴더에 저장한 파일에서 읽어 문서에 넣는다. 끝나면 저장한 파일의 경로를 알려 주고, 표의 숫자를 내가 대조할 수 있도록 분석 결과의 원래 출력을 보여 준다.
-- 통계량은 소수 둘째 자리까지 쓴다. p 값과 효과크기는 앞의 0 을 빼고, p 값은 소수 셋째 자리까지, .001 보다 작으면 "&lt; .001"로 쓴다. 1,000 이상의 숫자에는 세 자리마다 쉼표를 넣는다. 통계 기호(M, SD, n, F, t, p)는 기울임꼴로 쓴다.
-- 통계 용어는 보고서의 각 부분에서 처음 나올 때 "한국어(영어 원문)" 꼴로 쓴다. 예: 분산분석(analysis of variance, ANOVA), 제곱합(sum of squares, SS).
-- 데이터 처리와 그림에는 tidyverse 를 쓴다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
-- 그림의 한글은 showtext 로 Noto Sans KR 글꼴을 쓴다.
-- 어떤 방법으로 분석했는지, 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 설명해 준다.</pre></div>
+<div class="cb prompt"><span class="lang">필수 프롬프트 · 일원배치</span><pre>R 내장 자료 PlantGrowth 로 일원배치 분산분석을 하는 스크립트 scripts/oneway_anova.R 을 새로 써서 실행하고, 결과보고서를 만들어 줘. 처리에 따라 식물의 건조 중량(weight)이 다른지 보는 분석이고, 집단(group)은 대조군 ctrl, 처리 trt1, trt2 순서로 둔다.
+1. 표 1 · 기술통계: 집단별 사례 수, 평균, 표준편차, 평균의 95% 신뢰구간.
+2. 표 2 · 분산분석과 사후검정: 먼저 집단의 분산이 같은지 Levene 검정으로 확인하고, 같으면 일반적인 일원배치 분산분석을, 다르면 Welch 분산분석을 한다. 분산분석표(변동원, 제곱합, 자유도, 평균제곱, F, p, η²)에 Tukey HSD 사후검정의 결론을 한 열로 붙여 한 표로 만들고, 등분산 검정 결과와 집단별 평균(표준편차)은 표 아래 "주."에 적는다.
+3. 그림 1: 집단별 상자그림에 관측값 점을 겹치고 평균을 표시한다. output/oneway_box.png, 6×4 인치, 300 dpi.
+4. 결과 문장을 APA 형식으로 쓰고, 그 결과가 무엇을 뜻하는지 쉬운 말로 한 문단 쓴다.
+5. 표와 그림, 결과 문장을 Word 파일 output/report/oneway_report.docx 에 넣는다. 작업 폴더의 docx 스킬을 읽고 그 안내대로 APA 양식(표 번호는 굵게, 제목은 다음 줄에 기울임꼴, 가로선만)으로 만든다. 스킬이 없으면 다른 방법으로 만들지 말고 알려 준다.
+- 모든 숫자는 코드로 계산한 값을 넣고 손으로 적지 않는다. 표의 값은 output 폴더에 CSV 로도 저장하고, 내가 대조할 수 있게 분석의 원래 출력을 보여 준다.
+- 패키지를 새로 설치해야 하면 설치 전에 내 허락을 받는다.</pre></div>
+<h4>부가 프롬프트: 필요한 것만 골라 붙이기</h4>
+<p>필수 프롬프트를 실행한 뒤, 같은 대화에서 아래 첫 줄과 필요한 항목만 남겨 붙여 넣는다. 그림에 한글을 썼는데 네모로 나오면 "한글" 항목을 붙인다.</p>
+<div class="cb prompt"><span class="lang">부가 프롬프트 · 일원배치</span><pre>scripts/oneway_anova.R 에 이어서, 아래에서 고른 항목을 추가하고 결과보고서 output/report/oneway_report.docx 에도 이어서 넣어 줘. 표와 그림의 번호는 앞에 이어서 매긴다.
+- 한글: 그림의 한글은 showtext 로 Noto Sans KR 글꼴을 쓴다.
+- 가정 점검 표: Levene 검정(중앙값 기준), Bartlett 검정, 잔차의 Shapiro-Wilk 검정의 통계량, 자유도, p, 판단.
+- 사후검정 상세 표: 비교 쌍마다 평균 차이와, Tukey HSD 와 Bonferroni 각각의 95% 신뢰구간과 보정한 p. 두 방법의 결론이 같은지와, 집단 크기가 다를 때 Tukey 방법이 어떻게 달라지는지 "주."에 적는다.
+- 분산 분해 그림: 개별 관측값의 점, 전체 평균(점선), 집단 평균(가로선), 전체 평균에서 집단 평균까지의 화살표, 집단 평균에서 각 관측값까지의 세로선. 부제에 전체 제곱합이 두 조각으로 나뉘는 값과 자유도. output/oneway_decomposition.png, 7×4.5 인치.
+- 제곱합 막대: 처리와 오차의 제곱합을 쌓은 가로 막대 하나에 조각마다 제곱합, 자유도, 평균제곱. output/oneway_ss_bar.png, 6×3 인치.
+- 영가설 아래 분포: F 분포에 임계값, 관측한 F, p 값에 해당하는 넓이를 표시한다. output/oneway_fdist.png, 6×4 인치.
+- 사후검정 그림: 두 방법의 95% 신뢰구간을 비교 쌍마다 나란히 놓고 0 에 기준선을 긋는다. output/oneway_posthoc.png, 6×4 인치.
+- 잔차의 정규성: 잔차의 QQ 그림. output/oneway_qq.png, 5×5 인치.
+- 표기: 통계량은 소수 둘째 자리, p 값과 효과크기는 앞의 0 을 빼고 .001 보다 작으면 "&lt; .001", 1,000 이상은 세 자리 쉼표. 통계 기호는 기울임꼴, 통계 용어는 처음 나올 때 "한국어(영어 원문)" 꼴로 쓴다.
+- 코드 설명: 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 적는다.</pre></div>
 <h3>프롬프트 실행 뒤: 제공한 코드와 확인할 것</h3>
-<p>에이전트가 만든 <code>scripts/oneway_anova.R</code>와 아래 제공한 코드를 나란히 놓고 읽는다. 제공한 코드는 분석의 핵심만 담았고 보고서는 만들지 않는다. 코드에서 점선 밑줄이 그어진 함수 이름에 마우스를 올리면(휴대폰은 누르면) 목적, 인수, 반환값이 나온다. 폴더 구조는 <a href="prepare-for-ttest.html#s1">t 검정을 위한 데이터 준비</a>에서 쓴 것과 같다. 원자료는 <code>dataset/raw/</code>, 가공 자료는 <code>dataset/working/</code>, 표와 그림은 <code>output/</code>, 결과보고서는 <code>output/report/</code>에 둔다. 스크립트는 <code>scripts/</code>에 둔다.</p>
+<p>에이전트가 만든 <code>scripts/oneway_anova.R</code>와 아래 제공한 코드를 나란히 놓고 읽는다. 제공한 코드에는 필수 프롬프트의 분석과 그림 1(상자그림), 부가 프롬프트의 그림 일부(분산 분해 그림)가 들어 있다. 제공한 코드는 분석의 핵심만 담았고 보고서는 만들지 않는다. 코드에서 점선 밑줄이 그어진 함수 이름에 마우스를 올리면(휴대폰은 누르면) 목적, 인수, 반환값이 나온다. 폴더 구조는 <a href="prepare-for-ttest.html#s1">t 검정을 위한 데이터 준비</a>에서 쓴 것과 같다. 원자료는 <code>dataset/raw/</code>, 가공 자료는 <code>dataset/working/</code>, 표와 그림은 <code>output/</code>, 결과보고서는 <code>output/report/</code>에 둔다. 스크립트는 <code>scripts/</code>에 둔다.</p>
 <div class="callout"><p><strong>코드는 달라도 된다.</strong> 생성한 코드는 실행할 때마다, 에이전트마다 다를 수 있다. 변수 이름, 함수 선택, 줄 수가 달라도 틀린 것이 아니다. 판단의 기준은 코드의 모양이 아니라 아래 표의 항목과 결과의 숫자다.</p></div>
 <div class="cb r"><span class="lang">R · oneway_anova.R</span><pre>options(repos = c(CRAN = "https://cloud.r-project.org/"))
 # install.packages(c("tidyverse", "car", "rstatix", "showtext"))
@@ -326,7 +374,17 @@ pg %&gt;% pairwise_t_test(weight ~ group, pool.sd = TRUE, p.adjust.method = "bon
 # Bonferroni 신뢰구간의 반폭 = 0.712
 qt(1 - 0.05 / (2 * 3), df.residual(fit)) * sqrt(deviance(fit) / df.residual(fit) * (1 / 10 + 1 / 10))
 
-# 6) 분산 분해 시각화 -------------------------------------------------
+# 6) 그림 1: 집단별 상자그림과 평균 (필수) ------------------------------
+p_box &lt;- ggplot(pg, aes(x = group, y = weight)) +
+  geom_boxplot(width = 0.5, outlier.shape = NA) +                        # 상자그림
+  geom_jitter(width = 0.08, alpha = 0.6) +                               # 관측값
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 3,
+               fill = "white") +                                        # 평균(흰 마름모)
+  labs(x = "집단", y = "건조 중량") +
+  theme_minimal(base_family = "Noto Sans KR")
+ggsave("output/oneway_box.png", p_box, width = 6, height = 4, dpi = 300)
+
+# 7) 분산 분해 그림 (부가) --------------------------------------------
 gm &lt;- mean(pg$weight)
 pg_plot &lt;- pg %&gt;%
   group_by(group) %&gt;%
@@ -344,21 +402,21 @@ p_decomp &lt;- ggplot(pg_plot, aes(x = x, y = weight, colour = group)) +
                arrow = arrow(length = unit(0.15, "cm"))) +              # 집단 간 편차
   geom_point(size = 2.4) +
   scale_x_continuous(breaks = 1:3, labels = levels(pg$group)) +
-  labs(x = "집단", y = "건조 중량", title = "SST = SSB + SSW") +
+  labs(x = "집단", y = "건조 중량", title = "SST = SSTrt + SSE") +
   theme_minimal(base_family = "Noto Sans KR")
 ggsave("output/oneway_decomposition.png", p_decomp, width = 7, height = 4.5, dpi = 300)</pre></div>
 <h4>무엇을 확인하나</h4>
 <div class="scroll"><table class="check">
 <thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
 <tbody>
-<tr><td>분석 방법</td><td>일원배치 분산분석, Tukey HSD, Bonferroni를 프롬프트대로 했는가. 코드를 다 읽지 못해도 된다. 에이전트에게 "어느 줄이 어떤 분석인지 설명해 줘"라고 묻고, 아래 제공한 코드의 함수와 다르면 왜 그 함수를 썼는지 묻는다.</td></tr>
-<tr><td>숫자</td><td>보고서의 값이 이 쪽의 표 3과 표 4와 같은가. <i>F</i>(2, 27) = 4.85, Tukey <i>p</i> = .012, Bonferroni <i>p</i> = .013이어야 한다.</td></tr>
-<tr><td>분기</td><td>등분산 검정 결과에 따라 Welch와 Games-Howell로 가는 <code>if</code>문이 실제로 동작하는가.</td></tr>
+<tr><td>분석 방법</td><td>일원배치 분산분석과 Tukey HSD를 프롬프트대로 했는가(Bonferroni는 부가 항목을 붙였을 때). 코드를 다 읽지 못해도 된다. 에이전트에게 "어느 줄이 어떤 분석인지 설명해 줘"라고 묻고, 아래 제공한 코드의 함수와 다르면 왜 그 함수를 썼는지 묻는다.</td></tr>
+<tr><td>숫자</td><td>보고서의 값이 이 쪽의 표 3과 표 4와 같은가. <i>F</i>(2, 27) = 4.85, η² = .26, Tukey <i>p</i> = .012이어야 한다. 부가 항목의 Bonferroni는 <i>p</i> = .013이다.</td></tr>
+<tr><td>분기</td><td>등분산 검정 결과에 따라 일반 분산분석과 Welch 분산분석이 자동으로 골라지는가. 이 자료에서는 일반 분산분석이 골라져야 한다.</td></tr>
 <tr><td>docx 스킬</td><td>에이전트가 스킬을 읽고 썼는가. 보고서의 숫자가 CSV에서 읽은 값인가.</td></tr>
-<tr><td>APA 형식</td><td>보고서를 Word에서 연다. 표에 세로선이 없는가. 표와 그림의 번호·제목·주, 기호의 기울임꼴, <i>p</i> 앞의 0을 뺀 표기, 통계 용어의 영어 원문을 지켰는가. 그림이 문서 안에 들어 있는가.</td></tr>
+<tr><td>APA 형식</td><td>보고서를 Word에서 연다. 표에 세로선이 없는가. 표와 그림의 번호·제목·주, 기호의 기울임꼴, <i>p</i> 앞의 0을 뺀 표기, 통계 용어의 영어 원문(부가 항목을 붙였다면)을 지켰는가. 그림이 문서 안에 들어 있는가.</td></tr>
 <tr><td>손으로 적은 숫자</td><td>코드에 4.846 같은 결과값이 직접 적혀 있지 않은가.</td></tr>
-<tr><td>보고서 구성</td><td>프롬프트에 번호로 적은 표와 그림, 결과 문장이 차례로 다 들어 있는가. 해석이 결과의 숫자와 어긋나지 않는가.</td></tr>
-<tr><td>저장한 파일</td><td>프롬프트에 적은 경로에 CSV, PNG, Word 파일이 모두 생겼는가.</td></tr>
+<tr><td>보고서 구성</td><td>필수 프롬프트의 표 1, 표 2, 그림 1, 결과 문장이 다 들어 있는가. 부가 항목을 붙였다면 그것도 이어서 들어갔는가. 해석이 결과의 숫자와 어긋나지 않는가.</td></tr>
+<tr><td>저장한 파일</td><td>프롬프트에 적은 경로에 CSV, PNG, Word 파일이 생겼는가.</td></tr>
 </tbody></table></div>
 <p>어긋나는 항목이 있으면 에이전트에게 어느 항목이 어떻게 다른지 알려 고치게 하고, 왜 그렇게 했는지도 묻는다.</p>
 </section>
@@ -372,22 +430,73 @@ ggsave("output/oneway_decomposition.png", p_decomp, width = 7, height = 4.5, dpi
 </div>
 
 <h3>분산의 구성 시각화</h3>
-<p>일원배치(one-way design)에서 SSB 하나였던 "설명된 변동"이 이원배치(two-way design)에서는 세 조각으로 나뉜다. 균형 설계에서는 이 세 조각이 서로 직교(orthogonal)하므로 분해가 유일하다. 불균형 설계(unbalanced design)에서는 제곱합(sum of squares, SS)의 유형(Type I/II/III)에 따라 값이 달라진다.</p>
+<p>일원배치(one-way design)에서 SSTrt 하나였던 "설명된 변동"이 이원배치(two-way design)에서는 세 조각으로 나뉜다. 균형 설계에서는 이 세 조각이 서로 직교(orthogonal)하므로 분해가 유일하다. 불균형 설계(unbalanced design)에서는 제곱합(sum of squares, SS)의 유형(Type I/II/III)에 따라 값이 달라진다.</p>
 <details class="fold" id="ss-types">
 <summary>펼쳐 보기: 제곱합의 유형(types of sums of squares) Type I / II / III를 그림으로 구분하기</summary>
-<p>반복수가 칸마다 다른 불균형 설계(unbalanced design)에서는 두 요인이 서로 상관되어, 종속변수의 변동 가운데 두 요인이 함께 설명하는 겹친 몫이 생긴다. 세 유형의 차이는 이 겹친 몫을 누구의 것으로 치느냐다. 균형 설계(balanced design)에서는 겹침이 없어 세 유형이 같아진다.</p>
-<p>예제는 R 내장 <code>mtcars</code>의 자동차 32대다. 연비(mpg)를 변속기(am)와 기통 수(cyl)로 설명한다. 칸의 대수는 3, 4, 12, 8, 3, 2대로 불균형이다.</p>
+<div class="callout"><p><strong>한마디로.</strong> 두 요인이 서로 얽혀 있으면, 결과의 변동 가운데 "둘 중 누구 덕인지 가릴 수 없는 몫"이 생긴다. 그 몫을 먼저 들어온 요인에게 주면 Type I, 아무에게도 주지 않으면 Type II와 III이다. Type II와 III은 교호작용을 어떻게 다루느냐에서 갈린다.</p></div>
+
+<h4>1. 왜 "가릴 수 없는 몫"이 생기나</h4>
+<p>예제는 R 내장 <code>mtcars</code>의 자동차 32대다. 연비(mpg, 마일/갤런)를 변속기(am: 자동, 수동)와 기통 수(cyl: 4, 6, 8)로 설명한다. 먼저 두 요인이 어떻게 섞여 있는지 본다.</p>
+<div class="scroll"><table class="stat">
+<caption>변속기와 기통 수의 교차표(대수). 괄호는 변속기 안에서의 비율</caption>
+<thead><tr><th>변속기</th><th>4기통</th><th>6기통</th><th>8기통</th><th>합</th></tr></thead>
+<tbody>
+<tr><td>자동</td><td>3 (16%)</td><td>4 (21%)</td><td>12 (63%)</td><td>19</td></tr>
+<tr><td>수동</td><td>8 (62%)</td><td>3 (23%)</td><td>2 (15%)</td><td>13</td></tr>
+</tbody></table></div>
+<p>자동차는 대부분 8기통이고, 수동차는 대부분 4기통이다. 칸마다 대수가 다른 불균형 설계(unbalanced design)이고, 두 요인이 서로 상관되어 있다. 그래서 "수동차의 연비가 좋다"는 것이 변속기 때문인지, 수동차에 기통 수가 적은 차가 많아서인지 자료만 보고는 다 가릴 수 없다.</p>
+<div class="scroll"><table class="stat">
+<caption>평균 연비(mpg)</caption>
+<thead><tr><th>변속기</th><th>4기통</th><th>6기통</th><th>8기통</th><th>변속기 전체</th></tr></thead>
+<tbody>
+<tr><td>자동</td><td>22.90</td><td>19.12</td><td>15.05</td><td>17.15</td></tr>
+<tr><td>수동</td><td>28.08</td><td>20.57</td><td>15.40</td><td>24.39</td></tr>
+<tr><td>수동 − 자동</td><td>5.18</td><td>1.45</td><td>0.35</td><td>7.24</td></tr>
+</tbody></table></div>
+<p>변속기만 놓고 보면 수동차가 7.24 더 좋다. 그런데 같은 기통 수끼리 비교하면 차이는 5.18, 1.45, 0.35로 줄어든다. 7.24 가운데 상당 부분은 변속기가 아니라 기통 수가 낸 차이였던 셈이다. 이처럼 두 요인이 함께 설명하는 부분이 "가릴 수 없는 몫"이다.</p>
+
+<h4>2. 제곱합은 "요인을 넣을 때 줄어든 잔차"다</h4>
+<p>요인을 모형에 하나씩 넣으며 잔차(residual) 제곱합, 곧 아직 설명하지 못한 변동이 얼마나 줄어드는지 본다. 어떤 요인의 제곱합은 그 요인을 넣었을 때 줄어든 양이다.</p>
+<div class="scroll"><table class="stat steps">
+<caption>모형을 키울 때 잔차 제곱합의 변화</caption>
+<thead><tr><th>넣는 순서</th><th>모형</th><th>잔차 제곱합</th><th>줄어든 양 = 그 단계의 제곱합</th></tr></thead>
+<tbody>
+<tr><td rowspan="3">am 먼저</td><td>평균만</td><td>1126.05</td><td>(전체 제곱합)</td></tr>
+<tr><td>+ am</td><td>720.90</td><td>405.15 = SS(am)</td></tr>
+<tr><td>+ cyl</td><td>264.50</td><td>456.40 = SS(cyl | am)</td></tr>
+<tr><td rowspan="3">cyl 먼저</td><td>평균만</td><td>1126.05</td><td>(전체 제곱합)</td></tr>
+<tr><td>+ cyl</td><td>301.26</td><td>824.78 = SS(cyl)</td></tr>
+<tr><td>+ am</td><td>264.50</td><td>36.77 = SS(am | cyl)</td></tr>
+<tr class="total"><td>공통</td><td>+ am × cyl</td><td>239.06</td><td>25.44 = SS(am × cyl | am, cyl)</td></tr>
+</tbody></table></div>
+<p>\(\mathit{SS}(\text{am} \mid \text{cyl})\)은 "cyl을 이미 넣은 뒤 am이 더 설명하는 몫"이라고 읽는다. am은 혼자 들어가면 405.15를 설명하지만, cyl 다음에 들어가면 36.77만 더 설명한다. 둘의 차이 368.38이 두 요인이 함께 설명하는 몫이다. cyl 쪽에서 보아도 824.78 − 456.40 = 368.38로 같다. 두 순서 모두 마지막 잔차는 264.50으로 같고, 그 몫을 누구에게 붙이느냐만 다르다.</p>
+
+<h4>3. 세 유형의 규칙</h4>
 <div class="readout math">
 \[\text{Type I (순차, sequential)}:\quad \mathit{SS}(A),\quad \mathit{SS}(B \mid A),\quad \mathit{SS}(AB \mid A, B)\]
 \[\text{Type II (계층적, hierarchical)}:\quad \mathit{SS}(A \mid B),\quad \mathit{SS}(B \mid A),\quad \mathit{SS}(AB \mid A, B)\]
 \[\text{Type III (부분, partial)}:\quad \mathit{SS}(A \mid B, AB),\quad \mathit{SS}(B \mid A, AB),\quad \mathit{SS}(AB \mid A, B)\]
 </div>
-<p>\(\mathit{SS}(B \mid A)\)는 A를 모형에 넣은 뒤 B가 더 설명하는 몫이다. 아래 그림에서 원 세 개는 am, cyl, am × cyl이 설명하는 변동이고, 색칠한 곳이 그 유형에서 그 효과의 제곱합으로 치는 몫이다. 원의 크기와 겹침은 개념을 보이는 그림일 뿐 실제 비율이 아니며, 숫자는 실제 계산값이다.</p>
+<ul>
+<li><b>Type I(순차)</b>: 적은 순서대로 넣으며 줄어든 양을 그대로 준다. 먼저 들어간 요인이 겹친 몫을 모두 가져간다. 그래서 순서를 바꾸면 값이 달라진다.</li>
+<li><b>Type II(계층적)</b>: 주효과마다 "다른 주효과를 먼저 넣은 뒤" 더 설명하는 몫만 준다. 겹친 몫은 어느 주효과에도 주지 않는다. 교호작용은 주효과를 판단할 때 고려하지 않는다.</li>
+<li><b>Type III(부분)</b>: 주효과마다 "다른 주효과와 교호작용까지 모두 넣은 뒤" 더 설명하는 몫만 준다. 교호작용이 있어도 칸 평균을 같은 무게로 놓고 주효과를 본다.</li>
+</ul>
+<p>교호작용은 언제나 두 주효과를 모두 넣은 뒤에 들어가므로 세 유형에서 같다(25.44).</p>
+
+<h4>4. 그림으로 보기</h4>
+<p>원 세 개는 am, cyl, am × cyl이 설명하는 변동이고, 원이 겹친 곳이 함께 설명하는 몫이다. 색칠한 곳이 그 유형에서 그 효과의 제곱합으로 치는 부분이다. 줄마다 왼쪽에서 오른쪽으로 보며, 겹친 곳에 색이 칠해졌는지를 비교한다. 원의 크기와 겹침은 개념을 보이는 그림일 뿐 실제 비율이 아니며, 숫자는 실제 계산값이다.</p>
 <div class="fig">
   <svg id="sstypes" viewBox="0 0 640 556" role="img" aria-label="Type I, II, III에서 각 효과에 배정되는 제곱합 영역과 mtcars의 제곱합"></svg>
   <p class="figcap">교호작용은 어느 유형에서나 마지막에 남는 몫이라 25.44로 같다. 달라지는 것은 주효과(main effect)다. 잔차(residual) 제곱합은 239.06이고, 전체 제곱합은 1126.05다. Type I의 세 값을 더하면 전체 − 잔차 = 886.99와 정확히 같고, Type II와 III은 겹친 몫을 어느 효과에도 주지 않아 그 합이 더 작다. Type III의 값은 소수 첫째 자리까지 적었다.</p>
 </div>
+<p>첫 줄(Type I, am 먼저)에서 am 원은 겹친 곳까지 모두 칠해져 있다. 둘째 줄과 셋째 줄에서는 cyl과 겹친 곳이 비어 있다. 넷째 줄(Type III)은 교호작용과 겹친 곳까지 비어 있어 가장 작다.</p>
 <p>결론이 실제로 달라진다. am의 <i>p</i>는 am을 먼저 넣은 Type I에서 &lt; .001, cyl을 먼저 넣은 Type I과 Type II에서 .056, Type III에서 .083이다. 기통 수가 적은 차에 수동 변속기가 많아, am만의 몫으로 볼 수 있는 부분이 작기 때문이다.</p>
+
+<h4>5. 균형 설계에서는 고민할 필요가 없다</h4>
+<p>칸마다 사례 수가 같으면 두 요인이 서로 얽히지 않아 겹친 몫이 없다. 02절의 <code>ToothGrowth</code>는 칸마다 10마리여서, supp를 먼저 넣든 dose를 먼저 넣든 supp의 제곱합은 205.35, dose는 2426.43으로 같다. 세 유형이 같은 값을 주므로 유형을 고를 필요가 없다. 반대로 04절의 혼합 설계처럼 사료별 병아리 수가 다르면 유형에 따라 값이 달라진다.</p>
+
+<h4>6. 어느 유형을 쓸까</h4>
 <div class="scroll"><table class="methods">
 <caption>제곱합 유형의 선택</caption>
 <thead><tr><th>유형</th><th>언제 쓰나</th><th>주의할 점</th><th>R</th></tr></thead>
@@ -397,6 +506,11 @@ ggsave("output/oneway_decomposition.png", p_decomp, width = 7, height = 4.5, dpi
 <tr><td><b>Type III</b></td><td>교호작용이 있어도 칸 평균을 같은 무게로 놓고 주효과를 볼 때</td><td>합이 0이 되는 대비(<code>contr.sum</code>)를 써야 한다. R의 기본 대비로는 틀린 값이 나온다</td><td><code>car::Anova(type = 3)</code></td></tr>
 </tbody></table></div>
 <p>어느 유형을 쓸지는 결과를 보기 전에 정하고 보고서에 밝힌다. <code>aov()</code>는 Type I이고, 이 자료의 <code>rstatix::anova_test()</code> 출력은 개체 간 요인만 있으면 Type II, 반복측정이 있으면 Type III로 표시되었다. SPSS의 기본값은 Type III다.</p>
+<ul>
+<li><b>먼저 교호작용을 본다.</b> 교호작용이 유의하지 않으면 Type II가 무난하다. 교호작용이 유의하면 주효과보다 단순 주효과를 해석하는 것이 낫고, 주효과를 꼭 보고해야 한다면 Type III을 쓴다.</li>
+<li><b>소프트웨어마다 기본값이 다르다.</b> R의 <code>aov()</code>와 <code>anova()</code>는 Type I, SPSS는 Type III이다. 같은 자료인데 R과 SPSS의 결과가 다르면 유형부터 확인한다.</li>
+<li><b>Type III에는 대비 설정이 필요하다.</b> R의 기본 대비로 Type III을 구하면 틀린 값이 나온다. 아래 코드처럼 합이 0이 되는 대비를 지정한다.</li>
+</ul>
 <div class="cb r"><span class="lang">R · 세 유형을 같은 자료로</span><pre>library(tidyverse)
 library(car)
 
@@ -456,36 +570,45 @@ Anova(lm(mpg ~ am * cyl, data = d,
 </tbody></table></div>
 <div class="callout"><p><strong>해석 순서.</strong> ① 교호작용부터 본다 → ② 유의하면 교호작용 도표(interaction plot)와 단순 주효과로 해석한다 → ③ 유의하지 않으면 주효과를 해석하고, 수준이 셋 이상인 요인은 Tukey 사후검정(post hoc test)을 한다.</p></div>
 
-<h3>프롬프트의 구성요소</h3>
-<p>틀은 <a href="#oneway-parts">일원배치 프롬프트</a>와 같다. 이원배치에서 달라지는 부분을 중심으로 읽는다.</p>
+<p>틀은 <a href="#oneway-parts">일원배치 프롬프트</a>와 같다. 이원배치에서 달라지는 부분이다.</p>
+<details class="fold">
+<summary>펼쳐 보기: 프롬프트의 구성요소</summary>
 <div class="scroll"><table class="parts">
-<thead><tr><th>구성요소</th><th>이 프롬프트에 적은 것</th><th>왜 적나</th></tr></thead>
+<thead><tr><th>구분</th><th>구성요소</th><th>이 프롬프트에 적은 것</th></tr></thead>
 <tbody>
-<tr><td>첫 문단</td><td>자료, 무엇을 비교하는지, 용량을 범주로 다루기</td><td>숫자처럼 보이는 요인을 범주로 다루도록 말로 못 박는다</td></tr>
-<tr><td>"표 N · 이름:" 항목</td><td>칸별 기술통계, Levene 검정, 분산분석표, 교호작용에 따른 후속 분석</td><td>교호작용의 유의 여부에 따라 다음 분석이 갈리므로 두 경우를 모두 적는다</td></tr>
-<tr><td>"그림 N:" 항목</td><td>제곱합 구성, 교호작용 도표와 가법 모형, 칸별 상자그림</td><td>교호작용의 크기가 보이도록 요소를 지정한다</td></tr>
-<tr><td>결과 문장 항목</td><td>교호작용부터 쓰는 결과 문단과 쉬운 말의 해석</td><td>해석의 순서를 정한다</td></tr>
-<tr><td>Word 보고서 항목</td><td>파일 경로, docx 스킬, 표와 그림의 APA 양식</td><td>여러 결과를 한 문서로 모으고, 콘솔 출력으로 끝나지 않게 한다</td></tr>
-<tr><td>끝의 <code>-</code> 규칙</td><td>코드로 계산한 숫자, 자릿수와 표기, 영어 병기, 패키지와 글꼴, 코드 주석</td><td>모든 항목에 공통인 규칙을 한곳에 둔다. 숫자를 손으로 적지 못하게 하는 것이 핵심이다</td></tr>
+<tr><td>필수</td><td>기초 통계량</td><td>칸별 평균과 표준편차, 주변평균</td></tr>
+<tr><td>필수</td><td>분석 통계 정리</td><td>분산분석표에 교호작용에 따른 후속 분석의 결론을 붙인 한 표</td></tr>
+<tr><td>필수</td><td>도표</td><td>교호작용 도표</td></tr>
+<tr><td>필수</td><td>결과 문장과 Word 보고서</td><td>APA 형식 문장, 쉬운 말의 해석, docx 스킬로 만든 보고서</td></tr>
+<tr><td>필수</td><td>공통 규칙</td><td>코드로 계산한 숫자, CSV 저장, 설치 전 허락</td></tr>
+<tr><td>부가</td><td>한글</td><td>그림의 한글 글꼴</td></tr>
+<tr><td>부가</td><td>상세 표</td><td>가정 점검, 쌍별 비교</td></tr>
+<tr><td>부가</td><td>설명 그림</td><td>제곱합 구성, 가법 모형 예측, 칸별 상자그림</td></tr>
+<tr><td>부가</td><td>표기와 주석</td><td>불균형 설계 대비, 숫자와 용어 표기, 코드 주석</td></tr>
 </tbody></table></div>
+</details>
 <h3>프롬프트로 만들기</h3>
 <p>먼저 이 프롬프트로 스크립트와 결과보고서 <code>output/report/twoway_report.docx</code>를 만든 뒤, 아래 제공한 코드와 비교한다.</p>
-<div class="cb prompt"><span class="lang">프롬프트 · 이원배치</span><pre>R 내장 자료 ToothGrowth 로 이원배치 분산분석을 하는 스크립트 scripts/twoway_anova.R 을 새로 써서 실행하고, 보고서에 넣을 표와 그림을 만들어 줘. 비타민 C 의 보충 방법(supp: OJ, VC)과 용량(dose: 0.5, 1, 2)에 따라 상아질 세포 길이(len)가 다른지 보는 분석이다. 용량은 숫자가 아니라 세 수준의 범주로 다룬다.
-1. 표 1 · 기술통계: 보충 방법과 용량의 조합(칸)마다 사례 수, 평균, 표준편차를 구하고, 보충 방법별·용량별 평균도 함께 한 표로 만든다. output/twoway_cell_means.csv 에 저장한다.
-2. 표 2 · 가정 점검: 여섯 칸의 분산이 같은지 보는 Levene 검정(중앙값 기준)과 잔차의 Shapiro-Wilk 검정의 통계량, 자유도, p, 판단. output/twoway_assumptions.csv 에 저장한다.
-3. 표 3 · 분산분석표: 두 주효과와 교호작용, 오차의 자유도, 제곱합, 평균제곱, F, p, 부분 η². output/twoway_anova_table.csv 에 저장한다. 이 자료는 칸마다 사례 수가 같다. 사례 수가 다를 때는 어떻게 해야 하는지 스크립트에 주석으로 설명해 준다.
-4. 표 4 · 후속 분석: 교호작용이 유의하면 용량마다 보충 방법의 효과를, 보충 방법마다 용량의 효과를 따로 본다(단순 주효과). 이때 오차는 전체 모형의 것을 쓰고 Bonferroni 로 보정하며, 어느 수준끼리 다른지 쌍별로 비교한다. 유의하지 않으면 주효과를 해석하고 용량에 Tukey HSD 를 한다. output/twoway_followup.csv 에 저장한다.
-5. 그림 1: 전체 변동이 보충 방법, 용량, 교호작용, 오차로 나뉘는 비율을 쌓은 가로 막대 하나. 조각마다 비율(%)과 자유도를 적는다. output/twoway_ss_composition.png, 7×3 인치, 300 dpi.
-6. 그림 2: 교호작용 도표. 가로축은 용량, 선의 색은 보충 방법으로 하고 평균과 표준오차를 그린다. 교호작용이 없다고 가정했을 때의 예측값을 점선으로 겹쳐, 교호작용의 크기가 보이게 한다. output/twoway_interaction.png, 6.5×4.2 인치, 300 dpi.
-7. 그림 3: 칸별 상자그림에 관측값 점을 겹친다. output/twoway_cells_box.png, 6.5×4.2 인치, 300 dpi.
-8. 결과 문장을 APA 형식으로 쓴다: 교호작용부터 F 와 두 자유도, p, 부분 η² 를 쓰고, 이어서 단순 주효과를 쓴다. 그 결과가 실제로 무엇을 뜻하는지 쉬운 말로 한 문단 쓴다.
-9. 위의 표와 그림, 결과 문장을 Word 파일 output/report/twoway_report.docx 하나에 차례로 넣는다. 파일은 작업 폴더에 설치한 docx 스킬을 읽고 그 안내대로 만든다. 스킬이 없으면 다른 방법으로 만들지 말고 나에게 알려 준다. 표와 그림은 APA 양식으로 넣는다: "표 1"은 굵게, 제목은 다음 줄에 기울임꼴, 세로선 없이 가로선만 쓰고, 표 아래에 "주."로 단위와 약어, 보정 방법을 적는다. 그림도 "그림 1"은 굵게, 제목은 다음 줄에 기울임꼴로 쓰고 그림을 문서 안에 넣는다.
-- 모든 숫자는 코드로 계산한 값을 넣고 손으로 적지 않는다. 표의 값은 output 폴더에 저장한 파일에서 읽어 문서에 넣는다. 끝나면 저장한 파일의 경로를 알려 주고, 표의 숫자를 내가 대조할 수 있도록 분석 결과의 원래 출력을 보여 준다.
-- 통계량은 소수 둘째 자리까지 쓴다. p 값과 효과크기는 앞의 0 을 빼고, p 값은 소수 셋째 자리까지, .001 보다 작으면 "&lt; .001"로 쓴다. 1,000 이상의 숫자에는 세 자리마다 쉼표를 넣는다. 통계 기호(M, SD, n, F, t, p)는 기울임꼴로 쓴다.
-- 통계 용어는 보고서의 각 부분에서 처음 나올 때 "한국어(영어 원문)" 꼴로 쓴다. 예: 분산분석(analysis of variance, ANOVA), 제곱합(sum of squares, SS).
-- 데이터 처리와 그림에는 tidyverse 를 쓴다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
-- 그림의 한글은 showtext 로 Noto Sans KR 글꼴을 쓴다.
-- 어떤 방법으로 분석했는지, 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 설명해 준다.</pre></div>
+<div class="cb prompt"><span class="lang">필수 프롬프트 · 이원배치</span><pre>R 내장 자료 ToothGrowth 로 이원배치 분산분석을 하는 스크립트 scripts/twoway_anova.R 을 새로 써서 실행하고, 결과보고서를 만들어 줘. 비타민 C 의 보충 방법(supp: OJ, VC)과 용량(dose: 0.5, 1, 2)에 따라 상아질 세포 길이(len)가 다른지 보는 분석이다. 용량은 숫자가 아니라 세 수준의 범주로 다룬다.
+1. 표 1 · 기술통계: 보충 방법과 용량의 조합(칸)마다 사례 수, 평균, 표준편차와, 보충 방법별·용량별 평균.
+2. 표 2 · 분산분석과 후속 분석: 두 주효과와 교호작용의 분산분석표(변동원, 제곱합, 자유도, 평균제곱, F, p, 부분 η²). 교호작용이 유의하면 용량마다 보충 방법의 효과를 따로 보고(단순 주효과, Bonferroni 보정), 유의하지 않으면 용량에 Tukey HSD 를 해서 그 결론을 한 열로 붙인다. Levene 검정 결과는 "주."에 적는다.
+3. 그림 1: 교호작용 도표. 가로축은 용량, 선의 색은 보충 방법으로 하고 평균과 표준오차를 그린다. output/twoway_interaction.png, 6.5×4.2 인치, 300 dpi.
+4. 결과 문장을 교호작용부터 APA 형식으로 쓰고, 그 결과가 무엇을 뜻하는지 쉬운 말로 한 문단 쓴다.
+5. 표와 그림, 결과 문장을 Word 파일 output/report/twoway_report.docx 에 넣는다. 작업 폴더의 docx 스킬을 읽고 그 안내대로 APA 양식(표 번호는 굵게, 제목은 다음 줄에 기울임꼴, 가로선만)으로 만든다. 스킬이 없으면 다른 방법으로 만들지 말고 알려 준다.
+- 모든 숫자는 코드로 계산한 값을 넣고 손으로 적지 않는다. 표의 값은 output 폴더에 CSV 로도 저장하고, 내가 대조할 수 있게 분석의 원래 출력을 보여 준다.
+- 패키지를 새로 설치해야 하면 설치 전에 내 허락을 받는다.</pre></div>
+<h4>부가 프롬프트: 필요한 것만 골라 붙이기</h4>
+<p>필수 프롬프트를 실행한 뒤, 같은 대화에서 아래 첫 줄과 필요한 항목만 남겨 붙여 넣는다. 그림에 한글을 썼는데 네모로 나오면 "한글" 항목을 붙인다.</p>
+<div class="cb prompt"><span class="lang">부가 프롬프트 · 이원배치</span><pre>scripts/twoway_anova.R 에 이어서, 아래에서 고른 항목을 추가하고 결과보고서 output/report/twoway_report.docx 에도 이어서 넣어 줘. 표와 그림의 번호는 앞에 이어서 매긴다.
+- 한글: 그림의 한글은 showtext 로 Noto Sans KR 글꼴을 쓴다.
+- 가정 점검 표: 여섯 칸에 대한 Levene 검정(중앙값 기준)과 잔차의 Shapiro-Wilk 검정.
+- 후속 분석 상세 표: 보충 방법마다 용량의 효과와, 어느 수준끼리 다른지 쌍별 비교(전체 모형의 오차 사용, Bonferroni 보정).
+- 제곱합 구성 막대: 전체 변동이 보충 방법, 용량, 교호작용, 오차로 나뉘는 비율. 조각마다 비율(%)과 자유도. output/twoway_ss_composition.png, 7×3 인치.
+- 가법 모형 비교: 그림 1 에 교호작용이 없다고 가정했을 때의 예측값을 점선으로 겹쳐 교호작용의 크기가 보이게 한다.
+- 칸별 분포: 칸별 상자그림에 관측값 점을 겹친다. output/twoway_cells_box.png, 6.5×4.2 인치.
+- 불균형 설계 대비: 칸마다 사례 수가 다를 때는 어떻게 해야 하는지 스크립트에 주석으로 설명한다.
+- 표기: 통계량은 소수 둘째 자리, p 값과 효과크기는 앞의 0 을 빼고 .001 보다 작으면 "&lt; .001", 1,000 이상은 세 자리 쉼표. 통계 기호는 기울임꼴, 통계 용어는 처음 나올 때 "한국어(영어 원문)" 꼴로 쓴다.
+- 코드 설명: 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 적는다.</pre></div>
 <h3>프롬프트 실행 뒤: 제공한 코드와 확인할 것</h3>
 <p>에이전트가 만든 <code>scripts/twoway_anova.R</code>와 아래 제공한 코드를 나란히 놓고 읽는다.</p>
 <div class="callout"><p><strong>코드는 달라도 된다.</strong> 생성한 코드는 실행할 때마다, 에이전트마다 다를 수 있다. 변수 이름, 함수 선택, 줄 수가 달라도 틀린 것이 아니다. 판단의 기준은 코드의 모양이 아니라 아래 표의 항목과 결과의 숫자다.</p></div>
@@ -540,10 +663,10 @@ tg %&gt;%
 <tr><td>오차항</td><td>단순 주효과에서 전체 모형의 오차(MSE = 13.19, df = 54)를 썼는가.</td></tr>
 <tr><td>해석</td><td>교호작용부터 해석했는가. 2 mg에서 두 보충 방법의 차이가 없다는 내용이 들어 있는가.</td></tr>
 <tr><td>docx 스킬</td><td>에이전트가 스킬을 읽고 썼는가. 보고서의 숫자가 CSV에서 읽은 값인가.</td></tr>
-<tr><td>APA 형식</td><td>보고서를 Word에서 연다. 표에 세로선이 없는가. 표와 그림의 번호·제목·주, 기호의 기울임꼴, <i>p</i> 앞의 0을 뺀 표기, 통계 용어의 영어 원문을 지켰는가. 그림이 문서 안에 들어 있는가.</td></tr>
-<tr><td>보고서 구성</td><td>프롬프트에 번호로 적은 표와 그림, 결과 문장이 차례로 다 들어 있는가. 해석이 결과의 숫자와 어긋나지 않는가.</td></tr>
+<tr><td>APA 형식</td><td>보고서를 Word에서 연다. 표에 세로선이 없는가. 표와 그림의 번호·제목·주, 기호의 기울임꼴, <i>p</i> 앞의 0을 뺀 표기, 통계 용어의 영어 원문(부가 항목을 붙였다면)을 지켰는가. 그림이 문서 안에 들어 있는가.</td></tr>
+<tr><td>보고서 구성</td><td>필수 프롬프트의 표 1, 표 2, 그림 1, 결과 문장이 다 들어 있는가. 부가 항목을 붙였다면 그것도 이어서 들어갔는가. 해석이 결과의 숫자와 어긋나지 않는가.</td></tr>
 <tr><td>손으로 적은 숫자</td><td>코드에 분석 결과의 값이 직접 적혀 있지 않은가.</td></tr>
-<tr><td>저장한 파일</td><td>프롬프트에 적은 경로에 CSV, PNG, Word 파일이 모두 생겼는가.</td></tr>
+<tr><td>저장한 파일</td><td>프롬프트에 적은 경로에 CSV, PNG, Word 파일이 생겼는가.</td></tr>
 </tbody></table></div>
 <p>어긋나는 항목이 있으면 에이전트에게 어느 항목이 어떻게 다른지 알려 고치게 하고, 왜 그렇게 했는지도 묻는다.</p>
 </section>
@@ -620,39 +743,61 @@ tg %&gt;%
 <tr class="sig"><td>18일 − 12일</td><td>59.6</td><td>11.80</td><td>&lt; .001</td><td>1.73</td></tr>
 </tbody></table></div>
 <p>대응표본의 효과크기는 <a href="mean-test-with-r.html#s4">대응표본 t 검정</a>에서 본 것처럼 무엇으로 나누었는지를 밝힌다. 여기서는 차이의 표준편차(deviation)로 나눈 \(d_z = t/\sqrt{n}\)이다. 18일 − 6일의 평균 차이(mean difference)가 가장 큰데도 g가 12일 − 6일보다 작은 것은, 18일에는 개체마다 성장 속도가 달라 차이 점수의 표준편차가 함께 커졌기 때문이다.</p>
-<div class="callout"><p><strong>결과 보고 예시.</strong> Mauchly 검정에서 구형성 가정이 기각되어(<i>W</i> = 0.30, <i>p</i> &lt; .001) Greenhouse–Geisser 보정을 적용하였다. 체중은 시점에 따라 유의하게 증가하였다, <i>F</i>(1.17, 51.6) = 201.73, <i>p</i> &lt; .001, η²<sub>G</sub> = .62. Bonferroni 보정 대응표본 t 검정 결과 모든 시점 쌍의 차이가 유의하였다(모두 <i>p</i> &lt; .001).</p></div>
+<div class="callout"><p><strong>결과 보고 예시.</strong> Mauchly 검정에서 구형성 가정이 기각되어(<i>W</i> = 0.30, <i>p</i> &lt; .001) Greenhouse–Geisser 보정을 적용하였다. 체중은 시점에 따라 유의하게 증가하였다, <i>F</i>(1.17, 51.6) = 201.73, <i>p</i> &lt; .001, η²<sub>G</sub> = .62. Bonferroni 보정 대응표본 t 검정 결과 모든 시점 쌍의 차이가 유의하였다(모두 <i>p</i> &lt; .001).</p>
+<p>보고서용 표로 정리하면 다음과 같다. 반복측정에서는 개체 간 변동을 따로 한 줄로 적는다(표 번호는 보고서 안의 번호).</p>
+<div class="scroll">
+<table class="apa">
+<caption><b>표 2</b><br><i>일령에 따른 병아리 체중의 반복측정 분산분석과 사후검정</i></caption>
+<thead><tr><th>변동원</th><th><i>SS</i></th><th><i>df</i></th><th><i>MS</i></th><th><i>F</i></th><th><i>p</i></th><th>η²<sub>G</sub></th><th>사후검정 (Bonferroni)</th></tr></thead>
+<tbody>
+<tr><td>개체 간</td><td>126,865</td><td>44</td><td>2,883</td><td></td><td></td><td></td><td class="ph" rowspan="4">6일 &lt; 12일 &lt; 18일</td></tr>
+<tr><td>시점</td><td>310,957</td><td>2</td><td>155,478</td><td>201.73</td><td>&lt; .001</td><td>.62</td></tr>
+<tr><td>오차</td><td>67,825</td><td>88</td><td>771</td><td></td><td></td><td></td></tr>
+<tr class="total"><td>전체</td><td>505,647</td><td>134</td><td></td><td></td><td></td><td></td></tr>
+</tbody></table>
+<p class="apa-note"><i>주.</i> 시점별 <i>M</i> (<i>SD</i>): 6일 74.9 (8.38), 12일 132.8 (32.10), 18일 192.4 (57.60), <i>n</i> = 45. Mauchly 검정에서 구형성 가정이 기각되어(<i>W</i> = 0.30, <i>p</i> &lt; .001) Greenhouse–Geisser 보정을 적용하였다(ε = .59, <i>F</i>(1.17, 51.64) = 201.73, <i>p</i> &lt; .001). 사후검정은 Bonferroni 보정 대응표본 t 검정이며 모든 쌍에서 <i>p</i> &lt; .001이었다.</p>
+</div>
+</div>
 <div class="callout caution"><p><strong>시간 효과의 모양까지 보고 싶다면.</strong> 시점이 순서형이면 다항 대비(선형·2차)로 "직선적으로 증가하는가, 증가가 둔화되는가"를 검정할 수 있다. 측정 시점이 개체마다 다르거나 결측이 많으면 반복측정 분산분석(analysis of variance, ANOVA) 대신 선형혼합모형(<code>lme4::lmer()</code>)이 적합하다.</p></div>
 
-<h3>프롬프트의 구성요소</h3>
-<p>틀은 <a href="#oneway-parts">일원배치 프롬프트</a>와 같다. 반복측정에서 달라지는 부분을 중심으로 읽는다.</p>
+<p>틀은 <a href="#oneway-parts">일원배치 프롬프트</a>와 같다. 반복측정에서 달라지는 부분이다.</p>
+<details class="fold">
+<summary>펼쳐 보기: 프롬프트의 구성요소</summary>
 <div class="scroll"><table class="parts">
-<thead><tr><th>구성요소</th><th>이 프롬프트에 적은 것</th><th>왜 적나</th></tr></thead>
+<thead><tr><th>구분</th><th>구성요소</th><th>이 프롬프트에 적은 것</th></tr></thead>
 <tbody>
-<tr><td>첫 문단</td><td>완측 개체만 고르기, 세 시점, 범주로 다루기</td><td>자료를 고르는 규칙에 따라 결과가 달라지므로 그대로 적는다</td></tr>
-<tr><td>"표 N · 이름:" 항목</td><td>기술통계, 구형성 점검과 보정 규칙, 분산분석표, 사후비교</td><td>구형성 판단과 보정을 고르는 규칙을 말로 정해 준다</td></tr>
-<tr><td>"그림 N:" 항목</td><td>평균 변화와 개체 궤적, 차이 점수 분산, 독립집단 분석과의 비교</td><td>구형성과 개체 변동의 역할이 그림에 드러나게 한다</td></tr>
-<tr><td>결과 문장 항목</td><td>구형성 판단과 보정을 포함한 결과 문단과 쉬운 말의 해석</td><td>보정을 빠뜨리지 않게 한다</td></tr>
-<tr><td>Word 보고서 항목</td><td>파일 경로, docx 스킬, 표와 그림의 APA 양식</td><td>여러 결과를 한 문서로 모으고, 콘솔 출력으로 끝나지 않게 한다</td></tr>
-<tr><td>끝의 <code>-</code> 규칙</td><td>코드로 계산한 숫자, 자릿수와 표기, 영어 병기, 패키지와 글꼴, 코드 주석</td><td>모든 항목에 공통인 규칙을 한곳에 둔다. 숫자를 손으로 적지 못하게 하는 것이 핵심이다</td></tr>
+<tr><td>필수</td><td>기초 통계량</td><td>시점별 평균, 표준편차, 신뢰구간</td></tr>
+<tr><td>필수</td><td>분석 통계 정리</td><td>구형성 보정을 한 분산분석표에 Bonferroni 사후비교 결론을 붙인 한 표</td></tr>
+<tr><td>필수</td><td>도표</td><td>시점별 평균 변화</td></tr>
+<tr><td>필수</td><td>결과 문장과 Word 보고서</td><td>APA 형식 문장, 쉬운 말의 해석, docx 스킬로 만든 보고서</td></tr>
+<tr><td>필수</td><td>공통 규칙</td><td>코드로 계산한 숫자, CSV 저장, 설치 전 허락</td></tr>
+<tr><td>부가</td><td>한글</td><td>그림의 한글 글꼴</td></tr>
+<tr><td>부가</td><td>상세 표</td><td>구형성 점검, 사후비교와 효과크기</td></tr>
+<tr><td>부가</td><td>설명 그림</td><td>개체 궤적, 차이 점수 분산, 반복측정의 이점</td></tr>
+<tr><td>부가</td><td>표기와 주석</td><td>숫자와 용어 표기, 코드 주석</td></tr>
 </tbody></table></div>
+</details>
 <h3>프롬프트로 만들기</h3>
 <p>먼저 이 프롬프트로 스크립트와 결과보고서 <code>output/report/rm_report.docx</code>를 만든 뒤, 아래 제공한 코드와 비교한다.</p>
-<div class="cb prompt"><span class="lang">프롬프트 · 반복측정</span><pre>R 내장 자료 ChickWeight 로 일원 반복측정 분산분석을 하는 스크립트 scripts/rm_anova.R 을 새로 써서 실행하고, 보고서에 넣을 표와 그림을 만들어 줘. 같은 병아리의 체중(weight)이 시점에 따라 달라지는지 보는 분석이다. 12번 모두 측정된 병아리만 남기고 6일, 12일, 18일 자료만 쓴다(45마리 × 3시점). 병아리와 시점은 범주로 다루고, 고른 자료는 dataset/working/chick_6_12_18.csv 로 저장한다.
-1. 표 1 · 기술통계: 시점별 사례 수, 평균, 표준편차, 95% 신뢰구간. output/rm_desc.csv 에 저장한다.
-2. 표 2 · 구형성 점검: 시점 간 분산과 공분산, 모든 시점 쌍의 차이 점수 분산, Mauchly 검정의 결과, Greenhouse-Geisser 와 Huynh-Feldt 의 엡실론. 엡실론이 .75 보다 작으면 Greenhouse-Geisser, 아니면 Huynh-Feldt 보정을 고르고, 고른 보정을 표 아래 "주."에 적는다. output/rm_sphericity_check.csv 에 저장한다.
-3. 표 3 · 분산분석표: 요인과 오차의 자유도, 제곱합, 평균제곱, F, p, 보정한 자유도와 p, 일반화 η². 표 아래 "주."에 전체 제곱합이 개체, 시점, 오차로 나뉘는 값과 각 자유도를 적는다. output/rm_anova_table.csv 에 저장한다.
-4. 표 4 · 사후비교: 시점 쌍마다 Bonferroni 로 보정한 대응표본 t 검정의 평균 차이, t, 자유도, 보정한 p, Hedges g. 효과크기를 어떤 표준편차로 나누었는지 "주."에 밝힌다. output/rm_posthoc.csv 에 저장한다.
-5. 그림 1: 병아리별 궤적을 옅은 회색으로 그리고, 그 위에 시점별 평균선과 95% 신뢰구간을 그린다. output/rm_mean_change.png, 6.5×4.2 인치, 300 dpi.
-6. 그림 2: 시점 쌍별 차이 점수 분산의 막대그림. 평균 수준을 점선으로 긋는다. output/rm_diff_variance.png, 6×4 인치, 300 dpi.
-7. 그림 3: 같은 자료를 서로 다른 개체의 세 집단으로 잘못 보았을 때와 반복측정으로 보았을 때의 제곱합 분해를 쌓은 막대 두 개로 비교하고 각각의 F 를 적는다. output/rm_ss_compare.png, 7×3.5 인치, 300 dpi.
-8. 결과 문장을 APA 형식으로 쓴다: 구형성 판단과 보정, 보정한 F 와 두 자유도, p, 일반화 η², 사후비교. 그 결과가 실제로 무엇을 뜻하는지 쉬운 말로 한 문단 쓴다.
-9. 위의 표와 그림, 결과 문장을 Word 파일 output/report/rm_report.docx 하나에 차례로 넣는다. 파일은 작업 폴더에 설치한 docx 스킬을 읽고 그 안내대로 만든다. 스킬이 없으면 다른 방법으로 만들지 말고 나에게 알려 준다. 표와 그림은 APA 양식으로 넣는다: "표 1"은 굵게, 제목은 다음 줄에 기울임꼴, 세로선 없이 가로선만 쓰고, 표 아래에 "주."로 단위와 약어, 보정 방법을 적는다. 그림도 "그림 1"은 굵게, 제목은 다음 줄에 기울임꼴로 쓰고 그림을 문서 안에 넣는다.
-- 모든 숫자는 코드로 계산한 값을 넣고 손으로 적지 않는다. 표의 값은 output 폴더에 저장한 파일에서 읽어 문서에 넣는다. 끝나면 저장한 파일의 경로를 알려 주고, 표의 숫자를 내가 대조할 수 있도록 분석 결과의 원래 출력을 보여 준다.
-- 통계량은 소수 둘째 자리까지 쓴다. p 값과 효과크기는 앞의 0 을 빼고, p 값은 소수 셋째 자리까지, .001 보다 작으면 "&lt; .001"로 쓴다. 1,000 이상의 숫자에는 세 자리마다 쉼표를 넣는다. 통계 기호(M, SD, n, F, t, p)는 기울임꼴로 쓴다.
-- 통계 용어는 보고서의 각 부분에서 처음 나올 때 "한국어(영어 원문)" 꼴로 쓴다. 예: 분산분석(analysis of variance, ANOVA), 제곱합(sum of squares, SS).
-- 데이터 처리와 그림에는 tidyverse 를 쓴다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
-- 그림의 한글은 showtext 로 Noto Sans KR 글꼴을 쓴다.
-- 어떤 방법으로 분석했는지, 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 설명해 준다.</pre></div>
+<div class="cb prompt"><span class="lang">필수 프롬프트 · 반복측정</span><pre>R 내장 자료 ChickWeight 로 일원 반복측정 분산분석을 하는 스크립트 scripts/rm_anova.R 을 새로 써서 실행하고, 결과보고서를 만들어 줘. 같은 병아리의 체중(weight)이 시점에 따라 달라지는지 보는 분석이다. 12번 모두 측정된 병아리만 남기고 6일, 12일, 18일 자료만 쓴다(45마리 × 3시점). 고른 자료는 dataset/working/chick_6_12_18.csv 로 저장한다.
+1. 표 1 · 기술통계: 시점별 사례 수, 평균, 표준편차, 95% 신뢰구간.
+2. 표 2 · 분산분석과 사후검정: 먼저 Mauchly 검정으로 구형성을 확인하고, 기각되면 엡실론이 .75 보다 작을 때 Greenhouse-Geisser, 아니면 Huynh-Feldt 보정을 한다. 분산분석표(개체 간, 시점, 오차, 전체의 제곱합, 자유도, 평균제곱, F, p, 일반화 η²)에 Bonferroni 보정 대응표본 t 검정의 결론을 한 열로 붙인다. 구형성 검정과 보정 결과, 시점별 평균(표준편차)은 "주."에 적는다.
+3. 그림 1: 시점별 평균과 95% 신뢰구간을 잇는 선 그래프. output/rm_mean_change.png, 6.5×4.2 인치, 300 dpi.
+4. 결과 문장을 구형성 판단과 보정을 포함해 APA 형식으로 쓰고, 그 결과가 무엇을 뜻하는지 쉬운 말로 한 문단 쓴다.
+5. 표와 그림, 결과 문장을 Word 파일 output/report/rm_report.docx 에 넣는다. 작업 폴더의 docx 스킬을 읽고 그 안내대로 APA 양식(표 번호는 굵게, 제목은 다음 줄에 기울임꼴, 가로선만)으로 만든다. 스킬이 없으면 다른 방법으로 만들지 말고 알려 준다.
+- 모든 숫자는 코드로 계산한 값을 넣고 손으로 적지 않는다. 표의 값은 output 폴더에 CSV 로도 저장하고, 내가 대조할 수 있게 분석의 원래 출력을 보여 준다.
+- 패키지를 새로 설치해야 하면 설치 전에 내 허락을 받는다.</pre></div>
+<h4>부가 프롬프트: 필요한 것만 골라 붙이기</h4>
+<p>필수 프롬프트를 실행한 뒤, 같은 대화에서 아래 첫 줄과 필요한 항목만 남겨 붙여 넣는다. 그림에 한글을 썼는데 네모로 나오면 "한글" 항목을 붙인다.</p>
+<div class="cb prompt"><span class="lang">부가 프롬프트 · 반복측정</span><pre>scripts/rm_anova.R 에 이어서, 아래에서 고른 항목을 추가하고 결과보고서 output/report/rm_report.docx 에도 이어서 넣어 줘. 표와 그림의 번호는 앞에 이어서 매긴다.
+- 한글: 그림의 한글은 showtext 로 Noto Sans KR 글꼴을 쓴다.
+- 구형성 점검 표: 시점 간 분산과 공분산, 모든 시점 쌍의 차이 점수 분산, Greenhouse-Geisser 와 Huynh-Feldt 의 엡실론.
+- 사후비교 상세 표: 시점 쌍마다 평균 차이, t, 자유도, 보정한 p, Hedges g. 효과크기를 어떤 표준편차로 나누었는지 "주."에 밝힌다.
+- 개체 궤적: 그림 1 에 병아리별 궤적을 옅은 회색으로 겹친다.
+- 차이 점수 분산 그림: 시점 쌍별 차이 점수 분산의 막대그림과 평균 수준의 점선. output/rm_diff_variance.png, 6×4 인치.
+- 반복측정의 이점 그림: 같은 자료를 서로 다른 개체의 세 집단으로 잘못 보았을 때와 반복측정으로 보았을 때의 제곱합 분해를 쌓은 막대 두 개로 비교하고 각각의 F 를 적는다. output/rm_ss_compare.png, 7×3.5 인치.
+- 표기: 통계량은 소수 둘째 자리, p 값과 효과크기는 앞의 0 을 빼고 .001 보다 작으면 "&lt; .001", 1,000 이상은 세 자리 쉼표. 통계 기호는 기울임꼴, 통계 용어는 처음 나올 때 "한국어(영어 원문)" 꼴로 쓴다.
+- 코드 설명: 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 적는다.</pre></div>
 <h3>프롬프트 실행 뒤: 제공한 코드와 확인할 것</h3>
 <p>에이전트가 만든 <code>scripts/rm_anova.R</code>와 아래 제공한 코드를 나란히 놓고 읽는다.</p>
 <div class="callout"><p><strong>코드는 달라도 된다.</strong> 생성한 코드는 실행할 때마다, 에이전트마다 다를 수 있다. 변수 이름, 함수 선택, 줄 수가 달라도 틀린 것이 아니다. 판단의 기준은 코드의 모양이 아니라 아래 표의 항목과 결과의 숫자다.</p></div>
@@ -705,10 +850,10 @@ ggsave("output/rm_mean_change.png", p_rm, width = 6.5, height = 4.2, dpi = 300)<
 <tr><td>숫자</td><td>보고서의 값이 이 쪽의 표 9와 같은가. Mauchly <i>W</i> = 0.30, 보정 후 <i>F</i>(1.17, 51.6) = 201.73이어야 한다.</td></tr>
 <tr><td>효과크기</td><td>사후비교의 효과크기가 무엇으로 나눈 값인지 밝혔는가. 이 쪽의 표 10은 \(d_z\)에 보정을 한 값이다.</td></tr>
 <tr><td>docx 스킬</td><td>에이전트가 스킬을 읽고 썼는가. 보고서의 숫자가 CSV에서 읽은 값인가.</td></tr>
-<tr><td>APA 형식</td><td>보고서를 Word에서 연다. 표에 세로선이 없는가. 표와 그림의 번호·제목·주, 기호의 기울임꼴, <i>p</i> 앞의 0을 뺀 표기, 통계 용어의 영어 원문을 지켰는가. 그림이 문서 안에 들어 있는가.</td></tr>
-<tr><td>보고서 구성</td><td>프롬프트에 번호로 적은 표와 그림, 결과 문장이 차례로 다 들어 있는가. 해석이 결과의 숫자와 어긋나지 않는가.</td></tr>
+<tr><td>APA 형식</td><td>보고서를 Word에서 연다. 표에 세로선이 없는가. 표와 그림의 번호·제목·주, 기호의 기울임꼴, <i>p</i> 앞의 0을 뺀 표기, 통계 용어의 영어 원문(부가 항목을 붙였다면)을 지켰는가. 그림이 문서 안에 들어 있는가.</td></tr>
+<tr><td>보고서 구성</td><td>필수 프롬프트의 표 1, 표 2, 그림 1, 결과 문장이 다 들어 있는가. 부가 항목을 붙였다면 그것도 이어서 들어갔는가. 해석이 결과의 숫자와 어긋나지 않는가.</td></tr>
 <tr><td>손으로 적은 숫자</td><td>코드에 분석 결과의 값이 직접 적혀 있지 않은가.</td></tr>
-<tr><td>저장한 파일</td><td>프롬프트에 적은 경로에 CSV, PNG, Word 파일이 모두 생겼는가.</td></tr>
+<tr><td>저장한 파일</td><td>프롬프트에 적은 경로에 CSV, PNG, Word 파일이 생겼는가.</td></tr>
 </tbody></table></div>
 <p>어긋나는 항목이 있으면 에이전트에게 어느 항목이 어떻게 다른지 알려 고치게 하고, 왜 그렇게 했는지도 묻는다.</p>
 </section>
@@ -766,38 +911,45 @@ ggsave("output/rm_mean_change.png", p_rm, width = 6.5, height = 4.2, dpi = 300)<
 <div class="callout caution"><p><strong>보정이 결론을 바꾸는 경우.</strong> 같은 자료에서 시점을 4·8·12·16일로 잡으면 Diet × Time의 보정 전 p = .009가 GG 보정 후 p = .056이 된다. 구형성이 크게 깨진 자료에서 보정 없이 보고하면 교호작용을 잘못 주장하게 된다. 수업에서 시점만 바꿔 직접 확인해 본다.</p></div>
 <div class="callout"><p><strong>결과 보고 예시.</strong> 구형성 가정이 기각(reject)되어(<i>W</i> = 0.31, <i>p</i> &lt; .001) 개체 내 효과에 Greenhouse–Geisser 보정을 적용하였다. 사료의 주효과, <i>F</i>(3, 41) = 5.11, <i>p</i> = .004, η²<sub>G</sub> = .19, 일령의 주효과, <i>F</i>(1.18, 48.6) = 234.96, <i>p</i> &lt; .001, η²<sub>G</sub> = .68, 사료 × 일령 교호작용, <i>F</i>(3.55, 48.6) = 3.42, <i>p</i> = .019, η²<sub>G</sub> = .09가 모두 유의하였다. 사료 간 체중 차이는 일령에 따라 달랐으며, 18일에는 Diet 3이 가장 무거웠다.</p></div>
 
-<h3>프롬프트의 구성요소</h3>
-<p>틀은 <a href="#oneway-parts">일원배치 프롬프트</a>와 같다. 혼합 설계에서 달라지는 부분을 중심으로 읽는다.</p>
+<p>틀은 <a href="#oneway-parts">일원배치 프롬프트</a>와 같다. 혼합 설계에서 달라지는 부분이다.</p>
+<details class="fold">
+<summary>펼쳐 보기: 프롬프트의 구성요소</summary>
 <div class="scroll"><table class="parts">
-<thead><tr><th>구성요소</th><th>이 프롬프트에 적은 것</th><th>왜 적나</th></tr></thead>
+<thead><tr><th>구분</th><th>구성요소</th><th>이 프롬프트에 적은 것</th></tr></thead>
 <tbody>
-<tr><td>첫 문단</td><td>앞 절에서 저장한 CSV, 개체 간·개체 내 요인, 개체 ID</td><td>요인의 종류와 개체 ID를 알려야 설계를 올바로 지정한다</td></tr>
-<tr><td>"표 N · 이름:" 항목</td><td>기술통계, 가정 점검, 분산분석표, 제곱합 분해, 후속 분석, 민감도 분석</td><td>효과마다 오차항이 다르다는 것과 보정의 영향을 표로 보이게 한다</td></tr>
-<tr><td>"그림 N:" 항목</td><td>사료별 평균 변화, 개체 궤적의 facet, 제곱합 분해</td><td>개체 간 변동과 개체 내 변동이 나뉘는 것을 그림으로 보이게 한다</td></tr>
-<tr><td>결과 문장 항목</td><td>구형성 보정과 교호작용 해석을 포함한 결과 문단과 쉬운 말의 해석</td><td>효과마다 보고할 값을 정한다</td></tr>
-<tr><td>Word 보고서 항목</td><td>파일 경로, docx 스킬, 표와 그림의 APA 양식</td><td>여러 결과를 한 문서로 모으고, 콘솔 출력으로 끝나지 않게 한다</td></tr>
-<tr><td>끝의 <code>-</code> 규칙</td><td>코드로 계산한 숫자, 자릿수와 표기, 영어 병기, 패키지와 글꼴, 코드 주석</td><td>모든 항목에 공통인 규칙을 한곳에 둔다. 숫자를 손으로 적지 못하게 하는 것이 핵심이다</td></tr>
+<tr><td>필수</td><td>기초 통계량</td><td>사료 × 일령 칸별 평균, 표준편차, 표준오차</td></tr>
+<tr><td>필수</td><td>분석 통계 정리</td><td>구형성 보정을 한 분산분석표에 시점별 사료 효과의 결론을 붙인 한 표</td></tr>
+<tr><td>필수</td><td>도표</td><td>사료별 평균 변화</td></tr>
+<tr><td>필수</td><td>결과 문장과 Word 보고서</td><td>APA 형식 문장, 쉬운 말의 해석, docx 스킬로 만든 보고서</td></tr>
+<tr><td>필수</td><td>공통 규칙</td><td>코드로 계산한 숫자, CSV 저장, 설치 전 허락</td></tr>
+<tr><td>부가</td><td>한글</td><td>그림의 한글 글꼴</td></tr>
+<tr><td>부가</td><td>상세 표</td><td>가정 점검, 제곱합 분해, 쌍별 비교, 민감도 분석</td></tr>
+<tr><td>부가</td><td>설명 그림</td><td>개체 궤적, 제곱합 분해</td></tr>
+<tr><td>부가</td><td>표기와 주석</td><td>숫자와 용어 표기, 코드 주석</td></tr>
 </tbody></table></div>
+</details>
 <h3>프롬프트로 만들기</h3>
 <p>먼저 이 프롬프트로 스크립트와 결과보고서 <code>output/report/mixed_report.docx</code>를 만든 뒤, 아래 제공한 코드와 비교한다.</p>
-<div class="cb prompt"><span class="lang">프롬프트 · 혼합 설계</span><pre>개체 간 요인 하나와 반복측정 요인 하나가 있는 혼합 설계 분산분석을 하는 스크립트 scripts/mixed_anova.R 을 새로 써서 실행하고, 보고서에 넣을 표와 그림을 만들어 줘. 병아리의 체중(weight)이 사료(Diet, 4종, 병아리마다 하나)와 일령(Time, 3시점, 같은 병아리를 반복 측정)에 따라 달라지는지 보는 분석이다. 자료는 dataset/working/chick_6_12_18.csv 를 쓴다. 없으면 R 내장 ChickWeight 에서 12번 모두 측정된 병아리의 6일, 12일, 18일 자료로 만든다. 사료별 병아리 수는 16, 10, 10, 9마리로 다르다.
-1. 표 1 · 기술통계: 사료와 일령의 조합(칸)마다 사례 수, 평균, 표준편차, 표준오차. output/mixed_cell_means.csv 에 저장한다.
-2. 표 2 · 가정 점검: 시점별로 사료 집단의 분산이 같은지(Levene), 집단 간 공분산 구조가 같은지(Box's M), 구형성(Mauchly)과 Greenhouse-Geisser, Huynh-Feldt 의 엡실론. output/mixed_assumptions.csv 에 저장한다.
-3. 표 3 · 분산분석표: 사료, 일령, 사료 × 일령의 자유도, 제곱합, F, p, 보정한 자유도와 p, 일반화 η². 사례 수가 달라 제곱합의 유형에 따라 값이 달라지므로, 어떤 유형을 썼는지 "주."에 밝힌다. output/mixed_anova_table.csv 에 저장한다.
-4. 표 4 · 제곱합 분해: 변동을 개체 간 부분(사료, 사료 안의 개체 차이)과 개체 내 부분(일령, 사료 × 일령, 오차)으로 나눈 제곱합과 자유도. 개체 간 효과와 개체 내 효과의 F 를 만들 때 서로 다른 오차를 쓴다는 것을 보여 준다. output/mixed_ss_partition.csv 에 저장한다.
-5. 표 5 · 후속 분석: 교호작용이 유의하면 시점마다 사료의 효과를 보고 어느 사료끼리 다른지 Bonferroni 로 비교한다. 사료마다 일령의 효과도 Greenhouse-Geisser 로 보정해 본다. output/mixed_followup.csv 에 저장한다.
-6. 표 6 · 민감도 분석: 시점을 4, 8, 12, 16일로 바꿔 같은 분석을 하고, 교호작용의 보정 전·후 p 를 원래 시점과 비교한다. output/mixed_sensitivity.csv 에 저장한다.
-7. 그림 1: 가로축은 일령, 색은 사료로 하고 평균과 표준오차를 잇는 선 그래프. output/mixed_profile.png, 6.5×4.2 인치, 300 dpi.
-8. 그림 2: 사료마다 작은 그림을 나누어 병아리별 궤적과 굵은 평균선을 그린다. output/mixed_spaghetti.png, 7×5 인치, 300 dpi.
-9. 그림 3: 개체 간과 개체 내로 나뉜 제곱합 분해를 두 묶음의 쌓은 막대로 그린다. output/mixed_ss_partition.png, 7×3.5 인치, 300 dpi.
-10. 결과 문장을 APA 형식으로 쓴다: 구형성 보정, 각 효과의 F 와 두 자유도, p, 일반화 η², 교호작용 해석. 그 결과가 실제로 무엇을 뜻하는지 쉬운 말로 한 문단 쓴다.
-11. 위의 표와 그림, 결과 문장을 Word 파일 output/report/mixed_report.docx 하나에 차례로 넣는다. 파일은 작업 폴더에 설치한 docx 스킬을 읽고 그 안내대로 만든다. 스킬이 없으면 다른 방법으로 만들지 말고 나에게 알려 준다. 표와 그림은 APA 양식으로 넣는다: "표 1"은 굵게, 제목은 다음 줄에 기울임꼴, 세로선 없이 가로선만 쓰고, 표 아래에 "주."로 단위와 약어, 보정 방법을 적는다. 그림도 "그림 1"은 굵게, 제목은 다음 줄에 기울임꼴로 쓰고 그림을 문서 안에 넣는다.
-- 모든 숫자는 코드로 계산한 값을 넣고 손으로 적지 않는다. 표의 값은 output 폴더에 저장한 파일에서 읽어 문서에 넣는다. 끝나면 저장한 파일의 경로를 알려 주고, 표의 숫자를 내가 대조할 수 있도록 분석 결과의 원래 출력을 보여 준다.
-- 통계량은 소수 둘째 자리까지 쓴다. p 값과 효과크기는 앞의 0 을 빼고, p 값은 소수 셋째 자리까지, .001 보다 작으면 "&lt; .001"로 쓴다. 1,000 이상의 숫자에는 세 자리마다 쉼표를 넣는다. 통계 기호(M, SD, n, F, t, p)는 기울임꼴로 쓴다.
-- 통계 용어는 보고서의 각 부분에서 처음 나올 때 "한국어(영어 원문)" 꼴로 쓴다. 예: 분산분석(analysis of variance, ANOVA), 제곱합(sum of squares, SS).
-- 데이터 처리와 그림에는 tidyverse 를 쓴다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
-- 그림의 한글은 showtext 로 Noto Sans KR 글꼴을 쓴다.
-- 어떤 방법으로 분석했는지, 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 설명해 준다.</pre></div>
+<div class="cb prompt"><span class="lang">필수 프롬프트 · 혼합 설계</span><pre>개체 간 요인 하나와 반복측정 요인 하나가 있는 혼합 설계 분산분석을 하는 스크립트 scripts/mixed_anova.R 을 새로 써서 실행하고, 결과보고서를 만들어 줘. 병아리의 체중(weight)이 사료(Diet, 4종, 병아리마다 하나)와 일령(Time, 3시점, 같은 병아리를 반복 측정)에 따라 달라지는지 보는 분석이다. 자료는 dataset/working/chick_6_12_18.csv 를 쓴다. 없으면 R 내장 ChickWeight 에서 12번 모두 측정된 병아리의 6일, 12일, 18일 자료로 만든다.
+1. 표 1 · 기술통계: 사료와 일령의 조합(칸)마다 사례 수, 평균, 표준편차, 표준오차.
+2. 표 2 · 분산분석과 후속 분석: 사료, 일령, 사료 × 일령의 분산분석표(제곱합, 자유도, F, p, 보정한 자유도와 p, 일반화 η²). 구형성이 기각되면 Greenhouse-Geisser 로 보정한다. 교호작용이 유의하면 시점마다 사료의 효과를 따로 본 결론을 한 열로 붙인다. 사료별 병아리 수가 달라 제곱합의 유형에 따라 값이 달라지므로 어떤 유형을 썼는지와 구형성 검정 결과를 "주."에 적는다.
+3. 그림 1: 가로축은 일령, 색은 사료로 하고 평균과 표준오차를 잇는 선 그래프. output/mixed_profile.png, 6.5×4.2 인치, 300 dpi.
+4. 결과 문장을 구형성 보정과 교호작용 해석을 포함해 APA 형식으로 쓰고, 그 결과가 무엇을 뜻하는지 쉬운 말로 한 문단 쓴다.
+5. 표와 그림, 결과 문장을 Word 파일 output/report/mixed_report.docx 에 넣는다. 작업 폴더의 docx 스킬을 읽고 그 안내대로 APA 양식(표 번호는 굵게, 제목은 다음 줄에 기울임꼴, 가로선만)으로 만든다. 스킬이 없으면 다른 방법으로 만들지 말고 알려 준다.
+- 모든 숫자는 코드로 계산한 값을 넣고 손으로 적지 않는다. 표의 값은 output 폴더에 CSV 로도 저장하고, 내가 대조할 수 있게 분석의 원래 출력을 보여 준다.
+- 패키지를 새로 설치해야 하면 설치 전에 내 허락을 받는다.</pre></div>
+<h4>부가 프롬프트: 필요한 것만 골라 붙이기</h4>
+<p>필수 프롬프트를 실행한 뒤, 같은 대화에서 아래 첫 줄과 필요한 항목만 남겨 붙여 넣는다. 그림에 한글을 썼는데 네모로 나오면 "한글" 항목을 붙인다.</p>
+<div class="cb prompt"><span class="lang">부가 프롬프트 · 혼합 설계</span><pre>scripts/mixed_anova.R 에 이어서, 아래에서 고른 항목을 추가하고 결과보고서 output/report/mixed_report.docx 에도 이어서 넣어 줘. 표와 그림의 번호는 앞에 이어서 매긴다.
+- 한글: 그림의 한글은 showtext 로 Noto Sans KR 글꼴을 쓴다.
+- 가정 점검 표: 시점별 사료 집단의 Levene 검정, 집단 간 공분산 구조의 Box's M, Mauchly 검정과 Greenhouse-Geisser, Huynh-Feldt 의 엡실론.
+- 제곱합 분해 표: 개체 간 부분(사료, 사료 안의 개체 차이)과 개체 내 부분(일령, 사료 × 일령, 오차)의 제곱합과 자유도. 두 부분의 효과가 서로 다른 오차로 검정된다는 것을 보여 준다.
+- 후속 분석 상세 표: 시점마다 어느 사료끼리 다른지 쌍별 비교(Bonferroni)와, 사료마다 일령의 효과(Greenhouse-Geisser 보정).
+- 민감도 분석: 시점을 4, 8, 12, 16일로 바꿔 같은 분석을 하고, 교호작용의 보정 전·후 p 를 원래 시점과 비교한다.
+- 개체 궤적 그림: 사료마다 작은 그림을 나누어 병아리별 궤적과 굵은 평균선을 그린다. output/mixed_spaghetti.png, 7×5 인치.
+- 제곱합 분해 그림: 개체 간과 개체 내로 나뉜 제곱합을 두 묶음의 쌓은 막대로. output/mixed_ss_partition.png, 7×3.5 인치.
+- 표기: 통계량은 소수 둘째 자리, p 값과 효과크기는 앞의 0 을 빼고 .001 보다 작으면 "&lt; .001", 1,000 이상은 세 자리 쉼표. 통계 기호는 기울임꼴, 통계 용어는 처음 나올 때 "한국어(영어 원문)" 꼴로 쓴다.
+- 코드 설명: 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 적는다.</pre></div>
 <h3>프롬프트 실행 뒤: 제공한 코드와 확인할 것</h3>
 <p>에이전트가 만든 <code>scripts/mixed_anova.R</code>와 아래 제공한 코드를 나란히 놓고 읽는다.</p>
 <div class="callout"><p><strong>코드는 달라도 된다.</strong> 생성한 코드는 실행할 때마다, 에이전트마다 다를 수 있다. 변수 이름, 함수 선택, 줄 수가 달라도 틀린 것이 아니다. 판단의 기준은 코드의 모양이 아니라 아래 표의 항목과 결과의 숫자다.</p></div>
@@ -854,10 +1006,10 @@ ggsave("output/mixed_profile.png", p_mix, width = 6.5, height = 4.2, dpi = 300)<
 <tr><td>보정</td><td>Diet × Time의 보고값이 보정 후 <i>F</i>(3.55, 48.6) = 3.42, <i>p</i> = .019인가.</td></tr>
 <tr><td>민감도 분석</td><td>시점을 4·8·12·16일로 바꾼 결과가 보정 전 <i>p</i> = .009, 보정 후 <i>p</i> = .056인가.</td></tr>
 <tr><td>docx 스킬</td><td>에이전트가 스킬을 읽고 썼는가. 보고서의 숫자가 CSV에서 읽은 값인가.</td></tr>
-<tr><td>APA 형식</td><td>보고서를 Word에서 연다. 표에 세로선이 없는가. 표와 그림의 번호·제목·주, 기호의 기울임꼴, <i>p</i> 앞의 0을 뺀 표기, 통계 용어의 영어 원문을 지켰는가. 그림이 문서 안에 들어 있는가.</td></tr>
-<tr><td>보고서 구성</td><td>프롬프트에 번호로 적은 표와 그림, 결과 문장이 차례로 다 들어 있는가. 해석이 결과의 숫자와 어긋나지 않는가.</td></tr>
+<tr><td>APA 형식</td><td>보고서를 Word에서 연다. 표에 세로선이 없는가. 표와 그림의 번호·제목·주, 기호의 기울임꼴, <i>p</i> 앞의 0을 뺀 표기, 통계 용어의 영어 원문(부가 항목을 붙였다면)을 지켰는가. 그림이 문서 안에 들어 있는가.</td></tr>
+<tr><td>보고서 구성</td><td>필수 프롬프트의 표 1, 표 2, 그림 1, 결과 문장이 다 들어 있는가. 부가 항목을 붙였다면 그것도 이어서 들어갔는가. 해석이 결과의 숫자와 어긋나지 않는가.</td></tr>
 <tr><td>손으로 적은 숫자</td><td>코드에 분석 결과의 값이 직접 적혀 있지 않은가.</td></tr>
-<tr><td>저장한 파일</td><td>프롬프트에 적은 경로에 CSV, PNG, Word 파일이 모두 생겼는가.</td></tr>
+<tr><td>저장한 파일</td><td>프롬프트에 적은 경로에 CSV, PNG, Word 파일이 생겼는가.</td></tr>
 </tbody></table></div>
 <p>어긋나는 항목이 있으면 에이전트에게 어느 항목이 어떻게 다른지 알려 고치게 하고, 왜 그렇게 했는지도 묻는다.</p>
 </section>
@@ -889,6 +1041,7 @@ ggsave("output/mixed_profile.png", p_mix, width = 6.5, height = 4.2, dpi = 300)<
 <li>Dobson, A. J. (1983). <em>An Introduction to Statistical Modelling</em>. Chapman &amp; Hall. (PlantGrowth)</li>
 <li>Fox, J., &amp; Weisberg, S. (2019). <em>An R Companion to Applied Regression</em> (3rd ed.). Sage. (car 패키지)</li>
 <li>Greenhouse, S. W., &amp; Geisser, S. (1959). On methods in the analysis of profile data. <em>Psychometrika, 24</em>(2), 95–112.</li>
+<li>Henderson, H. V., &amp; Velleman, P. F. (1981). Building multiple regression models interactively. <em>Biometrics, 37</em>(2), 391–411. (mtcars)</li>
 <li>Huynh, H., &amp; Feldt, L. S. (1976). Estimation of the Box correction for degrees of freedom from sample data in randomized block and split-plot designs. <em>Journal of Educational Statistics, 1</em>(1), 69–82.</li>
 <li>Kassambara, A. (2023). <em>rstatix: Pipe-friendly framework for basic statistical tests</em> [R package]. <a href="https://CRAN.R-project.org/package=rstatix">CRAN.R-project.org/package=rstatix</a></li>
 <li>Levene, H. (1960). Robust tests for equality of variances. In I. Olkin (Ed.), <em>Contributions to Probability and Statistics</em> (pp. 278–292). Stanford University Press.</li>
@@ -917,7 +1070,7 @@ window.FN_EXTRA = {
 'pairwise.t.test':{pkg:'stats',sig:'pairwise.t.test(x, g, p.adjust.method, pool.sd, paired)',why:'모든 쌍에 t 검정을 하고 다중비교 보정 p를 표로 보여 준다. 기본값은 합동 표준편차를 쓴다.',args:[['x',1,'반응값 벡터'],['g',1,'집단 벡터'],['p.adjust.method',0,'"bonferroni", "holm" 등. 기본값 "holm"'],['pool.sd',0,'합동 표준편차를 쓸지. 대응표본이 아니면 기본값 TRUE'],['paired',0,'대응표본이면 TRUE. 기본값 FALSE']],ret:'pairwise.htest 객체. 보정된 p의 표.'},
 'qtukey':{pkg:'stats',sig:'qtukey(p, nmeans, df)',why:'스튜던트화 범위분포의 분위수. Tukey HSD의 임계값이다.',args:[['p',1,'누적확률. 유의수준 .05이면 0.95'],['nmeans',1,'집단 수 k'],['df',1,'오차 자유도']],ret:'임계값 수치.'},
 'qt':{pkg:'stats',sig:'qt(p, df)',why:'t 분포의 분위수. 신뢰구간의 임계값에 쓴다.',args:[['p',1,'누적확률'],['df',1,'자유도']],ret:'임계값 수치.'},
-'deviance':{pkg:'stats',sig:'deviance(object)',why:'적합한 선형모형의 잔차제곱합을 꺼낸다. 분산분석에서는 SSW다.',args:[['object',1,'aov나 lm 객체']],ret:'수치 하나.'},
+'deviance':{pkg:'stats',sig:'deviance(object)',why:'적합한 선형모형의 잔차제곱합을 꺼낸다. 분산분석에서는 SSE다.',args:[['object',1,'aov나 lm 객체']],ret:'수치 하나.'},
 'df.residual':{pkg:'stats',sig:'df.residual(object)',why:'적합한 모형의 잔차 자유도를 꺼낸다.',args:[['object',1,'aov나 lm 객체']],ret:'수치 하나.'},
 'Anova':{pkg:'car',sig:'Anova(mod, type)',why:'Type II 또는 Type III 제곱합으로 분산분석표를 만든다.',args:[['mod',1,'lm 같은 적합된 모형'],['type',0,'2 또는 3. 기본값 2. Type III에는 합이 0이 되는 대비를 쓴다']],ret:'anova 표(Sum Sq, Df, F value, Pr(&gt;F)).'},
 'anova':{pkg:'stats',sig:'anova(object)',why:'모형의 항을 적힌 순서대로 넣으며 Type I(순차) 제곱합으로 분산분석표를 만든다.',args:[['object',1,'lm 같은 적합된 모형']],ret:'anova 표(Df, Sum Sq, Mean Sq, F value, Pr(&gt;F)).'},
@@ -970,8 +1123,8 @@ const gmeans=groups.map(g=>{const v=PG.filter(d=>d[0]===g).map(d=>d[1]);return v
 let dcMode=4, dcSel=null;
 const caps=["모든 관측값이 하나의 전체 평균 ȳ = 5.073 주위에 흩어져 있다. 이 흩어짐 전체가 SST다.",
 "집단마다 평균(굵은 가로선)이 따로 있다. 집단을 알면 예측이 전체 평균보다 나아진다.",
-"집단 평균이 전체 평균에서 떨어진 거리(화살표)가 집단 간 편차다. 제곱해 집단 크기 10을 곱해 더하면 SSB = 3.766.",
-"개별값이 자기 집단 평균에서 떨어진 거리(세로선)가 집단 내 편차다. 모두 제곱해 더하면 SSW = 10.492.",
+"집단 평균이 전체 평균에서 떨어진 거리(화살표)가 집단 간 편차다. 제곱해 집단 크기 10을 곱해 더하면 SSTrt = 3.766.",
+"개별값이 자기 집단 평균에서 떨어진 거리(세로선)가 집단 내 편차다. 모두 제곱해 더하면 SSE = 10.492.",
 "두 종류의 편차를 함께 보면 (y − ȳ) = (ȳⱼ − ȳ) + (y − ȳⱼ) 관계가 점마다 성립한다."];
 function drawDecomp(){
   const svg=$("#decomp");svg.innerHTML="";
@@ -1004,13 +1157,13 @@ document.querySelectorAll("#dc-ctrls button").forEach(b=>b.addEventListener("cli
 function drawSSbar(){const svg=$("#ssbar");const W=280,x0=10;const sst=14.258,ssb=3.766,ssw=10.492;const s=v=>v/sst*W;
   el("text",{x:x0,y:16,class:"ink","font-weight":"600"},svg,"SST = 14.258   (df 29)");
   el("rect",{x:x0,y:24,width:W,height:30,fill:"var(--muted)",opacity:.35,rx:3},svg);
-  el("text",{x:x0,y:84,class:"ink","font-weight":"600"},svg,"= SSB + SSW");
+  el("text",{x:x0,y:84,class:"ink","font-weight":"600"},svg,"= SSTrt + SSE");
   el("rect",{x:x0,y:92,width:s(ssb),height:30,fill:"var(--accent)",rx:3},svg);
   el("rect",{x:x0+s(ssb)+2,y:92,width:s(ssw)-2,height:30,fill:"var(--warn)",opacity:.75,rx:3},svg);
-  el("text",{x:x0,y:142},svg,"SSB 3.766 · df 2");
-  el("text",{x:x0+W,y:142,"text-anchor":"end"},svg,"SSW 10.492 · df 27");
-  el("text",{x:x0,y:176,class:"ink"},svg,"MSB = 3.766 / 2 = 1.883");
-  el("text",{x:x0,y:198,class:"ink"},svg,"MSW = 10.492 / 27 = 0.389");
+  el("text",{x:x0,y:142},svg,"SSTrt 3.766 · df 2");
+  el("text",{x:x0+W,y:142,"text-anchor":"end"},svg,"SSE 10.492 · df 27");
+  el("text",{x:x0,y:176,class:"ink"},svg,"MSTrt = 3.766 / 2 = 1.883");
+  el("text",{x:x0,y:198,class:"ink"},svg,"MSE = 10.492 / 27 = 0.389");
   el("text",{x:x0,y:226,class:"ink","font-weight":"600","font-size":"15"},svg,"F = 1.883 / 0.389 = 4.846")}
 
 /* ---------- F 분포 ---------- */

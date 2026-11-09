@@ -1,0 +1,171 @@
+{
+  "page": "statistics/anova-with-r.html",
+  "items": [
+    {
+      "id": "748277bdd5",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "영가설 하",
+      "replace": "영가설 아래",
+      "before": "oup (집단 간)23.7661.8834.846.0159.264 Residuals (집단 내)2710.4920.389 Total2914.258 ",
+      "after": "(under \\(H_0\\))의 F(2, 27) 분포. 임계값(critical value) F.05 = 3.354, 관측값 F = 4.846의 오",
+      "note": "본문의 다른 곳은 '영가설 아래'로 쓴다(F 분포 그림 설명)",
+      "status": "pending"
+    },
+    {
+      "id": "ac220cd991",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "사후검정 (post hoc)",
+      "replace": "사후검정(post hoc test)",
+      "before": "e) \\(\\eta^2 = \\mathit{SSTrt}/\\mathit{SST} = .264\\)로, 중량 변동의 약 26%가 처리 차이로 설명된다. ",
+      "after": " F 검정이 유의하다는 것은 \"적어도 하나는 다르다\"까지만 말해 준다. 어느 쌍이 다른지는 사후검정으로 확인한다. 여러 쌍을 동시에 비교하므로 ",
+      "note": "소제목: 괄호 앞 띄어쓰기와 영어 표기를 본문과 맞춤",
+      "status": "pending"
+    },
+    {
+      "id": "4d8d539a15",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "구형성 가정 (sphericity)",
+      "replace": "구형성 가정",
+      "before": "섞여 F(2, 132) = 105.4가 된다. 반복측정 분석은 이를 떼어내어 오차가 67,825로 줄고 F(2, 88) = 201.7이 된다. ",
+      "after": " 반복측정 F 검정(F test)은 모든 시점 쌍의 차이 점수 분산이 같다는 구형성(sphericity) 가정을 필요로 한다. 독립 설계의 등분",
+      "note": "소제목: 바로 다음 문장에 '구형성(sphericity)'이 다시 나와 중복",
+      "status": "pending"
+    },
+    {
+      "id": "fc81a3a83c",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "0.5, 1, 2 mg/day",
+      "replace": "0.5, 1, 2 mg/일",
+      "before": " ToothGrowth는 기니피그 60마리에게 비타민 C를 보충 방법(supp: 오렌지주스 OJ, 아스코르브산 VC) 2가지와 용량(dose: ",
+      "after": ") 3가지로 나누어 준 뒤 상아질 세포 길이(len)를 잰 2 × 3 균형 설계(balanced design)다(칸마다 n = 10). \\[y_",
+      "note": "단위 표기를 데이터 표의 'mg/일'과 맞춤",
+      "status": "pending"
+    },
+    {
+      "id": "e614ed0551",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "이원배치 분산분석(two-way ANOVA)표",
+      "replace": "이원배치 분산분석표(two-way ANOVA table)",
+      "before": ")20.66 VC7.98 (2.75)16.77 (2.52)26.14 (4.80)16.96 열 평균10.6119.7426.1018.81 표 6. ",
+      "after": " (Levene F(5, 54) = 1.709, p = .148 → 등분산(equal variance) 유지) 요인dfSSMSFp부분 η² su",
+      "note": "표 6 제목: 영어 병기가 단어 중간에 끼어 있음",
+      "status": "pending"
+    },
+    {
+      "id": "1b6c76b68e",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "반복측정 분산분석(repeated measures ANOVA)표",
+      "replace": "반복측정 분산분석표(repeated measures ANOVA table)",
+      "before": "repsilon = 0.593\\). \\(\\varepsilon < .75\\)이면 GG, 그 이상이면 HF를 쓰는 것이 일반적인 권고다. 표 9. ",
+      "after": " 요인dfSSMSFpGG 보정 dfpGGges Time2, 88310,957155,478201.73< .0011.17, 51.6< .001.61",
+      "note": "표 9 제목: 영어 병기가 단어 중간에 끼어 있음",
+      "status": "pending"
+    },
+    {
+      "id": "eabcd8143a",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "단순 주효과(main effect)",
+      "replace": "단순 주효과",
+      "before": " simple main effect). 각 시점의 일원배치 분산분석(one-way ANOVA) 결과는 다음과 같다. 표 13. 시점별 Diet ",
+      "after": " 시점Diet 1Diet 2Diet 3Diet 4F(3, 41)p 6일67.775.477.983.715.02< .001 12일114.4131.3",
+      "note": "표 13 제목: '주효과(main effect)'로 잘못 병기됨",
+      "status": "pending"
+    },
+    {
+      "id": "f9780cf197",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "차이의 표준편차(deviation)로",
+      "replace": "차이의 표준편차로",
+      "before": "8일 − 12일59.611.80< .0011.73 대응표본의 효과크기는 대응표본 t 검정에서 본 것처럼 무엇으로 나누었는지를 밝힌다. 여기서는 ",
+      "after": " 나눈 \\(d_z = t/\\sqrt{n}\\)이다. 18일 − 6일의 평균 차이(mean difference)가 가장 큰데도 g가 12일 − 6일",
+      "note": "'표준편차(deviation)'는 잘못된 병기",
+      "status": "pending"
+    },
+    {
+      "id": "f586c78983",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "반복측정 분산분석(analysis of variance, ANOVA) 대신",
+      "replace": "반복측정 분산분석 대신",
+      "before": "서형이면 다항 대비(선형·2차)로 \"직선적으로 증가하는가, 증가가 둔화되는가\"를 검정할 수 있다. 측정 시점이 개체마다 다르거나 결측이 많으면 ",
+      "after": " 선형혼합모형(lme4::lmer())이 적합하다. 틀은 일원배치 프롬프트와 같다. 반복측정에서 달라지는 부분이다. 펼쳐 보기: 프롬프트의 구성",
+      "note": "이미 앞에서 병기한 용어를 다시 병기함",
+      "status": "pending"
+    },
+    {
+      "id": "825b468d55",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "대응표본 t 검정(t test) 사후비교",
+      "replace": "대응표본 t 검정 사후비교",
+      "before": " 평균이 모두 같지는 않다\"는 뜻이다. 도표에서 평균이 단조 증가하고 신뢰구간(confidence interval, CI)이 겹치지 않으므로, ",
+      "after": "(post hoc comparison)로 모든 인접·비인접 쌍이 다른지 확인한다. 표 10. 대응표본 t 사후비교 (Bonferroni). 효과",
+      "note": "'대응표본 t 검정(t test)'은 어색한 병기",
+      "status": "pending"
+    },
+    {
+      "id": "b5658b43ea",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "30개체, 집단마다 10",
+      "replace": "30개체, 집단마다 10개체",
+      "before": "기른 식물의 수확량을 건조 중량으로 비교한 실험(Dobson, 1983)weight 건조 중량, group 집단(ctrl, trt1, trt2)",
+      "after": " ToothGrowth02 이원배치기니피그 60마리에게 비타민 C를 보충 방법 2가지와 용량 3가지로 나누어 주고 상아질 세포(치아를 자라게 하",
+      "note": "데이터 표: 단위 빠짐",
+      "status": "pending"
+    },
+    {
+      "id": "879b0515d1",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "ChickWeight로 계산한 것이다",
+      "replace": "ChickWeight, 그리고 제곱합 유형 설명의 mtcars로 계산한 것이다",
+      "before": " 쌍이 다른지\"를 말해 주지 않는다. 확인 범위 이 자료의 표와 그림의 수치는 R 내장 데이터셋 PlantGrowth, ToothGrowth, ",
+      "after": ". ChickWeight 분석은 12회 모두 측정된 45마리의 6·12·18일 자료다. 표 1~13의 수치, 표 4-1의 사후검정 p, Tuke",
+      "note": "확인 범위: mtcars가 빠져 있음",
+      "status": "pending"
+    },
+    {
+      "id": "c367368c2a",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "Games–Howell 방법",
+      "replace": "Games-Howell 방법",
+      "before": "ANOVA) oneway.test(weight ~ group, var.equal = FALSE)를 쓰고, 사후검정(post hoc test)은 ",
+      "after": "(rstatix::games_howell_test())으로 바꾼다. 분산을 자유도에 따라 분해하기 분산분석의 핵심은 모든 관측값의 편차를 두 조",
+      "note": "인명 표기: 표 4-1과 프롬프트의 'Games-Howell'(하이픈)과 맞춤",
+      "status": "pending"
+    },
+    {
+      "id": "094c36d340",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "Welch + Games–Howell",
+      "replace": "Welch + Games-Howell",
+      "before": "잔차(residual) Shapiro–WilkTukey HSD와 Bonferroni (반복수가 다르면 Tukey-Kramer, 등분산이 깨지면 ",
+      "after": ")η² 이원배치(two-way design)ToothGrowthaov(y ~ A * B)칸별 Levene교호작용(interaction) 유의 →",
+      "note": "인명 표기: 하이픈으로 맞춤",
+      "status": "pending"
+    },
+    {
+      "id": "8770d117d8",
+      "created": "2026-11-09T12:42:43+09:00",
+      "mode": "text",
+      "find": "떼어낼 수 있어서",
+      "replace": "떼어 낼 수 있어서",
+      "before": "점이나 조건에서 반복해서 측정하면 관측이 더 이상 독립이 아니다. 대신 개체마다 다른 기본 수준(무거운 병아리는 모든 시점에서 무겁다)을 따로 ",
+      "after": ", 오차가 작아지고 검정력(power)이 커진다. 대응표본 t 검정(paired t test)이 두 시점에서 하던 일을 세 시점 이상으로 넓힌 ",
+      "note": "띄어쓰기(본용언+보조용언은 띄어 씀이 원칙)",
+      "status": "pending"
+    }
+  ],
+  "history": []
+}
