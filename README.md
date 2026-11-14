@@ -72,6 +72,17 @@ Space Studies.
   재배포가 금지된 자료라 배포하지 않습니다. 같은 폴더의 `hn24_24rc.sas7bdat`는
   24시간 회상 식품섭취 자료라 쓰지 않습니다.
 
+실습 폴더 뼈대 `skeleton/categorical-tests/`(폴더 구조, 실습용 CSV, `.gitignore`, 안내 README)는
+학생이 받아 그대로 쓰는 작업 폴더다. 사이트에서 받을 zip은 아래 명령으로 다시 만든다
+(`docs/downlodable/categorical-tests.zip`). 뼈대 안의 파일을 고치면 zip도 다시 만든다.
+
+```sh
+uv run python src/python/build_skeleton_zip.py
+```
+
+받는 방법(zip, `npx degit qmakescl/class-material/skeleton/categorical-tests`, git sparse checkout)은
+자료 페이지 02절 "이 폴더를 한 번에 받기"에 있다.
+
 `src/R/categorical_check.R`는 `docs/statistics/categorical-test-with-r.html`
 본문의 수치를 다시 계산해 콘솔에 출력합니다.
 

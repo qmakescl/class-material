@@ -1,0 +1,12 @@
+# 국민건강영양조사 원시자료와 그 가공본은 이용 조건상 다시 나눠 줄 수 없다. 커밋하지 않는다.
+dataset/raw/knhanes/*
+!dataset/raw/knhanes/README.md
+dataset/working/kn_*.rds
+
+# R 작업 흔적
+.Rhistory
+.RData
+.Rproj.user/
+
+# macOS
+.DS_Store

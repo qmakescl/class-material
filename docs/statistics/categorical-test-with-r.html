@@ -281,6 +281,18 @@
 │   │   └── knhanes/hn24_all.sas7bdat
 │   └── working/          # 정리한 분석용 파일 (.rds)
 └── output/               # 표(CSV)와 그림(PNG)</pre>
+<h4 id="skeleton">이 폴더를 한 번에 받기</h4>
+<p>위 구조의 빈 폴더와 실습용 사고 자료(<code>서울-사망교통사고-2025.csv</code>)를 미리 넣어 둔 뼈대를 GitHub 저장소의 <a href="https://github.com/qmakescl/class-material/tree/main/skeleton/categorical-tests" target="_blank" rel="noopener noreferrer"><code>skeleton/categorical-tests</code></a>에 두었다. 셋 가운데 편한 방법으로 받는다. 받은 뒤에는 <code>categorical-tests</code> 폴더를 VS Code로 <strong>폴더째</strong> 연다.</p>
+<ol>
+<li><strong>zip 내려받기.</strong> <a href="../downlodable/categorical-tests.zip" download>categorical-tests.zip</a>을 받아 원하는 곳에 푼다. 코드를 몰라도 된다.</li>
+<li><strong>degit.</strong> Node.js가 있으면(<a href="../data-science/nvm-node-agent-skills.html">nvm과 Node.js 설치하기</a>) 터미널에서 폴더만 바로 받는다. 저장소의 역사는 받지 않는다.
+<div class="cb"><span class="lang">터미널</span><pre>npx degit qmakescl/class-material/skeleton/categorical-tests categorical-tests</pre></div></li>
+<li><strong>git sparse checkout.</strong> git으로 받아 두고 나중에 <code>git pull</code>로 고친 내용을 받으려면, 저장소에서 이 폴더만 골라 받는다. 폴더는 <code>class-material/skeleton/categorical-tests</code>에 생긴다.
+<div class="cb"><span class="lang">터미널</span><pre>git clone --depth 1 --filter=blob:none --sparse https://github.com/qmakescl/class-material.git
+cd class-material
+git sparse-checkout set skeleton/categorical-tests</pre></div></li>
+</ol>
+<div class="callout caution"><p><strong>국민건강영양조사는 들어 있지 않다.</strong> 원시자료는 다시 나눠 줄 수 없으므로 뼈대에 넣지 않았다. 각자 받은 <code>hn24_all.sas7bdat</code>를 <code>dataset/raw/knhanes/</code>에 넣는다. 뼈대의 <code>.gitignore</code>가 이 폴더의 파일과 그 가공본이 커밋되지 않게 막는다. 이 폴더를 자기 GitHub 저장소로 관리할 때도 이 설정을 지우지 않는다.</p></div>
 
 <h3>서울 사망 교통사고 2025</h3>
 <p>도로교통공단 교통사고분석시스템(TAAS)에서 받은 2025년 1~12월 서울의 사망 교통사고 211건이다. 사고 한 건이 한 행이고, 발생년월·주야·시군구·사고유형·노면상태·기상상태·도로형태, 가해운전자와 피해운전자의 차종·성별·연령대가 들어 있다. 실습용 CSV는 UTF-8로 저장했다(Excel에서 열어도 한글이 보이도록 BOM을 붙였다). 공공데이터포털의 공공기관 CSV는 CP949(EUC-KR)인 경우가 많아, 다른 파일을 쓸 때는 인코딩부터 확인한다.</p>
