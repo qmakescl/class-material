@@ -203,10 +203,20 @@ window.MATERIALS = [
     subject: "statistics",
     label: "R 실습",
     title: "범주형 자료의 가설검정",
-    description: "2025년 서울 사망 교통사고와 국민건강영양조사 2024 자료로 적합도·독립성 검정, Fisher 정확검정, 표준화 잔차, McNemar 검정을 따라가며, 코딩 에이전트 프롬프트로 분석 코드를 만들고 만들어진 코드와 결과에서 무엇을 확인할지 익힙니다.",
+    description: "멘델의 완두 9:3:3:1에서 출발해, 2025년 서울 사망 교통사고, 우울증 임상시험, 국민건강영양조사 2024 자료로 적합도·독립성 검정, 동질성 검정과 사전 동질성·공분산분석, Fisher 정확검정, 표준화 잔차, McNemar 검정을 따라가며, 코딩 에이전트 프롬프트로 분석 코드를 만들고 만들어진 코드와 결과에서 무엇을 확인할지 익힙니다.",
     href: "statistics/categorical-test-with-r.html",
     practice: true,
     tags: ["통계", "사례분석", "R", "가설검정", "범주형자료", "카이제곱검정", "효과크기"],
     date: "2026-11-08"
+  },
+  {
+    subject: "data-science",
+    label: "개념 정리",
+    title: "살아남은 것만 보면 - 생존자 편향과 조건부 확률",
+    description: "합격 수기와 돌아온 폭격기에서 보이지 않는 데이터를 찾고, 자연빈도 나무로 양성예측도와 베이즈 정리를 직접 계산하며 걸러진 데이터와 조건의 방향을 함께 확인합니다.",
+    href: "data-science/survivorship-bias-conditional-probability.html",
+    practice: true,
+    tags: ["데이터과학", "개념정리", "생존자편향", "선택편향", "조건부확률", "베이즈정리", "기저율"],
+    date: "2026-11-14"
   }
 ];

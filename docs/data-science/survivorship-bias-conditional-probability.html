@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>살아남은 것만 보면 - 생존자 편향과 조건부 확률 | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/survivorship-bias-conditional-probability.html">
+<meta name="description" content="보이는 데이터가 어떤 걸러짐을 거쳐 내 앞에 왔는지 묻는 생존자 편향과, 정보로 믿음을 갱신하는 조건부 확률·베이즈 정리를 사례와 자연빈도 나무로 정리한 데이터과학 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="살아남은 것만 보면 - 생존자 편향과 조건부 확률 | Q의 아카이브">
+<meta property="og:description" content="생존자 편향에서 출발해 조건의 방향, 기저율, 베이즈 정리까지 자연빈도 나무로 직접 계산하며 확인합니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/survivorship-bias-conditional-probability.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="데이터과학 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="살아남은 것만 보면 - 생존자 편향과 조건부 확률 | Q의 아카이브">
+<meta name="twitter:description" content="생존자 편향에서 출발해 조건의 방향, 기저율, 베이즈 정리까지 자연빈도 나무로 직접 계산하며 확인합니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/material.css">
+<style>
+  :root {
+    /* 과목 강조색: 데이터과학 (styles.css --data-science / --data-science-tint) */
+    --accent: #0ea968; --accent-soft: #e6f8f0;
+    --inf: #d1264f;  --inf-soft: #fde8ee;   /* 감염 */
+    --non: #1c3fd6;  --non-soft: #e8edfd;   /* 비감염 */
+    --axis: #aab7d0;
+  }
+  .skip-link { position: fixed; top: -3rem; left: 1rem; z-index: 100; padding: .6rem 1rem; color: #fff; background: var(--accent); border-radius: 4px; font-weight: 700; text-decoration: none; }
+  .skip-link:focus { top: 1rem; }
+
+  .section-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .section-num { font-size: 15px; color: var(--muted); font-weight: 700; }
+  .block { display: flex; flex-direction: column; gap: 12px; }
+  .block + .block { margin-top: 12px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .cmp td, .cmp th { font-size: 14px; }
+  .cmp th:first-child { width: 112px; }
+
+  /* ---- 여는 질문: 폭격기 그림 ---- */
+  .opening { gap: 14px; }
+  .opening .q-lead { font-size: 17px; }
+  .opening .q-ask { font-size: 24px; font-weight: 800; letter-spacing: -.02em; line-height: 1.4; margin: 0; }
+  .plane { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .plane img { display: block; width: 100%; max-width: 860px; height: auto; margin: 0 auto; background: #f5f5f2; border: 1px solid var(--line); border-radius: 8px; }
+  .plane figcaption { font-size: 12.5px; color: var(--muted); line-height: 1.6; text-align: center; }
+  .plane figcaption a { color: inherit; }
+
+  /* ---- 자연빈도 나무 ---- */
+  .sim { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .sim-ctls { display: grid; gap: 12px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .sim-ctls { grid-template-columns: repeat(3, 1fr); } }
+  .sim-ctl { display: grid; gap: 6px; }
+  .sim-ctl label { font-size: 13px; font-weight: 700; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; }
+  .sim-ctl label span { font-family: var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .sim svg { display: block; width: 100%; height: auto; }
+  .tr-box { stroke-width: 1.4; rx: 6; }
+  .tr-box.all { fill: var(--soft); stroke: var(--ink); }
+  .tr-box.inf { fill: var(--inf-soft); stroke: var(--inf); }
+  .tr-box.non { fill: var(--non-soft); stroke: var(--non); }
+  .tr-box.pos { stroke-width: 2.6; }
+  .tr-box.neg { fill: #fff; stroke: var(--axis); }
+  .tr-edge { stroke: var(--axis); stroke-width: 1.4; fill: none; }
+  .tr-n { font-size: 15px; font-weight: 800; font-family: var(--mono); text-anchor: middle; fill: var(--ink); }
+  .tr-t { font-size: 11.5px; font-weight: 600; font-family: inherit; text-anchor: middle; fill: var(--muted); }
+  .tr-e { font-size: 11px; font-family: var(--mono); text-anchor: middle; fill: var(--muted); }
+  .posbar { display: flex; height: 26px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+  .posbar div { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; font-family: var(--mono); white-space: nowrap; overflow: hidden; }
+  .posbar .a { background: var(--inf); }
+  .posbar .b { background: var(--non); }
+  .big { font-size: 15px; }
+  .big b { font-family: var(--mono); font-size: 22px; color: var(--inf); font-variant-numeric: tabular-nums; }
+
+  /* ---- 버크슨 격자 ---- */
+  .bk { display: grid; gap: 16px; grid-template-columns: 1fr; align-items: start; }
+  @media (min-width: 720px) { .bk { grid-template-columns: minmax(0, 360px) 1fr; } }
+  .cell-on { fill: var(--accent); }
+  .cell-off { fill: #fff; stroke: var(--axis); stroke-width: 1.2; stroke-dasharray: 3 2; }
+  .grid-line { stroke: var(--line); stroke-width: 1; }
+  .tick-label { fill: var(--muted); font-size: 11px; font-family: inherit; text-anchor: middle; }
+  .axis-title { fill: var(--muted); font-size: 12px; font-weight: 600; font-family: inherit; text-anchor: middle; }
+  .regline { stroke: var(--inf); stroke-width: 2.2; stroke-dasharray: 6 4; }
+
+  /* ---- 활동지 ---- */
+  .sheet td:last-child { width: 45%; }
+  .sheet td:last-child::after { content: ""; display: block; min-height: 34px; border-bottom: 1px dashed var(--axis); }
+  .ck { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 9px; }
+  .ck li { position: relative; padding-left: 28px; font-size: 14.5px; }
+  .ck li::before { content: "☐"; position: absolute; left: 0; top: 0; color: var(--accent); font-weight: 700; }
+</style>
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+<script defer src="../assets/annotate.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../index.html#data-science">← 처음으로</a>
+  <h1>살아남은 것만 보면</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#opening"><b>00</b><span>어디를 보강할까</span></a>
+    <a href="#question"><b>01</b><span>하나의 질문</span></a>
+    <a href="#survivor"><b>02</b><span>생존자 편향</span></a>
+    <a href="#filter"><b>03</b><span>생존 필터 해부하기</span></a>
+    <a href="#direction"><b>04</b><span>조건의 방향</span></a>
+    <a href="#tree"><b>05</b><span>자연빈도 나무</span></a>
+    <a href="#bayes"><b>06</b><span>출발점을 바꾸면</span></a>
+    <a href="#berkson"><b>07</b><span>맛있는 집은 왜 불친절할까</span></a>
+    <a href="#misread"><b>08</b><span>자주 하는 오해</span></a>
+    <a href="#check"><b>09</b><span>스스로 점검하기</span></a>
+    <a href="#project"><b>10</b><span>탐정 리포트</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#데이터과학</span>
+    <span class="rail-tag">#개념정리</span>
+    <span class="rail-tag">#생존자편향</span>
+    <span class="rail-tag">#선택편향</span>
+    <span class="rail-tag">#조건부확률</span>
+    <span class="rail-tag">#베이즈정리</span>
+    <span class="rail-tag">#기저율</span>
+  </div>
+  <footer>자가진단키트와 스팸 문자의 수치는 손으로 따라 계산하기 위한 예시이며 실제 제품이나 서비스의 수치가 아닙니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+
+<main id="content">
+  <section class="panel opening" id="opening" aria-labelledby="opening-q">
+    <p class="q-lead">제2차 세계대전 중, 임무를 마치고 <strong>돌아온</strong> 폭격기들의 피탄 자국을 조사해 보니 아래와 같이 총알에 맞은 흔적이 있었습니다.</p>
+    <figure class="plane">
+      <img src="../assets/images/survivorship-bias-plane.jpg" width="1100" height="683"
+        alt="위에서 본 4발 폭격기. 붉은 총알 자국이 양쪽 날개 바깥쪽, 동체 뒤쪽, 꼬리 날개에 몰려 있고 엔진과 조종석, 동체 앞쪽에는 거의 없다">
+      <figcaption>그림: <a href="https://medium.com/@matwang2000/the-success-stories-we-see-and-the-failures-we-dont-a47930477498" target="_blank" rel="noopener noreferrer">@matwang2000, 「The Success Stories We See and the Failures We Don’t」, Medium</a>. 원본 그림에서 제목·설명 글자와 표시를 지우고 비행기만 잘라 썼습니다. 이 그림은 이 자료의 CC BY-SA 4.0 라이선스에 포함되지 않으며 저작권은 원저작자에게 있습니다.</figcaption>
+    </figure>
+    <p class="q-ask" id="opening-q">다음 출격 전에 장갑을 덧대려 합니다. 어디를 보강해야 할까요?</p>
+    <p class="note">답을 하나 정해 두고 읽어 내려가세요. 왜 그런지는 <a href="#bomber">02절 「돌아온 폭격기의 총알 자국」</a>에서 확인합니다.</p>
+  </section>
+
+  <header class="panel">
+    <div class="eyebrow">통계적 사고 · 이야기 자료</div>
+    <h2 class="page-title">살아남은 것만 보면 - 생존자 편향과 조건부 확률</h2>
+    <p class="lede">합격 수기, 오래된 맛집, 수익 인증 글. 우리가 보는 데이터는 대개 무언가를 통과해 살아남은 것들입니다. 보이지 않는 데이터를 찾는 법과, 새로 얻은 정보로 확률을 다시 계산하는 법을 차례로 살펴봅니다.</p>
+    <div class="callout"><strong>이 자료 전체를 꿰는 질문은 하나입니다.</strong> “보이는 데이터는 어떤 과정을 거쳐 내 앞에 왔는가?”</div>
+  </header>
+
+  <!-- ======================= 01 ======================= -->
+  <section class="panel" id="question">
+    <div class="section-head"><span class="section-num">01</span><h2>하나의 질문, 두 가지 습관</h2></div>
+    <p>앞부분(02~03)은 관찰된 결과 뒤에 숨은 <strong>걸러짐</strong>을 의심하는 습관을, 뒷부분(04~06)은 확보한 정보로 <strong>믿음을 갱신하는</strong> 방법을 다룹니다. 07에서 두 이야기가 한 사례 안에서 만납니다.</p>
+    <div class="scroll">
+      <table class="cmp">
+        <thead><tr><th></th><th>생존자 편향</th><th>조건부 확률 → 베이즈</th></tr></thead>
+        <tbody>
+          <tr><th>핵심 질문</th><td>내가 보지 못한 데이터는 무엇인가?</td><td>이 정보를 얻은 뒤 확률은 얼마나 달라지는가?</td></tr>
+          <tr><th>통계 개념</th><td>표본 선택 편향, 걸러진 표본</td><td>조건부 확률, 기저율, 베이즈 정리</td></tr>
+          <tr><th>사고 습관</th><td>결과에서 원인을 거슬러 추론하기 전에 표집 과정을 따진다</td><td>출발점(사전 믿음)과 증거의 강도를 함께 본다</td></tr>
+          <tr><th>연결 고리</th><td>살아남은 것만 보는 것은 \(P(\text{특성}\mid\text{생존})\)만 보는 것</td><td>\(P(\text{생존}\mid\text{특성})\)와 \(P(\text{특성}\mid\text{생존})\)는 다르다</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ======================= 02 ======================= -->
+  <section class="panel" id="survivor">
+    <div class="section-head"><span class="section-num">02</span><h2>생존자 편향: 보이지 않는 데이터 찾기</h2></div>
+
+    <article class="block">
+      <h3>합격 수기의 공통점</h3>
+      <p>합격 수기 세 편을 읽었더니 모두 “새벽 5시에 일어났다”, “오답노트를 썼다”는 이야기가 나옵니다. 이 방법을 따라 하면 합격할 확률이 올라갈까요? 답을 정하기 전에 한 가지만 물어봅시다. <strong>같은 방법을 쓰고 떨어진 사람은 수기를 썼을까요?</strong></p>
+      <p>수기는 합격한 사람만 씁니다. 그러니 수기 묶음은 “합격”이라는 필터를 통과한 데이터입니다. 이렇게 <strong>결과가 표본을 걸러낸 상황</strong>에서 남은 것만 보고 원인을 말하는 실수를 <strong>생존자 편향</strong>(survivorship bias)이라 부릅니다.</p>
+    </article>
+
+    <article class="block" id="bomber">
+      <h3>돌아온 폭격기의 총알 자국</h3>
+      <p><a href="#opening">맨 처음 그림</a>으로 돌아가 봅시다. 총알 자국은 날개 바깥쪽과 동체 뒤쪽, 꼬리 날개에 몰려 있고 엔진과 조종석에는 거의 없습니다. 많은 사람이 “자국이 많은 곳을 보강하자”고 답합니다.</p>
+      <p>컬럼비아 대학 통계연구그룹(SRG)의 <strong>아브라함 왈드</strong>(Abraham Wald)는 거꾸로 생각했습니다. 조사한 비행기는 <em>돌아온</em> 비행기뿐입니다. 엔진이나 조종석에 맞은 비행기는 돌아오지 못해 조사 대상에 들지 못했을 것입니다. 자국이 많은 곳은 <strong>맞고도 돌아올 수 있었던</strong> 곳이고, 자국이 <strong>적게 보이는</strong> 곳이 오히려 치명적인 곳입니다. 보강할 곳은 엔진과 조종석입니다.</p>
+      <p class="note">왈드의 분석은 Mangel &amp; Samaniego(1984)가 정리해 소개했습니다. 맨 처음 그림을 비롯해 널리 퍼진 “붉은 점 폭격기” 그림들은 이 이야기를 설명하려고 피탄 분포를 가정해 그린 삽화이며, 실제 조사 기록을 옮긴 것이 아닙니다.</p>
+    </article>
+
+    <article class="block">
+      <h3>주변의 생존자들</h3>
+      <div class="scroll">
+        <table class="cmp">
+          <thead><tr><th>사례</th><th>보이는 것</th><th>보이지 않는 것</th><th>걸러낸 필터</th></tr></thead>
+          <tbody>
+            <tr><th>합격·취업 수기</th><td>“새벽 5시 기상으로 합격” 같은 공통 습관</td><td>같은 방법을 쓰고 떨어진 사람들</td><td>합격한 사람만 수기를 쓴다</td></tr>
+            <tr><th>귀환 폭격기</th><td>동체·날개에 몰린 피탄 흔적</td><td>엔진에 맞고 추락한 비행기</td><td>돌아온 비행기만 조사했다</td></tr>
+            <tr><th>고층 낙상 고양이</th><td>7층 이상에서 떨어진 고양이의 부상이 오히려 가벼움</td><td>죽었거나 병원에 오지 않은 고양이</td><td>동물병원에 온 사례만 기록된다</td></tr>
+            <tr><th>“옛날 물건은 튼튼하다”</th><td>수십 년 된 냉장고, 백 년 된 건물</td><td>이미 고장 나 버려지거나 헐린 것들</td><td>시간이 약한 것을 지운다</td></tr>
+            <tr><th>“중퇴하고 성공한 CEO”</th><td>유명 창업자 몇 명</td><td>중퇴 후 평범하게 살거나 실패한 다수</td><td>언론은 성공한 사례만 다룬다</td></tr>
+            <tr><th>“오래된 동네 가게는 다 맛있다”</th><td>노포 가게들</td><td>맛이 없어 문 닫은 가게들</td><td>시장에서 살아남은 가게만 보인다</td></tr>
+            <tr><th>펀드 평균 수익률</th><td>현재 운용 중인 펀드의 높은 평균</td><td>성과가 나빠 청산·합병된 펀드</td><td>데이터베이스에서 사라진다</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li><strong>고양이</strong>: 뉴욕 동물병원 자료에서 7층 이상에서 떨어진 고양이의 부상이 덜하다는 보고가 있었습니다(Whitney &amp; Mehlhaff, 1987). “고양이가 공중에서 자세를 고친다”는 설명과 “죽은 고양이는 병원에 오지 않는다”는 설명이 함께 나왔는데, 두 설명은 서로를 배제하지 않습니다.</li>
+        <li><strong>펀드</strong>: 지금 남아 있는 펀드만 표본으로 삼으면 성과가 체계적으로 부풀려집니다(Brown et al., 1992).</li>
+      </ul>
+    </article>
+  </section>
+
+  <!-- ======================= 03 ======================= -->
+  <section class="panel" id="filter">
+    <div class="section-head"><span class="section-num">03</span><h2>직접 해 보기 · 생존 필터 해부하기</h2></div>
+    <p>02의 사례 가운데 하나(고양이, 옛 물건, 중퇴 CEO, 동네 가게)를 골라 아래 네 질문에 답해 봅니다. 모둠으로 한다면 한 모둠이 사례 하나를 맡고 1분씩 발표합니다.</p>
+    <div class="scroll">
+      <table class="sheet">
+        <thead><tr><th>질문</th><th>나의 답</th></tr></thead>
+        <tbody>
+          <tr><td>1. 이 주장은 어떤 데이터를 근거로 하는가?</td><td></td></tr>
+          <tr><td>2. 그 데이터는 어떤 필터(생존·성공·보도·기록)를 거쳤는가?</td><td></td></tr>
+          <tr><td>3. 필터에 걸려 보이지 않는 데이터는 무엇인가?</td><td></td></tr>
+          <tr><td>4. 주장을 제대로 판단하려면 어떤 비교 데이터가 필요한가?</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">고양이 사례를 골랐다면 하나 더 생각해 봅니다. <strong>어떤 데이터가 있으면 “자세를 고친다”와 “병원에 오지 않는다” 두 설명을 가릴 수 있을까요?</strong></div>
+  </section>
+
+  <!-- ======================= 04 ======================= -->
+  <section class="panel" id="direction">
+    <div class="section-head"><span class="section-num">04</span><h2>조건의 방향: 수기가 알려 주는 것과 우리가 알고 싶은 것</h2></div>
+    <p>합격 수기로 돌아가 봅시다. 수기 묶음에서 “새벽 기상”이 자주 보인다는 것은 <strong>합격한 사람 가운데</strong> 새벽에 일어난 사람의 비율이 높다는 뜻입니다. 기호로 쓰면</p>
+    <div class="readout math">\(P(\text{새벽 기상}\mid\text{합격})\) : 합격한 사람 중 새벽에 일어난 사람의 비율</div>
+    <p>그런데 우리가 정말 알고 싶은 것은 반대 방향입니다.</p>
+    <div class="readout math">\(P(\text{합격}\mid\text{새벽 기상})\) : 새벽에 일어난 사람 중 합격한 사람의 비율</div>
+    <p>세로 막대 \(\mid\) 오른쪽이 <strong>조건</strong>, 곧 “누구 가운데에서 세는가”입니다. 두 값은 같은 숫자가 아닙니다. 수험생 대부분이 새벽에 일어난다면 첫째 값은 높아도 둘째 값은 낮을 수 있습니다. 생존자 편향은 이렇게 <strong>조건부 확률의 방향을 뒤집어 읽는 실수</strong>이기도 합니다.</p>
+    <div class="callout warn"><strong>방향을 확인하는 습관.</strong> 확률이나 비율을 들으면 “무엇 가운데의 비율인가?”를 먼저 묻습니다. 이 질문 하나가 다음 절의 계산 전체를 이끕니다.</div>
+  </section>
+
+  <!-- ======================= 05 ======================= -->
+  <section class="panel" id="tree">
+    <div class="section-head"><span class="section-num">05</span><h2>자가진단키트: 자연빈도 나무로 계산하기</h2></div>
+
+    <article class="block">
+      <p>어떤 감염병의 자가진단키트를 생각해 봅시다. 아래 수치는 <strong>손으로 따라 계산하기 위한 예시</strong>이며 실제 제품의 수치가 아닙니다.</p>
+      <div class="callout"><strong>문제.</strong> 감염자의 90%가 양성(민감도 90%), 비감염자의 5%도 양성(위양성률 5%, 곧 특이도 95%)이 나온다. 유병률은 1%다. 양성이 나온 사람이 실제로 감염자일 확률은?</div>
+      <p>계산하기 전에 직감으로 답을 하나 적어 두세요. 많은 사람이 90% 가까이를 떠올립니다.</p>
+    </article>
+
+    <article class="block">
+      <h3>확률 대신 사람 수로</h3>
+      <p>같은 문제를 <strong>10,000명</strong>으로 바꿔 말하면 훨씬 쉬워집니다. 이런 표현을 <strong>자연빈도</strong>라 합니다.</p>
+      <ul>
+        <li>10,000명 중 감염자는 1%인 <strong>100명</strong>, 비감염자는 <strong>9,900명</strong>이다.</li>
+        <li>감염자 100명 중 90%인 <strong>90명</strong>이 양성이다.</li>
+        <li>비감염자 9,900명 중 5%인 <strong>495명</strong>도 양성이다.</li>
+        <li>양성은 모두 90 + 495 = <strong>585명</strong>. 그중 실제 감염자는 90명이다.</li>
+      </ul>
+      <div class="readout math">\(P(\text{감염}\mid\text{양성}) = \dfrac{90}{585} \approx 15.4\%\)</div>
+      <p>양성 585명 가운데 495명은 비감염자입니다. 감염자가 드물어서(1%) 작은 위양성률(5%)이 아주 큰 집단(9,900명)에 곱해지기 때문입니다. 이 값을 <strong>양성예측도</strong>라 부르고, 출발점인 유병률을 <strong>기저율</strong>이라 부릅니다.</p>
+    </article>
+
+    <article class="block">
+      <h3>직접 바꿔 보기</h3>
+      <p>막대를 움직여 유병률, 민감도, 특이도를 바꾸면 10,000명 기준 나무와 양성예측도가 바로 다시 계산됩니다. 굵은 테두리 상자가 양성인 사람들입니다.</p>
+      <div class="sim" id="tree-sim">
+        <div class="sim-ctls">
+          <div class="sim-ctl"><label for="in-prev">유병률(기저율) <span id="out-prev">1.0%</span></label><input type="range" id="in-prev" min="0.1" max="50" step="0.1" value="1"></div>
+          <div class="sim-ctl"><label for="in-sens">민감도 <span id="out-sens">90%</span></label><input type="range" id="in-sens" min="50" max="99.9" step="0.1" value="90"></div>
+          <div class="sim-ctl"><label for="in-spec">특이도 <span id="out-spec">95%</span></label><input type="range" id="in-spec" min="50" max="99.9" step="0.1" value="95"></div>
+        </div>
+        <div class="controls">
+          <button class="btn ghost" type="button" data-preset="1">아무나 검사 (유병률 1%)</button>
+          <button class="btn ghost" type="button" data-preset="20">증상·접촉 있음 (20%)</button>
+          <button class="btn" type="button" id="btn-again">한 번 더 검사해도 양성이면?</button>
+        </div>
+        <svg id="tree-svg" viewBox="0 0 640 250" role="img" aria-label="10,000명 기준 자연빈도 나무"></svg>
+        <div>
+          <p class="note" style="margin-bottom:6px">양성인 사람들만 모아 보면</p>
+          <div class="posbar" id="posbar"><div class="a"></div><div class="b"></div></div>
+          <div class="legend" style="margin-top:6px"><span><i style="background:var(--inf)"></i>감염자</span><span><i style="background:var(--non)"></i>비감염자</span></div>
+        </div>
+        <p class="big">양성일 때 실제 감염자일 확률 <b id="out-ppv">15.4%</b> <span class="muted" id="out-frac"></span></p>
+        <p class="note" id="out-note"></p>
+      </div>
+    </article>
+
+    <article class="block">
+      <h3>전문가도 헷갈립니다</h3>
+      <p>같은 문제라도 확률 대신 자연빈도로 제시하면 정답률이 약 16%에서 46%로 올랐다는 연구가 있습니다(Gigerenzer &amp; Hoffrage, 1995). 하버드 의대 관계자를 대상으로 한 고전적 조사에서는 비슷한 문제(정답 약 2%)를 맞힌 사람이 60명 중 11명뿐이었고, 가장 흔한 답은 95%였습니다(Casscells et al., 1978). 처음 직감이 빗나갔다면 지극히 정상입니다.</p>
+    </article>
+  </section>
+
+  <!-- ======================= 06 ======================= -->
+  <section class="panel" id="bayes">
+    <div class="section-head"><span class="section-num">06</span><h2>출발점을 바꾸면: 베이즈 정리</h2></div>
+
+    <article class="block">
+      <p>같은 키트, 같은 양성이라도 <strong>누가 검사했는가</strong>에 따라 결론이 달라집니다. 05의 막대에서 단추를 눌러 확인한 값을 정리하면 다음과 같습니다.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>상황</th><th>사전확률 \(P(\text{감염})\)</th><th>양성 중 감염자 / 전체 양성</th><th>사후확률 \(P(\text{감염}\mid\text{양성})\)</th></tr></thead>
+          <tbody>
+            <tr><td>증상 없이 아무나 검사</td><td class="n">1%</td><td class="n">90 / 585 (10,000명 기준)</td><td class="n">약 15%</td></tr>
+            <tr><td>증상이 있고 확진자와 접촉함</td><td class="n">20%</td><td class="n">1,800 / 2,200 (10,000명 기준)</td><td class="n">약 82%</td></tr>
+            <tr><td>첫 검사 양성 후 한 번 더 검사해도 양성 (두 검사가 독립이라고 가정)</td><td class="n">약 15%</td><td class="n">81 / 약 106 (첫 양성 585명 기준)</td><td class="n">약 77%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout"><strong>세 번째 줄이 베이즈적 사고의 핵심입니다.</strong> 오늘의 사후확률이 내일의 사전확률이 됩니다. 정보가 쌓일 때마다 믿음을 조금씩 갱신합니다.</div>
+      <p class="note">‘독립 가정’은 실제로는 성립하지 않을 수 있습니다. 같은 사람을 같은 종류의 키트로 다시 검사하면 같은 이유로 또 틀릴 수 있기 때문입니다. 그러면 두 번째 양성이 주는 정보는 표의 계산보다 작습니다.</p>
+    </article>
+
+    <article class="block">
+      <h3>공식으로 요약하면</h3>
+      <p>자연빈도 나무에서 한 계산을 기호로 옮기면 베이즈 정리가 됩니다. 분자는 “감염이면서 양성”인 사람, 분모는 “양성인 사람 전체”입니다.</p>
+      <p>\[ P(\text{감염}\mid\text{양성}) = \frac{P(\text{양성}\mid\text{감염})\,P(\text{감염})}{P(\text{양성}\mid\text{감염})\,P(\text{감염}) + P(\text{양성}\mid\text{비감염})\,P(\text{비감염})} \]</p>
+      <ul>
+        <li>\(P(\text{감염})\): <strong>사전확률</strong>. 검사 전의 믿음(기저율)</li>
+        <li>\(P(\text{양성}\mid\text{감염})\), \(P(\text{양성}\mid\text{비감염})\): <strong>가능도</strong>. 증거가 얼마나 강한가(민감도, 위양성률)</li>
+        <li>\(P(\text{감염}\mid\text{양성})\): <strong>사후확률</strong>. 증거를 본 뒤의 믿음</li>
+      </ul>
+      <p class="note">조건부 확률과 베이즈 정리를 확률의 공리에서부터 더 자세히 보려면 통계 자료 <a href="../statistics/grad-probability-lab.html#s3">확률에 대하여 · 조건부확률과 베이즈 정리</a>를 참고하세요.</p>
+    </article>
+
+    <article class="block">
+      <h3>내 휴대폰이 매일 하는 베이즈 추론: 스팸 문자</h3>
+      <p>문자 1,000건 중 스팸이 200건이라고 해 봅시다(계산 연습용 수치). ‘무료’라는 단어는 스팸의 40%(80건), 정상 문자의 2%(16건)에 나옵니다. ‘무료’가 들어 있는 문자는 96건이고 그중 80건이 스팸이므로</p>
+      <div class="readout math">\(P(\text{스팸}\mid\text{‘무료’ 포함}) = \dfrac{80}{80+16} \approx 83\%\)</div>
+      <p>여기에 다른 단어를 하나씩 더해 가며 같은 방식으로 갱신하는 것이 <strong>나이브 베이즈 분류기</strong>의 아이디어입니다.</p>
+    </article>
+  </section>
+
+  <!-- ======================= 07 ======================= -->
+  <section class="panel" id="berkson">
+    <div class="section-head"><span class="section-num">07</span><h2>두 이야기가 만나는 곳: 맛있는 집은 왜 불친절할까</h2></div>
+    <p>지도 앱에 남아 있는 동네 식당들을 보면, 맛 평점이 높을수록 친절 평점이 낮아 보입니다. 맛집은 원래 불친절한 걸까요?</p>
+    <ol>
+      <li><strong>생존자 편향으로 보기</strong>: 맛도 없고 불친절한 가게는 문을 닫아 데이터에서 사라졌습니다. 살아남은 가게는 “맛 또는 친절 중 하나는 갖춘” 곳들입니다.</li>
+      <li><strong>조건부 확률로 보기</strong>: 전체 가게에서 맛과 친절이 아무 관계가 없더라도, ‘살아남음’이라는 조건을 걸면 두 특성 사이에 음의 관계가 생깁니다.</li>
+    </ol>
+
+    <article class="block">
+      <h3>주사위 두 개로 확인하기</h3>
+      <p>주사위 두 개를 던져 하나는 맛, 하나는 친절 점수라고 합시다. 두 주사위는 서로 아무 관계가 없으므로 가능한 36가지 조합 전체에서 상관은 정확히 0입니다. 이제 <strong>두 점수의 합이 기준 이하인 가게를 ‘폐업’으로 지워</strong> 봅니다.</p>
+      <div class="sim">
+        <div class="sim-ctl" style="max-width:420px"><label for="in-cut">합이 이 값 이하면 폐업 <span id="out-cut">7</span></label><input type="range" id="in-cut" min="1" max="10" step="1" value="7"></div>
+        <div class="bk">
+          <svg id="bk-svg" viewBox="0 0 320 320" role="img" aria-label="맛 점수와 친절 점수의 36가지 조합 중 살아남은 가게"></svg>
+          <div class="block">
+            <div class="metrics">
+              <div><b id="bk-n">15</b><span>살아남은 가게 (36곳 중)</span></div>
+              <div><b>0.000</b><span>전체 36곳의 상관계수</span></div>
+              <div><b id="bk-r">−0.500</b><span>살아남은 가게의 상관계수</span></div>
+            </div>
+            <div class="legend"><span><i style="background:var(--accent);height:10px;width:10px;border-radius:2px"></i>살아남은 가게</span><span><i style="background:var(--inf)"></i>살아남은 가게들의 추세선</span></div>
+            <p class="note">기준을 1로 두면 아무도 지워지지 않아 상관이 0입니다. 기준을 올릴수록 왼쪽 아래(둘 다 낮은 가게)가 지워지며 음의 상관이 나타납니다.</p>
+          </div>
+        </div>
+      </div>
+      <p>교실에서라면 각자 실제로 주사위 두 개를 몇 번 던져 기록하고, 합이 7 이하인 기록을 지운 뒤 남은 점으로 산점도를 그려 보세요. 같은 음의 기울기가 나타납니다.</p>
+      <p>이 현상은 원래 병원 입원 환자 자료에서 두 질병 사이에 가짜 상관이 생기는 문제로 보고되었고, 보고한 사람의 이름을 따 <strong>버크슨의 역설</strong>이라 부릅니다(Berkson, 1946). 걸러짐(선택)은 곧 조건을 거는 일입니다. 더 깊은 이야기는 <a href="analysis-traps-three-paradoxes.html#trap3">데이터로 세상을 읽을 때 조심할 것들 · 함정 3</a>에 있습니다.</p>
+    </article>
+  </section>
+
+  <!-- ======================= 08 ======================= -->
+  <section class="panel" id="misread">
+    <div class="section-head"><span class="section-num">08</span><h2>자주 하는 오해</h2></div>
+    <div class="scroll">
+      <table class="cmp">
+        <thead><tr><th>오해</th><th>바로잡기</th></tr></thead>
+        <tbody>
+          <tr><td><strong>“표본 편향은 모두 생존자 편향이다.”</strong></td><td>생존자 편향은 <em>결과</em>가 표본을 걸러낸 특수한 경우입니다. 응답하고 싶은 사람만 답하는 자원자 응답 편향 같은 다른 선택 편향과 구분합니다.</td></tr>
+          <tr><td><strong>“그러니 수기의 방법은 효과가 없다.”</strong></td><td>효과가 없다는 뜻이 아니라 “이 데이터만으로는 알 수 없다”는 뜻입니다. 핵심은 비교할 집단이 없다는 것입니다.</td></tr>
+          <tr><td><strong>“민감도 90%면 양성일 때 감염 확률도 90%다.”</strong></td><td>\(P(\text{양성}\mid\text{감염})\)과 \(P(\text{감염}\mid\text{양성})\)을 뒤바꾼 가장 흔한 오류입니다. 법정에서 증거의 확률을 유죄의 확률로 읽는 ‘검사의 오류’와 같은 구조입니다.</td></tr>
+          <tr><td><strong>“그렇다면 검사는 믿을 수 없다.”</strong></td><td>양성 결과는 확률을 1%에서 약 15%로 15배 넘게 올렸습니다. 정보는 분명히 가치가 있고, 출발점이 낮았을 뿐입니다.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ======================= 09 ======================= -->
+  <section class="panel" id="check">
+    <div class="section-head"><span class="section-num">09</span><h2>스스로 점검하기</h2></div>
+    <article class="block">
+      <h3>1. 수익 인증 글</h3>
+      <p>SNS에 “이 주식 리딩방 따라 하고 1년에 수익 2배!”라는 후기가 올라왔습니다. <strong>보이지 않는 데이터 2가지</strong>와 <strong>필요한 비교 데이터 1가지</strong>를 적어 보세요.</p>
+      <details><summary>생각해 볼 점</summary>
+        <p>손실을 보고 후기를 쓰지 않은 참여자, 중간에 탈퇴한 회원이 보이지 않습니다. 같은 기간 시장 평균 수익률과 비교해야 리딩방의 효과를 말할 수 있습니다.</p>
+      </details>
+    </article>
+    <article class="block">
+      <h3>2. AI 글 탐지기</h3>
+      <p>어떤 탐지기는 AI로 쓴 글의 95%를 잡아내고, 사람이 쓴 글을 AI로 잘못 판정하는 비율은 5%입니다(계산 연습용 수치). 제출된 과제의 10%가 AI로 쓴 글이라면, 탐지기가 ‘AI’라고 판정한 글이 실제로 AI 글일 확률은 얼마일까요? 1,000건을 기준으로 자연빈도 나무를 그려 풀어 보세요.</p>
+      <details><summary>풀이</summary>
+        <p>AI 글 100건 중 95건, 사람 글 900건 중 45건이 ‘AI’로 판정됩니다. 판정된 140건 중 실제 AI 글은 95건이므로 \(95/140 \approx 68\%\)입니다. 나머지 약 32%는 억울하게 지목된 사람 글입니다.</p>
+      </details>
+    </article>
+    <article class="block">
+      <h3>데이터를 볼 때 묻는 질문</h3>
+      <ul class="ck">
+        <li><strong>이 데이터는 어떤 필터를 거쳤나.</strong> 살아남은 것, 성공한 것, 보도된 것만 남지 않았는가?</li>
+        <li><strong>빠진 쪽은 누구인가.</strong> 같은 조건에서 실패한 사례를 구할 수 있는가?</li>
+        <li><strong>무엇 가운데의 비율인가.</strong> 들은 확률의 조건이 내가 알고 싶은 조건과 같은 방향인가?</li>
+        <li><strong>출발점은 얼마인가.</strong> 기저율 없이 민감도나 정확도만 말하고 있지 않은가?</li>
+      </ul>
+    </article>
+  </section>
+
+  <!-- ======================= 10 ======================= -->
+  <section class="panel" id="project">
+    <div class="section-head"><span class="section-num">10</span><h2>과제 · “보이지 않는 데이터 탐정” 리포트</h2></div>
+    <p>뉴스·광고·SNS에서 확률이나 통계를 근거로 한 주장 하나를 골라 A4 2쪽 안팎으로 분석합니다.</p>
+    <ol>
+      <li>주장과 근거 데이터를 요약한다(출처 포함).</li>
+      <li>데이터가 거친 필터와 빠진 데이터를 밝힌다(02~03).</li>
+      <li>주장이 제시한 확률이 \(P(A\mid B)\)인지 \(P(B\mid A)\)인지 구분하고, 기저율이 빠졌는지 확인한다(04~06).</li>
+      <li>필요하면 자연빈도 나무를 그려 주장을 다시 계산한다. 이때 쓴 수치가 어디서 왔는지 밝힌다.</li>
+      <li>주장을 제대로 검증하려면 어떤 데이터가 필요한지 제안한다.</li>
+    </ol>
+    <h3>평가 기준</h3>
+    <div class="scroll">
+      <table class="cmp">
+        <thead><tr><th>기준</th><th>우수 (3)</th><th>보통 (2)</th><th>미흡 (1)</th></tr></thead>
+        <tbody>
+          <tr><th>필터·누락 데이터 식별</th><td>필터의 작동 방식과 누락 데이터를 구체적으로 밝힘</td><td>누락 데이터를 지적하나 필터 설명이 모호함</td><td>“표본이 편향됐다” 수준에 머묾</td></tr>
+          <tr><th>조건의 방향 구분</th><td>두 조건부 확률을 명시하고 차이를 설명함</td><td>방향 혼동을 지적하나 표기가 불완전함</td><td>방향을 구분하지 못함</td></tr>
+          <tr><th>수치 재계산</th><td>기저율을 넣은 빈도 나무로 정확히 재계산함</td><td>계산은 시도했으나 가정이나 수치에 오류가 있음</td><td>재계산이 없음</td></tr>
+          <tr><th>대안 데이터 제안</th><td>비교군·표집 방법을 실현 가능하게 제안함</td><td>제안이 있으나 추상적임</td><td>제안이 없음</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h3>참고문헌</h3>
+    <ol class="refs">
+      <li>Berkson, J. (1946). Limitations of the application of fourfold table analysis to hospital data. <em>Biometrics Bulletin</em>, 2(3), 47–53.</li>
+      <li>Brown, S. J., Goetzmann, W., Ibbotson, R. G., &amp; Ross, S. A. (1992). Survivorship bias in performance studies. <em>Review of Financial Studies</em>, 5(4), 553–580.</li>
+      <li>Casscells, W., Schoenberger, A., &amp; Graboys, T. B. (1978). Interpretation by physicians of clinical laboratory results. <em>New England Journal of Medicine</em>, 299(18), 999–1001.</li>
+      <li>Gigerenzer, G., &amp; Hoffrage, U. (1995). How to improve Bayesian reasoning without instruction: Frequency formats. <em>Psychological Review</em>, 102(4), 684–704.</li>
+      <li>Hoffrage, U., Lindsey, S., Hertwig, R., &amp; Gigerenzer, G. (2000). Communicating statistical information. <em>Science</em>, 290(5500), 2261–2262.</li>
+      <li>Mangel, M., &amp; Samaniego, F. J. (1984). Abraham Wald's work on aircraft survivability. <em>Journal of the American Statistical Association</em>, 79(386), 259–267.</li>
+      <li>Whitney, W. O., &amp; Mehlhaff, C. J. (1987). High-rise syndrome in cats. <em>Journal of the American Veterinary Medical Association</em>, 191(11), 1399–1403.</li>
+      <li>GAISE College Report ASA Revision Committee (2016). <em>Guidelines for Assessment and Instruction in Statistics Education College Report 2016</em>. American Statistical Association.</li>
+    </ol>
+    <p class="note">자가진단키트, 스팸 문자, AI 글 탐지기의 수치는 손으로 따라 계산하기 위한 예시이며 실제 제품이나 서비스에서 측정한 값이 아닙니다. 주사위 그림은 가능한 36가지 조합을 모두 그린 것입니다. 맨 처음의 폭격기 그림은 Medium 글 「The Success Stories We See and the Failures We Don’t」(@matwang2000)의 그림에서 글자와 표시를 지우고 비행기만 잘라 쓴 것입니다(손질 스크립트 <span class="mono">src/python/clean_survivorship_plane.py</span>).</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var svgNS = "http://www.w3.org/2000/svg";
+  function el(name, attrs, text) {
+    var e = document.createElementNS(svgNS, name);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); }
+  function fmtN(x) { return Math.round(x).toLocaleString("ko-KR"); }
+  function pct(x, d) { return (x * 100).toFixed(d == null ? 1 : d) + "%"; }
+
+  /* =============== 자연빈도 나무 (10,000명 기준) =============== */
+  var N = 10000;
+  var inPrev = document.getElementById("in-prev");
+  var inSens = document.getElementById("in-sens");
+  var inSpec = document.getElementById("in-spec");
+  var svgT = document.getElementById("tree-svg");
+  var prev = 0.01;      /* 사전확률: 막대 눈금보다 정밀하게 들고 있는다 */
+  var history = [];     /* "한 번 더 검사"를 누른 횟수 안내용 */
+
+  function box(x, y, w, h, cls, n, t) {
+    svgT.appendChild(el("rect", { x: x, y: y, width: w, height: h, "class": "tr-box " + cls }));
+    svgT.appendChild(el("text", { x: x + w / 2, y: y + 22, "class": "tr-n" }, n));
+    svgT.appendChild(el("text", { x: x + w / 2, y: y + 39, "class": "tr-t" }, t));
+  }
+  function edge(x1, y1, x2, y2, lab) {
+    svgT.appendChild(el("path", { "class": "tr-edge", d: "M" + x1 + "," + y1 + " C" + x1 + "," + (y1 + y2) / 2 + " " + x2 + "," + (y1 + y2) / 2 + " " + x2 + "," + y2 }));
+    if (lab) svgT.appendChild(el("text", { x: (x1 + x2) / 2 + (x2 < x1 ? -8 : 8), y: (y1 + y2) / 2 + 4, "class": "tr-e" }, lab));
+  }
+  function drawTree() {
+    var sens = +inSens.value / 100, spec = +inSpec.value / 100;
+    var inf = N * prev, non = N - inf;
+    var a = inf * sens, c = inf - a;           /* 감염: 양성 a, 음성 c */
+    var b = non * (1 - spec), d = non - b;     /* 비감염: 양성 b, 음성 d */
+    var ppv = a / (a + b);
+
+    document.getElementById("out-prev").textContent = pct(prev);
+    document.getElementById("out-sens").textContent = pct(sens);
+    document.getElementById("out-spec").textContent = pct(spec);
+
+    clear(svgT);
+    var bw = 120, bh = 48;
+    edge(320, 58, 165, 100, pct(prev));
+    edge(320, 58, 475, 100, pct(1 - prev));
+    edge(165, 148, 85, 190, pct(sens, 1));
+    edge(165, 148, 245, 190, "");
+    edge(475, 148, 395, 190, pct(1 - spec, 1));
+    edge(475, 148, 555, 190, "");
+    box(260, 10, bw, bh, "all", fmtN(N), "전체");
+    box(105, 100, bw, bh, "inf", fmtN(inf), "감염");
+    box(415, 100, bw, bh, "non", fmtN(non), "비감염");
+    box(25, 190, bw, bh, "inf pos", fmtN(a), "감염 · 양성");
+    box(185, 190, bw, bh, "neg", fmtN(c), "감염 · 음성");
+    box(335, 190, bw, bh, "non pos", fmtN(b), "비감염 · 양성");
+    box(495, 190, bw, bh, "neg", fmtN(d), "비감염 · 음성");
+
+    var bar = document.getElementById("posbar").children;
+    bar[0].style.width = (ppv * 100) + "%";
+    bar[1].style.width = ((1 - ppv) * 100) + "%";
+    bar[0].textContent = ppv > 0.08 ? fmtN(a) + "명" : "";
+    bar[1].textContent = ppv < 0.92 ? fmtN(b) + "명" : "";
+    document.getElementById("out-ppv").textContent = pct(ppv);
+    document.getElementById("out-frac").textContent = "(" + fmtN(a) + " / " + fmtN(a + b) + ")";
+    var note = "검사 전 " + pct(prev) + "였던 확률이 양성 결과를 본 뒤 " + pct(ppv) + "가 되었습니다.";
+    if (history.length) note += " 지금 유병률은 앞선 검사 " + history.length + "번의 사후확률을 이어받은 값입니다(두 검사가 독립이라고 가정).";
+    document.getElementById("out-note").textContent = note;
+    return ppv;
+  }
+  function setPrev(p) { prev = Math.min(Math.max(p, 0.001), 0.999); inPrev.value = Math.min(50, Math.max(0.1, +(prev * 100).toFixed(1))); }
+
+  inPrev.addEventListener("input", function () { prev = +inPrev.value / 100; history = []; drawTree(); });
+  inSens.addEventListener("input", drawTree);
+  inSpec.addEventListener("input", drawTree);
+  Array.prototype.forEach.call(document.querySelectorAll("[data-preset]"), function (b) {
+    b.addEventListener("click", function () {
+      setPrev(+b.getAttribute("data-preset") / 100);
+      inSens.value = 90; inSpec.value = 95; history = []; drawTree();
+    });
+  });
+  document.getElementById("btn-again").addEventListener("click", function () {
+    var ppv = drawTree();
+    history.push(ppv);
+    setPrev(ppv);
+    drawTree();
+  });
+  drawTree();
+
+  /* =============== 버크슨: 36가지 조합 =============== */
+  var svgB = document.getElementById("bk-svg");
+  var inCut = document.getElementById("in-cut");
+  function drawBerkson() {
+    var k = +inCut.value;
+    document.getElementById("out-cut").textContent = k;
+    clear(svgB);
+    var L = 46, T = 14, S = 40;              /* 칸 크기 */
+    var sx = function (v) { return L + (v - 0.5) * S; };
+    var sy = function (v) { return T + (6.5 - v) * S; };
+    for (var i = 1; i <= 6; i++) {
+      svgB.appendChild(el("text", { x: sx(i), y: T + 6 * S + 18, "class": "tick-label" }, i));
+      svgB.appendChild(el("text", { x: L - 12, y: sy(i) + 4, "class": "tick-label" }, i));
+    }
+    svgB.appendChild(el("text", { x: L + 3 * S, y: T + 6 * S + 40, "class": "axis-title" }, "맛 점수"));
+    var yl = el("text", { x: 12, y: T + 3 * S, "class": "axis-title", transform: "rotate(-90 12 " + (T + 3 * S) + ")" }, "친절 점수");
+    svgB.appendChild(yl);
+    var xs = [], ys = [];
+    for (var x = 1; x <= 6; x++) for (var y = 1; y <= 6; y++) {
+      var alive = x + y > k;
+      svgB.appendChild(el("rect", { x: sx(x) - 14, y: sy(y) - 14, width: 28, height: 28, rx: 5, "class": alive ? "cell-on" : "cell-off" }));
+      if (alive) { xs.push(x); ys.push(y); }
+    }
+    var n = xs.length, mx = 0, my = 0, sxy = 0, sxx = 0, syy = 0;
+    xs.forEach(function (v, j) { mx += v; my += ys[j]; }); mx /= n; my /= n;
+    xs.forEach(function (v, j) { sxy += (v - mx) * (ys[j] - my); sxx += (v - mx) * (v - mx); syy += (ys[j] - my) * (ys[j] - my); });
+    var r = sxx > 0 && syy > 0 ? sxy / Math.sqrt(sxx * syy) : 0;
+    if (sxx > 0) {
+      /* 추세선은 살아남은 칸의 맛 점수 범위 안에서만 긋는다 */
+      var b = sxy / sxx, a = my - b * mx;
+      var x0 = Math.min.apply(null, xs) - 0.3, x1 = Math.max.apply(null, xs) + 0.3;
+      svgB.appendChild(el("line", { x1: sx(x0), y1: sy(a + b * x0), x2: sx(x1), y2: sy(a + b * x1), "class": "regline" }));
+    }
+    document.getElementById("bk-n").textContent = n;
+    document.getElementById("bk-r").textContent = (r < -1e-9 ? "−" : "") + Math.abs(r).toFixed(3);
+  }
+  inCut.addEventListener("input", drawBerkson);
+  drawBerkson();
+
+  /* =============== 목차 scroll-spy =============== */
+  var links = Array.prototype.slice.call(document.querySelectorAll("#rail-nav a"));
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) links.forEach(function (l) { l.classList.toggle("on", l.getAttribute("href") === "#" + en.target.id); });
+    });
+  }, { rootMargin: "-25% 0px -65% 0px" });
+  links.forEach(function (l, i) {
+    var t = document.querySelector(l.getAttribute("href"));
+    if (t) obs.observe(t);
+    if (i === 0) l.classList.add("on");
+  });
+})();
+</script>
+</body>
+</html>

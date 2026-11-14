@@ -28,6 +28,12 @@ cat("행 수", nrow(acc), " 결측", sum(is.na(acc)), "\n")
 print(count(acc, 사고유형)); print(table(acc$가해차종, acc$차종묶음))
 
 # ---- 03 적합도와 단일 비율 ---------------------------------------------------
+hr("00·03 멘델 양성교배 9:3:3:1")
+mo <- c(315, 108, 101, 32); mp <- c(9, 3, 3, 1) / 16; me <- sum(mo) * mp
+print(rbind(관측 = mo, 기대 = me, 몫 = round((mo - me)^2 / me, 4))); cat("관측 비율", round(mo / sum(mo), 4), "\n")
+mt <- chisq.test(mo, p = mp); print(mt)
+cat("왼쪽 꼬리 =", pchisq(mt$statistic, 3), " w =", sqrt(mt$statistic / sum(mo)), " 임계값(df 3) =", qchisq(0.95, 3), "\n")
+cat("주야 1:1 보정 없는 χ² =", chisq.test(c(115, 96))$statistic, "\n")
 hr("03 월별 적합도")
 obs <- table(acc$월); print(obs)
 g1 <- chisq.test(obs); print(g1); cat("Cohen's w =", sqrt(g1$statistic / sum(obs)), "\n")
@@ -84,4 +90,30 @@ if (file.exists(kn_path)) {
   print(mcnemar.test(tm)); print(mcnemar.test(tm, correct = FALSE))
   b <- tm["비만", "비만 아님"]; cc <- tm["비만 아님", "비만"]; print(binom.test(b, b + cc))
   cat("g =", abs(b / (b + cc) - 0.5), " 대응 오즈비 =", b / cc, "\n"); print(chisq.test(tm))
+}
+
+# ---- 05 동질성 검정과 공분산분석: BtheB 임상시험 (HSAUR3, car, emmeans 가 있을 때만) ----
+if (all(vapply(c("HSAUR3", "car", "emmeans"), requireNamespace, logical(1), quietly = TRUE))) {
+  hr("05 사전 동질성 (BtheB)")
+  data("BtheB", package = "HSAUR3")
+  bt <- BtheB %>% mutate(treatment = factor(treatment, levels = c("TAU", "BtheB")))
+  for (v in c("drug", "length")) {
+    tb <- table(bt$treatment, bt[[v]]); print(tb); print(round(prop.table(tb, 1), 3))
+    print(chisq.test(tb)); cat("최소 기대도수", min(chisq.test(tb)$expected), " Fisher p", fisher.test(tb)$p.value, "\n")
+  }
+  print(bt %>% group_by(treatment) %>% summarise(n = n(), M = mean(bdi.pre), SD = sd(bdi.pre)))
+  print(t.test(bdi.pre ~ treatment, data = bt, var.equal = TRUE))
+  print(bt %>% group_by(drug) %>% summarise(n = n(), pre = mean(bdi.pre), m2 = mean(bdi.2m, na.rm = TRUE)))
+  hr("05 공분산분석")
+  d <- filter(bt, !is.na(bdi.2m)); cat("분석 인원", nrow(d), "\n")
+  print(t.test(bdi.2m ~ treatment, data = d, var.equal = TRUE))
+  for (f in list(bdi.2m ~ bdi.pre + treatment, bdi.2m ~ bdi.pre + drug + treatment)) {
+    fit <- lm(f, data = d); a <- car::Anova(fit, type = 2); print(a)
+    cat("부분 η²(집단) =", a["treatment", "Sum Sq"] / (a["treatment", "Sum Sq"] + a["Residuals", "Sum Sq"]), " R² =", summary(fit)$r.squared, "\n")
+    e <- emmeans::emmeans(fit, ~ treatment); print(e); print(confint(pairs(e)))
+  }
+  print(car::Anova(lm(bdi.2m ~ bdi.pre * treatment + drug, data = d), type = 2))
+  print(car::Anova(lm(bdi.2m ~ bdi.pre + drug * treatment, data = d), type = 2))
+  print(car::leveneTest(bdi.2m ~ treatment, data = d))
+  print(shapiro.test(residuals(lm(bdi.2m ~ bdi.pre + drug + treatment, data = d))))
 }

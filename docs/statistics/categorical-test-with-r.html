@@ -68,6 +68,69 @@
   .flow .arr { color: var(--muted); }
   .more { font-size: 14px; color: var(--muted); }
   .blank { letter-spacing: .1em; color: var(--muted); }
+
+  /* 00 멘델: 퍼넷 사각형, 완두 표시, 비율 막대 (표현형 네 가지의 색) */
+  :root { --ph-a: #fde7a0; --ph-b: #cde6bd; --ph-c: #f4c58a; --ph-d: #8dbd9c; --pea-y: #f0bf21; --pea-g: #5f9e43; }
+  .ph-a { background: var(--ph-a); } .ph-b { background: var(--ph-b); } .ph-c { background: var(--ph-c); } .ph-d { background: var(--ph-d); }
+  .mendel-wrap { display: flex; flex-wrap: wrap; gap: 18px 28px; align-items: center; }
+  .punnett-fig { margin: 0; }
+  .punnett-fig figcaption { font-size: 13.5px; color: var(--muted); margin-top: 8px; max-width: 420px; }
+  table.punnett { width: auto; border-collapse: separate; border-spacing: 4px; }
+  table.punnett th { font-family: var(--mono); font-size: 13px; color: var(--muted); padding: 2px 6px; text-align: center; border: 0; }
+  table.punnett td { width: 82px; height: 58px; text-align: center; vertical-align: middle; border: 0; border-radius: 6px;
+    font-family: var(--mono); font-size: 13px; font-weight: 600; line-height: 1.2; padding: 4px; }
+  .pea { display: block; width: 20px; height: 20px; margin: 0 auto 4px; border-radius: 50%; background: var(--pea-y); box-shadow: inset -3px -3px 0 rgb(0 0 0 / 12%); }
+  .ph-b .pea, .ph-d .pea { background: var(--pea-g); }
+  .ph-c .pea, .ph-d .pea { border-radius: 42% 58% 46% 54% / 55% 44% 56% 45%; box-shadow: inset 3px -2px 0 rgb(0 0 0 / 22%), inset -2px 3px 0 rgb(0 0 0 / 14%); }
+  .pea-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .pea-legend li { display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-radius: 6px; margin: 0; font-size: 14.5px; }
+  .pea-legend .pea { margin: 0; flex: none; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .ratio-bars { display: grid; gap: 10px; }
+  .rb-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; align-items: center; }
+  .rb-lab { font-size: 14px; font-weight: 700; }
+  .rb-bar { display: flex; height: 34px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+  .rb-bar span { display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; border-right: 1px solid rgb(255 255 255 / 70%); }
+  @media (max-width: 640px) { .rb-row { grid-template-columns: minmax(0, 1fr); gap: 4px; } table.punnett td { width: 62px; height: 52px; font-size: 11.5px; } }
+  /* 03 계산 단계와 반복 실험 위젯 */
+  ol.steps-plain { display: grid; gap: 6px; }
+  .sim-step { margin: 0; font-size: 14px; }
+  .presets .btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .plot .contrib { fill: var(--pos); opacity: .75; }
+  .plot .hbar { fill: var(--accent-soft); stroke: var(--accent); stroke-width: .5; }
+  .plot .hbar.hit { fill: var(--tail-soft); stroke: var(--tail); }
+
+  /* 02 데이터 준비: 프롬프트의 처리 순서 흐름도. 단계의 종류마다 색 */
+  .flowmap { margin: 0; display: grid; gap: 14px; }
+  .flowmap figcaption { font-size: 13.5px; color: var(--muted); }
+  .k-read { --k: var(--accent); --k-soft: var(--accent-soft); }
+  .k-ask { --k: var(--warn); --k-soft: var(--warn-soft); }
+  .k-make { --k: var(--ok); --k-soft: var(--ok-soft); }
+  .k-check { --k: #7a4fd6; --k-soft: #f1ebfd; }
+  .k-save { --k: var(--navy); --k-soft: var(--soft); }
+  .fm-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+  .fm-legend li { margin: 0; display: flex; align-items: center; gap: 6px; }
+  .fm-legend i { width: 14px; height: 14px; border-radius: 3px; background: var(--k-soft); border: 2px solid var(--k); }
+  .fm-lane { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 12px 14px 14px; }
+  .fm-title { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin-bottom: 10px; }
+  .fm-title b { font-size: 15px; }
+  .fm-title span { font-size: 13px; color: var(--muted); }
+  ol.fm-steps { list-style: none; margin: 0; padding: 0; display: flex; gap: 22px; align-items: stretch; }
+  ol.fm-steps > li { position: relative; flex: 1 1 0; min-width: 0; margin: 0; display: flex; flex-direction: column; gap: 4px;
+    background: var(--k-soft); border: 1px solid var(--k); border-top-width: 4px; border-radius: 6px; padding: 8px 10px 10px; font-size: 13px; line-height: 1.45; }
+  ol.fm-steps > li > b { font-size: 14px; color: var(--ink); }
+  ol.fm-steps > li:not(:last-child)::after { content: "→"; position: absolute; right: -18px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 700; }
+  ol.fm-steps > li.k-ask { box-shadow: 0 0 0 3px var(--warn-soft), 0 0 0 4px var(--warn); }
+  .fm-no { align-self: flex-start; font-family: var(--mono); font-size: 11.5px; font-weight: 700; color: #fff; background: var(--k); border-radius: 999px; padding: 0 8px; }
+  .fm-ex { font-family: var(--mono); font-size: 12px; background: rgb(255 255 255 / 75%); border-radius: 4px; padding: 1px 6px; overflow-wrap: anywhere; }
+  .fm-steps code { white-space: normal; overflow-wrap: anywhere; background: rgb(255 255 255 / 75%); }
+  .fm-steps code.fm-file { font-size: 13px; font-weight: 700; color: var(--ink); white-space: nowrap; background: none; padding: 0; }
+  .fm-out { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13.5px; border-top: 1px dashed var(--line); padding-top: 12px; }
+  .fm-out span { border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; background: var(--surface); }
+  @media (max-width: 900px) {
+    ol.fm-steps { flex-direction: column; gap: 18px; }
+    ol.fm-steps > li:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -17px; transform: translateX(-50%); }
+  }
   @media (max-width: 640px) { .lab-body { padding: 12px; } .grid22 .numin { width: 64px; } }
 </style>
 <script defer src="../assets/katex/katex.min.js"></script>
@@ -81,14 +144,16 @@
   <a class="rail-back" href="../index.html#statistics">← 처음으로</a>
   <h1>범주형 자료의<br>가설검정</h1>
   <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#mendel"><b>00</b><span>멘델의 9:3:3:1</span></a>
     <a href="#tables"><b>01</b><span>범주형 자료와 분할표</span></a>
     <a href="#data"><b>02</b><span>데이터 준비</span></a>
     <a href="#gof"><b>03</b><span>단일 비율과 적합도</span></a>
-    <a href="#independence"><b>04</b><span>두 비율과 독립성</span></a>
-    <a href="#fisher"><b>05</b><span>가정 점검과 Fisher</span></a>
-    <a href="#residuals"><b>06</b><span>표준화 잔차</span></a>
-    <a href="#mcnemar"><b>07</b><span>McNemar 검정</span></a>
-    <a href="#report"><b>08</b><span>보고와 로지스틱 회귀</span></a>
+    <a href="#independence"><b>04</b><span>독립성 검정</span></a>
+    <a href="#homogeneity"><b>05</b><span>동질성과 공분산분석</span></a>
+    <a href="#fisher"><b>06</b><span>가정 점검과 Fisher</span></a>
+    <a href="#residuals"><b>07</b><span>표준화 잔차</span></a>
+    <a href="#mcnemar"><b>08</b><span>McNemar 검정</span></a>
+    <a href="#report"><b>09</b><span>보고와 로지스틱 회귀</span></a>
   </nav>
   <div class="rail-tags" aria-label="태그">
     <span class="rail-tag">#통계</span>
@@ -106,16 +171,68 @@
 <header class="panel">
 <div class="eyebrow">R을 이용한 가설검정 · 범주형 자료</div>
 <h2 class="page-title">범주형 자료의 가설검정</h2>
-<p class="lede">평균 비교에서 익힌 "단일 표본 → 독립 두 집단 → 대응표본"의 틀을 그대로 가져와, 결과변수가 범주일 때 무엇이 바뀌는지 따라간다. 검정통계량은 t에서 χ²로, 기준 분포는 t분포에서 χ²·이항·초기하분포로, 효과크기는 Cohen's d에서 w, h, φ, V, g와 오즈비로 바뀐다. 절마다 개념을 먼저 정리하고, 분석 코드를 만들게 하는 코딩 에이전트 프롬프트를 둔 뒤, 비교해 볼 R 코드를 펼침 상자에 넣고, 만들어진 코드와 결과에서 무엇을 확인할지를 표로 정리했다.</p>
+<p class="lede">평균 비교에서 익힌 "단일 표본 → 독립 두 집단 → 대응표본"의 틀을 그대로 가져와, 결과변수가 범주일 때 무엇이 바뀌는지 따라간다. 검정통계량은 \(t\)에서 \(\chi^2\)로, 기준 분포는 \(t\) 분포에서 \(\chi^2\)·이항·초기하분포로, 효과크기는 Cohen's \(d\)에서 \(w\), \(h\), \(\varphi\), \(V\), \(g\)와 오즈비로 바뀐다. 절마다 개념을 먼저 정리하고, 분석 코드를 만들게 하는 코딩 에이전트 프롬프트를 둔 뒤, 비교해 볼 R 코드를 펼침 상자에 넣고, 만들어진 코드와 결과에서 무엇을 확인할지를 표로 정리했다.</p>
 <dl class="facts">
-<div><dt>도구</dt><dd>R과 tidyverse, haven, janitor, effectsize, showtext, VS Code의 코딩 에이전트. 설치는 <a href="../data-science/VScode-R-languageserver.html">VS Code에서 R 실행하기</a>에, 스크립트를 실행하는 방법은 <a href="prepare-for-ttest.html#s1">t 검정을 위한 데이터 준비</a>에 있다.</dd></div>
-<div><dt>예제 데이터</dt><dd>도로교통공단 교통사고분석시스템(TAAS)의 2025년 서울 사망 교통사고 211건(사고 1건 = 1행, <a href="../downlodable/서울-사망교통사고-2025.csv" download>실습용 CSV 내려받기</a>)과 국민건강영양조사 2024 원시자료(조사 대상자 1명 = 1행, 각자 신청)</dd></div>
+<div><dt>도구</dt><dd>R과 tidyverse, haven, janitor, effectsize, showtext, VS Code의 코딩 에이전트. 설치는 <a href="../data-science/VScode-R-languageserver.html">VS Code에서 R 실행하기</a>에, 스크립트를 실행하는 방법은 <a href="prepare-for-ttest.html#s1">\(t\) 검정을 위한 데이터 준비</a>에 있다.</dd></div>
+<div><dt>예제 데이터</dt><dd>도로교통공단 교통사고분석시스템(TAAS)의 2025년 서울 사망 교통사고 211건(사고 1건 = 1행, <a href="../downlodable/서울-사망교통사고-2025.csv" download>실습용 CSV 내려받기</a>)과 <a href="https://knhanes.kdca.go.kr/knhanes/main.do" target="_blank" rel="noopener noreferrer">국민건강영양조사</a> 2024 원시자료(조사 대상자 1명 = 1행, 각자 신청)</dd></div>
 <div><dt>다루는 검정</dt><dd>단일 비율·적합도, 두 비율 비교·독립성, Fisher 정확검정, 표준화 잔차, McNemar 검정, 그리고 로지스틱 회귀와의 연결</dd></div>
 <div><dt>앞서 볼 자료</dt><dd>평균 비교는 <a href="mean-test-with-r.html">모집단 평균에 대한 가설검정</a>, 검정의 논리는 <a href="hypothesis-testing.html">통계적 가설검정</a>에서 다루었다.</dd></div>
-<div><dt>효과크기</dt><dd>Cohen's w, h, g, φ 계수, Cramér's V, 위험비, 오즈비</dd></div>
+<div><dt>효과크기</dt><dd>Cohen's \(w\), \(h\), \(g\), \(\varphi\) 계수, Cramér's \(V\), 위험비, 오즈비</dd></div>
 <div><dt>함수 도움말</dt><dd>코드에서 점선 밑줄이 있는 함수 이름에 마우스를 올리면(휴대폰은 누르면) 목적, 인수, 반환값이 나타난다.</dd></div>
 </dl>
 </header>
+
+<!-- ===================== 00 ===================== -->
+<section class="panel" id="mendel">
+<div class="section-head"><span class="section-num">00</span><h2>들어가며: 멘델의 9:3:3:1</h2></div>
+<p>범주형 자료 분석의 오래된 출발점은 완두콩이다. 멘델(Mendel, 1866)은 씨 모양(둥근 R, 주름진 r)과 씨 색(노랑 Y, 초록 y)이 모두 이형접합인 완두(RrYy)끼리 교배했다. 두 형질이 독립적으로 유전된다면 자손의 표현형은 <strong>9 : 3 : 3 : 1</strong>로 나뉜다. 둥근 R과 노랑 Y가 우성이라, 대문자가 하나라도 있으면 그 형질이 겉으로 나타나기 때문이다.</p>
+
+<div class="mendel-wrap">
+<figure class="punnett-fig">
+<table class="punnett" aria-label="양성잡종 교배의 퍼넷 사각형">
+<thead><tr><th scope="col"><span class="sr">배우자</span></th><th scope="col">RY</th><th scope="col">Ry</th><th scope="col">rY</th><th scope="col">ry</th></tr></thead>
+<tbody>
+<tr><th scope="row">RY</th><td class="ph-a"><i class="pea"></i>RRYY</td><td class="ph-a"><i class="pea"></i>RRYy</td><td class="ph-a"><i class="pea"></i>RrYY</td><td class="ph-a"><i class="pea"></i>RrYy</td></tr>
+<tr><th scope="row">Ry</th><td class="ph-a"><i class="pea"></i>RRYy</td><td class="ph-b"><i class="pea"></i>RRyy</td><td class="ph-a"><i class="pea"></i>RrYy</td><td class="ph-b"><i class="pea"></i>Rryy</td></tr>
+<tr><th scope="row">rY</th><td class="ph-a"><i class="pea"></i>RrYY</td><td class="ph-a"><i class="pea"></i>RrYy</td><td class="ph-c"><i class="pea"></i>rrYY</td><td class="ph-c"><i class="pea"></i>rrYy</td></tr>
+<tr><th scope="row">ry</th><td class="ph-a"><i class="pea"></i>RrYy</td><td class="ph-b"><i class="pea"></i>Rryy</td><td class="ph-c"><i class="pea"></i>rrYy</td><td class="ph-d"><i class="pea"></i>rryy</td></tr>
+</tbody></table>
+<figcaption>RrYy × RrYy. 양쪽 부모가 RY, Ry, rY, ry 네 배우자를 같은 확률로 만들면 16칸이 모두 \(1/16\)의 확률을 갖는다. 같은 색의 칸을 세면 9, 3, 3, 1칸이다.</figcaption>
+</figure>
+<ul class="pea-legend" aria-label="표현형 범례">
+<li class="ph-a"><i class="pea"></i><span><b>둥글고 노랑</b> R_Y_ · 9칸</span></li>
+<li class="ph-b"><i class="pea"></i><span><b>둥글고 초록</b> R_yy · 3칸</span></li>
+<li class="ph-c"><i class="pea"></i><span><b>주름지고 노랑</b> rrY_ · 3칸</span></li>
+<li class="ph-d"><i class="pea"></i><span><b>주름지고 초록</b> rryy · 1칸</span></li>
+</ul>
+</div>
+
+<h3>멘델이 실제로 센 556개</h3>
+<p>멘델은 이 교배에서 얻은 완두 556개를 표현형별로 셌다. 이론 비율과 실제 비율을 같은 길이의 막대 위에 나란히 놓으면 이렇다.</p>
+<div class="ratio-bars" role="img" aria-label="이론 비율 9:3:3:1과 멘델 관측 비율의 비교 막대">
+  <div class="rb-row"><span class="rb-lab">이론 9 : 3 : 3 : 1</span>
+    <div class="rb-bar"><span class="ph-a" style="width:56.25%">56.3%</span><span class="ph-b" style="width:18.75%">18.8%</span><span class="ph-c" style="width:18.75%">18.8%</span><span class="ph-d" style="width:6.25%">6.3%</span></div></div>
+  <div class="rb-row"><span class="rb-lab">멘델의 관측 (556개)</span>
+    <div class="rb-bar"><span class="ph-a" style="width:56.65%">56.7%</span><span class="ph-b" style="width:19.42%">19.4%</span><span class="ph-c" style="width:18.17%">18.2%</span><span class="ph-d" style="width:5.76%">5.8%</span></div></div>
+</div>
+<div class="scroll"><table class="stat">
+<caption>표 0-1. 양성잡종 교배의 표현형 (Mendel, 1866)</caption>
+<thead><tr><th>표현형</th><th>이론 비율</th><th>관측 개수</th><th>관측 비율</th><th>이론대로라면 (556 × 비율)</th></tr></thead>
+<tbody>
+<tr><td>둥글고 노랑</td><td>9/16</td><td>315</td><td>56.7%</td><td>312.75</td></tr>
+<tr><td>둥글고 초록</td><td>3/16</td><td>108</td><td>19.4%</td><td>104.25</td></tr>
+<tr><td>주름지고 노랑</td><td>3/16</td><td>101</td><td>18.2%</td><td>104.25</td></tr>
+<tr><td>주름지고 초록</td><td>1/16</td><td>32</td><td>5.8%</td><td>34.75</td></tr>
+<tr><td><strong>합</strong></td><td>1</td><td>556</td><td>100%</td><td>556</td></tr>
+</tbody></table></div>
+
+<div class="callout"><p><strong>이 자료에서 무엇을 할 것인가.</strong> 두 막대는 거의 겹치지만 똑같지는 않다. 둥글고 초록은 이론보다 3.75개 많고, 주름지고 초록은 2.75개 적다. 이 쪽은 다음 세 질문을 따라간다.</p>
+<ol>
+<li><strong>이 정도 차이는 우연으로 생길 만한가?</strong> 관측을 칸으로 세어 표를 만들고(<a href="#tables">01</a>), 이론 비율과 얼마나 벗어났는지 숫자 하나(\(\chi^2\))로 모아 판단한다(<a href="#gof">03</a>, 적합도 검정).</li>
+<li><strong>너무 잘 맞는 것도 문제인가?</strong> 통계학자 Fisher(1936)는 멘델의 실험들을 모아 보면 결과가 이론에 지나치게 잘 맞는다고 의심했다. 우연이라면 이보다 더 들쭉날쭉해야 한다는 것이다. 이 주장에는 반론도 있다(Weiling, 1986, <a href="https://pubmed.ncbi.nlm.nih.gov/3531317/" target="_blank" rel="noopener">PubMed</a>). 03절에서 \(\chi^2\)의 왼쪽 꼬리로 이 논쟁을 읽는다.</li>
+<li><strong>우리 자료에는 멘델의 법칙 같은 이론 비율이 있는가?</strong> 적합도 검정은 자료 밖에서 온 이론 비율이 있어야 할 수 있다. 서울 사망사고 자료에서는 무엇을 그 이론으로 삼을 수 있는지 03절에서 따져 본다.</li>
+</ol></div>
+</section>
 
 <!-- ===================== 01 ===================== -->
 <section class="panel" id="tables">
@@ -125,16 +242,16 @@
 <div class="flow" aria-label="자료 형태 변환 흐름">
   <span class="step">원자료 (한 행 = 사고 1건)</span><span class="arr">→</span>
   <span class="step">빈도표 (변수 1개)</span><span class="arr">→</span>
-  <span class="step">분할표 (변수 2개, r × c)</span>
+  <span class="step">분할표 (변수 2개, \(r \times c\))</span>
 </div>
 
 <h3>평균 비교와의 대응</h3>
 <div class="scroll"><table>
 <thead><tr><th>평균 비교</th><th>이 자료</th><th>R 함수</th><th>효과크기</th></tr></thead>
 <tbody>
-<tr><td>단일표본 t</td><td>단일 비율 검정, 적합도 검정 (<a href="#gof">03</a>)</td><td><code>binom.test()</code>, <code>prop.test()</code>, <code>chisq.test()</code></td><td>Cohen's h, Cohen's w</td></tr>
-<tr><td>독립표본 t</td><td>두 비율 비교, 독립성·동질성 검정, Fisher 정확검정 (<a href="#independence">04</a>–<a href="#residuals">06</a>)</td><td><code>prop.test()</code>, <code>chisq.test()</code>, <code>fisher.test()</code></td><td>위험비, 오즈비, φ, Cramér's V</td></tr>
-<tr><td>대응표본 t</td><td>McNemar 검정 (<a href="#mcnemar">07</a>)</td><td><code>mcnemar.test()</code></td><td>Cohen's g, 대응 오즈비</td></tr>
+<tr><td>단일표본 \(t\)</td><td>단일 비율 검정, 적합도 검정 (<a href="#gof">03</a>)</td><td><code>binom.test()</code>, <code>prop.test()</code>, <code>chisq.test()</code></td><td>Cohen's \(h\), Cohen's \(w\)</td></tr>
+<tr><td>독립표본 \(t\)</td><td>독립성 검정 (<a href="#independence">04</a>), 동질성 검정과 사전 동질성 (<a href="#homogeneity">05</a>), Fisher 정확검정과 표준화 잔차 (<a href="#fisher">06</a>–<a href="#residuals">07</a>)</td><td><code>prop.test()</code>, <code>chisq.test()</code>, <code>fisher.test()</code></td><td>위험비, 오즈비, \(\varphi\), Cramér's \(V\)</td></tr>
+<tr><td>대응표본 \(t\)</td><td>McNemar 검정 (<a href="#mcnemar">08</a>)</td><td><code>mcnemar.test()</code></td><td>Cohen's \(g\), 대응 오즈비</td></tr>
 </tbody></table></div>
 
 <h3>같은 표를 만드는 세 가지 방법</h3>
@@ -145,8 +262,8 @@
 <div class="scroll"><table>
 <thead><tr><th>절</th><th>데이터</th><th>단위</th><th>구하는 방법</th></tr></thead>
 <tbody>
-<tr><td>02–06, 08</td><td>2025년 서울 사망 교통사고 211건 (도로교통공단 TAAS)</td><td>사망사고 1건 = 1행</td><td>이 쪽에서 <a href="../downlodable/서울-사망교통사고-2025.csv" download>실습용 CSV</a>를 내려받는다. TAAS에서 받은 원자료 22개 열 가운데 실습에 쓰는 15개 열만 남겼고 값은 고치지 않았다</td></tr>
-<tr><td>07</td><td>국민건강영양조사(KNHANES) 2024 원시자료 기본 DB</td><td>조사 대상자 1명 = 1행</td><td>질병관리청 누리집에서 이용자 등록·요청 후 각자 내려받는다. <strong>재배포 불가</strong></td></tr>
+<tr><td>02–04, 06–07, 09</td><td>2025년 서울 사망 교통사고 211건 (도로교통공단 TAAS)</td><td>사망사고 1건 = 1행</td><td>이 쪽에서 <a href="../downlodable/서울-사망교통사고-2025.csv" download>실습용 CSV</a>를 내려받는다. TAAS에서 받은 원자료 22개 열 가운데 실습에 쓰는 15개 열만 남겼고 값은 고치지 않았다</td></tr>
+<tr><td>08</td><td>국민건강영양조사(KNHANES) 2024 원시자료 기본 DB</td><td>조사 대상자 1명 = 1행</td><td><a href="https://knhanes.kdca.go.kr/knhanes/main.do" target="_blank" rel="noopener noreferrer">국민건강영양조사 누리집</a>의 "원시자료 다운로드"에서 이용자 등록·요청 후 각자 내려받는다. <strong>재배포 불가</strong></td></tr>
 </tbody></table></div>
 <div class="callout"><p><strong>이 자료의 뼈대.</strong> 개념 설명의 순서는 Navarro의 <em>Learning Statistics with R</em>(LSR) 12장(Categorical data analysis)을 따른다. 절 끝의 "더 읽기"에 대응 절 번호를 적었다. LSR이 다루지 않는 단일 비율 정확검정, 위험비·오즈비, 표준화 잔차는 Agresti(2019)로 보완했다.</p></div>
 </section>
@@ -155,7 +272,7 @@
 <section class="panel" id="data">
 <div class="section-head"><span class="section-num">02</span><h2>데이터 준비</h2></div>
 <h3>폴더 구조</h3>
-<p>폴더 구조는 <a href="prepare-for-ttest.html#s1">t 검정을 위한 데이터 준비</a>와 같다. 원자료는 <code>dataset/raw/</code>, 가공 자료는 <code>dataset/working/</code>, 표와 그림은 <code>output/</code>, 에이전트가 만든 스크립트는 <code>scripts/</code>에 둔다.</p>
+<p>폴더 구조는 <a href="prepare-for-ttest.html#s1">\(t\) 검정을 위한 데이터 준비</a>와 같다. 원자료는 <code>dataset/raw/</code>, 가공 자료는 <code>dataset/working/</code>, 표와 그림은 <code>output/</code>, 에이전트가 만든 스크립트는 <code>scripts/</code>에 둔다.</p>
 <pre class="tree">categorical-tests/
 ├── scripts/              # 에이전트가 만든 R 스크립트
 ├── dataset/
@@ -171,13 +288,13 @@
 <ul>
 <li><strong>사고유형</strong>은 "차대사람 - 횡단중"처럼 대분류와 세부 유형이 한 칸에 붙어 있다. " - "로 나누어 대분류(차대사람 119, 차대차 70, 차량단독 22)를 분석에 쓴다.</li>
 <li><strong>발생년월</strong>은 "2025년 7월" 같은 글자다. 월 숫자만 꺼내 1~12월 순서의 범주로 만든다.</li>
-<li><strong>가해운전자 차종</strong>은 9종인데 개인형이동수단(PM) 3건, 원동기 1건, 특수 1건처럼 아주 적은 종류가 있다. 05절에서 이 9종 그대로의 표가 χ² 근사를 어떻게 무너뜨리는지 보고, 06절에서는 뜻이 통하는 세 묶음(승용 / 승합·화물: 승합, 화물, 건설기계, 특수 / 이륜·자전거: 이륜, 원동기, 자전거, PM)을 쓴다.</li>
+<li><strong>가해운전자 차종</strong>은 9종인데 개인형이동수단(PM) 3건, 원동기 1건, 특수 1건처럼 아주 적은 종류가 있다. 06절에서 이 9종 그대로의 표가 \(\chi^2\) 근사를 어떻게 무너뜨리는지 보고, 07절에서는 뜻이 통하는 세 묶음(승용 / 승합·화물: 승합, 화물, 건설기계, 특수 / 이륜·자전거: 이륜, 원동기, 자전거, PM)을 쓴다.</li>
 </ul>
 <p>범주의 순서는 직접 정해 두어야 표와 그림이 의도한 순서로 나온다. 그리고 정한 순서는 CSV로 저장하면 사라진다. 다시 읽으면 글자 순서로 정렬되기 때문이다. 그래서 정리한 자료는 R 전용 형식(.rds)으로 저장한다.</p>
 
 <h3>국민건강영양조사 2024 원시자료</h3>
-<p>국민건강영양조사 누리집(knhanes.kdca.go.kr)의 원시자료 메뉴에서 이용자 등록과 요청서 작성을 거쳐 내려받는다. 자료는 연도별로 SAS(<code>.sas7bdat</code>)와 SPSS(<code>.sav</code>) 형식으로 제공된다. 쓸 파일은 <strong>기본 DB</strong>(<code>hn24_all</code>)다. 이름이 비슷한 24시간 회상 식품섭취조사 파일(<code>hn24_24rc</code>)은 음식 하나가 한 행이라 800MB가 넘고, 체형인식과 체질량지수가 없다. 기본 DB도 변수가 많으므로 필요한 열만 읽는다.</p>
-<p><a href="#mcnemar">07</a>에서 쓸 두 판정은 같은 사람에게서 나온 것이다. 하나는 본인이 생각하는 체형(주관적 체형인식, <code>BO1</code>: 1 매우 마른 편 ~ 5 매우 비만, 9 모름·무응답)이고, 다른 하나는 검진에서 잰 체질량지수(<code>HE_BMI</code>)다.</p>
+<p><a href="https://knhanes.kdca.go.kr/knhanes/main.do" target="_blank" rel="noopener noreferrer">국민건강영양조사 누리집</a>(knhanes.kdca.go.kr) 첫 화면의 "원시자료 다운로드" 메뉴에서 이용자 등록과 요청서 작성을 거쳐 내려받는다. 자료는 연도별로 SAS(<code>.sas7bdat</code>)와 SPSS(<code>.sav</code>) 형식으로 제공된다. 쓸 파일은 <strong>기본 DB</strong>(<code>hn24_all</code>)다. 이름이 비슷한 24시간 회상 식품섭취조사 파일(<code>hn24_24rc</code>)은 음식 하나가 한 행이라 800MB가 넘고, 체형인식과 체질량지수가 없다. 기본 DB도 변수가 많으므로 필요한 열만 읽는다.</p>
+<p><a href="#mcnemar">08</a>에서 쓸 두 판정은 같은 사람에게서 나온 것이다. 하나는 본인이 생각하는 체형(주관적 체형인식, <code>BO1</code>: 1 매우 마른 편 ~ 5 매우 비만, 9 모름·무응답)이고, 다른 하나는 검진에서 잰 체질량지수(<code>HE_BMI</code>)다.</p>
 <div class="callout caution"><p><strong>수강생 각자 신청.</strong> 국민건강영양조사 원시자료는 이용 조건상 제3자에게 다시 나눠 줄 수 없다. 수업 전에 수강생 각자 신청하도록 안내하고, 정리한 <code>working/</code> 파일도 공유하지 않는다. 변수명과 응답 코드는 해당 연도 「원시자료 이용지침서」로 반드시 확인한다.</p></div>
 
 <h3 id="data-parts">프롬프트의 구성요소</h3>
@@ -189,9 +306,40 @@
 <tr><td>확인받기</td><td>"열 이름을 먼저 보여 주고 확인받은 다음 진행"</td><td>받은 파일마다 열 이름이 다를 수 있다. 에이전트가 이름을 지어내지 않게 한다</td></tr>
 <tr><td>"표 N · 이름:" 항목</td><td>표의 행과 열, 쓸 검정의 이름, 판단 규칙, 저장 파일</td><td>보고서에 넣을 표를 하나씩 지정한다. 보정 여부처럼 결과가 갈리는 선택은 둘 다 적게 한다</td></tr>
 <tr><td>"그림 N:" 항목</td><td>그림의 요소, 파일 이름, 크기, 해상도</td><td>"그림을 그려 줘"보다 구체적으로 적어야 원하는 그림이 나온다</td></tr>
-<tr><td>결과 문장 항목</td><td>APA 형식의 결과 문장</td><td>문장에 꼭 들어갈 값(통계량, 자유도, N, p, 효과크기)을 정한다</td></tr>
+<tr><td>결과 문장 항목</td><td>APA 형식의 결과 문장</td><td>문장에 꼭 들어갈 값(통계량, 자유도, \(N\), \(p\), 효과크기)을 정한다</td></tr>
 <tr><td>끝의 <code>-</code> 규칙</td><td>코드로 계산한 숫자, 자릿수, 패키지와 글꼴, 코드 주석</td><td>모든 항목에 공통인 규칙을 한곳에 둔다. 숫자를 손으로 적지 못하게 하는 것이 핵심이다</td></tr>
 </tbody></table></div>
+
+<h3>프롬프트가 하는 일: 순서로 보기</h3>
+<p>아래 프롬프트를 붙여 넣으면 에이전트는 두 자료를 차례로 정리한다. 칸 위의 번호는 프롬프트의 항목 번호이고, 색은 그 단계가 하는 일의 종류다. 한 곳에서는 에이전트가 <strong>멈추고 내게 확인을 받는다</strong>. 그 자리에서 답할 내용은 아래 "무엇을 확인하나" 표에 있다.</p>
+<figure class="flowmap" aria-label="데이터 준비 프롬프트의 처리 순서">
+  <ul class="fm-legend" aria-label="단계의 종류">
+    <li><i class="k-read"></i>읽기</li><li><i class="k-ask"></i>멈추고 확인받기</li><li><i class="k-make"></i>변수 만들기</li><li><i class="k-check"></i>점검 출력</li><li><i class="k-save"></i>저장</li>
+  </ul>
+  <div class="fm-lane">
+    <div class="fm-title"><b>사망 교통사고</b><span>항목 1–5 · <code>dataset/raw/서울-사망교통사고-2025.csv</code> (211건)</span></div>
+    <ol class="fm-steps">
+      <li class="k-read"><span class="fm-no">1</span><b>CSV 읽기</b><span>한글이 깨지지 않게 읽고 열 이름과 앞쪽 값을 보여 준다</span></li>
+      <li class="k-ask"><span class="fm-no">1</span><b>열 확인받기</b><span>발생년월, 주야, 사고유형, 가해운전자 차종이 어느 열인지 묻고 기다린다</span></li>
+      <li class="k-make"><span class="fm-no">2</span><b>월·주야·사고유형</b><span class="fm-ex">2025년 7월 → 7</span><span class="fm-ex">차대사람 - 횡단중 → 차대사람 | 횡단중</span><span class="fm-ex">차대사람 → 보행자사고 "차대사람"</span></li>
+      <li class="k-make"><span class="fm-no">3</span><b>차종 묶기</b><span class="fm-ex">9종 → 승용 · 승합·화물 · 이륜·자전거</span><span class="fm-ex">건설기계 → "건설기계" / 그 외</span></li>
+      <li class="k-save"><span class="fm-no">3</span><b>저장</b><code class="fm-file">acc_clean.rds</code><span>working 폴더에, 범주 순서가 남는 형식으로</span></li>
+      <li class="k-check"><span class="fm-no">4–5</span><b>점검 출력</b><span>사고유형별 건수, 차종 × 묶음 교차표, 열마다 결측 수, 주야 × 보행자사고 비율과 건수</span></li>
+    </ol>
+  </div>
+  <div class="fm-lane">
+    <div class="fm-title"><b>국민건강영양조사 2024</b><span>항목 6 · <code>dataset/raw/knhanes/hn24_all.sas7bdat</code></span></div>
+    <ol class="fm-steps">
+      <li class="k-read"><span class="fm-no">6</span><b>필요한 열만 읽기</b><span>아이디, 성별, 나이, 체형인식(BO1), 체질량지수(HE_BMI), 가중치 6개 열</span></li>
+      <li class="k-make"><span class="fm-no">6</span><b>걸러 내기</b><span class="fm-ex">19세 이상 6,033명</span><span class="fm-ex">BO1 1~5, BMI 있음 → 5,727명</span></li>
+      <li class="k-make"><span class="fm-no">6</span><b>판정 변수</b><span class="fm-ex">BO1 4·5 → 인식비만 "비만"</span><span class="fm-ex">BMI 25 이상 → 측정비만 "비만"</span></li>
+      <li class="k-check"><span class="fm-no">6</span><b>점검 출력</b><span>걸러 내기 전후의 사람 수, 체형인식 응답별 사람 수</span></li>
+      <li class="k-save"><span class="fm-no">6</span><b>저장</b><code class="fm-file">kn_body.rds</code><span>working 폴더에. 공유하지 않는다</span></li>
+    </ol>
+  </div>
+  <div class="fm-out"><b>끝나면 받는 것</b><span><code>scripts/cat_prepare.R</code>(단계마다 주석)</span><span>정리한 자료 <code>.rds</code> 두 개</span><span>점검 출력 (원래 출력 그대로)</span><span>이용지침서에서 코드를 확인하라는 안내</span></div>
+  <figcaption>"걸러 내기"는 순서가 중요하다. 체형인식 응답 1~5만 남긴 다음에 '비만'을 판정해야, 9(모름·무응답) 213명이 '비만'으로 잘못 들어가지 않는다.</figcaption>
+</figure>
 
 <h3>프롬프트로 만들기</h3>
 <p>VS Code의 코딩 에이전트에 붙여 넣어 두 자료를 정리하는 스크립트를 만들게 한다. 에이전트가 열 이름을 보여 주며 확인을 요청하면, 아래 "무엇을 확인하나" 표를 보고 답한다.</p>
@@ -294,88 +442,156 @@ write_rds(kn, "dataset/working/kn_body.rds")      # 개인 작업용. 공유 금
 <!-- ===================== 03 ===================== -->
 <section class="panel" id="gof">
 <div class="section-head"><span class="section-num">03</span><h2>단일 비율과 적합도 검정</h2></div>
-<div class="callout caution"><p><strong>먼저 생각할 문제: 전수 자료에 검정을 하는가.</strong> 이 자료는 표본이 아니라 2025년 서울에서 일어난 사망 교통사고 <strong>전체</strong>(211건)다. 그런데도 검정을 하는 근거는, 올해의 사고 건수를 "달마다의 사고 발생 확률이라는 생성 과정"에서 나온 하나의 실현값으로 보는 데 있다(초모집단 관점). 이때 검정이 답하는 질문은 "올해 숫자가 같았는가"가 아니라 "사고를 만드는 과정이 달에 따라 다르다고 볼 증거가 있는가"다. 수업에서 이 해석을 먼저 짚고 넘어간다.</p></div>
-
 <h3>적합도 검정의 논리</h3>
-<p>범주가 \(k\)개인 변수에 대해 영가설(null hypothesis, 귀무가설)이 각 범주의 확률 \(p_1, \dots, p_k\)를 정해 주면, 표본크기 \(N\)에서 기대도수는 \(E_i = N p_i\)다. 관측도수 \(O_i\)와의 차이를 모은 통계량이 Pearson χ²다.</p>
+<p>범주가 \(k\)개인 변수에 대해 영가설(null hypothesis, 귀무가설)이 각 범주의 확률 \(p_1, \dots, p_k\)를 정해 주면, 표본크기 \(N\)에서 기대도수는 \(E_i = N p_i\)다. 관측도수 \(O_i\)와의 차이를 모은 통계량이 Pearson \(\chi^2\)다.</p>
 <div class="readout math">
 \[X^2 = \sum_{i=1}^{k} \frac{(O_i - E_i)^2}{E_i} \;\sim\; \chi^2_{k-1} \quad (\text{근사, under } H_0), \qquad w = \sqrt{X^2 / N}\]
 </div>
 <p>자유도가 \(k-1\)인 이유는, 총합 \(N\)이 정해지면 마지막 칸의 도수가 나머지에 의해 결정되기 때문이다. 평균 비교에서 표본분산의 자유도가 \(n-1\)이었던 것과 같은 논리다.</p>
-<div class="callout"><p><strong>손계산 예제 (LSR 12.1의 카드 예제).</strong> 200명이 카드 무늬 하나씩을 골랐더니 클로버 35, 다이아 51, 하트 64, 스페이드 50이었다. 네 무늬가 같은 확률이라면 기대도수는 모두 50이다.</p>
-<div class="readout math">\[X^2 = \frac{(35-50)^2 + (51-50)^2 + (64-50)^2 + (50-50)^2}{50} = \frac{225 + 1 + 196 + 0}{50} = 8.44\]</div>
-<p>자유도 3에서 \(p = .038\)이다. 아래 탐색기의 "카드 예제" 단추로 확인한다. 이 수치는 교재의 손계산용 예제다.</p></div>
+
+<h3>멘델의 9:3:3:1을 \(\chi^2\)로 확인하기</h3>
+<p><a href="#mendel">00</a>에서 본 멘델의 556개로 적합도 검정의 과정을 한 단계씩 따라간다.</p>
+<ol class="steps-plain">
+<li><strong>영가설을 비율로 쓴다.</strong> \(H_0\): 네 표현형의 확률이 \(9/16,\ 3/16,\ 3/16,\ 1/16\)이다. 대안가설은 "적어도 한 표현형의 확률이 이와 다르다"이다.</li>
+<li><strong>기대도수를 구한다.</strong> 전체 556개를 이론 비율대로 나눈다. 예: \(E_1 = 556 \times 9/16 = 312.75\).</li>
+<li><strong>칸마다 벗어난 정도를 잰다.</strong> 차이를 제곱해 부호를 없애고, 기대도수로 나누어 "기대에 비해 얼마나 벗어났나"로 바꾼다.</li>
+<li><strong>모두 더한다.</strong> 네 칸의 몫을 더한 것이 \(\chi^2\) 통계량이다.</li>
+<li><strong>자유도를 정한다.</strong> 범주 4개, 총합이 정해져 있으므로 \(4 - 1 = 3\).</li>
+<li><strong>영가설 하의 분포와 비교한다.</strong> 자유도 3인 \(\chi^2\) 분포에서 관측값 이상이 나올 확률이 \(p\)값이다.</li>
+</ol>
+<div class="scroll"><table class="stat">
+<caption>표 3-1. 멘델 양성교배의 \(\chi^2\) 계산 (\(N = 556\))</caption>
+<thead><tr><th>표현형</th><th>\(p_i\)</th><th>\(O_i\)</th><th>\(E_i = 556\,p_i\)</th><th>\(O_i - E_i\)</th><th>\((O_i - E_i)^2\)</th><th>\((O_i - E_i)^2 / E_i\)</th></tr></thead>
+<tbody>
+<tr><td>둥글고 노랑</td><td>9/16</td><td>315</td><td>312.75</td><td>2.25</td><td>5.0625</td><td>0.0162</td></tr>
+<tr><td>둥글고 초록</td><td>3/16</td><td>108</td><td>104.25</td><td>3.75</td><td>14.0625</td><td>0.1349</td></tr>
+<tr><td>주름지고 노랑</td><td>3/16</td><td>101</td><td>104.25</td><td>−3.25</td><td>10.5625</td><td>0.1013</td></tr>
+<tr><td>주름지고 초록</td><td>1/16</td><td>32</td><td>34.75</td><td>−2.75</td><td>7.5625</td><td>0.2176</td></tr>
+<tr><td><strong>합</strong></td><td>1</td><td>556</td><td>556</td><td>0</td><td></td><td><strong>0.4700</strong></td></tr>
+</tbody></table></div>
+<div class="readout math">\[X^2 = 0.0162 + 0.1349 + 0.1013 + 0.2176 = 0.470, \qquad \mathit{df} = 3, \qquad p = P(\chi^2_3 \ge 0.470) = .925\]</div>
+<p>\(\chi^2(3,\ N = 556) = 0.47\), \(p = .925\), Cohen's \(w = .03\)이다. 관측이 9:3:3:1에서 벗어났다고 볼 증거가 전혀 없다. 몫이 가장 큰 칸은 주름지고 초록(0.2176)이다. 차이는 2.75개로 가장 작지 않지만, 기대도수(34.75)가 작아서 같은 차이도 상대적으로 크게 친다. 이 \(p\)값은 어디서 왔을까? 그 답이 \(\chi^2\) 분포다.</p>
+
+<h3>\(\chi^2\) 분포는 어떻게 만들어지나</h3>
+<p>\(p\)값을 구하려면 "영가설이 참일 때 \(\chi^2\) 값이 어떻게 흩어지는가"를 알아야 한다. 수식 대신 실험을 되풀이해 본다. 9:3:3:1이 참인 세계에서 멘델의 실험을 다시 하면, 556개는 매번 조금씩 다르게 나뉜다. 그때마다 \(\chi^2\)를 계산해 점 하나로 쌓으면, 쌓인 모양이 바로 \(\chi^2\) 분포다.</p>
+<div class="lab" id="lab-sim">
+  <div class="lab-head"><strong>영가설의 세계에서 실험 되풀이하기</strong><span>컴퓨터가 영가설대로 흉내 낸 가상의 반복 실험이다. 실제로 관측한 자료가 아니다</span></div>
+  <div class="lab-body">
+    <div class="presets" role="group" aria-label="실험 고르기">
+      <button class="btn ghost" type="button" data-k="4" aria-pressed="true">멘델 9:3:3:1 (556개, 범주 4)</button>
+      <button class="btn ghost" type="button" data-k="2" aria-pressed="false">주간·야간 1:1 (211건, 범주 2)</button>
+      <button class="btn ghost" type="button" data-k="12" aria-pressed="false">열두 달 같은 확률 (211건, 범주 12)</button>
+    </div>
+    <div class="presets" role="group" aria-label="반복">
+      <button class="btn" type="button" data-rep="1">한 번 실험</button>
+      <button class="btn" type="button" data-rep="100">100번</button>
+      <button class="btn" type="button" data-rep="1000">1,000번</button>
+      <button class="btn ghost" type="button" data-rep="0">지우기</button>
+    </div>
+    <p class="sim-step"><b>① 한 번의 실험</b> 막대는 이번 실험의 개수, 검은 선은 이론대로라면 나올 개수다. 아래 붉은 막대는 칸마다 기대에서 벗어난 정도이고, 붉은 막대를 모두 이으면 이번 실험의 \(\chi^2\) 값이 된다.</p>
+    <svg class="plot" id="sim-one" viewBox="0 0 640 210" role="img" aria-label="한 번의 가상 실험: 범주별 개수와 기대, 칸마다 벗어난 정도"></svg>
+    <p class="sim-step"><b>② 값을 쌓는다</b> 실험마다 나온 \(\chi^2\) 값 하나가 아래 히스토그램에 하나씩 쌓인다. 많이 쌓을수록 막대의 윤곽이 파란 곡선(\(\chi^2\) 분포)에 겹쳐진다. 주황 선은 실제 자료의 \(\chi^2\)다.</p>
+    <svg class="plot" id="sim-hist" viewBox="0 0 640 250" role="img" aria-label="반복 실험의 카이제곱 값 히스토그램과 카이제곱 분포 곡선"></svg>
+    <div class="outs">
+      <div><span class="k">쌓은 실험 수</span><span class="v" id="sim-n">0</span></div>
+      <div><span class="k">이번 실험의 \(\chi^2\)</span><span class="v" id="sim-last">-</span></div>
+      <div><span class="k">실제 자료의 \(\chi^2\)</span><span class="v" id="sim-obs">-</span></div>
+      <div><span class="k">쌓인 값 중 실제 이상인 비율</span><span class="v" id="sim-share">-</span></div>
+      <div><span class="k">곡선으로 구한 \(p\)값</span><span class="v" id="sim-p">-</span></div>
+    </div>
+    <p class="figcap">범주를 바꾸어 보면 범주가 많을수록(자유도가 클수록) 분포가 오른쪽으로 옮겨 가고 퍼진다. 쌓인 값 중 실제 이상인 비율은 반복이 많아질수록 곡선으로 구한 \(p\)값에 가까워진다. \(p\)값은 바로 이 비율이다. 주간·야간의 \(\chi^2\)는 연속성 보정 없이 계산한 값(1.71)이라, 아래 단일 비율 절의 보정한 정규근사 값(1.54)과 조금 다르다.</p>
+  </div>
+</div>
+
+<div class="lab" id="lab-chi">
+  <div class="lab-head"><strong>\(\chi^2\) 분포 탐색기</strong><span>영가설 하(under \(H_0\))의 분포, 관측 통계량의 위치, 오른쪽 꼬리 확률</span></div>
+  <div class="lab-body">
+    <div class="ctrls">
+      <div class="ctrl"><label for="chi-df">자유도 <output id="chi-df-out">3</output></label><input type="range" id="chi-df" min="1" max="20" step="1" value="3"></div>
+      <div class="ctrl"><label for="chi-x">관측 \(\chi^2\)</label><input class="numin" type="number" id="chi-x" min="0" step="0.01" value="0.47"></div>
+    </div>
+    <div class="presets">
+      <button class="btn ghost" type="button" data-df="3" data-x="0.47">멘델 양성교배 (9:3:3:1)</button>
+      <button class="btn ghost" type="button" data-df="11" data-x="9.83">서울 2025 월별 (같은 확률)</button>
+      <button class="btn ghost" type="button" data-df="11" data-x="8.30">월별 (일수 비례)</button>
+      <button class="btn ghost" type="button" data-df="1" data-x="3.31">마녀 예제 (Yates)</button>
+    </div>
+    <svg class="plot" id="chi-svg" viewBox="0 0 640 260" role="img" aria-label="카이제곱 분포 곡선과 관측 통계량 위치"></svg>
+    <div class="outs">
+      <div><span class="k">\(p\)값 \(P(\chi^2 \ge x)\)</span><span class="v" id="chi-p">-</span></div>
+      <div><span class="k">\(\alpha = .05\) 임계값</span><span class="v" id="chi-crit">-</span></div>
+      <div><span class="k">판정 (\(\alpha = .05\))</span><span class="v" id="chi-dec">-</span></div>
+    </div>
+    <p class="figcap">에이전트가 만든 결과의 \(\chi^2\)와 자유도를 넣으면 R이 낸 \(p\)값과 같아야 한다.</p>
+  </div>
+</div>
+
+<h4>너무 잘 맞는 것도 문제인가: 왼쪽 꼬리</h4>
+<p>적합도 검정은 보통 오른쪽 꼬리, 곧 "이론에서 너무 많이 벗어났는가"만 본다. 그런데 반대쪽도 질문이 될 수 있다. 우연이 만드는 들쭉날쭉함보다 관측이 이론에 <strong>너무 가까우면</strong> \(\chi^2\)가 지나치게 작아진다. 위 탐색기에서 멘델의 0.47보다 작은 값이 나올 확률은 \(P(\chi^2_3 \le 0.47) = .075\)다. 실험 하나로는 특별히 의심스러운 값이 아니다.</p>
+<p>Fisher(1936)는 멘델의 여러 실험의 \(\chi^2\)를 모두 합쳐, 결과가 이만큼 이론에 잘 맞을 확률은 십만 번에 일곱 번꼴이라고 계산했다. 그래서 자료가 "너무 좋아서 사실이라기엔 의심스럽다"고 보았다. 반론도 있다. Weiling(1986)은 유전적 분리의 분산이 이항분포가 가정하는 것보다 작고, 분리의 종류마다 분산이 달라 \(\chi^2\)를 그렇게 합칠 수 없다고 주장했다. 이 논쟁에서 배울 점은 두 가지다. \(\chi^2\) 분포를 쓴다는 것은 "관측이 이항(다항) 분포처럼 흩어진다"는 가정을 쓴다는 뜻이다. 그리고 \(p\)값이 1에 가까운 것도 정보가 될 수 있다.</p>
+
+<h3>우리 자료에서는 무엇을 검정할 수 있나</h3>
+<p>멘델에게는 유전 법칙이라는 <strong>자료 밖의 이론</strong>이 9:3:3:1이라는 비율을 주었다. 적합도 검정과 단일 비율 검정은 이런 기준 비율이 있어야 할 수 있다. 자료에서 계산한 비율을 다시 영가설로 쓰면 검정이 되지 않는다. 2025년 서울 사망사고 자료의 변수마다 기준이 될 만한 것이 있는지 따져 보면 이렇다.</p>
+<div class="scroll"><table>
+<thead><tr><th>변수 (범주 수)</th><th>기준 비율이 될 수 있는 것</th><th>검정</th><th>이 쪽에서</th></tr></thead>
+<tbody>
+<tr><td>월 (12)</td><td>"열두 달의 확률이 같다", 또는 달력이 주는 일수 비례(31/365, 28/365, …)</td><td>적합도 검정, \(\mathit{df} = 11\)</td><td>한다 (아래)</td></tr>
+<tr><td>주야 (2)</td><td>"절반씩"(0.5). 다만 주간·야간의 시간 길이와 교통량이 달라 약한 기준이다</td><td>단일 비율 검정 (이항 정확검정)</td><td>한다 (아래)</td></tr>
+<tr><td>사고유형 대분류 (3)</td><td>정해진 이론 비율이 없다. 다른 해나 전국의 구성비를 기준으로 삼을 수는 있지만, 그 비율도 추정값임을 밝혀야 한다</td><td>적합도 검정 (기준을 정한다면)</td><td>해 볼 거리</td></tr>
+<tr><td>보행자 사고 여부 (2)</td><td>전국 사망사고 중 보행자 사고의 비율 같은 외부 통계</td><td>단일 비율 검정</td><td>해 볼 거리</td></tr>
+<tr><td>주야 × 사고유형 (두 변수)</td><td>기준 비율 대신 "두 변수가 독립"이 영가설이 된다</td><td>독립성 검정</td><td><a href="#independence">04</a></td></tr>
+</tbody></table></div>
+
+<div class="callout caution"><p><strong>먼저 생각할 문제: 전수 자료에 검정을 하는가.</strong> 이 자료는 표본이 아니라 2025년 서울에서 일어난 사망 교통사고 <strong>전체</strong>(211건)다. 그런데도 검정을 하는 근거는, 올해의 사고 건수를 "달마다의 사고 발생 확률이라는 생성 과정"에서 나온 하나의 실현값으로 보는 데 있다(초모집단 관점). 이때 검정이 답하는 질문은 "올해 숫자가 같았는가"가 아니라 "사고를 만드는 과정이 달에 따라 다르다고 볼 증거가 있는가"다. 멘델의 556개가 "같은 교배를 다시 하면 또 나올 수 있는 결과 가운데 하나"였던 것과 같은 관점이다.</p></div>
 
 <h3>사망사고는 달마다 고르게 일어나는가</h3>
 <div class="scroll"><table class="stat">
-<caption>표 3-1. 2025년 서울 월별 사망 교통사고 (N = 211)</caption>
+<caption>표 3-2. 2025년 서울 월별 사망 교통사고 (\(N = 211\))</caption>
 <thead><tr><th>월</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr></thead>
 <tbody>
 <tr><td>관측</td><td>16</td><td>11</td><td>15</td><td>17</td><td>21</td><td>12</td><td>23</td><td>18</td><td>19</td><td>22</td><td>15</td><td>22</td></tr>
 <tr><td>일수</td><td>31</td><td>28</td><td>31</td><td>30</td><td>31</td><td>30</td><td>31</td><td>31</td><td>30</td><td>31</td><td>30</td><td>31</td></tr>
 </tbody></table></div>
-<p>7월(23건)과 2월(11건)은 두 배 넘게 차이 나 보인다. 영가설 "열두 달의 사고 확률이 모두 같다"(\(p_i = 1/12\), 기대도수 211/12 ≈ 17.58)로 검정하면 χ²(11, <i>N</i> = 211) = 9.83, <i>p</i> = .545, Cohen's <i>w</i> = .22다. 자유도 11의 임계값 19.68에 한참 못 미친다. 211건쯤에서는 이 정도의 들쭉날쭉함이 우연으로도 흔히 생긴다는 뜻이다. 유의하지 않다는 결과는 "달마다 같다"는 증거가 아니라 "다르다고 말할 증거가 부족하다"는 뜻이다.</p>
+<p>7월(23건)과 2월(11건)은 두 배 넘게 차이 나 보인다. 영가설 "열두 달의 사고 확률이 모두 같다"(\(p_i = 1/12\), 기대도수 211/12 ≈ 17.58)로 검정하면 \(\chi^2(11,\ N = 211) = 9.83\), \(p = .545\), Cohen's \(w = .22\)다. 자유도 11의 임계값 19.68에 한참 못 미친다. 211건쯤에서는 이 정도의 들쭉날쭉함이 우연으로도 흔히 생긴다는 뜻이다. 위의 반복 실험에서 "열두 달 같은 확률"을 골라 1,000번 쌓아 보면 확인할 수 있다. 유의하지 않다는 결과는 "달마다 같다"는 증거가 아니라 "다르다고 말할 증거가 부족하다"는 뜻이다.</p>
 <h4>더 정교한 영가설</h4>
-<p>\(p_i = 1/12\)는 한 가지를 놓친다. 달마다 날수가 28~31일로 다르다. "<strong>하루당</strong> 사고 확률이 같다"를 영가설로 삼으려면 달별 일수에 비례한 확률(\(p_i = \text{일수}_i / 365\))을 쓴다. 2월(28일)의 기대도수는 16.2건, 31일인 달은 17.9건이 된다. 이 영가설로는 χ²(11) = 8.30, <i>p</i> = .686이다. 2월의 적은 사고 일부가 날수가 적은 탓으로 설명되어 통계량이 줄었다. 영가설을 말로 정확히 쓰는 연습으로 좋다(LSR 12.1.8).</p>
-
-<div class="lab" id="lab-chi">
-  <div class="lab-head"><strong>χ² 분포 탐색기</strong><span>영가설 하(under \(H_0\))의 분포, 관측 통계량의 위치, 오른쪽 꼬리 확률</span></div>
-  <div class="lab-body">
-    <div class="ctrls">
-      <div class="ctrl"><label for="chi-df">자유도 <output id="chi-df-out">11</output></label><input type="range" id="chi-df" min="1" max="20" step="1" value="11"></div>
-      <div class="ctrl"><label for="chi-x">관측 χ²</label><input class="numin" type="number" id="chi-x" min="0" step="0.01" value="9.83"></div>
-    </div>
-    <div class="presets">
-      <button class="btn ghost" type="button" data-df="11" data-x="9.83">서울 2025 월별 (같은 확률)</button>
-      <button class="btn ghost" type="button" data-df="11" data-x="8.30">월별 (일수 비례)</button>
-      <button class="btn ghost" type="button" data-df="3" data-x="8.44">카드 예제</button>
-      <button class="btn ghost" type="button" data-df="1" data-x="3.31">마녀 예제 (Yates)</button>
-    </div>
-    <svg class="plot" id="chi-svg" viewBox="0 0 640 260" role="img" aria-label="카이제곱 분포 곡선과 관측 통계량 위치"></svg>
-    <div class="outs">
-      <div><span class="k">p값 P(χ² ≥ x)</span><span class="v" id="chi-p">-</span></div>
-      <div><span class="k">α = .05 임계값</span><span class="v" id="chi-crit">-</span></div>
-      <div><span class="k">판정 (α = .05)</span><span class="v" id="chi-dec">-</span></div>
-    </div>
-    <p class="figcap">에이전트가 만든 결과의 χ²와 자유도를 넣으면 R이 낸 p값과 같아야 한다.</p>
-  </div>
-</div>
+<p>\(p_i = 1/12\)는 한 가지를 놓친다. 달마다 날수가 28~31일로 다르다. "<strong>하루당</strong> 사고 확률이 같다"를 영가설로 삼으려면 달별 일수에 비례한 확률(\(p_i = \text{일수}_i / 365\))을 쓴다. 2월(28일)의 기대도수는 16.2건, 31일인 달은 17.9건이 된다. 이 영가설로는 \(\chi^2(11) = 8.30\), \(p = .686\)이다. 2월의 적은 사고 일부가 날수가 적은 탓으로 설명되어 통계량이 줄었다. 멘델의 비율이 유전 법칙에서 왔듯, 이 비율은 달력에서 왔다. 영가설을 말로 정확히 쓰는 연습으로 좋다(LSR 12.1.8).</p>
 
 <h3>단일 비율: 야간 사고는 절반인가</h3>
-<p>범주가 두 개뿐이면 적합도 검정은 단일 비율 검정과 같아진다. 이때는 이항분포로 <strong>정확한</strong> p값을 구할 수 있다(이항 정확검정, Clopper–Pearson 신뢰구간). 정규근사 검정은 같은 질문에 연속성 보정을 한 근사로 답하며, 그 통계량은 자유도 1인 χ²와 같다. 효과크기 Cohen's h는 비율을 아크사인 변환한 척도에서의 차이다.</p>
+<p>범주가 두 개뿐이면 적합도 검정은 단일 비율 검정과 같아진다. 이때는 이항분포로 <strong>정확한</strong> \(p\)값을 구할 수 있다(이항 정확검정, Clopper–Pearson 신뢰구간). 정규근사 검정은 같은 질문에 연속성 보정을 한 근사로 답하며, 그 통계량은 자유도 1인 \(\chi^2\)와 같다. 효과크기 Cohen's \(h\)는 비율을 아크사인 변환한 척도에서의 차이다.</p>
 <div class="readout math">\[h = 2\arcsin\sqrt{\hat{p}} - 2\arcsin\sqrt{p_0}\]</div>
-<p>211건 중 야간 사고는 96건(45.5%)이다. 이항 정확검정은 <i>p</i> = .215, 95% 신뢰구간 [.386, .525]이고, 정규근사 검정은 χ²(1) = 1.54, <i>p</i> = .215로 거의 같다. Cohen's <i>h</i> = −.09다. 야간은 하루의 절반보다 교통량이 훨씬 적은데도 사망사고의 절반 가까이가 야간에 났다는 점은, 이 검정이 묻지 않는 다른 질문(교통량 대비 위험)으로 이어진다.</p>
+<p>211건 중 야간 사고는 96건(45.5%)이다. 이항 정확검정은 \(p = .215\), 95% 신뢰구간 [.386, .525]이고, 정규근사 검정은 \(\chi^2(1) = 1.54\), \(p = .215\)로 거의 같다. Cohen's \(h = -.09\)다. 야간은 하루의 절반보다 교통량이 훨씬 적은데도 사망사고의 절반 가까이가 야간에 났다는 점은, 이 검정이 묻지 않는 다른 질문(교통량 대비 위험)으로 이어진다.</p>
 
 <div class="lab" id="lab-binom">
-  <div class="lab-head"><strong>이항 정확분포와 정규근사</strong><span>n을 줄이면 두 p값이 언제 어긋나는지 보기</span></div>
+  <div class="lab-head"><strong>이항 정확분포와 정규근사</strong><span>\(n\)을 줄이면 두 \(p\)값이 언제 어긋나는지 보기</span></div>
   <div class="lab-body">
     <div class="ctrls">
-      <div class="ctrl"><label for="bn-n">n <output id="bn-n-out">211</output></label><input type="range" id="bn-n" min="5" max="250" step="1" value="211"></div>
-      <div class="ctrl"><label for="bn-p">영가설의 p₀ <output id="bn-p-out">0.50</output></label><input type="range" id="bn-p" min="0.05" max="0.95" step="0.01" value="0.5"></div>
-      <div class="ctrl"><label for="bn-x">관측 성공 수 x <output id="bn-x-out">96</output></label><input type="range" id="bn-x" min="0" max="211" step="1" value="96"></div>
+      <div class="ctrl"><label for="bn-n">\(n\) <output id="bn-n-out">211</output></label><input type="range" id="bn-n" min="5" max="250" step="1" value="211"></div>
+      <div class="ctrl"><label for="bn-p">영가설의 \(p_0\) <output id="bn-p-out">0.50</output></label><input type="range" id="bn-p" min="0.05" max="0.95" step="0.01" value="0.5"></div>
+      <div class="ctrl"><label for="bn-x">관측 성공 수 \(x\) <output id="bn-x-out">96</output></label><input type="range" id="bn-x" min="0" max="211" step="1" value="96"></div>
     </div>
     <div class="presets">
       <button class="btn ghost" type="button" data-n="211" data-p="0.5" data-x="96">서울 2025 야간 사고 (96 / 211)</button>
     </div>
     <svg class="plot" id="bn-svg" viewBox="0 0 640 240" role="img" aria-label="이항분포 막대와 정규근사 곡선"></svg>
     <div class="outs">
-      <div><span class="k">정확검정 p</span><span class="v" id="bn-pe">-</span></div>
-      <div><span class="k">정규근사 p (보정)</span><span class="v" id="bn-pa">-</span></div>
-      <div><span class="k">np₀ · n(1−p₀)</span><span class="v" id="bn-np">-</span></div>
-      <div><span class="k">Cohen's h</span><span class="v" id="bn-h">-</span></div>
+      <div><span class="k">정확검정 \(p\)</span><span class="v" id="bn-pe">-</span></div>
+      <div><span class="k">정규근사 \(p\) (보정)</span><span class="v" id="bn-pa">-</span></div>
+      <div><span class="k">\(np_0 \cdot n(1-p_0)\)</span><span class="v" id="bn-np">-</span></div>
+      <div><span class="k">Cohen's \(h\)</span><span class="v" id="bn-h">-</span></div>
     </div>
-    <p class="figcap">주황 막대는 관측값보다 확률이 같거나 작은 값들로, 이들의 합이 정확검정의 양측 p값이다. 파란 곡선은 \(N(np_0,\ np_0(1-p_0))\) 근사다. n을 20 아래로 줄이고 x를 옮겨 보면 두 p값이 벌어진다.</p>
+    <p class="figcap">주황 막대는 관측값보다 확률이 같거나 작은 값들로, 이들의 합이 정확검정의 양측 \(p\)값이다. 파란 곡선은 \(N(np_0,\ np_0(1-p_0))\) 근사다. \(n\)을 20 아래로 줄이고 \(x\)를 옮겨 보면 두 \(p\)값이 벌어진다.</p>
   </div>
 </div>
 
 <h3>프롬프트로 만들기</h3>
-<div class="cb prompt"><span class="lang">프롬프트 · 적합도와 단일 비율</span><pre>dataset/working/acc_clean.rds 에 정리해 둔 2025년 서울 사망 교통사고 자료로 적합도 검정과 단일 비율 검정을 하는 스크립트 scripts/cat_gof.R 을 새로 써서 실행해 줘. 자료는 한 해의 사망사고 전체다.
-1. 표 1 · 월별 건수: 달마다 관측 건수, 영가설에서 기대하는 건수, 관측이 기대에서 얼마나 벗어났는지 보여 주는 Pearson 잔차를 열로 둔다. 영가설은 "열두 달의 사고 확률이 모두 같다"이다. output/gof_month.csv 에 저장한다.
-2. 위 영가설로 Pearson 카이제곱 적합도 검정을 하고 통계량, 자유도, p값, 효과크기 Cohen's w 와 그 95% 신뢰구간을 보여 준다.
-3. 영가설을 "하루당 사고 확률이 같다"로 바꾸어 다시 검정한다. 2025년 달력에서 달마다 날이 며칠인지 세고, 그 일수에 비례하는 확률을 영가설로 쓴다. 달별 일수와 새 기대 건수를 보여 주고, 두 영가설의 결과를 나란히 비교한다.
-4. 표 2 · 야간 사고 비율: 야간 사고의 비율이 절반인지 검정한다. 이항분포를 쓰는 정확검정과 연속성 보정을 한 정규근사 검정을 행으로 두고, 비율, 95% 신뢰구간, p값을 열로 둔다. 효과크기 Cohen's h 도 구한다. output/gof_night.csv 에 저장한다.
-5. 그림 1: 월별 관측 건수를 막대로 그리고, 두 영가설의 기대 건수를 서로 다른 선으로 겹친다. output/gof_month.png, 6×4 인치, 300 dpi.
-6. 결과 문장을 APA 형식으로 두 개 쓴다(적합도, 단일 비율). 통계량과 자유도, N, p, 효과크기, 어느 쪽이 더 많은지를 넣는다. 유의하지 않으면 "같다"가 아니라 "다르다고 볼 증거가 없다"로 쓴다.
+<div class="cb prompt"><span class="lang">프롬프트 · 적합도와 단일 비율</span><pre>dataset/working/acc_clean.rds 에 정리해 둔 2025년 서울 사망 교통사고 자료로 적합도 검정과 단일 비율 검정을 하는 스크립트 scripts/cat_gof.R 을 새로 써서 실행해 줘. 자료는 한 해의 사망사고 전체다. 먼저 멘델의 완두 자료로 계산 과정을 확인한 뒤 사고 자료를 검정한다.
+1. 표 1 · 멘델의 양성교배: 멘델(1866)이 센 완두 556개(둥글고 노랑 315, 둥글고 초록 108, 주름지고 노랑 101, 주름지고 초록 32)가 9:3:3:1 을 따르는지 적합도 검정을 한다. 표현형마다 관측 개수, 이론 비율, 기대 개수, 관측과 기대의 차이, 카이제곱 통계량에 더해지는 몫을 열로 두고, 몫을 모두 더한 값이 검정 결과의 통계량과 같은지 보여 준다. 자유도와 p값, 그리고 관측한 값보다 작은 카이제곱이 나올 확률(이론에 이보다 더 잘 맞을 확률)도 구한다. output/gof_mendel.csv 에 저장한다.
+2. 표 2 · 월별 건수: 달마다 관측 건수, 영가설에서 기대하는 건수, 관측이 기대에서 얼마나 벗어났는지 보여 주는 Pearson 잔차를 열로 둔다. 영가설은 "열두 달의 사고 확률이 모두 같다"이다. output/gof_month.csv 에 저장한다.
+3. 위 영가설로 Pearson 카이제곱 적합도 검정을 하고 통계량, 자유도, p값, 효과크기 Cohen's w 와 그 95% 신뢰구간을 보여 준다.
+4. 영가설을 "하루당 사고 확률이 같다"로 바꾸어 다시 검정한다. 2025년 달력에서 달마다 날이 며칠인지 세고, 그 일수에 비례하는 확률을 영가설로 쓴다. 달별 일수와 새 기대 건수를 보여 주고, 두 영가설의 결과를 나란히 비교한다.
+5. 표 3 · 야간 사고 비율: 야간 사고의 비율이 절반인지 검정한다. 이항분포를 쓰는 정확검정과 연속성 보정을 한 정규근사 검정을 행으로 두고, 비율, 95% 신뢰구간, p값을 열로 둔다. 효과크기 Cohen's h 도 구한다. output/gof_night.csv 에 저장한다.
+6. 그림 1: 월별 관측 건수를 막대로 그리고, 두 영가설의 기대 건수를 서로 다른 선으로 겹친다. output/gof_month.png, 6×4 인치, 300 dpi.
+7. 결과 문장을 APA 형식으로 세 개 쓴다(멘델의 적합도, 월별 적합도, 단일 비율). 통계량과 자유도, N, p, 효과크기, 어느 쪽이 더 많은지를 넣는다. 유의하지 않으면 "같다"가 아니라 "다르다고 볼 증거가 없다"로 쓴다.
 - 모든 숫자는 코드로 계산한 값을 쓰고 손으로 적지 않는다. 끝나면 저장한 파일의 경로를 알려 주고, 표의 숫자를 내가 대조할 수 있도록 분석 결과의 원래 출력을 보여 준다.
 - 통계량은 소수 둘째 자리까지 쓴다. p값은 앞의 0 을 빼고 소수 셋째 자리까지, .001 보다 작으면 "&lt; .001"로 쓴다.
 - 데이터 처리와 그림에는 tidyverse 를 쓴다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
@@ -393,6 +609,19 @@ showtext_opts(dpi = 300)          # ggsave()의 dpi와 맞춘다
 
 acc &lt;- read_rds("dataset/working/acc_clean.rds")
 n_all &lt;- nrow(acc)
+
+# 0) 멘델의 양성교배: 9:3:3:1 적합도 검정의 계산 과정 --------------------
+mendel &lt;- tibble(표현형 = c("둥글고 노랑", "둥글고 초록", "주름지고 노랑", "주름지고 초록"),
+                 관측 = c(315, 108, 101, 32), 이론 = c(9, 3, 3, 1) / 16) %&gt;%
+  mutate(기대 = sum(관측) * 이론,                 # 556 × 9/16 = 312.75, ...
+         차이 = 관측 - 기대,
+         몫 = 차이^2 / 기대)                      # 칸마다 χ²에 더해지는 몫
+mendel
+sum(mendel$몫)                                    # 몫의 합 = 0.470
+mendel_test &lt;- chisq.test(mendel$관측, p = mendel$이론)
+mendel_test                                       # X-squared = 0.47, df = 3, p = .925
+pchisq(mendel_test$statistic, df = 3)             # 왼쪽 꼬리: 이보다 더 잘 맞을 확률 .075
+write_csv(mendel, "output/gof_mendel.csv")
 
 # 1) 월별 적합도 검정: 영가설 '열두 달의 확률이 모두 1/12' ----------------
 obs_month &lt;- table(acc$월)        # 1차원 빈도표 → chisq.test()는 적합도 검정
@@ -441,12 +670,12 @@ ggsave("output/gof_month.png", p_month, width = 6, height = 4, dpi = 300)</pre><
 <thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
 <tbody>
 <tr><td>검정의 종류</td><td>출력 첫 줄이 "Chi-squared test for given probabilities"인가. 2차원 표를 넘겼다면 독립성 검정이 되어 질문이 달라진다.</td></tr>
-<tr><td>숫자 (같은 확률)</td><td>기대 건수가 모두 17.58이고 합이 211인가. χ² = 9.83, 자유도 11, <i>p</i> = .545인가. Cohen's <i>w</i>가 .22인가. effectsize 1.0은 w의 신뢰구간을 하한만 있는 단측 구간(이 자료는 [0.00, 3.32])으로 낸다. 상한은 고정된 최댓값이라 해석하지 않는다.</td></tr>
-<tr><td>숫자 (일수 비례)</td><td>달별 일수의 합이 365이고 2월만 28일인가. 2월의 기대 건수가 16.19인가. χ² = 8.30, <i>p</i> = .686인가.</td></tr>
-<tr><td>단일 비율</td><td>야간 96건, 비율 .455, 정확검정 <i>p</i> = .215, 95% CI [.386, .525]인가. 정규근사의 통계량 이름이 X-squared(자유도 1)로 1.54인가.</td></tr>
-<tr><td>Cohen's h의 부호</td><td>야간 비율이 절반보다 작으니 h가 음수(−.09)인가.</td></tr>
+<tr><td>숫자 (같은 확률)</td><td>기대 건수가 모두 17.58이고 합이 211인가. \(\chi^2 = 9.83\), 자유도 11, \(p = .545\)인가. Cohen's \(w\)가 .22인가. effectsize 1.0은 \(w\)의 신뢰구간을 하한만 있는 단측 구간(이 자료는 [0.00, 3.32])으로 낸다. 상한은 고정된 최댓값이라 해석하지 않는다.</td></tr>
+<tr><td>숫자 (일수 비례)</td><td>달별 일수의 합이 365이고 2월만 28일인가. 2월의 기대 건수가 16.19인가. \(\chi^2 = 8.30\), \(p = .686\)인가.</td></tr>
+<tr><td>단일 비율</td><td>야간 96건, 비율 .455, 정확검정 \(p = .215\), 95% CI [.386, .525]인가. 정규근사의 통계량 이름이 X-squared(자유도 1)로 1.54인가.</td></tr>
+<tr><td>Cohen's \(h\)의 부호</td><td>야간 비율이 절반보다 작으니 \(h\)가 음수(−.09)인가.</td></tr>
 <tr><td>해석 문장</td><td>유의하지 않은 결과를 "달마다 같다", "야간과 주간이 같다"로 쓰지 않았는가.</td></tr>
-<tr><td>손계산 대조</td><td>에이전트에게 "같은 방법으로 카드 예제(35, 51, 64, 50)도 돌려 줘"라고 한다. χ² = 8.44, 자유도 3, <i>p</i> = .038이 나와야 한다.</td></tr>
+<tr><td>멘델 대조</td><td>표 1의 기대 개수가 312.75, 104.25, 104.25, 34.75이고 몫이 0.0162, 0.1349, 0.1013, 0.2176인가. 몫의 합이 검정 결과의 \(\chi^2(3) = 0.47\)과 같고 \(p = .925\), 왼쪽 꼬리 확률이 .075인가. 다르면 이론 비율을 9:3:3:1의 순서와 다르게 짝지었거나(예: 둥글고 초록에 9/16), 비율을 합이 1이 되게 나누지 않은 것이다.</td></tr>
 <tr><td>손으로 적은 숫자</td><td>결과 문장과 CSV의 숫자가 출력과 같은가. 코드에 결과값이 직접 적혀 있지 않은가.</td></tr>
 </tbody></table></div>
 <p class="more">더 읽기: LSR 12.1 · Agresti (2019) 1.4절 · 이항분포는 Blitzstein &amp; Hwang (2019) 3장</p>
@@ -454,17 +683,23 @@ ggsave("output/gof_month.png", p_month, width = 6, height = 4, dpi = 300)</pre><
 
 <!-- ===================== 04 ===================== -->
 <section class="panel" id="independence">
-<div class="section-head"><span class="section-num">04</span><h2>두 비율 비교와 독립성 검정</h2></div>
-<h3>독립성인가, 동질성인가</h3>
-<p>같은 \(r \times c\) 분할표와 같은 χ² 계산을 쓰지만, 자료를 모은 방식에 따라 영가설의 표현이 다르다.</p>
+<div class="section-head"><span class="section-num">04</span><h2>독립성 검정</h2></div>
+<h3>독립성 검정과 동질성 검정은 무엇이 다른가</h3>
+<p>두 검정은 \(r \times c\) 분할표에 같은 \(\chi^2\) 식을 쓰고, 기대도수 \(E_{ij} = (\text{행 합})(\text{열 합})/N\)과 자유도 \((r-1)(c-1)\)도 같다. 그래서 R 출력만 보아서는 구별되지 않는다. 다른 것은 <strong>자료를 어떻게 모았는가</strong>이고, 그에 따라 영가설, 기술할 비율, 결론의 문장이 달라진다. 계산이 같다고 아무 이름이나 붙이면 결론을 잘못 쓰게 된다.</p>
 <div class="scroll"><table>
-<thead><tr><th></th><th>독립성 검정</th><th>동질성 검정</th></tr></thead>
+<thead><tr><th></th><th>독립성 검정 (test of independence)</th><th>동질성 검정 (test of homogeneity)</th></tr></thead>
 <tbody>
-<tr><td>고정된 것</td><td>전체 \(N\)만</td><td>집단(행)별 표본크기</td></tr>
-<tr><td>영가설</td><td>두 변수가 서로 독립: \(p_{ij} = p_{i\cdot}\, p_{\cdot j}\)</td><td>모든 집단에서 열 범주의 분포가 같음</td></tr>
-<tr><td>예</td><td>사망사고 전체를 주야 × 사고유형으로 교차</td><td>남녀를 각각 정한 수만큼 뽑아 흡연 여부 비교</td></tr>
+<tr><td>자료를 모은 방식</td><td>한 모집단에서 \(N\)개를 뽑고(또는 전체를 모으고), 한 대상마다 범주형 변수 두 개를 잰다</td><td>집단을 먼저 정하고(서로 다른 모집단, 또는 무작위배정), 집단마다 정한 수의 대상에서 범주형 변수 하나를 잰다</td></tr>
+<tr><td>고정된 것</td><td>전체 \(N\)만. 행 합과 열 합은 세어 본 결과로 정해진다</td><td>집단(행)별 크기 \(n_1, \dots, n_r\). 행 합은 설계로 미리 정해진다</td></tr>
+<tr><td>변수의 역할</td><td>두 변수 모두 관측한 반응</td><td>행은 집단(설계), 열은 반응</td></tr>
+<tr><td>영가설</td><td>두 변수가 서로 독립이다: \(P(A_i \cap B_j) = P(A_i)\,P(B_j)\)</td><td>모든 집단에서 반응의 분포가 같다: \(P(B_j \mid \text{집단 } 1) = \cdots = P(B_j \mid \text{집단 } r)\)</td></tr>
+<tr><td>기술할 비율</td><td>전체 비율, 또는 관심 있는 방향의 조건부 비율</td><td>집단 안의 비율(행 비율). 열 비율(예: 복용자 가운데 실험군의 비율)은 집단 크기를 설계가 정했으므로 뜻이 없다</td></tr>
+<tr><td>결론의 문장</td><td>"주야와 사고유형은 관련이 있다(있다고 볼 증거가 없다)"</td><td>"두 집단의 항우울제 복용 비율이 다르다(다르다고 볼 증거가 없다)"</td></tr>
+<tr><td>주된 쓰임</td><td>관찰 자료에서 두 특성의 관련 탐색</td><td>집단 비교, 실험·유사실험 연구의 사전 동질성 확인(<a href="#homogeneity">05</a>)</td></tr>
+<tr><td>이 쪽의 예</td><td>2025년 서울 사망사고 211건의 주야 × 사고유형</td><td>우울증 임상시험의 치료 집단(배정, 48명·52명) × 항우울제 복용</td></tr>
 </tbody></table></div>
-<p>기대도수는 두 경우 모두 \(E_{ij} = (\text{행 합})(\text{열 합})/N\)이고, 자유도는 \((r-1)(c-1)\)이다.</p>
+<div class="callout"><p><strong>구별하는 질문 하나: 행의 합계를 설계가 정했는가?</strong> 정했다면 동질성 검정이고, 세어 보고 나서야 알았다면 독립성 검정이다. 서울 사망사고는 211건을 모두 모은 뒤에 주간 115건, 야간 96건으로 나뉘었다. 행 합을 아무도 정하지 않았으므로 독립성 검정이다. 반면 05절의 임상시험은 환자를 두 치료에 배정해 집단 크기(48명, 52명)를 설계가 정했으므로 동질성 검정이다. 표의 어느 쪽을 집단으로 볼지는 연구 질문이 아니라 <strong>표집 설계</strong>가 정한다.</p></div>
+<p>2 × 2 표에서 "주간과 야간의 비율이 같은가"(두 비율 비교)는 동질성의 말투이고, "주야와 보행자사고가 관련 있는가"는 독립성의 말투다. 계산이 같으므로 이 절에서도 두 비율 검정 함수를 쓸 수 있다. 다만 사망사고 자료는 한 무리를 세어 나눈 것이라 결론은 독립성 검정으로 쓰고, 주간·야간의 비율은 관련의 모양을 보여 주는 기술로 쓴다.</p>
 
 <h3>2 × 2: 야간에 보행자 사망사고 비율이 다른가</h3>
 <p>주야(행) × 보행자사고(열) 표에서 주간과 야간의 '차대사람' 비율을 비교한다. 두 비율 검정과 2 × 2 독립성 검정은 같은 검정이다. 효과의 크기는 세 가지로 본다.</p>
@@ -476,11 +711,11 @@ ggsave("output/gof_month.png", p_month, width = 6, height = 4, dpi = 300)</pre><
 <tr><td>주간</td><td>68 (59.1%)</td><td>47 (40.9%)</td><td>115</td></tr>
 <tr><td>야간</td><td>51 (53.1%)</td><td>45 (46.9%)</td><td>96</td></tr>
 </tbody></table></div>
-<p>보행자 사고의 비율은 주간이 6.0%p 높지만, Yates 보정 χ²(1, <i>N</i> = 211) = 0.54, <i>p</i> = .461(보정 없이 0.77, <i>p</i> = .381)로 유의하지 않다. 위험비(주간 ÷ 야간) 1.11 [0.87, 1.42], 오즈비 1.28 [0.74, 2.21], φ = .06이다(대괄호는 95% 신뢰구간). 두 비율 차이의 95% 신뢰구간은 [−.084, .204]로, 야간이 8%p 높은 경우부터 주간이 20%p 높은 경우까지를 모두 품는다. "차이가 없다"가 아니라 "이 표본 크기로는 차이를 가려낼 수 없다"로 읽는다.</p>
-<div class="callout"><p><strong>연속성 보정 (LSR 12.3).</strong> 2 × 2 표에서 R은 기본으로 Yates 보정을 적용해 각 칸의 \(|O-E|\)에서 0.5를 뺀다. 이산분포를 연속 χ²로 근사할 때 생기는 차이를 줄이려는 것이지만, 대체로 검정을 보수적으로 만든다. 그래서 프롬프트는 보정한 결과와 하지 않은 결과를 모두 받게 하고, 보고할 때 어느 쪽인지 밝힌다.</p></div>
+<p>보행자 사고의 비율은 주간이 6.0%p 높지만, Yates 보정 \(\chi^2(1,\ N = 211) = 0.54\), \(p = .461\)(보정 없이 0.77, \(p = .381\))로 유의하지 않다. 위험비(주간 ÷ 야간) 1.11 [0.87, 1.42], 오즈비 1.28 [0.74, 2.21], \(\varphi = .06\)이다(대괄호는 95% 신뢰구간). 두 비율 차이의 95% 신뢰구간은 [−.084, .204]로, 야간이 8%p 높은 경우부터 주간이 20%p 높은 경우까지를 모두 품는다. "차이가 없다"가 아니라 "이 표본 크기로는 차이를 가려낼 수 없다"로 읽는다.</p>
+<div class="callout"><p><strong>연속성 보정 (LSR 12.3).</strong> 2 × 2 표에서 R은 기본으로 Yates 보정을 적용해 각 칸의 \(|O-E|\)에서 0.5를 뺀다. 이산분포를 연속 \(\chi^2\)로 근사할 때 생기는 차이를 줄이려는 것이지만, 대체로 검정을 보수적으로 만든다. 그래서 프롬프트는 보정한 결과와 하지 않은 결과를 모두 받게 하고, 보고할 때 어느 쪽인지 밝힌다.</p></div>
 
 <div class="lab" id="lab-22">
-  <div class="lab-head"><strong>2 × 2 분할표 계산기</strong><span>칸 값을 바꾸면 기대도수 · χ² · Fisher p · 효과크기가 다시 계산된다</span></div>
+  <div class="lab-head"><strong>2 × 2 분할표 계산기</strong><span>칸 값을 바꾸면 기대도수 · \(\chi^2\) · Fisher \(p\) · 효과크기가 다시 계산된다</span></div>
   <div class="lab-body">
     <div class="presets">
       <button class="btn ghost" type="button" data-t="68,47,51,45">서울 2025 주야 × 보행자사고</button>
@@ -501,24 +736,24 @@ ggsave("output/gof_month.png", p_month, width = 6, height = 4, dpi = 300)</pre><
     </div>
     <p class="figcap">괄호 안은 기대도수다. 5 미만이면 붉게 표시된다. 에이전트가 만든 2 × 2 표의 네 칸을 넣으면 R 출력과 대조할 수 있다.</p>
     <div class="outs">
-      <div><span class="k">Pearson χ² (보정 없음)</span><span class="v" id="o-x2">-</span></div>
-      <div><span class="k">p</span><span class="v" id="o-p">-</span></div>
-      <div><span class="k">Yates 보정 χ²</span><span class="v" id="o-x2y">-</span></div>
-      <div><span class="k">p (Yates)</span><span class="v" id="o-py">-</span></div>
-      <div><span class="k">Fisher 정확 p</span><span class="v" id="o-pf">-</span></div>
+      <div><span class="k">Pearson \(\chi^2\) (보정 없음)</span><span class="v" id="o-x2">-</span></div>
+      <div><span class="k">\(p\)</span><span class="v" id="o-p">-</span></div>
+      <div><span class="k">Yates 보정 \(\chi^2\)</span><span class="v" id="o-x2y">-</span></div>
+      <div><span class="k">\(p\) (Yates)</span><span class="v" id="o-py">-</span></div>
+      <div><span class="k">Fisher 정확 \(p\)</span><span class="v" id="o-pf">-</span></div>
     </div>
     <div class="outs">
-      <div><span class="k">φ</span><span class="v" id="o-phi">-</span></div>
-      <div><span class="k">오즈비 (ad/bc)</span><span class="v" id="o-or">-</span></div>
+      <div><span class="k">\(\varphi\)</span><span class="v" id="o-phi">-</span></div>
+      <div><span class="k">오즈비 \(ad/bc\)</span><span class="v" id="o-or">-</span></div>
       <div><span class="k">위험비 (행 1 / 행 2)</span><span class="v" id="o-rr">-</span></div>
     </div>
     <p class="warnline" id="o-warn" hidden></p>
   </div>
 </div>
 
-<h3>r × c: 주야에 따라 사고유형 분포가 다른가</h3>
-<p>열이 셋 이상이면 효과크기는 Cramér's V로 본다. \(k = \min(r, c)\)일 때 \(V = \sqrt{X^2 / (N(k-1))}\)이고, 2 × 2에서는 \(|\varphi|\)와 같다. 주야 × 사고유형(차대사람, 차대차, 차량단독)은 가장 작은 기대도수가 10.0으로 근사에 문제가 없고, χ²(2, <i>N</i> = 211) = 0.91, <i>p</i> = .636, 고전적 V = .07이다. 주간(68, 35, 12)과 야간(51, 35, 10)의 구성이 다르다고 볼 증거가 없다.</p>
-<div class="callout"><p><strong>effectsize의 기본값 두 가지.</strong> <code>cramers_v()</code>는 최근 버전에서 편향 보정을 기본으로 하고, 신뢰구간도 기본이 단측(<code>alternative = "greater"</code>)이다. V는 0 아래로 내려갈 수 없어서 상한이 1인 구간을 보고하는 것이 관례이기 때문이다. 이 자료처럼 연관이 약하면 보정한 V는 0이 되기도 한다. 다른 소프트웨어 결과와 비교할 때는 이 두 설정을 먼저 맞춘다. 그래서 프롬프트는 보정한 값과 하지 않은 값을 모두 받는다.</p></div>
+<h3>\(r \times c\): 주야에 따라 사고유형 분포가 다른가</h3>
+<p>열이 셋 이상이면 효과크기는 Cramér's \(V\)로 본다. \(k = \min(r, c)\)일 때 \(V = \sqrt{X^2 / (N(k-1))}\)이고, 2 × 2에서는 \(|\varphi|\)와 같다. 주야 × 사고유형(차대사람, 차대차, 차량단독)은 가장 작은 기대도수가 10.0으로 근사에 문제가 없고, \(\chi^2(2,\ N = 211) = 0.91\), \(p = .636\), 고전적 \(V = .07\)이다. 주간(68, 35, 12)과 야간(51, 35, 10)의 구성이 다르다고 볼 증거가 없다.</p>
+<div class="callout"><p><strong>effectsize의 기본값 두 가지.</strong> <code>cramers_v()</code>는 최근 버전에서 편향 보정을 기본으로 하고, 신뢰구간도 기본이 단측(<code>alternative = "greater"</code>)이다. \(V\)는 0 아래로 내려갈 수 없어서 상한이 1인 구간을 보고하는 것이 관례이기 때문이다. 이 자료처럼 연관이 약하면 보정한 \(V\)는 0이 되기도 한다. 다른 소프트웨어 결과와 비교할 때는 이 두 설정을 먼저 맞춘다. 그래서 프롬프트는 보정한 값과 하지 않은 값을 모두 받는다.</p></div>
 
 <h3>프롬프트로 만들기</h3>
 <div class="cb prompt"><span class="lang">프롬프트 · 두 비율과 독립성</span><pre>dataset/working/acc_clean.rds 의 2025년 서울 사망 교통사고 자료로 두 비율 비교와 독립성 검정을 하는 스크립트 scripts/cat_independence.R 을 새로 써서 실행해 줘.
@@ -583,12 +818,12 @@ ggsave("output/ind_type_bar.png", p_type, width = 6, height = 4, dpi = 300)</pre
 <thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
 <tbody>
 <tr><td>표와 행 비율</td><td>표 1이 68, 47 / 51, 45이고 행 비율이 59.1%, 53.1%인가. 열 비율이나 전체 비율로 나누지 않았는가.</td></tr>
-<tr><td>같은 검정</td><td>두 비율 검정과 보정한 카이제곱 검정이 똑같이 χ² = 0.54, <i>p</i> = .461인가. 보정하지 않은 검정은 0.77, <i>p</i> = .381이다.</td></tr>
+<tr><td>같은 검정</td><td>두 비율 검정과 보정한 카이제곱 검정이 똑같이 \(\chi^2 = 0.54\), \(p = .461\)인가. 보정하지 않은 검정은 0.77, \(p = .381\)이다.</td></tr>
 <tr><td>보정 표기</td><td>표 2와 결과 문장에 보정 여부가 적혀 있는가.</td></tr>
-<tr><td>효과크기</td><td>위험비 1.11 [0.87, 1.42], 오즈비 1.28 [0.74, 2.21], φ = .06인가. φ를 제곱해 211을 곱하면 보정 없는 χ² 0.77이 되는가. effectsize 1.0의 기본 설정으로 구하면 φ가 "Phi (adj.) 0"으로 나온다. 편향 보정이 들어간 값이니, 보정 없는 φ를 따로 받았는지 본다.</td></tr>
+<tr><td>효과크기</td><td>위험비 1.11 [0.87, 1.42], 오즈비 1.28 [0.74, 2.21], \(\varphi = .06\)인가. \(\varphi\)를 제곱해 211을 곱하면 보정 없는 \(\chi^2\) 0.77이 되는가. effectsize 1.0의 기본 설정으로 구하면 \(\varphi\)가 "Phi (adj.) 0"으로 나온다. 편향 보정이 들어간 값이니, 보정 없는 \(\varphi\)를 따로 받았는지 본다.</td></tr>
 <tr><td>위험비의 방향</td><td>위험비가 표 1의 행 비율로 직접 나눈 값(59.1% ÷ 53.1% = 1.11)과 같은가. 1.12가 나왔다면 effectsize가 표의 열을 집단으로 보고 "차대사람 사고 중 주간의 비율 ÷ 그 외 사고 중 주간의 비율"(68/119 ÷ 47/92)을 계산한 것이다. 에이전트에게 "어느 비율을 어느 비율로 나눴는지" 묻고 주간 ÷ 야간으로 바로잡게 한다. 오즈비는 표를 뒤집어도 같다.</td></tr>
 <tr><td>방향</td><td>위험비와 오즈비가 1보다 크면 "주간이 높다"는 뜻이다. 결과 문장의 방향이 표 1과 맞는가. "서울 2025 주야 × 보행자사고" 단추로 2 × 2 계산기와 대조한다.</td></tr>
-<tr><td>주야 × 사고유형</td><td>기대도수의 최솟값이 10.0이고, χ² = 0.91, 자유도 2, <i>p</i> = .636, 고전적 V = .07인가. 보정한 V와 보정하지 않은 V가 이름으로 구별되는가.</td></tr>
+<tr><td>주야 × 사고유형</td><td>기대도수의 최솟값이 10.0이고, \(\chi^2 = 0.91\), 자유도 2, \(p = .636\), 고전적 \(V = .07\)인가. 보정한 \(V\)와 보정하지 않은 \(V\)가 이름으로 구별되는가.</td></tr>
 <tr><td>해석 문장</td><td>유의하지 않은 결과를 "주간과 야간이 같다"로 쓰지 않았는가.</td></tr>
 <tr><td>그림</td><td>막대가 주간·야간마다 100%로 맞춰져 있는가. 범례의 사고유형 순서와 한글이 바른가.</td></tr>
 </tbody></table></div>
@@ -596,24 +831,187 @@ ggsave("output/ind_type_bar.png", p_type, width = 6, height = 4, dpi = 300)</pre
 </section>
 
 <!-- ===================== 05 ===================== -->
+<section class="panel" id="homogeneity">
+<div class="section-head"><span class="section-num">05</span><h2>동질성 검정: 사전 동질성과 공분산분석</h2></div>
+<h3>연구에서 동질성 검정을 쓰는 자리</h3>
+<p>실험·유사실험 연구의 논문은 결과를 보기 전에 "대상자의 일반적 특성과 사전 동질성"이라는 표를 먼저 둔다. 처치 전의 실험군과 대조군이 비슷했는지 보여, 뒤에 나올 집단 차이를 처치 덕분으로 읽어도 되는지 판단하게 하는 표다. 집단 크기는 설계가 정했으므로 범주형 특성(성별, 학력, 복용 여부 등)은 <strong>동질성 \(\chi^2\) 검정</strong>으로 본다. 기대도수가 5 미만인 칸이 많으면 Fisher 정확검정을 쓴다. 연속형 특성과 사전 점수는 독립표본 \(t\) 검정(집단이 셋 이상이면 분산분석)으로 본다.</p>
+<div class="flow" aria-label="사전 동질성 분석 흐름">
+  <span class="step">일반적 특성 · 사전 점수</span><span class="arr">→</span>
+  <span class="step">사전 동질성 검정</span><span class="arr">→</span>
+  <span class="step">동질함: 사후 점수 비교 (\(t\) 검정, 분산분석)</span>
+  <span class="arr">/</span>
+  <span class="step">동질하지 않음: 그 특성을 공변량으로 넣은 공분산분석(ANCOVA)</span>
+</div>
+<p>사전 점수는 동질하더라도 공변량으로 넣는 경우가 많다. 사후 점수의 상당 부분을 사전 점수가 설명하므로 오차가 줄어 검정력이 높아지기 때문이다.</p>
+
+<h3>예제: 우울증 컴퓨터 인지행동치료 임상시험</h3>
+<p>Beat the Blues(BtheB) 시험은 영국 일반의원의 우울증 환자 100명을 일반 치료(TAU)와, 일반 치료에 컴퓨터 대화형 인지행동치료를 더한 집단(BtheB)에 무작위배정한 실제 임상시험이다(Proudfoot 외, 2003). 결과변수는 Beck 우울척도(BDI, 높을수록 우울)다. R 패키지 HSAUR3에 들어 있다.</p>
+<div class="scroll"><table>
+<thead><tr><th>변수</th><th>뜻</th><th>쓰임</th></tr></thead>
+<tbody>
+<tr><td><code>treatment</code></td><td>배정된 집단: TAU, BtheB</td><td>집단(설계)</td></tr>
+<tr><td><code>drug</code></td><td>항우울제 복용: No, Yes</td><td>일반적 특성 (범주형)</td></tr>
+<tr><td><code>length</code></td><td>현재 우울 삽화의 기간: &lt;6m, &gt;6m</td><td>일반적 특성 (범주형)</td></tr>
+<tr><td><code>bdi.pre</code></td><td>치료 전 BDI</td><td>사전 점수 (연속형)</td></tr>
+<tr><td><code>bdi.2m</code></td><td>2개월 뒤 BDI. TAU 3명 결측</td><td>결과</td></tr>
+</tbody></table></div>
+
+<div class="scroll"><table class="stat">
+<caption>표 5-1. 대상자의 일반적 특성과 사전 동질성 (\(N = 100\))</caption>
+<thead><tr><th>특성</th><th>구분</th><th>TAU (\(n = 48\))</th><th>BtheB (\(n = 52\))</th><th>검정 통계량</th><th>\(p\)</th></tr></thead>
+<tbody>
+<tr class="sig"><td rowspan="2">항우울제 복용</td><td>예</td><td>14 (29.2%)</td><td>30 (57.7%)</td><td rowspan="2">\(\chi^2(1) = 7.13\)ᵃ</td><td rowspan="2">.008</td></tr>
+<tr class="sig"><td>아니오</td><td>34 (70.8%)</td><td>22 (42.3%)</td></tr>
+<tr><td rowspan="2">우울 삽화 기간</td><td>6개월 미만</td><td>23 (47.9%)</td><td>26 (50.0%)</td><td rowspan="2">\(\chi^2(1) = 0.00\)ᵃ</td><td rowspan="2">.994</td></tr>
+<tr><td>6개월 이상</td><td>25 (52.1%)</td><td>26 (50.0%)</td></tr>
+<tr><td>사전 BDI</td><td>\(M\) (\(SD\))</td><td>24.19 (9.82)</td><td>22.54 (11.65)</td><td>\(t(98) = 0.76\)</td><td>.450</td></tr>
+</tbody></table></div>
+<p class="more">주. 백분율은 집단 안의 비율(행 비율)이다. ᵃ Yates 연속성 보정. 모든 칸의 기대도수가 21 이상이다. 항우울제 복용의 Fisher 정확검정 \(p = .005\).</p>
+<p>우울 삽화 기간과 사전 BDI는 두 집단이 비슷했지만, <strong>항우울제 복용은 동질하지 않았다</strong>. BtheB 집단의 복용 비율(57.7%)이 TAU(29.2%)의 두 배에 가깝다. 무작위배정을 해도 100명쯤이면 이런 우연한 불균형이 생긴다. 복용자는 사전 BDI가 더 높았고(25.6 대 21.6) 2개월 BDI는 더 낮았다(15.9 대 17.7). 복용이 결과와 관련 있는 변수라면, 보정하지 않은 집단 차이에는 치료의 효과와 복용의 차이가 섞인다.</p>
+<p>이 표는 동질성 검정의 표 읽기도 보여 준다. 비율은 집단(행) 안에서 내고, 결론은 "두 집단의 복용 비율이 다르다"로 쓴다. "복용 여부와 집단은 관련이 있다"는 독립성의 말투이고, "복용자 가운데 BtheB의 비율이 68%다"(30/44)는 집단 크기를 설계가 정한 표에서는 뜻이 없는 비율이다.</p>
+
+<h3>동질성을 통과하지 못하면: 공분산분석(ANCOVA)</h3>
+<p>공분산분석은 집단 비교에 공변량을 함께 넣은 선형모형이다. 공변량의 값을 두 집단에서 같게 맞추었을 때의 집단 차이(보정 평균의 차, adjusted mean difference)를 검정한다.</p>
+<div class="readout math">\[\text{BDI}_{2\text{m}} = \beta_0 + \beta_1 \cdot \text{BDI}_{\text{pre}} + \beta_2 \cdot \text{항우울제} + \tau \cdot \text{BtheB} + \varepsilon, \qquad H_0: \tau = 0\]</div>
+<p>가정은 네 가지다. ① 공변량이 처치의 영향을 받지 않는다(처치 전에 잰 값을 쓴다). ② <strong>회귀 기울기 동질성</strong>: 공변량과 결과의 기울기가 집단마다 같다. 집단 × 공변량 교호작용으로 검정하며, 교호작용이 유의하면 보정 평균 하나로 집단 차이를 요약할 수 없다. ③ 공변량과 결과의 관계가 선형이다. ④ 잔차가 정규분포를 따르고 분산이 같다. 분산분석표와 \(F\), 부분 \(\eta^2\)의 읽는 법은 <a href="anova-with-r.html">분산분석</a> 자료와 같다.</p>
+<div class="scroll"><table class="stat">
+<caption>표 5-2. 2개월 BDI의 집단 비교: 보정하는 공변량에 따라 (2개월 점수가 있는 97명)</caption>
+<thead><tr><th>분석</th><th>공변량</th><th>집단 차이 TAU − BtheB [95% CI]</th><th>검정 통계량</th><th>\(p\)</th></tr></thead>
+<tbody>
+<tr><td>독립표본 \(t\) 검정</td><td>없음</td><td>4.76 [0.48, 9.03]</td><td>\(t(95) = 2.21\)</td><td>.030</td></tr>
+<tr><td>ANCOVA 1</td><td>사전 BDI</td><td>3.95 [0.57, 7.34]</td><td>\(F(1,\ 94) = 5.37\)</td><td>.023</td></tr>
+<tr class="sig"><td>ANCOVA 2</td><td>사전 BDI, 항우울제 복용</td><td>2.98 [−0.57, 6.54]</td><td>\(F(1,\ 93) = 2.78\)</td><td>.099</td></tr>
+</tbody></table></div>
+<p class="more">주. ANCOVA의 차이는 보정 평균(추정주변평균)의 차이고, \(F\)는 Type II 제곱합의 집단 효과다. ANCOVA 2의 보정 평균은 TAU 18.3, BtheB 15.3(보정 전 19.47, 14.71), 집단의 부분 \(\eta^2 = .029\), 모형 \(R^2 = .43\). 기울기 동질성: 사전 BDI × 집단 \(F(1,\ 92) = 0.91\), \(p = .343\), 항우울제 × 집단 \(F(1,\ 92) = 0.25\), \(p = .615\). Levene 검정 \(p = .595\), 잔차의 Shapiro–Wilk \(W = 0.975\), \(p = .064\).</p>
+<p>보정하지 않은 비교와 사전 BDI만 보정한 비교에서는 BtheB가 유의하게 낮았다. 그런데 사전 동질성이 깨진 항우울제 복용까지 보정하자 차이가 2.98점으로 줄고 \(p = .099\)가 되었다. BtheB 집단에 복용자가 많았고 복용자의 2개월 점수가 낮았던 것이 차이의 일부를 설명한다. 기울기 동질성은 성립하므로 보정 평균으로 요약해도 된다. 보고할 때는 ANCOVA 2를 주 분석으로 쓰고 공변량을 고른 이유(사전 불균형)를 밝히며, 보정 여부에 따라 결론이 달라진다는 사실을 숨기지 않는다. 신뢰구간 [−0.57, 6.54]는 "효과가 없다"가 아니라 "이 표본으로는 효과의 크기를 좁히지 못했다"로 읽는다.</p>
+<div class="callout caution">
+<p><strong>무작위배정 시험에서의 주의.</strong> 무작위배정을 했다면 집단 사이의 기저 차이는 정의상 우연이므로, 기저 특성의 유의성 검정은 "무작위배정이 제대로 되었는가"에 답하지 못한다. CONSORT 2010 지침은 무작위배정 시험의 기저 특성 표에 유의성 검정을 하지 말라고 권하고(Moher 외, 2010; Senn, 1994), 공변량은 \(p\)값이 아니라 결과와의 관련성으로 분석 계획에 <strong>미리</strong> 정하라고 한다. 이 예처럼 \(p\)값을 본 뒤 공변량을 고르면 결론이 흔들릴 수 있다.</p>
+<p>사전 동질성 검정이 제 몫을 하는 곳은 무작위배정이 없는 유사실험(비동등성 대조군 사전사후 설계)이다. 이때도 두 가지를 기억한다. \(p &gt; .05\)는 "동질하다"는 증거가 아니다. 표본이 작으면 큰 차이도 유의하지 않게 나온다. 그리고 공분산분석은 잰 공변량만 보정하므로, 재지 않은 차이는 남는다. 비무작위 설계에서는 성향점수 같은 방법을 함께 검토한다.</p>
+</div>
+
+<h3>프롬프트로 만들기</h3>
+<div class="cb prompt"><span class="lang">프롬프트 · 사전 동질성과 공분산분석</span><pre>R 패키지 HSAUR3 에 들어 있는 Beat the Blues 임상시험 자료(BtheB)로 사전 동질성 검정과 공분산분석을 하는 스크립트 scripts/cat_homogeneity.R 을 새로 써서 실행해 줘. 우울증 환자 100명을 일반 치료(TAU)와 컴퓨터 인지행동치료(BtheB)에 무작위배정한 자료다. 자료는 dataset/raw/btheb.csv 로 저장한 뒤 다시 읽어 쓰고, 집단은 TAU, BtheB 순서로 둔다.
+1. 표 1 · 대상자의 일반적 특성과 사전 동질성: 행은 항우울제 복용(drug), 우울 삽화 기간(length), 치료 전 우울 점수(bdi.pre)로, 열은 TAU, BtheB, 검정 통계량, p 로 둔다. 범주형 특성은 범주마다 사람 수와 집단 안의 비율을 적고, 집단 크기는 설계로 정해진 것이므로 카이제곱 동질성 검정(연속성 보정)을 한다. 기대도수가 5 미만인 칸이 있으면 Fisher 정확검정을 쓴다. 연속형 특성은 평균과 표준편차를 적고 독립표본 t 검정을 한다. p 가 .05 보다 작은 특성은 "동질하지 않음"으로 표시한다. output/homogeneity_table1.csv 에 저장한다.
+2. 동질하지 않은 특성이 있으면, 그 특성의 수준마다 치료 전 우울 점수와 2개월 우울 점수(bdi.2m)의 평균을 보여 준다.
+3. 표 2 · 집단 비교: 2개월 우울 점수가 있는 사람만으로 세 가지 분석을 한다. ① 공변량 없는 독립표본 t 검정, ② 치료 전 우울 점수를 공변량으로 한 공분산분석, ③ 치료 전 우울 점수와 동질하지 않은 특성을 함께 공변량으로 한 공분산분석. 분석마다 집단 차이(TAU − BtheB)와 95% 신뢰구간, 검정 통계량, 자유도, p, 집단 효과의 부분 η² 를 적는다. 공분산분석의 집단 차이는 공변량을 같게 맞춘 보정 평균의 차이로 구하고, 제곱합은 Type II 로 한다. 분석에 쓴 사람 수도 적는다. output/ancova_compare.csv 에 저장한다.
+4. 표 3 · 공분산분석의 가정: ③ 모형에 대해 회귀 기울기 동질성(집단과 각 공변량의 교호작용), 집단 간 등분산(Levene 검정), 잔차의 정규성(Shapiro-Wilk 검정)을 행으로 두고 통계량, 자유도, p, 판단을 적는다. output/ancova_assumptions.csv 에 저장한다.
+5. 그림 1: 치료 전 우울 점수를 가로축, 2개월 우울 점수를 세로축으로 한 산점도에 집단마다 색을 달리하고 집단별 회귀직선을 겹친다. 기울기 동질성을 눈으로 보는 그림이다. output/ancova_scatter.png, 6×4.5 인치, 300 dpi.
+6. 결과 문장을 APA 형식으로 쓴다. 표 1 의 사전 동질성 결과, 세 분석의 결과, 공변량을 고른 이유를 넣는다. 공변량에 따라 결론이 달라지면 그 사실을 그대로 쓰고, 유의하지 않은 결과를 "효과가 없다"로 쓰지 않는다.
+- 모든 숫자는 코드로 계산한 값을 쓰고 손으로 적지 않는다. 끝나면 저장한 파일의 경로를 알려 주고, 표의 숫자를 내가 대조할 수 있도록 분석 결과의 원래 출력을 보여 준다.
+- 통계량은 소수 둘째 자리까지 쓴다. p값은 앞의 0 을 빼고 소수 셋째 자리까지, .001 보다 작으면 "&lt; .001"로 쓴다.
+- 데이터 처리와 그림에는 tidyverse 를 쓴다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
+- 그림의 한글은 showtext 로 Noto Sans KR 글꼴을 쓴다.
+- 어떤 방법으로 분석했는지, 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 설명해 준다.</pre></div>
+<details class="fold" id="homogeneity-code">
+<summary>펼쳐 보기: 제공한 R 코드 · scripts/cat_homogeneity.R</summary>
+<div class="cb r"><span class="lang">R · cat_homogeneity.R</span><pre>options(repos = c(CRAN = "https://cloud.r-project.org/"))
+# install.packages(c("HSAUR3", "car", "emmeans"))
+library(tidyverse)
+library(car)        # Type II 제곱합 Anova(), Levene 검정
+library(emmeans)    # 보정 평균(추정주변평균)
+library(showtext)
+
+font_add_google("Noto Sans KR")
+showtext_auto()
+showtext_opts(dpi = 300)
+dir.create("dataset/raw", recursive = TRUE, showWarnings = FALSE)
+dir.create("output", showWarnings = FALSE)
+
+# 1) 자료: Beat the Blues 무작위배정 임상시험 (HSAUR3 패키지) ----------
+data("BtheB", package = "HSAUR3")
+write_csv(BtheB, "dataset/raw/btheb.csv")
+bt &lt;- read_csv("dataset/raw/btheb.csv") %&gt;%
+  mutate(treatment = factor(treatment, levels = c("TAU", "BtheB")),   # 배정된 집단
+         drug = factor(drug), length = factor(length))
+count(bt, treatment)                         # 집단 크기: 설계가 정한 48, 52
+
+# 2) 사전 동질성: 범주형은 χ² 동질성 검정, 연속형은 독립 t 검정 -----------
+tab_drug &lt;- table(bt$treatment, bt$drug)    # 행 = 집단(설계), 열 = 반응
+tab_drug
+prop.table(tab_drug, margin = 1)            # 집단 안의 비율(행 비율)만 쓴다
+chisq.test(tab_drug)$expected               # 기대도수 확인
+chisq.test(tab_drug)                        # 동질성 검정 (Yates 보정)
+fisher.test(tab_drug)                       # 비교: 정확검정
+
+tab_len &lt;- table(bt$treatment, bt$length)
+prop.table(tab_len, margin = 1)
+chisq.test(tab_len)
+
+bt %&gt;% group_by(treatment) %&gt;% summarise(n = n(), M = mean(bdi.pre), SD = sd(bdi.pre))
+t.test(bdi.pre ~ treatment, data = bt, var.equal = TRUE)
+
+# 동질하지 않은 특성(항우울제 복용)이 우울 점수와 관련 있는가
+bt %&gt;% group_by(drug) %&gt;%
+  summarise(n = n(), 사전 = mean(bdi.pre), 두달 = mean(bdi.2m, na.rm = TRUE))
+
+# 3) 집단 비교: 보정 없음 → 사전 점수 보정 → 동질하지 않은 특성까지 보정 ---
+d &lt;- filter(bt, !is.na(bdi.2m))             # 2개월 점수가 있는 97명
+t.test(bdi.2m ~ treatment, data = d, var.equal = TRUE)   # ① 보정 없음
+
+fit1 &lt;- lm(bdi.2m ~ bdi.pre + treatment, data = d)        # ② 사전 점수 보정
+Anova(fit1, type = 2)
+confint(pairs(emmeans(fit1, ~ treatment)))
+
+fit2 &lt;- lm(bdi.2m ~ bdi.pre + drug + treatment, data = d) # ③ 복용까지 보정
+a2 &lt;- Anova(fit2, type = 2)
+a2                                          # treatment 줄: 공변량을 맞춘 뒤의 집단 효과
+emm2 &lt;- emmeans(fit2, ~ treatment)
+emm2                                        # 보정 평균
+confint(pairs(emm2))                        # TAU − BtheB 와 95% 신뢰구간
+a2[["Sum Sq"]] / (a2[["Sum Sq"]] + a2["Residuals", "Sum Sq"])   # 부분 η² (마지막 값은 무시)
+
+# 4) 공분산분석의 가정 --------------------------------------------------
+Anova(lm(bdi.2m ~ bdi.pre * treatment + drug, data = d), type = 2)   # 기울기 동질성: bdi.pre:treatment
+Anova(lm(bdi.2m ~ bdi.pre + drug * treatment, data = d), type = 2)   # drug:treatment
+leveneTest(bdi.2m ~ treatment, data = d)    # 등분산
+shapiro.test(residuals(fit2))               # 잔차 정규성
+
+# 5) 그림: 집단별 회귀직선이 나란한가 -----------------------------------
+p_anc &lt;- ggplot(d, aes(x = bdi.pre, y = bdi.2m, colour = treatment)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "치료 전 BDI", y = "2개월 BDI", colour = "집단",
+       title = "사전 점수와 2개월 점수: 집단별 회귀직선") +
+  theme_minimal(base_family = "Noto Sans KR")
+ggsave("output/ancova_scatter.png", p_anc, width = 6, height = 4.5, dpi = 300)</pre></div>
+</details>
+<h4>무엇을 확인하나</h4>
+<div class="scroll"><table class="check">
+<thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
+<tbody>
+<tr><td>검정의 이름과 말투</td><td>범주형 특성의 검정을 "동질성 검정"으로 부르고 결론을 "두 집단의 복용 비율이 다르다"로 썼는가. "집단과 복용이 관련 있다"(독립성의 말투)로 쓰지 않았는가.</td></tr>
+<tr><td>비율의 방향</td><td>표 1의 백분율이 집단 안의 비율(TAU 29.2%, BtheB 57.7%)인가. 복용자 가운데 BtheB의 비율(68.2%) 같은 열 비율을 쓰지 않았는가.</td></tr>
+<tr><td>표 1의 숫자</td><td>항우울제 복용 \(\chi^2(1) = 7.13\), \(p = .008\)(Fisher \(p = .005\)), 우울 삽화 기간 \(\chi^2(1) = 0.00\), \(p = .994\), 사전 BDI \(t(98) = 0.76\), \(p = .450\)인가. 기대도수가 모두 5 이상이니 Fisher가 아니라 \(\chi^2\)를 주 결과로 썼는가.</td></tr>
+<tr><td>공변량 고르기</td><td>③ 모형에 동질하지 않은 항우울제 복용이 들어갔는가. 처치 뒤에 잰 값(예: 3개월 BDI)을 공변량으로 넣지 않았는가.</td></tr>
+<tr><td>분석 사람 수</td><td>2개월 점수가 없는 TAU 3명을 빼서 97명(TAU 45, BtheB 52)으로 분석했는가. 결측을 0으로 채우지 않았는가.</td></tr>
+<tr><td>표 2의 숫자</td><td>집단 차이가 4.76 [0.48, 9.03], 3.95 [0.57, 7.34], 2.98 [−0.57, 6.54]이고 \(p\)가 .030, .023, .099인가. ③의 보정 평균이 18.3, 15.3인가.</td></tr>
+<tr><td>보정 평균과 계수</td><td>③ 모형의 집단 계수(treatmentBtheB = −2.98)가 보정 평균의 차 2.98과 부호만 반대이고 크기가 같은가. 다르면 공변량이 다른 모형을 쓴 것이다.</td></tr>
+<tr><td>제곱합의 유형</td><td>Type II 제곱합을 썼는가. <code>anova()</code>의 순차(Type I) 제곱합은 변수를 넣은 순서에 따라 공변량의 \(F\)가 달라진다.</td></tr>
+<tr><td>가정</td><td>기울기 동질성(사전 BDI × 집단 \(p = .343\), 복용 × 집단 \(p = .615\)), Levene \(p = .595\), Shapiro–Wilk \(p = .064\)인가. 그림에서 두 회귀직선이 거의 나란한가.</td></tr>
+<tr><td>결과 문장</td><td>보정에 따라 결론이 달라진다는 사실을 적었는가. ③의 \(p = .099\)를 "BtheB는 효과가 없다"로 쓰지 않았는가.</td></tr>
+</tbody></table></div>
+<p class="more">더 읽기: Agresti (2019) 2.2절 · Moher 외 (2010) · Senn (1994) · 자료는 Everitt &amp; Hothorn (2014) 12장</p>
+</section>
+
+<!-- ===================== 06 ===================== -->
 <section class="panel" id="fisher">
-<div class="section-head"><span class="section-num">05</span><h2>가정 점검과 Fisher 정확검정</h2></div>
-<h3>χ² 검정의 두 가정</h3>
+<div class="section-head"><span class="section-num">06</span><h2>가정 점검과 Fisher 정확검정</h2></div>
+<h3>\(\chi^2\) 검정의 두 가정</h3>
 <ol>
-<li><strong>관측의 독립.</strong> 한 관측이 한 칸에만 들어가고, 관측끼리 서로 영향을 주지 않아야 한다. 같은 사람을 두 번 세면 이 가정이 깨지며, 이때는 <a href="#mcnemar">07</a>의 McNemar 검정을 쓴다(LSR 12.5).</li>
+<li><strong>관측의 독립.</strong> 한 관측이 한 칸에만 들어가고, 관측끼리 서로 영향을 주지 않아야 한다. 같은 사람을 두 번 세면 이 가정이 깨지며, 이때는 <a href="#mcnemar">08</a>의 McNemar 검정을 쓴다(LSR 12.5).</li>
 <li><strong>기대도수가 충분히 큼.</strong> 흔히 "모든 기대도수 5 이상"을 기준으로 쓴다. 출처인 Cochran의 원래 권고는 "기대도수 1 미만인 칸이 없고, 5 미만인 칸이 20%를 넘지 않음"에 가깝다. Campbell(2007)의 모의실험은 2 × 2 표에서 이 규칙이 생각보다 보수적이라는 점을 보였다.</li>
 </ol>
 
 <h3>가해 차종 9종 × 사고유형: 근사가 무너지는 표</h3>
-<p>가해운전자 차종 9종을 그대로 사고유형 3개와 교차하면 27칸 중 <strong>17칸(63%)의 기대도수가 5 미만</strong>이고, <strong>9칸은 1 미만</strong>이다. 특수차·원동기는 각 1건, PM은 3건뿐이기 때문이다. R은 χ²(16) = 60.51과 함께 "Chi-squared approximation may be incorrect" 경고를 낸다. 이때 고를 수 있는 길은 두 가지다.</p>
+<p>가해운전자 차종 9종을 그대로 사고유형 3개와 교차하면 27칸 중 <strong>17칸(63%)의 기대도수가 5 미만</strong>이고, <strong>9칸은 1 미만</strong>이다. 특수차·원동기는 각 1건, PM은 3건뿐이기 때문이다. R은 \(\chi^2(16) = 60.51\)과 함께 "Chi-squared approximation may be incorrect" 경고를 낸다. 이때 고를 수 있는 길은 두 가지다.</p>
 <ul>
-<li><strong>몬테카를로 p값.</strong> 행·열 합을 고정한 표를 1만 번 무작위로 만들어, 관측한 χ²보다 큰 표의 비율을 p값으로 쓴다. 이 자료에서는 1만 번 중 하나도 관측보다 크지 않아 <i>p</i> &lt; .001이다(가능한 가장 작은 값 1/10001).</li>
-<li><strong>범주 묶기.</strong> 뜻이 통하는 경우에만 묶고, 묶은 사실을 보고한다. 06절에서 쓰는 세 묶음(승용 / 승합·화물 / 이륜·자전거)으로 묶으면 9칸 중 1칸(11%, 이륜·자전거 × 차량단독 4.69)만 5 미만이고 1 미만인 칸이 없어 Cochran 기준을 만족한다. R은 5 미만인 칸이 하나라도 있으면 경고를 내므로, 경고만 보고 판단하지 말고 기대도수 표를 직접 본다.</li>
+<li><strong>몬테카를로 \(p\)값.</strong> 행·열 합을 고정한 표를 1만 번 무작위로 만들어, 관측한 \(\chi^2\)보다 큰 표의 비율을 \(p\)값으로 쓴다. 이 자료에서는 1만 번 중 하나도 관측보다 크지 않아 \(p &lt; .001\)이다(가능한 가장 작은 값 1/10001).</li>
+<li><strong>범주 묶기.</strong> 뜻이 통하는 경우에만 묶고, 묶은 사실을 보고한다. 07절에서 쓰는 세 묶음(승용 / 승합·화물 / 이륜·자전거)으로 묶으면 9칸 중 1칸(11%, 이륜·자전거 × 차량단독 4.69)만 5 미만이고 1 미만인 칸이 없어 Cochran 기준을 만족한다. R은 5 미만인 칸이 하나라도 있으면 경고를 내므로, 경고만 보고 판단하지 말고 기대도수 표를 직접 본다.</li>
 </ul>
 
 <h3>Fisher 정확검정</h3>
 <p>행 합과 열 합을 고정하면 2 × 2 표에서 한 칸의 값이 정해질 때 나머지가 모두 정해지고, 그 칸의 분포는 <strong>초기하분포</strong>다. Fisher 검정은 검정통계량 없이, 관측된 표와 같거나 더 극단적인 표가 나올 확률을 직접 더한다(LSR 12.7).</p>
-<div class="readout math">\[P(a \mid \text{행·열 합}) = \frac{\binom{a+b}{a}\binom{c+d}{c}}{\binom{N}{a+c}}\]</div>
+<div class="readout math">\[P(a \mid \text{행 합, 열 합}) = \frac{\binom{a+b}{a}\binom{c+d}{c}}{\binom{N}{a+c}}\]</div>
 <div class="scroll"><table class="stat">
 <caption>표 5-1. 가해 차종이 건설기계인가 × 보행자사고 (괄호는 기대도수)</caption>
 <thead><tr><th></th><th>차대사람</th><th>그 외</th><th>합</th></tr></thead>
@@ -621,8 +1019,8 @@ ggsave("output/ind_type_bar.png", p_type, width = 6, height = 4, dpi = 300)</pre
 <tr><td>건설기계</td><td>8 (4.51)</td><td>0 (3.49)</td><td>8</td></tr>
 <tr><td>그 외 차종</td><td>111 (114.49)</td><td>92 (88.51)</td><td>203</td></tr>
 </tbody></table></div>
-<p>건설기계(굴착기, 지게차 등)가 가해한 사망사고 8건은 모두 보행자 사고였다. 두 칸의 기대도수가 5 미만이다. Yates 보정 χ²(1) = 4.72, <i>p</i> = .030이고, Fisher 정확검정은 <i>p</i> = .010이다. 0인 칸이 있어 표본 오즈비 \(ad/bc\)는 ∞이고, Fisher 검정의 오즈비 추정치도 ∞, 95% 신뢰구간은 [1.37, ∞]다. 이렇게 0인 칸이 있으면 오즈비 하나로 보고하기보다 "8건 모두"라는 건수와 신뢰구간의 하한을 함께 적는다.</p>
-<p>LSR의 마녀 예제(16명)에서도 보정 χ² 검정은 <i>p</i> = .069, Fisher 검정은 <i>p</i> = .036으로 갈린다. <a href="#lab-22">2 × 2 계산기</a>의 "건설기계"와 "LSR 마녀 예제" 단추로 두 값을 나란히 확인한다.</p>
+<p>건설기계(굴착기, 지게차 등)가 가해한 사망사고 8건은 모두 보행자 사고였다. 두 칸의 기대도수가 5 미만이다. Yates 보정 \(\chi^2(1) = 4.72\), \(p = .030\)이고, Fisher 정확검정은 \(p = .010\)이다. 0인 칸이 있어 표본 오즈비 \(ad/bc\)는 ∞이고, Fisher 검정의 오즈비 추정치도 ∞, 95% 신뢰구간은 [1.37, ∞]다. 이렇게 0인 칸이 있으면 오즈비 하나로 보고하기보다 "8건 모두"라는 건수와 신뢰구간의 하한을 함께 적는다.</p>
+<p>LSR의 마녀 예제(16명)에서도 보정 \(\chi^2\) 검정은 \(p = .069\), Fisher 검정은 \(p = .036\)으로 갈린다. <a href="#lab-22">2 × 2 계산기</a>의 "건설기계"와 "LSR 마녀 예제" 단추로 두 값을 나란히 확인한다.</p>
 <div class="callout caution"><p><strong>오즈비 값이 다를 때.</strong> Fisher 검정이 보고하는 오즈비는 조건부 최대가능도 추정치라, 0인 칸이 없을 때도 표본 오즈비 \(ad/bc\)와 조금 다르다. 둘 중 무엇을 보고했는지 밝힌다.</p></div>
 
 <h3>프롬프트로 만들기</h3>
@@ -672,25 +1070,25 @@ fisher.test(tab_small)              # 정확 p, 조건부 최대가능도 오즈
 <thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
 <tbody>
 <tr><td>기대도수 먼저</td><td>검정보다 기대도수를 먼저 보여 주었는가. R의 경고("Chi-squared approximation may be incorrect")가 출력에 그대로 남아 있는가.</td></tr>
-<tr><td>9종 점검</td><td>27칸 중 5 미만 17칸(63%), 1 미만 9칸인가. 일반 χ² = 60.51, 자유도 16인가.</td></tr>
-<tr><td>몬테카를로</td><td>모의 횟수가 1만 번이고 시드가 고정되어 있는가. 출력에 "simulated p-value (based on 10000 replicates)"가 있고 자유도가 NA인 것은 정상이다. p값이 0.0001(= 1/10001)로 나오면 보고는 "&lt; .001"로 한다. 시드를 바꿔도 결론이 같은가.</td></tr>
+<tr><td>9종 점검</td><td>27칸 중 5 미만 17칸(63%), 1 미만 9칸인가. 일반 \(\chi^2 = 60.51\), 자유도 16인가.</td></tr>
+<tr><td>몬테카를로</td><td>모의 횟수가 1만 번이고 시드가 고정되어 있는가. 출력에 "simulated p-value (based on 10000 replicates)"가 있고 자유도가 NA인 것은 정상이다. \(p\)값이 0.0001(= 1/10001)로 나오면 보고는 "&lt; .001"로 한다. 시드를 바꿔도 결론이 같은가.</td></tr>
 <tr><td>묶은 표</td><td>세 묶음 표에서 5 미만이 1칸(4.69)뿐이고 1 미만이 없는가. 그런데도 R이 경고를 내는 이유(5 미만 칸이 하나라도 있으면 경고)를 에이전트가 설명했는가.</td></tr>
-<tr><td>건설기계 표</td><td>표가 8, 0 / 111, 92이고 기대도수 3.49인 칸이 있는가. 보정 χ² <i>p</i> = .030, Fisher <i>p</i> = .010인가. "서울 2025 건설기계" 단추로 2 × 2 계산기와 대조한다.</td></tr>
+<tr><td>건설기계 표</td><td>표가 8, 0 / 111, 92이고 기대도수 3.49인 칸이 있는가. 보정 \(\chi^2\) \(p = .030\), Fisher \(p = .010\)인가. "서울 2025 건설기계" 단추로 2 × 2 계산기와 대조한다.</td></tr>
 <tr><td>0인 칸과 오즈비</td><td>오즈비가 ∞(Inf)로 나온 것을 오류로 처리하거나 지우지 않고, 0인 칸 때문이라고 설명했는가. Fisher 신뢰구간의 하한 1.37을 함께 적었는가.</td></tr>
-<tr><td>판단 문단</td><td>9종 표는 몬테카를로 p나 묶은 표를, 건설기계 표는 Fisher 검정을 보고하도록 고른 이유가 기대도수 수치와 맞는가.</td></tr>
+<tr><td>판단 문단</td><td>9종 표는 몬테카를로 \(p\)나 묶은 표를, 건설기계 표는 Fisher 검정을 보고하도록 고른 이유가 기대도수 수치와 맞는가.</td></tr>
 </tbody></table></div>
 <p class="more">더 읽기: LSR 12.5, 12.7 · Campbell (2007) · 초기하분포는 Blitzstein &amp; Hwang (2019) 3장</p>
 </section>
 
-<!-- ===================== 06 ===================== -->
+<!-- ===================== 07 ===================== -->
 <section class="panel" id="residuals">
-<div class="section-head"><span class="section-num">06</span><h2>사후 분석: 표준화 잔차</h2></div>
-<p>r × c 표의 χ² 검정이 유의하면 "어딘가 다르다"까지만 알 수 있다. 어느 칸이 차이를 만들었는지는 <strong>표준화 잔차</strong>(adjusted residual)로 본다. 영가설 하(under \(H_0\))에서 근사적으로 표준정규분포를 따르므로, 절댓값이 2(정확히는 1.96)를 넘는 칸을 기대보다 유난히 많거나 적은 칸으로 읽는다.</p>
+<div class="section-head"><span class="section-num">07</span><h2>사후 분석: 표준화 잔차</h2></div>
+<p>\(r \times c\) 표의 \(\chi^2\) 검정이 유의하면 "어딘가 다르다"까지만 알 수 있다. 어느 칸이 차이를 만들었는지는 <strong>표준화 잔차</strong>(adjusted residual)로 본다. 영가설 하(under \(H_0\))에서 근사적으로 표준정규분포를 따르므로, 절댓값이 2(정확히는 1.96)를 넘는 칸을 기대보다 유난히 많거나 적은 칸으로 읽는다.</p>
 <div class="readout math">\[r_{ij} = \frac{O_{ij} - E_{ij}}{\sqrt{E_{ij}\,(1 - p_{i\cdot})(1 - p_{\cdot j})}}\]</div>
 <p>적합도 검정에서 본 Pearson 잔차 \((O - E)/\sqrt{E}\)와는 분모가 다르다. 칸이 많으면 우연히 2를 넘는 칸이 생기기 쉬우므로, 칸 수 \(m\)으로 Bonferroni 보정한 기준 \(z_{1-\alpha/(2m)}\)을 함께 본다. 3 × 3 표는 \(m = 9\)이고 기준은 2.77이다.</p>
 
 <h3>가해 차종 묶음 × 사고유형</h3>
-<p>세 묶음으로 나눈 가해 차종과 사고유형의 독립성 검정은 χ²(4, <i>N</i> = 211) = 42.79, <i>p</i> &lt; .001, 고전적 V = .32(단측 95% 신뢰구간의 하한 .23)다. 어느 칸이 이 차이를 만들었는지 표준화 잔차로 본다.</p>
+<p>세 묶음으로 나눈 가해 차종과 사고유형의 독립성 검정은 \(\chi^2(4,\ N = 211) = 42.79\), \(p &lt; .001\), 고전적 \(V = .32\)(단측 95% 신뢰구간의 하한 .23)다. 어느 칸이 이 차이를 만들었는지 표준화 잔차로 본다.</p>
 <div class="scroll"><table class="stat">
 <caption>표 6-1. 건수와 표준화 잔차 (굵은 글씨: Bonferroni 기준 2.77을 넘는 칸)</caption>
 <thead><tr><th>가해 차종</th><th>차대사람</th><th>차대차</th><th>차량단독</th><th>합</th></tr></thead>
@@ -754,7 +1152,7 @@ ggsave("output/stdres_vehicle_type.png", g, width = 7, height = 5, dpi = 300)</p
 <div class="scroll"><table class="check">
 <thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
 <tbody>
-<tr><td>검정 결과</td><td>χ² = 42.79, 자유도 4, <i>p</i> &lt; .001인가. 묶음별 건수가 82, 84, 45인가.</td></tr>
+<tr><td>검정 결과</td><td>\(\chi^2 = 42.79\), 자유도 4, \(p &lt; .001\)인가. 묶음별 건수가 82, 84, 45인가.</td></tr>
 <tr><td>잔차의 종류</td><td>표준화 잔차를 썼는가, Pearson 잔차를 썼는가. 이륜·자전거 × 차대사람이 −5.55이면 표준화 잔차다(Pearson 잔차라면 −3.25). 코드를 다 읽지 못해도 된다. 에이전트에게 "어느 잔차인지, 분모가 무엇인지 설명해 줘"라고 묻는다.</td></tr>
 <tr><td>기준값</td><td>칸의 수가 9이고 기준값이 2.77인가. 1.96을 그대로 쓰지 않았는가.</td></tr>
 <tr><td>표시</td><td>기준을 넘는 칸이 다섯 개(승합·화물의 차대사람·차대차, 이륜·자전거의 세 칸)이고, CSV의 "기준 초과"와 그림의 굵은 숫자가 같은 칸인가.</td></tr>
@@ -764,23 +1162,23 @@ ggsave("output/stdres_vehicle_type.png", g, width = 7, height = 5, dpi = 300)</p
 <p class="more">더 읽기: Agresti (2019) 2.4.5절 (LSR에는 이 내용이 없다)</p>
 </section>
 
-<!-- ===================== 07 ===================== -->
+<!-- ===================== 08 ===================== -->
 <section class="panel" id="mcnemar">
-<div class="section-head"><span class="section-num">07</span><h2>대응 범주 자료: McNemar 검정</h2></div>
+<div class="section-head"><span class="section-num">08</span><h2>대응 범주 자료: McNemar 검정</h2></div>
 <h3>왜 독립성 검정을 쓰면 안 되는가</h3>
-<p>국민건강영양조사의 성인 응답자 한 사람마다 두 판정이 있다. 본인이 비만이라고 생각하는가(인식), 그리고 BMI 25 이상인가(측정). 이 두 판정으로 2 × 2 표를 만들면 한 사람이 한 칸에 들어가지만, 행과 열이 <strong>같은 사람의 두 측정</strong>이다. 질문도 독립성 검정과 다르다.</p>
+<p><a href="https://knhanes.kdca.go.kr/knhanes/main.do" target="_blank" rel="noopener noreferrer">국민건강영양조사</a>(KNHANES)의 성인 응답자 한 사람마다 두 판정이 있다. 원시자료를 받는 방법은 <a href="#data">02</a>에 있다. 본인이 비만이라고 생각하는가(인식), 그리고 BMI 25 이상인가(측정). 이 두 판정으로 2 × 2 표를 만들면 한 사람이 한 칸에 들어가지만, 행과 열이 <strong>같은 사람의 두 측정</strong>이다. 질문도 독립성 검정과 다르다.</p>
 <div class="scroll"><table>
 <thead><tr><th></th><th>측정: 비만</th><th>측정: 비만 아님</th></tr></thead>
 <tbody>
-<tr><td>인식: 비만</td><td>a (일치)</td><td><strong>b</strong> (과대 인식)</td></tr>
-<tr><td>인식: 비만 아님</td><td><strong>c</strong> (과소 인식)</td><td>d (일치)</td></tr>
+<tr><td>인식: 비만</td><td>\(a\) (일치)</td><td><strong>\(b\)</strong> (과대 인식)</td></tr>
+<tr><td>인식: 비만 아님</td><td><strong>\(c\)</strong> (과소 인식)</td><td>\(d\) (일치)</td></tr>
 </tbody></table></div>
 <ul>
-<li><strong>독립성 검정</strong>은 "인식과 측정이 관련 있는가"를 묻는다. 같은 사람의 두 판정이니 관련이 있는 것은 당연해서, 대개 아주 작은 p가 나오고 별 정보가 없다.</li>
-<li><strong>McNemar 검정</strong>은 "인식 비만 비율 \((a+b)/N\)과 측정 비만 비율 \((a+c)/N\)이 같은가"를 묻는다(주변 동질성). 두 비율의 차이는 \((b-c)/N\)이므로, 정보는 <strong>엇갈린 칸 b와 c에만</strong> 있다.</li>
+<li><strong>독립성 검정</strong>은 "인식과 측정이 관련 있는가"를 묻는다. 같은 사람의 두 판정이니 관련이 있는 것은 당연해서, 대개 아주 작은 \(p\)가 나오고 별 정보가 없다.</li>
+<li><strong>McNemar 검정</strong>은 "인식 비만 비율 \((a+b)/N\)과 측정 비만 비율 \((a+c)/N\)이 같은가"를 묻는다(주변 동질성). 두 비율의 차이는 \((b-c)/N\)이므로, 정보는 <strong>엇갈린 칸 \(b\)와 \(c\)에만</strong> 있다.</li>
 </ul>
 <div class="readout math">\[X^2 = \frac{(|b - c| - 1)^2}{b + c} \;\sim\; \chi^2_1 \quad (\text{근사, under } H_0), \qquad H_0:\ b \text{와 } c \text{가 나올 가능성이 같음}\]</div>
-<p>영가설 하(under \(H_0\))에서 엇갈린 \(b+c\)명 중 b에 속할 수는 이항분포 \(\text{Bin}(b+c,\ 0.5)\)를 따르므로 정확검정도 할 수 있다. Fagerland 등(2013)은 작은 표본에서 이 정확 조건부 검정이 지나치게 보수적이므로 mid-p나 보정 없는 근사 검정을 권한다. 효과크기 Cohen's g는 \(|b/(b+c) - 0.5|\)이고, 대응 오즈비는 \(b/c\)다.</p>
+<p>영가설 하(under \(H_0\))에서 엇갈린 \(b+c\)명 중 \(b\)에 속할 수는 이항분포 \(\text{Bin}(b+c,\ 0.5)\)를 따르므로 정확검정도 할 수 있다. Fagerland 등(2013)은 작은 표본에서 이 정확 조건부 검정이 지나치게 보수적이므로 mid-\(p\)나 보정 없는 근사 검정을 권한다. 효과크기 Cohen's \(g\)는 \(|b/(b+c) - 0.5|\)이고, 대응 오즈비는 \(b/c\)다.</p>
 
 <h3>국민건강영양조사 2024: 스스로 생각하는 체형과 BMI</h3>
 <div class="scroll"><table class="stat">
@@ -791,41 +1189,41 @@ ggsave("output/stdres_vehicle_type.png", g, width = 7, height = 5, dpi = 300)</p
 <tr><td>인식: 비만 아님</td><td><strong>298</strong> (과소 인식)</td><td>2,745</td><td>3,043</td></tr>
 <tr><td>합</td><td>2,107 (36.8%)</td><td>3,620</td><td>5,727</td></tr>
 </tbody></table></div>
-<p>스스로 비만(약간 비만 포함)이라고 생각한 비율은 46.9%로, BMI 25 이상의 36.8%보다 10.1%p 높다. 두 판정이 엇갈린 1,173명 가운데 과대 인식이 875명(74.6%)이다. McNemar χ²(1, <i>N</i> = 5,727) = 282.84, <i>p</i> &lt; .001(보정 없이 283.83), Cohen's <i>g</i> = .25 [.22, .27], 대응 오즈비 2.94다. 같은 표에 독립성 검정을 하면 χ²(1) = 2,032.6으로 훨씬 크게 나오지만, 그것은 "인식과 측정이 관련 있다"는 당연한 답이다.</p>
+<p>스스로 비만(약간 비만 포함)이라고 생각한 비율은 46.9%로, BMI 25 이상의 36.8%보다 10.1%p 높다. 두 판정이 엇갈린 1,173명 가운데 과대 인식이 875명(74.6%)이다. McNemar \(\chi^2(1,\ N = 5{,}727) = 282.84\), \(p &lt; .001\)(보정 없이 283.83), Cohen's \(g = .25\) [.22, .27], 대응 오즈비 2.94다. 같은 표에 독립성 검정을 하면 \(\chi^2(1) = 2{,}032.6\)으로 훨씬 크게 나오지만, 그것은 "인식과 측정이 관련 있다"는 당연한 답이다.</p>
 
 <div class="lab" id="lab-mc">
-  <div class="lab-head"><strong>McNemar 계산기</strong><span>a·d를 바꿔도 검정 결과는 그대로라는 점을 확인해 본다</span></div>
+  <div class="lab-head"><strong>McNemar 계산기</strong><span>\(a\)·\(d\)를 바꿔도 검정 결과는 그대로라는 점을 확인해 본다</span></div>
   <div class="lab-body">
     <div class="presets">
       <button class="btn ghost" type="button" data-m="1809,875,298,2745">국민건강영양조사 2024 체형 인식 × BMI</button>
       <button class="btn ghost" type="button" data-m="5,25,5,65">LSR 12.8 광고 예제 (손계산용)</button>
     </div>
     <div class="ctrls">
-      <div class="ctrl"><label for="m-a">a (둘 다 예)</label><input class="numin" type="number" id="m-a" min="0" step="1"></div>
-      <div class="ctrl"><label for="m-b">b (행만 예)</label><input class="numin" type="number" id="m-b" min="0" step="1"></div>
-      <div class="ctrl"><label for="m-c">c (열만 예)</label><input class="numin" type="number" id="m-c" min="0" step="1"></div>
-      <div class="ctrl"><label for="m-d">d (둘 다 아니오)</label><input class="numin" type="number" id="m-d" min="0" step="1"></div>
+      <div class="ctrl"><label for="m-a">\(a\) (둘 다 예)</label><input class="numin" type="number" id="m-a" min="0" step="1"></div>
+      <div class="ctrl"><label for="m-b">\(b\) (행만 예)</label><input class="numin" type="number" id="m-b" min="0" step="1"></div>
+      <div class="ctrl"><label for="m-c">\(c\) (열만 예)</label><input class="numin" type="number" id="m-c" min="0" step="1"></div>
+      <div class="ctrl"><label for="m-d">\(d\) (둘 다 아니오)</label><input class="numin" type="number" id="m-d" min="0" step="1"></div>
     </div>
     <div class="outs">
-      <div><span class="k">행 기준 비율 (a+b)/N</span><span class="v" id="m-p1">-</span></div>
-      <div><span class="k">열 기준 비율 (a+c)/N</span><span class="v" id="m-p2">-</span></div>
-      <div><span class="k">McNemar χ² (보정)</span><span class="v" id="m-x2">-</span></div>
-      <div><span class="k">p</span><span class="v" id="m-p">-</span></div>
-      <div><span class="k">보정 없음 p</span><span class="v" id="m-pn">-</span></div>
-      <div><span class="k">정확 p (이항)</span><span class="v" id="m-pe">-</span></div>
+      <div><span class="k">행 기준 비율 \((a+b)/N\)</span><span class="v" id="m-p1">-</span></div>
+      <div><span class="k">열 기준 비율 \((a+c)/N\)</span><span class="v" id="m-p2">-</span></div>
+      <div><span class="k">McNemar \(\chi^2\) (보정)</span><span class="v" id="m-x2">-</span></div>
+      <div><span class="k">\(p\)</span><span class="v" id="m-p">-</span></div>
+      <div><span class="k">보정 없음 \(p\)</span><span class="v" id="m-pn">-</span></div>
+      <div><span class="k">정확 \(p\) (이항)</span><span class="v" id="m-pe">-</span></div>
     </div>
     <div class="outs">
-      <div><span class="k">Cohen's g</span><span class="v" id="m-g">-</span></div>
-      <div><span class="k">대응 오즈비 b / c</span><span class="v" id="m-or">-</span></div>
+      <div><span class="k">Cohen's \(g\)</span><span class="v" id="m-g">-</span></div>
+      <div><span class="k">대응 오즈비 \(b/c\)</span><span class="v" id="m-or">-</span></div>
     </div>
-    <p class="figcap">a(1,809)와 d(2,745)를 아무리 바꿔도 χ²와 p는 변하지 않는다. 광고 예제는 교재의 손계산용 수치다(보정 χ² = 12.03, p = .0005).</p>
+    <p class="figcap">\(a\)(1,809)와 \(d\)(2,745)를 아무리 바꿔도 \(\chi^2\)와 \(p\)는 변하지 않는다. 광고 예제는 교재의 손계산용 수치다(보정 \(\chi^2 = 12.03\), \(p = .0005\)).</p>
   </div>
 </div>
 
 <div class="callout caution"><p><strong>복합표본설계와 가중치.</strong> 국민건강영양조사는 층화·집락 추출과 가중치를 쓰는 복합표본조사다. 이 절의 분석과 위의 비율은 가중치를 무시한 단순 검정으로, 검정의 구조를 익히기 위한 교육용 단순화다. 모집단 추정치를 보고하려면 <code>survey</code> 패키지로 설계(분산추정 층 <code>kstrata</code>, 조사구 <code>psu</code>)를 지정하고 가중치(<code>wt_itvex</code>)를 적용해야 하며, 이는 질병관리청 이용지침서의 권고이기도 하다.</p></div>
 
 <h3>같은 표, 다른 질문 (LSR 12.9)</h3>
-<p>LSR은 같은 사람이 카드를 두 번 고른 4 × 4 표에 독립성 검정과 McNemar 검정을 모두 적용해, 결과가 다르게 나오는 것을 보여 준다. 첫 번째 선택이 두 번째 선택과 관련 있는가(독립성)와, 두 번째 선택의 무늬 분포가 첫 번째와 달라졌는가(주변 동질성)는 다른 질문이기 때문이다. 체형 자료에서도 두 검정을 나란히 돌려, 각 p값이 무엇에 대한 답인지 문장으로 써 본다.</p>
+<p>LSR은 같은 사람이 카드를 두 번 고른 4 × 4 표에 독립성 검정과 McNemar 검정을 모두 적용해, 결과가 다르게 나오는 것을 보여 준다. 첫 번째 선택이 두 번째 선택과 관련 있는가(독립성)와, 두 번째 선택의 무늬 분포가 첫 번째와 달라졌는가(주변 동질성)는 다른 질문이기 때문이다. 체형 자료에서도 두 검정을 나란히 돌려, 각 \(p\)값이 무엇에 대한 답인지 문장으로 써 본다.</p>
 
 <h3>프롬프트로 만들기</h3>
 <div class="cb prompt"><span class="lang">프롬프트 · McNemar 검정</span><pre>dataset/working/kn_body.rds 에 정리해 둔 국민건강영양조사 2024 자료로, 같은 사람의 두 판정(스스로 비만이라고 생각하는가, 체질량지수로 비만인가)을 비교하는 스크립트 scripts/cat_mcnemar.R 을 새로 써서 실행해 줘. 한 사람이 두 번 판정되었으므로 대응 자료로 다룬다.
@@ -870,35 +1268,36 @@ chisq.test(tab_mc)</pre></div>
 <div class="scroll"><table class="check">
 <thead><tr><th>항목</th><th>확인할 것</th></tr></thead>
 <tbody>
-<tr><td>표</td><td>표가 1,809, 875 / 298, 2,745(N = 5,727)인가. 다르면 02절의 걸러 내기부터 다시 본다.</td></tr>
-<tr><td>엇갈린 칸</td><td>과대 인식(875)과 과소 인식(298)으로 적은 칸이 표의 행·열 이름과 맞는가. 행과 열을 바꿔 놓으면 b와 c가 뒤바뀌어 대응 오즈비가 역수(0.34)가 된다.</td></tr>
-<tr><td>두 비율의 차이</td><td>인식 46.9% − 측정 36.8% = 10.1%p가 (875 − 298) / 5,727과 같은가.</td></tr>
-<tr><td>숫자</td><td>보정 McNemar χ² = 282.84, 보정 없이 283.83, 자유도 1, <i>p</i> &lt; .001, <i>g</i> = .25, 대응 오즈비 2.94인가. "국민건강영양조사 2024" 단추로 McNemar 계산기와 대조한다.</td></tr>
-<tr><td>정확검정의 n</td><td>정확 이항검정의 시행 수가 전체 5,727이 아니라 엇갈린 1,173명인가. 추정 비율이 .746인가.</td></tr>
-<tr><td>독립성 검정과의 구별</td><td>독립성 검정(χ² = 2,032.6)의 p가 아주 작다는 것을 "인식과 측정의 비율이 다르다"로 쓰지 않았는가. 두 검정의 질문을 한 문장씩 구별해 썼는가.</td></tr>
+<tr><td>표</td><td>표가 1,809, 875 / 298, 2,745(\(N = 5{,}727\))인가. 다르면 02절의 걸러 내기부터 다시 본다.</td></tr>
+<tr><td>엇갈린 칸</td><td>과대 인식(875)과 과소 인식(298)으로 적은 칸이 표의 행·열 이름과 맞는가. 행과 열을 바꿔 놓으면 \(b\)와 \(c\)가 뒤바뀌어 대응 오즈비가 역수(0.34)가 된다.</td></tr>
+<tr><td>두 비율의 차이</td><td>인식 46.9% − 측정 36.8% = 10.1%\(p\)가 (875 − 298) / 5,727과 같은가.</td></tr>
+<tr><td>숫자</td><td>보정 McNemar \(\chi^2 = 282.84\), 보정 없이 283.83, 자유도 1, \(p &lt; .001\), \(g = .25\), 대응 오즈비 2.94인가. "국민건강영양조사 2024" 단추로 McNemar 계산기와 대조한다.</td></tr>
+<tr><td>정확검정의 \(n\)</td><td>정확 이항검정의 시행 수가 전체 5,727이 아니라 엇갈린 1,173명인가. 추정 비율이 .746인가.</td></tr>
+<tr><td>독립성 검정과의 구별</td><td>독립성 검정(\(\chi^2 = 2{,}032.6\))의 \(p\)가 아주 작다는 것을 "인식과 측정의 비율이 다르다"로 쓰지 않았는가. 두 검정의 질문을 한 문장씩 구별해 썼는가.</td></tr>
 <tr><td>가중치 문구</td><td>결과 문장 아래에 가중치와 복합표본설계를 무시했다는 문구가 있는가.</td></tr>
 <tr><td>개인 자료</td><td><code>output/</code>에 사람 단위 자료가 저장되지 않았는가. 표와 요약값만 있어야 한다.</td></tr>
 </tbody></table></div>
 <p class="more">더 읽기: LSR 12.8–12.9 · Fagerland, Lydersen &amp; Laake (2013)</p>
 </section>
 
-<!-- ===================== 08 ===================== -->
+<!-- ===================== 09 ===================== -->
 <section class="panel" id="report">
-<div class="section-head"><span class="section-num">08</span><h2>결과 보고와 로지스틱 회귀 예고</h2></div>
+<div class="section-head"><span class="section-num">09</span><h2>결과 보고와 로지스틱 회귀 예고</h2></div>
 <h3>보고 양식</h3>
-<p>검정 이름, 통계량과 자유도, 표본크기, p값, 효과크기, 그리고 방향(어느 쪽이 더 큰가)을 함께 적는다. 아래는 이 쪽의 자료로 쓴 예시다. 프롬프트에서 받은 결과 문장이 이 항목을 모두 담고 있는지 대조한다.</p>
+<p>검정 이름, 통계량과 자유도, 표본크기, \(p\)값, 효과크기, 그리고 방향(어느 쪽이 더 큰가)을 함께 적는다. 아래는 이 쪽의 자료로 쓴 예시다. 프롬프트에서 받은 결과 문장이 이 항목을 모두 담고 있는지 대조한다.</p>
 <div class="callout">
-<p><strong>적합도.</strong> 2025년 서울의 월별 사망 교통사고 건수(<i>N</i> = 211)가 달마다 다르다고 볼 증거는 없었다, χ²(11, <i>N</i> = 211) = 9.83, <i>p</i> = .545, Cohen's <i>w</i> = .22. 달별 일수에 비례한 영가설로도 결론은 같았다, χ²(11) = 8.30, <i>p</i> = .686.</p>
-<p><strong>독립성 (2 × 2).</strong> 보행자 사고(차대사람)의 비율은 주간(59.1%)이 야간(53.1%)보다 높았으나 유의하지 않았다, χ²(1, <i>N</i> = 211) = 0.54 (Yates 보정), <i>p</i> = .461, 위험비 = 1.11, 오즈비 = 1.28.</p>
-<p><strong>독립성 (r × c)과 사후 분석.</strong> 가해 차종에 따라 사고유형의 구성이 달랐다, χ²(4, <i>N</i> = 211) = 42.79, <i>p</i> &lt; .001, <i>V</i> = .32. 표준화 잔차(Bonferroni 기준 2.77)로 보면 승합·화물 가해 사고에서는 보행자 사고가 기대보다 많았고(4.15), 이륜·자전거 가해 사고에서는 보행자 사고가 적고(−5.55) 차량단독 사고가 많았다(4.57).</p>
-<p><strong>McNemar.</strong> 스스로 비만이라고 인식한 비율(46.9%)은 BMI 기준 비만 비율(36.8%)보다 높았다, McNemar χ²(1, <i>N</i> = 5,727) = 282.84, <i>p</i> &lt; .001, Cohen's <i>g</i> = .25. 가중치를 적용하지 않은 분석이다.</p>
+<p><strong>적합도.</strong> 2025년 서울의 월별 사망 교통사고 건수(\(N = 211\))가 달마다 다르다고 볼 증거는 없었다, \(\chi^2(11,\ N = 211) = 9.83\), \(p = .545\), Cohen's \(w = .22\). 달별 일수에 비례한 영가설로도 결론은 같았다, \(\chi^2(11) = 8.30\), \(p = .686\).</p>
+<p><strong>독립성 (2 × 2).</strong> 보행자 사고(차대사람)의 비율은 주간(59.1%)이 야간(53.1%)보다 높았으나 유의하지 않았다, \(\chi^2(1,\ N = 211) = 0.54\) (Yates 보정), \(p = .461\), 위험비 = 1.11, 오즈비 = 1.28.</p>
+<p><strong>독립성 (\(r \times c\))과 사후 분석.</strong> 가해 차종에 따라 사고유형의 구성이 달랐다, \(\chi^2(4,\ N = 211) = 42.79\), \(p &lt; .001\), \(V = .32\). 표준화 잔차(Bonferroni 기준 2.77)로 보면 승합·화물 가해 사고에서는 보행자 사고가 기대보다 많았고(4.15), 이륜·자전거 가해 사고에서는 보행자 사고가 적고(−5.55) 차량단독 사고가 많았다(4.57).</p>
+<p><strong>사전 동질성과 공분산분석.</strong> 두 집단은 우울 삽화 기간(\(\chi^2(1) = 0.00\), \(p = .994\))과 치료 전 BDI(\(t(98) = 0.76\), \(p = .450\))에서 동질했으나, 항우울제 복용 비율은 BtheB 집단(57.7%)이 TAU 집단(29.2%)보다 높았다, \(\chi^2(1,\ N = 100) = 7.13\), \(p = .008\). 이에 치료 전 BDI와 항우울제 복용을 공변량으로 한 공분산분석을 하였다. 2개월 BDI의 보정 평균은 BtheB 15.3, TAU 18.3으로 차이는 2.98점, 95% CI [-0.57, 6.54]였고 유의하지 않았다, \(F(1,\ 93) = 2.78\), \(p = .099\), 부분 \(\eta^2 = .029\). 사전 BDI만 보정하면 차이가 유의했다(3.95점, \(p = .023\)).</p>
+<p><strong>McNemar.</strong> 스스로 비만이라고 인식한 비율(46.9%)은 BMI 기준 비만 비율(36.8%)보다 높았다, McNemar \(\chi^2(1,\ N = 5{,}727) = 282.84\), \(p &lt; .001\), Cohen's \(g = .25\). 가중치를 적용하지 않은 분석이다.</p>
 </div>
-<div class="callout caution"><p><strong>효과크기 해석 기준에 대해.</strong> Cohen(1988)의 w = .1/.3/.5, h = .2/.5/.8, g = .05/.15/.25를 작음·중간·큼으로 부르는 관례가 있지만, Cohen 스스로 다른 근거가 없을 때 쓰는 임시 기준이라고 밝혔다. 교통안전이나 공중보건에서는 "작은" 효과도 대상 인구가 크면 실질적 의미가 크다. <code>interpret_cramers_v()</code> 같은 함수의 출력은 출발점으로만 쓴다.</p></div>
+<div class="callout caution"><p><strong>효과크기 해석 기준에 대해.</strong> Cohen(1988)의 \(w = .1/.3/.5\), \(h = .2/.5/.8\), \(g = .05/.15/.25\)를 작음·중간·큼으로 부르는 관례가 있지만, Cohen 스스로 다른 근거가 없을 때 쓰는 임시 기준이라고 밝혔다. 교통안전이나 공중보건에서는 "작은" 효과도 대상 인구가 크면 실질적 의미가 크다. <code>interpret_cramers_v()</code> 같은 함수의 출력은 출발점으로만 쓴다.</p></div>
 
 <h3>다음 단계: 로지스틱 회귀</h3>
 <p>2 × 2 표의 오즈비는 로지스틱 회귀에서 이분형 설명변수 하나를 넣었을 때의 \(\exp(\beta_1)\)과 같다. 분할표 검정은 설명변수가 하나뿐이고 범주형일 때의 특수한 경우이며, 연속형 공변량을 넣거나 여러 변수를 동시에 통제하려면 로지스틱 회귀로 넘어간다(James 외, 2013, 4.3절).</p>
 <div class="readout math">\[\log\frac{P(\text{차대사람})}{1 - P(\text{차대사람})} = \beta_0 + \beta_1 \cdot \text{야간}, \qquad \exp(\beta_1) = \text{야간 대 주간의 오즈비}\]</div>
-<p>표에서 계산한 오즈비 \(ad/bc = 1.28\)은 첫 행(주간)을 분자에 두므로 "주간 대 야간"이다. 회귀에서는 첫 수준(주간)이 기준 범주가 되어 \(\exp(\beta_1) = 0.78\)이 "야간 대 주간"이다(95% 프로파일 신뢰구간 [0.45, 1.35]). 그래서 두 값은 서로 역수로 나온다(1 / 1.28 = 0.78). 모형의 가능도비 χ²(1) = 0.767은 보정 없는 Pearson χ² 0.767과 소수 셋째 자리까지 같아 보이지만 계산식이 다른 통계량이다(넷째 자리에서 0.7672와 0.7674로 갈린다). 이 차이를 직접 확인하는 것이 로지스틱 회귀로 넘어가는 좋은 연결 고리가 된다.</p>
+<p>표에서 계산한 오즈비 \(ad/bc = 1.28\)은 첫 행(주간)을 분자에 두므로 "주간 대 야간"이다. 회귀에서는 첫 수준(주간)이 기준 범주가 되어 \(\exp(\beta_1) = 0.78\)이 "야간 대 주간"이다(95% 프로파일 신뢰구간 [0.45, 1.35]). 그래서 두 값은 서로 역수로 나온다(1 / 1.28 = 0.78). 모형의 가능도비 \(\chi^2(1) = 0.767\)은 보정 없는 Pearson \(\chi^2\) 0.767과 소수 셋째 자리까지 같아 보이지만 계산식이 다른 통계량이다(넷째 자리에서 0.7672와 0.7674로 갈린다). 이 차이를 직접 확인하는 것이 로지스틱 회귀로 넘어가는 좋은 연결 고리가 된다.</p>
 
 <h3>프롬프트로 만들기</h3>
 <div class="cb prompt"><span class="lang">프롬프트 · 오즈비와 로지스틱 회귀</span><pre>dataset/working/acc_clean.rds 의 2025년 서울 사망 교통사고 자료로, 2×2 표의 오즈비와 로지스틱 회귀를 비교하는 스크립트 scripts/cat_logistic.R 을 새로 써서 실행해 줘.
@@ -935,14 +1334,14 @@ chisq.test(tab22, correct = FALSE)   # 비교: Pearson χ² (보정 없음)</pre
 <tr><td>기준 범주</td><td>계수표의 설명변수 이름이 "주야야간"인가. "주야주간"으로 나오면 기준 범주가 야간으로 바뀐 것이다. 데이터 준비의 범주 순서를 확인한다.</td></tr>
 <tr><td>역수 관계</td><td>회귀의 오즈비 0.78과 표의 오즈비 1.28을 곱하면 1인가. 1이 아니라면 둘 중 하나가 다른 표나 다른 반응 범주로 계산된 것이다.</td></tr>
 <tr><td>신뢰구간의 방법</td><td>회귀의 신뢰구간 [0.45, 1.35]가 프로파일 가능도인지 Wald인지 적혀 있는가. 두 방법은 큰 표본에서 거의 같지만 같지는 않다.</td></tr>
-<tr><td>두 χ²</td><td>가능도비 χ²가 0.7672, 보정 없는 Pearson χ²가 0.7674로 넷째 자리에서 다른가. 똑같다면 같은 검정을 두 번 돌린 것이 아닌지 묻는다.</td></tr>
+<tr><td>두 \(\chi^2\)</td><td>가능도비 \(\chi^2\)가 0.7672, 보정 없는 Pearson \(\chi^2\)가 0.7674로 넷째 자리에서 다른가. 똑같다면 같은 검정을 두 번 돌린 것이 아닌지 묻는다.</td></tr>
 <tr><td>04절과의 대조</td><td>표의 오즈비가 04절 결과의 오즈비 1.28과 같은가.</td></tr>
 </tbody></table></div>
 </section>
 
 <section class="panel" id="scope">
 <h3>확인 범위</h3>
-<p>이 쪽의 사고 자료 수치는 실습용 CSV(<code>서울-사망교통사고-2025.csv</code>, 2025년 서울 사망 교통사고 211건)로, 국민건강영양조사 수치는 2024년 기본 DB의 19세 이상 응답자로 계산했다. 모두 R 4.6과 tidyverse로 다시 계산해 같음을 확인했다(저장소의 <code>src/R/categorical_check.R</code>). 효과크기의 신뢰구간은 effectsize 1.0.3의 값이다. 이 패키지는 버전에 따라 기본값(편향 보정, 단측 구간, 위험비의 방향)이 달라질 수 있다. 제공한 R 코드 일곱 편은 실습용 CSV와 2024 기본 DB로 처음부터 끝까지 실행해 오류 없이 돌고, 본문의 수치와 같은 값을 내는 것을 확인했다. 교재의 손계산 예제(카드, 마녀, 광고)도 R로 다시 계산했다. 국민건강영양조사 수치는 가중치를 적용하지 않은 표본 수치이므로 모집단 추정치로 인용하지 않는다. 쪽 안의 계산기와 탐색기는 넣은 값으로 쪽의 스크립트가 직접 계산한다.</p>
+<p>이 쪽의 사고 자료 수치는 실습용 CSV(<code>서울-사망교통사고-2025.csv</code>, 2025년 서울 사망 교통사고 211건)로, 국민건강영양조사 수치는 2024년 기본 DB의 19세 이상 응답자로, 05절의 수치는 R 패키지 HSAUR3의 BtheB 자료(100명)로 계산했다. 모두 R 4.6과 tidyverse로 다시 계산해 같음을 확인했다(저장소의 <code>src/R/categorical_check.R</code>). 효과크기의 신뢰구간은 effectsize 1.0.3의 값이다. 이 패키지는 버전에 따라 기본값(편향 보정, 단측 구간, 위험비의 방향)이 달라질 수 있다. 제공한 R 코드 여덟 편은 실습용 CSV, 2024 기본 DB, BtheB 자료로 처음부터 끝까지 실행해 오류 없이 돌고, 본문의 수치와 같은 값을 내는 것을 확인했다. 멘델(1866)의 양성교배 자료와 교재의 손계산 예제(마녀, 광고)도 R로 다시 계산했다. 03절의 반복 실험 위젯만은 영가설의 비율로 컴퓨터가 흉내 낸 가상의 실험이며, 그 위젯에 그렇게 밝혀 두었다. 국민건강영양조사 수치는 가중치를 적용하지 않은 표본 수치이므로 모집단 추정치로 인용하지 않는다. 쪽 안의 계산기와 탐색기는 넣은 값으로 쪽의 스크립트가 직접 계산한다.</p>
 </section>
 
 <section class="panel" id="refs">
@@ -953,15 +1352,22 @@ chisq.test(tab22, correct = FALSE)   # 비교: Pearson χ² (보정 없음)</pre
 <li>Blitzstein, J. K., &amp; Hwang, J. (2019). <em>Introduction to probability</em> (2nd ed.). CRC Press.</li>
 <li>Campbell, I. (2007). Chi-squared and Fisher–Irwin tests of two-by-two tables with small sample recommendations. <em>Statistics in Medicine, 26</em>(19), 3661–3675.</li>
 <li>Cohen, J. (1988). <em>Statistical power analysis for the behavioral sciences</em> (2nd ed.). Lawrence Erlbaum.</li>
+<li>Everitt, B. S., &amp; Hothorn, T. (2014). <em>A handbook of statistical analyses using R</em> (3rd ed.). CRC Press. (HSAUR3 패키지, 12장 BtheB 자료)</li>
 <li>Fagerland, M. W., Lydersen, S., &amp; Laake, P. (2013). The McNemar test for binary matched-pairs data: Mid-p and asymptotic are better than exact conditional. <em>BMC Medical Research Methodology, 13</em>, 91.</li>
+<li>Fisher, R. A. (1936). Has Mendel's work been rediscovered? <em>Annals of Science, 1</em>(2), 115–137.</li>
 <li>James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2013). <em>An introduction to statistical learning: With applications in R</em>. Springer. (4장 Classification)</li>
 <li>Kweon, S., Kim, Y., Jang, M., et al. (2014). Data resource profile: The Korea National Health and Nutrition Examination Survey (KNHANES). <em>International Journal of Epidemiology, 43</em>(1), 69–77.</li>
+<li>Mendel, G. (1866). Versuche über Pflanzen-Hybriden. <em>Verhandlungen des naturforschenden Vereines in Brünn, 4</em>, 3–47.</li>
+<li>Moher, D., Hopewell, S., Schulz, K. F., Montori, V., Gøtzsche, P. C., Devereaux, P. J., Elbourne, D., Egger, M., &amp; Altman, D. G. (2010). CONSORT 2010 explanation and elaboration: Updated guidelines for reporting parallel group randomised trials. <em>BMJ, 340</em>, c869.</li>
 <li>Navarro, D. J. (2019). <em>Learning statistics with R: A tutorial for psychology students and other beginners</em> (Version 0.6.1). (12장 Categorical data analysis)</li>
+<li>Proudfoot, J., Goldberg, D., Mann, A., Everitt, B., Marks, I., &amp; Gray, J. A. (2003). Computerized, interactive, multimedia cognitive-behavioural program for anxiety and depression in general practice. <em>Psychological Medicine, 33</em>(2), 217–227.</li>
+<li>Senn, S. (1994). Testing for baseline balance in clinical trials. <em>Statistics in Medicine, 13</em>(17), 1715–1726.</li>
+<li>Weiling, F. (1986). What about R. A. Fisher's statement of the "too good" data of J. G. Mendel's Pisum paper? <em>Journal of Heredity, 77</em>(4), 281–283. https://doi.org/10.1093/oxfordjournals.jhered.a110239</li>
 </ol>
 <h3>데이터 출처</h3>
 <ul>
 <li>도로교통공단, 교통사고분석시스템(TAAS) 사망 교통사고 정보, 2025년 서울 (<a href="https://taas.koroad.or.kr" target="_blank" rel="noopener">taas.koroad.or.kr</a>). 경찰이 조사·처리한 교통사고 중 사망사고. 실습용 CSV는 원자료의 열 일부만 남긴 것이다.</li>
-<li>질병관리청, 「국민건강영양조사 제9기 3차년도(2024) 원시자료」 기본 DB (<a href="https://knhanes.kdca.go.kr" target="_blank" rel="noopener">knhanes.kdca.go.kr</a>). 원시자료 이용지침서 참조.</li>
+<li>질병관리청, 「국민건강영양조사 제9기 3차년도(2024) 원시자료」 기본 DB (<a href="https://knhanes.kdca.go.kr/knhanes/main.do" target="_blank" rel="noopener noreferrer">knhanes.kdca.go.kr</a>). 원시자료 이용지침서 참조.</li>
 </ul>
 </section>
 
@@ -1013,7 +1419,7 @@ window.FN_EXTRA = {
 'glm':{pkg:'stats',sig:'glm(formula, family, data)',why:'일반화선형모형. family = binomial이면 로지스틱 회귀다.',args:[['formula',1,'<code>반응 ~ 설명변수</code>'],['family',1,'binomial'],['data',2,'데이터프레임']],ret:'glm 객체. <code>summary()</code>, <code>coef()</code>, <code>anova()</code>로 본다.'},
 'coef':{pkg:'stats',sig:'coef(object)',why:'모형의 계수를 꺼낸다.',args:[['object',1,'적합한 모형']],ret:'이름 붙은 숫자 벡터.'},
 'exp':{pkg:'base',sig:'exp(x)',why:'지수함수. 로지스틱 회귀의 계수(로그 오즈비)를 오즈비로 바꾼다.',args:[['x',1,'숫자']],ret:'숫자.'},
-'confint':{pkg:'stats',sig:'confint(object, level = 0.95)',why:'계수의 신뢰구간. glm에서는 프로파일 가능도 구간을 구한다.',args:[['object',1,'적합한 모형'],['level',0,'신뢰수준. 기본값 0.95']],ret:'하한·상한 두 열의 행렬.'},
+'confint':{pkg:'stats',sig:'confint(object, level = 0.95)',why:'신뢰구간을 구한다. glm 계수에서는 프로파일 가능도 구간, emmeans의 쌍별 비교에서는 차이의 구간이다.',args:[['object',1,'적합한 모형'],['level',0,'신뢰수준. 기본값 0.95']],ret:'하한·상한 두 열의 행렬.'},
 'anova':{pkg:'stats',sig:'anova(object, test)',why:'모형의 이탈도 분석표. test = "Chisq"면 가능도비 χ² 검정을 한다.',args:[['object',1,'glm 객체'],['test',0,'"Chisq"']],ret:'anova 표.'},
 'separate_wider_delim':{pkg:'tidyr',sig:'separate_wider_delim(data, cols, delim, names)',why:'한 열의 글자를 구분자로 나누어 여러 열로 만든다. "차대사람 - 횡단중"을 두 열로 나눌 때 쓴다.',args:[['data',1,'파이프로 넘겨받는 데이터프레임'],['cols',1,'나눌 열'],['delim',1,'구분자. 예: " - "'],['names',1,'새 열들의 이름']],ret:'열이 나뉜 데이터프레임. 원래 열은 사라진다.'},
 'str_extract':{pkg:'stringr',sig:'str_extract(string, pattern)',why:'글자에서 정규표현식에 맞는 부분을 꺼낸다. "2025년 7월"에서 월 숫자를 꺼낼 때 쓴다.',args:[['string',1,'문자형 벡터'],['pattern',1,'정규표현식. "\\d+(?=월)"은 "월" 바로 앞의 숫자']],ret:'꺼낸 글자. 맞는 부분이 없으면 NA.'},
@@ -1023,6 +1429,14 @@ window.FN_EXTRA = {
 'month':{pkg:'lubridate',sig:'month(x)',why:'날짜의 월(1~12)을 꺼낸다. tidyverse와 함께 불러와진다.',args:[['x',1,'날짜']],ret:'정수 벡터.'},
 'function':{pkg:'base',sig:'function(인수) { 본문 }',why:'함수를 만든다. 같은 점검을 여러 표에 되풀이할 때 쓴다.',args:[['인수',0,'함수에 넘길 값의 이름']],ret:'함수.'},
 'mean':{pkg:'base',sig:'mean(x)',why:'평균. 논리값에 쓰면 TRUE의 비율이 된다(기대도수 5 미만 칸의 비율).',args:[['x',1,'숫자 또는 논리값 벡터']],ret:'숫자 하나.'},
+'lm':{pkg:'stats',sig:'lm(formula, data)',why:'선형모형을 적합한다. 집단 요인과 공변량을 함께 넣으면 공분산분석(ANCOVA) 모형이 된다.',args:[['formula',1,'<code>결과 ~ 공변량 + 집단</code>. <code>a * b</code>는 주효과와 교호작용'],['data',2,'데이터프레임']],ret:'lm 객체.'},
+'Anova':{pkg:'car',sig:'Anova(mod, type = 2)',why:'Type II(또는 III) 제곱합으로 분산분석표를 만든다. 변수를 넣은 순서와 상관없이 다른 항을 보정한 뒤의 효과를 검정한다.',args:[['mod',1,'lm 같은 적합된 모형'],['type',0,'2(기본값) 또는 3']],ret:'anova 표: Sum Sq, Df, F value, Pr(&gt;F).'},
+'emmeans':{pkg:'emmeans',sig:'emmeans(object, specs)',why:'보정 평균(추정주변평균)을 구한다. 공변량을 평균값에 맞추고, 범주형 공변량은 수준을 고르게 평균한다.',args:[['object',1,'lm 같은 적합된 모형'],['specs',1,'<code>~ 집단</code>']],ret:'emmGrid 객체. 출력하면 보정 평균, 표준오차, 신뢰구간이 나온다.'},
+'pairs':{pkg:'emmeans',sig:'pairs(x)',why:'보정 평균끼리 쌍별 차이를 구한다. <code>confint()</code>로 감싸면 차이의 신뢰구간이 나온다.',args:[['x',1,'emmeans 결과']],ret:'차이와 표준오차, t, p.'},
+'leveneTest':{pkg:'car',sig:'leveneTest(y, data, center = median)',why:'Levene 등분산 검정. 영가설은 모든 집단의 분산이 같다는 것이다.',args:[['y',1,'<code>결과 ~ 집단</code>'],['data',2,'데이터프레임']],ret:'검정 표: F value, Pr(&gt;F).'},
+'residuals':{pkg:'stats',sig:'residuals(object)',why:'모형의 잔차(관측값 − 적합값)를 꺼낸다. 정규성 점검에 쓴다.',args:[['object',1,'적합한 모형']],ret:'숫자 벡터.'},
+'geom_smooth':{pkg:'ggplot2',sig:'geom_smooth(method, se)',why:'산점도에 추세선을 겹친다. method = "lm"이면 회귀직선이고, 색으로 나눈 집단마다 따로 그린다.',args:[['method',0,'"lm"은 회귀직선'],['se',0,'신뢰띠를 그릴지. FALSE면 선만']],ret:'ggplot 레이어.'},
+'pchisq':{pkg:'stats',sig:'pchisq(q, df, lower.tail = TRUE)',why:'χ² 분포의 누적확률 P(χ² ≤ q)를 구한다. 기본값은 왼쪽 꼬리라, 이론에 이보다 더 잘 맞을 확률이 된다.',args:[['q',1,'χ² 값'],['df',1,'자유도'],['lower.tail',0,'FALSE면 오른쪽 꼬리 P(χ² &gt; q), 곧 p값']],ret:'0과 1 사이의 확률.'},
 'interpret_cramers_v':{pkg:'effectsize',sig:'interpret_cramers_v(es, rules)',why:'V 값에 관례적인 크기 이름(작음, 중간 등)을 붙인다.',args:[['es',1,'V 값'],['rules',0,'기준의 이름']],ret:'이름표 글자.'}
 };
 </script>
@@ -1125,6 +1539,94 @@ window.FN_EXTRA = {
     dfIn.addEventListener("input", draw); xIn.addEventListener("input", draw);
     document.querySelectorAll("#lab-chi [data-df]").forEach(b => b.addEventListener("click", () => { dfIn.value = b.dataset.df; xIn.value = b.dataset.x; draw(); }));
     draw();
+  })();
+
+
+  /* ---------- 위젯 0: 영가설의 세계에서 실험 되풀이하기 (χ² 분포 만들기) ----------
+     실제 관측값(obs)은 실측 자료(멘델 1866, 서울 2025)이고, 반복 실험은 영가설의 비율로 컴퓨터가 흉내 낸 것이다. */
+  (() => {
+    const SETS = {
+      4: { lab: ["둥글고 노랑", "둥글고 초록", "주름지고 노랑", "주름지고 초록"], p: [9, 3, 3, 1].map(v => v / 16),
+           obs: [315, 108, 101, 32], name: "멘델", xmax: 14 },
+      2: { lab: ["주간", "야간"], p: [0.5, 0.5], obs: [115, 96], name: "서울 주야", xmax: 9 },
+      12: { lab: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"], p: Array(12).fill(1 / 12),
+            obs: [16, 11, 15, 17, 21, 12, 23, 18, 19, 22, 15, 22], name: "서울 월별", xmax: 32 }
+    };
+    const one = $("sim-one"), hist = $("sim-hist");
+    let k = 4, vals = [], last = null;
+    const chiOf = (o, e) => o.reduce((s, v, i) => s + (v - e[i]) ** 2 / e[i], 0);
+    function experiment(set) {
+      const n = set.obs.reduce((a, b) => a + b, 0), cum = [], cnt = Array(set.p.length).fill(0);
+      set.p.reduce((s, v, i) => (cum[i] = s + v), 0);
+      for (let j = 0; j < n; j++) { const u = Math.random(); let i = 0; while (i < cum.length - 1 && u > cum[i]) i++; cnt[i]++; }
+      return cnt;
+    }
+    function drawOne() {
+      const set = SETS[k], n = set.obs.reduce((a, b) => a + b, 0), e = set.p.map(v => v * n);
+      const W = 640, L = 30, R = 10, top = 10, h1 = 100, gap = 34, h2 = 50, m = set.p.length, cw = (W - L - R) / m;
+      let s = "";
+      if (!last) {
+        s = `<text class="lbl" x="${W / 2}" y="90" text-anchor="middle">"한 번 실험" 단추를 누르면 영가설대로 ${n}개를 나눈다</text>`;
+        one.innerHTML = s; return;
+      }
+      const ymax = Math.max(...last, ...e) * 1.1, cont = last.map((v, i) => (v - e[i]) ** 2 / e[i]);
+      const cmax = Math.max(1.5, ...cont);
+      for (let i = 0; i < m; i++) {
+        const x = L + i * cw, bw = cw * 0.6, bx = x + cw * 0.2;
+        const bh = h1 * last[i] / ymax, ey = top + h1 - h1 * e[i] / ymax;
+        s += `<rect class="bar" x="${bx.toFixed(1)}" y="${(top + h1 - bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}"/>`;
+        s += `<line class="curve" x1="${(bx - 3).toFixed(1)}" x2="${(bx + bw + 3).toFixed(1)}" y1="${ey.toFixed(1)}" y2="${ey.toFixed(1)}"/>`;
+        if (m <= 4) s += `<text class="tick" x="${(x + cw / 2).toFixed(1)}" y="${top + h1 - bh - 4}" text-anchor="middle">${last[i]}</text>`;
+        s += `<text class="tick" x="${(x + cw / 2).toFixed(1)}" y="${top + h1 + 14}" text-anchor="middle">${set.lab[i]}</text>`;
+        const ch = h2 * cont[i] / cmax, cy = top + h1 + gap;
+        s += `<rect class="contrib" x="${bx.toFixed(1)}" y="${cy.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0.8, ch).toFixed(1)}"/>`;
+        if (m <= 4) s += `<text class="tick" x="${(x + cw / 2).toFixed(1)}" y="${(cy + ch + 12).toFixed(1)}" text-anchor="middle">${cont[i].toFixed(2)}</text>`;
+      }
+      s += `<line class="axis" x1="${L}" x2="${W - R}" y1="${top + h1}" y2="${top + h1}"/>`;
+      s += `<text class="lblw" x="${L - 26}" y="${top + h1 + gap + 10}">벗어남</text>`;
+      s += `<text class="lbl" x="${W - R}" y="${top + h1 + gap + h2 + 30}" text-anchor="end">붉은 막대의 합 = 이번 χ² = ${chiOf(last, e).toFixed(2)}</text>`;
+      one.innerHTML = s;
+    }
+    function drawHist() {
+      const set = SETS[k], n = set.obs.reduce((a, b) => a + b, 0), e = set.p.map(v => v * n), df = set.p.length - 1;
+      const obs = chiOf(set.obs, e), xmax = set.xmax, nb = 40, bw = xmax / nb, cnt = Array(nb).fill(0);
+      vals.forEach(v => { const b = Math.min(nb - 1, Math.floor(v / bw)); cnt[b]++; });
+      const W = 640, H = 250, L = 20, R = 16, T = 22, B = 30, pw = W - L - R, ph = H - T - B;
+      const reps = Math.max(vals.length, 1), curve = [];
+      for (let i = 0; i <= 200; i++) { const x = xmax * i / 200; curve.push([x, reps * bw * chiPdf(Math.max(x, xmax * 0.004), df)]); }
+      const ymax = Math.max(...cnt, ...curve.map(c => (df <= 2 && c[0] < bw) ? 0 : c[1])) * 1.1 || 1;
+      const sx = x => L + pw * x / xmax, sy = y => T + ph - ph * Math.min(y, ymax) / ymax;
+      let s = "";
+      cnt.forEach((c, i) => { if (c) s += `<rect class="hbar${(i + 1) * bw > obs ? " hit" : ""}" x="${sx(i * bw).toFixed(1)}" y="${sy(c).toFixed(1)}" width="${(pw / nb - 1).toFixed(1)}" height="${(T + ph - sy(c)).toFixed(1)}"/>`; });
+      if (vals.length) s += `<path class="norm" d="${curve.map((c, i) => (i ? "L" : "M") + sx(c[0]).toFixed(1) + " " + sy(c[1]).toFixed(1)).join(" ")}"/>`;
+      s += `<line class="axis" x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}"/>`;
+      const step = xmax > 20 ? 5 : 2;
+      for (let t = 0; t <= xmax + 1e-9; t += step) s += `<text class="tick" x="${sx(t)}" y="${T + ph + 16}" text-anchor="middle">${t}</text>`;
+      const xo = sx(Math.min(obs, xmax)), anchor = xo > W - 200 ? "end" : "start", off = anchor === "end" ? -6 : 6;
+      s += `<line class="stat" x1="${xo}" x2="${xo}" y1="${T}" y2="${T + ph}"/>`;
+      s += `<text class="lbl" x="${xo + off}" y="${T - 6}" text-anchor="${anchor}">${set.name} 실제 χ² = ${obs.toFixed(2)}</text>`;
+      s += `<text class="tick" x="${W - R}" y="${T + ph + 28}" text-anchor="end">χ² (자유도 ${df})</text>`;
+      if (!vals.length) s += `<text class="lbl" x="${W / 2}" y="${T + ph / 2}" text-anchor="middle">아직 쌓인 실험이 없다</text>`;
+      hist.innerHTML = s;
+      $("sim-n").textContent = vals.length.toLocaleString("ko-KR");
+      $("sim-last").textContent = last ? chiOf(last, e).toFixed(2) : "-";
+      $("sim-obs").textContent = obs.toFixed(2);
+      $("sim-share").textContent = vals.length ? (vals.filter(v => v >= obs).length / vals.length).toFixed(3).replace(/^0/, "") : "-";
+      $("sim-p").textContent = fmtP(chiUpper(obs, df));
+    }
+    function run(r) {
+      const set = SETS[k], n = set.obs.reduce((a, b) => a + b, 0), e = set.p.map(v => v * n);
+      if (r === 0) { vals = []; last = null; }
+      for (let i = 0; i < r; i++) { last = experiment(set); vals.push(chiOf(last, e)); }
+      drawOne(); drawHist();
+    }
+    document.querySelectorAll("#lab-sim [data-k]").forEach(b => b.addEventListener("click", () => {
+      k = +b.dataset.k; vals = []; last = null;
+      document.querySelectorAll("#lab-sim [data-k]").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+      run(0);
+    }));
+    document.querySelectorAll("#lab-sim [data-rep]").forEach(b => b.addEventListener("click", () => run(+b.dataset.rep)));
+    run(0);
   })();
 
   /* ---------- 위젯 2: 이항 정확분포와 정규근사 ---------- */
