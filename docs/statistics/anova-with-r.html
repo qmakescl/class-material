@@ -178,7 +178,7 @@
   <div class="legend"><span><i style="background:var(--g1)"></i>ctrl</span><span><i style="background:var(--g2)"></i>trt1</span><span><i style="background:var(--g3)"></i>trt2</span></div>
   <p class="figcap">정사각형 하나가 관측값 하나다. 한 변이 예측에서 틀린 거리이고, 넓이가 그 제곱이다. 위 줄은 전체 평균으로, 아래 줄은 집단 평균으로 예측했을 때다. 아래 줄의 정사각형이 대체로 작아지고, 아래 막대에서 줄어든 넓이가 SSTrt다. 제곱을 쓰기 때문에 크게 틀린 관측값일수록 넓이가 훨씬 커진다.</p>
 </div>
-<p>정리하면, 어떤 요인의 제곱합은 "그 요인을 알게 되어 예측 오차의 넓이가 얼마나 줄었는가"이다. 02절에서 제곱합의 유형(Type I/II/III)을 설명할 때도 이 생각을 그대로 쓴다. 위 항등식의 세 편차마다 제곱합이 하나씩 있다.</p>
+<p>정리하면, 어떤 요인의 제곱합은 "그 요인을 알게 되어 예측 오차의 넓이가 얼마나 줄었는가"이다. 02절의 순차 제곱합(Type I)도 이 생각을 그대로 쓴다. 다만 Type II와 III은 효과마다 다른 조건의 가설을 검정하므로, 그 값들은 하나의 양을 나눈 조각으로 읽지 않는다. 위 항등식의 세 편차마다 제곱합이 하나씩 있다.</p>
 <div class="readout math">
 \[\mathit{SST} = \sum_{j=1}^{k}\sum_{i=1}^{n_j} (y_{ij} - \bar{y})^2 = 14.258 \qquad (\text{전체 제곱합, total SS})\]
 \[\mathit{SSTrt} = \sum_{j=1}^{k} n_j\,(\bar{y}_j - \bar{y})^2 = 10\,\{(-0.041)^2 + (-0.412)^2 + 0.453^2\} = 3.766 \qquad (\text{처리 제곱합, treatment SS})\]
@@ -447,7 +447,7 @@ ggsave("output/oneway_decomposition.png", p_decomp, width = 7, height = 4.5, dpi
 <p>일원배치(one-way design)에서 SSTrt 하나였던 "설명된 변동"이 이원배치(two-way design)에서는 세 조각으로 나뉜다. 균형 설계에서는 이 세 조각이 서로 직교(orthogonal)하므로 분해가 유일하다. 불균형 설계(unbalanced design)에서는 제곱합(sum of squares, SS)의 유형(Type I/II/III)에 따라 값이 달라진다.</p>
 <details class="fold" id="ss-types">
 <summary>펼쳐 보기: 제곱합의 유형(types of sums of squares) Type I / II / III를 그림으로 구분하기</summary>
-<div class="callout"><p><strong>한마디로.</strong> 두 요인이 서로 얽혀 있으면, 결과의 변동 가운데 "둘 중 누구 덕인지 가릴 수 없는 몫"이 생긴다. 그 몫을 먼저 들어온 요인에게 주면 Type I, 아무에게도 주지 않으면 Type II와 III이다. Type II와 III은 교호작용을 어떻게 다루느냐에서 갈린다.</p></div>
+<div class="callout"><p><strong>한마디로.</strong> 불균형 설계에서는 한 요인이 더 설명하는 변동이 다른 요인을 어떻게 고려하느냐에 따라 달라진다. Type I은 요인을 정한 순서로 넣으며 줄어드는 잔차 제곱합을 적는 <b>순차 분해</b>다. Type II와 III은 효과마다 서로 다른 조정 조건에서 <b>가설을 검정</b>한다. 그래서 Type II와 III의 효과별 제곱합은 전체 변동을 남김없이 나눈 조각이 아니고, 더해도 모형이 설명한 양과 같을 필요가 없다. 핵심 질문은 "변동을 누구에게 나누어 주는가"가 아니라 "어떤 평균 차이를 어떤 조건에서 검정하는가"다.</p></div>
 
 <h4>1. 왜 "가릴 수 없는 몫"이 생기나</h4>
 <p>예제는 R 내장 <code>mtcars</code>의 자동차 32대다. 연비(mpg, 마일/갤런)를 변속기(am: 자동, 수동)와 기통 수(cyl: 4, 6, 8)로 설명한다. 먼저 두 요인이 어떻게 섞여 있는지 본다.</p>
@@ -483,7 +483,7 @@ ggsave("output/oneway_decomposition.png", p_decomp, width = 7, height = 4.5, dpi
 <tr><td>+ am</td><td>264.50</td><td>36.77 = SS(am | cyl)</td></tr>
 <tr class="total"><td>공통</td><td>+ am × cyl</td><td>239.06</td><td>25.44 = SS(am × cyl | am, cyl)</td></tr>
 </tbody></table></div>
-<p>\(\mathit{SS}(\text{am} \mid \text{cyl})\)은 "cyl을 이미 넣은 뒤 am이 더 설명하는 몫"이라고 읽는다. am은 혼자 들어가면 405.15를 설명하지만, cyl 다음에 들어가면 36.77만 더 설명한다. 둘의 차이 368.38이 두 요인이 함께 설명하는 몫이다. cyl 쪽에서 보아도 824.78 − 456.40 = 368.38로 같다. 두 순서 모두 마지막 잔차는 264.50으로 같고, 그 몫을 누구에게 붙이느냐만 다르다.</p>
+<p>\(\mathit{SS}(\text{am} \mid \text{cyl})\)은 "cyl을 이미 넣은 뒤 am이 더 설명하는 몫"이라고 읽는다. am은 혼자 들어가면 405.15를 설명하지만, cyl 다음에 들어가면 36.77만 더 설명한다. 이 자료에서는 둘의 차이 368.38을 두 요인이 함께 설명하는 몫으로 볼 수 있다. cyl 쪽에서 보아도 824.78 − 456.40 = 368.38로 같다. 두 순서 모두 마지막 잔차는 264.50으로 같다. 다만 다른 요인을 먼저 넣으면 늘 이렇게 줄어드는 것은 아니다. 오히려 커지는 경우도 있는데, 4절 아래의 반례에서 본다.</p>
 
 <h4>3. 세 유형의 규칙</h4>
 <div class="readout math">
@@ -492,63 +492,76 @@ ggsave("output/oneway_decomposition.png", p_decomp, width = 7, height = 4.5, dpi
 \[\text{Type III (부분, partial)}:\quad \mathit{SS}(A \mid B, AB),\quad \mathit{SS}(B \mid A, AB),\quad \mathit{SS}(AB \mid A, B)\]
 </div>
 <ul>
-<li><b>Type I(순차)</b>: 적은 순서대로 넣으며 줄어든 양을 그대로 준다. 먼저 들어간 요인이 겹친 몫을 모두 가져간다. 그래서 순서를 바꾸면 값이 달라진다.</li>
-<li><b>Type II(계층적)</b>: 주효과마다 "다른 주효과를 먼저 넣은 뒤" 더 설명하는 몫만 준다. 겹친 몫은 어느 주효과에도 주지 않는다. 교호작용은 주효과를 판단할 때 고려하지 않는다.</li>
-<li><b>Type III(부분)</b>: 주효과마다 "다른 주효과와 교호작용까지 모두 넣은 뒤" 더 설명하는 몫만 준다. 교호작용이 있어도 칸 평균을 같은 무게로 놓고 주효과를 본다.</li>
+<li><b>Type I(순차)</b>: 적은 순서대로 항을 넣으며 줄어든 잔차를 그대로 적는다. 세 줄을 더하면 모형이 설명한 양이 된다. 순서를 바꾸면 각 줄의 값이 달라진다.</li>
+<li><b>Type II(계층적)</b>: 주효과마다 "다른 주효과를 이미 넣은 모형에 그 효과를 더할 때 줄어드는 잔차"를 적는다. 교호작용이 없는 가법 모형에서 다른 주효과를 조정한 효과를 검정하는 셈이다.</li>
+<li><b>Type III(부분)</b>: 다른 모든 항(교호작용 포함)이 든 모형에서 그 효과의 계수가 0인지를 검정한다. 합이 0이 되는 대비 코딩을 쓰면, 이것이 다른 요인의 수준을 같은 무게로 평균한 주효과의 가설이 된다. 코딩이 다르면 다른 가설이 된다(<a href="#contrast">대비 펼침 상자</a>).</li>
 </ul>
-<p>교호작용은 언제나 두 주효과를 모두 넣은 뒤에 들어가므로 세 유형에서 같다(25.44).</p>
+<p>Type II와 III의 줄들은 서로 다른 조건에서 구한 값이어서, 더한 값에 따로 뜻이 있지 않다. 교호작용은 언제나 두 주효과를 모두 넣은 뒤에 들어가므로 세 유형에서 같다(25.44).</p>
 
 <h4>4. 그림으로 보기</h4>
 <p>원 세 개는 am, cyl, am × cyl이 설명하는 변동이고, 원이 겹친 곳이 함께 설명하는 몫이다. 색칠한 곳이 그 유형에서 그 효과의 제곱합으로 치는 부분이다. 줄마다 왼쪽에서 오른쪽으로 보며, 겹친 곳에 색이 칠해졌는지를 비교한다. 원의 크기와 겹침은 개념을 보이는 그림일 뿐 실제 비율이 아니며, 숫자는 실제 계산값이다.</p>
+<div class="callout caution"><p><strong>이 그림의 단서.</strong> 원이 겹치는 그림은 이 자료의 mpg처럼 두 요인이 같은 방향으로 얽혀 있어서, 다른 요인을 고려하면 제곱합이 <em>줄어드는</em> 경우에만 맞는 비유다. 다른 요인을 고려하면 오히려 <em>커지는</em> 경우도 있는데(아래 반례), 그런 경우는 원의 겹침으로 그릴 수 없다. 또 Type III는 실제로 원의 일부를 잘라 내는 계산이 아니라 계수에 대한 가설검정이다. 이 그림은 "유형마다 무엇을 조정하는가"를 떠올리는 데만 쓰고, 넓이를 셈하는 규칙으로 읽지 않는다.</p></div>
 <div class="fig">
   <svg id="sstypes" viewBox="0 0 640 556" role="img" aria-label="Type I, II, III에서 각 효과에 배정되는 제곱합 영역과 mtcars의 제곱합"></svg>
-  <p class="figcap">교호작용은 어느 유형에서나 마지막에 남는 몫이라 25.44로 같다. 달라지는 것은 주효과(main effect)다. 잔차(residual) 제곱합은 239.06이고, 전체 제곱합은 1126.05다. Type I의 세 값을 더하면 전체 − 잔차 = 886.99와 정확히 같고, Type II와 III은 겹친 몫을 어느 효과에도 주지 않아 그 합이 더 작다. 남은 몫이 어디로 갔는지는 그림 아래에서 다룬다. Type III의 값은 소수 첫째 자리까지 적었다.</p>
+  <p class="figcap">교호작용은 어느 유형에서나 마지막에 남는 몫이라 25.44로 같다. 달라지는 것은 주효과(main effect)다. 잔차(residual) 제곱합은 239.06이고, 전체 제곱합은 1126.05다. Type I의 세 값을 더하면 전체 − 잔차 = 886.99와 정확히 같다. Type II와 III의 세 값을 더하면 이 자료에서는 886.99보다 작지만, 늘 그런 것은 아니다(그림 아래의 반례). Type III의 값은 소수 첫째 자리까지 적었다.</p>
 </div>
-<p>첫 줄(Type I, am 먼저)에서 am 원은 겹친 곳까지 모두 칠해져 있다. 둘째 줄과 셋째 줄에서는 cyl과 겹친 곳이 비어 있다. 넷째 줄(Type III)은 교호작용과 겹친 곳까지 비어 있어 가장 작다.</p>
-<p>결론이 실제로 달라진다. am의 <i>p</i>는 am을 먼저 넣은 Type I에서 &lt; .001, cyl을 먼저 넣은 Type I과 Type II에서 .056, Type III에서 .083이다. 기통 수가 적은 차에 수동 변속기가 많아, am만의 몫으로 볼 수 있는 부분이 작기 때문이다.</p>
+<p>첫 줄(Type I, am 먼저)에서 am 원은 겹친 곳까지 모두 칠해져 있다. 둘째 줄과 셋째 줄에서는 cyl과 겹친 곳이 비어 있다. 넷째 줄(Type III)은 교호작용과 겹친 곳까지 비워 그렸다. 이 자료에서는 Type III의 am이 가장 작지만, 이것이 일반 규칙은 아니다.</p>
+<p>결론이 실제로 달라진다. am의 <i>p</i>는 am을 먼저 넣은 Type I에서 &lt; .001, cyl을 먼저 넣은 Type I과 Type II에서 .056, Type III에서 .083이다. 기통 수가 적은 차에 수동 변속기가 많아, cyl을 고려하면 am이 더 설명하는 양이 작아지기 때문이다.</p>
 
-<div class="callout"><p><strong>질문: 그럼 Type II와 III에서 겹친 몫은 어디로 갔나?</strong> 사라지지도, 오차로 가지도 않는다. 모형 안에 그대로 남아 있다. 다만 "누구 몫"이라는 이름표가 붙지 않아서 분산분석표의 어느 줄에도 나오지 않을 뿐이다.</p></div>
-<p>세 가지를 차례로 확인하면 이해가 쉽다.</p>
+<div class="callout"><p><strong>질문: Type II와 III의 세 줄을 더하면 왜 모형이 설명한 양과 다른가? 모자라는 몫은 어디로 갔나?</strong> 어디로 "간" 것이 아니다. Type II와 III의 줄은 처음부터 하나의 양을 나눈 조각이 아니기 때문이다. 그래서 합이 모자랄 수도, 넘칠 수도 있다.</p></div>
 <ol>
-<li><b>모형이 설명한 양은 유형과 상관없다.</b> am, cyl, am × cyl을 모두 넣은 모형은 하나뿐이다. 그래서 그 모형의 잔차는 어느 유형에서나 239.06이고, 모형이 설명한 양도 1126.05 − 239.06 = 886.99로 같다. 유형이 정하는 것은 이 886.99를 효과마다 어떻게 나누어 적느냐뿐이다.</li>
-<li><b>Type I은 남김없이 나눈다.</b> 겹친 몫을 먼저 들어간 효과에 붙여서, 세 줄을 더하면 886.99가 된다. 대신 순서를 바꾸면 각 줄의 값이 바뀐다.</li>
-<li><b>Type II와 III은 확실한 몫만 적는다.</b> 효과마다 "그 효과만이 설명하는 몫"만 적는다. 그래서 세 줄을 더해도 886.99에 못 미친다. 모자라는 만큼이 이름표 없이 남은 겹친 몫이다.
-  <ul>
-  <li>Type II: 886.99 − 518.61 = 368.38. 앞의 표에서 본 "am과 cyl이 함께 설명하는 몫" 368.38과 정확히 같다.</li>
-  <li>Type III: 886.99 − 465.77 = 421.22. 주효과와 교호작용이 겹친 몫까지 더해져 더 크다.</li>
-  </ul></li>
+<li><b>같은 완전모형이면 적합값과 잔차는 유형과 상관없다.</b> am, cyl, am × cyl을 모두 넣은 모형의 잔차는 어느 유형에서나 239.06이고, 모형이 설명한 양은 1126.05 − 239.06 = 886.99다. 유형에 따라 달라지는 것은 효과마다 검정하는 가설과 그 가설에 맞는 제곱합이다. 그래서 효과별 제곱합과 <i>p</i>가 달라진다.</li>
+<li><b>Type I만 순차 분해다.</b> 정한 순서로 줄어든 잔차를 적으므로 세 줄을 더하면 886.99가 된다.</li>
+<li><b>Type II와 III의 합은 아무 쪽으로나 어긋날 수 있다.</b> mpg에서는 518.61과 465.77로 886.99보다 작다. 하지만 같은 차 32대의 qsec(정지 상태에서 1/4마일을 달리는 데 걸린 초)를 같은 모형으로 분석하면 결과가 반대다. 모형이 설명한 양은 74.28인데, Type II의 합은 108.59, Type III의 합은 97.13으로 더 크다.</li>
 </ol>
+<div class="scroll"><table class="stat">
+<caption>qsec의 반례: 다른 요인을 고려하면 제곱합이 커진다</caption>
+<thead><tr><th>변속기</th><th>4기통</th><th>6기통</th><th>8기통</th></tr></thead>
+<tbody>
+<tr><td>자동 (대수)</td><td>20.97 (3)</td><td>19.22 (4)</td><td>17.14 (12)</td></tr>
+<tr><td>수동 (대수)</td><td>18.45 (8)</td><td>16.33 (3)</td><td>14.55 (2)</td></tr>
+</tbody></table></div>
+<p>같은 기통끼리 보면 수동차가 2.5~2.9초 빠르다. 그런데 수동차는 대부분 가속이 느린 4기통이고, 자동차는 대부분 가속이 빠른 8기통이다. 그래서 변속기만 놓고 보면 두 차이가 상쇄되어 am은 5.23만 설명한다. cyl을 먼저 고려하면 가려졌던 변속기 차이가 드러나 am이 39.54를 설명한다. 다른 요인을 고려했더니 제곱합이 줄지 않고 7배 넘게 커졌다. 이런 경우의 차이를 "겹친 몫"이라는 넓이로 읽을 수는 없다.</p>
 <div class="fig">
-  <svg id="ss-left" viewBox="0 0 640 250" role="img" aria-label="전체 제곱합 1126.05를 유형마다 효과, 이름표 없는 겹친 몫, 잔차로 나눈 막대"></svg>
-  <div class="legend"><span><i style="background:var(--g1)"></i>am</span><span><i style="background:var(--g2)"></i>cyl</span><span><i style="background:var(--g3)"></i>am × cyl</span><span><i style="background:var(--muted);opacity:.45"></i>겹친 몫(이름표 없음)</span><span><i style="background:var(--ink)"></i>잔차</span></div>
-  <p class="figcap">막대 네 개의 전체 길이는 모두 1126.05이고, 오른쪽 끝의 잔차 239.06도 모두 같다. 유형마다 다른 것은 모형이 설명한 886.99를 나누는 방식이다. 회색 빗금이 어느 효과의 줄에도 적히지 않은 겹친 몫이다.</p>
+  <div class="modes" role="group" aria-label="반응 변수 고르기" id="ssc-ctrls">
+    <button type="button" data-y="mpg" aria-pressed="true">mpg (연비)</button>
+    <button type="button" data-y="qsec" aria-pressed="false">qsec (가속 시간)</button>
+  </div>
+  <svg id="ss-left" viewBox="0 0 640 330" role="img" aria-label="유형별 효과 제곱합을 나란히 놓고 세 줄의 합을 모형이 설명한 양과 견준 막대"></svg>
+  <div class="legend"><span><i style="background:var(--g1)"></i>am</span><span><i style="background:var(--g2)"></i>cyl</span><span><i style="background:var(--g3)"></i>am × cyl</span></div>
+  <p class="figcap" id="ss-left-cap"></p>
 </div>
-<p>그래서 Type II나 III의 분산분석표에서는 효과의 제곱합과 잔차를 더해도 전체 제곱합이 되지 않는다. 계산이 틀린 것이 아니라 겹친 몫을 일부러 적지 않은 결과다. 각 효과의 F 검정은 어느 유형에서나 같은 잔차(평균제곱 239.06 / 26 = 9.19)를 분모로 쓰므로, 겹친 몫은 검정에도 들어가지 않는다. 같은 까닭으로, 불균형 설계에서 효과크기를 "효과 제곱합 / 전체 제곱합"으로 구하면 Type II나 III에서는 그 합이 1에 못 미친다. 그래서 부분 \(\eta^2\)(partial eta squared), 곧 효과 / (효과 + 잔차)를 보고하는 경우가 많다.</p>
-<div class="cb r"><span class="lang">R · 겹친 몫 확인</span><pre>fit &lt;- lm(mpg ~ am * cyl, data = d,
-          contrasts = list(am = contr.sum, cyl = contr.sum))
-sst      &lt;- sum((d$mpg - mean(d$mpg))^2)         # 전체 제곱합 1126.05
-explained &lt;- sst - deviance(fit)                  # 모형이 설명한 양 886.99
+<p>그래서 Type II나 III의 분산분석표에서는 효과의 제곱합과 잔차를 더해도 전체 제곱합이 되지 않는다. 계산이 틀린 것이 아니라, 효과마다 다른 조건에서 구한 값이기 때문이다. F 검정의 분모는 어느 유형에서나 같은 완전모형의 잔차 평균제곱(mpg에서는 239.06 / 26 = 9.19)이다.</p>
+<p>효과크기도 마찬가지다. 부분 \(\eta^2\)(partial eta squared)는 그 효과의 제곱합을 "그 효과 + 오차" 제곱합으로 나눈다. 불균형 설계에서는 분자에 쓰는 제곱합의 유형에 따라 값이 달라진다. mpg의 am은 Type I(am 먼저)에서 .629, Type II에서 .133, Type III에서 .111이다. 그러니 부분 \(\eta^2\)를 보고할 때는 유형을 함께 밝힌다. 부분 \(\eta^2\)도 효과별로 더해서 1이 되는 지표는 아니다.</p>
+<div class="cb r"><span class="lang">R · 세 줄의 합과 모형이 설명한 양 견주기</span><pre>sum_check &lt;- function(y) {
+  fit &lt;- lm(reformulate("am * cyl", y), data = d,
+            contrasts = list(am = contr.sum, cyl = contr.sum))
+  sst &lt;- sum((d[[y]] - mean(d[[y]]))^2)
+  c(explained = sst - deviance(fit),                        # 모형이 설명한 양
+    type2_sum = sum(Anova(fit, type = 2)[1:3, "Sum Sq"]),   # Type II 세 줄의 합
+    type3_sum = sum(Anova(fit, type = 3)[2:4, "Sum Sq"]))   # Type III 세 줄의 합
+}
+sum_check("mpg")    # 886.99 / 518.61 / 465.77: 합이 작다
+sum_check("qsec")   #  74.28 / 108.59 /  97.13: 합이 크다</pre></div>
 
-explained - sum(Anova(fit, type = 2)[1:3, "Sum Sq"])   # Type II의 겹친 몫 368.38
-explained - sum(Anova(fit, type = 3)[2:4, "Sum Sq"])   # Type III의 겹친 몫 421.22</pre></div>
-
-<h4>5. 균형 설계에서는 고민할 필요가 없다</h4>
-<p>칸마다 사례 수가 같으면 두 요인이 서로 얽히지 않아 겹친 몫이 없다. 02절의 <code>ToothGrowth</code>는 칸마다 10마리여서, supp를 먼저 넣든 dose를 먼저 넣든 supp의 제곱합은 205.35, dose는 2426.43으로 같다. 세 유형이 같은 값을 주므로 유형을 고를 필요가 없다. 반대로 04절의 혼합 설계처럼 사료별 병아리 수가 다르면 유형에 따라 값이 달라진다.</p>
+<h4>5. 균형 설계에서는 세 유형이 같다 (조건이 있다)</h4>
+<p>모든 칸이 있고 칸마다 사례 수가 같은 완전 요인 설계에서는 두 요인이 서로 얽히지 않는다. 02절의 <code>ToothGrowth</code>는 칸마다 10마리여서, supp를 먼저 넣든 dose를 먼저 넣든 supp의 제곱합은 205.35, dose는 2426.43으로 같다. 통상적인 주효과 가설을 검정하면, 곧 Type III에 합이 0이 되는 대비를 쓰면, 세 유형이 같은 값을 준다. 다만 같은 균형 자료라도 R의 기본 처리 대비로 Type III을 구하면 supp의 제곱합이 137.81로 다르게 나온다. 이것은 기준 용량 0.5 mg에서의 supp 단순 효과라는 다른 가설을 검정한 결과다. 반대로 04절의 혼합 설계처럼 사료별 병아리 수가 다르면 유형에 따라 값이 달라진다.</p>
 
 <h4>6. 어느 유형을 쓸까</h4>
 <div class="scroll"><table class="methods">
-<caption>제곱합 유형의 선택</caption>
-<thead><tr><th>유형</th><th>언제 쓰나</th><th>주의할 점</th><th>R</th></tr></thead>
+<caption>제곱합 유형의 선택: 연구 질문에서 출발한다</caption>
+<thead><tr><th>방법</th><th>연구 질문</th><th>주의할 점</th><th>R</th></tr></thead>
 <tbody>
-<tr><td><b>Type I</b></td><td>요인의 순서에 이론적 근거가 있을 때(예: 통제할 변수를 먼저 넣는다)</td><td>요인의 순서를 바꾸면 값이 달라진다</td><td><code>aov()</code>, <code>anova()</code></td></tr>
-<tr><td><b>Type II</b></td><td>교호작용이 없을 때 주효과를 볼 때. 그 경우 검정력이 가장 높다</td><td>교호작용이 있으면 주효과의 해석이 어렵다</td><td><code>car::Anova(type = 2)</code></td></tr>
-<tr><td><b>Type III</b></td><td>교호작용이 있어도 칸 평균을 같은 무게로 놓고 주효과를 볼 때</td><td>합이 0이 되는 대비(contrast, <code>contr.sum</code>)를 써야 한다(<a href="#contrast">대비 펼침 상자</a>). R의 기본 대비로는 틀린 값이 나온다</td><td><code>car::Anova(type = 3)</code></td></tr>
+<tr><td><b>Type I</b></td><td>정한 순서로 변수를 더할 때 설명력이 얼마나 느는가? (예: 통제할 변수를 먼저 넣는다)</td><td>요인의 순서를 바꾸면 값이 달라진다</td><td><code>aov()</code>, <code>anova()</code></td></tr>
+<tr><td><b>Type II</b></td><td>교호작용이 없는 가법 모형에서, 다른 주효과를 조정한 효과는?</td><td>가법 모형의 주효과 검정에 자연스럽다. 교호작용이 뚜렷하면 주효과의 해석이 어렵다</td><td><code>car::Anova(type = 2)</code></td></tr>
+<tr><td><b>Type III</b><br>(적절한 코딩)</td><td>교호작용을 모형에 두면서, 다른 요인 수준을 같은 무게로 평균한 효과는?</td><td>합이 0이 되는 대비(contrast, <code>contr.sum</code> 등)를 써야 이 가설이 된다. 기본 처리 대비로는 다른 요인의 기준 수준에서의 단순 효과를 검정한다(<a href="#contrast">대비 펼침 상자</a>)</td><td><code>car::Anova(type = 3)</code></td></tr>
+<tr><td>단순 주효과,<br>명시적 대비</td><td>특정 수준에서의 효과는?</td><td>비교할 수준과 가중치를 미리 정한다</td><td><code>emmeans</code> 등</td></tr>
 </tbody></table></div>
 <p>어느 유형을 쓸지는 결과를 보기 전에 정하고 보고서에 밝힌다. <code>aov()</code>는 Type I이고, 이 자료의 <code>rstatix::anova_test()</code> 출력은 개체 간 요인만 있으면 Type II, 반복측정이 있으면 Type III로 표시되었다. SPSS의 기본값은 Type III다.</p>
 <ul>
-<li><b>먼저 교호작용을 본다.</b> 교호작용이 유의하지 않으면 Type II가 무난하다. 교호작용이 유의하면 주효과보다 단순 주효과를 해석하는 것이 낫고, 주효과를 꼭 보고해야 한다면 Type III을 쓴다.</li>
+<li><b>p 값이 아니라 연구 질문으로 고른다.</b> 교호작용이 유의하지 않다는 것은 교호작용이 없다는 증거가 아니다. 그러니 교호작용 검정의 결과를 보고 유형을 바꾸지 않는다. 가법 모형으로 충분한지, 교호작용을 둔 채 평균 효과를 물을지는 설계와 이론으로 정한다. 교호작용이 뚜렷하면 주효과보다 단순 주효과를 해석하는 것이 낫다.</li>
 <li><b>소프트웨어마다 기본값이 다르다.</b> R의 <code>aov()</code>와 <code>anova()</code>는 Type I, SPSS는 Type III이다. 같은 자료인데 R과 SPSS의 결과가 다르면 유형부터 확인한다.</li>
-<li><b>Type III에는 대비 설정이 필요하다.</b> R의 기본 대비로 Type III을 구하면 틀린 값이 나온다. 아래 코드처럼 합이 0이 되는 대비를 지정한다. 까닭은 <a href="#contrast">대비 펼침 상자</a>에 있다.</li>
+<li><b>Type III에는 대비 코딩을 지정한다.</b> R의 기본 처리 대비로 Type III을 구하면, 주효과 줄이 다른 요인의 기준 수준에서의 단순 효과 검정이 된다. 계산이 틀린 것이 아니라 다른 가설을 검정한 것이다. 다른 요인의 수준을 같은 무게로 평균한 주효과를 검정하려면 아래 코드처럼 합이 0이 되는 대비를 지정한다. <code>contr.helmert</code>, <code>contr.poly</code>처럼 열마다 합이 0인 다른 코딩도 같은 결과를 준다. 까닭은 <a href="#contrast">대비 펼침 상자</a>에 있다.</li>
 </ul>
 <div class="cb r"><span class="lang">R · 세 유형을 같은 자료로</span><pre>library(tidyverse)
 library(car)
@@ -567,11 +580,12 @@ Anova(lm(mpg ~ am * cyl, data = d,
 </details>
 
 <details class="fold" id="contrast">
-<summary>펼쳐 보기: 대비(contrast)란 무엇이고, Type III에는 왜 합이 0이 되는 대비가 필요한가</summary>
-<div class="callout"><p><strong>한마디로.</strong> 대비는 집단 평균에 더해서 0이 되는 가중치를 곱해 더한 값으로, "어느 평균과 어느 평균을 견주는가"를 하나의 숫자로 적는 방법이다. R은 요인을 모형에 넣을 때 수준마다 이런 가중치 열을 만드는데, 그 규칙에 따라 계수의 뜻이 달라진다. Type III는 그 계수를 그대로 검정하므로 규칙을 잘못 고르면 엉뚱한 가설을 검정한다.</p></div>
+<summary>펼쳐 보기: 대비(contrast)란 무엇이고, Type III에서는 왜 대비 코딩이 검정하는 가설을 정하나</summary>
+<div class="callout"><p><strong>한마디로.</strong> 대비는 집단 평균에 합이 0인 가중치를 곱해 더한 값으로, "어느 평균과 어느 평균을 견주는가"를 숫자 하나로 적는 방법이다. 한편 R은 요인을 모형에 넣을 때 수준을 숫자 열로 바꾸는데, 그 규칙을 대비 코딩이라고 부른다. 코딩에 따라 계수의 뜻이 달라지고, Type III은 그 계수가 0인지를 검정한다. 그래서 코딩이 곧 검정하는 가설을 정한다.</p></div>
+<p>이 상자에서는 두 가지를 구별한다. <b>평균에 대한 대비</b>는 비교하려는 평균들의 선형결합(linear combination)이다. <b>대비 코딩</b>(contrast coding)은 요인의 수준을 회귀모형의 숫자 열로 나타내는 규칙이다. 둘은 이어져 있지만, 코딩 열이 곧 평균을 견주는 가중치는 아니다. 예를 들어 R의 기본값인 처리 대비의 열은 합이 0이 아니다. 그래도 R에서는 관례적으로 이것까지 "대비 코딩"이라고 부른다. 1절은 대비, 2·3절은 대비 코딩을 다룬다.</p>
 
 <h4>1. 대비는 "평균을 견주는 가중치"다</h4>
-<p>집단이 k개일 때 대비(contrast) \(\psi\)는 집단 평균 \(\mu_j\)에 가중치 \(c_j\)를 곱해 더한 값이다. 가중치는 더해서 0이 되어야 한다.</p>
+<p>집단이 k개일 때 대비 \(\psi\)는 집단 평균 \(\mu_j\)에 가중치 \(c_j\)를 곱해 더한 값이다. 가중치는 더해서 0이 되어야 한다.</p>
 <div class="readout math">
 \[\psi = \sum_{j=1}^{k} c_j\,\mu_j, \qquad \sum_{j=1}^{k} c_j = 0, \qquad \hat{\psi} = \sum_{j=1}^{k} c_j\,\bar{y}_j\]
 </div>
@@ -583,9 +597,9 @@ Anova(lm(mpg ~ am * cyl, data = d,
 <tbody>
 <tr><td>처리 1은 대조군과 다른가?</td><td>−1</td><td>+1</td><td>0</td><td>−0.371</td></tr>
 <tr><td>두 처리는 서로 다른가?</td><td>0</td><td>−1</td><td>+1</td><td>0.865</td></tr>
-<tr><td>어느 처리든 처리를 하면 대조군과 다른가?</td><td>−1</td><td>+½</td><td>+½</td><td>0.062</td></tr>
+<tr><td>두 처리 평균의 평균이 대조군과 다른가?</td><td>−1</td><td>+½</td><td>+½</td><td>0.062</td></tr>
 </tbody></table></div>
-<p>마지막 질문에서 trt1과 trt2에 ½씩 주는 것은 두 처리를 한 접시에 반씩 올려 "처리 집단의 평균"을 만든다는 뜻이다. 대비 하나는 이렇게 질문 하나에 답한다. 분산분석의 F 검정은 "세 평균이 모두 같은가"를 묻는데, 이것은 서로 겹치지 않는 질문 두 개(자유도 2)를 한꺼번에 묻는 것이다.</p>
+<p>마지막 질문에서 trt1과 trt2에 ½씩 주는 것은 두 처리를 한 접시에 반씩 올려 "두 처리 평균의 평균"을 만든다는 뜻이다. 이것은 "어느 처리든 효과가 있는가?"와 다른 질문이다. 이 자료에서 trt1은 대조군보다 0.371 가볍고 trt2는 0.494 무겁다. 그래서 둘을 평균하면 효과가 상쇄되어 \(\hat{\psi}\)가 0.062밖에 되지 않는다. 한 처리는 늘리고 다른 처리는 줄이면 이 대비로는 효과를 놓친다. 질문을 말로 정확히 적어야 가중치가 질문과 맞는다. 대비 하나는 이렇게 질문 하나에 답한다. 분산분석의 F 검정은 "세 평균이 모두 같은가"를 묻는데, 이것은 서로 겹치지 않는 질문 두 개(자유도 2)를 한꺼번에 묻는 것이다.</p>
 <p>대비 하나는 자유도 1짜리 제곱합을 가진다. 집단 크기가 \(n_j\)일 때 다음과 같다.</p>
 <div class="readout math">
 \[\mathit{SS}_{\psi} = \frac{\hat{\psi}^2}{\sum_j c_j^2 / n_j}\]
@@ -603,10 +617,14 @@ Anova(lm(mpg ~ am * cyl, data = d,
   </div>
   <p class="figcap">PlantGrowth의 집단 평균은 ctrl 5.032, trt1 4.661, trt2 5.526이고 집단마다 10개체다. 가중치가 0인 집단은 흐리게 그렸다.</p>
 </div>
-<p>두 대비의 가중치를 칸마다 곱해 더한 값이 0이면 두 대비는 직교(orthogonal)한다고 한다. (−1, ½, ½)와 (0, −1, 1)은 \((-1)(0) + (\tfrac12)(-1) + (\tfrac12)(1) = 0\)이어서 직교한다. 직교하는 대비 k − 1개의 제곱합을 더하면 처리 제곱합이 된다. 이 자료에서는 0.025 + 3.741 = 3.766 = SSTrt다. 대조군과 두 처리의 평균은 거의 같고, 처리 사이의 차이가 처리 효과의 거의 전부라는 뜻이다. 앞에서 제곱합을 "집단을 알게 되어 줄어든 예측 오차"로 보았다. 그 줄어든 3.766을 서로 겹치지 않는 질문 두 개가 0.025와 3.741로 나누어 가진 셈이다.</p>
+<p>두 대비 \(\hat{\psi} = \sum_j c_j \bar{y}_j\)와 \(\hat{\phi} = \sum_j d_j \bar{y}_j\)가 서로 상관이 없을 때 두 대비는 직교(orthogonal)한다고 한다. 집단 평균이 서로 독립이고 등분산이면 두 추정값의 공분산은 다음과 같다.</p>
+<div class="readout math">
+\[\mathrm{Cov}(\hat{\psi}, \hat{\phi}) = \sigma^2 \sum_j \frac{c_j d_j}{n_j} \qquad\Longrightarrow\qquad \text{직교 조건}:\ \sum_j \frac{c_j d_j}{n_j} = 0\]
+</div>
+<p>이 예제처럼 집단마다 반복수가 같으면 조건이 \(\sum_j c_j d_j = 0\)으로 줄어, 가중치를 대응하는 집단끼리 곱해 더한 값이 0이면 직교한다. 반복수가 다른 불균형 설계에서는 \(\sum_j c_j d_j / n_j = 0\)인지 확인해야 한다. (−1, ½, ½)와 (0, −1, 1)은 \((-1)(0) + (\tfrac12)(-1) + (\tfrac12)(1) = 0\)이고 반복수가 모두 10이므로 직교한다. 이 조건을 만족하는 대비 k − 1개의 제곱합을 더하면 처리 제곱합이 된다. 이 자료에서는 0.025 + 3.741 = 3.766 = SSTrt다. 대조군과 두 처리의 평균은 거의 같고, 처리 사이의 차이가 처리 효과의 거의 전부라는 뜻이다. 앞에서 제곱합을 "집단을 알게 되어 줄어든 예측 오차"로 보았다. 그 줄어든 3.766을 서로 겹치지 않는 질문 두 개가 0.025와 3.741로 나누어 가진 셈이다.</p>
 
 <h4>2. R은 요인을 대비 열로 바꿔 모형에 넣는다</h4>
-<p><code>lm()</code>과 <code>aov()</code>는 요인을 숫자 열로 바꿔서 회귀식에 넣는다. 수준이 k개인 요인은 k − 1개의 열이 되고, 수준마다 그 열에 어떤 숫자를 넣을지가 대비 코딩(contrast coding)이다. 많이 쓰는 두 가지는 다음과 같다.</p>
+<p><code>lm()</code>과 <code>aov()</code>는 요인을 숫자 열로 바꿔서 회귀식에 넣는다. 수준이 k개인 요인은 k − 1개의 열이 되고, 수준마다 그 열에 어떤 숫자를 넣을지가 대비 코딩이다. 많이 쓰는 두 가지는 다음과 같다.</p>
 <div class="scroll"><table class="stat">
 <caption>cyl(4, 6, 8)과 am(자동, 수동)을 바꾸는 두 가지 규칙</caption>
 <thead><tr><th>수준</th><th>처리 대비: 열 1</th><th>처리 대비: 열 2</th><th>합 0 대비: 열 1</th><th>합 0 대비: 열 2</th></tr></thead>
@@ -621,11 +639,11 @@ Anova(lm(mpg ~ am * cyl, data = d,
 <li><b>처리 대비(treatment contrast, <code>contr.treatment</code>)</b>: R의 기본값이다. 첫 수준을 기준 범주(reference level)로 두고 모든 열을 0으로 적는다. 계수는 "기준 범주와의 차이"다. 더미 코딩(dummy coding)이라고도 한다.</li>
 <li><b>합 0 대비(sum-to-zero contrast, <code>contr.sum</code>)</b>: 열마다 숫자를 더하면 0이다. 계수는 "그 수준의 평균 − 칸 평균의 평균"이다. 효과 코딩(effect coding)이라고도 한다.</li>
 </ul>
-<div class="callout"><p><strong>직관으로: 두 규칙은 자의 영점을 어디에 두느냐의 차이다.</strong> 처리 대비는 "자동·4기통 차"라는 한 칸에 영점을 놓고, 다른 칸을 그 차에서 얼마나 떨어졌는지로 잰다. 합 0 대비는 여섯 칸 평균의 한가운데에 영점을 놓고, 각 수준이 한가운데에서 얼마나 떨어졌는지로 잰다. 같은 자료를 같은 자로 재므로 적합값은 같다. 하지만 "변속기 계수"라는 눈금이 처리 대비에서는 4기통에서 잰 차이를, 합 0 대비에서는 세 기통을 고르게 평균해 잰 차이를 가리킨다.</p></div>
+<div class="callout"><p><strong>직관으로: 두 규칙은 자의 영점을 어디에 두느냐의 차이다.</strong> 처리 대비는 "자동·4기통 차"라는 한 칸에 영점을 놓고, 다른 칸을 그 차에서 얼마나 떨어졌는지로 잰다. 합 0 대비는 여섯 칸 평균의 한가운데에 영점을 놓고, 각 수준이 한가운데에서 얼마나 떨어졌는지로 잰다. 같은 자료를 같은 자로 재므로 적합값은 같다. 하지만 "변속기 계수"라는 눈금이 가리키는 것이 다르다. 처리 대비에서는 4기통에서 잰 수동 − 자동 차이를 가리킨다. 합 0 대비에서는 세 기통을 고르게 평균한 자동 평균이 한가운데에서 떨어진 거리, 곧 고르게 평균한 수동 − 자동 차이의 절반을 부호를 바꾸어 가리킨다.</p></div>
 <p>교호작용이 없는 모형에서는 어느 규칙을 써도 적합값과 제곱합이 같고, 계수의 뜻만 달라진다. 문제는 교호작용 항이 들어 있는 모형에서 주효과의 열만 뺄 때 생긴다. Type III가 바로 그렇게 계산한다.</p>
 
 <h4>3. 교호작용이 있을 때 주효과 계수가 뜻하는 것</h4>
-<p>교호작용 열은 두 요인의 열을 곱해서 만든다. 처리 대비에서는 cyl이 기준 범주(4기통)일 때 cyl 열과 교호작용 열이 모두 0이 된다. 그래서 am의 계수는 "4기통에서의 수동 − 자동"만 뜻한다. 합 0 대비에서는 cyl 열이 세 수준을 더하면 0이어서, am의 계수가 세 기통의 차이를 같은 무게로 평균한 값이 된다. 아래 그림에서 두 규칙을 바꿔 가며 am의 계수가 가리키는 자리를 비교한다.</p>
+<p>교호작용 열은 두 요인의 열을 곱해서 만든다. 처리 대비에서는 cyl이 기준 범주(4기통)일 때 cyl 열과 교호작용 열이 모두 0이 된다. 그래서 am의 계수는 "4기통에서의 수동 − 자동"만 뜻한다. 합 0 대비에서는 cyl 열이 세 수준을 더하면 0이어서, am의 계수는 기통 수별 "자동 − 수동" 차이를 같은 무게로 평균한 값의 절반이 된다(자동 +1, 수동 −1로 적었기 때문이다). 계수의 값과 검정하는 가설은 구별한다. 상수를 곱해도 0인지 아닌지는 바뀌지 않으므로, "계수가 0"이라는 가설은 "같은 무게로 평균한 변속기 차이가 0"이라는 가설과 같다. 아래 그림에서 두 규칙을 바꿔 가며 am의 계수가 가리키는 자리를 비교한다.</p>
 <div class="fig">
   <div class="modes" role="group" aria-label="대비 규칙 고르기" id="ctr-mt-ctrls">
     <button type="button" data-k="trt" aria-pressed="true">처리 대비 (R 기본값)</button>
@@ -637,16 +655,16 @@ Anova(lm(mpg ~ am * cyl, data = d,
   <p class="figcap" id="ctr-mt-cap"></p>
 </div>
 <p>말로 풀면, Type III에서 am을 검정하는 것은 "am 계수가 0인가?"를 묻는 것이다. 그러니 am 계수가 무엇을 재는지가 곧 묻는 질문이 된다. 처리 대비라면 "4기통 차에서 변속기에 따라 연비가 다른가?"를 묻고, 합 0 대비라면 "기통 수를 고르게 놓고 볼 때 변속기에 따라 연비가 다른가?"를 묻는다. 주효과로 알고 싶은 것은 뒤의 질문이다.</p>
-<p>Type III에서 am의 제곱합은 "교호작용까지 넣은 모형에서 am 열 하나를 뺄 때 늘어나는 잔차"다. 처리 대비로 계산하면 이것은 4기통에서의 차이 5.18이 0인지를 검정한다. 그래서 SS = 58.4, <i>p</i> = .018로 유의하게 나온다. 하지만 이것은 "변속기의 주효과"가 아니라 4기통에서의 단순 주효과(simple main effect)다. 합 0 대비로 계산하면 세 기통의 차이를 같은 무게로 평균한 2.32가 0인지를 검정한다. 이때 SS = 29.9, <i>p</i> = .083이며, 이것이 Type III가 뜻하는 주효과다.</p>
+<p>Type III에서 am의 제곱합은 "교호작용까지 넣은 모형에서 am 열 하나를 뺄 때 늘어나는 잔차"다. 처리 대비로 계산하면 이것은 4기통에서의 차이 5.18이 0인지를 검정한다. 그래서 SS = 58.4, <i>p</i> = .018로 유의하게 나온다. 하지만 이것은 "변속기의 주효과"가 아니라 4기통에서의 단순 주효과(simple main effect)다. 합 0 대비로 계산하면 세 기통의 차이를 같은 무게로 평균한 2.32가 0인지를 검정한다. 이때 SS = 29.9, <i>p</i> = .083이며, 흔히 "Type III 주효과"라고 부르는 것이 이 가설이다. 처리 대비의 결과도 계산이 틀린 것은 아니다. 다른 가설을 검정한 결과일 뿐이다.</p>
 <div class="scroll"><table class="stat">
 <caption>같은 자료, 같은 Type III, 다른 대비: am의 결과</caption>
 <thead><tr><th>대비 규칙</th><th>am 계수</th><th>계수의 뜻</th><th>SS</th><th>F(1, 26)</th><th>p</th></tr></thead>
 <tbody>
 <tr><td>처리 대비 (R 기본값)</td><td>5.175</td><td>4기통에서 수동 − 자동</td><td>58.43</td><td>6.35</td><td>.018</td></tr>
-<tr><td>합 0 대비 (contr.sum)</td><td>−1.161</td><td>자동 평균 − 칸 평균의 평균. 두 배 하면 수동 − 자동 = 2.32</td><td>29.87</td><td>3.25</td><td>.083</td></tr>
+<tr><td>합 0 대비 (contr.sum)</td><td>−1.161</td><td>자동 평균 − 칸 평균의 평균. −2배 하면 수동 − 자동 = 2.32</td><td>29.87</td><td>3.25</td><td>.083</td></tr>
 </tbody></table></div>
 <p>교호작용의 제곱합(25.44)과 잔차는 두 규칙에서 같다. 달라지는 것은 교호작용이 든 모형에서 빼는 주효과뿐이다. Type I과 Type II는 주효과를 교호작용이 없는 모형끼리 비교해 구하므로 대비 규칙에 따라 값이 바뀌지 않는다. 그래서 대비를 신경 써야 하는 것은 Type III뿐이다.</p>
-<div class="callout caution"><p><strong>실수하기 쉬운 곳.</strong> <code>car::Anova(type = 3)</code>는 대비 규칙을 묻지 않고 계산한다. 경고도 없다. Type III을 쓸 때는 모형마다 <code>contrasts = list(...)</code>로 합 0 대비를 주거나, 분석 처음에 <code>options(contrasts = c("contr.sum", "contr.poly"))</code>로 전역 설정을 바꾼다. 결과를 SPSS와 견주었는데 Type III 값이 다르면 대비부터 확인한다.</p></div>
+<div class="callout caution"><p><strong>실수하기 쉬운 곳.</strong> <code>car::Anova(type = 3)</code>는 대비 규칙을 묻지 않고 계산한다. 경고도 없다. Type III을 쓸 때는 모형마다 <code>contrasts = list(...)</code>로 합 0 대비(또는 <code>contr.helmert</code>처럼 열마다 합이 0인 코딩)를 주거나, 분석 처음에 <code>options(contrasts = c("contr.sum", "contr.poly"))</code>로 전역 설정을 바꾼다. 결과를 SPSS와 견주었는데 Type III 값이 다르면 대비부터 확인한다.</p></div>
 <div class="cb r"><span class="lang">R · 대비 코딩과 Type III</span><pre>library(tidyverse)
 library(car)
 
@@ -1539,11 +1557,11 @@ function drawCtrMT(){const svg=$("#ctr-mt");svg.innerHTML="";const L=52,R=620,T=
     el("text",{x:xm-10,y:y(rm)-8,"text-anchor":"end",style:"fill:var(--g2)"},svg,"21.35");
     el("line",{x1:xm+14,x2:xm+14,y1:y(gmm),y2:y(ra),stroke:"var(--ink)","stroke-width":3},svg);
     el("text",{x:xm+20,y:(y(gmm)+y(ra))/2+4,class:"ink","font-weight":"700"},svg,"am1 −1.16");}
-  el("text",{x:R,y:T-12,"text-anchor":"end",class:"ink","font-weight":"600"},svg,sum?"am 계수: 세 차이를 같은 무게로 평균":"am 계수: 4기통에서의 차이만");
+  el("text",{x:R,y:T-12,"text-anchor":"end",class:"ink","font-weight":"600"},svg,sum?"am 계수: 고르게 평균한 차이 2.32의 −½":"am 계수: 4기통에서의 차이만");
   $("#ctr-mt-read").textContent=sum?
-   "합 0 대비 (contr.sum)\n절편   = 칸 평균 6개의 평균 20.186\nam1    = 자동의 세 칸 평균 − 20.186\n       = 19.025 − 20.186 = −1.161\n수동 − 자동 = 2 × 1.161 = 2.322\n      = (5.18 + 1.44 + 0.35) / 3\n\nType III, am\nSS = 29.87, F(1, 26) = 3.25\np = .083":
+   "합 0 대비 (contr.sum)\n절편   = 칸 평균 6개의 평균 20.186\nam1    = 자동의 세 칸 평균 − 20.186\n       = 19.025 − 20.186 = −1.161\n수동 − 자동 = −2 × am1 = −2 × (−1.161)\n          = 2.322 = (5.18 + 1.44 + 0.35) / 3\n\nType III, am\nSS = 29.87, F(1, 26) = 3.25\np = .083":
    "처리 대비 (R 기본값)\n절편     = 자동·4기통 평균 22.900\nammanual = 4기통에서 수동 − 자동\n         = 28.075 − 22.900 = 5.175\n6기통, 8기통의 차이는\n교호작용 계수가 따로 맡는다\n\nType III, am\nSS = 58.43, F(1, 26) = 6.35\np = .018";
-  $("#ctr-mt-cap").textContent=sum?"합 0 대비에서는 cyl의 열을 세 수준에 걸쳐 더하면 0이 되므로, am의 열이 세 기통의 차이를 고르게 평균한 값을 맡는다. Type III에서 am을 빼면 이 평균 차이(2.32)가 0인지를 검정한다.":"처리 대비에서는 4기통이 기준 범주라 cyl 열과 교호작용 열이 모두 0이다. 그래서 am의 열은 4기통에서의 차이(5.18)만 맡고, Type III에서 am을 빼면 이 차이가 0인지를 검정한다."}
+  $("#ctr-mt-cap").textContent=sum?"합 0 대비에서는 cyl의 열을 세 수준에 걸쳐 더하면 0이 되므로, am 계수는 세 기통을 고르게 평균한 수동 − 자동 차이의 절반을 부호를 바꾸어 나타낸다(−1.161 = −2.322 / 2). Type III에서 am을 검정하면 이 평균 차이(2.32)가 0인지를 묻는 셈이다.":"처리 대비에서는 4기통이 기준 범주라 cyl 열과 교호작용 열이 모두 0이다. 그래서 am의 열은 4기통에서의 차이(5.18)만 맡고, Type III에서 am을 빼면 이 차이가 0인지를 검정한다."}
 document.querySelectorAll("#ctr-mt-ctrls button").forEach(b=>b.addEventListener("click",()=>{ctrK=b.dataset.k;document.querySelectorAll("#ctr-mt-ctrls button").forEach(x=>x.setAttribute("aria-pressed",x===b));drawCtrMT()}));
 
 /* ---------- 제곱합 = 오차 정사각형 넓이의 합 ---------- */
@@ -1567,25 +1585,33 @@ function drawSq(){const svg=$("#sq-pg");svg.innerHTML="";const s=30,gap=3,X0=20;
   el("text",{x:bx+10.492*sc+3.766*sc/2,y:300,"text-anchor":"middle",class:"ink","font-weight":"700"},svg,"줄어든 몫 = SSTrt 3.766 (26%)");
 }
 
-/* ---------- 제곱합 유형: 겹친 몫은 어디로 ---------- */
-function drawLeft(){const svg=$("#ss-left");svg.innerHTML="";const X=110,W=500,tot=1126.047,sc=W/tot,RH=50,T=14;
-  const C=["var(--g1)","var(--g2)","var(--g3)"];
-  const rows=[["Type I","am 먼저",[405.15,456.40,25.44],0],["Type I","cyl 먼저",[36.77,824.78,25.44],0],["Type II","",[36.77,456.40,25.44],368.38],["Type III","",[29.87,410.46,25.44],421.22]];
-  const defs=el("defs",{},svg);const pt=el("pattern",{id:"lefthatch",width:6,height:6,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},defs);
-  el("rect",{width:6,height:6,fill:"var(--muted)",opacity:.25},pt);el("line",{x1:0,y1:0,x2:0,y2:6,stroke:"var(--muted)","stroke-width":2,opacity:.6},pt);
-  rows.forEach(([a,b,v,left],i)=>{const y=T+i*RH;let x=X;
-    el("text",{x:X-10,y:y+15,"text-anchor":"end",class:"ink","font-weight":"600"},svg,a);
-    if(b)el("text",{x:X-10,y:y+30,"text-anchor":"end"},svg,b);
-    v.forEach((s,j)=>{const w=s*sc;const r=el("rect",{x,y,width:w,height:26,fill:C[j],opacity:.85},svg);el("title",{},r,["am","cyl","am × cyl"][j]+" "+s.toFixed(2));
-      if(w>38)el("text",{x:x+w/2,y:y+17,"text-anchor":"middle",style:"fill:#fff","font-weight":"600"},svg,s.toFixed(1));x+=w});
-    if(left){const w=left*sc;el("rect",{x,y,width:w,height:26,fill:"url(#lefthatch)",stroke:"var(--muted)","stroke-width":.8},svg);
-      el("text",{x:x+w/2,y:y+17,"text-anchor":"middle",class:"ink","font-weight":"700"},svg,"겹친 몫 "+left.toFixed(1));x+=w}
-    el("rect",{x,y,width:239.06*sc,height:26,fill:"var(--ink)",opacity:.85},svg);
-    el("text",{x:x+239.06*sc/2,y:y+17,"text-anchor":"middle",style:"fill:var(--surface)","font-weight":"600"},svg,"잔차 239.1")});
-  const yb=T+4*RH+6,xm=X+886.99*sc;
-  el("line",{x1:X,x2:xm,y1:yb,y2:yb,stroke:"var(--ink)","stroke-width":1.2},svg);
-  el("line",{x1:X,x2:X,y1:yb-5,y2:yb+5,stroke:"var(--ink)"},svg);el("line",{x1:xm,x2:xm,y1:yb-5,y2:yb+5,stroke:"var(--ink)"},svg);
-  el("text",{x:(X+xm)/2,y:yb+18,"text-anchor":"middle",class:"ink","font-weight":"600"},svg,"모형이 설명한 양 886.99 (네 막대 모두 같다)")}
+/* ---------- 제곱합 유형: 효과별 SS를 나란히, 합은 모형이 설명한 양과 견준다 ---------- */
+const SSC={mpg:{ex:886.99,res:239.06,max:900,rows:[[405.15,456.40,25.44],[36.77,824.78,25.44],[36.77,456.40,25.44],[29.87,410.46,25.44]]},
+  qsec:{ex:74.28,res:24.70,max:75,rows:[[5.23,68.91,0.14],[39.54,34.61,0.14],[39.54,68.91,0.14],[39.39,57.60,0.14]]}};
+let sscY="mpg";
+function drawLeft(){const svg=$("#ss-left");svg.innerHTML="";const D=SSC[sscY],X=110,W=330,sc=W/D.max,RH=64,T=26;
+  const C=["var(--g1)","var(--g2)","var(--g3)"],names=[["Type I","am 먼저"],["Type I","cyl 먼저"],["Type II",""],["Type III",""]];
+  const f2=v=>v<10?v.toFixed(2):v.toFixed(1);
+  el("text",{x:X,y:14,class:"ink","font-weight":"600"},svg,"효과별 제곱합 (같은 눈금)");
+  el("text",{x:X+W+120,y:14,"text-anchor":"middle",class:"ink","font-weight":"600"},svg,"세 줄의 합");
+  D.rows.forEach((v,i)=>{const y=T+i*RH;if(i)el("line",{x1:0,x2:640,y1:y-6,y2:y-6,class:"ax"},svg);
+    el("text",{x:X-10,y:y+20,"text-anchor":"end",class:"ink","font-weight":"600"},svg,names[i][0]);
+    if(names[i][1])el("text",{x:X-10,y:y+36,"text-anchor":"end"},svg,names[i][1]);
+    v.forEach((ss,k)=>{const w=Math.max(ss*sc,1.5),yy=y+k*17;el("rect",{x:X,y:yy,width:w,height:13,fill:C[k],opacity:.85},svg);
+      el("text",{x:X+w+5,y:yy+11},svg,f2(ss))});
+    const sum=v.reduce((a,b)=>a+b,0),d=sum-D.ex,eq=Math.abs(d)<0.02;
+    el("text",{x:X+W+120,y:y+22,"text-anchor":"middle",class:"ink","font-weight":"700","font-size":"14"},svg,(eq?D.ex:sum).toFixed(2));
+    el("text",{x:X+W+120,y:y+40,"text-anchor":"middle",style:"fill:"+(eq?"var(--g3)":"var(--accent)"),"font-weight":"600"},svg,eq?"= 설명한 양":(d<0?"< 설명한 양 ("+d.toFixed(2)+")":"> 설명한 양 (+"+d.toFixed(2)+")"))});
+  const yb=T+4*RH+4,tot=D.ex+D.res,s2=(W+150)/tot;
+  el("text",{x:X-10,y:yb+15,"text-anchor":"end",class:"ink","font-weight":"600"},svg,"완전모형");
+  el("rect",{x:X,y:yb,width:D.ex*s2,height:20,fill:"var(--muted)",opacity:.45},svg);
+  el("text",{x:X+D.ex*s2/2,y:yb+14,"text-anchor":"middle",class:"ink","font-weight":"600"},svg,"모형이 설명한 양 "+D.ex.toFixed(2));
+  el("rect",{x:X+D.ex*s2,y:yb,width:D.res*s2,height:20,fill:"var(--ink)",opacity:.85},svg);
+  el("text",{x:X+D.ex*s2+D.res*s2/2,y:yb+14,"text-anchor":"middle",style:"fill:var(--surface)","font-weight":"600"},svg,"잔차 "+D.res.toFixed(2));
+  $("#ss-left-cap").textContent=sscY==="mpg"?
+   "mpg: Type I의 세 줄은 어느 순서로 넣어도 모형이 설명한 886.99와 같다. Type II와 III의 합은 이 자료에서는 그보다 작다. 맨 아래 막대는 완전모형 하나의 분해라 어느 유형에서나 같다.":
+   "qsec: 같은 차, 같은 모형인데 Type II와 III의 합이 모형이 설명한 74.28보다 크다. cyl을 고려하면 am의 제곱합이 5.23에서 39.54로 커지기 때문이다. Type II·III의 줄은 하나의 양을 나눈 조각이 아니라는 뜻이다."}
+document.querySelectorAll("#ssc-ctrls button").forEach(b=>b.addEventListener("click",()=>{sscY=b.dataset.y;document.querySelectorAll("#ssc-ctrls button").forEach(x=>x.setAttribute("aria-pressed",x===b));drawLeft()}));
 
 /* ---------- 혼합 설계: 03절과 견준 제곱합의 층 ---------- */
 function drawMxSS(){const svg=$("#mxss");svg.innerHTML="";const X=120,W=500,tot=505647,sc=W/tot;

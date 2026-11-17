@@ -6,11 +6,11 @@
 <meta name="color-scheme" content="light">
 <title>살아남은 것만 보면 - 생존자 편향과 조건부 확률 | Q의 아카이브</title>
 <link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/survivorship-bias-conditional-probability.html">
-<meta name="description" content="보이는 데이터가 어떤 걸러짐을 거쳐 내 앞에 왔는지 묻는 생존자 편향과, 정보로 믿음을 갱신하는 조건부 확률·베이즈 정리를 사례와 자연빈도 나무로 정리한 데이터과학 자료입니다.">
+<meta name="description" content="보이는 데이터가 어떤 걸러짐을 거쳐 내 앞에 왔는지 묻는 생존자 편향과, 정보로 믿음을 갱신하는 조건부 확률·베이즈 정리를 사례와 자연빈도 트리로 정리한 데이터과학 자료입니다.">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Q의 데이터 이야기 자료">
 <meta property="og:title" content="살아남은 것만 보면 - 생존자 편향과 조건부 확률 | Q의 아카이브">
-<meta property="og:description" content="생존자 편향에서 출발해 조건의 방향, 기저율, 베이즈 정리까지 자연빈도 나무로 직접 계산하며 확인합니다.">
+<meta property="og:description" content="생존자 편향에서 출발해 조건의 방향, 기저율, 베이즈 정리까지 자연빈도 트리로 직접 계산하며 확인합니다.">
 <meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/survivorship-bias-conditional-probability.html">
 <meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
 <meta property="og:image:type" content="image/png">
@@ -19,7 +19,7 @@
 <meta property="og:image:alt" content="데이터과학 자료 아이콘">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="살아남은 것만 보면 - 생존자 편향과 조건부 확률 | Q의 아카이브">
-<meta name="twitter:description" content="생존자 편향에서 출발해 조건의 방향, 기저율, 베이즈 정리까지 자연빈도 나무로 직접 계산하며 확인합니다.">
+<meta name="twitter:description" content="생존자 편향에서 출발해 조건의 방향, 기저율, 베이즈 정리까지 자연빈도 트리로 직접 계산하며 확인합니다.">
 <meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
 <meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
 <link rel="stylesheet" href="../assets/katex/katex.min.css">
@@ -42,6 +42,47 @@
   .cmp td, .cmp th { font-size: 14px; }
   .cmp th:first-child { width: 112px; }
 
+  /* ---- 혼동행렬과 평가 지표 펼침 상자 ---- */
+  .fold > * + * { margin-top: 14px; }
+  .fold[open] > summary { margin-bottom: 0; }
+  .fold h4 { margin-bottom: 0; }
+  .fold ul { margin-top: 8px; }
+  .cm { border-collapse: collapse; width: auto; min-width: 420px; margin: 0; }
+  .cm th, .cm td { border: 1px solid var(--line); padding: 8px 12px; text-align: center; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .cm th { background: var(--surface); font-weight: 700; }
+  .cm td span { display: block; font-family: var(--mono); font-size: 16px; font-weight: 700; }
+  .cm td.ok { background: #e6f8f0; }
+  .cm td.bad { background: #fdecef; }
+  .metrics { min-width: 760px; }
+  .purpose { min-width: 820px; }
+  .purpose td { font-size: 13.5px; line-height: 1.6; vertical-align: top; }
+  .metrics td:nth-child(4) { font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+
+  /* ---- 베이즈 정리: 세 상황 대입, 가능도 그림 ---- */
+  .bayes3 { display: grid; gap: 10px; }
+  .b3 { border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; background: var(--soft); overflow-x: auto; }
+  .b3 p { margin: 0; }
+  .b3 .b3-h { font-size: 14px; font-weight: 700; }
+  .odds { min-width: 600px; }
+  .odds td, .odds th { white-space: nowrap; }
+  @media (min-width: 720px) { .lk-ctls { grid-template-columns: repeat(2, 1fr); } }
+  .lk-h { font-size: 13px; font-weight: 700; fill: var(--ink); }
+  .lk-lab { font-size: 13px; fill: var(--ink); }
+  .lk-seg.inf { fill: var(--inf); }
+  .lk-seg.non { fill: var(--non); }
+  .lk-seg.off { opacity: .16; }
+  .lk-seg.on { stroke: var(--ink); stroke-width: 2; }
+  .lk-in { font-size: 12px; font-weight: 700; fill: #fff; }
+  .lk-small { font-size: 11.5px; fill: var(--muted); }
+  .lk-val { font-size: 14px; font-weight: 700; fill: var(--ink); font-family: var(--mono); }
+  .lk-axis { stroke: var(--muted); stroke-width: 1.2; }
+  .lk-tick { stroke: var(--muted); stroke-width: 1; }
+  .lk-arrow { stroke: var(--accent); stroke-width: 3; fill: none; }
+  .lk-ah { fill: var(--accent); }
+  .lk-pt0 { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+  .lk-pt1 { fill: var(--accent); stroke: var(--ink); stroke-width: 1.2; }
+  .lk-lr { font-size: 13px; font-weight: 800; fill: var(--accent); }
+
   /* ---- 여는 질문: 폭격기 그림 ---- */
   .opening { gap: 14px; }
   .opening .q-lead { font-size: 17px; }
@@ -51,7 +92,7 @@
   .plane figcaption { font-size: 12.5px; color: var(--muted); line-height: 1.6; text-align: center; }
   .plane figcaption a { color: inherit; }
 
-  /* ---- 자연빈도 나무 ---- */
+  /* ---- 자연빈도 트리 ---- */
   .sim { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 16px; display: flex; flex-direction: column; gap: 14px; }
   .sim-ctls { display: grid; gap: 12px; grid-template-columns: 1fr; }
   @media (min-width: 720px) { .sim-ctls { grid-template-columns: repeat(3, 1fr); } }
@@ -109,7 +150,7 @@
     <a href="#survivor"><b>02</b><span>생존자 편향</span></a>
     <a href="#filter"><b>03</b><span>생존 필터 해부하기</span></a>
     <a href="#direction"><b>04</b><span>조건의 방향</span></a>
-    <a href="#tree"><b>05</b><span>자연빈도 나무</span></a>
+    <a href="#tree"><b>05</b><span>자연빈도 트리</span></a>
     <a href="#bayes"><b>06</b><span>출발점을 바꾸면</span></a>
     <a href="#berkson"><b>07</b><span>맛있는 집은 왜 불친절할까</span></a>
     <a href="#misread"><b>08</b><span>자주 하는 오해</span></a>
@@ -236,7 +277,7 @@
 
   <!-- ======================= 05 ======================= -->
   <section class="panel" id="tree">
-    <div class="section-head"><span class="section-num">05</span><h2>자가진단키트: 자연빈도 나무로 계산하기</h2></div>
+    <div class="section-head"><span class="section-num">05</span><h2>자가진단키트: 자연빈도 트리로 계산하기</h2></div>
 
     <article class="block">
       <p>어떤 감염병의 자가진단키트를 생각해 봅시다. 아래 수치는 <strong>손으로 따라 계산하기 위한 예시</strong>이며 실제 제품의 수치가 아닙니다.</p>
@@ -255,11 +296,52 @@
       </ul>
       <div class="readout math">\(P(\text{감염}\mid\text{양성}) = \dfrac{90}{585} \approx 15.4\%\)</div>
       <p>양성 585명 가운데 495명은 비감염자입니다. 감염자가 드물어서(1%) 작은 위양성률(5%)이 아주 큰 집단(9,900명)에 곱해지기 때문입니다. 이 값을 <strong>양성예측도</strong>라 부르고, 출발점인 유병률을 <strong>기저율</strong>이라 부릅니다.</p>
+
+      <details class="fold" id="metrics">
+        <summary>펼쳐 보기: 민감도·특이도, 그리고 인공지능 평가에서 쓰는 지표들</summary>
+        <p>검사 결과(양성/음성)와 실제 상태(감염/비감염)를 엇갈려 세면 칸이 넷인 표가 나옵니다. 인공지능 분류 모형에서는 같은 표를 <strong>혼동행렬</strong>(confusion matrix)이라 부르고, "검사 결과" 자리에 모형의 예측을 놓습니다. 위의 10,000명을 이 표에 옮기면 다음과 같습니다(행 = 실제, 열 = 예측).</p>
+        <div class="scroll"><table class="cm">
+          <tr><th></th><th>예측 양성</th><th>예측 음성</th><th>합</th></tr>
+          <tr><th>실제 감염</th><td class="ok"><b>TP</b> 참양성 <span>90</span></td><td class="bad"><b>FN</b> 위음성 <span>10</span></td><td>100</td></tr>
+          <tr><th>실제 비감염</th><td class="bad"><b>FP</b> 위양성 <span>495</span></td><td class="ok"><b>TN</b> 참음성 <span>9,405</span></td><td>9,900</td></tr>
+          <tr><th>합</th><td>585</td><td>9,415</td><td>10,000</td></tr>
+        </table></div>
+        <p>모든 지표는 이 네 칸으로 만든 비율입니다. 지표마다 <strong>분모가 어느 줄이냐</strong>가 다릅니다. 분모가 실제 상태의 행이면 검사 자체의 성능이고, 분모가 예측 결과의 열이면 결과를 받은 사람이 궁금해하는 값입니다.</p>
+        <div class="scroll"><table class="cmp metrics">
+          <tr><th>지표</th><th>계산</th><th>분모</th><th>이 예</th><th>묻는 것</th></tr>
+          <tr><td><strong>민감도</strong><br>= 재현율(recall)</td><td>\(\dfrac{TP}{TP+FN}\)</td><td>실제 감염 행</td><td>90/100 = 90%</td><td>감염자를 얼마나 놓치지 않고 찾아내나</td></tr>
+          <tr><td><strong>특이도</strong>(specificity)</td><td>\(\dfrac{TN}{TN+FP}\)</td><td>실제 비감염 행</td><td>9,405/9,900 = 95%</td><td>비감염자를 얼마나 음성으로 걸러 내나</td></tr>
+          <tr><td>위양성률<br>(false positive rate)</td><td>\(\dfrac{FP}{TN+FP}\)</td><td>실제 비감염 행</td><td>495/9,900 = 5%</td><td>1 − 특이도. 잘못된 경보의 비율</td></tr>
+          <tr><td>위음성률<br>(false negative rate)</td><td>\(\dfrac{FN}{TP+FN}\)</td><td>실제 감염 행</td><td>10/100 = 10%</td><td>1 − 민감도. 놓친 비율</td></tr>
+          <tr><td><strong>양성예측도</strong><br>= 정밀도(precision)</td><td>\(\dfrac{TP}{TP+FP}\)</td><td>예측 양성 열</td><td>90/585 ≈ 15.4%</td><td>양성이라 판정된 것을 얼마나 믿을 수 있나</td></tr>
+          <tr><td>음성예측도<br>(negative predictive value)</td><td>\(\dfrac{TN}{TN+FN}\)</td><td>예측 음성 열</td><td>9,405/9,415 ≈ 99.9%</td><td>음성이라 판정된 것을 얼마나 믿을 수 있나</td></tr>
+          <tr><td><strong>정확도</strong>(accuracy)</td><td>\(\dfrac{TP+TN}{\text{전체}}\)</td><td>전체</td><td>9,495/10,000 ≈ 95.0%</td><td>전체 가운데 맞힌 비율</td></tr>
+          <tr><td>균형 정확도<br>(balanced accuracy)</td><td>\(\dfrac{\text{민감도}+\text{특이도}}{2}\)</td><td>두 행을 따로</td><td>(90% + 95%)/2 = 92.5%</td><td>두 집단의 크기 차이를 지운 정확도</td></tr>
+          <tr><td><strong>F1 점수</strong></td><td>\(\dfrac{2\,TP}{2\,TP+FP+FN}\)</td><td>TN을 쓰지 않음</td><td>180/685 ≈ 26.3%</td><td>정밀도와 재현율의 조화평균. 둘 중 낮은 쪽에 끌려간다</td></tr>
+        </table></div>
+        <h4>민감도, 특이도, 정밀도, 정확도는 무엇을 보려고 쓰나</h4>
+        <p>이 지표들은 "어떤 실수가 더 비싼가"에 따라 쓰임이 갈립니다. 놓치는 실수(FN)와 잘못 경보하는 실수(FP) 가운데 어느 쪽을 줄여야 하는지 먼저 정하면, 볼 지표가 정해집니다.</p>
+        <div class="scroll"><table class="cmp purpose">
+          <tr><th>지표</th><th>목적</th><th>주로 쓰는 상황</th><th>값이 높으면 할 수 있는 말</th><th>조심할 점</th></tr>
+          <tr><td><strong>민감도</strong></td><td>찾아야 할 것을 <strong>놓치지 않는지</strong> 평가한다. FN을 줄이는 것이 목표다</td><td>놓쳤을 때 대가가 큰 일: 감염병·암의 1차 선별검사, 공항 보안 검색, 사기 거래 1차 탐지</td><td>민감도가 높은 검사에서 <strong>음성</strong>이 나오면 "아니다"라고 배제하기 좋다</td><td>무엇이든 양성이라 하면 민감도는 100%가 된다. 특이도나 정밀도를 함께 봐야 한다</td></tr>
+          <tr><td><strong>특이도</strong></td><td>아닌 것을 <strong>잘못 잡지 않는지</strong> 평가한다. FP를 줄이는 것이 목표다</td><td>잘못된 양성의 대가가 큰 일: 수술·치료로 이어지는 확진 검사, 정상 메일을 지우는 스팸 필터, 부정행위 판정</td><td>특이도가 높은 검사에서 <strong>양성</strong>이 나오면 "맞다"고 확정하기 좋다</td><td>무엇이든 음성이라 하면 특이도는 100%가 된다. 민감도를 함께 봐야 한다</td></tr>
+          <tr><td><strong>정밀도</strong><br>(양성예측도)</td><td>"맞다"고 판정한 것을 <strong>믿고 움직여도 되는지</strong> 평가한다. 양성 판정 가운데 FP의 몫을 줄이는 것이 목표다</td><td>양성 판정마다 사람이 확인하거나 조치해야 하는 일: 검색·추천 결과, 사기 경보를 받는 조사팀, 이상 탐지 알림. 결과를 받은 사람이 "이 양성을 믿어도 되나"를 물을 때</td><td>양성으로 나온 것 가운데 실제로 맞는 것이 많다. 경보에 대응하는 수고가 헛되지 않다</td><td>기저율에 따라 크게 변한다. 같은 검사라도 유병률 1%에서 15%, 20%에서 82%다. 확실한 몇 개만 양성이라 하면 높아지므로 재현율(민감도)과 함께 본다</td></tr>
+          <tr><td><strong>정확도</strong></td><td>전체 가운데 얼마나 맞혔는지 <strong>한 숫자로 요약</strong>한다</td><td>두 범주가 비슷하게 많고 두 실수의 대가도 비슷할 때. 여러 모형을 처음 견줄 때</td><td>"전체로 보면 이만큼 맞힌다"</td><td>한쪽이 드물면 다수 쪽 성적에 묻힌다. 이 예에서 95%지만 양성예측도는 15%다. 이때는 균형 정확도나 민감도·특이도를 따로 본다</td></tr>
+        </table></div>
+        <p>그래서 실제 진단 과정은 흔히 두 단계로 짭니다. 먼저 <strong>민감도가 높은 검사</strong>로 넓게 걸러 놓치는 사람을 줄이고, 양성이 나온 사람만 <strong>특이도가 높은 검사</strong>로 다시 확인해 잘못된 양성을 걸러 냅니다. 첫 검사에서 양성이 나온 사람들은 기저율이 이미 높아진 집단이므로, 같은 검사를 다시 해도 정밀도가 크게 오릅니다. 아래 위젯의 "한 번 더 검사해도 양성이면?" 단추와 06절의 표가 이 둘째 단계를 보여 줍니다. 인공지능 모형도 마찬가지로, 정확도 하나만 보고하지 말고 어떤 실수를 줄이려는 모형인지에 맞춰 민감도와 특이도, 또는 재현율과 정밀도를 함께 밝히는 것이 좋습니다.</p>
+        <h4>세 가지만 기억하기</h4>
+        <ul>
+          <li><strong>이름만 다른 같은 지표가 있습니다.</strong> 의학의 민감도는 인공지능의 재현율이고, 의학의 양성예측도는 인공지능의 정밀도입니다.</li>
+          <li><strong>민감도·특이도는 기저율에 따라 변하지 않지만 양성예측도·정밀도는 변합니다.</strong> 분모가 실제 상태의 행인 지표는 감염자가 몇 명이든 같은 값이 나옵니다. 분모가 예측 열인 지표는 행의 크기, 곧 기저율에 끌려갑니다. 아래 위젯에서 유병률만 움직여 보면 확인할 수 있습니다.</li>
+          <li><strong>드문 것을 찾을 때 정확도는 속기 쉽습니다.</strong> 이 예에서 정확도는 95%인데 양성예측도는 15%입니다. 모두에게 "음성"이라고만 답하는 쓸모없는 검사도 정확도는 99%(9,900/10,000)가 됩니다. 그래서 사기 거래 탐지나 희귀 질환 진단처럼 한쪽이 드문 문제에서는 정확도보다 재현율·정밀도·F1을 함께 봅니다.</li>
+        </ul>
+        <p>판정 기준(예: 몇 점 이상이면 양성)을 바꾸면 민감도와 특이도가 서로 반대로 움직입니다. 기준을 바꿔 가며 민감도를 세로축, 위양성률(1 − 특이도)을 가로축에 찍은 곡선이 <strong>ROC 곡선</strong>이고, 그 아래 넓이가 <strong>AUC</strong>입니다. 숫자 열 개를 가르는 분류기에서 이 표를 읽는 법은 <a href="../ai/mnist-classifier-practice.html">MNIST 분류기 실습</a>에서 이어집니다.</p>
+      </details>
     </article>
 
     <article class="block">
       <h3>직접 바꿔 보기</h3>
-      <p>막대를 움직여 유병률, 민감도, 특이도를 바꾸면 10,000명 기준 나무와 양성예측도가 바로 다시 계산됩니다. 굵은 테두리 상자가 양성인 사람들입니다.</p>
+      <p>막대를 움직여 유병률, 민감도, 특이도를 바꾸면 10,000명 기준 트리와 양성예측도가 바로 다시 계산됩니다. 굵은 테두리 상자가 양성인 사람들입니다.</p>
       <div class="sim" id="tree-sim">
         <div class="sim-ctls">
           <div class="sim-ctl"><label for="in-prev">유병률(기저율) <span id="out-prev">1.0%</span></label><input type="range" id="in-prev" min="0.1" max="50" step="0.1" value="1"></div>
@@ -268,10 +350,10 @@
         </div>
         <div class="controls">
           <button class="btn ghost" type="button" data-preset="1">아무나 검사 (유병률 1%)</button>
-          <button class="btn ghost" type="button" data-preset="20">증상·접촉 있음 (20%)</button>
+          <button class="btn ghost" type="button" data-preset="20">증상·접촉 반영 (20%)</button>
           <button class="btn" type="button" id="btn-again">한 번 더 검사해도 양성이면?</button>
         </div>
-        <svg id="tree-svg" viewBox="0 0 640 250" role="img" aria-label="10,000명 기준 자연빈도 나무"></svg>
+        <svg id="tree-svg" viewBox="0 0 640 250" role="img" aria-label="10,000명 기준 자연빈도 트리"></svg>
         <div>
           <p class="note" style="margin-bottom:6px">양성인 사람들만 모아 보면</p>
           <div class="posbar" id="posbar"><div class="a"></div><div class="b"></div></div>
@@ -282,10 +364,6 @@
       </div>
     </article>
 
-    <article class="block">
-      <h3>전문가도 헷갈립니다</h3>
-      <p>같은 문제라도 확률 대신 자연빈도로 제시하면 정답률이 약 16%에서 46%로 올랐다는 연구가 있습니다(Gigerenzer &amp; Hoffrage, 1995). 하버드 의대 관계자를 대상으로 한 고전적 조사에서는 비슷한 문제(정답 약 2%)를 맞힌 사람이 60명 중 11명뿐이었고, 가장 흔한 답은 95%였습니다(Casscells et al., 1978). 처음 직감이 빗나갔다면 지극히 정상입니다.</p>
-    </article>
   </section>
 
   <!-- ======================= 06 ======================= -->
@@ -296,10 +374,10 @@
       <p>같은 키트, 같은 양성이라도 <strong>누가 검사했는가</strong>에 따라 결론이 달라집니다. 05의 막대에서 단추를 눌러 확인한 값을 정리하면 다음과 같습니다.</p>
       <div class="scroll">
         <table>
-          <thead><tr><th>상황</th><th>사전확률 \(P(\text{감염})\)</th><th>양성 중 감염자 / 전체 양성</th><th>사후확률 \(P(\text{감염}\mid\text{양성})\)</th></tr></thead>
+          <thead><tr><th>상황</th><th>검사 전 확률(사전확률) \(P(\text{감염})\)</th><th>양성 중 감염자 / 전체 양성</th><th>사후확률 \(P(\text{감염}\mid\text{양성})\)</th></tr></thead>
           <tbody>
-            <tr><td>증상 없이 아무나 검사</td><td class="n">1%</td><td class="n">90 / 585 (10,000명 기준)</td><td class="n">약 15%</td></tr>
-            <tr><td>증상이 있고 확진자와 접촉함</td><td class="n">20%</td><td class="n">1,800 / 2,200 (10,000명 기준)</td><td class="n">약 82%</td></tr>
+            <tr><td>증상 없이 아무나 검사 (기저율 그대로)</td><td class="n">1%</td><td class="n">90 / 585 (10,000명 기준)</td><td class="n">약 15%</td></tr>
+            <tr><td>증상이 있고 확진자와 접촉함 (이 정보로 검사 전 확률이 20%까지 올랐다고 가정)</td><td class="n">20%</td><td class="n">1,800 / 2,200 (10,000명 기준)</td><td class="n">약 82%</td></tr>
             <tr><td>첫 검사 양성 후 한 번 더 검사해도 양성 (두 검사가 독립이라고 가정)</td><td class="n">약 15%</td><td class="n">81 / 약 106 (첫 양성 585명 기준)</td><td class="n">약 77%</td></tr>
           </tbody>
         </table>
@@ -310,13 +388,86 @@
 
     <article class="block">
       <h3>공식으로 요약하면</h3>
-      <p>자연빈도 나무에서 한 계산을 기호로 옮기면 베이즈 정리가 됩니다. 분자는 “감염이면서 양성”인 사람, 분모는 “양성인 사람 전체”입니다.</p>
+      <p>자연빈도 트리에서 한 계산을 기호로 옮기면 베이즈 정리가 됩니다. 분자는 “감염이면서 양성”인 사람, 분모는 “양성인 사람 전체”입니다.</p>
       <p>\[ P(\text{감염}\mid\text{양성}) = \frac{P(\text{양성}\mid\text{감염})\,P(\text{감염})}{P(\text{양성}\mid\text{감염})\,P(\text{감염}) + P(\text{양성}\mid\text{비감염})\,P(\text{비감염})} \]</p>
       <ul>
-        <li>\(P(\text{감염})\): <strong>사전확률</strong>. 검사 전의 믿음(기저율)</li>
+        <li>\(P(\text{감염})\): <strong>사전확률</strong>. 이 검사를 하기 전의 믿음(검사 전 확률). 아무 정보가 없으면 기저율이고, 증상처럼 검사 전에 알게 된 정보가 있으면 그만큼 갱신된 값이다</li>
         <li>\(P(\text{양성}\mid\text{감염})\), \(P(\text{양성}\mid\text{비감염})\): <strong>가능도</strong>. 증거가 얼마나 강한가(민감도, 위양성률)</li>
         <li>\(P(\text{감염}\mid\text{양성})\): <strong>사후확률</strong>. 증거를 본 뒤의 믿음</li>
       </ul>
+
+      <h4>세 상황에 대입하면</h4>
+      <p>위 표의 세 줄은 모두 같은 공식에 수를 넣은 것입니다. 가능도(민감도 0.90, 위양성률 0.05)는 세 줄에서 같고, <strong>사전확률만</strong> 바뀝니다.</p>
+      <div class="bayes3">
+        <div class="b3">
+          <p class="b3-h">① 증상 없이 아무나 검사: 사전확률 0.01</p>
+          <p>\[ P(\text{감염}\mid\text{양성}) = \frac{0.90 \times 0.01}{0.90 \times 0.01 + 0.05 \times 0.99} = \frac{0.009}{0.0585} \approx 0.154 \]</p>
+        </div>
+        <div class="b3">
+          <p class="b3-h">② 증상이 있고 확진자와 접촉함: 이 정보를 반영한 검사 전 확률 0.20(가정)</p>
+          <p>\[ P(\text{감염}\mid\text{양성}) = \frac{0.90 \times 0.20}{0.90 \times 0.20 + 0.05 \times 0.80} = \frac{0.18}{0.22} \approx 0.818 \]</p>
+        </div>
+        <div class="b3">
+          <p class="b3-h">③ 첫 검사 양성 뒤 한 번 더 양성: 사전확률은 ①의 사후확률 0.154</p>
+          <p>\[ P(\text{감염}\mid\text{양성, 양성}) = \frac{0.90 \times 0.154}{0.90 \times 0.154 + 0.05 \times 0.846} \approx \frac{0.1385}{0.1808} \approx 0.766 \]</p>
+        </div>
+      </div>
+      <p class="note">③은 두 검사가 독립이라고 가정한 계산입니다. 앞의 표처럼 10,000명으로 세면 81 / 약 106이 되어 같은 값이 나옵니다.</p>
+
+      <h4>오즈로 쓰면 더 간단합니다</h4>
+      <p>분모가 같은 두 식 \(P(\text{감염}\mid\text{양성})\)과 \(P(\text{비감염}\mid\text{양성})\)을 나누면 분모가 지워지고 곱셈 하나만 남습니다. 확률의 비 \(P/(1-P)\)를 <strong>오즈</strong>(odds), 두 가능도의 비를 <strong>가능도비</strong>(likelihood ratio)라 합니다.</p>
+      <p>\[ \underbrace{\frac{P(\text{감염}\mid\text{양성})}{P(\text{비감염}\mid\text{양성})}}_{\text{사후 오즈}} = \underbrace{\frac{P(\text{양성}\mid\text{감염})}{P(\text{양성}\mid\text{비감염})}}_{\text{가능도비}} \times \underbrace{\frac{P(\text{감염})}{P(\text{비감염})}}_{\text{사전 오즈}} \]</p>
+      <div class="scroll">
+        <table class="cmp odds">
+          <thead><tr><th>상황</th><th>사전 오즈</th><th>× 가능도비</th><th>= 사후 오즈</th><th>사후확률 = 오즈 ÷ (1 + 오즈)</th></tr></thead>
+          <tbody>
+            <tr><td>① 아무나 검사</td><td class="n">0.01 / 0.99 ≈ 0.0101</td><td class="n">× 18</td><td class="n">≈ 0.182</td><td class="n">≈ 15.4%</td></tr>
+            <tr><td>② 증상·접촉 반영</td><td class="n">0.20 / 0.80 = 0.25</td><td class="n">× 18</td><td class="n">= 4.5</td><td class="n">≈ 81.8%</td></tr>
+            <tr><td>③ 한 번 더 양성</td><td class="n">0.154 / 0.846 ≈ 0.182</td><td class="n">× 18</td><td class="n">≈ 3.27</td><td class="n">≈ 76.6%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>가능도비 \(0.90 / 0.05 = 18\)은 세 줄 모두 같습니다. "양성"이라는 증거는 언제나 감염 쪽으로 오즈를 18배 밀어 줍니다. 결론이 달라진 것은 출발점(사전 오즈)이 달랐기 때문입니다.</p>
+
+      <h4>증상은 어디에 들어가나</h4>
+      <p>②에서 증상과 접촉 이력은 키트의 성능을 바꾼 것이 아니라 <strong>검사보다 먼저 들어온 증거</strong>입니다. 기저율 1%에서 출발한 믿음이 증상·접촉을 보고 한 번 갱신되어 20%가 되고, 그다음 양성 결과로 다시 갱신된 것입니다. 오즈로 쓰면 갱신이 두 번 이어집니다.</p>
+      <p>\[ \underbrace{0.0101}_{\text{기저율 1\%}} \xrightarrow{\ \times\ \text{약 }25\ (\text{증상과 접촉})\ } \underbrace{0.25}_{\text{검사 전 20\%}} \xrightarrow{\ \times\ 18\ (\text{양성})\ } \underbrace{4.5}_{\text{검사 후 81.8\%}} \]</p>
+      <ul>
+        <li><strong>①→②도 베이즈 갱신입니다.</strong> 1%를 20%로 올리려면 증상과 접촉을 합한 가능도비가 약 25여야 합니다(0.25 ÷ 0.0101). 20%는 손계산을 위한 가정이고, 실제 값은 질병과 유행 시기, 증상의 종류에 따라 다릅니다.</li>
+        <li><strong>그래서 "사전"은 "이 검사 전"이라는 뜻입니다.</strong> 같은 사람이라도 어떤 정보까지 반영했는지에 따라 사전확률이 달라집니다. ③에서 첫 검사의 사후확률이 둘째 검사의 사전확률이 된 것과 같은 구조입니다.</li>
+        <li><strong>세 상황에서 민감도·특이도를 같게 둔 것은 단순화입니다.</strong> 실제로는 증상이 있는 사람에게서 민감도가 더 높게 나오는 검사가 많습니다. 증상이 있을 때는 병이 진행되어 찾아내기 쉬운 경우가 많기 때문입니다. 검사 대상의 구성에 따라 민감도·특이도가 달라지는 이 현상을 <strong>스펙트럼 효과</strong>(spectrum effect)라 합니다(Ransohoff &amp; Feinstein, 1978). 코로나19 신속항원검사의 체계적 고찰에서도 증상이 있는 사람의 민감도가 증상이 없는 사람보다 높았습니다(Dinnes et al., 2022). 이 경우 증상은 검사 전 확률과 가능도 양쪽에 작용하고, 증상과 검사 결과가 서로 독립이라는 가정도 깨집니다.</li>
+      </ul>
+    </article>
+
+    <article class="block" id="likelihood">
+      <h3>가능도: 같은 증거를 가설마다 다시 읽기</h3>
+      <p>가능도와 확률은 같은 수 \(P(\text{양성}\mid\text{감염})\)을 쓰지만 <strong>읽는 방향</strong>이 다릅니다.</p>
+      <ul>
+        <li><strong>확률</strong>은 가설을 하나 정해 두고 결과를 묻습니다. "감염이라면 양성이 나올 확률은 90%, 음성은 10%." 한 가설 안에서 결과들의 확률을 더하면 1입니다.</li>
+        <li><strong>가능도</strong>는 이미 본 결과를 정해 두고 가설을 바꿔 가며 묻습니다. "양성이 나왔다. 이 결과는 감염이라는 가설 아래서 얼마나 그럴듯한가(0.90), 비감염이라는 가설 아래서는(0.05)?" 가설마다의 가능도를 더해도 1이 될 필요가 없습니다(0.90 + 0.05 = 0.95).</li>
+      </ul>
+      <p>그래서 가능도 하나만으로는 "감염일 확률"이 나오지 않습니다. 가능도는 가설끼리 <strong>견주는</strong> 데 쓰고, 그 비(가능도비)가 사전 오즈를 얼마나 밀어 주는지가 증거의 힘입니다. 아래 그림에서 관찰한 결과와 출발점을 바꿔 보세요.</p>
+      <div class="sim" id="lk-sim">
+        <div class="controls" role="group" aria-label="관찰한 검사 결과">
+          <span class="muted" style="font-size:13px;font-weight:700">관찰한 결과</span>
+          <button class="btn" type="button" data-obs="pos" aria-pressed="true">양성</button>
+          <button class="btn ghost" type="button" data-obs="neg" aria-pressed="false">음성</button>
+        </div>
+        <div class="controls" role="group" aria-label="사전확률">
+          <span class="muted" style="font-size:13px;font-weight:700">출발점(사전확률)</span>
+          <button class="btn" type="button" data-lkprior="0.01" aria-pressed="true">① 1% (기저율)</button>
+          <button class="btn ghost" type="button" data-lkprior="0.2" aria-pressed="false">② 20% (증상·접촉 반영)</button>
+          <button class="btn ghost" type="button" data-lkprior="0.153846" aria-pressed="false">③ 15.4% (첫 양성 후)</button>
+        </div>
+        <div class="sim-ctls lk-ctls">
+          <div class="sim-ctl"><label for="lk-sens">민감도 <span id="lk-out-sens">90%</span></label><input type="range" id="lk-sens" min="50" max="99.9" step="0.1" value="90"></div>
+          <div class="sim-ctl"><label for="lk-spec">특이도 <span id="lk-out-spec">95%</span></label><input type="range" id="lk-spec" min="50" max="99.9" step="0.1" value="95"></div>
+        </div>
+        <svg id="lk-svg" viewBox="0 0 640 360" role="img" aria-label="확률과 가능도를 읽는 방향, 가능도비에 따른 오즈의 이동"></svg>
+        <p class="big" id="lk-big"></p>
+        <p class="note" id="lk-note"></p>
+      </div>
+      <p class="note">③번 그림의 가로축은 오즈에 로그를 씌운 눈금이고, 아래 글자는 그 오즈에 해당하는 확률입니다. 이 눈금에서는 가능도비를 곱하는 일이 같은 길이만큼 옮기는 일이 됩니다. 그래서 출발점을 바꿔도 화살표의 길이는 그대로입니다. 음성이 나오면 가능도비가 1보다 작아 화살표가 왼쪽을 향합니다.</p>
       <p class="note">조건부 확률과 베이즈 정리를 확률의 공리에서부터 더 자세히 보려면 통계 자료 <a href="../statistics/grad-probability-lab.html#s3">확률에 대하여 · 조건부확률과 베이즈 정리</a>를 참고하세요.</p>
     </article>
 
@@ -388,7 +539,7 @@
     </article>
     <article class="block">
       <h3>2. AI 글 탐지기</h3>
-      <p>어떤 탐지기는 AI로 쓴 글의 95%를 잡아내고, 사람이 쓴 글을 AI로 잘못 판정하는 비율은 5%입니다(계산 연습용 수치). 제출된 과제의 10%가 AI로 쓴 글이라면, 탐지기가 ‘AI’라고 판정한 글이 실제로 AI 글일 확률은 얼마일까요? 1,000건을 기준으로 자연빈도 나무를 그려 풀어 보세요.</p>
+      <p>어떤 탐지기는 AI로 쓴 글의 95%를 잡아내고, 사람이 쓴 글을 AI로 잘못 판정하는 비율은 5%입니다(계산 연습용 수치). 제출된 과제의 10%가 AI로 쓴 글이라면, 탐지기가 ‘AI’라고 판정한 글이 실제로 AI 글일 확률은 얼마일까요? 1,000건을 기준으로 자연빈도 트리를 그려 풀어 보세요.</p>
       <details><summary>풀이</summary>
         <p>AI 글 100건 중 95건, 사람 글 900건 중 45건이 ‘AI’로 판정됩니다. 판정된 140건 중 실제 AI 글은 95건이므로 \(95/140 \approx 68\%\)입니다. 나머지 약 32%는 억울하게 지목된 사람 글입니다.</p>
       </details>
@@ -412,7 +563,7 @@
       <li>주장과 근거 데이터를 요약한다(출처 포함).</li>
       <li>데이터가 거친 필터와 빠진 데이터를 밝힌다(02~03).</li>
       <li>주장이 제시한 확률이 \(P(A\mid B)\)인지 \(P(B\mid A)\)인지 구분하고, 기저율이 빠졌는지 확인한다(04~06).</li>
-      <li>필요하면 자연빈도 나무를 그려 주장을 다시 계산한다. 이때 쓴 수치가 어디서 왔는지 밝힌다.</li>
+      <li>필요하면 자연빈도 트리를 그려 주장을 다시 계산한다. 이때 쓴 수치가 어디서 왔는지 밝힌다.</li>
       <li>주장을 제대로 검증하려면 어떤 데이터가 필요한지 제안한다.</li>
     </ol>
     <h3>평가 기준</h3>
@@ -422,7 +573,7 @@
         <tbody>
           <tr><th>필터·누락 데이터 식별</th><td>필터의 작동 방식과 누락 데이터를 구체적으로 밝힘</td><td>누락 데이터를 지적하나 필터 설명이 모호함</td><td>“표본이 편향됐다” 수준에 머묾</td></tr>
           <tr><th>조건의 방향 구분</th><td>두 조건부 확률을 명시하고 차이를 설명함</td><td>방향 혼동을 지적하나 표기가 불완전함</td><td>방향을 구분하지 못함</td></tr>
-          <tr><th>수치 재계산</th><td>기저율을 넣은 빈도 나무로 정확히 재계산함</td><td>계산은 시도했으나 가정이나 수치에 오류가 있음</td><td>재계산이 없음</td></tr>
+          <tr><th>수치 재계산</th><td>기저율을 넣은 자연빈도 트리로 정확히 재계산함</td><td>계산은 시도했으나 가정이나 수치에 오류가 있음</td><td>재계산이 없음</td></tr>
           <tr><th>대안 데이터 제안</th><td>비교군·표집 방법을 실현 가능하게 제안함</td><td>제안이 있으나 추상적임</td><td>제안이 없음</td></tr>
         </tbody>
       </table>
@@ -435,9 +586,11 @@
       <li>Berkson, J. (1946). Limitations of the application of fourfold table analysis to hospital data. <em>Biometrics Bulletin</em>, 2(3), 47–53.</li>
       <li>Brown, S. J., Goetzmann, W., Ibbotson, R. G., &amp; Ross, S. A. (1992). Survivorship bias in performance studies. <em>Review of Financial Studies</em>, 5(4), 553–580.</li>
       <li>Casscells, W., Schoenberger, A., &amp; Graboys, T. B. (1978). Interpretation by physicians of clinical laboratory results. <em>New England Journal of Medicine</em>, 299(18), 999–1001.</li>
+      <li>Dinnes, J., et al. (2022). Rapid, point-of-care antigen tests for diagnosis of SARS-CoV-2 infection. <em>Cochrane Database of Systematic Reviews</em>, 2022(7), CD013705.</li>
       <li>Gigerenzer, G., &amp; Hoffrage, U. (1995). How to improve Bayesian reasoning without instruction: Frequency formats. <em>Psychological Review</em>, 102(4), 684–704.</li>
       <li>Hoffrage, U., Lindsey, S., Hertwig, R., &amp; Gigerenzer, G. (2000). Communicating statistical information. <em>Science</em>, 290(5500), 2261–2262.</li>
       <li>Mangel, M., &amp; Samaniego, F. J. (1984). Abraham Wald's work on aircraft survivability. <em>Journal of the American Statistical Association</em>, 79(386), 259–267.</li>
+      <li>Ransohoff, D. F., &amp; Feinstein, A. R. (1978). Problems of spectrum and bias in evaluating the efficacy of diagnostic tests. <em>New England Journal of Medicine</em>, 299(17), 926–930.</li>
       <li>Whitney, W. O., &amp; Mehlhaff, C. J. (1987). High-rise syndrome in cats. <em>Journal of the American Veterinary Medical Association</em>, 191(11), 1399–1403.</li>
       <li>GAISE College Report ASA Revision Committee (2016). <em>Guidelines for Assessment and Instruction in Statistics Education College Report 2016</em>. American Statistical Association.</li>
     </ol>
@@ -459,7 +612,7 @@
   function fmtN(x) { return Math.round(x).toLocaleString("ko-KR"); }
   function pct(x, d) { return (x * 100).toFixed(d == null ? 1 : d) + "%"; }
 
-  /* =============== 자연빈도 나무 (10,000명 기준) =============== */
+  /* =============== 자연빈도 트리 (10,000명 기준) =============== */
   var N = 10000;
   var inPrev = document.getElementById("in-prev");
   var inSens = document.getElementById("in-sens");
@@ -534,6 +687,117 @@
     drawTree();
   });
   drawTree();
+
+  /* =============== 가능도: 행(확률)과 열(가능도), 오즈의 이동 =============== */
+  var lkSvg = document.getElementById("lk-svg");
+  var lk = { sens: 0.90, spec: 0.95, prior: 0.01, obs: "pos" };
+  var lkSens = document.getElementById("lk-sens");
+  var lkSpec = document.getElementById("lk-spec");
+
+  function lkText(x, y, s, cls, anchor) {
+    var a = { x: x, y: y, "class": cls };
+    if (anchor) a["text-anchor"] = anchor;
+    lkSvg.appendChild(el("text", a, s));
+  }
+  function logit(p) { return Math.log(p / (1 - p)); }
+  function sig3(x) { return Number(x.toPrecision(3)).toLocaleString("ko-KR", { maximumSignificantDigits: 3 }); }
+  function fmtLR(x) { return x >= 10 ? x.toFixed(1) : x >= 1 ? x.toFixed(2) : x.toFixed(3); }
+
+  function drawLk() {
+    clear(lkSvg);
+    var pos = lk.obs === "pos";
+    var obsName = pos ? "양성" : "음성";
+    var Li = pos ? lk.sens : 1 - lk.sens;          /* P(관찰 | 감염) */
+    var Ln = pos ? 1 - lk.spec : lk.spec;          /* P(관찰 | 비감염) */
+    var LR = Li / Ln;
+    var post = Li * lk.prior / (Li * lk.prior + Ln * (1 - lk.prior));
+
+    /* ① 확률: 가설(행)마다 결과의 비율, 합은 100% */
+    lkText(0, 16, "① 확률: 가설마다 결과를 나눈다 (한 줄의 합 = 100%)", "lk-h");
+    var x0 = 86, W = 290;
+    [{ name: "감염이면", p: lk.sens, cls: "inf" }, { name: "비감염이면", p: 1 - lk.spec, cls: "non" }].forEach(function (r, i) {
+      var y = 44 + i * 64, wPos = W * r.p;
+      lkText(0, y + 20, r.name, "lk-lab");
+      var segs = [
+        { x: x0, w: wPos, on: pos, t: "양성 " + pct(r.p, 1) },
+        { x: x0 + wPos, w: W - wPos, on: !pos, t: "음성 " + pct(1 - r.p, 1) }
+      ];
+      segs.forEach(function (s, j) {
+        lkSvg.appendChild(el("rect", { x: s.x, y: y, width: Math.max(s.w, 0.5), height: 30, "class": "lk-seg " + r.cls + (s.on ? " on" : " off") }));
+        if (s.w >= 70) lkText(s.x + s.w / 2, y + 20, s.t, s.on ? "lk-in" : "lk-small", "middle");
+        else lkText(j === 0 ? s.x : s.x + s.w, y - 6, s.t, "lk-small", j === 0 ? "start" : "end");
+      });
+    });
+    lkText(x0, 178, "굵은 테두리 = 실제로 관찰한 결과(" + obsName + ")", "lk-small");
+
+    /* ② 가능도: 관찰한 결과 열만 읽어 가설끼리 견준다 */
+    lkText(420, 16, "② 가능도: '" + obsName + "' 열만 읽는다", "lk-h");
+    var base = 150, H = 100;
+    [{ name: "감염", v: Li, cls: "inf", x: 440 }, { name: "비감염", v: Ln, cls: "non", x: 540 }].forEach(function (b) {
+      var h = Math.max(H * b.v, 1);
+      lkSvg.appendChild(el("rect", { x: b.x, y: base - h, width: 60, height: h, "class": "lk-seg " + b.cls + " on" }));
+      lkText(b.x + 30, base - h - 8, b.v.toFixed(3), "lk-val", "middle");
+      lkText(b.x + 30, base + 18, "P(" + obsName + " | " + b.name + ")", "lk-small", "middle");
+    });
+    lkText(530, 188, "가능도비 = " + Li.toFixed(3) + " ÷ " + Ln.toFixed(3) + " = " + fmtLR(LR), "lk-lr", "middle");
+
+    lkSvg.appendChild(el("line", { x1: 0, y1: 204, x2: 640, y2: 204, "class": "lk-tick", "stroke-dasharray": "3 4" }));
+
+    /* ③ 오즈의 로그 눈금 위에서 가능도비만큼 이동 */
+    lkText(0, 228, "③ 사전 오즈 × 가능도비 = 사후 오즈 (가로축: 오즈의 로그 눈금)", "lk-h");
+    var L = 7.5, ax0 = 30, ax1 = 610, ay = 296;
+    function X(p) { var z = Math.max(-L, Math.min(L, logit(p))); return ax0 + (z + L) / (2 * L) * (ax1 - ax0); }
+    lkSvg.appendChild(el("line", { x1: ax0, y1: ay, x2: ax1, y2: ay, "class": "lk-axis" }));
+    [0.001, 0.01, 0.05, 0.2, 0.5, 0.8, 0.95, 0.99, 0.999].forEach(function (p) {
+      var x = X(p);
+      lkSvg.appendChild(el("line", { x1: x, y1: ay - 4, x2: x, y2: ay + 4, "class": "lk-tick" }));
+      lkText(x, ay + 18, (p * 100) + "%", "lk-small", "middle");
+    });
+    var xa = X(lk.prior), xb = X(post), ar = 266;
+    if (Math.abs(xb - xa) > 12) {
+      var dir = xb > xa ? 1 : -1;
+      lkSvg.appendChild(el("line", { x1: xa, y1: ar, x2: xb - dir * 10, y2: ar, "class": "lk-arrow" }));
+      lkSvg.appendChild(el("path", { d: "M" + xb + " " + ar + " l" + (-dir * 12) + " -7 l0 14 z", "class": "lk-ah" }));
+    }
+    lkText((xa + xb) / 2, ar - 10, "× " + fmtLR(LR), "lk-lr", "middle");
+    lkSvg.appendChild(el("line", { x1: xa, y1: ar, x2: xa, y2: ay, "class": "lk-tick", "stroke-dasharray": "2 3" }));
+    lkSvg.appendChild(el("line", { x1: xb, y1: ar, x2: xb, y2: ay, "class": "lk-tick", "stroke-dasharray": "2 3" }));
+    lkSvg.appendChild(el("circle", { cx: xa, cy: ay, r: 6, "class": "lk-pt0" }));
+    lkSvg.appendChild(el("circle", { cx: xb, cy: ay, r: 6, "class": "lk-pt1" }));
+    var close = Math.abs(xb - xa) < 110, left = xa <= xb;
+    lkText(xa, 344, "사전 " + pct(lk.prior, 1), "lk-lab", close ? (left ? "end" : "start") : "middle");
+    lkText(xb, 344, "사후 " + pct(post, 1), "lk-h", close ? (left ? "start" : "end") : "middle");
+
+    document.getElementById("lk-out-sens").textContent = pct(lk.sens, 1).replace(".0%", "%");
+    document.getElementById("lk-out-spec").textContent = pct(lk.spec, 1).replace(".0%", "%");
+    document.getElementById("lk-big").innerHTML = "'" + obsName + "'을 본 뒤 감염일 확률 <b>" + pct(post, 1) + "</b> <span class=\"muted\">사전 오즈 " +
+      sig3(lk.prior / (1 - lk.prior)) + " × 가능도비 " + fmtLR(LR) + " = 사후 오즈 " + sig3(post / (1 - post)) + "</span>";
+    document.getElementById("lk-note").textContent = "두 가능도를 더하면 " + Li.toFixed(3) + " + " + Ln.toFixed(3) + " = " + (Li + Ln).toFixed(3) +
+      "입니다. 가능도는 가설끼리 견주는 값이라 합이 1일 필요가 없습니다." + (pos ? "" : " 음성은 가능도비가 1보다 작아 오즈를 줄입니다.");
+  }
+
+  function lkPress(sel, attr, val) {
+    Array.prototype.forEach.call(document.querySelectorAll(sel), function (b) {
+      var on = b.getAttribute(attr) === val;
+      b.className = on ? "btn" : "btn ghost";
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+  if (lkSvg) {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-obs]"), function (b) {
+      b.addEventListener("click", function () { lk.obs = b.getAttribute("data-obs"); lkPress("[data-obs]", "data-obs", lk.obs); drawLk(); });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-lkprior]"), function (b) {
+      b.addEventListener("click", function () {
+        lk.prior = parseFloat(b.getAttribute("data-lkprior"));
+        lkPress("[data-lkprior]", "data-lkprior", b.getAttribute("data-lkprior"));
+        drawLk();
+      });
+    });
+    lkSens.addEventListener("input", function () { lk.sens = lkSens.value / 100; drawLk(); });
+    lkSpec.addEventListener("input", function () { lk.spec = lkSpec.value / 100; drawLk(); });
+    drawLk();
+  }
 
   /* =============== 버크슨: 36가지 조합 =============== */
   var svgB = document.getElementById("bk-svg");

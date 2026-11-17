@@ -213,7 +213,7 @@ window.MATERIALS = [
     subject: "data-science",
     label: "개념 정리",
     title: "살아남은 것만 보면 - 생존자 편향과 조건부 확률",
-    description: "합격 수기와 돌아온 폭격기에서 보이지 않는 데이터를 찾고, 자연빈도 나무로 양성예측도와 베이즈 정리를 직접 계산하며 걸러진 데이터와 조건의 방향을 함께 확인합니다.",
+    description: "합격 수기와 돌아온 폭격기에서 보이지 않는 데이터를 찾고, 자연빈도 트리로 양성예측도와 베이즈 정리를 직접 계산하며 걸러진 데이터와 조건의 방향을 함께 확인합니다.",
     href: "data-science/survivorship-bias-conditional-probability.html",
     practice: true,
     tags: ["데이터과학", "개념정리", "생존자편향", "선택편향", "조건부확률", "베이즈정리", "기저율"],
