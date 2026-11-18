@@ -137,6 +137,21 @@ uv run python src/python/prepare_galton_father_son.py   # docs/assets/data/galto
   통계, 중부모 기준 비교를 계산한다. 원자료는 Galton(1886)이며
   <https://www.randomservices.org/random/data/Galton.tsv>에서 받았다.
 
+`docs/data-science/normal-error-regression-intro.html`(측정의 흔들림에서 회귀직선까지)은
+위의 `galton-father-son.js`와 아래 R 스크립트가 만드는 마이컬슨 측정 자료를 읽는다.
+
+```sh
+Rscript src/R/prepare_michelson_morley.R   # docs/assets/data/michelson-morley.js
+```
+
+- `prepare_michelson_morley.R`는 R 기본 자료 `datasets::morley`(Michelson 1879년의 빛의
+  속도 측정 100회)를 km/s로 바꿔 평균·표준편차, 평균 ±1·±2 표준편차 안의 비율과 함께
+  내보낸다. 별도 원자료 파일이 필요 없다.
+- 같은 자료의 10절 R 실습은 실습 폴더 뼈대 `skeleton/nd_lm/`(폴더 구조, 갈턴 원자료
+  `dataset/raw/Galton.tsv` 사본, `.gitignore`, 안내 README, 코딩 에이전트 규칙 `AGENTS.md`와 이를 불러오는 `CLAUDE.md`)을 쓴다. 사이트에서 받을
+  `docs/downlodable/nd_lm.zip`은 `uv run python src/python/build_skeleton_zip.py nd_lm`으로
+  다시 만든다. 뼈대 안의 파일을 고치면 zip도 다시 만든다.
+
 `docs/ai/regression-to-deep-learning.html`(회귀에서 딥러닝으로)이 읽는 데이터는 아래
 두 스크립트가 만든다(`window.GISTEMP_ANNUAL`, `window.MNIST_BRIDGE`를 정의하는 생성
 파일이므로 직접 수정하지 않는다).

@@ -1,0 +1,1480 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>측정의 흔들림에서 회귀직선까지 | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/normal-error-regression-intro.html">
+<meta name="description" content="갈릴레이부터 마이컬슨까지 빛의 속도를 잰 역사에서 출발해, 빛의 속도를 백 번 잰 실측 자료로 관측오차와 정규분포를 보고, 갈턴의 아버지–아들 키 자료로 '직선 위에서 종 모양으로 흩어지는' 회귀분석의 관점을 그림으로 익히는 데이터과학 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="측정의 흔들림에서 회귀직선까지 | Q의 아카이브">
+<meta property="og:description" content="관측오차가 왜 종 모양인지에서 출발해, 아버지 키가 정해지면 아들 키가 직선 위의 값을 가운데로 흩어진다는 회귀분석의 관점까지 그림으로 따라갑니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/normal-error-regression-intro.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="데이터과학 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="측정의 흔들림에서 회귀직선까지 | Q의 아카이브">
+<meta name="twitter:description" content="관측오차가 왜 종 모양인지에서 출발해, 아버지 키가 정해지면 아들 키가 직선 위의 값을 가운데로 흩어진다는 회귀분석의 관점까지 그림으로 따라갑니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/material.css">
+<style>
+/* 이 자료 고유의 스타일만. 공통 토큰·레이아웃은 ../assets/material.css */
+:root{
+  --line-soft:#e6ebf5;
+  --curve:#e2662a; --curve-soft:rgba(226,102,42,.16);   /* 정규분포 곡선 (차트 계열색) */
+}
+.skip-link{position:fixed;top:-3rem;left:1rem;z-index:100;padding:.6rem 1rem;color:#fff;background:#1c3fd6;border-radius:4px;font-weight:700;text-decoration:none}
+.skip-link:focus{top:1rem}
+
+/* 머리말 */
+.masthead{display:flex;flex-direction:column;gap:12px;padding-bottom:4px}
+.mast-meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.mast-meta span{display:inline-flex;align-items:center;gap:7px}
+.swatch{width:11px;height:11px;border-radius:2px;display:inline-block}
+
+/* 절 머리 */
+.sec-head{display:flex;gap:16px;align-items:baseline}
+.sec-num{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;flex:none;padding-top:2px}
+.stack{display:flex;flex-direction:column;gap:10px}
+em{font-style:normal;background:var(--accent-soft);padding:1px 5px;border-radius:3px}
+
+/* 그림 틀 */
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.fig-bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line-soft);background:var(--accent-soft)}
+.fig-title{font-size:13px;font-weight:600;letter-spacing:.01em;margin-right:auto}
+.fig-plot{padding:10px 8px 4px;min-width:0}
+.fig-note{padding:12px 16px;border-top:1px solid var(--line-soft);font-size:13.5px;color:var(--muted);line-height:1.6}
+svg.plot{display:block;width:100%;height:auto;overflow:visible}
+svg.plot text{font-family:var(--mono)}
+svg.plot text:not([fill]){fill:var(--muted)}
+svg.plot .mv{transition:cx .9s ease,cy .9s ease}
+
+/* 조작 */
+.ctrl{display:flex;align-items:center;gap:10px;font-size:13px}
+.ctrl label{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+.ctrl output{font-family:var(--mono);font-size:13px;font-weight:600;min-width:5.2em}
+input[type=range]{-webkit-appearance:none;appearance:none;height:22px;background:transparent;width:clamp(110px,22vw,190px);cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--line);border-radius:2px}
+input[type=range]::-moz-range-track{height:3px;background:var(--line);border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--accent);margin-top:-6px;border:2px solid var(--surface)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent);border:2px solid var(--surface)}
+.fig-bar .btn{font-size:12.5px;padding:6px 12px;background:var(--surface);color:var(--ink);border-color:var(--line);transition:background .15s,border-color .15s}
+.fig-bar .btn:hover{border-color:var(--accent);color:var(--accent)}
+.fig-bar .btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.fig-bar .seg .btn{border:none;border-radius:0;border-right:1px solid var(--line)}
+.fig-bar .seg .btn:last-child{border-right:none}
+.num-in{width:5.4em;font-family:var(--mono);font-size:13px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+
+/* 수치 표시 */
+.stat-row{display:flex;flex-wrap:wrap;gap:8px 26px;padding:12px 16px;border-top:1px solid var(--line-soft)}
+.stat{display:flex;flex-direction:column;gap:1px;margin:0}
+.stat dt{font-size:11.5px;color:var(--muted)}
+.stat dd{margin:0;font-family:var(--mono);font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat dd small{font-size:11.5px;color:var(--muted);font-weight:400;margin-left:3px}
+.stat.hl dd{color:var(--accent)}
+.warn-line{padding:10px 16px;border-top:1px solid var(--line-soft);background:var(--warn-soft);color:var(--warn);font-size:13.5px;font-weight:600}
+
+/* 세 가지 약속 */
+.promises{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.promises > div{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--soft)}
+.promises b{display:block;font-family:var(--mono);color:var(--accent);font-size:13px;margin-bottom:4px}
+@media (max-width:760px){.promises{grid-template-columns:minmax(0,1fr)}}
+
+main > footer{padding-top:8px;color:var(--muted);font-size:13.5px}
+.dl-link{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:var(--ink);color:var(--surface)!important;border-radius:9px;font-weight:700;font-size:14px;text-decoration:none}
+.dl-link:hover,.dl-link:focus-visible{opacity:.88}
+</style>
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+<script defer src="../assets/annotate.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../index.html#data-science">← 처음으로</a>
+  <h1>측정의 흔들림에서<br>회귀직선까지</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#light-speed"><b>01</b><span>빛은 얼마나 빠를까</span></a>
+    <a href="#michelson"><b>02</b><span>마이컬슨의 회전 거울</span></a>
+    <a href="#repeat"><b>03</b><span>같은 것을 백 번 재면</span></a>
+    <a href="#bell"><b>04</b><span>작은 흔들림이 쌓이면</span></a>
+    <a href="#two-numbers"><b>05</b><span>두 숫자와 표준정규분포</span></a>
+    <a href="#two-variables"><b>06</b><span>두 변수를 함께 보면</span></a>
+    <a href="#fit-line"><b>07</b><span>가운데를 잇는 직선</span></a>
+    <a href="#model"><b>08</b><span>직선 위에 종을 세우다</span></a>
+    <a href="#predict"><b>09</b><span>예측해 보기</span></a>
+    <a href="#with-r"><b>10</b><span>R로 다시 해 보기</span></a>
+    <a href="#wrap"><b>11</b><span>정리와 다음 걸음</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#데이터과학</span>
+    <span class="rail-tag">#시각화</span>
+    <span class="rail-tag">#정규분포</span>
+    <span class="rail-tag">#관측오차</span>
+    <span class="rail-tag">#회귀분석</span>
+    <span class="rail-tag">#예측</span>
+  </div>
+  <footer>버튼과 슬라이더로 그림을 바꾸면 수치가 바로 따라 바뀝니다. 그림의 점은 모두 실제로 잰 값입니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+
+<main id="content">
+<header class="masthead">
+  <p class="eyebrow">흔들림과 모형 · 이야기 자료</p>
+  <h1>측정의 흔들림에서 회귀직선까지 - 정규분포로 여는 회귀분석</h1>
+  <p class="lede"><strong>빛은 1초에 얼마나 멀리 갈까?</strong> 스위치를 올리는 순간 방이 환해지니 빛은 시간이 전혀 걸리지 않는 것처럼 보인다. 사람들은 이 속도를 재려고 300년 가까이 애썼고, 그 끝에서 뜻밖의 사실을 만났다. 아무리 정밀한 장치로 재도 같은 것을 여러 번 재면 값이 매번 조금씩 다르다. 이 흔들림은 측정에만 있는 것이 아니다. 아버지 키로 아들 키를 짐작할 때도, 키가 같은 아버지들의 아들 키는 하나로 정해지지 않고 흩어진다. 그래서 두 변수의 관계는 <strong>직선이 말해 주는 규칙</strong>과 <strong>그 둘레의 흔들림</strong>을 함께 적어야 온전해진다. 규칙과 흔들림을 함께 담은 이 식을 <strong>모형</strong>이라 하고, 규칙으로 직선을 쓰는 모형이 <strong>회귀분석</strong>이다. 흔들림의 모양을 먼저 알아 두면 그 직선이 무엇을 말하고 무엇을 말하지 않는지가 보인다. 수식은 꼭 필요한 몇 개만 쓰고, 나머지는 그림으로 따라간다.</p>
+  <div class="mast-meta">
+    <span><i class="swatch" style="background:var(--accent)"></i>실제로 잰 값</span>
+    <span><i class="swatch" style="background:var(--curve)"></i>정규분포 곡선</span>
+    <span><i class="swatch" style="background:var(--ink)"></i>평균 · 회귀직선</span>
+  </div>
+</header>
+
+<!-- ======================= 01 ======================= -->
+<section class="panel" id="light-speed">
+  <div class="sec-head"><span class="sec-num">01</span><h2>빛은 얼마나 빠를까</h2></div>
+  <div class="stack">
+    <p>번개가 치면 빛이 먼저 보이고 천둥은 몇 초 뒤에 들린다. 소리는 1초에 340 m쯤 가니 그 몇 초로 번개까지의 거리를 어림할 수 있다. 그렇다면 빛은? 번쩍하는 순간 이미 와 있으니 <strong>빛은 시간이 전혀 걸리지 않는 걸까</strong>, 아니면 <strong>너무 빨라서 못 느낄 뿐 정해진 속도가 있는 걸까</strong>. 있다면 1초에 얼마나 갈까?</p>
+    <p>이 물음에 사람들은 300년 가까이 매달렸다. 처음에는 등불로, 다음에는 목성의 달로, 그다음에는 톱니바퀴와 회전하는 거울로 쟀다. 아래 그림에서 실험을 하나씩 골라 보자.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">빛의 속도를 잰 역사 속 실험</span>
+      <div class="seg" role="group" aria-label="실험 고르기">
+        <button class="btn" type="button" data-h1="galileo" aria-pressed="true">갈릴레이 1638</button>
+        <button class="btn" type="button" data-h1="romer" aria-pressed="false">뢰머 1676</button>
+        <button class="btn" type="button" data-h1="fizeau" aria-pressed="false">피조 1849</button>
+      </div>
+      <div class="ctrl" id="h1-ctrl"><label for="h1-s" id="h1-sl">지구의 위치</label><input type="range" id="h1-s" min="0" max="360" step="1" value="0"><output id="h1-sv" for="h1-s"></output></div>
+      <button class="btn" type="button" id="h1-go">등불 신호 보내기</button>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="h1-svg" role="img" aria-label="빛의 속도를 재는 실험의 모식도"></svg></div>
+    <dl class="stat-row" id="h1-stats"></dl>
+    <p class="fig-note" id="h1-note"></p>
+  </div>
+
+  <div class="stack">
+    <p>세 실험의 생각은 같다. <strong>빛이 간 거리를 그동안 걸린 시간으로 나눈다.</strong> 어려운 것은 시간이다. 빛은 너무 빨라서 땅 위의 거리로는 걸린 시간이 너무 짧다. 갈릴레이는 시간을 잴 수 없어서 실패했고, 뢰머는 거리를 우주 크기로 늘려서 시간을 분 단위로 만들었고, 피조는 1초에 수십 바퀴 도는 톱니바퀴를 시계로 삼아 땅 위의 몇 km에서 시간을 쟀다.</p>
+    <p>그렇게 얻은 값들을 연도순으로 놓으면 아래와 같다. 처음에는 값이 크게 흔들리다가 점점 한 값으로 모인다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">연도별로 발표된 빛의 속도</span>
+      <div class="seg" role="group" aria-label="세로축 범위">
+        <button class="btn" type="button" data-h2="all" aria-pressed="true">전체</button>
+        <button class="btn" type="button" data-h2="zoom" aria-pressed="false">1860년 이후 가까이</button>
+      </div>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="h2-svg" role="img" aria-label="연도별로 발표된 빛의 속도 값과 오늘날 정의값"></svg></div>
+    <p class="fig-note">점선은 1983년에 정한 값 299,792.458 km/s다. 이때부터 미터를 "빛이 1/299,792,458초 동안 가는 거리"로 정했기 때문에, 이 값은 더 이상 재는 값이 아니라 정의된 값이다. 1690년의 점은 호이겐스가 뢰머의 관측으로 계산한 값이다. 세로 막대는 실험자가 밝힌 불확실성(±)이다. 1879년 값은 마이컬슨이 여러 보정을 거쳐 발표한 값이라서, 03절에서 볼 100개 기록의 단순 평균(299,852 km/s)과 조금 다르다.</p>
+  </div>
+</section>
+
+<!-- ======================= 02 ======================= -->
+<section class="panel" id="michelson">
+  <div class="sec-head"><span class="sec-num">02</span><h2>마이컬슨의 회전 거울</h2></div>
+  <div class="stack">
+    <p>1862년 푸코(Léon Foucault)는 톱니바퀴 대신 <strong>빠르게 도는 거울</strong>을 썼다. 빛이 도는 거울에 맞아 먼 거울까지 갔다가 돌아오는 사이에 거울이 아주 조금 돌아가 있으므로, 돌아온 빛은 처음과 조금 다른 방향으로 튕겨 나간다. 그 어긋남을 재면 빛이 오간 시간을 알 수 있다. 푸코는 약 298,000 km/s를 얻었다.</p>
+    <p>1879년 미국 해군사관학교의 교관 <strong>앨버트 마이컬슨</strong>(Albert A. Michelson)은 이 방법을 크게 키웠다. 푸코의 빛길이 20 m 남짓(약 66피트)이었던 데 비해 마이컬슨은 두 거울 사이를 <strong>2,000피트(약 610 m) 가까이</strong> 벌렸다. 거울은 1초에 256바퀴를 돌았고, 돌아온 빛의 상은 약 <strong>133 mm</strong>나 옮겨졌다. 푸코 때보다 20배쯤 커서 자로 훨씬 정확하게 잴 수 있었다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">마이컬슨의 회전 거울 장치 (1879)</span>
+      <div class="ctrl"><label for="h3-n">거울 회전</label><input type="range" id="h3-n" min="0" max="256" step="1" value="256"><output id="h3-nv" for="h3-n"></output></div>
+      <button class="btn" type="button" id="h3-go">빛 보내기</button>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="h3-svg" role="img" aria-label="회전 거울, 먼 고정 거울, 옮겨진 상을 그린 마이컬슨 장치 모식도"></svg></div>
+    <dl class="stat-row" id="h3-stats"></dl>
+    <p class="fig-note">그림의 각도는 눈에 보이도록 크게 부풀렸고, 먼 거울까지의 거리도 줄여 그렸다. 실제 각도와 거리는 아래 수치에 있다. 상의 이동은 "1초에 256바퀴일 때 약 133 mm"라는 기록에 회전 속도를 비례시켜 계산했다. 자료: Kleppner, D. (2007), <em style="background:none;padding:0">Master Michelson's measurement</em>, Physics Today.</p>
+  </div>
+
+  <div class="stack">
+    <p>실제 측정은 거꾸로 간다. 마이컬슨은 <em>두 거울 사이의 거리</em>, <em>거울이 1초에 도는 바퀴 수</em>, <em>상이 옮겨진 거리</em> 세 가지를 쟀다. 상이 옮겨진 거리로 거울이 돈 각도를 알고, 그 각도를 도는 데 걸린 시간을 회전 속도로 알고, 빛이 간 거리(왕복)를 그 시간으로 나누면 빛의 속도다.</p>
+    <p>세 가지 모두 아주 정밀하게 재야 한다. 그런데 회전 속도는 소리굽쇠와 맞춰 가며 읽고, 상의 위치는 눈으로 접안경의 눈금을 읽고, 공기의 온도는 그날그날 바뀐다. 그래서 마이컬슨은 한 번 재고 끝내지 않고 <strong>같은 측정을 100번</strong> 했다. 이제 그 100개의 기록을 열어 보자.</p>
+  </div>
+</section>
+
+<!-- ======================= 03 ======================= -->
+<section class="panel" id="repeat">
+  <div class="sec-head"><span class="sec-num">03</span><h2>같은 것을 백 번 재면</h2></div>
+  <div class="stack">
+    <p>02절의 회전 거울 장치로 마이컬슨은 1879년 6월과 7월에 <strong>빛의 속도</strong>를 쟀다. 같은 장치로, 같은 사람이, 같은 빛을 다섯 차례에 걸쳐 20번씩, 모두 100번 쟀다. 빛의 속도는 하나인데 기록된 값은 <strong>100개가 모두 같지 않다</strong>. 가장 작은 값은 299,620 km/s, 가장 큰 값은 300,070 km/s다.</p>
+    <p>아래 그림은 그 100개를 잰 순서대로 찍은 것이다. 위아래로 들쭉날쭉할 뿐 어떤 규칙도 없어 보인다. <strong>값별로 쌓기</strong>를 누르면 같은 점들이 비슷한 값끼리 왼쪽으로 모인다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">마이컬슨의 빛의 속도 측정 · 100회</span>
+      <div class="seg" role="group" aria-label="보는 방식">
+        <button class="btn" type="button" data-f1="order" aria-pressed="true">잰 순서대로</button>
+        <button class="btn" type="button" data-f1="stack" aria-pressed="false">값별로 쌓기</button>
+      </div>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="f1-svg" role="img" aria-label="빛의 속도 측정값 100개의 점 그림"></svg></div>
+    <dl class="stat-row" id="f1-stats"></dl>
+    <p class="fig-note">점 하나가 측정 한 번이다. 쌓을 때는 20 km/s 간격으로 비슷한 값끼리 모았다. 자료: Michelson(1882), R의 <code>morley</code> 자료.</p>
+  </div>
+
+  <div class="stack">
+    <p>쌓아 놓고 보면 모양이 생긴다. <em>가운데에 많고, 가운데에서 멀어질수록 드물고, 위아래가 대체로 비슷하다.</em> 재는 사람이 대충 잰 것이 아니다. 아무리 조심해도 측정에는 이런 흔들림이 따라오고, 이것을 <strong>관측오차</strong>(측정오차)라 한다.</p>
+    <p>그림에는 선이 두 개 있다. 굵은 선은 100번의 <strong>평균</strong> 299,852 km/s이고, 점선은 오늘날 정해진 빛의 속도 299,792.458 km/s다. 평균이 점선보다 약 60 km/s 위에 있다. 오차에는 두 종류가 있다는 뜻이다.</p>
+    <table>
+      <thead><tr><th>오차의 종류</th><th>성질</th><th>평균을 내면</th></tr></thead>
+      <tbody>
+        <tr><td><strong>우연오차</strong></td><td>잴 때마다 위로도 아래로도 흔들린다. 그림에서 점들이 퍼진 폭이다.</td><td>위와 아래가 서로 상쇄되어 줄어든다</td></tr>
+        <tr><td><strong>치우침</strong>(계통오차)</td><td>장치의 보정, 온도 보정 같은 한 가지 원인이 매번 같은 쪽으로 민다. 평균선과 점선의 거리다.</td><td>몇 번을 재도 그대로 남는다</td></tr>
+      </tbody>
+    </table>
+    <p>이 자료에서 다루는 정규분포는 <strong>우연오차의 모양</strong>이다. 치우침은 측정을 더 해서가 아니라 장치와 방법을 고쳐서 없앤다.</p>
+  </div>
+</section>
+
+<!-- ======================= 04 ======================= -->
+<section class="panel" id="bell">
+  <div class="sec-head"><span class="sec-num">04</span><h2>작은 흔들림이 쌓이면 종 모양이 된다</h2></div>
+  <div class="stack">
+    <p>왜 하필 가운데가 볼록한 모양일까. 측정 한 번의 오차는 원인 하나에서 오지 않는다. 그날의 공기 온도, 거울이 도는 속도의 아주 작은 변화, 눈금을 읽는 눈의 위치, 손의 떨림처럼 <strong>작은 원인 여럿이 저마다 조금씩 위나 아래로 민 결과의 합</strong>이다.</p>
+    <p>이것을 눈으로 보는 장치가 <strong>갈턴 보드</strong>다. 위에서 떨어진 공이 못에 부딪힐 때마다 왼쪽이나 오른쪽으로 반반의 확률로 튄다. 공 하나를 측정 한 번, 못 하나를 작은 원인 하나로 보면 된다. 공이 도착한 칸이 곧 그 측정의 오차다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">갈턴 보드 · 쌓인 공과 계산한 도착 비율</span>
+      <div class="ctrl"><label for="f2-n">못의 줄 수</label><input type="range" id="f2-n" min="1" max="16" step="1" value="4"><output id="f2-nv" for="f2-n">4줄</output></div>
+      <button class="btn" type="button" id="f2-drop">공 100개 떨어뜨리기</button>
+      <button class="btn ghost" type="button" id="f2-reset">비우기</button>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="f2-svg" role="img" aria-label="갈턴 보드, 칸마다 쌓인 공, 계산한 도착 비율 막대와 정규분포 곡선"></svg></div>
+    <dl class="stat-row" id="f2-stats"></dl>
+    <p class="fig-note">쌓이는 공은 컴퓨터가 못마다 왼쪽·오른쪽을 반반의 확률로 골라 떨어뜨린 결과라서 누를 때마다 조금씩 달라진다. 공이 다 쌓이고 나면 뒤에 나타나는 <strong>파란 테두리 막대</strong>는 갈림길마다 반반일 때 각 칸에 도착하는 <strong>경로의 수로 계산한 비율</strong>을 떨어뜨린 공 수에 맞춘 높이이고, <strong>주황 곡선</strong>은 같은 가운데와 퍼짐을 가진 정규분포 곡선이다. 공을 더 떨어뜨리면 배경은 잠시 사라졌다가 다 쌓인 뒤 다시 나타난다.</p>
+  </div>
+
+  <div class="stack">
+    <p>공을 몇 번 떨어뜨려 쌓아 보자. 공이 많아질수록 쌓인 더미가 계산한 막대를 닮아 간다. 이제 줄을 1줄에서 하나씩 늘려 보자. 1줄이면 칸이 둘뿐이고, 2줄이면 가운데가 두 배가 된다. 줄이 많아질수록 더미와 막대의 윤곽이 주황 곡선에 붙는다. 가운데에 몰리는 까닭은 단순하다. 맨 오른쪽 칸에 가려면 <em>모든 못에서 오른쪽으로</em> 튀어야 하는데 그런 경로는 딱 하나다. 가운데 칸으로 가는 경로는 오른쪽과 왼쪽이 반씩 섞이기만 하면 되니 수없이 많다. <strong>작은 원인들이 서로 상쇄되는 길이 한쪽으로 몰리는 길보다 훨씬 많다.</strong></p>
+    <p>작고 서로 무관한 흔들림이 많이 더해지면 그 합은 원인 하나하나의 모양과 상관없이 이 종 모양에 가까워진다. 통계에서는 이 사실을 <strong>중심극한정리</strong>라 부르고, 이 종 모양을 <strong>정규분포</strong>라 한다. 19세기 초 가우스가 천체 관측의 오차를 다루며 정리했기 때문에 <strong>가우스 분포</strong>라고도 한다. 통계 분석이 "오차는 정규분포를 따른다"고 가정하는 근거가 바로 이것이다.</p>
+  </div>
+</section>
+
+<!-- ======================= 05 ======================= -->
+<section class="panel" id="two-numbers">
+  <div class="sec-head"><span class="sec-num">05</span><h2>종 모양을 정하는 두 숫자와 표준정규분포</h2></div>
+  <div class="stack">
+    <p>정규분포의 모양은 숫자 두 개로 정해진다. <strong>평균</strong>은 종의 가운데가 어디인지, <strong>표준편차</strong>는 종이 얼마나 넓게 퍼졌는지를 말한다. 표준편차는 "값들이 평균에서 대략 얼마쯤 떨어져 있는가"를 나타내는 퍼짐의 자다.</p>
+    <p>마이컬슨의 100회는 평균 299,852 km/s, 표준편차 79 km/s다. 이 두 숫자로 그린 정규분포 곡선을 실제 측정의 막대그림 위에 겹쳐 보자.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">측정값의 막대그림과 정규분포 곡선</span>
+      <div class="seg" role="group" aria-label="범위">
+        <button class="btn" type="button" data-f3="1" aria-pressed="true">평균 ± 1 표준편차</button>
+        <button class="btn" type="button" data-f3="2" aria-pressed="false">평균 ± 2 표준편차</button>
+      </div>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="f3-svg" role="img" aria-label="빛의 속도 측정값의 막대그림과 정규분포 곡선"></svg></div>
+    <dl class="stat-row" id="f3-stats"></dl>
+    <p class="fig-note">막대는 50 km/s 간격으로 묶은 측정 개수다. 막대 넓이의 합과 곡선 아래 넓이가 같도록 높이를 맞췄다. 축 아래의 짧은 눈금은 측정값 하나하나이고, 색칠한 범위 안에 든 것은 파랑, 밖에 있는 것은 회색이다.</p>
+  </div>
+
+  <div class="stack">
+    <p>정규분포라면 <strong>평균 ± 1 표준편차 안에 약 68%</strong>, <strong>평균 ± 2 표준편차 안에 약 95%</strong>가 들어간다. 마이컬슨의 측정은 각각 67개, 97개가 들어 있다. 100번밖에 재지 않았는데도 곡선이 말하는 비율과 거의 같다.</p>
+    <div class="callout"><p><strong>가져갈 것 하나.</strong> "평균에서 표준편차 두 개만큼 떨어진 범위 안에 대부분(약 95%)이 들어온다." 이 감각을 뒤의 예측 범위에서 그대로 쓴다.</p></div>
+    <details>
+      <summary>곡선의 식이 궁금하다면</summary>
+      <p>평균이 \(\mu\), 표준편차가 \(\sigma\)인 정규분포 곡선은 다음과 같다. 외울 필요는 없다. \(\mu\)가 곡선을 좌우로 옮기고, \(\sigma\)가 곡선을 넓히거나 좁힌다는 것만 보면 된다.</p>
+      \[ f(x) = \frac{1}{\sigma\sqrt{2\pi}}\, \exp\!\left( -\frac{(x-\mu)^{2}}{2\sigma^{2}} \right) \]
+    </details>
+  </div>
+
+  <div class="stack">
+    <h3>모든 종을 하나의 자로 재기: 표준정규분포</h3>
+    <p>마이컬슨의 측정은 km/s 단위이고 평균 299,852, 표준편차 79다. 06절부터 쓸 갈턴의 아들 키는 cm 단위이고 평균 175.8, 표준편차 6.7이다. 단위도, 가운데도, 퍼짐도 다르다. 그래도 둘 다 종 모양이라면 <strong>같은 종을 다른 눈금으로 잰 것</strong>일 뿐이다.</p>
+    <p>눈금을 하나로 맞추는 방법은 간단하다. 각 값에서 <strong>평균을 빼고</strong>(가운데를 0으로 옮기고), <strong>표준편차로 나눈다</strong>(퍼짐을 1로 맞춘다). 그러면 단위는 사라지고 "평균에서 표준편차 몇 개만큼 떨어졌는가"만 남는다. 이 수를 <strong>z 점수</strong>(표준화 점수)라 한다.</p>
+    \[ z = \frac{\text{값} - \text{평균}}{\text{표준편차}} \]
+    <p>정규분포를 따르는 값을 z 점수로 바꾸면 평균이 0, 표준편차가 1인 정규분포가 된다. 이것을 <strong>표준정규분포</strong>라 한다. 아래 그림에서 <strong>z 점수로 바꾸기</strong>를 눌러 두 자료가 하나의 곡선으로 겹치는 것을 보자.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">두 자료를 z 점수로 바꾸면</span>
+      <div class="seg" role="group" aria-label="눈금">
+        <button class="btn" type="button" data-fz="0" aria-pressed="true">원래 단위</button>
+        <button class="btn" type="button" data-fz="1" aria-pressed="false">z 점수로 바꾸기</button>
+      </div>
+      <div class="ctrl"><label for="fz-z">z</label><input type="range" id="fz-z" min="-3" max="3" step="0.1" value="1"><output id="fz-zv" for="fz-z"></output></div>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="fz-svg" role="img" aria-label="마이컬슨 측정값과 갈턴 아들 키의 막대그림을 원래 단위와 z 점수로 바꿔 겹쳐 보는 그림"></svg></div>
+    <dl class="stat-row" id="fz-stats"></dl>
+    <p class="fig-note">위는 마이컬슨의 측정 100회(50 km/s 간격), 아래는 갈턴 자료의 아들 465명(1인치 = 2.54 cm 간격)이다. 막대와 곡선은 넓이가 바뀌지 않게 높이를 맞춰서, 옆으로 늘어나면 낮아지고 좁아지면 높아진다. 주황 세로선은 슬라이더로 고른 z이고, 그 아래 숫자가 같은 z에 해당하는 원래 값이다.</p>
+  </div>
+
+  <div class="stack">
+    <p>원래 단위에서는 두 막대그림이 서로 다른 곳에 다른 폭으로 놓여 있다. z 점수로 바꾸면 둘 다 0을 가운데로, 같은 폭으로 정렬되고 <strong>같은 곡선 하나</strong>(표준정규분포)에 들어맞는다. 그래서 정규분포에 관한 비율은 표준정규분포 하나만 알면 된다. 앞의 68%와 95%도 "z가 −1과 1 사이에 약 68%, −2와 2 사이에 약 95%"라는 하나의 사실이다. 더 정확히 말하면 95%가 드는 범위는 −1.96에서 1.96까지다.</p>
+    <p>z 점수는 단위가 다른 값을 견줄 때도 쓴다. 마이컬슨의 가장 큰 측정값 300,070 km/s는 z ≈ 2.8이고, 갈턴 자료에서 가장 큰 아들 키 200.7 cm는 z ≈ 3.7이다. km/s와 cm는 비교할 수 없지만, z로 보면 <strong>가장 큰 아들 키가 제 무리 안에서 더 드문 값</strong>이다.</p>
+  </div>
+</section>
+
+<!-- ======================= 06 ======================= -->
+<section class="panel" id="two-variables">
+  <div class="sec-head"><span class="sec-num">06</span><h2>두 변수를 함께 보면</h2></div>
+  <div class="stack">
+    <p>이제 변수가 둘인 경우로 넘어간다. 영국의 프랜시스 갈턴(Francis Galton)은 1880년대에 런던의 가족들에게서 부모와 자녀의 키를 모았다. 그중 <strong>아버지와 아들 465쌍</strong>을 센티미터로 바꿔 점을 찍으면 아래와 같다. 가로가 아버지 키, 세로가 아들 키다.</p>
+    <p>슬라이더로 아버지 키를 하나 고르면, 그 키(±1.5cm)인 아버지들의 아들만 파랗게 표시되고 그 아들들의 키가 오른쪽에 막대그림으로 모인다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">갈턴의 아버지–아들 키 · 465쌍</span>
+      <div class="ctrl"><label for="f4-x">아버지 키</label><input type="range" id="f4-x" min="160" max="195" step="0.5" value="170"><output id="f4-xv" for="f4-x">170.0 cm</output></div>
+      <button class="btn" type="button" id="f4-centers" aria-pressed="false">칸마다 가운데 이어 보기</button>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="f4-svg" role="img" aria-label="아버지 키와 아들 키의 산점도와 고른 아버지들의 아들 키 분포"></svg></div>
+    <dl class="stat-row" id="f4-stats"></dl>
+    <p class="fig-note">아버지 키는 반 인치 단위로 기록되어 같은 값이 많다. 점이 겹치지 않도록 가로로만 ±0.6cm 안에서 살짝 흩뜨려 그렸다(계산에는 원래 값을 쓴다). 오른쪽 주황 곡선은 고른 아들들의 평균과 표준편차로 그린 정규분포 곡선이다. 자료: Galton(1886).</p>
+  </div>
+
+  <div class="stack">
+    <p>슬라이더를 왼쪽 끝에서 오른쪽 끝까지 천천히 옮겨 보면 두 가지가 보인다.</p>
+    <ol>
+      <li><strong>아버지 키를 정해도 아들 키는 하나로 정해지지 않는다.</strong> 아버지가 170cm인 아들 중에도 160cm대와 180cm대가 섞여 있다. 그 흩어짐은 03절의 측정처럼 <em>가운데가 볼록한 종 모양</em>이다.</li>
+      <li><strong>아버지 키가 커질수록 종의 가운데가 위로 올라간다.</strong> 반면 종의 폭은 어디서나 비슷하다(표준편차 5~6cm 안팎).</li>
+    </ol>
+    <p>마이컬슨이 빛의 속도 하나를 여러 번 잰 것처럼, "아버지 키가 같은 집들"의 아들 키는 <strong>같은 가운데를 여러 번 잰 값</strong>처럼 볼 수 있다. 다른 점은 그 가운데가 아버지 키에 따라 움직인다는 것뿐이다. <strong>칸마다 가운데 이어 보기</strong>를 눌러 아버지 키 5cm 칸마다 아들 키의 평균을 찍으면, 그 가운데들이 거의 한 줄로 늘어선다.</p>
+  </div>
+</section>
+
+<!-- ======================= 07 ======================= -->
+<section class="panel" id="fit-line">
+  <div class="sec-head"><span class="sec-num">07</span><h2>가운데를 잇는 직선 긋기</h2></div>
+  <div class="stack">
+    <p>가운데들이 한 줄로 늘어선다면 직선 하나로 요약할 수 있다. 직선은 숫자 두 개로 정해진다.</p>
+    \[ \text{아들 키} = a + b \times \text{아버지 키} \]
+    <p>\(b\)는 <strong>기울기</strong>로, 아버지 키가 1cm 클 때 직선이 몇 cm 올라가는지다. \(a\)는 <strong>절편</strong>으로 직선의 높이를 맞추는 숫자다. 아래에서는 알아보기 쉽게 절편 대신 "아버지 평균 키(175.7cm)에서 직선의 높이"를 움직인다. 처음 직선은 <strong>아들 키 = 아버지 키</strong>, 즉 아들이 아버지를 그대로 닮는다는 직선이다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">직선을 직접 맞춰 보기</span>
+      <div class="ctrl"><label for="f5-b">기울기 b</label><input type="range" id="f5-b" min="-0.2" max="1.4" step="0.01" value="1"><output id="f5-bv" for="f5-b">1.00</output></div>
+      <div class="ctrl"><label for="f5-h">175.7cm에서의 높이</label><input type="range" id="f5-h" min="168" max="184" step="0.1" value="175.7"><output id="f5-hv" for="f5-h">175.7 cm</output></div>
+    </div>
+    <div class="fig-bar">
+      <button class="btn" type="button" id="f5-same">아들 키 = 아버지 키</button>
+      <button class="btn" type="button" id="f5-best">가장 잘 맞는 직선</button>
+      <button class="btn" type="button" id="f5-miss" aria-pressed="false">빗나간 거리 보기</button>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="f5-svg" role="img" aria-label="아버지–아들 키 산점도 위에 직접 움직이는 직선"></svg></div>
+    <dl class="stat-row" id="f5-stats"></dl>
+    <p class="fig-note">검은 마름모는 06절에서 찍은 칸별 가운데(아들 키 평균)다. "평균적으로 빗나간 정도"는 아들마다 실제 키와 직선이 말하는 키의 차이를 제곱해 평균한 뒤 제곱근을 씌운 값으로, 단위가 cm다.</p>
+  </div>
+
+  <div class="stack">
+    <p>기울기와 높이를 움직이며 "평균적으로 빗나간 정도"를 가장 작게 만들어 보자. 아무리 움직여도 <strong>6.1cm 밑으로는 내려가지 않는다.</strong> 그 바닥에 있는 직선이 <strong>회귀직선</strong>이다. 빗나간 거리의 제곱을 가장 작게 만드는 방법이라 <strong>최소제곱법</strong>이라 부르고, 컴퓨터는 이 직선을 손으로 더듬지 않고 바로 계산해 준다.</p>
+    \[ \text{아들 키} = 97.2 + 0.448 \times \text{아버지 키} \]
+    <table>
+      <tbody>
+        <tr><td><strong>기울기 0.448</strong></td><td>아버지 키가 1cm 큰 집의 아들은 <strong>평균적으로</strong> 0.45cm 크다. 아버지 키가 10cm 차이 나면 아들 키는 평균 4.5cm 차이 난다.</td></tr>
+        <tr><td><strong>절편 97.2</strong></td><td>식으로는 "아버지 키가 0cm일 때"의 값이지만 그런 아버지는 없다. 직선이 자료가 있는 곳을 지나도록 높이를 맞추는 숫자로만 읽는다.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <p><strong>"회귀"라는 이름은 여기서 나왔다.</strong> 기울기가 1이 아니라 0.448이다. 키가 아주 큰 아버지의 아들도 평균적으로는 아버지만큼 크지 않고, 아주 작은 아버지의 아들도 평균적으로는 아버지보다 크다. 갈턴은 이것을 아들 세대가 평균 쪽으로 <strong>되돌아간다(regression)</strong>고 불렀고, 이 직선을 구하는 방법 전체가 회귀분석이라는 이름을 얻었다. 이 현상이 유전의 힘이 아니라 통계적 성질이라는 이야기는 <a href="analysis-traps-three-paradoxes.html">데이터로 세상을 읽을 때 조심할 것들</a>에서 같은 자료로 다룬다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 08 ======================= -->
+<section class="panel" id="model">
+  <div class="sec-head"><span class="sec-num">08</span><h2>직선 위에 종을 세우다</h2></div>
+  <div class="stack">
+    <p>회귀직선은 <strong>가운데만</strong> 말한다. 아버지 키가 180cm면 아들 키의 가운데는 177.8cm라는 것이지, 아들이 177.8cm라는 것이 아니다. 06절에서 본 것처럼 같은 아버지 키에서도 아들 키는 종 모양으로 흩어진다. 그래서 회귀분석은 데이터를 이렇게 본다.</p>
+    <div class="callout"><p><strong>아버지 키 \(x\)가 정해지면, 아들 키는 직선 위의 값 \(a + bx\)를 가운데로 해서 정규분포를 이루며 흩어진다.</strong></p></div>
+    <p>그림으로 그리면 직선 위 곳곳에 종을 세운 모양이 된다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">회귀직선과 아버지 키마다 세운 정규분포</span>
+      <button class="btn" type="button" id="f6-real" aria-pressed="false">실제 아들 키 겹치기</button>
+      <button class="btn" type="button" id="f6-band" aria-pressed="false">± 2 표준편차 띠</button>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="f6-svg" role="img" aria-label="회귀직선을 따라 세로로 세운 정규분포 곡선들"></svg></div>
+    <dl class="stat-row" id="f6-stats"></dl>
+    <p class="fig-note">주황 곡선은 아버지 키 165·170·175·180·185cm에서 세운 정규분포다. 가운데는 회귀직선 위, 폭(표준편차)은 모두 같다. "실제 아들 키 겹치기"는 그 키(±1.5cm)인 아버지들의 아들 키를 3cm 간격 막대그림으로 같은 축척에 그린다.</p>
+  </div>
+
+  <div class="stack">
+    <p>이 그림을 한 줄로 쓰면 회귀분석의 모형이 된다.</p>
+    \[ \text{아들 키} = \underbrace{97.2 + 0.448 \times \text{아버지 키}}_{\text{가운데: 회귀직선}} \; + \underbrace{\text{흔들림}}_{\text{정규분포, 표준편차 약 }6.2\text{cm}} \]
+    <p>이 한 줄에는 약속이 세 개 들어 있다. 통계책에서 "회귀분석의 가정"이라고 부르는 것들이다.</p>
+    <div class="promises">
+      <div><b>① 가운데는 직선 위에</b>아버지 키마다 아들 키의 평균이 한 직선 위에 놓인다.</div>
+      <div><b>② 흩어짐은 종 모양</b>그 평균을 중심으로 아들 키가 정규분포를 이루며 흩어진다.</div>
+      <div><b>③ 폭은 어디서나 같다</b>아버지가 작은 쪽이든 큰 쪽이든 흩어지는 폭(표준편차)이 같다.</div>
+    </div>
+    <p>왜 흔들림을 정규분포로 볼까. 아들 키를 정하는 것은 아버지 키만이 아니다. 어머니의 키, 자라는 동안의 영양, 아버지 키로는 드러나지 않는 수많은 유전자, 키를 재던 날의 자세까지 <strong>직선이 담지 못한 작은 원인들이 저마다 조금씩 더해진다</strong>. 04절 갈턴 보드의 못과 같은 이치다. 그래서 그 합인 흔들림은 종 모양이 되리라 기대한다. 마이컬슨의 측정에서 "빛의 속도 + 관측오차"였던 것이 여기서는 <strong>"직선 + 흔들림"</strong>으로 바뀌었을 뿐이다.</p>
+    <p>정말 그런지 실제 자료로 확인할 수 있다. 465명의 아들 중 직선에서 ±1 표준편차 안에 든 비율과 ±2 표준편차 안에 든 비율이 위 그림 아래에 나와 있다. 05절에서 정규분포라면 약 68%, 약 95%라고 했던 값과 비교해 보자.</p>
+    <p class="note">여기서 표준편차 6.2cm는 07절의 "평균적으로 빗나간 정도"와 같은 양이다. 계산할 때 465가 아니라 463으로 나누는 관례 때문에 소수 첫째 자리가 6.1과 6.2로 갈린다. 직선에서 빗나간 거리 하나하나(잔차)를 들여다보며 이 세 약속을 점검하는 방법은 <a href="../statistics/least-squares-residuals.html">회귀분석 조금 깊이 보기 - 최소제곱과 잔차</a>에서 다룬다.</p>
+  </div>
+</section>
+
+<!-- ======================= 09 ======================= -->
+<section class="panel" id="predict">
+  <div class="sec-head"><span class="sec-num">09</span><h2>예측해 보기</h2></div>
+  <div class="stack">
+    <p>직선과 종을 함께 쓰면 예측이 두 부분으로 나온다. 직선이 주는 <strong>가운데 하나</strong>, 그리고 종이 주는 <strong>범위</strong>다. 05절의 감각대로 가운데 ± 2 표준편차를 범위로 잡으면 아들의 약 95%가 그 안에 들어온다고 기대할 수 있다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">아버지 키를 넣으면 아들 키를 예측한다</span>
+      <div class="ctrl"><label for="f7-x">아버지 키</label><input type="range" id="f7-x" min="150" max="205" step="0.5" value="180"><input class="num-in" type="number" id="f7-n" min="150" max="205" step="0.5" value="180" aria-label="아버지 키 입력 (cm)"><span class="mono">cm</span></div>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="f7-svg" role="img" aria-label="입력한 아버지 키에서의 예측값과 예측 범위"></svg></div>
+    <dl class="stat-row" id="f7-stats"></dl>
+    <p class="warn-line" id="f7-warn" hidden></p>
+    <p class="fig-note">예측 범위는 "예측값 ± 2 × 표준편차(6.2cm)"로 잡았다. 파란 점은 입력한 키(±1.5cm)인 실제 아버지들의 아들이다.</p>
+  </div>
+
+  <div class="stack">
+    <p>아버지 키에 180을 넣으면 "아들 키는 평균 177.8cm, 대략 165.5cm에서 190.1cm 사이"라는 답이 나온다. 범위의 폭이 25cm나 된다. 직선은 <strong>아버지 키가 같은 집들의 평균</strong>은 꽤 잘 말해 주지만, <strong>한 사람의 키</strong>는 넓은 범위로밖에 말하지 못한다. 아버지 키가 아들 키를 정하는 원인의 일부일 뿐이기 때문이다. 회귀분석의 결과를 읽을 때 직선만 보지 말고 종의 폭까지 함께 봐야 하는 이유다.</p>
+    <div class="callout caution"><p><strong>자료 밖으로는 조심.</strong> 갈턴의 자료에서 아버지 키는 157.5cm에서 199.4cm 사이다. 그 밖의 값을 넣어도 직선은 숫자를 내놓지만, 그 범위에서도 같은 직선과 같은 종이 맞는지는 자료가 말해 주지 않는다. 또 이 자료는 19세기 영국의 가족이다. 오늘날 한국의 부자에게 같은 직선을 쓸 수 있는지는 별개의 문제다.</p></div>
+    <p class="note">R 같은 프로그램이 내는 <strong>예측구간</strong>은 직선 자체가 표본에 따라 조금씩 흔들리는 것까지 반영해 계산한다. 이 자료처럼 표본이 크고 자료의 가운데 근처를 예측할 때는 여기서 쓴 "± 2 표준편차"와 거의 같다(10절에서 확인한다).</p>
+  </div>
+</section>
+
+<!-- ======================= 10 ======================= -->
+<section class="panel" id="with-r">
+  <div class="sec-head"><span class="sec-num">10</span><h2>R로 다시 해 보기</h2></div>
+  <div class="stack">
+    <p>지금까지 그림으로 본 숫자를 R로 직접 확인해 보자. 순서는 본문과 같다. <strong>1단계</strong>에서 마이컬슨의 측정으로 오차가 정규분포를 이루는지 보고, <strong>2단계</strong>에서 갈턴의 아버지와 아들 키로 회귀직선을 구해 예측한다. 단계마다 코딩 에이전트에게 줄 프롬프트와 직접 쓸 R 코드를 함께 실었다. 먼저 작업 폴더를 준비한다.</p>
+
+    <h3>작업 폴더 준비</h3>
+    <p>원자료는 <code>dataset/raw/</code>, 정리한 자료는 <code>dataset/working/</code>, 표와 그림은 <code>output/</code>, R 스크립트는 <code>scripts/</code>에 둔다.</p>
+<pre class="tree">nd_lm/
+├── AGENTS.md             # 코딩 에이전트가 따를 규칙
+├── CLAUDE.md             # Claude Code용: AGENTS.md를 불러온다
+├── scripts/              # R 스크립트 (처음엔 비어 있다)
+├── dataset/
+│   ├── raw/              # 원본. 손대지 않음
+│   │   └── Galton.tsv    # 갈턴(1886)의 부모와 자녀 키
+│   └── working/          # 정리한 분석용 파일
+└── output/               # 표(CSV)와 그림(PNG)</pre>
+    <p>위 구조의 빈 폴더와 갈턴의 원자료(<code>Galton.tsv</code>)를 미리 넣어 둔 뼈대를 GitHub 저장소의 <a href="https://github.com/qmakescl/class-material/tree/main/skeleton/nd_lm" target="_blank" rel="noopener noreferrer"><code>skeleton/nd_lm</code></a>에 두었다. 셋 가운데 편한 방법으로 받고, 받은 뒤에는 <code>nd_lm</code> 폴더를 VS Code로 <strong>폴더째</strong> 연다. 그래야 R의 작업 폴더가 <code>nd_lm</code>이 되어 아래 코드의 경로가 그대로 통한다.</p>
+    <p><a class="dl-link" href="../downlodable/nd_lm.zip" download="nd_lm.zip">⬇ nd_lm.zip 다운로드</a></p>
+    <ol>
+      <li><strong>zip 내려받기.</strong> 위 단추로 <code>nd_lm.zip</code>을 받아 원하는 곳에 푼다. 코드를 몰라도 된다.</li>
+      <li><strong>degit.</strong> Node.js가 있으면(<a href="nvm-node-agent-skills.html">nvm과 Node.js 설치하기</a>) 터미널에서 폴더만 바로 받는다. 저장소의 역사는 받지 않는다.
+        <div class="cb"><span class="lang">터미널</span><pre>npx degit qmakescl/class-material/skeleton/nd_lm nd_lm</pre></div></li>
+      <li><strong>git sparse checkout.</strong> git으로 받아 두고 나중에 <code>git pull</code>로 고친 내용을 받으려면, 저장소에서 이 폴더만 골라 받는다. 폴더는 <code>class-material/skeleton/nd_lm</code>에 생긴다.
+        <div class="cb"><span class="lang">터미널</span><pre>git clone --depth 1 --filter=blob:none --sparse https://github.com/qmakescl/class-material.git
+cd class-material
+git sparse-checkout set skeleton/nd_lm</pre></div></li>
+    </ol>
+    <p>폴더 맨 위의 <code>AGENTS.md</code>는 코딩 에이전트가 이 폴더에서 일할 때 따를 규칙이다. 에이전트가 폴더를 열면 이 파일을 먼저 읽으므로, 프롬프트마다 같은 요구를 되풀이하지 않아도 된다. 규칙은 네 가지다.</p>
+    <ul>
+      <li>R 코드는 <strong>tidyverse</strong>로 쓴다. 자료는 readr로 읽고 dplyr로 가공한다.</li>
+      <li>그림은 tidyverse에 들어 있는 <strong>ggplot2</strong>로만 그리고 <code>output/</code>에 PNG로 저장한다.</li>
+      <li>한글은 <strong>showtext</strong>로 Google Fonts의 <strong>Noto Sans KR</strong>을 쓴다.</li>
+      <li>원자료(<code>dataset/raw/</code>)는 고치지 않고, 경로는 <code>nd_lm/</code> 기준의 상대 경로로 쓴다.</li>
+    </ul>
+    <p>Claude Code는 <code>AGENTS.md</code> 대신 <code>CLAUDE.md</code>를 읽기 때문에, <code>AGENTS.md</code>를 불러오는 한 줄짜리 <code>CLAUDE.md</code>도 함께 넣어 두었다. 필요한 R 패키지는 tidyverse와 showtext다.</p>
+    <p><code>Galton.tsv</code>는 탭으로 구분한 텍스트이고 단위는 인치다. 열은 가족 번호(<code>Family</code>), 아버지 키(<code>Father</code>), 어머니 키(<code>Mother</code>), 성별(<code>Gender</code>), 자녀 키(<code>Height</code>), 자녀 수(<code>Kids</code>)다. 마이컬슨의 측정은 R에 들어 있어 파일이 필요 없다.</p>
+
+    <h3>1단계 · 마이컬슨의 측정: 오차는 정규분포를 이루는가</h3>
+    <p>회귀분석에 앞서, 이 자료의 출발점인 "측정의 오차는 종 모양으로 흩어진다"부터 확인한다. 마이컬슨의 100회 측정은 R에 <code>morley</code>라는 이름으로 들어 있어 내려받을 필요가 없다.</p>
+    <p><strong>코딩 에이전트에게 맡긴다면</strong></p>
+    <div class="cb prompt"><span class="lang">프롬프트 · 마이컬슨 측정의 오차</span><pre>R에 들어 있는 morley 자료는 마이컬슨이 1879년에 빛의 속도를 100번 잰 기록이다. Speed 열은 빛의 속도(km/s)에서 299,000을 뺀 값이다. 이 측정의 오차가 정규분포를 이루는지 확인하는 R 스크립트 scripts/michelson_errors.R 을 써서 실행해 줘.
+
+1. 측정값을 km/s 단위로 되돌린 뒤 측정 횟수, 평균, 표준편차를 알려 줘.
+2. 각 측정값에서 평균을 뺀 값을 오차로 보고, 오차를 표준편차로 나눈 z 점수도 만들어 줘. z 점수의 가장 작은 값, 가장 큰 값, 사분위수를 보여 줘.
+3. 평균에서 ±1 표준편차, ±2 표준편차 안에 든 측정의 비율을 각각 계산해 줘.
+4. 오차의 막대그림(50 km/s 간격, 높이는 밀도) 위에 가운데가 0이고 표준편차가 같은 정규분포 곡선을 겹쳐 output/michelson-error-hist.png 로 저장해 줘.
+5. z 점수로 정규 Q-Q 그림을 그리고 기준 직선을 함께 그려 output/michelson-qq.png 로 저장해 줘.
+
+코드와 그림은 이 폴더의 AGENTS.md 규칙을 따라 줘.
+
+결과를 받으면 확인할 것: 측정은 100번인가? 평균은 299,852, 표준편차는 79 근처인가? ±1, ±2 표준편차 안의 비율이 68%, 95%에 가까운가? Q-Q 그림의 점이 대체로 직선을 따르는가?</pre></div>
+    <p><strong>직접 쓴다면</strong></p>
+    <div class="cb r"><span class="lang">R · scripts/michelson_errors.R</span><pre># 마이컬슨의 빛의 속도 100회: 오차가 정규분포를 이루는지 본다
+library(tidyverse)
+library(showtext)
+font_add_google("Noto Sans KR", "notosanskr")
+showtext_auto()
+showtext_opts(dpi = 300)
+options(pillar.sigfig = 7)
+
+michelson &lt;- as_tibble(morley) %&gt;%
+  mutate(speed = Speed + 299000)    # R 내장 자료, 단위 km/s
+
+# 측정 횟수, 평균, 표준편차
+michelson %&gt;%
+  summarise(n = n(), mean = mean(speed), sd = sd(speed))
+
+errs &lt;- michelson %&gt;%
+  mutate(err = speed - mean(speed), # 오차: 평균에서 벗어난 정도
+         z   = err / sd(speed))     # z 점수: 표준편차 몇 개만큼 벗어났나
+summary(errs$z)
+
+# 평균 ± 1, ± 2 표준편차 안에 든 비율 (정규분포라면 약 68%, 95%)
+errs %&gt;%
+  summarise(within_1sd = mean(abs(z) &lt;= 1),
+            within_2sd = mean(abs(z) &lt;= 2))
+
+# 1) 오차의 막대그림 위에 정규분포 곡선을 겹친다
+ggplot(errs, aes(err)) +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 50, boundary = 0,
+                 fill = "#2f6fed", alpha = 0.3, colour = "#2f6fed") +
+  stat_function(fun = dnorm, args = list(mean = 0, sd = sd(errs$err)),
+                colour = "#e2662a", linewidth = 1) +
+  labs(x = "오차 = 측정값 − 평균 (km/s)", y = "밀도",
+       title = "마이컬슨 측정의 오차와 정규분포 곡선") +
+  theme_minimal(base_family = "notosanskr")
+ggsave("output/michelson-error-hist.png", width = 7, height = 4.5)
+
+# 2) 정규 Q-Q 그림: 점이 직선 위에 놓일수록 정규분포에 가깝다
+ggplot(errs, aes(sample = z)) +
+  geom_qq(colour = "#2f6fed") +
+  geom_qq_line(colour = "#e2662a", linewidth = 1) +
+  labs(x = "표준정규분포에서 기대하는 z", y = "실제 오차의 z 점수",
+       title = "마이컬슨 측정 오차의 정규 Q-Q 그림") +
+  theme_minimal(base_family = "notosanskr")
+ggsave("output/michelson-qq.png", width = 5, height = 5)</pre></div>
+    <div class="cb"><span class="lang">출력</span><pre># A tibble: 1 × 3
+      n     mean       sd
+  &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1   100 299852.4 79.01055
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+-2.94138 -0.56828 -0.03038  0.00000  0.50753  2.75406 
+# A tibble: 1 × 2
+  within_1sd within_2sd
+       &lt;dbl&gt;      &lt;dbl&gt;
+1       0.67       0.97</pre></div>
+    <p>평균 299,852.4 km/s, 표준편차 79.0 km/s, ±1·±2 표준편차 안의 비율 67%·97%는 03·05절의 그림과 같다. z 점수는 가장 작은 것이 −2.9, 가장 큰 것이 2.8이라 모두 ±3 안에 있다.</p>
+    <p><strong>정규 Q-Q 그림</strong>은 05절의 표준정규분포를 쓰는 점검 도구다. 오차를 작은 것부터 늘어놓고, 100개를 표준정규분포에서 뽑았다면 그 순서에 기대되는 z 값과 짝지어 찍는다. 오차가 정규분포를 따르면 점들이 기준 직선 위에 놓인다. 마이컬슨의 오차는 대체로 직선을 따르고 양 끝 몇 개만 조금 벗어난다. 점들이 가로로 몇 개씩 같은 높이에 놓인 계단 모양은 측정값이 10 km/s 단위로 기록되었기 때문이다. 이 정도면 "관측오차는 정규분포를 따른다"고 보고 다음 단계로 넘어갈 수 있다.</p>
+
+    <h3>2단계 · 갈턴의 아버지와 아들 키: 회귀직선과 예측</h3>
+    <p>이제 두 변수로 넘어간다. 아버지 키와 아들 키를 먼저 눈으로 보고, 06–09절에서 그림으로 본 회귀직선, 흩어짐, 예측 범위를 숫자로 확인한다.</p>
+    <p><strong>코딩 에이전트에게 맡긴다면</strong></p>
+    <div class="cb prompt"><span class="lang">프롬프트 · 갈턴 회귀분석</span><pre>dataset/raw/Galton.tsv 는 갈턴이 1886년에 모은 부모와 자녀의 키 자료이고 단위는 인치다. 원자료는 고치지 않는다. 아들만 골라 아버지 키와 아들 키를 센티미터로 바꾼 뒤, 아버지 키로 아들 키를 설명하는 단순 회귀분석을 하는 R 스크립트 scripts/galton_regression.R 을 써서 실행해 줘.
+
+1. 아들이 몇 명인지 알려 주고, 가족 번호와 함께 아버지 키와 아들 키를 처음 여섯 쌍 보여 줘. 아버지 키와 아들 키 각각의 평균과 표준편차도 알려 줘.
+2. 회귀직선의 절편과 기울기, 그리고 직선 주변으로 아들 키가 흩어진 정도(표준편차)를 알려 줘.
+3. 아버지 키가 170cm, 180cm일 때 아들 키의 예측값과 95% 예측구간을 표로 보여 줘.
+4. 아들 키가 회귀직선에서 ±1 표준편차, ±2 표준편차 안에 드는 비율을 각각 계산해 줘.
+5. 산점도에 회귀직선을 겹친 그림을 output/galton-regression.png 로 저장해 줘. 아버지 키는 같은 값이 많으니 점이 겹치지 않게 가로로만 조금 흩뜨려 줘.
+
+코드와 그림은 이 폴더의 AGENTS.md 규칙을 따라 줘.
+
+결과를 받으면 확인할 것: 아들은 465명인가? 아버지와 아들의 평균 키는 둘 다 176cm 근처인가? 기울기는 0.45 근처, 흩어진 정도는 6cm 남짓인가? ±2 표준편차 안의 비율은 95% 가까이인가?</pre></div>
+    <p><strong>직접 쓴다면</strong></p>
+    <div class="cb r"><span class="lang">R · scripts/galton_regression.R</span><pre># 갈턴의 아버지–아들 키로 회귀직선을 구하고 예측한다
+library(tidyverse)
+library(showtext)
+font_add_google("Noto Sans KR", "notosanskr")
+showtext_auto()
+showtext_opts(dpi = 300)
+options(pillar.sigfig = 7)
+
+galton &lt;- read_tsv("dataset/raw/Galton.tsv", show_col_types = FALSE)  # 원자료 (단위: 인치)
+
+sons &lt;- galton %&gt;%
+  filter(Gender == "M") %&gt;%                 # 아들만
+  mutate(father = Father * 2.54,            # 인치 → cm
+         son    = Height * 2.54) %&gt;%
+  select(Family, father, son)
+
+# 아버지와 아들의 키 (cm): 처음 여섯 쌍, 아들 수, 평균, 표준편차
+head(sons)
+sons %&gt;%
+  summarise(n = n(),
+            across(c(father, son), list(mean = mean, sd = sd)))
+
+fit &lt;- lm(son ~ father, data = sons)        # 아들 키 = a + b × 아버지 키
+coef(fit)                                   # 절편 a 와 기울기 b
+sigma(fit)                                  # 직선 주변 흩어짐의 표준편차
+
+# 아버지 키가 170cm, 180cm일 때의 예측값과 95% 예측구간
+predict(fit, newdata = tibble(father = c(170, 180)),
+        interval = "prediction", level = 0.95)
+
+# 직선에서 ±1, ±2 표준편차 안에 든 아들의 비율
+sons %&gt;%
+  mutate(dist = abs(resid(fit))) %&gt;%
+  summarise(within_1sd = mean(dist &lt;= 1 * sigma(fit)),
+            within_2sd = mean(dist &lt;= 2 * sigma(fit)))
+
+ggplot(sons, aes(father, son)) +
+  geom_jitter(width = 0.6, height = 0, alpha = 0.4, colour = "#2f6fed") +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, colour = "#0b1220") +
+  labs(x = "아버지 키 (cm)", y = "아들 키 (cm)",
+       title = "갈턴의 아버지–아들 키와 회귀직선") +
+  theme_minimal(base_family = "notosanskr")
+ggsave("output/galton-regression.png", width = 7, height = 5)</pre></div>
+    <div class="cb"><span class="lang">출력</span><pre id="r-out"># A tibble: 6 × 3
+  Family father     son
+  &lt;chr&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+1 1      199.39 185.928
+2 2      191.77 186.69 
+3 2      191.77 184.15 
+4 3      190.5  180.34 
+5 4      190.5  179.07 
+6 4      190.5  173.99 
+# A tibble: 1 × 5
+      n father_mean father_sd son_mean   son_sd
+  &lt;int&gt;       &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1   465    175.6872  5.841820 175.8412 6.684249
+(Intercept)      father 
+ 97.1776370   0.4477479 
+[1] 6.157859
+       fit      lwr      upr
+1 173.2948 161.1686 185.4209
+2 177.7723 165.6513 189.8932
+# A tibble: 1 × 2
+  within_1sd within_2sd
+       &lt;dbl&gt;      &lt;dbl&gt;
+1  0.6881720  0.9591398</pre></div>
+    <p>처음 여섯 쌍만 봐도 키 큰 아버지의 아들이 대체로 크지만 아버지만큼 크지는 않다. 1번 가족의 아버지는 199.4cm인데 아들은 185.9cm다. 아버지와 아들의 평균 키는 175.7cm와 175.8cm로 거의 같고, 아들 키의 표준편차는 6.7cm다. 아버지 키를 알면 이 흩어짐이 직선 주변의 6.16cm로 줄어든다.</p>
+    <p>기울기 0.448, 표준편차 6.16cm가 그림에서 본 값과 같다. ±1·±2 표준편차 안의 비율(68.8%·95.9%)은 08절 그림의 값과 소수 첫째 자리가 조금 다른데, 그림은 키를 0.1cm로 반올림한 자료로 계산했기 때문이다. 아버지 180cm의 95% 예측구간 165.7~189.9cm도 09절의 "± 2 표준편차" 범위 165.5~190.1cm와 거의 같다.</p>
+
+  </div>
+</section>
+
+<!-- ======================= 11 ======================= -->
+<section class="panel" id="wrap">
+  <div class="sec-head"><span class="sec-num">11</span><h2>정리와 다음 걸음</h2></div>
+  <div class="recap">
+    <p><strong>관측오차</strong> — 같은 것을 여러 번 재도 값은 흔들린다. 흔들림에는 위아래로 상쇄되는 우연오차와 한쪽으로 미는 치우침이 있다.</p>
+    <p><strong>정규분포</strong> — 작고 서로 무관한 원인이 많이 더해지면 그 합은 종 모양이 된다. 모양은 평균(가운데)과 표준편차(폭) 두 숫자로 정해지고, 평균 ± 2 표준편차 안에 약 95%가 든다.</p>
+    <p><strong>회귀직선</strong> — 한 변수(아버지 키)가 정해졌을 때 다른 변수(아들 키)의 가운데를 잇는 직선이다. 기울기는 "x가 1 클 때 y의 평균이 얼마나 큰가"를 말한다.</p>
+    <p><strong>회귀분석의 관점</strong> — x가 정해지면 y는 직선 위의 값을 가운데로 정규분포를 이루며 흩어진다. 그래서 예측에는 가운데 하나와 범위가 함께 나온다.</p>
+  </div>
+  <div class="stack" style="margin-top:14px">
+    <p>여기서 미뤄 둔 질문들은 다음 자료로 이어진다.</p>
+    <ul>
+      <li><a href="../statistics/least-squares-residuals.html">회귀분석 조금 깊이 보기 - 최소제곱과 잔차</a> — 왜 하필 제곱인가, 직선이 얼마나 설명하는가(결정계수), 세 약속이 깨졌는지 잔차로 점검하는 법.</li>
+      <li><a href="../statistics/t-distribution-degrees-of-freedom.html">t 분포와 자유도</a> — 표준편차를 자료에서 추정하면 종 모양이 어떻게 조금 달라지는가.</li>
+      <li><a href="../ai/regression-to-deep-learning.html">회귀에서 딥러닝으로</a> — 같은 직선이 신경망의 뉴런 하나가 되기까지.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <p>01–02절의 역사 속 값과 장치의 수치는 각 실험의 발표값을 정리한 문헌(Kleppner 2007, Physics Today 등)에서 옮겼고, 뢰머와 피조 그림의 거리·시간은 오늘날의 값으로 다시 계산했다.</p>
+  <p>자료: Michelson, A. A. (1882), <em style="background:none;padding:0">Experimental determination of the velocity of light made at the U.S. Naval Academy, Annapolis</em> (1879년 측정, R 내장 자료 <code>morley</code>). Galton, F. (1886), <em style="background:none;padding:0">Regression towards mediocrity in hereditary stature</em> (원자료 <code>Galton.tsv</code>, randomservices.org). 그림의 점과 막대는 모두 이 실측 자료에서 나왔고, 갈턴 보드만 예외다. 그 그림에 쌓이는 공은 반반의 확률로 흉내 낸 결과이고, 배경 막대는 확률 계산값이다.</p>
+</footer>
+</main>
+
+<script src="../assets/data/michelson-morley.js"></script>
+<script src="../assets/data/galton-father-son.js"></script>
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg";
+var MI=window.MICHELSON, GA=window.GALTON;
+var C={accent:"#2f6fed",ink:"#0b1220",muted:"#45506b",grid:"#e6ebf5",dim:"#aab4ca",curve:"#e2662a",teal:"#0b8a8f"};
+var reduceMotion=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- 공통 도우미 ---------------- */
+function el(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function txt(parent,x,y,s,attrs){var a={x:x,y:y,"font-size":11.5};for(var k in attrs)a[k]=attrs[k];var e=el("text",a,parent);e.textContent=s;return e;}
+function clear(n){while(n.firstChild)n.removeChild(n.firstChild);}
+function lin(d0,d1,r0,r1){return function(v){return r0+(v-d0)/(d1-d0)*(r1-r0);};}
+function pdf(x,m,s){var z=(x-m)/s;return Math.exp(-z*z/2)/(s*Math.sqrt(2*Math.PI));}
+function mean(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i];return s/a.length;}
+function sd(a){var m=mean(a),s=0;for(var i=0;i<a.length;i++)s+=(a[i]-m)*(a[i]-m);return Math.sqrt(s/(a.length-1));}
+function fmt(v,d){return v.toLocaleString("ko-KR",{minimumFractionDigits:d,maximumFractionDigits:d});}
+function pct(v,d){return (v*100).toFixed(d===undefined?1:d)+"%";}
+function frame(svg,o){
+  svg.setAttribute("viewBox","0 0 "+o.W+" "+o.H);
+  return {o:o,X:lin(o.x[0],o.x[1],o.l,o.W-o.r),Y:lin(o.y[0],o.y[1],o.H-o.b,o.t)};
+}
+/* 격자·눈금·축 이름 */
+function axes(g,P,a){
+  var o=P.o,x1=o.W-o.r,yb=o.H-o.b;
+  (a.yt||[]).forEach(function(v){var y=P.Y(v);el("line",{x1:o.l,x2:x1,y1:y,y2:y,stroke:C.grid},g);txt(g,o.l-8,y+4,a.yf?a.yf(v):String(v),{"text-anchor":"end","font-size":11});});
+  (a.xt||[]).forEach(function(v){var x=P.X(v);el("line",{x1:x,x2:x,y1:o.t,y2:yb,stroke:C.grid},g);txt(g,x,yb+(a.xoff||16),a.xf?a.xf(v):String(v),{"text-anchor":"middle","font-size":11});});
+  el("line",{x1:o.l,x2:x1,y1:yb,y2:yb,stroke:C.muted},g);
+  if(a.xl)txt(g,(o.l+x1)/2,o.H-6,a.xl,{"text-anchor":"middle","font-size":12});
+  if(a.yl){var cy=(o.t+yb)/2;txt(g,14,cy,a.yl,{"text-anchor":"middle","font-size":12,transform:"rotate(-90 14 "+cy+")"});}
+}
+function stats(id,items){
+  var dl=document.getElementById(id);dl.innerHTML="";
+  items.forEach(function(it){
+    var d=document.createElement("div");d.className="stat"+(it.hl?" hl":"");
+    var dt=document.createElement("dt");dt.textContent=it.k;
+    var dd=document.createElement("dd");dd.textContent=it.v;
+    if(it.u){var sm=document.createElement("small");sm.textContent=it.u;dd.appendChild(sm);}
+    d.appendChild(dt);d.appendChild(dd);dl.appendChild(d);
+  });
+}
+function pressSeg(btns,on){btns.forEach(function(b){b.setAttribute("aria-pressed",b===on?"true":"false");});}
+function toggle(btn,fn){btn.addEventListener("click",function(){var v=btn.getAttribute("aria-pressed")!=="true";btn.setAttribute("aria-pressed",v?"true":"false");fn(v);});}
+/* 양쪽 화살표와 거리 라벨 */
+function arrow(g,x1,x2,y,label){
+  el("line",{x1:x1,x2:x2,y1:y,y2:y,stroke:C.muted,"stroke-width":1.2},g);
+  [x1,x2].forEach(function(x,i){var d=i?-1:1;el("path",{d:"M"+x+","+y+" l"+(6*d)+",-4 M"+x+","+y+" l"+(6*d)+",4",stroke:C.muted,fill:"none"},g);});
+  txt(g,(x1+x2)/2,y-7,label,{"text-anchor":"middle","font-size":11.5,fill:C.ink});
+}
+
+/* ================= 01 역사 속 실험: 갈릴레이 · 뢰머 · 피조 ================= */
+(function(){
+  var svg=document.getElementById("h1-svg"),W=640,H=320,CL=299792.458;   /* km/s, 오늘날 정의값 */
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  var g=el("g",{},svg),gAnim=el("g",{},svg);
+  var ctrl=document.getElementById("h1-ctrl"),sl=document.getElementById("h1-s"),slL=document.getElementById("h1-sl"),slV=document.getElementById("h1-sv");
+  var go=document.getElementById("h1-go"),note=document.getElementById("h1-note");
+  var mode="galileo",raf=0;
+  function stopAnim(){if(raf)cancelAnimationFrame(raf);raf=0;clear(gAnim);}
+
+  /* --- 갈릴레이: 두 언덕의 등불 --- */
+  function galileo(){
+    var gy=190;
+    el("path",{d:"M10,"+gy+" Q90,95 190,"+gy+" Z",fill:"#e9eef7"},g);
+    el("path",{d:"M450,"+gy+" Q550,95 630,"+gy+" Z",fill:"#e9eef7"},g);
+    el("line",{x1:10,x2:630,y1:gy,y2:gy,stroke:C.dim},g);
+    [[100,"갈릴레이"],[540,"조수"]].forEach(function(p){
+      el("rect",{x:p[0]-6,y:122,width:12,height:16,rx:2,fill:C.ink},g);
+      el("circle",{cx:p[0],cy:118,r:9,fill:C.curve,"fill-opacity":.35,id:"h1-lamp-"+p[0]},g);
+      txt(g,p[0],210,p[1],{"text-anchor":"middle",fill:C.ink,"font-weight":700});
+    });
+    arrow(g,120,520,80,"1마일(약 1.6 km)이 안 되는 거리");
+    /* 아래: 걸린 시간 비교 막대 */
+    var x0=60,L=520,y1=250,y2=285;
+    txt(g,x0,y1-8,"사람이 보고 등불을 여는 데 걸리는 시간 · 약 0.2초",{fill:C.ink});
+    el("rect",{x:x0,y:y1,width:L,height:12,fill:C.dim,rx:2},g);
+    txt(g,x0,y2-8,"빛이 오가는 데 걸리는 시간 · 약 0.00001초 (같은 비율이면 폭 0.03 픽셀)",{fill:C.curve});
+    el("line",{x1:x0,x2:x0,y1:y2-2,y2:y2+14,stroke:C.curve,"stroke-width":2},g);
+    stats("h1-stats",[
+      {k:"빛이 가는 거리 (왕복)",v:"3.2",u:"km 미만"},
+      {k:"빛이 걸리는 시간",v:"0.00001",u:"초 남짓",hl:true},
+      {k:"사람의 반응 시간",v:"0.2",u:"초 안팎"},
+      {k:"얻은 값",v:"잴 수 없음"}
+    ]);
+    note.innerHTML="갈릴레이는 <em style=\"background:none;padding:0\">두 새로운 과학</em>(1638)에서 이 방법을 제안했다. 한 사람이 등불을 열면 건너편 사람이 그 빛을 보자마자 자기 등불을 열고, 처음 사람은 빛이 돌아오기까지의 시간을 잰다. 1마일이 안 되는 거리에서 해 본 결과 빛이 순간에 오는지 아닌지 가릴 수 없었다. 빛이 오가는 시간보다 사람의 반응이 2만 배쯤 느리니 당연한 결과다. <strong>신호 보내기</strong>를 누르면 빛을 아주 느리게 늦춰서 보여 준다.";
+  }
+  function galileoAnim(){
+    stopAnim();var t0=0,dot=el("circle",{r:6,fill:C.curve},gAnim);
+    function f(ts){
+      if(!t0)t0=ts;var u=(ts-t0)/1400;     /* 0→1 가는 길, 1→2 오는 길 */
+      if(u>=2.4){stopAnim();return;}
+      var x=u<1?100+440*u:u<1.2?540:540-440*Math.min(1,u-1.2);
+      dot.setAttribute("cx",x);dot.setAttribute("cy",118);
+      raf=requestAnimationFrame(f);
+    }
+    raf=requestAnimationFrame(f);
+  }
+
+  /* --- 뢰머: 목성의 달 이오의 식 --- */
+  var AU=55,sun=[170,150],jup=[170+5.2*AU,150];
+  function romer(){
+    var a=+sl.value*Math.PI/180;
+    el("circle",{cx:sun[0],cy:sun[1],r:AU,fill:"none",stroke:C.dim,"stroke-dasharray":"3 4"},g);
+    el("circle",{cx:sun[0],cy:sun[1],r:13,fill:"#f5b83d"},g);
+    txt(g,sun[0],sun[1]+30,"태양",{"text-anchor":"middle"});
+    var e=[sun[0]+AU*Math.cos(a),sun[1]-AU*Math.sin(a)];
+    /* 목성의 그림자 속으로 들어가는 이오 */
+    el("path",{d:"M"+jup[0]+","+(jup[1]-11)+" L"+(jup[0]+80)+","+(jup[1]-11)+" L"+(jup[0]+80)+","+(jup[1]+11)+" L"+jup[0]+","+(jup[1]+11)+"Z",fill:C.ink,"fill-opacity":.12},g);
+    el("circle",{cx:jup[0],cy:jup[1],r:11,fill:"#c9a27a"},g);
+    el("circle",{cx:jup[0]+30,cy:jup[1],r:3.5,fill:C.muted},g);
+    txt(g,jup[0],jup[1]+30,"목성",{"text-anchor":"middle"});
+    txt(g,jup[0]+30,jup[1]-18,"이오",{"text-anchor":"middle","font-size":10.5});
+    var d=Math.hypot(jup[0]-e[0],jup[1]-e[1])/AU, extra=d-4.2, sec=extra*149597870.7/CL;
+    el("line",{x1:e[0],y1:e[1],x2:jup[0],y2:jup[1],stroke:C.curve,"stroke-width":2,"stroke-dasharray":"7 5"},g);
+    el("circle",{cx:e[0],cy:e[1],r:7,fill:C.accent},g);
+    txt(g,e[0],e[1]-12,"지구",{"text-anchor":"middle",fill:C.accent,"font-weight":700});
+    /* 늦어지는 시간 막대 */
+    var x0=60,L=520,y=290,mx=2*149597870.7/CL;
+    el("rect",{x:x0,y:y,width:L,height:10,fill:C.grid,rx:2},g);
+    el("rect",{x:x0,y:y,width:L*sec/mx,height:10,fill:C.curve,rx:2},g);
+    txt(g,x0,y-8,"가장 가까울 때보다 이오의 식이 늦게 보이는 시간",{fill:C.ink});
+    txt(g,x0+L,y-8,"최대 "+fmt(mx/60,1)+"분",{"text-anchor":"end"});
+    slV.textContent=fmt(+sl.value,0)+"°";
+    stats("h1-stats",[
+      {k:"지구–목성 거리",v:fmt(d*1.496,2),u:"억 km"},
+      {k:"가장 가까울 때보다 더 가는 거리",v:fmt(extra*1.496,2),u:"억 km"},
+      {k:"이오의 식이 늦게 보이는 시간",v:fmt(sec/60,1),u:"분",hl:true}
+    ]);
+    note.innerHTML="이오는 목성을 약 42시간 반마다 한 바퀴 돌며 목성의 그림자에 들어간다(식). 뢰머는 지구가 목성에서 멀어지는 계절에는 식이 예보보다 늦게, 가까워지는 계절에는 일찍 보인다는 것을 알아챘다. 늦어진 만큼이 <strong>빛이 더 먼 길을 오는 데 걸린 시간</strong>이다. 뢰머는 지구 궤도의 지름을 지나는 데 약 22분이 걸린다고 보았고, 호이겐스는 이것으로 약 220,000 km/s를 계산했다. 오늘날 값으로는 약 16.6분이다. 슬라이더로 지구를 태양 둘레로 옮겨 보자. 목성은 12년에 한 바퀴를 도니 몇 달 사이에는 거의 그 자리에 있다고 보았다. 거리와 시간은 오늘날의 값으로 계산했다.";
+  }
+
+  /* --- 피조: 톱니바퀴 --- */
+  var FD=8633,TEETH=720;
+  function fizeauShift(n,c){return n*TEETH*2*FD/(c*1000);}   /* 빛이 오가는 동안 지나간 톱니 수 */
+  function bright(n,c){var f=fizeauShift(n,c)%1;return 1-2*Math.min(f,1-f);}
+  function fizeau(){
+    var n=+sl.value,by=95,cxw=190,p=26;
+    /* 광원, 반거울, 눈 */
+    el("circle",{cx:40,cy:by,r:10,fill:"#f5b83d"},g);txt(g,40,by-18,"광원",{"text-anchor":"middle"});
+    el("line",{x1:96,y1:by-16,x2:124,y2:by+16,stroke:C.teal,"stroke-width":3},g);
+    txt(g,110,by-24,"반거울",{"text-anchor":"middle","font-size":10.5});
+    var b=bright(n,CL);
+    el("path",{d:"M98,"+(by+70)+" Q110,"+(by+58)+" 122,"+(by+70)+" Q110,"+(by+82)+" 98,"+(by+70),fill:"none",stroke:C.ink},g);
+    el("circle",{cx:110,cy:by+70,r:4,fill:C.ink},g);
+    el("circle",{cx:110,cy:by+70,r:16,fill:C.curve,"fill-opacity":.6*b},g);
+    txt(g,110,by+98,"눈",{"text-anchor":"middle"});
+    el("line",{x1:110,y1:by,x2:110,y2:by+50,stroke:C.curve,"stroke-width":2,"stroke-opacity":Math.max(.08,b)},g);
+    /* 빛길 */
+    el("line",{x1:50,y1:by,x2:cxw,y2:by,stroke:C.curve,"stroke-width":2},g);
+    el("line",{x1:cxw,y1:by,x2:600,y2:by,stroke:C.curve,"stroke-width":2,"stroke-dasharray":"7 5"},g);
+    el("rect",{x:600,y:by-30,width:8,height:60,fill:C.teal},g);
+    txt(g,604,by+46,"거울",{"text-anchor":"middle"});
+    arrow(g,cxw+14,596,by-34,"8,633 m (쉬렌 → 몽마르트르)");
+    /* 톱니: 돌아왔을 때의 위치 */
+    var off=(fizeauShift(n,CL)%1)*p;
+    var clip="h1clip";
+    var defs=el("defs",{},g),cp=el("clipPath",{id:clip},defs);el("rect",{x:cxw-9,y:by-48,width:18,height:96},cp);
+    var comb=el("g",{"clip-path":"url(#"+clip+")"},g);
+    for(var k=-4;k<=4;k++)el("rect",{x:cxw-9,y:by+p/4+k*p+off,width:18,height:p/2,fill:C.ink},comb);
+    el("rect",{x:cxw-9,y:by-48,width:18,height:96,fill:"none",stroke:C.muted},g);
+    txt(g,cxw,by+64,"톱니바퀴 가장자리",{"text-anchor":"middle","font-size":10.5});
+    txt(g,cxw,by+78,"(빛이 돌아왔을 때)",{"text-anchor":"middle","font-size":10.5});
+    /* 아래: 회전 속도에 따른 밝기 */
+    var x0=60,x1=600,y0=300,h=70,X=lin(0,40,x0,x1),Y=lin(0,1,y0,y0-h),d="";
+    for(var v=0;v<=40.0001;v+=0.1)d+=(d?" L":"M")+X(v).toFixed(1)+","+Y(bright(v,CL)).toFixed(1);
+    el("line",{x1:x0,x2:x1,y1:y0,y2:y0,stroke:C.muted},g);
+    [0,10,20,30,40].forEach(function(v){txt(g,X(v),y0+14,String(v),{"text-anchor":"middle","font-size":10.5});});
+    txt(g,x1,y0-h-4,"1초에 도는 바퀴 수 →",{"text-anchor":"end","font-size":10.5});
+    txt(g,x0,y0-h-4,"눈에 돌아온 빛의 밝기",{"font-size":10.5,fill:C.ink});
+    el("path",{d:d,fill:"none",stroke:C.accent,"stroke-width":2},g);
+    var nF=0.5/(TEETH*2*FD/(313274*1000));     /* 피조가 처음 어두워진다고 본 회전 속도 */
+    el("line",{x1:X(nF),x2:X(nF),y1:y0,y2:y0-h,stroke:C.dim,"stroke-dasharray":"3 3"},g);
+    el("line",{x1:X(n),x2:X(n),y1:y0,y2:y0-h,stroke:C.curve,"stroke-width":1.5},g);
+    el("circle",{cx:X(n),cy:Y(b),r:5,fill:C.curve},g);
+    slV.textContent=fmt(n,1)+"바퀴/초";
+    var n0=0.5/(TEETH*2*FD/(CL*1000));
+    stats("h1-stats",[
+      {k:"빛이 오가는 시간",v:fmt(2*FD/(CL*1000)*1e6,1),u:"백만분의 1초"},
+      {k:"그동안 지나간 톱니",v:fmt(fizeauShift(n,CL),2),u:"개"},
+      {k:"돌아온 빛의 밝기",v:pct(b,0),hl:true},
+      {k:"처음 어두워지는 회전",v:fmt(n0,1),u:"바퀴/초 (오늘날 값으로)"}
+    ]);
+    note.innerHTML="피조는 톱니 720개짜리 바퀴의 틈으로 빛을 내보내고 8,633 m 떨어진 거울에서 되돌아온 빛을 같은 바퀴 너머로 보았다. 바퀴를 천천히 돌리면 빛은 같은 틈으로 돌아오지만, 빠르게 돌리면 그 사이 틈이 비켜나 <strong>다음 톱니에 가려 어두워진다</strong>. 처음 어두워지는 회전 속도를 알면 빛이 오간 시간은 “톱니 반 칸이 지나가는 시간”이다. 피조는 1초에 약 12.6바퀴에서 어두워진다고 보고 약 313,000 km/s를 얻었다(회색 점선). 오늘날의 빛의 속도라면 약 12.1바퀴다. 톱니는 몇 개만 그렸다.";
+  }
+
+  function draw(){
+    stopAnim();clear(g);
+    ctrl.hidden=(mode==="galileo");go.hidden=(mode!=="galileo")||reduceMotion;
+    if(mode==="romer"){slL.textContent="지구의 위치";sl.min=0;sl.max=360;sl.step=1;}
+    if(mode==="fizeau"){slL.textContent="바퀴 회전";sl.min=0;sl.max=40;sl.step=0.1;}
+    ({galileo:galileo,romer:romer,fizeau:fizeau})[mode]();
+  }
+  var btns=Array.prototype.slice.call(document.querySelectorAll("[data-h1]"));
+  btns.forEach(function(b){b.addEventListener("click",function(){
+    pressSeg(btns,b);mode=b.getAttribute("data-h1");
+    sl.value=mode==="romer"?60:mode==="fizeau"?6:0;draw();
+  });});
+  sl.addEventListener("input",function(){clear(g);(mode==="romer"?romer:fizeau)();});
+  go.addEventListener("click",galileoAnim);
+  draw();
+})();
+
+/* ================= 01 연도별 빛의 속도 ================= */
+(function(){
+  /* 발표값(km/s)과 밝힌 불확실성. 호이겐스는 뢰머의 관측으로 계산한 값 */
+  var D=[
+    {y:1690,v:220000,who:"호이겐스(뢰머의 관측)"},
+    {y:1729,v:301000,who:"브래들리(별빛의 광행차)"},
+    {y:1849,v:313300,who:"피조(톱니바퀴)"},
+    {y:1862,v:298000,e:500,who:"푸코(회전 거울)",pos:"down"},
+    {y:1879,v:299910,e:50,who:"마이컬슨(회전 거울)",pos:"up"},
+    {y:1926,v:299796,e:4,who:"마이컬슨(윌슨산)",pos:"down",end:true}
+  ],DEF=299792.458;
+  var svg=document.getElementById("h2-svg"),g=el("g",{},svg),gAx=el("g",{},svg);
+  function draw(zoom){
+    clear(g);clear(gAx);
+    var o={W:640,H:300,l:78,r:24,t:18,b:46,x:zoom?[1850,1990]:[1660,1990],y:zoom?[297200,300400]:[200000,330000]};
+    var P=frame(svg,o);
+    axes(gAx,P,{
+      yt:zoom?[297500,298000,298500,299000,299500,300000]:[200000,220000,240000,260000,280000,300000,320000],yf:function(v){return fmt(v,0);},
+      xt:zoom?[1860,1880,1900,1920,1940,1960,1980]:[1675,1725,1775,1825,1875,1925,1975],xl:"발표한 해",yl:"km/s"
+    });
+    var yd=P.Y(DEF);
+    el("line",{x1:o.l,x2:o.W-o.r,y1:yd,y2:yd,stroke:C.teal,"stroke-width":2,"stroke-dasharray":"6 4"},g);
+    el("circle",{cx:P.X(1983),cy:yd,r:5,fill:C.teal},g);
+    if(zoom)txt(g,P.X(1983),yd-12,"1983 정의값",{"text-anchor":"end",fill:C.teal,"font-weight":700});
+    else txt(g,P.X(1862)-6,P.Y(270000),"1862년 이후 네 점은 \u201c1860년 이후 가까이\u201d에서",{fill:C.muted,"font-size":11});
+    D.forEach(function(d,i){
+      if(zoom&&d.y<1850)return;
+      var lab=zoom||d.y<1850;
+      var x=P.X(d.y),y=P.Y(d.v);
+      if(d.e){var y1=P.Y(d.v+d.e),y2=P.Y(d.v-d.e);el("line",{x1:x,x2:x,y1:y1,y2:y2,stroke:C.accent,"stroke-width":2},g);
+        [y1,y2].forEach(function(yy){el("line",{x1:x-4,x2:x+4,y1:yy,y2:yy,stroke:C.accent,"stroke-width":2},g);});}
+      el("circle",{cx:x,cy:y,r:5.5,fill:C.accent},g);
+      if(!lab)return;
+      var up=d.pos?d.pos==="up":d.v>DEF,dx=d.end?-10:10,an=d.end?"end":"start";
+      txt(g,x+dx,y+(up?-24:18),d.y+" "+d.who,{"text-anchor":an,fill:C.ink,"font-size":11});
+      txt(g,x+dx,y+(up?-10:32),fmt(d.v,0)+(d.e?" ± "+fmt(d.e,0):""),{"text-anchor":an,"font-size":10.5});
+    });
+  }
+  var btns=Array.prototype.slice.call(document.querySelectorAll("[data-h2]"));
+  btns.forEach(function(b){b.addEventListener("click",function(){pressSeg(btns,b);draw(b.getAttribute("data-h2")==="zoom");});});
+  draw(false);
+})();
+
+/* ================= 02 마이컬슨의 회전 거울 ================= */
+(function(){
+  var svg=document.getElementById("h3-svg"),W=640,H=300,CL=299792458,DIST=2000*0.3048;  /* m */
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  var g=el("g",{},svg),gA=el("g",{},svg);
+  var sl=document.getElementById("h3-n"),out=document.getElementById("h3-nv"),go=document.getElementById("h3-go");
+  var Sx=110,Sy=230,R=[240,120],FX=600,raf=0;
+  var tRT=2*DIST/CL, VIS=9;      /* 그림에서는 각도를 9배 남짓으로 부풀린다: 256바퀴/초에서 거울 각 0.38° → 약 3.4° */
+  function reflect(u,a){        /* 방향 u를 법선 각 a의 거울로 반사 */
+    var nx=Math.cos(a),ny=Math.sin(a),d=u[0]*nx+u[1]*ny;return [u[0]-2*d*nx,u[1]-2*d*ny];
+  }
+  /* 처음 거울 법선: S→R 방향을 오른쪽(+x)으로 보내는 법선 */
+  var inc=[R[0]-Sx,R[1]-Sy],il=Math.hypot(inc[0],inc[1]);inc=[inc[0]/il,inc[1]/il];
+  var n0=Math.atan2(0-inc[1],1-inc[0]);   /* 법선 ∝ (나가는 방향 − 들어오는 방향) */
+  function geom(n){
+    var turn=360*n*tRT, vis=turn*VIS*Math.PI/180;
+    var back=reflect([-1,0],n0+vis);
+    /* 돌아온 빛이 광원 쪽 눈금선(S를 지나고 RS에 수직)과 만나는 점 */
+    var px=-inc[1],py=inc[0];   /* 눈금선 방향 */
+    /* R + t*back = S + s*(px,py) */
+    var det=back[0]*(-py)-back[1]*(-px),dx=Sx-R[0],dy=Sy-R[1];
+    var t=(dx*(-py)-dy*(-px))/det;
+    return {turn:turn,vis:vis,hit:[R[0]+t*back[0],R[1]+t*back[1]],mm:133*n/256};
+  }
+  function mirror(a,attrs){
+    var c=Math.cos(a+Math.PI/2),s=Math.sin(a+Math.PI/2),L=26;
+    return el("line",Object.assign({x1:R[0]-c*L,y1:R[1]-s*L,x2:R[0]+c*L,y2:R[1]+s*L,"stroke-width":5,"stroke-linecap":"round"},attrs),g);
+  }
+  function draw(){
+    clear(g);var n=+sl.value,G=geom(n);
+    /* 슬릿과 눈금 */
+    var px=-inc[1],py=inc[0];
+    el("line",{x1:Sx-px*70,y1:Sy-py*70,x2:Sx+px*70,y2:Sy+py*70,stroke:C.muted},g);
+    for(var k=-6;k<=6;k++)el("line",{x1:Sx+px*k*10,y1:Sy+py*k*10,x2:Sx+px*k*10+inc[0]*-5,y2:Sy+py*k*10+inc[1]*-5,stroke:C.muted},g);
+    el("circle",{cx:Sx,cy:Sy,r:5,fill:"#f5b83d"},g);
+    txt(g,Sx-14,Sy+4,"광원(슬릿)",{"text-anchor":"end",fill:C.ink});
+    /* 빛길 */
+    el("line",{x1:Sx,y1:Sy,x2:R[0],y2:R[1],stroke:C.curve,"stroke-width":2},g);
+    el("line",{x1:R[0],y1:R[1]-3,x2:FX,y2:R[1]-3,stroke:C.curve,"stroke-width":2},g);
+    el("line",{x1:FX,y1:R[1]+3,x2:R[0],y2:R[1]+3,stroke:C.accent,"stroke-width":2,"stroke-dasharray":"6 4"},g);
+    el("line",{x1:R[0],y1:R[1],x2:G.hit[0],y2:G.hit[1],stroke:C.accent,"stroke-width":2},g);
+    el("circle",{cx:G.hit[0],cy:G.hit[1],r:5,fill:C.accent},g);
+    if(n>0)txt(g,G.hit[0]-14,G.hit[1]-4,"돌아온 빛의 상",{"text-anchor":"end",fill:C.accent,"font-weight":700});
+    /* 렌즈 */
+    el("ellipse",{cx:340,cy:R[1],rx:6,ry:30,fill:"#dfe9fb",stroke:C.accent},g);
+    txt(g,340,R[1]+48,"렌즈",{"text-anchor":"middle"});
+    /* 생략 표시와 고정 거울 */
+    el("path",{d:"M440,"+(R[1]-14)+" l-8,28 M452,"+(R[1]-14)+" l-8,28",stroke:C.muted,"stroke-width":1.5},g);
+    el("rect",{x:FX,y:R[1]-34,width:8,height:68,fill:C.teal},g);
+    txt(g,FX+4,R[1]+52,"고정 거울",{"text-anchor":"middle"});
+    arrow(g,R[0]+10,FX-4,R[1]-46,"약 610 m (2,000피트 가까이)");
+    /* 회전 거울: 나갈 때(옅게)와 돌아왔을 때 */
+    mirror(n0,{stroke:C.dim});
+    mirror(n0+G.vis,{stroke:C.ink});
+    txt(g,R[0],R[1]+52,"회전 거울",{"text-anchor":"middle",fill:C.ink,"font-weight":700});
+    out.textContent=n+"바퀴/초";
+    stats("h3-stats",[
+      {k:"빛이 오가는 시간",v:fmt(tRT*1e6,2),u:"백만분의 1초"},
+      {k:"그동안 거울이 돈 각도",v:fmt(G.turn,3),u:"°"},
+      {k:"돌아온 빛이 꺾인 각도",v:fmt(2*G.turn,3),u:"°"},
+      {k:"상이 옮겨진 거리",v:fmt(G.mm,1),u:"mm",hl:true}
+    ]);
+  }
+  function anim(){
+    if(raf)cancelAnimationFrame(raf);clear(gA);
+    var dot=el("circle",{r:6,fill:C.curve},gA),t0=0,G=geom(+sl.value);
+    var path=[[Sx,Sy],R,[FX,R[1]],R,G.hit],seg=[];
+    for(var i=0;i<4;i++)seg.push(Math.hypot(path[i+1][0]-path[i][0],path[i+1][1]-path[i][1]));
+    var tot=seg.reduce(function(a,b){return a+b;},0);
+    function f(ts){
+      if(!t0)t0=ts;var u=(ts-t0)/2600*tot;
+      if(u>=tot){clear(gA);raf=0;return;}
+      for(var i=0;i<4&&u>seg[i];i++)u-=seg[i];
+      var a=path[i],b=path[i+1],r=u/seg[i];
+      dot.setAttribute("cx",a[0]+(b[0]-a[0])*r);dot.setAttribute("cy",a[1]+(b[1]-a[1])*r);
+      raf=requestAnimationFrame(f);
+    }
+    raf=requestAnimationFrame(f);
+  }
+  if(reduceMotion)go.hidden=true;
+  sl.addEventListener("input",draw);
+  go.addEventListener("click",anim);
+  draw();
+})();
+
+/* ================= 03 마이컬슨: 잰 순서 ↔ 값별로 쌓기 ================= */
+(function(){
+  var svg=document.getElementById("f1-svg"),sp=MI.speed,n=sp.length;
+  var o={W:640,H:340,l:74,r:120,t:14,b:44,x:[0,n+1],y:[299600,300100]};
+  var P=frame(svg,o);
+  var Xs=function(c){return o.l+c*9;};          /* 쌓기: 점 하나에 9px */
+  var gAx=el("g",{},svg),gRef=el("g",{},svg),gPts=el("g",{},svg);
+  var cnt={},pos=sp.map(function(v){var k=Math.round(v/20)*20;cnt[k]=(cnt[k]||0)+1;return {k:k,h:cnt[k]};});
+  var dots=sp.map(function(){return el("circle",{r:4.1,fill:C.accent,"fill-opacity":.72,"class":"mv"},gPts);});
+  /* 평균선과 정의값 선 */
+  var ym=P.Y(MI.mean),yt=P.Y(MI.trueValue),xr=o.W-o.r;
+  el("line",{x1:o.l,x2:xr,y1:ym,y2:ym,stroke:C.ink,"stroke-width":2},gRef);
+  el("line",{x1:o.l,x2:xr,y1:yt,y2:yt,stroke:C.teal,"stroke-width":2,"stroke-dasharray":"6 4"},gRef);
+  txt(gRef,xr+8,ym-2,"평균",{fill:C.ink,"font-weight":700});
+  txt(gRef,xr+8,ym+12,fmt(MI.mean,1),{fill:C.ink});
+  txt(gRef,xr+8,yt+4,"현재 정의값",{fill:C.teal,"font-weight":700});
+  txt(gRef,xr+8,yt+18,fmt(MI.trueValue,3),{fill:C.teal});
+  function draw(mode){
+    clear(gAx);
+    var stack=mode==="stack";
+    axes(gAx,{o:o,X:stack?Xs:P.X,Y:P.Y},{
+      yt:[299600,299700,299800,299900,300000,300100],yf:function(v){return fmt(v,0);},
+      xt:stack?[0,5,10,15,20,25]:[1,20,40,60,80,100],
+      xl:stack?"20 km/s 간격으로 모은 측정 개수":"잰 순서 (번째)",yl:"빛의 속도 (km/s)"
+    });
+    dots.forEach(function(d,i){
+      d.setAttribute("cx",stack?Xs(pos[i].h-0.5):P.X(i+1));
+      d.setAttribute("cy",P.Y(stack?pos[i].k:sp[i]));
+    });
+  }
+  var btns=Array.prototype.slice.call(document.querySelectorAll("[data-f1]"));
+  btns.forEach(function(b){b.addEventListener("click",function(){pressSeg(btns,b);draw(b.getAttribute("data-f1"));});});
+  draw("order");
+  stats("f1-stats",[
+    {k:"측정 횟수",v:String(n),u:"회"},
+    {k:"가장 작은 값",v:fmt(Math.min.apply(null,sp),0),u:"km/s"},
+    {k:"가장 큰 값",v:fmt(Math.max.apply(null,sp),0),u:"km/s"},
+    {k:"평균",v:fmt(MI.mean,1),u:"km/s",hl:true},
+    {k:"평균 − 현재 정의값",v:"+"+fmt(MI.mean-MI.trueValue,1),u:"km/s"}
+  ]);
+})();
+
+/* ================= 04 갈턴 보드 ================= */
+(function(){
+  var svg=document.getElementById("f2-svg"),W=640,H=430,cx=W/2,top=26,pegH=220,base=410,stackMax=150,rs=3.6,BATCH=100;
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  /* 아래에서 위로: 판(못·칸막이) → 배경(계산 비율 막대·정규분포 곡선) → 쌓인 공 → 떨어지는 공 */
+  var gBoard=el("g",{},svg),gBg=el("g",{style:"opacity:0;transition:opacity .9s ease"},svg),gStack=el("g",{},svg),gBall=el("g",{},svg);
+  var slider=document.getElementById("f2-n"),out=document.getElementById("f2-nv");
+  var dropBtn=document.getElementById("f2-drop"),resetBtn=document.getElementById("f2-reset");
+  var n=+slider.value,dx,dy,probs,cols,rowH,counts,dots,total,revealed,balls=[],raf=0,spawnLeft=0,lastSpawn=0;
+  function binom(n){var p=[],c=1;for(var k=0;k<=n;k++){p.push(c/Math.pow(2,n));c=c*(n-k)/(k+1);}return p;}
+  function bx(k,rows){return cx+(k-rows/2)*dx;}
+  function midK(){return n%2===0?n/2:(n-1)/2;}
+  /* 판: 못, 입구, 칸막이, 바닥 */
+  function drawBoard(){
+    clear(gBoard);
+    dx=Math.min(40,580/(n+1));dy=Math.min(26,pegH/n);probs=binom(n);
+    cols=Math.max(1,Math.floor(dx*0.8/(2*rs)));
+    for(var r=0;r<n;r++)for(var j=0;j<=r;j++)el("circle",{cx:bx(j,r),cy:top+(r+1)*dy,r:3,fill:C.muted},gBoard);
+    el("path",{d:"M"+(cx-14)+","+(top-14)+" L"+(cx-5)+","+(top+2)+" M"+(cx+14)+","+(top-14)+" L"+(cx+5)+","+(top+2),stroke:C.muted,"stroke-width":2,fill:"none"},gBoard);
+    for(var k=0;k<=n+1;k++){var x=bx(k-0.5,n);el("line",{x1:x,x2:x,y1:base-stackMax,y2:base,stroke:C.grid,"stroke-width":1.5},gBoard);}
+    el("line",{x1:20,x2:W-20,y1:base,y2:base,stroke:C.muted},gBoard);
+    txt(gBoard,bx(0,n),base+16,"맨 왼쪽",{"text-anchor":"middle","font-size":10.5});
+    txt(gBoard,bx(n,n),base+16,"맨 오른쪽",{"text-anchor":"middle","font-size":10.5});
+    if(n>=2)txt(gBoard,cx,base+16,"가운데",{"text-anchor":"middle","font-size":10.5});
+    out.textContent=n+"줄";
+  }
+  /* 공 하나의 세로 높이(한 줄 높이)를 정한다. 가장 높은 더미나 계산 막대가 쌓는 칸을 넘으면 줄 간격을 좁힌다 */
+  function scale(){
+    var maxRows=Math.max(Math.ceil(Math.max.apply(null,counts)/cols),Math.max.apply(null,probs)*total/cols,1);
+    rowH=Math.min(2*rs,stackMax/maxRows);
+  }
+  function dotXY(k,i){return [bx(k,n)+((i%cols)-(cols-1)/2)*2*rs,base-(Math.floor(i/cols)+0.5)*rowH];}
+  function layoutStacks(){
+    for(var k=0;k<=n;k++)dots[k].forEach(function(d,i){var p=dotXY(k,i);d.setAttribute("cx",p[0].toFixed(1));d.setAttribute("cy",p[1].toFixed(1));});
+  }
+  /* 배경: 경로 수로 계산한 비율을 지금까지 떨어뜨린 공 수에 맞춘 막대와 정규분포 곡선 */
+  function drawBg(){
+    clear(gBg);if(!total)return;
+    var u=total/cols*rowH;
+    probs.forEach(function(p,k){
+      var x=bx(k,n),h=p*u;
+      el("rect",{x:x-dx*0.45,y:base-h,width:dx*0.9,height:h,fill:C.accent,"fill-opacity":.16,stroke:C.accent,"stroke-opacity":.55,rx:2},gBg);
+      if(n<=9)txt(gBg,x,base-Math.max(h,Math.ceil(counts[k]/cols)*rowH)-6,pct(p,p<0.1?1:0),{"text-anchor":"middle","font-size":10.5,fill:C.accent,"font-weight":700});
+    });
+    var s=Math.sqrt(n)/2,d="";
+    for(var t=-1;t<=n+1.0001;t+=0.05){var y=base-pdf(t,n/2,s)*u;d+=(d?" L":"M")+bx(t,n).toFixed(1)+","+y.toFixed(1);}
+    el("path",{d:d,fill:"none",stroke:C.curve,"stroke-width":2.4},gBg);
+  }
+  function refresh(){scale();layoutStacks();if(revealed)drawBg();updateStats();}
+  function reveal(){if(!total)return;revealed=true;drawBg();gBg.style.opacity="1";updateStats();}
+  function updateStats(){
+    var mid=probs[midK()];
+    stats("f2-stats",[
+      {k:"쌓인 공",v:fmt(total,0),u:"개"},
+      {k:"가운데 칸에 쌓인 비율",v:total?pct(counts[midK()]/total,1):"—",hl:true},
+      {k:"가운데 칸 계산 비율",v:revealed?pct(mid,1):"공이 다 쌓이면"},
+      {k:"맨 끝으로 가는 경로",v:"1",u:"가지 / 전체 "+fmt(Math.pow(2,n),0)+"가지"}
+    ]);
+  }
+  function land(k){
+    var p=dotXY(k,counts[k]);
+    dots[k].push(el("circle",{cx:p[0].toFixed(1),cy:p[1].toFixed(1),r:rs,fill:C.accent,"fill-opacity":.85},gStack));
+    counts[k]++;total++;
+    var before=rowH;scale();if(rowH!==before)layoutStacks();
+    if(revealed)drawBg();
+    updateStats();
+  }
+  /* 공: 못마다 반반의 확률로 왼쪽·오른쪽을 정해 경로를 미리 만든다 */
+  function newBall(){
+    var k=0,pts=[[cx,top-12]];
+    for(var r=0;r<n;r++){pts.push([bx(k,r),top+(r+1)*dy-6]);if(Math.random()<0.5)k++;}
+    pts.push([bx(k,n),top+n*dy+12]);
+    return {pts:pts,k:k,t:0,node:el("circle",{r:4.5,fill:C.curve,stroke:"#fff","stroke-width":1.2},gBall)};
+  }
+  function step(ts){
+    if(spawnLeft>0&&ts-lastSpawn>35){balls.push(newBall());spawnLeft--;lastSpawn=ts;}
+    balls=balls.filter(function(b){
+      b.t+=0.16;var last=b.pts.length;      /* 마지막 구간: 칸 입구 → 그 칸 더미의 꼭대기 */
+      var seg=Math.floor(b.t);
+      if(seg>=last){gBall.removeChild(b.node);land(b.k);return false;}
+      var a,c,f=b.t-seg;
+      if(seg>=last-1){a=b.pts[last-1];c=[a[0],dotXY(b.k,counts[b.k])[1]];}
+      else{a=b.pts[seg];c=b.pts[seg+1];}
+      b.node.setAttribute("cx",a[0]+(c[0]-a[0])*f);b.node.setAttribute("cy",a[1]+(c[1]-a[1])*f);
+      return true;
+    });
+    if(balls.length||spawnLeft>0){raf=requestAnimationFrame(step);}
+    else{raf=0;reveal();}
+  }
+  function reset(){
+    if(raf)cancelAnimationFrame(raf);raf=0;balls=[];spawnLeft=0;clear(gBall);clear(gStack);clear(gBg);
+    gBg.style.opacity="0";revealed=false;total=0;counts=[];dots=[];
+    drawBoard();for(var k=0;k<=n;k++){counts.push(0);dots.push([]);}
+    refresh();
+  }
+  slider.addEventListener("input",function(){n=+slider.value;reset();});
+  resetBtn.addEventListener("click",reset);
+  dropBtn.addEventListener("click",function(){
+    if(reduceMotion){                     /* 움직임 줄이기: 애니메이션 없이 바로 쌓는다 */
+      for(var i=0;i<BATCH;i++){var k=0;for(var r=0;r<n;r++)if(Math.random()<0.5)k++;land(k);}
+      reveal();return;
+    }
+    if(revealed){gBg.style.opacity="0";revealed=false;updateStats();}   /* 새로 떨어뜨리는 동안은 배경을 감춘다 */
+    spawnLeft+=BATCH;if(!raf)raf=requestAnimationFrame(step);
+  });
+  reset();
+})();
+
+/* ================= 05 마이컬슨: 막대그림 + 정규분포 ================= */
+(function(){
+  var svg=document.getElementById("f3-svg"),sp=MI.speed,n=sp.length,m=MI.mean,s=MI.sd,bw=50;
+  var counts=[];for(var b=299600;b<300100;b+=bw)counts.push({lo:b,c:sp.filter(function(v){return v>=b&&v<b+bw;}).length});
+  var ymax=Math.max(Math.max.apply(null,counts.map(function(c){return c.c/(n*bw);})),pdf(m,m,s))*1.12;
+  var o={W:640,H:300,l:24,r:20,t:18,b:52,x:[299600,300100],y:[0,ymax]};
+  var P=frame(svg,o),g=el("g",{},svg);
+  function draw(k){
+    clear(g);
+    axes(g,P,{xt:[299600,299700,299800,299900,300000,300100],xf:function(v){return fmt(v,0);},xoff:26,xl:"빛의 속도 (km/s)"});
+    var lo=m-k*s,hi=m+k*s,d="M"+P.X(lo)+","+P.Y(0);
+    for(var x=lo;x<=hi;x+=2)d+=" L"+P.X(x).toFixed(1)+","+P.Y(pdf(x,m,s)).toFixed(1);
+    d+=" L"+P.X(hi)+","+P.Y(0)+" Z";
+    el("path",{d:d,fill:C.curve,"fill-opacity":.16},g);
+    counts.forEach(function(c){
+      var h=c.c/(n*bw);if(!h)return;
+      el("rect",{x:P.X(c.lo)+1,y:P.Y(h),width:P.X(c.lo+bw)-P.X(c.lo)-2,height:P.Y(0)-P.Y(h),fill:C.accent,"fill-opacity":.28,stroke:C.accent,"stroke-opacity":.7},g);
+    });
+    var cd="";for(var x2=299600;x2<=300100;x2+=4)cd+=(cd?" L":"M")+P.X(x2).toFixed(1)+","+P.Y(pdf(x2,m,s)).toFixed(1);
+    el("path",{d:cd,fill:"none",stroke:C.curve,"stroke-width":2.4},g);
+    el("line",{x1:P.X(m),x2:P.X(m),y1:o.t,y2:P.Y(0),stroke:C.ink,"stroke-width":1.6},g);
+    [lo,hi].forEach(function(v){el("line",{x1:P.X(v),x2:P.X(v),y1:o.t+18,y2:P.Y(0),stroke:C.curve,"stroke-width":1.4,"stroke-dasharray":"5 4"},g);});
+    txt(g,P.X(m),o.t+10,"평균",{"text-anchor":"middle",fill:C.ink,"font-weight":700});
+    txt(g,P.X(lo),o.t+12,"−"+k+" 표준편차",{"text-anchor":"middle",fill:C.curve,"font-size":10.5});
+    txt(g,P.X(hi),o.t+12,"+"+k+" 표준편차",{"text-anchor":"middle",fill:C.curve,"font-size":10.5});
+    var inside=0;
+    sp.forEach(function(v){var on=Math.abs(v-m)<=k*s;if(on)inside++;
+      el("line",{x1:P.X(v),x2:P.X(v),y1:P.Y(0)+3,y2:P.Y(0)+11,stroke:on?C.accent:C.dim,"stroke-width":1.4},g);});
+    stats("f3-stats",[
+      {k:"평균 ± "+k+" 표준편차",v:fmt(lo,0)+" ~ "+fmt(hi,0),u:"km/s"},
+      {k:"이 안에 든 측정",v:inside+" / "+n,u:"("+pct(inside/n,0)+")",hl:true},
+      {k:"정규분포라면",v:k===1?"약 68%":"약 95%"}
+    ]);
+  }
+  var btns=Array.prototype.slice.call(document.querySelectorAll("[data-f3]"));
+  btns.forEach(function(b){b.addEventListener("click",function(){pressSeg(btns,b);draw(+b.getAttribute("data-f3"));});});
+  draw(1);
+})();
+
+/* ================= 갈턴 자료 공통 ================= */
+var PR=GA.pairs,N=PR.length,FX=PR.map(function(p){return p[0];}),SY=PR.map(function(p){return p[1];});
+var xbar=mean(FX),ybar=mean(SY),sxy=0,sxx=0;
+for(var i=0;i<N;i++){sxy+=(FX[i]-xbar)*(SY[i]-ybar);sxx+=(FX[i]-xbar)*(FX[i]-xbar);}
+var B=sxy/sxx,A=ybar-B*xbar,SSE=0;
+for(i=0;i<N;i++){var e=SY[i]-(A+B*FX[i]);SSE+=e*e;}
+var SIG=Math.sqrt(SSE/(N-2));
+function jit(i){return (((i*7919)%13)/12-0.5)*1.2;}   /* 그림에서만 가로로 ±0.6cm 흩뜨림 */
+function near(c,h){var out=[];for(var i=0;i<N;i++)if(Math.abs(FX[i]-c)<=h)out.push(SY[i]);return out;}
+var CENTERS=[];for(var c5=160;c5<=195;c5+=5){var sel5=near(c5,2.5);if(sel5.length>=8)CENTERS.push([c5,mean(sel5),sel5.length]);}
+function galtonFrame(svg,r){return frame(svg,{W:640,H:420,l:56,r:r,t:16,b:44,x:[155,202],y:[150,204]});}
+function galtonAxes(g,P){axes(g,P,{xt:[160,170,180,190,200],yt:[150,160,170,180,190,200],xl:"아버지 키 (cm)",yl:"아들 키 (cm)"});}
+function galtonDots(g,P){return PR.map(function(p,i){return el("circle",{cx:P.X(p[0]+jit(i)),cy:P.Y(p[1]),r:2.7,fill:C.dim,"fill-opacity":.55},g);});}
+function clipTo(svg,P,id){var cp=el("clipPath",{id:id},svg);el("rect",{x:P.o.l,y:P.o.t,width:P.o.W-P.o.r-P.o.l,height:P.o.H-P.o.b-P.o.t},cp);return "url(#"+id+")";}
+function drawCenters(g,P){
+  var d="";CENTERS.forEach(function(c){d+=(d?" L":"M")+P.X(c[0])+","+P.Y(c[1]);});
+  el("path",{d:d,fill:"none",stroke:C.ink,"stroke-width":1.2,"stroke-dasharray":"3 3"},g);
+  CENTERS.forEach(function(c){var x=P.X(c[0]),y=P.Y(c[1]);el("rect",{x:x-5,y:y-5,width:10,height:10,transform:"rotate(45 "+x+" "+y+")",fill:C.ink,stroke:"#fff","stroke-width":1.2},g);});
+}
+/* 세로로 세운 정규분포 곡선: 가로 길이 = k × 밀도 (cm 단위) */
+function vCurve(g,P,x0,mu,s,k,attrs){
+  var d="";for(var y=mu-3.2*s;y<=mu+3.2*s+1e-9;y+=s/20)d+=(d?" L":"M")+P.X(x0+k*pdf(y,mu,s)).toFixed(1)+","+P.Y(y).toFixed(1);
+  var a={d:d,fill:"none",stroke:C.curve,"stroke-width":2.2};for(var key in attrs)a[key]=attrs[key];
+  return el("path",a,g);
+}
+
+/* ================= 05 표준정규분포: 두 자료를 z 점수로 ================= */
+(function(){
+  var svg=document.getElementById("fz-svg"),W=640,H=400,l=24,r=20,xl=l,xr=W-r;
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  var g=el("g",{},svg),sl=document.getElementById("fz-z"),out=document.getElementById("fz-zv");
+  /* 표준정규분포의 누적비율 (Abramowitz–Stegun 7.1.26 근사) */
+  function Phi(z){var t=1/(1+0.3275911*Math.abs(z)/Math.SQRT2),y=1-((((1.061405429*t-1.453152027)*t+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-z*z/2);return z>=0?(1+y)/2:(1-y)/2;}
+  function panel(name,unit,vals,start,bw,dom,ticks,dec,top,binOf){
+    var m=mean(vals),s=sd(vals),c={};
+    vals.forEach(function(v){var k=binOf?binOf(v):Math.floor((v-start)/bw+1e-6);c[k]=(c[k]||0)+1;});
+    return {name:name,unit:unit,vals:vals,m:m,s:s,bw:bw,start:start,bins:c,dom:dom,ticks:ticks,dec:dec,top:top,base:top+140};
+  }
+  var P=[
+    panel("마이컬슨의 빛의 속도","km/s",MI.speed,299600,50,[299450,300250],[299500,299700,299900,300100],0,22),
+    /* 원자료는 인치. cm로 바꾸며 0.1 cm에서 반올림했으므로 인치로 되돌려 1인치 칸에 넣는다 */
+    panel("갈턴 자료의 아들 키","cm",GA.pairs.map(function(p){return p[1];}),0,2.54,[145,215],[150,160,170,180,190,200,210],1,220,
+      function(v){return Math.floor(Math.round(v/2.54*10)/10+1e-9);})
+  ];
+  var ZD=[-4,4],pz=(xr-xl)/(ZD[1]-ZD[0]),Hs=140*0.6/pdf(0,0,1),t=0,raf=0;
+  function Xo(p,v){return xl+(v-p.dom[0])/(p.dom[1]-p.dom[0])*(xr-xl);}
+  function Xz(z){return xl+(z-ZD[0])*pz;}
+  function X(p,v){return (1-t)*Xo(p,v)+t*Xz((v-p.m)/p.s);}
+  function draw(){
+    clear(g);var z=+sl.value;
+    P.forEach(function(p){
+      var ut=(1-t)*(xr-xl)/(p.dom[1]-p.dom[0])*p.s+t*pz, k=Hs*pz/ut;   /* 표준편차 하나의 픽셀 폭, 넓이 보존 배율 */
+      /* 눈금: 원래 단위는 사라지고 z는 나타난다 */
+      p.ticks.forEach(function(v){var x=X(p,v);
+        el("line",{x1:x,x2:x,y1:p.top,y2:p.base,stroke:C.grid,"stroke-opacity":1-t},g);
+        txt(g,x,p.base+15,fmt(v,0),{"text-anchor":"middle","font-size":10.5,"fill-opacity":1-t});});
+      for(var zz=-3;zz<=3;zz++){var x=X(p,p.m+zz*p.s);
+        el("line",{x1:x,x2:x,y1:p.top,y2:p.base,stroke:C.grid,"stroke-opacity":t},g);
+        txt(g,x,p.base+15,(zz>0?"+":zz<0?"−":"")+Math.abs(zz),{"text-anchor":"middle","font-size":10.5,"fill-opacity":t});}
+      el("line",{x1:xl,x2:xr,y1:p.base,y2:p.base,stroke:C.muted},g);
+      txt(g,xr,p.base+30,t<0.5?p.unit:"z",{"text-anchor":"end","font-size":10.5});
+      /* 막대 */
+      for(var b in p.bins){var lo=p.start+b*p.bw,dz=p.bins[b]/p.vals.length/(p.bw/p.s),h=dz*k;
+        el("rect",{x:X(p,lo)+0.5,y:p.base-h,width:Math.max(0,X(p,lo+p.bw)-X(p,lo)-1),height:h,fill:C.accent,"fill-opacity":.28,stroke:C.accent,"stroke-opacity":.7},g);}
+      /* 정규분포 곡선 */
+      var d="";for(var q=-4;q<=4.0001;q+=0.05)d+=(d?" L":"M")+X(p,p.m+q*p.s).toFixed(1)+","+(p.base-pdf(q,0,1)*k).toFixed(1);
+      el("path",{d:d,fill:"none",stroke:C.curve,"stroke-width":2.2},g);
+      /* 평균선과 고른 z */
+      var xm=X(p,p.m),xv=X(p,p.m+z*p.s),v=p.m+z*p.s;
+      el("line",{x1:xm,x2:xm,y1:p.top+16,y2:p.base,stroke:C.ink,"stroke-width":1.4},g);
+      el("line",{x1:xv,x2:xv,y1:p.top+16,y2:p.base,stroke:C.curve,"stroke-width":2,"stroke-dasharray":"5 3"},g);
+      txt(g,xv+(z>=0?5:-5),p.top+26,fmt(v,p.dec)+" "+p.unit,{"text-anchor":z>=0?"start":"end",fill:C.curve,"font-weight":700,"font-size":11});
+      txt(g,xl,p.top+2,p.name+" · 평균 "+fmt(p.m,p.dec)+", 표준편차 "+fmt(p.s,p.dec),{fill:C.ink,"font-size":11.5,"font-weight":700});
+    });
+    out.textContent=(z>0?"+":"")+fmt(z,1);
+    function below(p){var v=p.m+z*p.s;return p.vals.filter(function(a){return a<=v;}).length/p.vals.length;}
+    stats("fz-stats",[
+      {k:"같은 z의 빛의 속도",v:fmt(P[0].m+z*P[0].s,0),u:"km/s"},
+      {k:"같은 z의 아들 키",v:fmt(P[1].m+z*P[1].s,1),u:"cm"},
+      {k:"표준정규분포에서 z보다 작은 비율",v:pct(Phi(z),1),hl:true},
+      {k:"실제로 그보다 작은 측정",v:pct(below(P[0]),0)},
+      {k:"실제로 그보다 작은 아들",v:pct(below(P[1]),0)}
+    ]);
+  }
+  function animTo(goal){
+    if(raf)cancelAnimationFrame(raf);
+    if(reduceMotion){t=goal;draw();return;}
+    var t0=null,from=t;
+    function f(ts){if(t0===null)t0=ts;var u=Math.min(1,(ts-t0)/1000),e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+      t=from+(goal-from)*e;draw();raf=u<1?requestAnimationFrame(f):0;}
+    raf=requestAnimationFrame(f);
+  }
+  var btns=Array.prototype.slice.call(document.querySelectorAll("[data-fz]"));
+  btns.forEach(function(b){b.addEventListener("click",function(){pressSeg(btns,b);animTo(+b.getAttribute("data-fz"));});});
+  sl.addEventListener("input",draw);
+  draw();
+})();
+
+/* ================= 06 아버지 키를 고르면 ================= */
+(function(){
+  var svg=document.getElementById("f4-svg"),P=galtonFrame(svg,170),o=P.o;
+  var gAx=el("g",{},svg),gBand=el("g",{},svg),gPts=el("g",{},svg),gTop=el("g",{},svg),gCen=el("g",{},svg),gSide=el("g",{},svg);
+  galtonAxes(gAx,P);
+  var dots=galtonDots(gPts,P);
+  var sx0=o.W-o.r+26,sLen=118,bw=2.5;
+  txt(gAx,sx0,o.t+2,"고른 아버지들의",{"font-size":11,fill:C.ink});
+  txt(gAx,sx0,o.t+16,"아들 키",{"font-size":11,fill:C.ink});
+  el("line",{x1:sx0,x2:sx0,y1:o.t+24,y2:o.H-o.b,stroke:C.muted},gAx);
+  var slider=document.getElementById("f4-x"),out=document.getElementById("f4-xv");
+  function update(){
+    var c=+slider.value,h=1.5,sel=[];
+    out.textContent=c.toFixed(1)+" cm";
+    clear(gBand);clear(gTop);clear(gSide);
+    el("rect",{x:P.X(c-h),y:o.t,width:P.X(c+h)-P.X(c-h),height:o.H-o.b-o.t,fill:C.accent,"fill-opacity":.08},gBand);
+    dots.forEach(function(d,i){var on=Math.abs(FX[i]-c)<=h;if(on)sel.push(SY[i]);
+      d.setAttribute("fill",on?C.accent:C.dim);d.setAttribute("fill-opacity",on?.85:.45);d.setAttribute("r",on?3.4:2.7);
+      if(on)gTop.appendChild(d);else gPts.appendChild(d);});
+    if(!sel.length){stats("f4-stats",[{k:"고른 아버지 키",v:(c-h).toFixed(1)+" ~ "+(c+h).toFixed(1),u:"cm"},{k:"해당하는 아들",v:"0",u:"명"}]);return;}
+    var m=mean(sel),s=sel.length>1?sd(sel):0,bins={},maxc=0;
+    sel.forEach(function(v){var b=Math.floor(v/bw)*bw;bins[b]=(bins[b]||0)+1;if(bins[b]>maxc)maxc=bins[b];});
+    var scale=sLen/Math.max(maxc,4);
+    Object.keys(bins).forEach(function(b){b=+b;
+      el("rect",{x:sx0,y:P.Y(b+bw)+0.5,width:bins[b]*scale,height:P.Y(b)-P.Y(b+bw)-1,fill:C.accent,"fill-opacity":.7},gSide);});
+    if(s>0){var d="";for(var y=150;y<=204;y+=0.5){d+=(d?" L":"M")+(sx0+sel.length*bw*pdf(y,m,s)*scale).toFixed(1)+","+P.Y(y).toFixed(1);}
+      el("path",{d:d,fill:"none",stroke:C.curve,"stroke-width":2},gSide);}
+    el("line",{x1:sx0-4,x2:sx0+sLen,y1:P.Y(m),y2:P.Y(m),stroke:C.ink,"stroke-width":1.6},gSide);
+    txt(gSide,sx0+sLen-2,P.Y(m)-5,"평균 "+m.toFixed(1),{"text-anchor":"end","font-size":10.5,fill:C.ink,"font-weight":700});
+    el("line",{x1:P.X(c-h)-4,x2:P.X(c+h)+4,y1:P.Y(m),y2:P.Y(m),stroke:C.ink,"stroke-width":2.4},gTop);
+    stats("f4-stats",[
+      {k:"고른 아버지 키",v:(c-h).toFixed(1)+" ~ "+(c+h).toFixed(1),u:"cm"},
+      {k:"해당하는 아들",v:String(sel.length),u:"명"},
+      {k:"아들 키 평균 (가운데)",v:m.toFixed(1),u:"cm",hl:true},
+      {k:"아들 키 표준편차 (폭)",v:s.toFixed(1),u:"cm"},
+      {k:"가장 작은 / 큰 아들",v:Math.min.apply(null,sel).toFixed(1)+" / "+Math.max.apply(null,sel).toFixed(1),u:"cm"}
+    ]);
+  }
+  slider.addEventListener("input",update);
+  toggle(document.getElementById("f4-centers"),function(v){clear(gCen);if(v)drawCenters(gCen,P);});
+  update();
+})();
+
+/* ================= 07 직선을 직접 맞춰 보기 ================= */
+(function(){
+  var svg=document.getElementById("f5-svg"),P=galtonFrame(svg,20),o=P.o;
+  var clip=clipTo(svg,P,"f5-clip");
+  var gAx=el("g",{},svg),gMiss=el("g",{"clip-path":clip},svg),gPts=el("g",{},svg),gCen=el("g",{},svg),gLine=el("g",{"clip-path":clip},svg);
+  galtonAxes(gAx,P);
+  galtonDots(gPts,P).forEach(function(d){d.setAttribute("fill",C.accent);d.setAttribute("fill-opacity",.35);});
+  drawCenters(gCen,P);
+  var sb=document.getElementById("f5-b"),sh=document.getElementById("f5-h"),showMiss=false;
+  var bestRMS=Math.sqrt(SSE/N);
+  function update(){
+    var b=+sb.value,h=+sh.value,a=h-b*xbar,sse=0;
+    document.getElementById("f5-bv").textContent=b.toFixed(2);
+    document.getElementById("f5-hv").textContent=h.toFixed(1)+" cm";
+    clear(gLine);clear(gMiss);
+    for(var i=0;i<N;i++){var fit=a+b*FX[i],e=SY[i]-fit;sse+=e*e;
+      if(showMiss)el("line",{x1:P.X(FX[i]+jit(i)),x2:P.X(FX[i]+jit(i)),y1:P.Y(SY[i]),y2:P.Y(fit),stroke:e>0?C.curve:C.teal,"stroke-opacity":.35,"stroke-width":1},gMiss);}
+    el("line",{x1:P.X(150),x2:P.X(210),y1:P.Y(a+b*150),y2:P.Y(a+b*210),stroke:C.ink,"stroke-width":2.6},gLine);
+    var rms=Math.sqrt(sse/N);
+    stats("f5-stats",[
+      {k:"지금 직선",v:"아들 = "+a.toFixed(1)+" + "+b.toFixed(3)+" × 아버지"},
+      {k:"평균적으로 빗나간 정도",v:rms.toFixed(2),u:"cm",hl:true},
+      {k:"가장 잘 맞는 직선이면",v:bestRMS.toFixed(2),u:"cm"}
+    ]);
+  }
+  function set(b,h){sb.value=b;sh.value=h;update();}
+  sb.addEventListener("input",update);sh.addEventListener("input",update);
+  document.getElementById("f5-same").addEventListener("click",function(){set(1,175.7);});
+  document.getElementById("f5-best").addEventListener("click",function(){set(B,A+B*xbar);});
+  toggle(document.getElementById("f5-miss"),function(v){showMiss=v;update();});
+  update();
+})();
+
+/* ================= 08 직선 위에 종을 세우다 ================= */
+(function(){
+  var svg=document.getElementById("f6-svg"),P=galtonFrame(svg,20),o=P.o;
+  var clip=clipTo(svg,P,"f6-clip");
+  var gAx=el("g",{},svg),gBand=el("g",{"clip-path":clip},svg),gPts=el("g",{},svg),gLine=el("g",{"clip-path":clip},svg),gReal=el("g",{},svg),gCurve=el("g",{},svg);
+  galtonAxes(gAx,P);
+  galtonDots(gPts,P).forEach(function(d){d.setAttribute("fill-opacity",.4);});
+  el("line",{x1:P.X(150),x2:P.X(210),y1:P.Y(A+B*150),y2:P.Y(A+B*210),stroke:C.ink,"stroke-width":2.4},gLine);
+  var XS=[165,170,175,180,185],K=4.2/pdf(0,0,SIG);   /* 곡선 꼭대기 = 가로 4.2cm */
+  XS.forEach(function(x0){var mu=A+B*x0;
+    el("line",{x1:P.X(x0),x2:P.X(x0),y1:P.Y(mu-3.2*SIG),y2:P.Y(mu+3.2*SIG),stroke:C.curve,"stroke-width":1,"stroke-dasharray":"3 3"},gCurve);
+    vCurve(gCurve,P,x0,mu,SIG,K);
+    el("circle",{cx:P.X(x0),cy:P.Y(mu),r:3.6,fill:"#fff",stroke:C.ink,"stroke-width":1.8},gCurve);
+  });
+  function drawReal(on){
+    clear(gReal);if(!on)return;
+    var bw=3;
+    XS.forEach(function(x0){var sel=near(x0,1.5),bins={};
+      sel.forEach(function(v){var b=Math.floor(v/bw)*bw;bins[b]=(bins[b]||0)+1;});
+      Object.keys(bins).forEach(function(b){b=+b;var dens=bins[b]/(sel.length*bw);
+        el("rect",{x:P.X(x0),y:P.Y(b+bw)+0.5,width:P.X(x0+K*dens)-P.X(x0),height:P.Y(b)-P.Y(b+bw)-1,fill:C.accent,"fill-opacity":.55},gReal);});
+    });
+  }
+  function drawBand(on){
+    clear(gBand);if(!on)return;
+    var x1=150,x2=210,u=2*SIG;
+    el("path",{d:"M"+P.X(x1)+","+P.Y(A+B*x1+u)+" L"+P.X(x2)+","+P.Y(A+B*x2+u)+" L"+P.X(x2)+","+P.Y(A+B*x2-u)+" L"+P.X(x1)+","+P.Y(A+B*x1-u)+" Z",fill:C.curve,"fill-opacity":.12},gBand);
+  }
+  toggle(document.getElementById("f6-real"),drawReal);
+  toggle(document.getElementById("f6-band"),drawBand);
+  var in1=0,in2=0;for(var i=0;i<N;i++){var e=Math.abs(SY[i]-(A+B*FX[i]));if(e<=SIG)in1++;if(e<=2*SIG)in2++;}
+  stats("f6-stats",[
+    {k:"직선 주변 흩어짐 (표준편차)",v:SIG.toFixed(2),u:"cm",hl:true},
+    {k:"직선 ± 1 표준편차 안",v:pct(in1/N,1),u:"(정규분포라면 약 68%)"},
+    {k:"직선 ± 2 표준편차 안",v:pct(in2/N,1),u:"(정규분포라면 약 95%)"}
+  ]);
+})();
+
+/* ================= 09 예측 도구 ================= */
+(function(){
+  var svg=document.getElementById("f7-svg"),P=frame(svg,{W:640,H:420,l:56,r:20,t:16,b:44,x:[148,207],y:[148,206]}),o=P.o;
+  var clip=clipTo(svg,P,"f7-clip");
+  var gAx=el("g",{},svg),gBand=el("g",{"clip-path":clip},svg),gPts=el("g",{},svg),gLine=el("g",{"clip-path":clip},svg),gTop=el("g",{},svg),gMark=el("g",{},svg);
+  axes(gAx,P,{xt:[150,160,170,180,190,200],yt:[150,160,170,180,190,200],xl:"아버지 키 (cm)",yl:"아들 키 (cm)"});
+  var dots=galtonDots(gPts,P),u=2*SIG,lo=Math.min.apply(null,FX),hi=Math.max.apply(null,FX);
+  el("path",{d:"M"+P.X(140)+","+P.Y(A+B*140+u)+" L"+P.X(215)+","+P.Y(A+B*215+u)+" L"+P.X(215)+","+P.Y(A+B*215-u)+" L"+P.X(140)+","+P.Y(A+B*140-u)+" Z",fill:C.curve,"fill-opacity":.08},gBand);
+  el("line",{x1:P.X(140),x2:P.X(215),y1:P.Y(A+B*140),y2:P.Y(A+B*215),stroke:C.ink,"stroke-width":2.2},gLine);
+  var sl=document.getElementById("f7-x"),ni=document.getElementById("f7-n"),warn=document.getElementById("f7-warn");
+  function update(x0){
+    clear(gMark);
+    var mu=A+B*x0,yl=mu-u,yh=mu+u,X=P.X(x0),k=7/pdf(0,0,SIG),cnt=0,inR=0;
+    dots.forEach(function(d,i){var on=Math.abs(FX[i]-x0)<=1.5;
+      d.setAttribute("fill",on?C.accent:C.dim);d.setAttribute("fill-opacity",on?.9:.4);d.setAttribute("r",on?3.4:2.7);
+      if(on){gTop.appendChild(d);cnt++;if(SY[i]>=yl&&SY[i]<=yh)inR++;}else gPts.appendChild(d);});
+    vCurve(gMark,P,x0,mu,SIG,k,{"stroke-width":2.6});
+    el("line",{x1:X,x2:X,y1:P.Y(yl),y2:P.Y(yh),stroke:C.curve,"stroke-width":4,"stroke-linecap":"round"},gMark);
+    [yl,yh].forEach(function(v){el("line",{x1:X-7,x2:X+7,y1:P.Y(v),y2:P.Y(v),stroke:C.curve,"stroke-width":2.4},gMark);});
+    el("circle",{cx:X,cy:P.Y(mu),r:6,fill:"#fff",stroke:C.ink,"stroke-width":2.6},gMark);
+    var right=x0<190,anchor=right?"start":"end",tx=right?P.X(x0+7.5):X-14;
+    txt(gMark,tx,P.Y(mu)+4,"평균 "+mu.toFixed(1),{"text-anchor":anchor,fill:C.ink,"font-weight":700,"font-size":12.5});
+    txt(gMark,right?X+10:X-10,P.Y(yh)+4,yh.toFixed(1),{"text-anchor":anchor,fill:C.curve,"font-weight":700});
+    txt(gMark,right?X+10:X-10,P.Y(yl)+4,yl.toFixed(1),{"text-anchor":anchor,fill:C.curve,"font-weight":700});
+    var items=[
+      {k:"아버지 키",v:x0.toFixed(1),u:"cm"},
+      {k:"아들 키 예측 (가운데)",v:mu.toFixed(1),u:"cm",hl:true},
+      {k:"약 95% 범위 (± 2 표준편차)",v:yl.toFixed(1)+" ~ "+yh.toFixed(1),u:"cm"}
+    ];
+    items.push(cnt?{k:"실제: 이 키(±1.5cm) 아버지의 아들",v:inR+" / "+cnt,u:"명이 범위 안"}:{k:"실제: 이 키(±1.5cm) 아버지의 아들",v:"없음"});
+    stats("f7-stats",items);
+    if(x0<lo||x0>hi){warn.hidden=false;warn.textContent="자료 밖의 키입니다. 갈턴의 자료에서 아버지 키는 "+lo.toFixed(1)+"~"+hi.toFixed(1)+"cm 사이라, 이 예측이 맞는지 자료로 확인할 수 없습니다.";}
+    else warn.hidden=true;
+  }
+  sl.addEventListener("input",function(){ni.value=sl.value;update(+sl.value);});
+  ni.addEventListener("change",function(){var v=Math.max(150,Math.min(205,+ni.value||180));ni.value=v;sl.value=v;update(v);});
+  update(+sl.value);
+})();
+
+/* ---------------- 코드 상자 복사 버튼 ---------------- */
+Array.prototype.forEach.call(document.querySelectorAll(".cb.r, .cb.prompt"),function(box){
+  var pre=box.querySelector("pre");if(!pre)return;
+  var b=document.createElement("button");b.type="button";b.className="copy";b.textContent="복사";
+  b.addEventListener("click",function(){
+    var done=function(){b.textContent="복사됨";setTimeout(function(){b.textContent="복사";},1400);};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(pre.textContent).then(done,function(){});}
+  });
+  box.appendChild(b);
+});
+
+/* ---------------- 레일 목차 scroll-spy ---------------- */
+var railLinks=Array.prototype.slice.call(document.querySelectorAll("#rail-nav a"));
+var railObserver=new IntersectionObserver(function(entries){
+  entries.forEach(function(entry){
+    if(entry.isIntersecting){
+      railLinks.forEach(function(link){link.classList.toggle("on",link.getAttribute("href")==="#"+entry.target.id);});
+    }
+  });
+},{rootMargin:"-25% 0px -65% 0px"});
+railLinks.forEach(function(link,index){
+  var target=document.querySelector(link.getAttribute("href"));
+  if(target)railObserver.observe(target);
+  if(index===0)link.classList.add("on");
+});
+})();
+</script>
+</body>
+</html>
