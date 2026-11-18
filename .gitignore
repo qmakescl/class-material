@@ -20,3 +20,6 @@ datasets/mnist/*.gz
 datasets/categorical/*.sas7bdat
 datasets/categorical/taas_2024_seoul_deaths.xlsx
 datasets/categorical/knhanes24_body_sample.csv
+
+# 과제 채점 자료(채점 기준, 모범 풀이, 감수 기록, 과제 작업 기록) — 비공개, 로컬 전용
+_review/

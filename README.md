@@ -152,6 +152,15 @@ Rscript src/R/prepare_michelson_morley.R   # docs/assets/data/michelson-morley.j
   `docs/downlodable/nd_lm.zip`은 `uv run python src/python/build_skeleton_zip.py nd_lm`으로
   다시 만든다. 뼈대 안의 파일을 고치면 zip도 다시 만든다.
 
+「숫자로 읽는 세상」 레포트 과제 "금쪽같은 휴일, 우리는 어떻게 움직이나?"(2025년 서울
+지하철·기상 자료, R 전용, 마감 2026-11-28)의 작업 폴더 뼈대는 `skeleton/report-sno/`다.
+질문과 제공 수치는 뼈대에 넣지 않고 수업 노션의 과제 안내 페이지에만 둔다(에이전트가 과제를 대신 풀지 않게). `AGENTS.md`가 에이전트에게 요청마다
+`dialogues/YYYY-MM-DD.md`에 요청 원문·응답 요약·바꾼 파일·실행 결과를 남기게 하고,
+출처 없는 바깥 숫자를 쓰지 못하게 한다. 지하철·기상 원자료는 넣지 않고(학생이 직접 받는다),
+2025년 휴일 목록 `dataset/raw/holidays-2025.csv`(공휴일·대체공휴일·임시공휴일·근로자의 날)만 넣는다. 배포는 zip으로만 하며
+`uv run python src/python/build_skeleton_zip.py report-sno`로
+`docs/downlodable/report-sno.zip`을 다시 만든다.
+
 `docs/ai/regression-to-deep-learning.html`(회귀에서 딥러닝으로)이 읽는 데이터는 아래
 두 스크립트가 만든다(`window.GISTEMP_ANNUAL`, `window.MNIST_BRIDGE`를 정의하는 생성
 파일이므로 직접 수정하지 않는다).
