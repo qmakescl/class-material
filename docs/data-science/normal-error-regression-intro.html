@@ -91,6 +91,8 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;bac
 main > footer{padding-top:8px;color:var(--muted);font-size:13.5px}
 .dl-link{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:var(--ink);color:var(--surface)!important;border-radius:9px;font-weight:700;font-size:14px;text-decoration:none}
 .dl-link:hover,.dl-link:focus-visible{opacity:.88}
+.sr-box .fig{margin:14px 0}
+.sr-box summary{font-weight:700}
 </style>
 <script defer src="../assets/katex/katex.min.js"></script>
 <script defer src="../assets/katex/contrib/auto-render.min.js"></script>
@@ -179,6 +181,50 @@ main > footer{padding-top:8px;color:var(--muted);font-size:13.5px}
     <div class="fig-plot"><svg class="plot" id="h2-svg" role="img" aria-label="연도별로 발표된 빛의 속도 값과 오늘날 정의값"></svg></div>
     <p class="fig-note">점선은 1983년에 정한 값 299,792.458 km/s다. 이때부터 미터를 "빛이 1/299,792,458초 동안 가는 거리"로 정했기 때문에, 이 값은 더 이상 재는 값이 아니라 정의된 값이다. 1690년의 점은 호이겐스가 뢰머의 관측으로 계산한 값이다. 세로 막대는 실험자가 밝힌 불확실성(±)이다. 1879년 값은 마이컬슨이 여러 보정을 거쳐 발표한 값이라서, 03절에서 볼 100개 기록의 단순 평균(299,852 km/s)과 조금 다르다.</p>
   </div>
+
+  <div class="callout">
+    <p><strong>오늘날 인류가 쓰는 빛의 속도.</strong> 진공에서 <strong>299,792,458 m/s</strong>(299,792.458 km/s)다. 이 값에는 오차가 없다. 재서 얻은 값이 아니라 <strong>정한 값</strong>이기 때문이다.</p>
+    <ul>
+      <li><strong>1972년 · 측정.</strong> 미국 국립표준국(NBS, 지금의 NIST)의 에벤슨(Kenneth M. Evenson) 연구진이 레이저 빛의 진동수와 파장을 함께 재어 299,792,456.2 ± 1.1 m/s를 얻었다. 그 전에 받아들여지던 값보다 불확실성이 약 100분의 1로 작았다.</li>
+      <li><strong>1975년 · 권고.</strong> 미터법을 관리하는 국제 회의인 제15차 <strong>국제도량형총회</strong>(CGPM)가 이런 레이저 측정들을 바탕으로 <strong>299,792,458 m/s</strong>를 빛의 속도의 권고값으로 채택했다.</li>
+      <li><strong>1983년 · 정의.</strong> 제17차 국제도량형총회가 미터를 "빛이 진공에서 1/299,792,458초 동안 가는 거리"로 새로 정의했다. 1975년의 값을 그대로 쓰기로 했고, 이때부터 빛의 속도는 정의로 고정되었다.</li>
+      <li><strong>지금.</strong> 2018년 제26차 총회가 정하고 2019년부터 시행한 국제단위계(SI)에서 빛의 속도는 단위를 정의하는 일곱 개의 상수 가운데 하나다. 미터는 이 값과 세슘 원자로 정한 1초에서 나온다.</li>
+    </ul>
+    <p>그래서 오늘 누군가 빛의 속도를 "재면" 그것은 사실 미터 자를 확인하는 일이 된다. 300년 동안 재려고 애쓴 값이 마침내 길이를 재는 기준이 된 셈이다.</p>
+  </div>
+
+  <details class="sr-box">
+    <summary>왜 빛의 속도는 누구에게나 같을까 · 아인슈타인의 특수 상대성 이론</summary>
+    <div class="stack">
+      <p>빛의 속도를 길이의 기준으로 삼을 수 있는 것은, 누가 어떻게 움직이며 재든 <strong>빛의 속도가 언제나 같은 값</strong>으로 나오기 때문이다. 이 사실을 이론의 출발점으로 삼은 사람이 알베르트 아인슈타인(Albert Einstein)이다. 1905년 논문 「움직이는 물체의 전기역학에 대하여」에서 그는 두 가지를 가정했다.</p>
+      <ol>
+        <li><strong>상대성 원리.</strong> 일정한 속도로 움직이는 관찰자에게는 누구에게나 물리 법칙이 똑같다. 창문 없는 기차 안에서는 기차가 서 있는지 고르게 달리는지 실험으로 가릴 수 없다.</li>
+        <li><strong>빛의 속도는 일정하다.</strong> 진공에서 빛의 속도는 빛을 낸 물체가 움직이든 관찰자가 움직이든 언제나 \(c\)다.</li>
+      </ol>
+      <p>두 번째 가정은 상식과 어긋난다. 시속 100 km로 달리는 기차에서 앞으로 시속 50 km로 공을 던지면, 땅에 선 사람에게 공은 시속 150 km로 날아간다. 그렇다면 기차에서 앞으로 쏜 빛은 \(c\)보다 빨라야 할 것 같다. 그런데 그렇지 않다. 02절의 마이컬슨이 1887년 몰리(Edward Morley)와 함께 한 간섭계 실험에서도, 지구가 초속 30 km로 공전하는데 빛의 속도는 어느 방향으로 재도 차이가 없었다. 아래 그림에서 기차의 속도를 바꿔 보자.</p>
+    </div>
+
+    <div class="fig">
+      <div class="fig-bar">
+        <span class="fig-title">특수 상대성 이론 · 빛의 속도가 일정하면 생기는 일</span>
+        <div class="seg" role="group" aria-label="장면 고르기">
+          <button class="btn" type="button" data-sr="add" aria-pressed="true">속도 더하기</button>
+          <button class="btn" type="button" data-sr="clock" aria-pressed="false">빛 시계</button>
+        </div>
+        <div class="ctrl"><label for="sr-v">기차의 속도</label><input type="range" id="sr-v" min="0" max="0.95" step="0.01" value="0.5"><output id="sr-vv" for="sr-v"></output></div>
+      </div>
+      <div class="fig-plot"><svg class="plot" id="sr-svg" role="img" aria-label="기차에서 쏜 빛과 공의 속도, 그리고 정지한 빛 시계와 움직이는 빛 시계"></svg></div>
+      <dl class="stat-row" id="sr-stats"></dl>
+      <p class="fig-note" id="sr-note"></p>
+    </div>
+
+    <div class="stack">
+      <p><strong>빛 시계로 보는 시간 지연.</strong> 두 거울 사이를 빛이 한 번 오가면 "똑딱" 하는 시계를 생각하자. 기차에 실린 시계를 땅에서 보면, 빛은 거울 사이를 오가는 동안 기차와 함께 옆으로도 움직이므로 비스듬한 더 긴 길을 간다. 빛의 속도는 누구에게나 같으니, 더 긴 길을 가는 데에는 더 긴 시간이 걸린다. 그래서 땅에서 보면 <strong>움직이는 시계가 느리게 간다</strong>. 느려지는 정도는 피타고라스 정리로 나온다.</p>
+      \[ \gamma = \frac{1}{\sqrt{1 - v^{2}/c^{2}}} \]
+      <p>기차의 시계가 한 번 똑딱이는 동안 땅의 시계는 \(\gamma\)번 똑딱인다. 같은 이유로, 기차에서 속도 \(u\)로 쏜 물체의 속도는 땅에서 \(u+v\)가 아니라 \((u+v)/(1+uv/c^{2})\)이고, \(u=c\)를 넣으면 언제나 \(c\)가 나온다.</p>
+      <p>일상의 속도에서는 이 차이가 너무 작아 느낄 수 없다. 초속 30 km로 공전하는 지구에서도 \(\gamma\)는 1보다 10억분의 5쯤 클 뿐이다. 하지만 초속 약 3.9 km로 도는 GPS 위성의 시계는 속도 때문에 하루에 약 7마이크로초씩 늦게 가고, 위성 항법은 이 효과를 (중력에 따른 효과와 함께) 보정해야 정확한 위치를 낸다. 빛의 속도가 누구에게나 같다는 사실이 이렇게 실험과 기술로 거듭 확인되었기에, 1983년 국제도량형총회는 빛의 속도를 재는 대상에서 <strong>길이를 정하는 기준</strong>으로 바꿀 수 있었다.</p>
+    </div>
+  </details>
 </section>
 
 <!-- ======================= 02 ======================= -->
@@ -791,23 +837,28 @@ function arrow(g,x1,x2,y,label){
     el("circle",{cx:jup[0]+30,cy:jup[1],r:3.5,fill:C.muted},g);
     txt(g,jup[0],jup[1]+30,"목성",{"text-anchor":"middle"});
     txt(g,jup[0]+30,jup[1]-18,"이오",{"text-anchor":"middle","font-size":10.5});
-    var d=Math.hypot(jup[0]-e[0],jup[1]-e[1])/AU, extra=d-4.2, sec=extra*149597870.7/CL;
+    /* 거리는 지구 궤도 반지름(태양–지구 거리)을 1로 잰다. 1676년에도 행성 사이의 비율은 알려져 있었다.
+       늦어지는 시간은 뢰머의 추정 "지구 궤도의 지름(2)을 지나는 데 약 22분", 곧 반지름 하나에 11분으로 계산한다. */
+    var R_MIN=11, d=Math.hypot(jup[0]-e[0],jup[1]-e[1])/AU, extra=d-4.2, mins=extra*R_MIN;
     el("line",{x1:e[0],y1:e[1],x2:jup[0],y2:jup[1],stroke:C.curve,"stroke-width":2,"stroke-dasharray":"7 5"},g);
     el("circle",{cx:e[0],cy:e[1],r:7,fill:C.accent},g);
     txt(g,e[0],e[1]-12,"지구",{"text-anchor":"middle",fill:C.accent,"font-weight":700});
-    /* 늦어지는 시간 막대 */
-    var x0=60,L=520,y=290,mx=2*149597870.7/CL;
+    /* 늦어지는 시간 막대 (뢰머의 추정). 회색 눈금은 오늘날 값 */
+    var x0=60,L=520,y=290,mx=2*R_MIN,today=2*149597870.7/CL/60;
     el("rect",{x:x0,y:y,width:L,height:10,fill:C.grid,rx:2},g);
-    el("rect",{x:x0,y:y,width:L*sec/mx,height:10,fill:C.curve,rx:2},g);
-    txt(g,x0,y-8,"가장 가까울 때보다 이오의 식이 늦게 보이는 시간",{fill:C.ink});
-    txt(g,x0+L,y-8,"최대 "+fmt(mx/60,1)+"분",{"text-anchor":"end"});
+    el("rect",{x:x0,y:y,width:L*mins/mx,height:10,fill:C.curve,rx:2},g);
+    el("line",{x1:x0+L*today/mx,x2:x0+L*today/mx,y1:y-3,y2:y+13,stroke:C.muted,"stroke-width":1.5},g);
+    txt(g,x0+L*today/mx,y+26,"오늘날 값 "+fmt(today,1)+"분",{"text-anchor":"middle","font-size":10.5});
+    txt(g,x0,y-8,"가장 가까울 때보다 이오의 식이 늦게 보이는 시간 (뢰머의 추정)",{fill:C.ink});
+    txt(g,x0+L,y-8,"최대 22분",{"text-anchor":"end"});
     slV.textContent=fmt(+sl.value,0)+"°";
     stats("h1-stats",[
-      {k:"지구–목성 거리",v:fmt(d*1.496,2),u:"억 km"},
-      {k:"가장 가까울 때보다 더 가는 거리",v:fmt(extra*1.496,2),u:"억 km"},
-      {k:"이오의 식이 늦게 보이는 시간",v:fmt(sec/60,1),u:"분",hl:true}
+      {k:"지구–목성 거리",v:fmt(d,2),u:"× 지구 궤도 반지름"},
+      {k:"가장 가까울 때보다 더 가는 거리",v:fmt(extra,2),u:"× 지구 궤도 반지름"},
+      {k:"뢰머의 추정으로 늦게 보이는 시간",v:fmt(mins,1),u:"분",hl:true}
     ]);
-    note.innerHTML="이오는 목성을 약 42시간 반마다 한 바퀴 돌며 목성의 그림자에 들어간다(식). 뢰머는 지구가 목성에서 멀어지는 계절에는 식이 예보보다 늦게, 가까워지는 계절에는 일찍 보인다는 것을 알아챘다. 늦어진 만큼이 <strong>빛이 더 먼 길을 오는 데 걸린 시간</strong>이다. 뢰머는 지구 궤도의 지름을 지나는 데 약 22분이 걸린다고 보았고, 호이겐스는 이것으로 약 220,000 km/s를 계산했다. 오늘날 값으로는 약 16.6분이다. 슬라이더로 지구를 태양 둘레로 옮겨 보자. 목성은 12년에 한 바퀴를 도니 몇 달 사이에는 거의 그 자리에 있다고 보았다. 거리와 시간은 오늘날의 값으로 계산했다.";
+    note.innerHTML="이오는 목성을 약 42시간 반마다 한 바퀴 돌며 목성의 그림자에 들어간다(식). 뢰머는 지구가 목성에서 멀어지는 계절에는 식이 예보보다 늦게, 가까워지는 계절에는 일찍 보인다는 것을 알아챘다. 늦어진 만큼이 <strong>빛이 더 먼 길을 오는 데 걸린 시간</strong>이다. 1676년 뢰머는 그해 11월의 식이 예보보다 약 10분 늦게 보일 것이라고 미리 말했고, 빛이 <strong>지구 궤도의 지름을 지나는 데 약 22분</strong>이 걸린다고 보았다. 위 그림과 수치는 이 22분으로 계산했다. 거리는 km가 아니라 지구 궤도 반지름을 1로 잰 비율인데, 당시에도 행성 사이 거리의 비율은 알려져 있었기 때문이다. 호이겐스는 지구 궤도의 지름을 지구 지름의 약 2만 2천 배로 잡고, 빛이 1초에 지구 지름의 16⅔배를 간다고 계산했다(1초에 1억 1천만 투아즈, 오늘날 단위로 약 214,000 km/s). 목성은 12년에 한 바퀴를 도니 몇 달 사이에는 거의 그 자리에 있다고 보았다."
+      +"<br><br><strong>오늘날 값으로 다시 계산하면.</strong> 지구 궤도의 반지름은 약 1억 4,960만 km이므로 지름은 약 2억 9,920만 km다. 목성은 태양에서 지구보다 약 5.2배 멀리 있어서, 지구–목성 거리는 가장 가까울 때 약 4.2배(약 6억 3천만 km), 가장 멀 때 약 6.2배(약 9억 3천만 km)이고 그 차이가 바로 지구 궤도의 지름이다. 빛이 1초에 299,792 km를 가므로 이 지름을 지나는 데는 약 998초, 곧 <strong>약 16.6분</strong>이 걸린다(막대의 회색 눈금). 뢰머의 22분은 이보다 3분의 1쯤 길었고, 그래서 이 시절의 빛의 속도는 실제보다 작게 나왔다. 22분을 오늘날의 궤도 크기에 대어도 약 227,000 km/s다.";
   }
 
   /* --- 피조: 톱니바퀴 --- */
@@ -881,11 +932,117 @@ function arrow(g,x1,x2,y,label){
   draw();
 })();
 
+/* ================= 01 펼침: 특수 상대성 이론 ================= */
+(function(){
+  var svg=document.getElementById("sr-svg"),W=640,H=330;
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  var g=el("g",{},svg),sl=document.getElementById("sr-v"),out=document.getElementById("sr-vv"),note=document.getElementById("sr-note");
+  var mode="add",raf=0,t0=null,simT=0,last=null;
+  function gamma(b){return 1/Math.sqrt(1-b*b);}
+  function hbar(x0,y,len,col,label,dash){
+    el("line",{x1:x0,x2:x0+len,y1:y,y2:y,stroke:col,"stroke-width":7,"stroke-linecap":"round","stroke-dasharray":dash||"none","stroke-opacity":dash?0.45:1},g);
+    el("path",{d:"M"+(x0+len+2)+","+(y-7)+" l10,7 l-10,7z",fill:col,"fill-opacity":dash?0.45:1},g);
+    if(label)txt(g,x0+len+16,y+4,label,{fill:col,"font-size":11.5,"font-weight":700});
+  }
+  /* --- 장면 1: 속도 더하기 --- */
+  function drawAdd(){
+    clear(g);var b=+sl.value,x0=150,U=180;          /* 빛의 속도 c 를 180 px로 */
+    txt(g,20,24,"땅에 선 사람이 잰 속도 (빛의 속도 c를 기준으로)",{fill:C.ink,"font-weight":700});
+    el("line",{x1:x0,x2:x0,y1:40,y2:H-24,stroke:C.dim,"stroke-dasharray":"3 3"},g);
+    el("line",{x1:x0+U,x2:x0+U,y1:40,y2:H-24,stroke:C.teal,"stroke-width":1.5,"stroke-dasharray":"6 4"},g);
+    txt(g,x0+U,H-8,"c",{"text-anchor":"middle",fill:C.teal,"font-weight":700});
+    txt(g,x0,H-8,"0",{"text-anchor":"middle"});
+    /* 기차 */
+    var rows=[["기차",70],["기차에서 앞으로 쏜 빛",150],["기차에서 0.5c로 쏜 공",240]];
+    rows.forEach(function(r){txt(g,x0-12,r[1]+4,r[0],{"text-anchor":"end",fill:C.ink,"font-size":11.5});});
+    hbar(x0,70,b*U,C.muted,fmt(b,2)+" c");
+    /* 빛: 상식의 예상(점선) vs 실제 */
+    hbar(x0,140,(1+b)*U,C.dim,"상식대로라면 "+fmt(1+b,2)+" c","8 5");
+    hbar(x0,162,U,C.curve,"실제로 잰 값 1.00 c");
+    var u=0.5,cl=u+b,rel=(u+b)/(1+u*b);
+    hbar(x0,230,cl*U,C.dim,"상식대로라면 "+fmt(cl,2)+" c","8 5");
+    hbar(x0,252,rel*U,C.accent,"실제 "+fmt(rel,3)+" c");
+    stats("sr-stats",[
+      {k:"기차의 속도",v:fmt(b,2),u:"c"},
+      {k:"기차에서 쏜 빛 (땅에서)",v:"1.00",u:"c",hl:true},
+      {k:"0.5c로 쏜 공 (땅에서)",v:fmt(rel,3),u:"c"},
+      {k:"상식의 덧셈이라면",v:fmt(cl,2),u:"c"}
+    ]);
+    note.innerHTML="점선은 속도를 그냥 더했을 때의 예상이다. 기차가 아무리 빨라도 기차에서 쏜 빛은 땅에서도 정확히 c이고, 공도 c를 넘지 못한다. 속도를 더하는 규칙 자체가 “(u + v) / (1 + uv/c²)”로 바뀌기 때문이다. 일상의 속도에서는 분모가 거의 1이라 그냥 더한 것과 구별되지 않는다.";
+  }
+  /* --- 장면 2: 빛 시계 --- */
+  var L=110,CP=110;    /* 거울 사이 110 px, 빛은 1초(그림 시간)에 110 px */
+  function photonY(tt,period){var ph=(tt%period)/period;return ph<0.5?ph*2:2-ph*2;}   /* 0 → 1 → 0 */
+  function drawClock(){
+    clear(g);var b=+sl.value,gm=gamma(b);
+    var top=70,bot=top+L,TS=2*L/CP;                 /* 정지한 시계의 한 번 똑딱 (그림 시간) */
+    var TM=TS*gm;                                   /* 땅에서 본 움직이는 시계의 한 번 똑딱 */
+    /* 정지한 시계 */
+    var sx=95;
+    txt(g,sx,30,"땅에 놓인 시계",{"text-anchor":"middle",fill:C.ink,"font-weight":700});
+    [top,bot].forEach(function(y){el("line",{x1:sx-26,x2:sx+26,y1:y,y2:y,stroke:C.teal,"stroke-width":4},g);});
+    var py=bot-photonY(simT,TS)*L;
+    el("line",{x1:sx,x2:sx,y1:top,y2:bot,stroke:C.curve,"stroke-opacity":.25,"stroke-width":2},g);
+    el("circle",{cx:sx,cy:py,r:6,fill:C.curve},g);
+    txt(g,sx,bot+30,"똑딱 "+Math.floor(simT/TS)+"번",{"text-anchor":"middle",fill:C.ink,"font-size":13,"font-weight":700});
+    /* 움직이는 시계: 땅에서 본 모습 */
+    var x0=210,x1=W-30,span=x1-x0,vpx=b*CP;
+    var mx=x0+((vpx*simT)%span+span)%span;
+    txt(g,(x0+x1)/2,30,"기차에 실린 시계 (땅에서 본 모습)",{"text-anchor":"middle",fill:C.ink,"font-weight":700});
+    el("line",{x1:x0,x2:x1,y1:bot+10,y2:bot+10,stroke:C.dim},g);
+    /* 빛이 지나온 길: 지난 한 번과 이번 똑딱의 지그재그. 그림 틀 밖은 잘라 낸다 */
+    var defs=el("defs",{},g),cp=el("clipPath",{id:"sr-clip"},defs);el("rect",{x:x0,y:top-10,width:span,height:L+20},cp);
+    var gc=el("g",{"clip-path":"url(#sr-clip)"},g);
+    var cyc=Math.floor(simT/TM),ph=(simT-cyc*TM)/TM,xs=mx-vpx*(simT-cyc*TM),d="";
+    var xp=xs-vpx*TM;
+    d="M"+xp+","+bot+" L"+(xp+vpx*TM/2)+","+top+" L"+xs+","+bot;
+    d+=ph<0.5?" L"+mx+","+qyOf(ph):" L"+(xs+vpx*TM/2)+","+top+" L"+mx+","+qyOf(ph);
+    if(b>0)el("path",{d:d,fill:"none",stroke:C.curve,"stroke-opacity":.4,"stroke-width":2,"stroke-dasharray":"5 4"},gc);
+    function qyOf(f){return bot-(f<0.5?f*2:2-f*2)*L;}
+    [top,bot].forEach(function(y){el("line",{x1:mx-26,x2:mx+26,y1:y,y2:y,stroke:C.accent,"stroke-width":4},gc);});
+    el("circle",{cx:mx,cy:qyOf(ph),r:6,fill:C.curve},gc);
+    txt(g,(x0+x1)/2,bot+30,"똑딱 "+cyc+"번",{"text-anchor":"middle",fill:C.ink,"font-size":13,"font-weight":700});
+    /* 아래: 반 번 똑딱 동안의 직각삼각형 */
+    var ty=H-14,hh=52,ww=Math.min(260,hh*b/Math.sqrt(1-b*b)),tx=250;
+    el("path",{d:"M"+tx+","+ty+" L"+tx+","+(ty-hh)+" M"+tx+","+ty+" L"+(tx+ww)+","+ty,stroke:C.muted,"stroke-width":1.5,fill:"none"},g);
+    el("line",{x1:tx,y1:ty,x2:tx+ww,y2:ty-hh,stroke:C.curve,"stroke-width":2},g);
+    txt(g,tx-8,ty-hh/2+4,"거울 사이: c × (기차의 시계로 잰 시간)",{"text-anchor":"end","font-size":10.5});
+    txt(g,tx+ww/2,ty+12,"기차가 간 거리: v × (땅의 시계로 잰 시간)",{"text-anchor":"middle","font-size":10.5});
+    txt(g,tx,ty-hh-8,"빛이 간 비스듬한 길(주황): c × (땅의 시계로 잰 시간)",{fill:C.curve,"font-size":10.5});
+    out.textContent=fmt(b,2)+" c";
+    stats("sr-stats",[
+      {k:"기차의 속도",v:fmt(b,2),u:"c"},
+      {k:"γ (느려지는 배율)",v:fmt(gm,3),hl:true},
+      {k:"땅의 시계가 10번 똑딱일 때 기차의 시계",v:fmt(10/gm,2),u:"번"}
+    ]);
+    note.innerHTML="두 시계는 똑같이 만들었다. 왼쪽은 땅에 놓였고, 오른쪽은 기차에 실려 오른쪽으로 달린다. 땅에서 보면 오른쪽 시계의 빛은 점선처럼 비스듬한 길을 가는데, 빛의 속도는 같으니 한 번 오가는 데 더 오래 걸린다. 기차의 속도를 0.9c 이상으로 올리면 차이가 확 커진다. 그림의 시간은 아주 느리게 늦춰 보여 준 것이다.";
+  }
+  function loop(ts){
+    if(last===null)last=ts;simT+=(ts-last)/1000;last=ts;
+    drawClock();raf=requestAnimationFrame(loop);
+  }
+  function stop(){if(raf)cancelAnimationFrame(raf);raf=0;last=null;}
+  function draw(){
+    out.textContent=fmt(+sl.value,2)+" c";
+    stop();
+    if(mode==="add"){drawAdd();return;}
+    if(reduceMotion){simT=gamma(+sl.value)*2*L/CP*0.25;drawClock();return;}
+    raf=requestAnimationFrame(loop);
+  }
+  var btns=Array.prototype.slice.call(document.querySelectorAll("[data-sr]"));
+  btns.forEach(function(b){b.addEventListener("click",function(){pressSeg(btns,b);mode=b.getAttribute("data-sr");simT=0;draw();});});
+  sl.addEventListener("input",function(){simT=0;draw();});
+  /* 펼쳤을 때만 움직인다 */
+  var box=svg.closest("details");
+  box.addEventListener("toggle",function(){if(box.open)draw();else stop();});
+  drawAdd();out.textContent=fmt(+sl.value,2)+" c";
+})();
+
 /* ================= 01 연도별 빛의 속도 ================= */
 (function(){
   /* 발표값(km/s)과 밝힌 불확실성. 호이겐스는 뢰머의 관측으로 계산한 값 */
   var D=[
-    {y:1690,v:220000,who:"호이겐스(뢰머의 관측)"},
+    {y:1690,v:214000,who:"호이겐스(뢰머의 관측)"},
     {y:1729,v:301000,who:"브래들리(별빛의 광행차)"},
     {y:1849,v:313300,who:"피조(톱니바퀴)"},
     {y:1862,v:298000,e:500,who:"푸코(회전 거울)",pos:"down"},
