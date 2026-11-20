@@ -180,7 +180,7 @@
 | 기본 | `body`, `h1`~`h4`(산세리프 800, 자간 -0.02em), `p`, `a`, `code`/`.mono`/`.num`, `.muted`, `.note`, `.lede`, `.eyebrow`, `.katex-display` |
 | 레이아웃 | `.rail`(레일·목차·모바일 전환), `main`(레일 폭만큼 왼쪽 여백, 최대 1060px), `main > section` |
 | 박스 | `.panel`(기본 박스), `.panel.raised`(그림자), `.callout`(`.warn`, 주의 상자 `.caution`), `.recap`, `.row`/`.col`, `.scroll` |
-| 조각 | `.tag`, `.readout`(`.math`), `.metrics`, `.legend`, `.nav` |
+| 조각 | `.tag`, `.dl-link`(내려받기 단추), `.readout`(`.math`), `.metrics`, `.legend`, `.nav` |
 | 입력 | `.btn`(`.ghost`), `.controls`, `input[type=range]` |
 | 표·기타 | `table`/`th`/`td`/`td.n`, `details`, `pre`, `ol.refs` |
 | 코드 | 코드 상자 `.cb`(`.r` R, `.py` Python, `.prompt` 코딩 에이전트 프롬프트, 없으면 출력·셸) + 언어 이름표 `.lang` + 복사 버튼 `button.copy`(붙이는 스크립트는 쪽마다), 폴더 구조 `pre.tree` |

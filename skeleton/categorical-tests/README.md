@@ -8,6 +8,7 @@
 
 ```text
 categorical-tests/
+├── AGENTS.md             # 코딩 에이전트가 따를 규칙 (코드, 그림, 표)
 ├── scripts/              # 에이전트가 만든 R 스크립트 (처음엔 비어 있다)
 ├── dataset/
 │   ├── raw/              # 내려받은 원본. 손대지 않는다

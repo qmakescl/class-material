@@ -107,6 +107,9 @@ h2.page-title{font-size:clamp(28px,6vw,40px)}
 .scroll{overflow-x:auto}
 
 /* ---------- 조각 ---------- */
+/* 내려받기 단추: 실습 폴더 zip 등 (<a class="dl-link" href=".." download>) */
+.dl-link{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:var(--ink);color:var(--surface)!important;border-radius:9px;font-weight:700;font-size:14px;text-decoration:none}
+.dl-link:hover,.dl-link:focus-visible{opacity:.88}
 .tag{display:inline-block;font:600 12px var(--mono);padding:1px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent)}
 .readout{font-family:var(--mono);font-size:14px;background:var(--soft);border-radius:6px;padding:8px 12px;font-variant-numeric:tabular-nums}
 .readout.math{font-family:var(--sans);font-size:16px;overflow-x:auto;overflow-y:hidden}

@@ -31,6 +31,7 @@
 | 대안가설 | 대립가설 | alternative hypothesis | \(H_1\) | "대안가설의 방향(양측, 한쪽)"처럼 쓴다 | 2026-10-10 |
 | 영가설 하(under \(H_0\)) | 영가설 아래, \(H_0\) 아래 | under the null hypothesis | \(H_0\) 하 | 뒤에 (under \(H_0\))를 붙인다. 대안가설도 "대안가설 하(under \(H_1\))"로 맞춘다 | 2026-11-02 |
 | 동질성 검정 | 동일성 검정 | test of homogeneity | — | 집단 크기를 설계가 정한 표에서 "집단마다 반응의 분포가 같은가"를 보는 χ² 검정. 계산이 같아도 한 표본의 두 변수를 보는 독립성 검정(test of independence)과 구별해 쓴다 | 2026-11-14 |
+| 상대위험률 | 위험비 | relative risk | RR | 두 집단에서 사건이 일어난 비율의 비. "한 집단의 비율이 다른 집단의 몇 배"로 읽는다. 오즈비(odds ratio)와 구별한다 | 2026-11-20 |
 
 ## 인공지능
 
@@ -52,4 +53,4 @@
 
 - `docs/statistics/hypothesis-testing.html`: "영가설(귀무가설, \(H_0\))", "대안가설(대립가설, \(H_1\))"
 - `docs/statistics/mean-test-with-r.html`: "영가설(귀무가설이라고도 한다)과 대안가설(대립가설이라고도 한다)"
-- `docs/statistics/categorical-test-with-r.html`: "영가설(null hypothesis, 귀무가설)"
+- `docs/statistics/categorical-test-with-r.html`: "영가설(null hypothesis, 귀무가설)", "상대위험률(relative risk, 위험비라고도 한다)"
