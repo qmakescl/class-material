@@ -1,0 +1,1517 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>멘델의 독립 법칙은 조작일까? - 카이제곱 통계량 소개 | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/data-science/mendel-chi-square-intro.html">
+<meta name="description" content="멘델이 센 완두 556개가 9:3:3:1이라는 이론과 맞는지, 기대와 관찰의 어긋남을 숫자 하나(χ²)로 모으고 우연의 흔들림과 견주어 판단하는 과정을 처음 배우는 사람의 눈높이로 따라가는 데이터과학 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="멘델의 독립 법칙은 조작일까? - 카이제곱 통계량 소개 | Q의 아카이브">
+<meta property="og:description" content="이론이 기대한 개수와 실제로 센 개수는 얼마나 달라도 괜찮을까? 멘델의 완두로 카이제곱 통계량과 p값을 손으로, 그림으로, 컴퓨터로 확인합니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/data-science/mendel-chi-square-intro.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="데이터과학 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="멘델의 독립 법칙은 조작일까? - 카이제곱 통계량 소개 | Q의 아카이브">
+<meta name="twitter:description" content="이론이 기대한 개수와 실제로 센 개수는 얼마나 달라도 괜찮을까? 멘델의 완두로 카이제곱 통계량과 p값을 손으로, 그림으로, 컴퓨터로 확인합니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/data.png">
+<meta name="twitter:image:alt" content="데이터과학 자료 아이콘">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/material.css">
+<link rel="stylesheet" href="../assets/rlesson.css">
+<style>
+  :root {
+    /* 과목 강조색: 데이터과학 (styles.css --data-science / --data-science-tint) */
+    --accent: #0ea968; --accent-soft: #e6f8f0;
+    /* 차트 계열색: 꼬리 확률, 분포 곡선 */
+    --tail: #e0772a; --tail-soft: rgb(224 119 42 / 26%);
+    --curve: #1c3fd6; --curve-soft: rgb(28 63 214 / 14%);
+    /* 표현형 네 가지의 색 (퍼넷 사각형, 비율 막대) */
+    --ph-a: #fde7a0; --ph-b: #cde6bd; --ph-c: #f4c58a; --ph-d: #8dbd9c; --pea-y: #f0bf21; --pea-g: #5f9e43;
+  }
+
+  .sec-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .sec-num { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: .08em; }
+  .sec-head h2 { margin: 0; }
+
+  /* 여는 질문 */
+  .opening .q-ask { font-size: 22px; font-weight: 800; letter-spacing: -.02em; line-height: 1.45; margin: 0; }
+  .vs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .vs > div { border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; background: var(--soft); }
+  .vs b { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  .vs .big { font-family: var(--mono); font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  @media (max-width: 640px) { .vs { grid-template-columns: minmax(0, 1fr); } .opening .q-ask { font-size: 19px; } }
+
+  /* 세 걸음 */
+  .walk { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .walk > div { border: 1px solid var(--line); border-top: 4px solid var(--accent); border-radius: 8px; padding: 12px 14px; background: var(--surface); }
+  .walk b { display: block; font-family: var(--mono); color: var(--accent); font-size: 13px; margin-bottom: 4px; }
+  .walk p { margin: 0; font-size: 14.5px; }
+  @media (max-width: 760px) { .walk { grid-template-columns: minmax(0, 1fr); } }
+
+  /* 퍼넷 사각형과 완두 표시 */
+  .ph-a { background: var(--ph-a); } .ph-b { background: var(--ph-b); } .ph-c { background: var(--ph-c); } .ph-d { background: var(--ph-d); }
+  .mendel-wrap { display: flex; flex-wrap: wrap; gap: 18px 28px; align-items: center; }
+  .punnett-fig { margin: 0; }
+  .punnett-fig figcaption { font-size: 13.5px; color: var(--muted); margin-top: 8px; max-width: 420px; }
+  table.punnett { width: auto; border-collapse: separate; border-spacing: 4px; }
+  table.punnett th { font-family: var(--mono); font-size: 13px; color: var(--muted); padding: 2px 6px; text-align: center; border: 0; }
+  table.punnett td { width: 82px; height: 58px; text-align: center; vertical-align: middle; border: 0; border-radius: 6px;
+    font-family: var(--mono); font-size: 13px; font-weight: 600; line-height: 1.2; padding: 4px; }
+  .pea { display: block; width: 20px; height: 20px; margin: 0 auto 4px; border-radius: 50%; background: var(--pea-y); box-shadow: inset -3px -3px 0 rgb(0 0 0 / 12%); }
+  .ph-b .pea, .ph-d .pea { background: var(--pea-g); }
+  .ph-c .pea, .ph-d .pea { border-radius: 42% 58% 46% 54% / 55% 44% 56% 45%; box-shadow: inset 3px -2px 0 rgb(0 0 0 / 22%), inset -2px 3px 0 rgb(0 0 0 / 14%); }
+  .pea-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .pea-legend li { display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-radius: 6px; margin: 0; font-size: 14.5px; }
+  .pea-legend .pea { margin: 0; flex: none; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .mult { display: grid; gap: 6px; font-size: 15px; }
+  .mult div { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; padding: 6px 12px; border-radius: 6px; }
+  .mult .eq { font-family: var(--mono); font-weight: 600; }
+
+  /* 비율 막대 */
+  .ratio-bars { display: grid; gap: 10px; }
+  .rb-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; align-items: center; }
+  .rb-lab { font-size: 14px; font-weight: 700; }
+  .rb-bar { display: flex; height: 34px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+  .rb-bar span { display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; border-right: 1px solid rgb(255 255 255 / 70%); }
+  @media (max-width: 640px) { .rb-row { grid-template-columns: minmax(0, 1fr); gap: 4px; } table.punnett td { width: 62px; height: 52px; font-size: 11.5px; } }
+
+  /* 표의 숫자 */
+  table.num td:not(:first-child), table.num th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+  table.num td:not(:first-child) { font-family: var(--mono); font-size: 14px; }
+  table.num tfoot td { font-weight: 700; border-top: 2px solid var(--line); }
+  table caption { caption-side: top; text-align: left; font-size: 13.5px; color: var(--muted); padding-bottom: 6px; }
+
+  /* 실험판(위젯) 틀 */
+  .lab { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .lab-head { background: var(--accent-soft); padding: 10px 18px; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+  .lab-head strong { font-size: 15px; }
+  .lab-head span { font-size: 13.5px; color: var(--muted); }
+  .lab-body { padding: 16px 18px 18px; display: grid; gap: 14px; }
+  .lab-body .figcap { font-size: 13.5px; color: var(--muted); margin: 0; }
+  @media (max-width: 640px) { .lab-body { padding: 12px; } }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; }
+  .presets .btn { font-size: 13.5px; padding: 6px 12px; }
+  .presets .btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .outs { display: flex; flex-wrap: wrap; gap: 10px 26px; font-size: 14px; }
+  .outs div { display: grid; }
+  .outs .k { font-size: 12.5px; color: var(--muted); }
+  .outs .v { font-family: var(--mono); font-size: 17px; font-variant-numeric: tabular-nums; }
+  .outs .v.hl { color: var(--tail); font-weight: 700; }
+  .sim-step { margin: 0; font-size: 14px; }
+
+  /* 단계별로 채워지는 χ² 표 */
+  .steptable .s1, .steptable .s2, .steptable .s3, .steptable .s4 { transition: opacity .25s; }
+  .steptable[data-step="0"] .s1, .steptable[data-step="0"] .s2, .steptable[data-step="0"] .s3, .steptable[data-step="0"] .s4,
+  .steptable[data-step="1"] .s2, .steptable[data-step="1"] .s3, .steptable[data-step="1"] .s4,
+  .steptable[data-step="2"] .s3, .steptable[data-step="2"] .s4,
+  .steptable[data-step="3"] .s4 { opacity: 0; }
+  .steptable .now { background: var(--accent-soft); }
+  .step-note { margin: 0; min-height: 3.2em; font-size: 15px; border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; }
+
+  /* SVG 그림 */
+  .plot { display: block; width: 100%; height: auto; }
+  .plot .axis { stroke: var(--muted); stroke-width: 1; fill: none; }
+  .plot .tick { fill: var(--muted); font-family: var(--mono); font-size: 11px; }
+  .plot .curve { stroke: var(--curve); stroke-width: 2.2; fill: none; }
+  .plot .tailfill { fill: var(--tail-soft); stroke: none; }
+  .plot .stat { stroke: var(--tail); stroke-width: 2.4; }
+  .plot .crit { stroke: var(--pos); stroke-width: 1.3; stroke-dasharray: 5 4; }
+  .plot .lbl { fill: var(--ink); font-family: var(--sans); font-size: 12.5px; font-weight: 700; }
+  .plot .lblc { fill: var(--pos); font-family: var(--sans); font-size: 11.5px; font-weight: 600; }
+  .plot .lblt { fill: var(--tail); font-family: var(--sans); font-size: 12.5px; font-weight: 700; }
+  .plot .bar { fill: var(--line); }
+  .plot .alphafill { fill: var(--pos-soft); stroke: none; }
+  .plot .exp { stroke: var(--ink); stroke-width: 2; }
+  .plot .contrib { fill: var(--pos); opacity: .75; }
+  .plot .hbar { fill: var(--curve-soft); stroke: var(--curve); stroke-width: .5; }
+  .plot .hbar.hit { fill: var(--tail-soft); stroke: var(--tail); }
+
+  /* 연습: 빈칸 표와 계산기 */
+  .sheet td.blank::after { content: ""; display: block; min-width: 64px; min-height: 22px; border-bottom: 1px dashed var(--muted); }
+  .calc-rows { display: grid; gap: 6px; }
+  .calc-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, .8fr); gap: 8px; align-items: center; }
+  .calc-row.h { font-size: 12.5px; color: var(--muted); font-weight: 700; }
+  .calc-row input { width: 100%; font-family: var(--mono); font-size: 14px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); }
+  .calc-row input[type=text] { font-family: var(--sans); }
+  .warnline { color: var(--warn); background: var(--warn-soft); font-size: 14px; margin: 0; padding: 8px 12px; border-radius: 6px; }
+  ol.qs { display: grid; gap: 8px; margin: 0; }
+
+  /* 06 카이제곱 분포: 자유도 손계산 표, 비교 곡선, 고른 곡선, 평균선 */
+  table.df-demo { width: auto; min-width: 560px; }
+  table.df-demo td.fixed { background: var(--accent-soft); font-weight: 700; color: var(--ink); }
+  .plot .ref { stroke: var(--muted); stroke-width: 1.2; fill: none; opacity: .38; }
+  .plot .reflbl { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; }
+  .plot .sel { stroke: var(--accent); stroke-width: 2.8; fill: none; }
+  .plot .meanl { stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 3 3; }
+  #sq-one { margin: 0; overflow-x: auto; white-space: nowrap; }
+
+  /* 11 컴퓨터 주사위: 눈별 비율 막대, 이론선, 횟수별 차이 */
+  .plot .rbar { fill: var(--accent); opacity: .8; }
+  .plot .theory { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 6 4; }
+  .plot .errline { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .plot .errpt { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
+  .plot .errpt.now { fill: var(--tail); stroke: var(--tail); }
+  .plot .errpt.real { fill: var(--ink); stroke: var(--ink); }
+  .plot .rbar.real { fill: var(--ink); opacity: .75; }
+  #roll-hist tr.real td { font-weight: 700; }
+  .infoline { margin: 0; font-size: 14px; padding: 8px 12px; border-radius: 6px; background: var(--soft); border-left: 3px solid var(--ink); }
+  #roll-hist tr.now td { background: var(--accent-soft); }
+  #lab-roll h4 { margin: 6px 0 0; }
+
+  main > footer { padding-top: 8px; color: var(--muted); font-size: 13.5px; }
+</style>
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+<script defer src="../assets/annotate.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../index.html#data-science">← 처음으로</a>
+  <h1>멘델의 독립 법칙은<br>조작일까?</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#opening"><b>00</b><span>이론은 맞았을까</span></a>
+    <a href="#lens"><b>01</b><span>기대와 관찰</span></a>
+    <a href="#mendel"><b>02</b><span>멘델의 완두와 9:3:3:1</span></a>
+    <a href="#counts"><b>03</b><span>556개를 세어 보니</span></a>
+    <a href="#score"><b>04</b><span>어긋남을 숫자 하나로</span></a>
+    <a href="#chance"><b>05</b><span>우연은 얼마나 흔들리나</span></a>
+    <a href="#origin"><b>06</b><span>카이제곱 분포는 어디서 왔나</span></a>
+    <a href="#pvalue"><b>07</b><span>p값으로 판단하기</span></a>
+    <a href="#toogood"><b>08</b><span>너무 잘 맞아도 문제?</span></a>
+    <a href="#practice"><b>09</b><span>직접 해 보기</span></a>
+    <a href="#computer"><b>10</b><span>컴퓨터로 확인하기</span></a>
+    <a href="#dice"><b>11</b><span>주사위로 실험하기</span></a>
+    <a href="#wrap"><b>12</b><span>정리와 다음 걸음</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#데이터과학</span>
+    <span class="rail-tag">#개념정리</span>
+    <span class="rail-tag">#카이제곱검정</span>
+    <span class="rail-tag">#범주형자료</span>
+    <span class="rail-tag">#가설검정</span>
+    <span class="rail-tag">#p값</span>
+    <span class="rail-tag">#자유도</span>
+  </div>
+  <footer>완두의 개수는 모두 멘델(1866)이 실제로 센 값입니다. 05·06절의 반복 실험과 11절의 컴퓨터 주사위만 컴퓨터가 확률대로 흉내 낸 결과입니다. 11절의 래비 기록(Labby, 2009)은 실측 자료입니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+
+<main id="content">
+<!-- ======================= 00 ======================= -->
+<section class="panel opening" id="opening" aria-labelledby="opening-q">
+  <div class="sec-head"><span class="sec-num">00</span><h2>이론은 맞았을까</h2></div>
+  <p>19세기 중반, 오스트리아의 수도사 그레고어 멘델은 수도원 정원에서 여러 해 동안 완두를 길렀습니다. 그는 완두끼리 교배하고, 거둔 씨앗을 모양과 색에 따라 하나하나 세었습니다. 그리고 유전에 대한 자기 이론이 맞다면 네 종류의 완두가 <strong>9 : 3 : 3 : 1</strong>의 비율로 나와야 한다고 생각했습니다.</p>
+  <div class="vs">
+    <div><b>이론이 말한 비율</b><span class="big">9 : 3 : 3 : 1</span></div>
+    <div><b>멘델이 실제로 센 완두 556개</b><span class="big">315 : 108 : 101 : 32</span></div>
+  </div>
+  <p>556개를 9 : 3 : 3 : 1로 나누면 312.75개, 104.25개, 104.25개, 34.75개입니다. 실제 개수와 <strong>딱 맞는 칸은 하나도 없습니다.</strong></p>
+  <p class="q-ask" id="opening-q">그렇다면 멘델의 이론은 틀린 걸까요, 맞은 걸까요? 아니면 "조금 다르다"는 것만으로는 아무 말도 할 수 없는 걸까요?</p>
+  <p class="note">답을 하나 정해 두고 읽어 내려가세요. 이 자료는 이 질문에 답하는 도구인 <strong>\(\chi^2\)(Chi-square, 카이제곱) 검정</strong>을 수식보다 그림과 손계산으로 따라갑니다. 답은 <a href="#pvalue">07절</a>에서 확인합니다.</p>
+</section>
+
+<header class="panel">
+  <div class="eyebrow">데이터로 판단하기 · 이야기 자료</div>
+  <h2 class="page-title">멘델의 독립 법칙은 조작일까? - 카이제곱 통계량 소개</h2>
+  <p class="lede">데이터과학에서 가장 자주 만나는 질문 가운데 하나는 "내가 기대한 것과 실제로 본 것이 다른데, 이 차이를 믿어도 되는가?"입니다. 기대와 관찰은 거의 언제나 조금씩 다릅니다. 그러니 물어야 할 것은 "다른가?"가 아니라 "<strong>우연이라고 보기에는 너무 다른가?</strong>"입니다. 이 자료는 150여 년 전 멘델의 완두 자료 하나로 그 질문에 답하는 과정을 처음부터 끝까지 따라갑니다. 생물이나 통계를 따로 공부하지 않았어도 읽을 수 있게 썼고, 사칙연산과 제곱이면 충분합니다. 제목의 물음, 곧 "멘델의 자료는 이론에 너무 잘 맞아 손을 댄 것이 아닐까"라는 통계학자 피셔의 의심은 그 도구를 모두 갖춘 뒤 <a href="#toogood">08절</a>에서 따져 봅니다.</p>
+  <dl class="facts">
+    <div><dt>누구를 위한 자료인가</dt><dd>데이터과학을 처음 배우는 사람, 통계를 전공하지 않은 사람</dd></div>
+    <div><dt>쓰는 자료</dt><dd>멘델(Mendel, 1866)의 완두 교배 결과. 모두 멘델이 실제로 센 값이다.</dd></div>
+    <div><dt>이 자료를 마치면</dt><dd>기대 개수를 구하고, \(\chi^2\)를 손으로 계산하고, \(p\)값을 말로 풀어 설명하고, 결과를 한 문장으로 쓸 수 있다.</dd></div>
+    <div><dt>직접 해 보는 실험</dt><dd>웰던(1894)의 주사위 실험을 컴퓨터로 재현하며 던진 횟수에 따라 \(\chi^2\)가 어떻게 달라지는지 보고, 실제 주사위로 되풀이한 래비(2009)의 기록과 견준다(11절, 실습 폴더 제공).</dd></div>
+    <div><dt>더 깊이</dt><dd>같은 예제를 R과 실제 교통사고 자료로 넓힌 통계 자료 <a href="../statistics/categorical-test-with-r.html">범주형 자료의 가설검정</a>으로 이어진다.</dd></div>
+  </dl>
+</header>
+
+<!-- ======================= 01 ======================= -->
+<section class="panel" id="lens">
+  <div class="sec-head"><span class="sec-num">01</span><h2>기대와 관찰: 데이터과학의 오래된 질문</h2></div>
+  <p>데이터를 다루다 보면 같은 모양의 질문을 여러 곳에서 만납니다. 한쪽에는 <strong>기대</strong>가 있습니다. 이론, 규칙, 또는 "아무 차이도 없다면 이렇게 나와야 한다"는 생각이 기대를 줍니다. 다른 쪽에는 <strong>관찰</strong>, 곧 실제로 세어 본 데이터가 있습니다.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>기대 (이론·규칙)</th><th>관찰 (데이터)</th><th>묻고 싶은 것</th></tr></thead>
+    <tbody>
+      <tr><td>유전 법칙대로라면 9 : 3 : 3 : 1</td><td>종류별로 센 완두의 개수</td><td>유전 법칙이 이 자료와 맞는가</td></tr>
+      <tr><td>주사위가 공정하다면 1부터 6까지 같은 비율</td><td>여러 번 던져서 나온 눈의 개수</td><td>이 주사위는 공정한가</td></tr>
+      <tr><td>사고가 달과 상관없이 일어난다면 열두 달이 같은 비율</td><td>달마다 일어난 교통사고 건수</td><td>사고가 특히 많은 달이 있는가 (<a href="../statistics/categorical-test-with-r.html#gof">서울 2025년 자료로 해 본 예</a>)</td></tr>
+    </tbody>
+  </table></div>
+  <p>세 경우 모두 데이터는 <strong>범주</strong>(완두의 종류, 주사위의 눈, 달)마다 <strong>개수</strong>를 센 것이고, 기대는 그 범주들의 <strong>비율</strong>입니다. 그리고 세 경우 모두 관찰은 기대와 정확히 같지 않을 것입니다. 공정한 동전을 10번 던져도 앞면이 딱 5번 나올 확률은 약 25%밖에 되지 않습니다. 우연은 늘 조금씩 흔들림을 만듭니다.</p>
+  <p>그래서 이 자료는 다음 세 걸음으로 질문에 답합니다.</p>
+  <div class="walk">
+    <div><b>걸음 1 · 04절</b><p>기대와 관찰이 어긋난 정도를 <strong>숫자 하나</strong>로 모은다. 이 숫자가 \(\chi^2\)다.</p></div>
+    <div><b>걸음 2 · 05~06절</b><p>이론이 정확히 맞는 세계에서도 그 숫자가 <strong>우연만으로 얼마나 흔들리는지</strong> 보고, 그 흔들림을 나타내는 카이제곱 분포를 만난다.</p></div>
+    <div><b>걸음 3 · 07절</b><p>실제 숫자가 그 흔들림 안에 있는지 밖에 있는지를 <strong>\(p\)값</strong>으로 판단한다.</p></div>
+  </div>
+</section>
+
+<!-- ======================= 02 ======================= -->
+<section class="panel" id="mendel">
+  <div class="sec-head"><span class="sec-num">02</span><h2>멘델의 완두와 9:3:3:1</h2></div>
+  <div class="callout"><p><strong>생물을 몰라도 괜찮습니다.</strong> 이 절에서 가져갈 것은 "이론이 네 종류의 비율을 미리 정해 준다"는 사실 하나입니다. 비율이 어디서 왔는지 궁금한 사람을 위해 짧게 풀어 둡니다.</p></div>
+  <h3>한 가지 형질: 3 : 1</h3>
+  <p>멘델이 본 형질 가운데 둘은 씨의 <strong>모양</strong>(둥근가, 주름졌는가)과 씨의 <strong>색</strong>(노란가, 초록인가)입니다. 완두는 모양을 정하는 유전 정보를 두 개씩, 부모에게서 하나씩 받습니다. 둥글게 만드는 것을 R, 주름지게 만드는 것을 r이라 쓰면 완두는 RR, Rr, rr 가운데 하나를 갖습니다. 그런데 R이 하나라도 있으면 씨는 둥급니다(이런 성질을 <strong>우성</strong>이라 합니다). 주름진 씨는 rr일 때만 나옵니다.</p>
+  <p>부모가 모두 Rr이면 자식은 엄마에게서 R이나 r을 반반의 확률로, 아빠에게서도 반반의 확률로 받습니다. 가능한 경우는 RR, Rr, rR, rr 네 가지이고 확률이 모두 1/4입니다. 이 가운데 셋이 둥글고 하나가 주름졌으니 <strong>둥근 씨 : 주름진 씨 = 3 : 1</strong>입니다. 색도 마찬가지로 노랑(Y)이 초록(y)보다 우성이라 <strong>노랑 : 초록 = 3 : 1</strong>입니다.</p>
+  <h3>두 가지 형질을 함께 보면: 9 : 3 : 3 : 1</h3>
+  <p>멘델은 모양과 색이 서로 영향을 주지 않고 따로따로 유전된다고 보았습니다. 서로 영향을 주지 않는 두 일이 함께 일어날 확률은 <strong>두 확률을 곱한 값</strong>입니다. 그래서 네 종류의 비율은 이렇게 나옵니다.</p>
+  <div class="mult">
+    <div class="ph-a"><b>둥글고 노랑</b><span class="eq">3/4 × 3/4 = 9/16</span></div>
+    <div class="ph-b"><b>둥글고 초록</b><span class="eq">3/4 × 1/4 = 3/16</span></div>
+    <div class="ph-c"><b>주름지고 노랑</b><span class="eq">1/4 × 3/4 = 3/16</span></div>
+    <div class="ph-d"><b>주름지고 초록</b><span class="eq">1/4 × 1/4 = 1/16</span></div>
+  </div>
+  <p>분모 16을 떼고 분자만 읽으면 <strong>9 : 3 : 3 : 1</strong>입니다. 아래 그림(퍼넷 사각형)은 같은 계산을 16칸으로 펼친 것입니다. 가로와 세로는 부모가 자식에게 넘겨줄 수 있는 네 가지 조합이고, 16칸은 모두 같은 확률 1/16을 갖습니다. 같은 색의 칸을 세어 보세요.</p>
+  <div class="mendel-wrap">
+    <figure class="punnett-fig">
+      <table class="punnett" aria-label="양성잡종 교배의 퍼넷 사각형">
+        <thead><tr><th scope="col"><span class="sr">부모가 넘겨주는 조합</span></th><th scope="col">RY</th><th scope="col">Ry</th><th scope="col">rY</th><th scope="col">ry</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">RY</th><td class="ph-a"><i class="pea"></i>RRYY</td><td class="ph-a"><i class="pea"></i>RRYy</td><td class="ph-a"><i class="pea"></i>RrYY</td><td class="ph-a"><i class="pea"></i>RrYy</td></tr>
+          <tr><th scope="row">Ry</th><td class="ph-a"><i class="pea"></i>RRYy</td><td class="ph-b"><i class="pea"></i>RRyy</td><td class="ph-a"><i class="pea"></i>RrYy</td><td class="ph-b"><i class="pea"></i>Rryy</td></tr>
+          <tr><th scope="row">rY</th><td class="ph-a"><i class="pea"></i>RrYY</td><td class="ph-a"><i class="pea"></i>RrYy</td><td class="ph-c"><i class="pea"></i>rrYY</td><td class="ph-c"><i class="pea"></i>rrYy</td></tr>
+          <tr><th scope="row">ry</th><td class="ph-a"><i class="pea"></i>RrYy</td><td class="ph-b"><i class="pea"></i>Rryy</td><td class="ph-c"><i class="pea"></i>rrYy</td><td class="ph-d"><i class="pea"></i>rryy</td></tr>
+        </tbody>
+      </table>
+      <figcaption>RrYy끼리 교배했을 때의 16가지 경우. 대문자가 하나라도 있으면 그 형질(둥근, 노랑)이 겉으로 나타난다. 같은 색의 칸은 9, 3, 3, 1칸이다.</figcaption>
+    </figure>
+    <ul class="pea-legend" aria-label="네 종류의 완두">
+      <li class="ph-a"><i class="pea"></i><span><b>둥글고 노랑</b> · 9칸</span></li>
+      <li class="ph-b"><i class="pea"></i><span><b>둥글고 초록</b> · 3칸</span></li>
+      <li class="ph-c"><i class="pea"></i><span><b>주름지고 노랑</b> · 3칸</span></li>
+      <li class="ph-d"><i class="pea"></i><span><b>주름지고 초록</b> · 1칸</span></li>
+    </ul>
+  </div>
+  <p>정리하면, 멘델의 이론은 <strong>자료를 보기 전에</strong> 네 범주의 비율을 정해 주었습니다. 이것이 중요합니다. 비교의 기준이 자료 밖에서 왔기 때문에, 그 기준에 자료가 맞는지를 따져 볼 수 있습니다.</p>
+</section>
+
+<!-- ======================= 03 ======================= -->
+<section class="panel" id="counts">
+  <div class="sec-head"><span class="sec-num">03</span><h2>556개를 세어 보니</h2></div>
+  <p>멘델은 이 교배에서 얻은 완두 556개를 네 종류로 나누어 셌습니다. 이론의 비율과 실제 비율을 같은 길이의 막대 위에 나란히 놓으면 이렇습니다.</p>
+  <div class="ratio-bars" role="img" aria-label="이론 비율 9:3:3:1과 멘델이 관측한 비율의 비교 막대. 네 칸의 폭이 거의 같다">
+    <div class="rb-row"><span class="rb-lab">이론 9 : 3 : 3 : 1</span>
+      <div class="rb-bar"><span class="ph-a" style="width:56.25%">56.3%</span><span class="ph-b" style="width:18.75%">18.8%</span><span class="ph-c" style="width:18.75%">18.8%</span><span class="ph-d" style="width:6.25%">6.3%</span></div></div>
+    <div class="rb-row"><span class="rb-lab">멘델의 관찰 (556개)</span>
+      <div class="rb-bar"><span class="ph-a" style="width:56.65%">56.7%</span><span class="ph-b" style="width:19.42%">19.4%</span><span class="ph-c" style="width:18.17%">18.2%</span><span class="ph-d" style="width:5.76%">5.8%</span></div></div>
+  </div>
+  <p>두 막대는 거의 겹칩니다. 이제 비율을 개수로 바꾸어 봅시다. 이론대로라면 몇 개가 나와야 했을까요? 전체 556개에 각 비율을 곱하면 됩니다. 이 값을 <strong>기대 개수</strong>(기대도수)라고 부릅니다.</p>
+  <div class="readout math">\[\text{기대 개수} = \text{전체 개수} \times \text{이론 비율}, \qquad \text{예: } 556 \times \tfrac{9}{16} = 312.75\]</div>
+  <div class="scroll"><table class="num">
+    <caption>표 1. 멘델의 양성잡종 교배 결과와 기대 개수 (Mendel, 1866)</caption>
+    <thead><tr><th>완두의 종류</th><th>이론 비율</th><th>관찰 개수</th><th>관찰 비율</th><th>기대 개수 (556 × 비율)</th></tr></thead>
+    <tbody>
+      <tr><td>둥글고 노랑</td><td>9/16</td><td>315</td><td>56.7%</td><td>312.75</td></tr>
+      <tr><td>둥글고 초록</td><td>3/16</td><td>108</td><td>19.4%</td><td>104.25</td></tr>
+      <tr><td>주름지고 노랑</td><td>3/16</td><td>101</td><td>18.2%</td><td>104.25</td></tr>
+      <tr><td>주름지고 초록</td><td>1/16</td><td>32</td><td>5.8%</td><td>34.75</td></tr>
+    </tbody>
+    <tfoot><tr><td>합</td><td>1</td><td>556</td><td>100%</td><td>556</td></tr></tfoot>
+  </table></div>
+  <p>완두를 0.75개 셀 수는 없는데 기대 개수가 312.75처럼 소수여도 될까요? 괜찮습니다. 기대 개수는 "같은 실험을 아주 여러 번 되풀이하면 <strong>평균적으로</strong> 이쯤 나온다"는 뜻이기 때문입니다. 주사위를 10번 던지면 6이 평균 1.67번 나온다고 말하는 것과 같습니다.</p>
+  <div class="callout"><p><strong>여기까지의 관찰.</strong> 둥글고 초록은 기대보다 3.75개 많고, 주름지고 노랑은 3.25개 적습니다. 네 칸 모두 몇 개씩 어긋나 있습니다. 이 어긋남들을 어떻게 한 숫자로 모을까요?</p></div>
+</section>
+
+<!-- ======================= 04 ======================= -->
+<section class="panel" id="score">
+  <div class="sec-head"><span class="sec-num">04</span><h2>어긋남을 숫자 하나로: \(\chi^2\) 만들기</h2></div>
+  <p>네 칸의 어긋남을 하나의 점수로 모아 봅시다. 아래 표의 단추를 차례로 누르면 열이 하나씩 채워집니다. 단계마다 "왜 이렇게 하는가"를 함께 적었습니다.</p>
+  <div class="lab" id="lab-step">
+    <div class="lab-head"><strong>어긋남 점수를 한 단계씩 만들기</strong><span>멘델의 완두 556개</span></div>
+    <div class="lab-body">
+      <div class="presets" role="group" aria-label="계산 단계">
+        <button class="btn ghost" type="button" data-step="1">① 차이 구하기</button>
+        <button class="btn ghost" type="button" data-step="2">② 제곱하기</button>
+        <button class="btn ghost" type="button" data-step="3">③ 기대 개수로 나누기</button>
+        <button class="btn ghost" type="button" data-step="4">④ 모두 더하기</button>
+        <button class="btn ghost" type="button" data-step="0">처음부터</button>
+      </div>
+      <div class="scroll"><table class="num steptable" id="steptable" data-step="4">
+        <thead><tr><th>완두의 종류</th><th>관찰</th><th>기대</th><th class="s1">① 관찰 − 기대</th><th class="s2">② (관찰 − 기대)²</th><th class="s3">③ ②를 기대로 나눈 몫</th></tr></thead>
+        <tbody>
+          <tr><td>둥글고 노랑</td><td>315</td><td>312.75</td><td class="s1">+2.25</td><td class="s2">5.0625</td><td class="s3">0.0162</td></tr>
+          <tr><td>둥글고 초록</td><td>108</td><td>104.25</td><td class="s1">+3.75</td><td class="s2">14.0625</td><td class="s3">0.1349</td></tr>
+          <tr><td>주름지고 노랑</td><td>101</td><td>104.25</td><td class="s1">−3.25</td><td class="s2">10.5625</td><td class="s3">0.1013</td></tr>
+          <tr><td>주름지고 초록</td><td>32</td><td>34.75</td><td class="s1">−2.75</td><td class="s2">7.5625</td><td class="s3">0.2176</td></tr>
+        </tbody>
+        <tfoot><tr><td>합</td><td>556</td><td>556</td><td class="s1">0</td><td class="s2">37.25</td><td class="s4">χ² = 0.470</td></tr></tfoot>
+      </table></div>
+      <p class="step-note" id="step-note" aria-live="polite">네 단계를 모두 거친 결과다. 단추를 눌러 한 단계씩 다시 따라가 보자.</p>
+    </div>
+  </div>
+
+  <h3>단계마다 왜 그렇게 하나</h3>
+  <ol>
+    <li><strong>차이를 구한다.</strong> 관찰에서 기대를 뺍니다. 많으면 +, 적으면 −입니다. 그런데 이 차이를 그냥 더하면 <strong>언제나 0</strong>이 됩니다. 관찰도 556개, 기대도 556개라서 어딘가에서 많으면 다른 곳에서 반드시 적기 때문입니다. 그래서 더하기 전에 부호를 없애야 합니다.</li>
+    <li><strong>제곱한다.</strong> 제곱하면 부호가 사라지고, 크게 어긋난 칸일수록 더 무겁게 셉니다.</li>
+    <li><strong>기대 개수로 나눈다.</strong> 같은 3개 차이라도 기대가 300개인 칸에서와 30개인 칸에서는 무게가 다릅니다. 300개 가운데 3개는 1%지만 30개 가운데 3개는 10%입니다. 그래서 "기대에 비해 얼마나 어긋났나"로 바꿉니다. 표에서 둥글고 노랑은 2.25개 차이로 0.0162를, 주름지고 초록은 2.75개 차이로 0.2176을 보탭니다. 차이는 비슷한데 몫은 열세 배쯤 됩니다. 주름지고 초록의 기대 개수가 작기 때문입니다.</li>
+    <li><strong>모두 더한다.</strong> 네 칸의 몫을 더한 값이 <strong>카이제곱 통계량</strong> \(\chi^2\)입니다. 멘델의 완두는 \(\chi^2 = 0.470\)입니다.</li>
+  </ol>
+  <p>네 단계를 한 줄로 쓰면 이렇습니다. 칼 피어슨(Pearson, 1900)이 만든 식이라 피어슨 카이제곱이라고도 합니다. \(\chi\)는 그리스 문자 "카이"입니다.</p>
+  <div class="readout math">\[\chi^2 = \sum_{\text{모든 칸}} \frac{(\text{관찰} - \text{기대})^2}{\text{기대}}\]</div>
+  <div class="callout"><p><strong>이 숫자를 읽는 법.</strong> 관찰이 기대와 완전히 같으면 \(\chi^2 = 0\)이고, 어긋날수록 커집니다. 음수는 나오지 않습니다. 그런데 0.470은 큰 값일까요, 작은 값일까요? 아직은 알 수 없습니다. 비교할 <strong>기준</strong>이 없기 때문입니다. 그 기준을 다음 절에서 만듭니다.</p></div>
+</section>
+
+<!-- ======================= 05 ======================= -->
+<section class="panel" id="chance">
+  <div class="sec-head"><span class="sec-num">05</span><h2>우연은 얼마나 흔들리나</h2></div>
+  <p>0.470이 큰지 작은지 알려면 "이론이 <strong>정확히 맞는</strong> 세계에서도 \(\chi^2\)가 보통 얼마쯤 나오는가"를 알아야 합니다. 이론이 맞아도 우연 때문에 관찰은 흔들리고, 그러면 \(\chi^2\)도 0이 아닌 값이 나오기 때문입니다.</p>
+  <p>그 세계를 컴퓨터로 만들어 봅시다. 16면 주사위를 떠올리면 쉽습니다. 9개 면에는 "둥글고 노랑", 3개 면에는 "둥글고 초록", 3개 면에는 "주름지고 노랑", 1개 면에는 "주름지고 초록"이 적혀 있습니다. 이 주사위를 556번 던져 네 종류의 개수를 세면, 9 : 3 : 3 : 1이 정확히 맞는 세계에서 실험을 한 번 한 것과 같습니다. 그 결과로 \(\chi^2\)를 계산하고, 이것을 여러 번 되풀이해 쌓아 봅니다.</p>
+  <div class="lab" id="lab-sim">
+    <div class="lab-head"><strong>이론이 맞는 세계에서 실험 되풀이하기</strong><span>컴퓨터가 9 : 3 : 3 : 1의 확률로 흉내 낸 가상의 실험이다. 실제로 관측한 자료가 아니다</span></div>
+    <div class="lab-body">
+      <div class="presets" role="group" aria-label="반복 횟수">
+        <button class="btn" type="button" data-rep="1">한 번 실험</button>
+        <button class="btn" type="button" data-rep="10">10번</button>
+        <button class="btn" type="button" data-rep="100">100번</button>
+        <button class="btn" type="button" data-rep="1000">1,000번</button>
+        <button class="btn ghost" type="button" data-rep="0">지우기</button>
+      </div>
+      <p class="sim-step"><b>① 한 번의 실험</b> 회색 막대는 이번 실험에서 나온 개수, 검은 가로선은 기대 개수다. 아래 붉은 막대는 칸마다 \(\chi^2\)에 보태는 몫이고, 붉은 막대를 모두 더하면 이번 실험의 \(\chi^2\)가 된다.</p>
+      <svg class="plot" id="sim-one" viewBox="0 0 640 240" role="img" aria-label="한 번의 가상 실험: 네 종류의 개수와 기대 개수, 칸마다 보태는 몫"></svg>
+      <p class="sim-step"><b>② 값을 쌓는다</b> 실험마다 나온 \(\chi^2\) 하나가 아래에 막대로 쌓인다. 많이 쌓을수록 쌓인 모양이 파란 곡선에 가까워진다. 주황 세로선은 멘델의 실제 \(\chi^2\)(0.470)이고, 그보다 오른쪽에 쌓인 실험은 주황으로 칠해진다.</p>
+      <svg class="plot" id="sim-hist" viewBox="0 0 640 250" role="img" aria-label="반복 실험에서 나온 카이제곱 값의 히스토그램과 자유도 3인 카이제곱 분포 곡선"></svg>
+      <div class="outs">
+        <div><span class="k">쌓은 실험 수</span><span class="v" id="sim-n">0</span></div>
+        <div><span class="k">이번 실험의 \(\chi^2\)</span><span class="v" id="sim-last">-</span></div>
+        <div><span class="k">멘델의 실제 \(\chi^2\)</span><span class="v">0.470</span></div>
+        <div><span class="k">쌓인 실험 가운데 0.470 이상인 비율</span><span class="v hl" id="sim-share">-</span></div>
+      </div>
+      <p class="figcap">같은 단추를 다시 누르면 실험이 계속 더해진다. 컴퓨터가 매번 새로 던지므로 누를 때마다 조금씩 다른 결과가 나온다.</p>
+    </div>
+  </div>
+  <h3>쌓인 모양에서 보이는 것</h3>
+  <ul>
+    <li>이론이 정확히 맞는 세계에서도 \(\chi^2\)는 거의 0이 되지 않습니다. 우연한 흔들림은 늘 있습니다.</li>
+    <li>대부분의 실험은 0에서 몇 사이에 몰리고, 아주 큰 값은 드뭅니다. 오른쪽으로 갈수록 꼬리가 가늘어집니다.</li>
+    <li>실험을 많이 쌓을수록 막대의 윤곽은 파란 곡선과 겹칩니다. 이 곡선을 <strong>카이제곱 분포</strong>라고 합니다. 수학자들이 이 모양을 미리 계산해 두었기 때문에, 실제로는 실험을 되풀이하지 않고 곡선만으로 답을 구할 수 있습니다. 이 곡선이 왜, 어떻게 나왔는지, 그리고 그림 아래에 적힌 "자유도 3"이 무슨 뜻인지는 06절에서 봅니다.</li>
+  </ul>
+  <p>그러면 멘델의 0.470은 이 흔들림 속 어디쯤에 있을까요? 주황 선의 위치와, 그보다 오른쪽에 쌓인 실험의 비율을 확인해 보세요. 그 비율이 다음 절의 주인공입니다.</p>
+</section>
+
+<!-- ======================= 06 ======================= -->
+<section class="panel" id="origin">
+  <div class="sec-head"><span class="sec-num">06</span><h2>카이제곱 분포는 어디서 왔나</h2></div>
+  <h3>왜 새로운 분포가 필요했나</h3>
+  <p>05절에서는 컴퓨터로 실험을 천 번 되풀이해 "이론이 맞을 때 \(\chi^2\)가 얼마나 흔들리는지"를 보았습니다. 그런데 이 방법을 처음 고민한 1900년의 통계학자 칼 피어슨에게는 컴퓨터가 없었습니다. 완두를 수천 번 다시 기르거나 주사위를 수십만 번 던질 수도 없었습니다. 그전까지 사람들은 관찰이 이론과 "잘 맞아 보인다"를 눈으로 판단했습니다. 피어슨이 원한 것은 <strong>유전 비율이든 주사위든, 범주가 몇 개든 쓸 수 있는 하나의 객관적인 잣대</strong>였습니다.</p>
+  <p>그래서 그는 실험을 되풀이하는 대신 <strong>수학으로</strong> 답을 구했습니다. "이론이 맞다면 어긋남 점수는 이런 모양으로 흩어진다"는 곡선을 식으로 구해 둔 것입니다. 그 곡선이 카이제곱 분포이고, 그 덕분에 표 한 장(오늘날에는 함수 하나)으로 \(p\)값을 구할 수 있게 되었습니다. 피어슨과 함께 학술지 <i>Biometrika</i>를 세운 생물학자 웰던(Weldon)은 1894년에 주사위 12개를 한꺼번에 던지기를 26,306번 되풀이하며 5나 6이 나온 개수를 기록했습니다(Rundel, 2013). 이런 기록이 "우연이라 보기엔 너무 다른가"를 판단할 잣대가 필요했던 것입니다. 11절에서 이 실험을 컴퓨터로 다시 해 봅니다.</p>
+  <p>그 곡선이 어떻게 나왔는지 세 걸음으로 따라가 봅시다. 열쇠는 04절에서 "기대 개수로 나눈다"고 했던 단계에 있습니다.</p>
+
+  <h3>칸마다의 어긋남을 표준화하면</h3>
+  <p>먼저 <strong>표준정규분포</strong>를 떠올립시다. 평균이 0, 표준편차가 1인 종 모양의 분포이고, 값은 대부분 −2와 2 사이에 있습니다(−1.96과 1.96 사이에 95%가 듭니다). 처음 듣는다면 <a href="normal-error-regression-intro.html#two-numbers">측정의 흔들림에서 회귀직선까지의 05절</a>에서 그림으로 볼 수 있습니다. 여기서는 기호 \(Z\)로 씁니다.</p>
+  <p>이론이 맞더라도 한 칸의 개수는 기대 개수 둘레에서 흔들립니다. 그 흔들림의 크기는 대략 \(\sqrt{\text{기대}}\)입니다. 기대가 100개인 칸은 10개 안팎, 기대가 400개인 칸은 20개 안팎으로 흔들립니다. 그러니 "관찰 − 기대"를 \(\sqrt{\text{기대}}\)로 나누면 <strong>"흔들림 몇 개만큼 벗어났나"</strong>로 단위가 맞춰집니다. 이것을 표준화라고 하고, 기대 개수가 충분히 크면 이 값은 표준정규분포를 따르는 \(Z\)처럼 흔들립니다.</p>
+  <div class="readout math">\[z = \frac{\text{관찰} - \text{기대}}{\sqrt{\text{기대}}}, \qquad z^2 = \frac{(\text{관찰} - \text{기대})^2}{\text{기대}}\]</div>
+  <p>오른쪽 식을 보세요. 04절 표에서 칸마다 구한 ③ "기대로 나눈 몫"이 바로 \(z^2\)입니다. 기대로 나눈 것은 임의로 정한 규칙이 아니라 <strong>표준화한 어긋남을 제곱한 것</strong>이었습니다. 멘델의 자료로 확인하면 이렇습니다.</p>
+  <div class="scroll"><table class="num">
+    <caption>표 3. 멘델 자료의 표준화한 어긋남</caption>
+    <thead><tr><th>완두의 종류</th><th>관찰 − 기대</th><th>\(\sqrt{\text{기대}}\)</th><th>\(z\)</th><th>\(z^2\) (04절의 ③)</th></tr></thead>
+    <tbody>
+      <tr><td>둥글고 노랑</td><td>+2.25</td><td>17.68</td><td>+0.127</td><td>0.0162</td></tr>
+      <tr><td>둥글고 초록</td><td>+3.75</td><td>10.21</td><td>+0.367</td><td>0.1349</td></tr>
+      <tr><td>주름지고 노랑</td><td>−3.25</td><td>10.21</td><td>−0.318</td><td>0.1013</td></tr>
+      <tr><td>주름지고 초록</td><td>−2.75</td><td>5.89</td><td>−0.467</td><td>0.2176</td></tr>
+    </tbody>
+    <tfoot><tr><td>합</td><td>0</td><td></td><td></td><td>0.470</td></tr></tfoot>
+  </table></div>
+  <p>네 칸 모두 흔들림 반 개도 벗어나지 않았습니다(\(|z| < 0.5\)). 표준정규분포에서 흔히 나오는 −2~2 범위의 한가운데입니다. 멘델의 \(\chi^2\)가 작게 나온 까닭이 여기서도 보입니다.</p>
+
+  <h3>표준정규분포를 제곱해 더한 것이 카이제곱 분포</h3>
+  <p>정리하면, \(\chi^2\) 통계량은 표준정규분포처럼 흔들리는 값들을 <strong>제곱해서 더한 것</strong>입니다. 그래서 그 흔들림을 나타내는 분포를 이렇게 정의합니다.</p>
+  <div class="readout math">\[\chi^2_k = Z_1^2 + Z_2^2 + \cdots + Z_k^2 \qquad (Z_1, \dots, Z_k \text{는 서로 독립인 표준정규분포})\]</div>
+  <p>서로 독립인 표준정규분포 \(k\)개를 각각 제곱해 더한 값이 따르는 분포를 <strong>자유도 \(k\)인 카이제곱 분포</strong>라고 합니다. 지금은 자유도를 "제곱해서 더한, 서로 독립인 값의 개수"로 읽어 두세요. 이름에 왜 "자유"가 들어가는지는 아래 <a href="#df">자유도란 무엇인가</a>에서 봅니다. 이 정의에서 몇 가지가 바로 나옵니다.</p>
+  <ul>
+    <li><strong>음수가 없다.</strong> 제곱을 더했기 때문입니다.</li>
+    <li><strong>평균은 \(k\)다.</strong> \(Z\)의 표준편차가 1이라 \(Z^2\)의 평균은 1이고, \(k\)개를 더하면 평균이 \(k\)가 됩니다.</li>
+  </ul>
+  <div class="lab" id="lab-sq">
+    <div class="lab-head"><strong>표준정규분포 \(k\)개를 제곱해 더하기</strong><span>컴퓨터가 표준정규분포에서 뽑은 가상의 값이다. 실제로 관측한 자료가 아니다</span></div>
+    <div class="lab-body">
+      <div class="ctrls">
+        <div class="ctrl"><label for="sq-k">더할 개수 \(k\) <output id="sq-k-out">1</output></label><input type="range" id="sq-k" min="1" max="10" step="1" value="1"></div>
+      </div>
+      <div class="presets" role="group" aria-label="뽑기">
+        <button class="btn" type="button" data-sq="1">한 번 뽑기</button>
+        <button class="btn" type="button" data-sq="100">100번</button>
+        <button class="btn" type="button" data-sq="1000">1,000번</button>
+        <button class="btn ghost" type="button" data-sq="0">지우기</button>
+      </div>
+      <p class="readout" id="sq-one">"한 번 뽑기"를 누르면 표준정규분포에서 \(k\)개를 뽑아 제곱해 더한다.</p>
+      <svg class="plot" id="sq-hist" viewBox="0 0 640 250" role="img" aria-label="표준정규분포 k개의 제곱합의 히스토그램과 자유도 k인 카이제곱 분포 곡선"></svg>
+      <div class="outs">
+        <div><span class="k">뽑은 횟수</span><span class="v" id="sq-n">0</span></div>
+        <div><span class="k">쌓인 값의 평균</span><span class="v hl" id="sq-mean">-</span></div>
+        <div><span class="k">이론의 평균 (\(= k\))</span><span class="v" id="sq-k2">1</span></div>
+      </div>
+      <p class="figcap">파란 곡선은 자유도 \(k\)인 카이제곱 분포다. \(k\)를 바꾸면 쌓인 값을 지우고 새로 시작한다. 쌓을수록 막대가 곡선에 겹치고, 쌓인 값의 평균이 \(k\)에 가까워지는지 보자.</p>
+    </div>
+  </div>
+
+  <h3 id="df">자유도란 무엇인가</h3>
+  <p><strong>자유도</strong>(degrees of freedom, df)는 말 그대로 <strong>"자유롭게 정해질 수 있는 값의 개수"</strong>입니다. 값이 여러 개 있어도 그 사이에 지켜야 할 조건(제약)이 있으면, 일부 값은 다른 값들에 따라 저절로 정해집니다. 저절로 정해지는 값을 빼고 남은 개수가 자유도입니다.</p>
+  <p>손으로 해 볼 수 있는 예를 하나 들어 봅시다. 네 칸에 숫자를 적되 <strong>네 수의 합이 10이 되어야 한다</strong>는 조건이 있습니다.</p>
+  <div class="scroll"><table class="num df-demo">
+    <thead><tr><th></th><th>칸 A</th><th>칸 B</th><th>칸 C</th><th>칸 D</th><th>합</th></tr></thead>
+    <tbody>
+      <tr><td>마음대로 적는다</td><td>3</td><td>1</td><td>4</td><td class="fixed">?</td><td>10</td></tr>
+      <tr><td>저절로 정해진다</td><td>3</td><td>1</td><td>4</td><td class="fixed">10 − 3 − 1 − 4 = 2</td><td>10</td></tr>
+    </tbody>
+  </table></div>
+  <p>A, B, C에는 어떤 수를 적어도 됩니다. 그러나 셋을 적고 나면 D는 고를 수 없습니다. 합이 10이 되도록 정해져 버리기 때문입니다. 값은 넷이지만 자유롭게 정해지는 것은 셋이므로 자유도는 3입니다. 일반적으로 이렇게 셉니다.</p>
+  <div class="readout math">\[\text{자유도} = \text{값의 개수} - \text{값들을 묶는 조건의 개수}\]</div>
+  <p><strong>멘델 자료도 똑같습니다.</strong> 네 칸의 개수는 합이 556이라는 조건에 묶여 있습니다. 둥글고 노랑 315, 둥글고 초록 108, 주름지고 노랑 101을 알면 주름지고 초록은 556 − 315 − 108 − 101 = 32로 저절로 정해집니다. 같은 조건을 04절의 말로 하면 "관찰 − 기대를 모두 더하면 언제나 0"입니다. 그래서 네 칸의 어긋남 \(z\)도 넷 가운데 셋만 자유롭게 움직입니다.</p>
+  <p><strong>카이제곱 분포의 자유도와 이어 보면</strong> 이렇습니다. 위의 정의에서 \(k\)는 서로 독립인(곧 서로 묶이지 않은) 표준정규분포의 개수였습니다. 멘델의 \(z^2\)는 넷이지만 하나의 조건에 묶여 있습니다. 정확히 계산해 보면(기대 개수가 충분히 클 때) 이렇게 묶인 네 개의 \(z^2\)를 더한 값은 <strong>독립인 표준정규분포 세 개를 제곱해 더한 것</strong>과 같은 분포를 따릅니다. 묶인 만큼 자유도가 하나 줄어드는 것입니다. 그래서 범주가 \(k\)개인 적합도 검정의 자유도는 다음과 같습니다.</p>
+  <div class="readout math">\[\text{적합도 검정의 자유도} = \text{범주의 수} - 1\]</div>
+  <ul>
+    <li>멘델의 완두: 4 − 1 = <strong>3</strong></li>
+    <li>주사위의 눈(11절): 6 − 1 = <strong>5</strong></li>
+    <li>웰던이 센 방식(11절 프롬프트 3, 끝 칸을 합친 11칸): 11 − 1 = <strong>10</strong></li>
+  </ul>
+  <p><strong>자유도가 왜 중요할까요?</strong> \(\chi^2\)는 자유롭게 흔들리는 몫들을 더한 값입니다. 자유롭게 흔들리는 몫이 많을수록 이론이 맞아도 우연만으로 더한 값이 커집니다. 그래서 같은 \(\chi^2\) 값이라도 자유도가 다르면 뜻이 달라지고, 판단할 때는 반드시 자유도에 맞는 곡선을 기준으로 씁니다. 바로 아래 그림에서 그 차이를 눈으로 확인합니다.</p>
+  <p class="note">자유도는 카이제곱 검정에만 나오는 말이 아닙니다. 표본에서 분산을 구할 때 \(n\)이 아니라 \(n - 1\)로 나누는 것도, 평균을 구하는 데 자료를 한 번 써서 하나의 조건이 생기기 때문입니다. 이 이야기는 통계 자료 <a href="../statistics/t-distribution-degrees-of-freedom.html">t 분포와 자유도</a>에서 이어집니다.</p>
+  <p class="note">비율의 일부를 자료에서 추정해 쓰면 자유도가 더 줄어듭니다. 얼마나 빼야 하는지는 피어슨과 피셔(Fisher, 1922) 사이에 큰 논쟁이 되었고, 피셔의 계산이 오늘날의 규칙이 되었습니다. 이 자료의 예는 비율을 모두 이론이 정해 주므로 \(k - 1\)이면 됩니다.</p>
+
+  <h3>자유도에 따라 달라지는 모양</h3>
+  <p>더하는 제곱이 많아지면 분포는 어떻게 변할까요? 자유도를 바꾸며 곡선을 비교해 보세요.</p>
+  <div class="lab" id="lab-df">
+    <div class="lab-head"><strong>자유도에 따른 카이제곱 분포</strong><span>초록 곡선이 고른 자유도, 옅은 회색은 비교용 곡선이다</span></div>
+    <div class="lab-body">
+      <div class="ctrls">
+        <div class="ctrl"><label for="df-k">자유도 <output id="df-k-out">3</output></label><input type="range" id="df-k" min="1" max="30" step="1" value="3"></div>
+      </div>
+      <div class="presets" role="group" aria-label="자유도 고르기">
+        <button class="btn ghost" type="button" data-df="1">자유도 1</button>
+        <button class="btn ghost" type="button" data-df="2">자유도 2</button>
+        <button class="btn ghost" type="button" data-df="3">멘델 (3)</button>
+        <button class="btn ghost" type="button" data-df="5">주사위 (5)</button>
+        <button class="btn ghost" type="button" data-df="11">열두 달 (11)</button>
+        <button class="btn ghost" type="button" data-df="30">자유도 30</button>
+        <button class="btn ghost" type="button" id="df-ref" aria-pressed="true">비교 곡선 보이기</button>
+      </div>
+      <svg class="plot" id="df-svg" viewBox="0 0 640 270" role="img" aria-label="고른 자유도의 카이제곱 분포 곡선과 비교 곡선, 평균"></svg>
+      <div class="outs">
+        <div><span class="k">평균 (\(= k\))</span><span class="v" id="df-mean">-</span></div>
+        <div><span class="k">표준편차 (\(= \sqrt{2k}\))</span><span class="v" id="df-sd">-</span></div>
+        <div><span class="k">가장 높은 곳</span><span class="v" id="df-mode">-</span></div>
+      </div>
+      <p class="figcap">검은 점선은 고른 자유도의 평균이다. 비교 곡선은 자유도 1, 2, 3, 5, 10, 20이다.</p>
+    </div>
+  </div>
+  <ul>
+    <li><strong>자유도가 커질수록 산 전체가 오른쪽으로 옮겨 갑니다.</strong> 더하는 제곱이 많으니 합도 커집니다. 평균이 곧 자유도입니다.</li>
+    <li><strong>퍼짐도 커집니다.</strong> 표준편차는 \(\sqrt{2k}\)라서 자유도가 커지면 곡선이 낮고 넓어집니다.</li>
+    <li><strong>자유도 1과 2는 0에서 가장 높고 오른쪽으로 내려가기만 합니다.</strong> 표준정규분포에서는 0 근처 값이 가장 흔하므로 그 제곱도 0 근처가 가장 흔하기 때문입니다.</li>
+    <li><strong>자유도가 커지면 좌우가 비슷한 종 모양에 가까워집니다.</strong> 서로 독립인 값을 많이 더하면 종 모양이 된다는 성질(<a href="normal-error-regression-intro.html#bell">작은 흔들림이 쌓이면 종 모양이 된다</a>)이 여기서도 나타납니다.</li>
+  </ul>
+  <div class="callout"><p><strong>그래서 \(\chi^2\) 값은 자유도와 함께 읽어야 합니다.</strong> 예를 들어 \(\chi^2 = 8\)은 자유도 3인 곡선에서는 산의 오른쪽 꼬리, 곧 잘 나오지 않는 큰 값이지만, 자유도 11(열두 달)인 곡선에서는 평균 11보다 작은, 흔히 나오는 값입니다. 범주가 많으면 더하는 몫이 많아 우연만으로도 \(\chi^2\)가 커지기 때문입니다. 판단할 때는 반드시 자유도에 맞는 곡선을 씁니다. 다음 절에서 멘델의 자료를 자유도 3인 곡선에 놓고 판단합니다.</p></div>
+</section>
+
+<!-- ======================= 07 ======================= -->
+<section class="panel" id="pvalue">
+  <div class="sec-head"><span class="sec-num">07</span><h2>\(p\)값으로 판단하기</h2></div>
+  <h3>\(p\)값이란</h3>
+  <p>05절에서 마지막으로 확인한 비율, 곧 "이론이 맞는 세계에서 실험을 했을 때 <strong>멘델이 본 것만큼 또는 그보다 더 어긋난 결과</strong>가 나올 확률"을 <strong>\(p\)값</strong>이라고 합니다. 곡선으로 정확히 계산하면 멘델의 완두는 다음과 같습니다.</p>
+  <div class="readout math">\[p = P(\chi^2 \ge 0.470) = 0.925\]</div>
+  <figure class="lab" style="margin:0">
+    <div class="lab-head"><strong>자유도 3인 카이제곱 분포와 멘델의 \(\chi^2\)</strong><span>주황으로 칠한 넓이가 \(p\)값</span></div>
+    <div class="lab-body">
+      <svg class="plot" id="pv-svg" viewBox="0 0 640 260" role="img" aria-label="자유도 3인 카이제곱 분포 곡선. 0.47 오른쪽의 넓은 넓이가 칠해져 있다"></svg>
+      <p class="figcap">곡선 아래 전체 넓이는 1(100%)이다. 0.470 오른쪽이 92.5%를 차지한다.</p>
+    </div>
+  </figure>
+  <p>말로 풀면 이렇습니다. <strong>9 : 3 : 3 : 1이 정확히 맞더라도, 멘델과 같은 실험을 100번 하면 약 92번은 이만큼 또는 이보다 더 크게 어긋난 결과가 나온다.</strong> 멘델의 결과는 우연한 흔들림으로 충분히 설명되는, 아주 평범한 결과입니다.</p>
+
+  <h3>\(p\)값이 작다는 것은 어떻게 읽나</h3>
+  <p>멘델의 \(p\)값은 컸습니다. 그렇다면 \(p\)값이 아주 작게, 예를 들어 0.001이 나왔다면 어떻게 읽어야 할까요? "이론이 맞다면 1,000번에 한 번 나올까 말까 한 결과가 지금 나왔다"는 뜻입니다. 이때 떠올릴 수 있는 설명은 두 가지뿐입니다.</p>
+  <ol>
+    <li><strong>이론은 맞는데, 아주 드문 우연이 하필 이번에 일어났다.</strong></li>
+    <li><strong>이론이 틀렸다.</strong> 그래서 이론의 세계에서는 드문 결과가 실제로는 자연스럽게 나왔다.</li>
+  </ol>
+  <p>\(p\)값은 둘 가운데 어느 쪽이 맞는지 알려 주지 않습니다. 알려 주는 것은 <strong>첫째 설명을 받아들이려면 얼마나 드문 우연을 믿어야 하는가</strong>입니다. \(p\)값이 작을수록 첫째 설명은 믿기 어려워지고, 그만큼 둘째 설명, 곧 "이론과 다르다"는 쪽으로 증거가 쌓입니다. 그래서 \(p\)값은 <strong>"이론이 맞다고 할 때 지금 결과가 얼마나 놀라운가"를 재는 눈금</strong>으로 읽습니다.</p>
+  <p>놀라움의 크기가 잘 와닿지 않으면, 공정한 동전을 연속으로 던져 모두 앞면이 나오는 일에 견주어 보세요.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>\(p\)값</th><th>이론이 맞다면</th><th>비슷한 놀라움</th></tr></thead>
+    <tbody>
+      <tr><td>0.925 (멘델)</td><td>거의 언제나 나온다</td><td>동전 한 번 던져 앞면이 나오는 것보다도 흔한 일</td></tr>
+      <tr><td>0.25</td><td>4번에 1번</td><td>동전 2번 연속 앞면 (1/4)</td></tr>
+      <tr><td>0.05</td><td>20번에 1번</td><td>동전 4~5번 연속 앞면 (1/16 = 0.06, 1/32 = 0.03)</td></tr>
+      <tr><td>0.01</td><td>100번에 1번</td><td>동전 6~7번 연속 앞면 (1/64 = 0.016, 1/128 = 0.008)</td></tr>
+      <tr><td>0.001</td><td>1,000번에 1번</td><td>동전 10번 연속 앞면 (1/1,024)</td></tr>
+    </tbody>
+  </table></div>
+  <p>친구가 던진 동전이 두 번 연속 앞면이면 그냥 웃고 넘어가지만, 열 번 연속 앞면이면 "그 동전 좀 보자"고 하게 됩니다. 그런데 몇 번째에서 의심을 시작할지는 사람마다 다릅니다. 이 "몇 번째부터"를 미리 정해 두는 것이 다음에 볼 기준선입니다.</p>
+
+  <h3>무엇과 비교하나: 기준선은 연구자가 세운다</h3>
+  <p>\(p\)값은 0과 1 사이의 연속된 수입니다. "이론과 다르다고 할까, 말까"를 정하려면 \(p\)값을 견줄 <strong>기준</strong>이 필요합니다. 이 기준을 <strong>유의수준</strong>이라 하고 \(\alpha\)(알파)로 적습니다. \(p\)값이 \(\alpha\)보다 작으면 "이론과 다르다고 볼 증거가 있다"고 판정합니다.</p>
+  <p>중요한 점은 <strong>\(\alpha\)는 자료가 정해 주는 값도, 수학이 정해 주는 값도 아니라는 것</strong>입니다. 연구자가 자기 연구의 사정을 따져 <strong>자료를 보기 전에</strong> 정합니다. 무엇을 따질까요?</p>
+  <ul>
+    <li><strong>\(\alpha\)는 "이론이 맞는데도 틀렸다고 판정할 확률"입니다.</strong> \(\alpha = 0.05\)로 정하면, 이론이 실제로 맞는 실험을 여러 번 해도 그 가운데 약 5%에서는 "다르다"는 잘못된 경보가 울립니다. 이것을 <strong>제1종 오류</strong>라고 합니다.</li>
+    <li><strong>\(\alpha\)를 작게 잡으면</strong> 잘못된 경보는 줄지만, 이론이 정말 틀렸을 때 그것을 알아차리기는 어려워집니다. 경보기의 민감도를 낮추는 것과 같습니다.</li>
+    <li><strong>그래서 잘못된 경보의 대가가 클수록 \(\alpha\)를 작게 잡습니다.</strong> 많은 분야에서 0.05를 관례로 쓰는데, 피셔(Fisher, 1925)가 편리한 기준으로 제안한 것이 굳어진 것입니다. 더 엄격하게 0.01을 쓰는 연구도 있고, 새로운 입자의 발견을 주장하는 입자물리학은 약 0.0000003("5시그마"), 수십만 개의 유전 변이를 한꺼번에 검정하는 유전체 연구는 0.00000005를 씁니다.</li>
+    <li><strong>자료를 본 뒤에 정하면 안 됩니다.</strong> 결과를 보고 기준을 옮기면, 원하는 결론에 맞춰 기준을 움직이는 것이 되기 때문입니다.</li>
+  </ul>
+  <p>정한 \(\alpha\)를 \(\chi^2\)의 눈금으로 옮긴 것이 <strong>기준선</strong>(임계값)입니다. 곡선의 오른쪽 꼬리 넓이가 꼭 \(\alpha\)가 되는 \(\chi^2\) 값이고, 관찰한 \(\chi^2\)가 이 선을 넘으면 \(p\)값이 \(\alpha\)보다 작다는 것과 같은 말입니다. 아래에서 \(\alpha\)를 바꾸며 기준선이 어떻게 움직이는지 보세요.</p>
+  <div class="lab" id="lab-alpha">
+    <div class="lab-head"><strong>연구자가 정하는 기준선</strong><span>자유도 3인 카이제곱 분포, 붉게 칠한 넓이가 \(\alpha\)</span></div>
+    <div class="lab-body">
+      <div class="presets" role="group" aria-label="유의수준 고르기">
+        <button class="btn ghost" type="button" data-alpha="0.1" aria-pressed="false">α = 0.10</button>
+        <button class="btn ghost" type="button" data-alpha="0.05" aria-pressed="true">α = 0.05</button>
+        <button class="btn ghost" type="button" data-alpha="0.01" aria-pressed="false">α = 0.01</button>
+        <button class="btn ghost" type="button" data-alpha="0.001" aria-pressed="false">α = 0.001</button>
+      </div>
+      <svg class="plot" id="alpha-svg" viewBox="0 0 640 260" role="img" aria-label="자유도 3인 카이제곱 분포에서 고른 유의수준의 기준선과 멘델의 카이제곱 위치"></svg>
+      <div class="outs">
+        <div><span class="k">유의수준 \(\alpha\) (연구자가 정함)</span><span class="v" id="alpha-a">-</span></div>
+        <div><span class="k">기준선 (임계값)</span><span class="v hl" id="alpha-c">-</span></div>
+        <div><span class="k">멘델의 \(\chi^2\)</span><span class="v">0.470</span></div>
+        <div><span class="k">멘델의 \(p\)값</span><span class="v">.925</span></div>
+        <div><span class="k">판정</span><span class="v" id="alpha-d">-</span></div>
+      </div>
+      <p class="figcap">\(\alpha\)를 작게 잡을수록 기준선은 오른쪽으로 물러나, 웬만큼 어긋나서는 "다르다"고 판정하지 않게 된다. 멘델의 자료는 어떤 \(\alpha\)를 골라도 기준선보다 한참 왼쪽에 있다.</p>
+    </div>
+  </div>
+  <p class="note">기준선은 판정을 위한 약속이지 자연에 그어진 경계가 아닙니다. \(p = 0.049\)와 \(p = 0.051\)은 \(\alpha = 0.05\) 앞에서 판정이 갈리지만, 증거의 크기는 거의 같습니다. 그래서 보고서에는 판정만이 아니라 \(p\)값 자체도 함께 적습니다.</p>
+  <p class="note">기준선과 표준정규분포의 연결도 하나 짚어 둡니다. \(\alpha = 0.05\)일 때 <strong>자유도 1의 기준선 3.84는 \(1.96^2\)</strong>입니다. 06절에서 본 것처럼 자유도 1인 \(\chi^2\)는 표준정규분포 \(Z\) 하나를 제곱한 것이므로, "\(|Z|\)가 1.96보다 클 확률 5%"와 "\(Z^2\)이 3.84보다 클 확률 5%"는 같은 말입니다. 표준정규분포에서 익숙한 ±1.96이 카이제곱의 기준선으로 이어지는 셈입니다.</p>
+
+  <h3>판단의 말: 영가설과 대안가설</h3>
+  <p>통계에서는 이 판단을 정해진 말로 적습니다. 따져 볼 기준이 되는 주장을 <strong>영가설</strong>(귀무가설, \(H_0\))이라 하고, 그 반대를 <strong>대안가설</strong>(\(H_1\))이라 합니다.</p>
+  <ul>
+    <li>영가설 \(H_0\): 네 종류의 비율은 9/16, 3/16, 3/16, 1/16이다. (멘델의 이론이 맞다)</li>
+    <li>대안가설 \(H_1\): 적어도 한 종류의 비율이 이와 다르다.</li>
+  </ul>
+  <p>그리고 연구자가 미리 정한 유의수준 \(\alpha\)와 \(p\)값을 견줍니다. 아래 표는 관례대로 \(\alpha = 0.05\)로 정한 경우입니다.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>\(p\)값이</th><th>뜻</th><th>판단</th></tr></thead>
+    <tbody>
+      <tr><td>\(\alpha\)(0.05)보다 작다</td><td>이론이 맞다면 20번에 1번도 나오기 어려운 큰 어긋남이다</td><td>영가설을 기각한다. "이론과 다르다고 볼 증거가 있다"</td></tr>
+      <tr><td>\(\alpha\)(0.05) 이상이다</td><td>이론이 맞아도 흔히 나올 만한 어긋남이다</td><td>영가설을 기각하지 못한다. "이론과 다르다고 볼 증거가 없다"</td></tr>
+    </tbody>
+  </table></div>
+  <p>멘델의 완두는 \(p = 0.925\)로 \(\alpha = 0.05\)보다 훨씬 크므로, <strong>멘델의 관찰이 9 : 3 : 3 : 1에서 벗어났다고 볼 증거가 없습니다.</strong> 00절의 질문에 대한 답입니다. 칸마다 몇 개씩 어긋난 것은 이론이 틀려서가 아니라 우연으로 설명되는 흔들림입니다. 보고서에는 보통 다음처럼 한 줄로 씁니다.</p>
+  <div class="readout">χ²(3, N = 556) = 0.47, p = .925</div>
+  <p>괄호 안의 3은 06절에서 본 <strong>자유도</strong>, N은 전체 개수입니다. \(\alpha = 0.05\)일 때 자유도 3의 기준선은 7.81이고, 멘델의 0.47은 그보다 한참 왼쪽에 있습니다. 그래서 "\(\chi^2\)가 기준선을 넘지 않는다"고 말해도 같은 판단입니다. 어떤 \(\alpha\)를 썼는지도 함께 밝혀 적습니다.</p>
+
+  <h3>자유도: 왜 3인가</h3>
+  <p>06절의 <a href="#df">자유도란 무엇인가</a>에서 본 것처럼, 완두는 네 종류지만 합이 556이라는 조건 때문에 자유롭게 정해지는 칸은 셋뿐입니다. 그래서 자유도는 <strong>범주의 수 − 1 = 3</strong>이고, 판단에는 자유도 3인 곡선을 씁니다. 자유도가 다르면 기준이 되는 곡선도 다릅니다(06절의 자유도 비교 그림).</p>
+
+  <div class="callout caution"><p><strong>자주 하는 오해 세 가지</strong></p>
+  <ol>
+    <li><strong>"\(p = 0.925\)이니 이론이 맞을 확률이 92.5%다."</strong> 아닙니다. \(p\)값은 "이론이 맞다고 할 때 이런 데이터가 나올 확률"이지, "데이터를 보고 난 뒤 이론이 맞을 확률"이 아닙니다. 조건의 방향이 반대입니다.</li>
+    <li><strong>"기각하지 못했으니 이론이 증명되었다."</strong> 아닙니다. "다르다고 볼 증거가 없다"는 것은 "같다는 증거가 있다"와 다릅니다. 9 : 3 : 3 : 1과 아주 조금 다른 비율을 영가설로 세워도 이 자료로는 역시 기각되지 않을 수 있습니다. 멘델의 이론은 이 하나의 검정이 아니라 수많은 실험과 이후의 연구가 함께 뒷받침합니다.</li>
+    <li><strong>"관찰이 몇 개든 이 계산을 쓸 수 있다."</strong> 카이제곱 분포는 근사입니다. 기대 개수가 너무 작은 칸이 있으면 근사가 틀어집니다. 흔히 <strong>모든 칸의 기대 개수가 5 이상</strong>인지 확인합니다. 멘델의 자료는 가장 작은 칸도 34.75라 괜찮습니다.</li>
+  </ol></div>
+</section>
+
+<!-- ======================= 08 ======================= -->
+<section class="panel" id="toogood">
+  <div class="sec-head"><span class="sec-num">08</span><h2>너무 잘 맞아도 문제일까</h2></div>
+  <p>지금까지는 곡선의 <strong>오른쪽</strong>, 곧 "이론에서 너무 많이 벗어났는가"만 보았습니다. 그런데 반대쪽도 질문이 될 수 있습니다. 우연은 늘 어느 정도 흔들림을 만들기 때문에, 관찰이 이론에 <strong>너무 가깝게</strong> 붙어 있는 것도 이상한 일입니다.</p>
+  <figure class="lab" style="margin:0">
+    <div class="lab-head"><strong>왼쪽 꼬리: 이론에 이보다 더 잘 맞을 확률</strong><span>\(P(\chi^2 \le 0.470) = 0.075\)</span></div>
+    <div class="lab-body">
+      <svg class="plot" id="left-svg" viewBox="0 0 640 260" role="img" aria-label="자유도 3인 카이제곱 분포 곡선. 0.47 왼쪽의 좁은 넓이가 칠해져 있다"></svg>
+      <p class="figcap">이론이 맞는 세계에서 멘델보다 이론에 더 가까운 결과가 나올 확률은 7.5%다. 실험 하나만 보면 특별히 의심스러운 값은 아니다.</p>
+    </div>
+  </figure>
+  <p>그런데 통계학자 로널드 피셔(Fisher, 1936)는 멘델의 여러 실험의 \(\chi^2\)를 모두 모아 계산한 뒤, 결과가 이만큼 이론에 잘 맞을 확률은 <strong>십만 번에 일곱 번</strong>꼴이라고 보았습니다. 실험 하나하나는 평범해 보여도, 모두가 한결같이 이론에 가깝다는 것은 우연이라 보기 어렵다는 것입니다. 그래서 멘델의 자료가 "사실이라기엔 너무 좋다"고 의심했습니다.</p>
+  <p>반론도 있습니다. 바일링(Weiling, 1986, <a href="https://pubmed.ncbi.nlm.nih.gov/3531317/" target="_blank" rel="noopener noreferrer">PubMed</a>)은 유전에서 실제로 일어나는 흔들림이 주사위 같은 단순한 확률 모형이 가정하는 것보다 작을 수 있어서, 피셔처럼 합쳐 계산할 수 없다고 주장했습니다. 이 논쟁은 지금도 완전히 끝나지 않았습니다.</p>
+  <div class="callout"><p><strong>데이터과학에서 배울 점.</strong> 첫째, \(p\)값이 0에 가까운 것만 신호가 아닙니다. 1에 가까운 것도 "데이터가 어떻게 만들어졌는지" 다시 묻게 하는 신호가 될 수 있습니다. 데이터를 고르거나, 반올림하거나, 기대에 맞지 않는 결과를 빼는 습관은 데이터를 지나치게 깔끔하게 만듭니다. 둘째, 카이제곱 분포를 쓴다는 것은 "관찰이 16면 주사위처럼 흔들린다"는 가정을 쓴다는 뜻입니다. 이 가정이 맞는지도 늘 따져 볼 대상입니다.</p></div>
+</section>
+
+<!-- ======================= 09 ======================= -->
+<section class="panel" id="practice">
+  <div class="sec-head"><span class="sec-num">09</span><h2>직접 해 보기</h2></div>
+  <p>이 절은 지금까지의 과정을 다른 자료에 그대로 옮겨 보며 손에 익히기 위한 곳입니다. 그래서 답을 싣지 않았습니다. 손으로 계산한 뒤, 아래 계산기로 스스로 맞춰 보세요.</p>
+  <h3>멘델의 한 가지 형질 실험</h3>
+  <p>멘델은 모양과 색을 따로따로 본 실험도 했습니다. Rr끼리, Yy끼리 교배한 결과는 다음과 같습니다(Mendel, 1866).</p>
+  <div class="scroll"><table class="num sheet">
+    <caption>표 2. 한 가지 형질만 본 교배 결과. 빈칸을 채워 보자</caption>
+    <thead><tr><th>실험 · 종류</th><th>관찰 개수</th><th>이론 비율</th><th>기대 개수</th><th>관찰 − 기대</th><th>(관찰 − 기대)² ÷ 기대</th></tr></thead>
+    <tbody>
+      <tr><td>씨 모양 · 둥근 씨</td><td>5474</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>씨 모양 · 주름진 씨</td><td>1850</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>씨 색 · 노란 씨</td><td>6022</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+      <tr><td>씨 색 · 초록 씨</td><td>2001</td><td class="blank"></td><td class="blank"></td><td class="blank"></td><td class="blank"></td></tr>
+    </tbody>
+  </table></div>
+  <ol class="qs">
+    <li>이론이 말하는 비율은 몇 대 몇인가요? 02절의 "한 가지 형질" 설명을 다시 보세요.</li>
+    <li>씨 모양 실험과 씨 색 실험 각각에 대해 표의 빈칸을 채우고 \(\chi^2\)를 구하세요. 두 실험은 따로 검정합니다.</li>
+    <li>각 실험의 자유도는 얼마인가요? 왜 그런가요?</li>
+    <li>계산기로 \(p\)값을 구하고, 0.05와 견주어 결론을 "…에서 벗어났다고 볼 증거가 (있다 / 없다)"의 한 문장으로 쓰세요.</li>
+    <li>씨 모양 실험은 완두를 7천 개 넘게 셌습니다. 556개를 센 04절의 실험과 비교해, 관찰 비율이 이론 비율에서 몇 퍼센트포인트 벗어났는지 보세요. 개수가 많아지면 같은 크기의 비율 차이도 \(\chi^2\)에서는 어떻게 될지, 04절의 계산 단계를 떠올리며 설명해 보세요.</li>
+    <li>08절의 시각에서, 두 실험의 결과는 "너무 잘 맞는" 쪽에 가까운가요? 계산기의 왼쪽 꼬리 확률로 확인하세요.</li>
+  </ol>
+
+  <div class="lab" id="lab-calc">
+    <div class="lab-head"><strong>카이제곱 계산기</strong><span>관찰 개수와 이론 비율을 넣으면 기대 개수, \(\chi^2\), \(p\)값을 계산한다</span></div>
+    <div class="lab-body">
+      <div class="presets" role="group" aria-label="칸 준비">
+        <button class="btn ghost" type="button" data-preset="mendel" aria-pressed="true">멘델 양성잡종 (04절 예)</button>
+        <button class="btn ghost" type="button" data-preset="2" aria-pressed="false">빈 칸 2개</button>
+        <button class="btn ghost" type="button" data-preset="3" aria-pressed="false">빈 칸 3개</button>
+        <button class="btn ghost" type="button" data-preset="4" aria-pressed="false">빈 칸 4개</button>
+      </div>
+      <div class="calc-rows" id="calc-rows"></div>
+      <p class="figcap">이론 비율은 3 : 1처럼 정수로 넣어도 되고 0.75, 0.25처럼 확률로 넣어도 된다. 계산기가 합이 1이 되게 나누어 쓴다.</p>
+      <div class="scroll"><table class="num" id="calc-table">
+        <thead><tr><th>범주</th><th>관찰</th><th>비율</th><th>기대</th><th>몫</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+      <p class="warnline" id="calc-warn" hidden></p>
+      <div class="outs">
+        <div><span class="k">\(\chi^2\)</span><span class="v hl" id="calc-chi">-</span></div>
+        <div><span class="k">자유도</span><span class="v" id="calc-df">-</span></div>
+        <div><span class="k">\(p\)값 (오른쪽 꼬리)</span><span class="v" id="calc-p">-</span></div>
+        <div><span class="k">왼쪽 꼬리 (이보다 더 잘 맞을 확률)</span><span class="v" id="calc-left">-</span></div>
+        <div><span class="k">판단 (기준 0.05)</span><span class="v" id="calc-dec">-</span></div>
+      </div>
+      <svg class="plot" id="calc-svg" viewBox="0 0 640 260" role="img" aria-label="입력한 자료의 카이제곱 값과 해당 자유도의 카이제곱 분포"></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 10 ======================= -->
+<section class="panel" id="computer">
+  <div class="sec-head"><span class="sec-num">10</span><h2>컴퓨터로 확인하기</h2></div>
+  <p>손으로 해 본 계산을 컴퓨터는 한 줄로 합니다. 데이터과학에서는 이 계산을 직접 코드로 쓰기도 하고, 코딩 에이전트에게 말로 부탁하기도 합니다. 어느 쪽이든 <strong>결과의 숫자가 손계산과 같은지 대조하는 습관</strong>이 중요합니다. R을 설치하는 방법은 <a href="VScode-R-languageserver.html">VS Code에서 R 실행하기</a>에 있습니다.</p>
+  <h3 id="folder">실습 폴더 받기</h3>
+  <p>R로 분석할 작업 폴더의 뼈대를 준비해 두었습니다. 이 절의 멘델 검정과 11절의 웰던 실험 재현을 모두 이 폴더에서 합니다. 코딩 에이전트의 규칙과 래비(2009)의 실제 주사위 기록이 들어 있고, 멘델의 개수는 프롬프트와 코드에 숫자로 들어 있어 따로 파일이 필요 없습니다.</p>
+<pre class="tree">chisq-dice/
+├── AGENTS.md             # 코딩 에이전트가 따를 규칙
+├── CLAUDE.md             # Claude Code용: AGENTS.md를 불러온다
+├── README.md             # 폴더 안내
+├── scripts/              # R 스크립트 (처음엔 비어 있다)
+├── dataset/
+│   ├── raw/
+│   │   └── labby_2009_faces.csv  # 래비(2009)의 실제 주사위 기록: 눈별 개수
+│   └── working/          # 컴퓨터로 흉내 낸 결과를 둘 곳
+└── output/               # 표(CSV)와 그림(PNG)</pre>
+  <p><a class="dl-link" href="../downlodable/chisq-dice.zip" download="chisq-dice.zip">⬇ chisq-dice.zip 다운로드</a></p>
+  <ol>
+    <li><strong>zip 내려받기.</strong> 위 단추로 <code>chisq-dice.zip</code>을 받아 원하는 곳에 푼다. 코드를 몰라도 된다.</li>
+    <li><strong>degit.</strong> Node.js가 있으면(<a href="nvm-node-agent-skills.html">nvm과 Node.js 설치하기</a>) 터미널에서 폴더만 바로 받는다.
+      <div class="cb"><span class="lang">터미널</span><pre>npx degit qmakescl/class-material/skeleton/chisq-dice chisq-dice</pre></div></li>
+    <li><strong>git sparse checkout.</strong> 저장소에서 이 폴더만 골라 받는다. 폴더는 <code>class-material/skeleton/chisq-dice</code>에 생긴다.
+      <div class="cb"><span class="lang">터미널</span><pre>git clone --depth 1 --filter=blob:none --sparse https://github.com/qmakescl/class-material.git
+cd class-material
+git sparse-checkout set skeleton/chisq-dice</pre></div></li>
+  </ol>
+  <p>받은 뒤에는 <code>chisq-dice</code> 폴더를 VS Code로 <strong>폴더째</strong> 엽니다. 그래야 R의 작업 폴더가 <code>chisq-dice</code>가 되어 프롬프트의 경로가 그대로 통합니다. 폴더 맨 위의 <code>AGENTS.md</code>는 코딩 에이전트가 이 폴더에서 일할 때 먼저 읽는 규칙입니다. 프롬프트마다 같은 요구를 되풀이하지 않아도 됩니다.</p>
+  <ul>
+    <li>R 코드는 <strong>tidyverse</strong>로 쓴다. 자료는 readr로 읽고 dplyr로 가공한다.</li>
+    <li>그림은 tidyverse에 들어 있는 <strong>ggplot2</strong>로만 그리고 <code>output/</code>에 PNG로 저장한다.</li>
+    <li>한글은 <strong>showtext</strong>로 Google Fonts의 <strong>Noto Sans KR</strong>을 쓴다.</li>
+    <li>난수를 쓸 때는 <strong>시드를 정하고 알린다.</strong> 컴퓨터로 흉내 낸 결과는 <code>dataset/working/</code>에 두고, 실측 자료(<code>dataset/raw/</code>)와 섞거나 실측처럼 적지 않는다.</li>
+  </ul>
+  <p>Claude Code는 <code>AGENTS.md</code> 대신 <code>CLAUDE.md</code>를 읽기 때문에, <code>AGENTS.md</code>를 불러오는 한 줄짜리 <code>CLAUDE.md</code>도 함께 넣어 두었습니다. 필요한 R 패키지는 tidyverse와 showtext입니다.</p>
+
+  <h3>코딩 에이전트에게 맡긴다면</h3>
+  <div class="cb prompt"><span class="lang">프롬프트 · 멘델 완두의 적합도 검정</span><pre>멘델(1866)이 양성잡종 교배에서 센 완두 556개가 이론 비율 9:3:3:1 을 따르는지 카이제곱 적합도 검정을 하는 R 스크립트 scripts/mendel_chisq.R 을 써서 실행해 줘. 관찰 개수는 둥글고 노랑 315, 둥글고 초록 108, 주름지고 노랑 101, 주름지고 초록 32 이고, 이론 비율도 이 순서로 짝짓는다.
+
+1. 종류마다 관찰 개수, 이론 비율, 기대 개수, 관찰과 기대의 차이, 카이제곱 통계량에 보태는 몫을 한 표로 보여 줘. 몫을 모두 더한 값이 검정 결과의 통계량과 같은지도 확인해 줘.
+2. 카이제곱 통계량, 자유도, p값을 알려 주고, 이론에 이보다 더 잘 맞을 확률(왼쪽 꼬리)도 구해 줘.
+3. 결과를 "카이제곱(자유도, N = 전체 개수) = 값, p = 값" 꼴의 한 줄과, 통계를 모르는 사람도 이해할 수 있는 한 문장으로 정리해 줘. 유의하지 않으면 "같다"가 아니라 "다르다고 볼 증거가 없다"로 쓴다.</pre></div>
+
+  <h3>직접 쓴다면</h3>
+  <p>실습 폴더의 <code>scripts/mendel_chisq.R</code>로 저장하고 <code>chisq-dice/</code>에서 실행합니다.</p>
+  <div class="cb r"><span class="lang">R</span><pre># 멘델이 센 완두 556개 (Mendel, 1866)
+peas   &lt;- c(round_yellow = 315, round_green = 108,
+            wrinkled_yellow = 101, wrinkled_green = 32)
+theory &lt;- c(9, 3, 3, 1) / 16          # 9:3:3:1 을 확률로
+
+result &lt;- chisq.test(peas, p = theory)
+result                                # 통계량, 자유도, p값
+result$expected                       # 기대 개수
+(peas - result$expected)^2 / result$expected   # 칸마다 보태는 몫
+pchisq(result$statistic, df = 3)      # 왼쪽 꼬리: 이보다 더 잘 맞을 확률</pre></div>
+  <div class="cb"><span class="lang">출력</span><pre>	Chi-squared test for given probabilities
+
+data:  peas
+X-squared = 0.47002, df = 3, p-value = 0.9254
+
+   round_yellow     round_green wrinkled_yellow  wrinkled_green
+         312.75          104.25          104.25           34.75
+   round_yellow     round_green wrinkled_yellow  wrinkled_green
+     0.01618705      0.13489209      0.10131894      0.21762590
+X-squared
+0.0745741 </pre></div>
+  <h3>확인할 것</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>무엇을</th><th>어떻게 확인하나</th></tr></thead>
+    <tbody>
+      <tr><td>기대 개수</td><td>312.75, 104.25, 104.25, 34.75인가. 다르면 이론 비율을 종류와 다른 순서로 짝지은 것이다(예: 둥글고 초록에 9/16).</td></tr>
+      <tr><td>칸마다의 몫</td><td>04절 표의 ③ 열(0.0162, 0.1349, 0.1013, 0.2176)과 같은가. 몫의 합이 출력의 X-squared(0.47)와 같은가.</td></tr>
+      <tr><td>자유도와 \(p\)값</td><td>df = 3, p = 0.925인가. 07절 그림의 넓이와 같은가.</td></tr>
+      <tr><td>결론 문장</td><td>"9 : 3 : 3 : 1과 같다"가 아니라 "벗어났다고 볼 증거가 없다"로 썼는가.</td></tr>
+    </tbody>
+  </table></div>
+  <p>09절의 한 가지 형질 실험도 관찰 개수와 비율만 바꾸어 같은 방법으로 확인할 수 있습니다. 다음 절에서는 이 도구를 들고 직접 만든 데이터로 실험합니다.</p>
+</section>
+
+<!-- ======================= 11 ======================= -->
+<section class="panel" id="dice">
+  <div class="sec-head"><span class="sec-num">11</span><h2>주사위로 실험하기</h2></div>
+  <div class="callout"><p><strong>이 절은 직접 해 보는 실험입니다.</strong> 목적은 정답을 맞히는 것이 아니라, 내 손으로 만든 데이터에서 <strong>던진 횟수에 따라 \(\chi^2\)와 비율이 어떻게 달라지는지</strong> 직접 보는 것입니다. 코딩 에이전트가 만들어 준 결과를 그대로 받아 적는 데서 멈추지 말고, 그림을 보며 스스로 설명해 보세요. 그래서 이 절에는 결과를 싣지 않았습니다. 무엇을 하고, 무엇을 시키고, 무엇을 확인할지만 적었습니다.</p></div>
+
+  <h3>무엇을 하나</h3>
+  <p>웰던의 주사위 실험을 컴퓨터로 재현합니다. 영가설은 "각 눈이 나올 확률은 1/6이다", 곧 <strong>주사위가 공정하다</strong>는 것입니다. 멘델의 완두와 같은 적합도 검정이고, 범주가 여섯 개이므로 자유도는 5입니다. 기대 개수는 "센 주사위 수 ÷ 6"이고, 판단 기준선(유의수준 0.05의 임계값)은 11.07입니다.</p>
+  <p>여기에 한 가지를 더 봅니다. <strong>던진 횟수를 늘려 가며</strong> 이론과 실제의 차이, 그리고 \(\chi^2\)가 어떻게 달라지는지 봅니다. 먼저 쪽 안의 위젯으로 주사위 12개를 한 번에 던지는 횟수를 20번에서 200,000번까지 늘려 흐름을 보고, 다음에 코딩 에이전트에게 같은 실험을 R로 재현하게 해 래비의 실제 기록과 견주고 웰던이 센 방식으로도 세어 봅니다. 시작하기 전에 예상을 하나 적어 두세요.</p>
+  <div class="readout">예상: 던질수록 각 눈의 비율은 1/6에 가까워질 것이다. 그렇다면 χ²는 ______________.</div>
+
+  <h3>1. 웰던처럼 주사위 12개를 던져 보기 (컴퓨터)</h3>
+  <p>06절에서 잠깐 만난 생물통계학자 웰던(Walter F. R. Weldon, 1860–1906)은 1894년에 <strong>주사위 12개를 한꺼번에 던지기를 26,306번</strong> 되풀이하고, 던질 때마다 5나 6이 나온 주사위의 개수를 기록했습니다. 결과는 5와 6이 기대보다 자주 나온 것으로 보였고, 피어슨은 그 까닭을 주사위의 만듦새에서 찾았습니다. 값싼 주사위는 눈을 파서 새기는데, 마주 보는 면의 눈을 더하면 7이므로 눈이 여섯 개 파인 6의 면이 눈이 하나뿐인 1의 면보다 가볍다는 것입니다. 2009년에는 시카고 대학의 래비(Zacariah Labby)가 주사위를 던지고 눈을 세는 기계를 직접 만들어 같은 실험을 되풀이했습니다. 이번에는 5·6만이 아니라 주사위마다 나온 눈을 모두 기록했습니다(Rundel, 2013).</p>
+  <p>우리도 컴퓨터로 웰던의 실험을 해 봅니다. 아래 단추로 <strong>주사위 12개를 한 번에 던지는 횟수</strong>를 고르면, 나온 눈을 모두 세어 눈마다 이론(1/6)과 견줍니다. 20번 던지면 주사위 240개, 200,000번 던지면 240만 개를 세는 셈입니다. 웰던이 센 "5 또는 6이 나온 비율"(이론 1/3)도 함께 보입니다. 이론과 실제의 차이는 두 가지로 잽니다.</p>
+  <ul>
+    <li><strong>개수 차이</strong> = 나온 횟수 − 기대 개수. "몇 번이나 더(덜) 나왔나"입니다.</li>
+    <li><strong>비율 차이</strong> = 나온 비율 − 1/6. "비율로 보면 이론에서 얼마나 벗어났나"입니다. %p(퍼센트포인트)로 적습니다.</li>
+  </ul>
+  <p>마지막 단추는 컴퓨터가 굴린 것이 아니라 <strong>래비가 실제 주사위로 26,306번 던진 기록</strong>입니다(Rundel, 2013의 표). 컴퓨터 주사위의 결과와 같은 표에 놓고 견주어 보세요.</p>
+  <div class="lab" id="lab-roll">
+    <div class="lab-head"><strong>주사위 12개 던지기</strong><span>횟수 단추는 컴퓨터가 눈마다 1/6의 확률로 흉내 낸 가상의 주사위다. 래비의 기록만 실제로 던진 주사위다</span></div>
+    <div class="lab-body">
+      <div class="presets" role="group" aria-label="던질 횟수">
+        <button class="btn ghost" type="button" data-roll="20" aria-pressed="false">20번</button>
+        <button class="btn ghost" type="button" data-roll="200" aria-pressed="false">200번</button>
+        <button class="btn ghost" type="button" data-roll="2000" aria-pressed="false">2,000번</button>
+        <button class="btn ghost" type="button" data-roll="20000" aria-pressed="false">20,000번</button>
+        <button class="btn ghost" type="button" data-roll="200000" aria-pressed="false">200,000번</button>
+        <button class="btn ghost" type="button" data-roll="labby" aria-pressed="false">래비의 실제 기록 (26,306번)</button>
+      </div>
+      <div class="presets">
+        <button class="btn" type="button" id="roll-again" disabled>같은 횟수로 다시 던지기</button>
+        <button class="btn ghost" type="button" id="roll-clear">표 비우기</button>
+      </div>
+      <p class="infoline" id="roll-note" hidden></p>
+      <div class="outs">
+        <div><span class="k">던진 횟수 (12개씩)</span><span class="v" id="roll-n">-</span></div>
+        <div><span class="k">센 주사위</span><span class="v" id="roll-dice">-</span></div>
+        <div><span class="k">가장 큰 개수 차이</span><span class="v" id="roll-maxd">-</span></div>
+        <div><span class="k">가장 큰 비율 차이</span><span class="v" id="roll-maxs">-</span></div>
+        <div><span class="k">5 또는 6의 비율 (이론 33.33%)</span><span class="v" id="roll-56">-</span></div>
+        <div><span class="k">\(\chi^2\) (자유도 5)</span><span class="v hl" id="roll-chi">-</span></div>
+        <div><span class="k">\(p\)값</span><span class="v" id="roll-p">-</span></div>
+      </div>
+      <svg class="plot" id="roll-bars" viewBox="0 0 640 220" role="img" aria-label="이번 결과의 눈별 비율과 이론 비율 1/6"></svg>
+      <div class="scroll"><table class="num" id="roll-table">
+        <thead><tr><th>눈</th><th>나온 횟수</th><th>기대 개수</th><th>개수 차이</th><th>나온 비율</th><th>비율 차이</th><th>\(\chi^2\)의 몫</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+      <h4>던진 횟수를 늘려 가며</h4>
+      <p class="figcap">횟수를 고를 때마다 아래 표에 한 줄씩 쌓인다. 같은 횟수를 다시 던지면 그 줄이 새 결과로 바뀐다. 그림은 표의 두 차이를 던진 횟수 순서로 이은 것이고(가로축은 10배마다 같은 간격), 검은 네모는 래비의 실제 기록이다.</p>
+      <div class="scroll"><table class="num" id="roll-hist">
+        <thead><tr><th>던진 횟수</th><th>센 주사위</th><th>기대 개수</th><th>가장 큰 개수 차이</th><th>가장 큰 비율 차이</th><th>5·6 비율 차이</th><th>\(\chi^2\)</th><th>\(p\)값</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+      <svg class="plot" id="roll-err" viewBox="0 0 640 250" role="img" aria-label="던진 횟수에 따른 가장 큰 개수 차이와 가장 큰 비율 차이"></svg>
+    </div>
+  </div>
+
+  <h3>2. R로 웰던의 실험 재현하기</h3>
+  <p>이번에는 같은 실험을 코딩 에이전트에게 R로 재현하게 합니다. 분석은 <a href="#folder">10절에서 받은 실습 폴더</a> <code>chisq-dice</code>에서 합니다. 폴더에는 래비의 실제 기록(<code>dataset/raw/labby_2009_faces.csv</code>, Rundel 2013의 5쪽 표)이 들어 있습니다. 웰던 본인의 집계는 남아 있는 자료가 없어 컴퓨터로 흉내 냅니다.</p>
+  <p>컴퓨터가 흉내 내는 결과는 실행할 때마다 달라집니다. 그래서 <strong>시드</strong>(난수의 출발점이 되는 수)를 정해 두면 같은 결과를 다시 얻을 수 있습니다. 프롬프트에서는 웰던이 실험한 해인 1894를 시드로 씁니다. 또 횟수마다 따로 다시 던지지 않고, 200,000번을 한 번 흉내 낸 뒤 처음 20번, 200번, …까지 잘라 봅니다. 실제로 계속 던지며 중간중간 세어 보는 것과 같습니다.</p>
+  <div class="cb prompt"><span class="lang">프롬프트 1 · 웰던의 실험 흉내 내기</span><pre>웰던(1894)의 주사위 실험을 컴퓨터로 재현하는 R 스크립트 scripts/weldon_sim.R 을 써서 실행해 줘. 웰던은 주사위 12개를 한 번에 던지기를 되풀이했다. 각 주사위는 눈마다 1/6의 확률로 나온다고 흉내 내고, 시드는 1894로 정한다.
+
+1. 주사위 12개를 한 번에 던지기를 200,000번 흉내 내어 dataset/working/weldon_sim.rds 로 저장해 줘. 한 행이 한 번 던지기이고, 몇 번째 던지기인지와 주사위 12개의 눈을 열로 둔다.
+2. 처음 20번, 200번, 2,000번, 20,000번, 200,000번까지 던진 결과에서 각각 눈마다 나온 횟수, 기대 개수, 개수 차이(나온 횟수 − 기대 개수), 나온 비율, 비율 차이(나온 비율 − 1/6), 카이제곱 통계량에 보태는 몫을 구해 output/weldon_by_face.csv 로 저장해 줘.
+3. 던진 횟수마다 센 주사위 수, 카이제곱 통계량, p값, 가장 큰 개수 차이, 가장 큰 비율 차이, 5 또는 6이 나온 비율과 1/3의 차이를 한 표로 보여 주고 output/weldon_by_n.csv 로 저장해 줘.
+4. 던진 횟수에 따른 가장 큰 개수 차이와 가장 큰 비율 차이를 나란히 두 칸의 선 그래프로 그려 output/weldon_diffs.png 로, 카이제곱 통계량을 유의수준 0.05의 임계값 점선과 함께 그려 output/weldon_chisq.png 로 저장해 줘. 가로축은 던진 횟수의 로그 눈금으로 하고 세로축은 0에서 시작한다.</pre></div>
+  <div class="cb prompt"><span class="lang">프롬프트 2 · 래비의 실제 주사위와 견주기</span><pre>dataset/raw/labby_2009_faces.csv 는 래비(2009)가 실제 주사위 12개를 한 번에 던지기를 26,306번 되풀이해 센 눈별 개수다. 이 기록과, weldon_sim.rds 에서 처음 26,306번만 쓴 컴퓨터 주사위를 견주는 R 스크립트 scripts/labby_compare.R 을 써서 실행해 줘. 컴퓨터로 다시 흉내 내지 말고 저장해 둔 파일을 읽는다.
+
+1. 두 자료 각각에 대해 눈마다 나온 횟수, 기대 개수, 개수 차이, 비율 차이, 카이제곱 통계량에 보태는 몫을 한 표로 보여 주고 output/labby_compare.csv 로 저장해 줘.
+2. 두 자료 각각의 카이제곱 통계량, 자유도, p값을 알려 줘.
+3. 눈마다 비율 차이를 두 자료를 나란히 놓은 막대그래프로 그리고 0에 점선을 그어 output/labby_compare.png 로 저장해 줘. 범례에서 실제 주사위와 컴퓨터 주사위를 구별한다.</pre></div>
+  <div class="cb prompt"><span class="lang">프롬프트 3 · 웰던이 센 방식 그대로</span><pre>웰던은 눈을 하나하나 세지 않고, 한 번 던질 때 주사위 12개 가운데 5 또는 6이 나온 주사위가 몇 개인지(0~12개)를 기록했다. weldon_sim.rds 의 처음 26,306번으로 이 방식 그대로 세어 보는 R 스크립트 scripts/weldon_successes.R 을 써서 실행해 줘.
+
+1. 던질 때마다 5 또는 6이 나온 주사위 수를 세어, 0개부터 12개까지 각각 몇 번 나왔는지 표로 만든다. 한 번도 나오지 않은 개수도 0으로 넣는다.
+2. 한 주사위에서 5나 6이 나올 확률을 1/3로 두고, 12개 가운데 그 개수만큼 나올 이론 확률과 기대 개수를 붙여 줘.
+3. 기대 개수가 5보다 작은 끝 칸은 이웃 칸과 합쳐 모든 칸의 기대 개수가 5 이상이 되게 한 뒤 카이제곱 적합도 검정을 하고, 어떻게 합쳤는지와 자유도, p값을 알려 줘. 합친 표를 output/weldon_successes.csv 로 저장해 줘.
+4. 나온 횟수를 막대로, 기대 개수를 점으로 겹쳐 그려 output/weldon_successes.png 로 저장해 줘.</pre></div>
+  <details class="fold">
+    <summary>직접 쓴다면: 프롬프트 1~3을 R 코드로 쓴 예 (펼쳐 보기)</summary>
+    <p>에이전트가 만든 코드와 견주어 보거나, 코드를 직접 쓰고 싶을 때 참고하세요. 실습 폴더의 <code>scripts/</code>에 저장하고 <code>chisq-dice/</code>에서 1, 2, 3의 순서로 실행합니다. 2와 3은 1이 저장한 파일을 읽습니다.</p>
+    <div class="cb r"><span class="lang">R · scripts/weldon_sim.R</span><pre># 웰던(1894)의 실험을 컴퓨터로 흉내 낸다: 주사위 12개를 한 번에 던지기를 200,000번
+library(tidyverse)
+library(showtext)
+font_add_google("Noto Sans KR", "notosanskr")
+showtext_auto()
+showtext_opts(dpi = 300)
+options(pillar.sigfig = 7)
+
+set.seed(1894)                      # 웰던이 실험한 해. 시드를 바꾸면 다른 결과가 나온다
+n_max &lt;- 200000
+# 한 행 = 한 번 던지기, d1~d12 = 주사위 12개의 눈 (컴퓨터가 흉내 낸 값)
+sim &lt;- matrix(sample(1:6, n_max * 12, replace = TRUE), ncol = 12,
+              dimnames = list(NULL, paste0("d", 1:12))) %&gt;%
+  as_tibble() %&gt;%
+  mutate(throw = row_number(), .before = 1)
+write_rds(sim, "dataset/working/weldon_sim.rds")
+
+long &lt;- sim %&gt;% pivot_longer(d1:d12, names_to = "die", values_to = "face")
+
+# 처음 20, 200, ..., 200,000번까지 던진 결과를 눈마다 센다
+checkpoints &lt;- c(20, 200, 2000, 20000, 200000)
+by_face &lt;- map(checkpoints, \(k) long %&gt;%
+                 filter(throw &lt;= k) %&gt;%
+                 count(face = factor(face, levels = 1:6), .drop = FALSE, name = "observed") %&gt;%
+                 mutate(throws = k)) %&gt;%
+  list_rbind() %&gt;%
+  mutate(dice = 12 * throws,
+         expected = dice / 6,
+         diff = observed - expected,             # 개수 차이
+         share = observed / dice,
+         share_diff = share - 1 / 6,             # 비율 차이
+         contribution = diff^2 / expected)
+write_csv(by_face, "output/weldon_by_face.csv")
+
+by_n &lt;- by_face %&gt;%
+  group_by(throws, dice) %&gt;%
+  summarise(chisq = sum(contribution),
+            max_diff = max(abs(diff)),
+            max_share_diff = max(abs(share_diff)),
+            share56 = sum(observed[face %in% c("5", "6")]) / first(dice),
+            .groups = "drop") %&gt;%
+  mutate(p_value = pchisq(chisq, df = 5, lower.tail = FALSE),
+         share56_diff = share56 - 1 / 3)
+print(by_n)
+write_csv(by_n, "output/weldon_by_n.csv")
+
+# 그림 1: 던진 횟수에 따른 두 가지 차이
+p1 &lt;- by_n %&gt;%
+  transmute(throws,
+            `가장 큰 개수 차이 (번)` = max_diff,
+            `가장 큰 비율 차이 (%p)` = max_share_diff * 100) %&gt;%
+  pivot_longer(-throws, names_to = "what", values_to = "value") %&gt;%
+  ggplot(aes(throws, value)) +
+  geom_line(colour = "#0ea968", linewidth = 0.8) +
+  geom_point(colour = "#0ea968", size = 2) +
+  facet_wrap(~ what, scales = "free_y") +
+  scale_x_log10(breaks = checkpoints, labels = scales::label_comma()) +
+  expand_limits(y = 0) +
+  labs(x = "던진 횟수 (주사위 12개씩)", y = NULL,
+       title = "던진 횟수에 따른 이론과 실제의 차이",
+       subtitle = str_glue("컴퓨터로 흉내 낸 주사위 (시드 1894)")) +
+  theme_minimal(base_family = "notosanskr")
+ggsave("output/weldon_diffs.png", p1, width = 9, height = 4.5)
+
+# 그림 2: 던진 횟수에 따른 카이제곱 통계량
+crit &lt;- qchisq(0.95, df = 5)
+p2 &lt;- ggplot(by_n, aes(throws, chisq)) +
+  geom_line(colour = "#0ea968", linewidth = 0.8) +
+  geom_point(colour = "#0ea968", size = 2) +
+  geom_hline(yintercept = crit, colour = "#d1264f", linetype = "dashed") +
+  annotate("text", x = 20, y = crit, label = sprintf("임계값 %.2f", crit),
+           hjust = 0, vjust = -0.5, colour = "#d1264f", family = "notosanskr") +
+  scale_x_log10(breaks = checkpoints, labels = scales::label_comma()) +
+  expand_limits(y = 0) +
+  labs(x = "던진 횟수 (주사위 12개씩)", y = "카이제곱 통계량",
+       title = "던진 횟수에 따른 카이제곱 통계량 (자유도 5)") +
+  theme_minimal(base_family = "notosanskr")
+ggsave("output/weldon_chisq.png", p2, width = 7, height = 5)</pre></div>
+    <div class="cb r"><span class="lang">R · scripts/labby_compare.R</span><pre># 래비(2009)의 실제 주사위 기록과 같은 횟수의 컴퓨터 주사위를 견준다
+library(tidyverse)
+library(showtext)
+font_add_google("Noto Sans KR", "notosanskr")
+showtext_auto()
+showtext_opts(dpi = 300)
+options(pillar.sigfig = 7)
+
+labby &lt;- read_csv("dataset/raw/labby_2009_faces.csv", col_types = cols(face = col_character(), observed = col_integer()))
+
+# weldon_sim.R 이 만든 흉내 낸 기록에서 처음 26,306번만 쓴다
+sim &lt;- read_rds("dataset/working/weldon_sim.rds") %&gt;%
+  filter(throw &lt;= 26306) %&gt;%
+  pivot_longer(d1:d12, names_to = "die", values_to = "face") %&gt;%
+  count(face = factor(face, levels = 1:6), .drop = FALSE, name = "observed") %&gt;%
+  mutate(face = as.character(face))
+
+compare &lt;- bind_rows(labby %&gt;% mutate(source = "래비 (실제 주사위)"),
+                     sim %&gt;% mutate(source = "컴퓨터 (같은 횟수)")) %&gt;%
+  group_by(source) %&gt;%
+  mutate(dice = sum(observed),
+         expected = dice / 6,
+         diff = observed - expected,
+         share_diff = observed / dice - 1 / 6,
+         contribution = diff^2 / expected) %&gt;%
+  ungroup()
+print(compare)
+write_csv(compare, "output/labby_compare.csv")
+
+tests &lt;- compare %&gt;%
+  group_by(source) %&gt;%
+  summarise(dice = first(dice), chisq = sum(contribution), .groups = "drop") %&gt;%
+  mutate(df = 5, p_value = pchisq(chisq, df = 5, lower.tail = FALSE))
+print(tests)
+
+p &lt;- ggplot(compare, aes(face, share_diff * 100, fill = source)) +
+  geom_col(position = position_dodge(width = 0.7), width = 0.65) +
+  geom_hline(yintercept = 0, colour = "#0b1220", linetype = "dashed") +
+  scale_fill_manual(values = c("래비 (실제 주사위)" = "#0b1220", "컴퓨터 (같은 횟수)" = "#0ea968")) +
+  labs(x = "주사위 눈", y = "비율 차이 (%p, 나온 비율 − 1/6)", fill = NULL,
+       title = "주사위 12개 × 26,306번: 실제 주사위와 컴퓨터 주사위") +
+  theme_minimal(base_family = "notosanskr") +
+  theme(legend.position = "top")
+ggsave("output/labby_compare.png", p, width = 7, height = 5)</pre></div>
+    <div class="cb r"><span class="lang">R · scripts/weldon_successes.R</span><pre># 웰던이 센 방식 그대로: 한 번 던질 때 주사위 12개 중 5 또는 6이 나온 개수(0~12개)
+library(tidyverse)
+library(showtext)
+font_add_google("Noto Sans KR", "notosanskr")
+showtext_auto()
+showtext_opts(dpi = 300)
+options(pillar.sigfig = 7)
+
+n &lt;- 26306                                        # 웰던이 던진 횟수
+succ &lt;- read_rds("dataset/working/weldon_sim.rds") %&gt;%
+  filter(throw &lt;= n) %&gt;%
+  mutate(successes = rowSums(across(d1:d12, \(x) x &gt;= 5)))
+
+# 이론: 한 주사위에서 5나 6이 나올 확률 1/3, 12개 중 k개가 나올 확률(이항분포)
+tab &lt;- succ %&gt;%
+  count(successes = factor(successes, levels = 0:12), .drop = FALSE, name = "observed") %&gt;%
+  mutate(k = as.integer(as.character(successes)),
+         prob = dbinom(k, size = 12, prob = 1 / 3),
+         expected = n * prob)
+print(tab)
+
+# 기대 개수가 5보다 작은 끝 칸(11, 12개)을 10개와 합쳐 "10개 이상"으로 둔다
+pooled &lt;- tab %&gt;%
+  mutate(group = if_else(k &gt;= 10, "10+", as.character(k)),
+         group = factor(group, levels = c(0:9, "10+"))) %&gt;%
+  group_by(group) %&gt;%
+  summarise(observed = sum(observed), prob = sum(prob), expected = sum(expected), .groups = "drop")
+stopifnot(all(pooled$expected &gt;= 5))
+print(pooled)
+write_csv(pooled, "output/weldon_successes.csv")
+
+test &lt;- chisq.test(pooled$observed, p = pooled$prob)
+print(test)                                       # 칸 11개, 자유도 10
+
+p &lt;- pooled %&gt;%
+  ggplot(aes(group)) +
+  geom_col(aes(y = observed), fill = "#0ea968", width = 0.6) +
+  geom_point(aes(y = expected), colour = "#0b1220", size = 2.5, shape = 18) +
+  labs(x = "한 번 던질 때 5 또는 6이 나온 주사위 수", y = "횟수",
+       title = "웰던의 방식으로 센 결과 (컴퓨터 주사위 26,306번)",
+       subtitle = "막대: 나온 횟수, 검은 점: 이론(이항분포)의 기대 개수") +
+  theme_minimal(base_family = "notosanskr")
+ggsave("output/weldon_successes.png", p, width = 7, height = 5)</pre></div>
+  </details>
+
+  <h3>3. 확인할 것</h3>
+  <p>위젯, R 재현, 래비의 실제 기록을 보며 아래 질문에 답해 보세요. 답은 그림과 표 안에 있습니다. 조원들과 결과를 견주면 더 많이 보입니다.</p>
+  <ol class="qs">
+    <li><strong>20번 던지기.</strong> 주사위 240개를 셌으니 이론대로라면 눈마다 40번씩입니다. 실제로 모든 눈이 40번씩 나왔나요? 여러 번 다시 던져 보세요. 이 어긋남을 "주사위가 공정하지 않다"는 증거로 볼 수 있을까요?</li>
+    <li><strong>20번 → 200,000번.</strong> 횟수를 10배씩 늘릴 때 "가장 큰 개수 차이"와 "가장 큰 비율 차이"는 각각 어떻게 변하나요? 두 그림이 서로 다른 방향으로 움직인다면, 어느 쪽이 "이론에 가까워진다"는 말에 맞는 잣대인가요?</li>
+    <li><strong>같은 표의 \(\chi^2\).</strong> 횟수가 커질 때 \(\chi^2\)는 개수 차이와 비율 차이 중 어느 쪽을 닮았나요, 아니면 둘 다 닮지 않았나요? 같은 횟수로 여러 번 다시 던져 보고, 04절의 계산 단계(차이를 제곱해 기대 개수로 나눈다)와 06절의 자유도 5인 곡선으로 그 이유를 설명해 보세요.</li>
+    <li><strong>래비의 실제 기록.</strong> 래비의 기록을 불러와 비슷한 횟수(20,000번)의 컴퓨터 주사위와 견주어 보세요. 비율 차이는 어느 쪽이 큰가요? \(\chi^2\)와 \(p\)값으로 보면 래비의 주사위는 공정하다고 볼 수 있나요? 어느 눈이 기대보다 많이 나왔고, 그것은 "5와 6이 더 자주 나온다"는 피어슨의 설명과 맞나요?</li>
+    <li><strong>작은 차이와 큰 표본.</strong> 래비의 기록에서 비율 차이는 1%p도 되지 않습니다. 그런데도 \(\chi^2\)가 큰 까닭은 무엇일까요? 같은 크기의 비율 차이가 주사위 240개(20번)에서 나왔다면 어땠을지 생각해 보세요.</li>
+    <li><strong>R 재현.</strong> R로 만든 두 그림(<code>weldon_diffs.png</code>, <code>weldon_chisq.png</code>)이 위젯에서 본 흐름과 같은가요? 시드를 1894에서 다른 수로 바꿔 다시 실행하면 표의 숫자와 그림의 모양 가운데 무엇이 바뀌고 무엇이 그대로인가요? 처음에 적어 둔 예상과도 견주어 보세요.</li>
+    <li><strong>시드가 다른 조원들.</strong> 조원마다 시드를 다르게 정해 실행하고 20,000번 결과의 \(p\)값을 모아 보세요. 모두 공정한 주사위를 흉내 냈는데도 \(p\)값이 0.05보다 작은 사람이 나올 수 있을까요? 여러 사람이 하면 대략 몇 명 가운데 한 명꼴로 나올 것이라 예상할 수 있나요?</li>
+    <li><strong>웰던이 센 방식.</strong> 프롬프트 3의 표에서 0~12개 가운데 가장 자주 나온 개수는 몇 개인가요? 이론의 기대 개수가 가장 큰 칸과 같은가요? 끝 칸을 합친 까닭은 무엇이고, 그 때문에 자유도는 몇이 되었나요? 06절에서 본 것처럼 자유도는 "칸의 수 − 1"입니다.</li>
+    <li><strong>결과 쓰기.</strong> 래비의 기록과 같은 횟수의 컴퓨터 주사위 각각에 대해 "χ²(5, N = 센 주사위 수) = 값, p = 값"의 한 줄과, 통계를 모르는 친구도 이해할 한 문장을 써 보세요. 유의하지 않다면 "공정하다"가 아니라 "공정하지 않다고 볼 증거가 없다"로 씁니다.</li>
+  </ol>
+</section>
+
+<!-- ======================= 11 ======================= -->
+<section class="panel" id="wrap">
+  <div class="sec-head"><span class="sec-num">12</span><h2>정리와 다음 걸음</h2></div>
+  <div class="recap">
+    <p><strong>기대 개수</strong> — 전체 개수 × 이론 비율. 이론이 맞다면 평균적으로 나올 개수다.</p>
+    <p><strong>카이제곱 통계량 \(\chi^2\)</strong> — 칸마다 (관찰 − 기대)² ÷ 기대를 구해 모두 더한 값. 0이면 완전히 일치하고, 클수록 많이 어긋난 것이다.</p>
+    <p><strong>카이제곱 분포</strong> — 서로 독립인 표준정규분포 \(k\)개를 제곱해 더한 값의 분포. 칸마다의 어긋남을 표준화해 제곱한 것이 \(\chi^2\)의 몫이라, 이론이 맞는 세계에서 \(\chi^2\)가 흔들리는 모양이 된다. 피어슨(1900)이 실험을 되풀이하지 않고도 판단할 잣대로 썼다.</p>
+    <p><strong>자유도</strong> — 제곱해 더한 독립적인 값의 개수. 적합도 검정에서는 범주의 수 − 1이다. 자유도가 커지면 분포가 오른쪽으로 옮겨 가고(평균 = 자유도) 넓게 퍼지며 종 모양에 가까워진다.</p>
+    <p><strong>\(p\)값</strong> — 이론이 맞을 때 지금만큼 또는 더 어긋난 결과가 나올 확률. 작으면(흔히 0.05 미만) 이론과 다르다고 볼 증거가 있다고 판단한다.</p>
+    <p><strong>던진 횟수</strong> — 던진 횟수가 늘 때 비율과 \(\chi^2\)가 각각 어떻게 움직이는지는 11절의 웰던 실험 재현에서 확인한 것이 답이다. 둘이 같은 방향으로 움직였는지 다시 떠올려 보자.</p>
+    <p><strong>판단의 말</strong> — 기각하지 못한 것은 "같다는 증명"이 아니라 "다르다고 볼 증거가 없다"이다. 너무 잘 맞는 결과(\(p\)값이 1에 가까움)도 데이터가 만들어진 과정을 다시 묻게 한다.</p>
+  </div>
+  <p>이 자료에서 한 검정은 하나의 범주형 변수가 이론의 비율과 맞는지 보는 <strong>적합도 검정</strong>입니다. 카이제곱 검정은 다른 질문에도 쓰입니다.</p>
+  <ul>
+    <li><strong>두 범주형 변수가 서로 관련이 있는가</strong>(독립성 검정). 예를 들어 사고가 일어난 시간대(낮과 밤)와 사고의 종류가 관련이 있는지. 이때는 이론 대신 "두 변수가 관련이 없다면"이라는 가정이 기대 개수를 줍니다.</li>
+    <li><strong>여러 집단에서 반응의 분포가 같은가</strong>(동질성 검정). 예를 들어 치료 집단과 대조 집단의 처음 상태가 비슷한지.</li>
+  </ul>
+  <p>다음 자료로 이어 가세요.</p>
+  <ul>
+    <li><a href="../statistics/categorical-test-with-r.html">범주형 자료의 가설검정</a> — 같은 멘델 예제에서 출발해 서울 사망 교통사고 자료로 적합도·독립성·동질성 검정, Fisher 정확검정, McNemar 검정을 R과 코딩 에이전트로 따라간다.</li>
+    <li><a href="../statistics/hypothesis-testing.html">통계적 가설검정</a> — 유의수준, 검정력, \(p\)값의 논리를 시뮬레이션으로 더 깊이 본다.</li>
+    <li><a href="survivorship-bias-conditional-probability.html">살아남은 것만 보면</a> — 07절 오해 1에서 말한 "조건의 방향"을 조건부 확률로 정리한다.</li>
+  </ul>
+</section>
+
+<footer>
+  <p>자료: Mendel, G. (1866). Versuche über Pflanzen-Hybriden. <i>Verhandlungen des naturforschenden Vereines in Brünn</i>, 4, 3–47. 03절의 양성잡종 556개와 09절의 한 가지 형질 실험(씨 모양 7,324개, 씨 색 8,023개)은 이 논문에 보고된 값이다.</p>
+  <p>참고: Pearson, K. (1900). On the criterion that a given system of deviations from the probable… <i>Philosophical Magazine</i>, 50, 157–175. Fisher, R. A. (1936). Has Mendel's work been rediscovered? <i>Annals of Science</i>, 1, 115–137. Weiling, F. (1986). What about R. A. Fisher's statement of the "too good" data of J. G. Mendel's Pisum paper? <i>Journal of Heredity</i>, 77, 281–283.</p>
+  <p>웰던과 래비의 주사위 실험: Rundel, C. (2013). <i>Lecture 13 – χ² Tests</i>. Statistics 102, Duke University, 2–5·19–23쪽. <a href="https://www2.stat.duke.edu/courses/Spring13/sta102.001/Lec/Lec13.pdf" target="_blank" rel="noopener noreferrer">강의 자료(PDF)</a>. 이 강의가 추천 읽을거리로 든 래비의 보고: <a href="http://galton.uchicago.edu/about/docs/labby09dice.pdf" target="_blank" rel="noopener noreferrer">Labby, Z. (2009). Weldon's dice, automated</a>.</p>
+  <p>05절의 반복 실험은 컴퓨터가 9 : 3 : 3 : 1의 확률로 흉내 낸 결과이며 실제 관측 자료가 아니다. 곡선과 \(p\)값은 카이제곱 분포로 계산한 값이다. 06절의 제곱합 시연과 11절의 컴퓨터 주사위도 컴퓨터가 확률대로 흉내 낸 결과다. 11절의 래비 기록은 Rundel(2013) 5쪽의 표에 실린 Labby(2009)의 실측값이다. 11절에는 주사위 실험의 결과를 싣지 않았다. 위젯의 수치는 읽는 사람이 단추를 누를 때마다 새로 굴려 계산된다.</p>
+</footer>
+</main>
+
+<script>
+/* 이 쪽의 위젯: 단계별 χ² 표, 반복 실험(χ² 분포 만들기), p값·왼쪽 꼬리 그림, χ² 계산기.
+   완두의 개수는 실측(Mendel, 1866)이고, 반복 실험만 이론 비율로 컴퓨터가 흉내 낸 것이다. */
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+
+  /* ---------- 수치 함수: 감마 함수와 카이제곱 분포 ---------- */
+  function lgamma(x) {
+    const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
+    let y = x, t = x + 5.5; t -= (x + 0.5) * Math.log(t);
+    let s = 1.000000000190015;
+    for (let j = 0; j < 6; j++) s += c[j] / ++y;
+    return -t + Math.log(2.5066282746310005 * s / x);
+  }
+  function gammaQcf(a, x) {
+    let b = x + 1 - a, c = 1 / 1e-300, d = 1 / b, h = d;
+    for (let i = 1; i < 500; i++) {
+      const an = -i * (i - a); b += 2;
+      d = an * d + b; if (Math.abs(d) < 1e-300) d = 1e-300;
+      c = b + an / c; if (Math.abs(c) < 1e-300) c = 1e-300;
+      d = 1 / d; const del = d * c; h *= del; if (Math.abs(del - 1) < 1e-14) break;
+    }
+    return Math.exp(-x + a * Math.log(x) - lgamma(a)) * h;
+  }
+  function gammaP(a, x) {
+    if (x <= 0) return 0;
+    if (x < a + 1) {
+      let ap = a, sum = 1 / a, del = sum;
+      for (let n = 0; n < 500; n++) { ap++; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-14) break; }
+      return sum * Math.exp(-x + a * Math.log(x) - lgamma(a));
+    }
+    return 1 - gammaQcf(a, x);
+  }
+  const chiUpper = (x, k) => x <= 0 ? 1 : (x < k / 2 + 1 ? 1 - gammaP(k / 2, x / 2) : gammaQcf(k / 2, x / 2));
+  const chiPdf = (x, k) => x <= 0 ? 0 : Math.exp((k / 2 - 1) * Math.log(x) - x / 2 - (k / 2) * Math.LN2 - lgamma(k / 2));
+  function chiCrit(k, alpha) {
+    let lo = 0, hi = 400;
+    for (let i = 0; i < 100; i++) { const m = (lo + hi) / 2; if (chiUpper(m, k) > alpha) lo = m; else hi = m; }
+    return (lo + hi) / 2;
+  }
+  const fmtP = p => !isFinite(p) ? "-" : (p < 0.0001 ? "< .0001" : p.toFixed(4).replace(/^0/, ""));
+
+  /* ---------- 곡선 그림: 자유도 k의 χ² 분포에 관측값 x와 꼬리 넓이를 표시 ---------- */
+  /* alpha 가 null 이면 기준선을 그리지 않는다(07절 p값 그림은 기준선을 소개하기 전이라 뺀다) */
+  function drawCurve(svg, k, x, tail, alpha = 0.05) {
+    const crit = chiCrit(k, alpha ?? 0.05);
+    const xmax = Math.max(k + 4 * Math.sqrt(2 * k) + 4, x * 1.15, crit * 1.15);
+    const W = 640, H = 260, T = 22, L = 20, R = 16, B = 34, pw = W - L - R, ph = H - T - B;
+    const pts = [];
+    for (let i = 0; i <= 260; i++) { const xv = xmax * i / 260; pts.push([xv, chiPdf(Math.max(xv, xmax * 0.002), k)]); }
+    let ycap = 0;
+    pts.forEach(q => { if (q[0] > xmax * 0.02 || k > 2) ycap = Math.max(ycap, q[1]); });
+    const ymax = (k <= 2 ? Math.min(ycap * 1.6, 1.2) : ycap * 1.12) || 1;
+    const sx = v => L + pw * v / xmax, sy = v => T + ph - ph * Math.min(v, ymax) / ymax;
+    const d = pts.map((q, j) => (j ? "L" : "M") + sx(q[0]).toFixed(1) + " " + sy(q[1]).toFixed(1)).join(" ");
+    const xc = Math.min(x, xmax);
+    let fill;
+    if (tail === "left") {
+      fill = "M" + sx(0).toFixed(1) + " " + sy(0).toFixed(1);
+      pts.forEach(q => { if (q[0] <= xc) fill += " L" + sx(q[0]).toFixed(1) + " " + sy(q[1]).toFixed(1); });
+      fill += " L" + sx(xc).toFixed(1) + " " + sy(chiPdf(Math.max(xc, xmax * 0.002), k)).toFixed(1) + " L" + sx(xc).toFixed(1) + " " + sy(0).toFixed(1) + " Z";
+    } else {
+      fill = "M" + sx(xc).toFixed(1) + " " + sy(0).toFixed(1) + " L" + sx(xc).toFixed(1) + " " + sy(chiPdf(Math.max(xc, xmax * 0.002), k)).toFixed(1);
+      pts.forEach(q => { if (q[0] >= xc) fill += " L" + sx(q[0]).toFixed(1) + " " + sy(q[1]).toFixed(1); });
+      fill += " L" + sx(xmax).toFixed(1) + " " + sy(0).toFixed(1) + " Z";
+    }
+    let ticks = "";
+    const step = xmax > 60 ? 20 : xmax > 30 ? 10 : xmax > 12 ? 5 : 2;
+    for (let t = 0; t <= xmax + 1e-9; t += step) {
+      ticks += `<line class="axis" x1="${sx(t)}" x2="${sx(t)}" y1="${T + ph}" y2="${T + ph + 5}"/><text class="tick" x="${sx(t)}" y="${T + ph + 18}" text-anchor="middle">${t}</text>`;
+    }
+    const xs = sx(xc), xcr = sx(crit);
+    const prob = tail === "left" ? 1 - chiUpper(x, k) : chiUpper(x, k);
+    const anchor = xs > W - 200 ? "end" : "start", off = anchor === "end" ? -6 : 6;
+    svg.innerHTML = `<path class="tailfill" d="${fill}"/>` +
+      `<path class="curve" d="${d}"/>` +
+      `<line class="axis" x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}"/>` + ticks +
+      (alpha === null ? "" : `<line class="crit" x1="${xcr}" x2="${xcr}" y1="${T + 18}" y2="${T + ph}"/>` +
+      `<text class="lblc" x="${xcr + 4}" y="${T + 30}">기준선 ${crit.toFixed(2)} (오른쪽 ${Math.round(alpha * 1000) / 10}%)</text>`) +
+      `<line class="stat" x1="${xs}" x2="${xs}" y1="${T - 4}" y2="${T + ph}"/>` +
+      `<text class="lbl" x="${xs + off}" y="${T + 4}" text-anchor="${anchor}">χ² = ${x.toFixed(3)}</text>` +
+      `<text class="lblt" x="${xs + off}" y="${T + 20}" text-anchor="${anchor}">${tail === "left" ? "왼쪽" : "오른쪽"} 넓이 = ${prob.toFixed(3)}</text>` +
+      `<text class="tick" x="${W - R}" y="${T + ph + 32}" text-anchor="end">χ² (자유도 ${k})</text>`;
+  }
+
+  /* ---------- 위젯 1: 단계별 χ² 표 ---------- */
+  (() => {
+    const table = $("steptable"), note = $("step-note");
+    const NOTES = [
+      "관찰과 기대만 있다. 이제 칸마다 얼마나 어긋났는지 재 보자.",
+      "① 차이: 많으면 +, 적으면 −다. 맨 아래 합을 보라. 차이를 그냥 더하면 0이 되어 어긋남이 사라진다.",
+      "② 제곱: 부호가 사라졌다. 크게 어긋난 칸일수록 더 무겁게 센다.",
+      "③ 기대로 나누기: 주름지고 초록(기대 34.75)의 몫이 가장 크다. 차이는 2.75개뿐이지만 기대가 작아서 상대적으로 크게 어긋난 셈이다.",
+      "④ 더하기: 네 칸의 몫을 더한 0.470이 멘델 자료의 χ²다."
+    ];
+    const COL = { 1: "s1", 2: "s2", 3: "s3", 4: "s4" };
+    function set(step) {
+      table.dataset.step = step;
+      table.querySelectorAll(".now").forEach(c => c.classList.remove("now"));
+      if (COL[step]) table.querySelectorAll("." + COL[step]).forEach(c => c.classList.add("now"));
+      note.textContent = NOTES[step];
+    }
+    document.querySelectorAll("#lab-step [data-step]").forEach(b => b.addEventListener("click", () => set(+b.dataset.step)));
+    set(0);
+  })();
+
+  /* ---------- 위젯 2: 이론이 맞는 세계에서 실험 되풀이하기 ---------- */
+  (() => {
+    const LAB = ["둥글고 노랑", "둥글고 초록", "주름지고 노랑", "주름지고 초록"];
+    const P = [9, 3, 3, 1].map(v => v / 16), N = 556, E = P.map(p => p * N), OBS = 0.47002, DF = 3, XMAX = 14;
+    const one = $("sim-one"), hist = $("sim-hist");
+    let vals = [], last = null;
+    const chiOf = o => o.reduce((s, v, i) => s + (v - E[i]) ** 2 / E[i], 0);
+    const cum = []; P.reduce((s, v, i) => (cum[i] = s + v), 0);
+    function experiment() {
+      const cnt = [0, 0, 0, 0];
+      for (let j = 0; j < N; j++) { const u = Math.random(); let i = 0; while (i < 3 && u > cum[i]) i++; cnt[i]++; }
+      return cnt;
+    }
+    function drawOne() {
+      const W = 640, L = 20, R = 10, top = 16, h1 = 100, gap = 36, h2 = 44, cw = (W - L - R) / 4;
+      if (!last) {
+        one.innerHTML = `<text class="lbl" x="${W / 2}" y="100" text-anchor="middle">"한 번 실험" 단추를 누르면 16면 주사위를 556번 던진다</text>`;
+        return;
+      }
+      const ymax = Math.max(...last, ...E) * 1.1, cont = last.map((v, i) => (v - E[i]) ** 2 / E[i]), cmax = Math.max(1.5, ...cont);
+      let s = "";
+      for (let i = 0; i < 4; i++) {
+        const x = L + i * cw, bw = cw * 0.5, bx = x + cw * 0.25;
+        const bh = h1 * last[i] / ymax, ey = top + h1 - h1 * E[i] / ymax;
+        s += `<rect class="bar" x="${bx.toFixed(1)}" y="${(top + h1 - bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}"/>`;
+        s += `<line class="exp" x1="${(bx - 4).toFixed(1)}" x2="${(bx + bw + 4).toFixed(1)}" y1="${ey.toFixed(1)}" y2="${ey.toFixed(1)}"/>`;
+        s += `<text class="tick" x="${(x + cw / 2).toFixed(1)}" y="${(Math.min(top + h1 - bh, ey) - 5).toFixed(1)}" text-anchor="middle">${last[i]}개 (기대 ${E[i]})</text>`;
+        s += `<text class="tick" x="${(x + cw / 2).toFixed(1)}" y="${top + h1 + 15}" text-anchor="middle">${LAB[i]}</text>`;
+        const ch = h2 * cont[i] / cmax, cy = top + h1 + gap;
+        s += `<rect class="contrib" x="${bx.toFixed(1)}" y="${cy.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0.8, ch).toFixed(1)}"/>`;
+        s += `<text class="tick" x="${(x + cw / 2).toFixed(1)}" y="${(cy + ch + 12).toFixed(1)}" text-anchor="middle">${cont[i].toFixed(3)}</text>`;
+      }
+      s += `<line class="axis" x1="${L}" x2="${W - R}" y1="${top + h1}" y2="${top + h1}"/>`;
+      s += `<text class="lbl" x="${W - R}" y="${top + h1 + gap + h2 + 30}" text-anchor="end">붉은 막대의 합 = 이번 실험의 χ² = ${chiOf(last).toFixed(3)}</text>`;
+      one.innerHTML = s;
+    }
+    function drawHist() {
+      const nb = 35, bw = XMAX / nb, cnt = Array(nb).fill(0);
+      vals.forEach(v => { if (v < XMAX) cnt[Math.floor(v / bw)]++; });
+      const W = 640, H = 250, L = 20, R = 16, T = 24, B = 30, pw = W - L - R, ph = H - T - B;
+      const reps = Math.max(vals.length, 1), curve = [];
+      for (let i = 0; i <= 200; i++) { const x = XMAX * i / 200; curve.push([x, reps * bw * chiPdf(Math.max(x, XMAX * 0.004), DF)]); }
+      const ymax = Math.max(...cnt, ...curve.map(c => c[1])) * 1.1 || 1;
+      const sx = x => L + pw * x / XMAX, sy = y => T + ph - ph * Math.min(y, ymax) / ymax;
+      let s = "";
+      cnt.forEach((c, i) => { if (c) s += `<rect class="hbar${i * bw >= OBS ? " hit" : ""}" x="${sx(i * bw).toFixed(1)}" y="${sy(c).toFixed(1)}" width="${(pw / nb - 1).toFixed(1)}" height="${(T + ph - sy(c)).toFixed(1)}"/>`; });
+      if (vals.length) s += `<path class="curve" d="${curve.map((c, i) => (i ? "L" : "M") + sx(c[0]).toFixed(1) + " " + sy(c[1]).toFixed(1)).join(" ")}"/>`;
+      s += `<line class="axis" x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}"/>`;
+      for (let t = 0; t <= XMAX; t += 2) s += `<text class="tick" x="${sx(t)}" y="${T + ph + 16}" text-anchor="middle">${t}</text>`;
+      const xo = sx(OBS);
+      s += `<line class="stat" x1="${xo}" x2="${xo}" y1="${T - 6}" y2="${T + ph}"/>`;
+      s += `<text class="lblt" x="${xo + 6}" y="${T - 10}">멘델의 실제 χ² = 0.470</text>`;
+      s += `<text class="tick" x="${W - R}" y="${T + ph + 28}" text-anchor="end">χ² (자유도 3)</text>`;
+      if (!vals.length) s += `<text class="lbl" x="${W / 2}" y="${T + ph / 2}" text-anchor="middle">아직 쌓인 실험이 없다</text>`;
+      hist.innerHTML = s;
+      $("sim-n").textContent = vals.length.toLocaleString("ko-KR");
+      $("sim-last").textContent = last ? chiOf(last).toFixed(3) : "-";
+      $("sim-share").textContent = vals.length ? (vals.filter(v => v >= OBS).length / vals.length).toFixed(3) : "-";
+    }
+    function run(r) {
+      if (r === 0) { vals = []; last = null; }
+      for (let i = 0; i < r; i++) { last = experiment(); vals.push(chiOf(last)); }
+      drawOne(); drawHist();
+    }
+    document.querySelectorAll("#lab-sim [data-rep]").forEach(b => b.addEventListener("click", () => run(+b.dataset.rep)));
+    run(0);
+  })();
+
+  /* ---------- 고정 그림: 오른쪽 꼬리(p값)와 왼쪽 꼬리 ---------- */
+  drawCurve($("pv-svg"), 3, 0.47002, "right", null);
+  drawCurve($("left-svg"), 3, 0.47002, "left");
+
+  /* ---------- 위젯 3: χ² 계산기 ---------- */
+  (() => {
+    const rowsBox = $("calc-rows"), tbody = document.querySelector("#calc-table tbody");
+    const PRESETS = {
+      mendel: [["둥글고 노랑", 315, 9], ["둥글고 초록", 108, 3], ["주름지고 노랑", 101, 3], ["주름지고 초록", 32, 1]]
+    };
+    function build(rows) {
+      rowsBox.innerHTML = `<div class="calc-row h"><span>범주 이름</span><span>관찰 개수</span><span>이론 비율</span></div>` +
+        rows.map((r, i) => `<div class="calc-row">
+          <input type="text" aria-label="범주 ${i + 1} 이름" value="${r[0]}" placeholder="범주 ${i + 1}">
+          <input type="number" aria-label="범주 ${i + 1} 관찰 개수" min="0" step="1" value="${r[1]}">
+          <input type="number" aria-label="범주 ${i + 1} 이론 비율" min="0" step="any" value="${r[2]}">
+        </div>`).join("");
+      rowsBox.querySelectorAll("input").forEach(inp => inp.addEventListener("input", calc));
+      calc();
+    }
+    function clearOut(msg) {
+      tbody.innerHTML = "";
+      ["calc-chi", "calc-df", "calc-p", "calc-left", "calc-dec"].forEach(id => { $(id).textContent = "-"; });
+      $("calc-svg").innerHTML = msg ? `<text class="lbl" x="320" y="130" text-anchor="middle">${msg}</text>` : "";
+    }
+    function calc() {
+      const warn = $("calc-warn");
+      warn.hidden = true;
+      const rows = [...rowsBox.querySelectorAll(".calc-row:not(.h)")].map((r, i) => {
+        const [n, o, p] = r.querySelectorAll("input");
+        return { name: n.value.trim() || `범주 ${i + 1}`, o: o.value === "" ? NaN : +o.value, p: p.value === "" ? NaN : +p.value };
+      });
+      if (rows.some(r => !isFinite(r.o) || !isFinite(r.p))) { clearOut("관찰 개수와 이론 비율을 모두 넣으면 계산한다"); return; }
+      if (rows.some(r => r.o < 0 || r.p <= 0)) { clearOut("관찰 개수는 0 이상, 이론 비율은 0보다 커야 한다"); return; }
+      const N = rows.reduce((s, r) => s + r.o, 0), ps = rows.reduce((s, r) => s + r.p, 0);
+      if (N <= 0) { clearOut("관찰 개수의 합이 0보다 커야 한다"); return; }
+      let chi = 0;
+      tbody.innerHTML = rows.map(r => {
+        const p = r.p / ps, e = N * p, c = (r.o - e) ** 2 / e; chi += c;
+        r.e = e;
+        return `<tr><td>${r.name.replace(/[<>&]/g, "")}</td><td>${r.o}</td><td>${p.toFixed(4)}</td><td>${e.toFixed(2)}</td><td>${c.toFixed(4)}</td></tr>`;
+      }).join("") + `<tr><td><strong>합</strong></td><td>${N}</td><td>1</td><td>${N.toFixed(2)}</td><td><strong>${chi.toFixed(4)}</strong></td></tr>`;
+      const df = rows.length - 1, pv = chiUpper(chi, df);
+      $("calc-chi").textContent = chi.toFixed(4);
+      $("calc-df").textContent = df;
+      $("calc-p").textContent = fmtP(pv);
+      $("calc-left").textContent = fmtP(1 - pv);
+      $("calc-dec").textContent = pv < 0.05 ? "영가설 기각" : "영가설 기각 못 함";
+      const small = rows.filter(r => r.e < 5);
+      if (small.length) { warn.textContent = `기대 개수가 5보다 작은 칸이 ${small.length}개 있다. 카이제곱 분포 근사가 잘 맞지 않을 수 있다.`; warn.hidden = false; }
+      drawCurve($("calc-svg"), df, chi, "right");
+    }
+    document.querySelectorAll("#lab-calc [data-preset]").forEach(b => b.addEventListener("click", () => {
+      document.querySelectorAll("#lab-calc [data-preset]").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+      const key = b.dataset.preset;
+      build(PRESETS[key] || Array.from({ length: +key }, () => ["", "", ""]));
+    }));
+    build(PRESETS.mendel);
+  })();
+
+  /* ---------- 위젯 5: 표준정규분포 k개를 제곱해 더하기 ----------
+     컴퓨터가 표준정규분포에서 뽑은 값으로 카이제곱 분포의 정의를 보여 주는 확률 장치 시연이다(실측 자료 아님). */
+  (() => {
+    const kIn = $("sq-k"), hist = $("sq-hist");
+    let vals = [];
+    const randZ = () => { let u = 0, v = 0; while (u === 0) u = Math.random(); while (v === 0) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+    const fmtS = x => (x < 0 ? "−" : "") + Math.abs(x).toFixed(2);
+    function draw() {
+      const k = +kIn.value, xmax = Math.max(10, Math.ceil(k + 4 * Math.sqrt(2 * k) + 2)), nb = 40, bw = xmax / nb, cnt = Array(nb).fill(0);
+      vals.forEach(v => { if (v < xmax) cnt[Math.floor(v / bw)]++; });
+      const W = 640, H = 250, L = 20, R = 16, T = 16, B = 30, pw = W - L - R, ph = H - T - B;
+      const reps = Math.max(vals.length, 1), curve = [];
+      for (let i = 1; i <= 240; i++) { const x = xmax * i / 240; curve.push([x, reps * bw * chiPdf(x, k)]); }
+      const ymax = Math.max(...cnt, ...curve.filter(c => c[0] >= bw).map(c => c[1])) * 1.1 || 1;
+      const sx = x => L + pw * x / xmax, sy = y => T + ph - ph * Math.min(y, ymax) / ymax;
+      let s = "";
+      cnt.forEach((c, i) => { if (c) s += `<rect class="hbar" x="${sx(i * bw).toFixed(1)}" y="${sy(c).toFixed(1)}" width="${(pw / nb - 1).toFixed(1)}" height="${(T + ph - sy(c)).toFixed(1)}"/>`; });
+      if (vals.length) s += `<path class="curve" d="${curve.map((c, i) => (i ? "L" : "M") + sx(c[0]).toFixed(1) + " " + sy(c[1]).toFixed(1)).join(" ")}"/>`;
+      s += `<line class="axis" x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}"/>`;
+      const step = xmax > 20 ? 5 : 2;
+      for (let t = 0; t <= xmax; t += step) s += `<text class="tick" x="${sx(t)}" y="${T + ph + 16}" text-anchor="middle">${t}</text>`;
+      s += `<text class="tick" x="${W - R}" y="${T + ph + 28}" text-anchor="end">Z₁² + … + Z${k === 1 ? "₁" : "ₖ"}² (k = ${k})</text>`;
+      if (!vals.length) s += `<text class="lbl" x="${W / 2}" y="${T + ph / 2}" text-anchor="middle">아직 쌓인 값이 없다</text>`;
+      hist.innerHTML = s;
+      $("sq-n").textContent = vals.length.toLocaleString("ko-KR");
+      $("sq-mean").textContent = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(3) : "-";
+      $("sq-k2").textContent = k;
+    }
+    function run(r) {
+      const k = +kIn.value;
+      if (r === 0) { vals = []; $("sq-one").textContent = "\"한 번 뽑기\"를 누르면 표준정규분포에서 값을 뽑아 제곱해 더한다."; }
+      let z = [];
+      for (let i = 0; i < r; i++) { z = Array.from({ length: k }, randZ); vals.push(z.reduce((a, b) => a + b * b, 0)); }
+      if (r > 0) $("sq-one").textContent = `이번에 뽑은 Z: ${z.map(fmtS).join(", ")}  →  제곱: ${z.map(v => (v * v).toFixed(2)).join(", ")}  →  합: ${z.reduce((a, b) => a + b * b, 0).toFixed(2)}`;
+      draw();
+    }
+    kIn.addEventListener("input", () => { $("sq-k-out").textContent = kIn.value; run(0); });
+    document.querySelectorAll("#lab-sq [data-sq]").forEach(b => b.addEventListener("click", () => run(+b.dataset.sq)));
+    run(0);
+  })();
+
+  /* ---------- 위젯 6: 자유도에 따른 카이제곱 분포 ---------- */
+  (() => {
+    const kIn = $("df-k"), svg = $("df-svg"), refBtn = $("df-ref"), REFS = [1, 2, 3, 5, 10, 20], XMAX = 45, YMAX = 0.5;
+    let showRef = true;
+    function draw() {
+      const k = +kIn.value;
+      const W = 640, H = 270, L = 34, R = 16, T = 22, B = 34, pw = W - L - R, ph = H - T - B;
+      const sx = x => L + pw * x / XMAX, sy = y => T + ph - ph * Math.min(y, YMAX) / YMAX;
+      const path = kk => { let d = ""; for (let i = kk > 2 ? 0 : 1; i <= 450; i++) {   /* 자유도 3 이상은 0에서 출발한다 */ const x = XMAX * i / 450; d += (d ? " L" : "M") + sx(x).toFixed(1) + " " + sy(chiPdf(x, kk)).toFixed(1); } return d; };
+      let s = "";
+      for (let t = 0; t <= XMAX; t += 5) s += `<text class="tick" x="${sx(t)}" y="${T + ph + 16}" text-anchor="middle">${t}</text>`;
+      for (let t = 0; t <= YMAX + 1e-9; t += 0.1) s += `<text class="tick" x="${L - 6}" y="${sy(t) + 4}" text-anchor="end">${t.toFixed(1)}</text>`;
+      if (showRef) REFS.forEach(r => {
+        s += `<path class="ref" d="${path(r)}"/>`;
+        const lx = r === 1 ? 0.3 : r === 2 ? 0.75 : r - 2, ly = chiPdf(lx, r);   /* 1, 2는 0에서 가장 높아 왼쪽 가장자리에 붙인다 */
+        s += `<text class="reflbl" x="${sx(lx) + (r <= 2 ? 7 : 4)}" y="${Math.max(T + 8, sy(ly) - 4)}">${r}</text>`;
+      });
+      s += `<path class="sel" d="${path(k)}"/>`;
+      s += `<line class="axis" x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}"/><line class="axis" x1="${L}" x2="${L}" y1="${T}" y2="${T + ph}"/>`;
+      s += `<line class="meanl" x1="${sx(k)}" x2="${sx(k)}" y1="${T}" y2="${T + ph}"/><text class="lbl" x="${sx(k) + 4}" y="${T + 6}">평균 ${k}</text>`;
+      s += `<text class="tick" x="${W - R}" y="${T + ph + 30}" text-anchor="end">χ² (자유도 ${k})</text>`;
+      svg.innerHTML = s;
+      $("df-k-out").textContent = k;
+      $("df-mean").textContent = k;
+      $("df-sd").textContent = Math.sqrt(2 * k).toFixed(2);
+      $("df-mode").textContent = k <= 2 ? "0" : String(k - 2);
+    }
+    kIn.addEventListener("input", draw);
+    document.querySelectorAll("#lab-df [data-df]").forEach(b => b.addEventListener("click", () => { kIn.value = b.dataset.df; draw(); }));
+    refBtn.addEventListener("click", () => { showRef = !showRef; refBtn.setAttribute("aria-pressed", String(showRef)); refBtn.textContent = showRef ? "비교 곡선 보이기" : "비교 곡선 숨김"; draw(); });
+    draw();
+  })();
+
+  /* ---------- 위젯 7: 연구자가 정하는 기준선 (유의수준 α와 임계값) ---------- */
+  (() => {
+    const svg = $("alpha-svg"), K = 3, X = 0.47002, XMAX = 20;
+    function draw(alpha) {
+      const crit = chiCrit(K, alpha);
+      const W = 640, H = 260, L = 20, R = 16, T = 24, B = 34, pw = W - L - R, ph = H - T - B;
+      const ymax = 0.27, sx = v => L + pw * v / XMAX, sy = v => T + ph - ph * Math.min(v, ymax) / ymax;
+      let d = "", fill = `M${sx(crit).toFixed(1)} ${sy(0)}`;
+      for (let i = 0; i <= 300; i++) { const x = XMAX * i / 300; d += (i ? " L" : "M") + sx(x).toFixed(1) + " " + sy(chiPdf(x, K)).toFixed(1); }
+      for (let i = 0; i <= 120; i++) { const x = crit + (XMAX - crit) * i / 120; fill += ` L${sx(x).toFixed(1)} ${sy(chiPdf(x, K)).toFixed(1)}`; }
+      fill += ` L${sx(XMAX)} ${sy(0)} Z`;
+      let s = `<path class="alphafill" d="${fill}"/><path class="curve" d="${d}"/>`;
+      s += `<line class="axis" x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}"/>`;
+      for (let t = 0; t <= XMAX; t += 2) s += `<text class="tick" x="${sx(t)}" y="${T + ph + 16}" text-anchor="middle">${t}</text>`;
+      s += `<line class="crit" x1="${sx(crit)}" x2="${sx(crit)}" y1="${T - 6}" y2="${T + ph}"/>`;
+      s += `<text class="lblc" x="${sx(crit) + 5}" y="${T + 4}">기준선 ${crit.toFixed(2)}</text><text class="lblc" x="${sx(crit) + 5}" y="${T + 20}">오른쪽 넓이 = α = ${alpha}</text>`;
+      s += `<line class="stat" x1="${sx(X)}" x2="${sx(X)}" y1="${T + 40}" y2="${T + ph}"/><text class="lblt" x="${sx(X) + 6}" y="${T + ph - 10}">멘델 χ² = 0.470</text>`;
+      s += `<text class="tick" x="${W - R}" y="${T + ph + 30}" text-anchor="end">χ² (자유도 3)</text>`;
+      svg.innerHTML = s;
+      $("alpha-a").textContent = String(alpha);
+      $("alpha-c").textContent = crit.toFixed(2);
+      $("alpha-d").textContent = chiUpper(X, K) < alpha ? "영가설 기각" : "영가설 기각 못 함";
+      document.querySelectorAll("#lab-alpha [data-alpha]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.alpha === alpha)));
+    }
+    document.querySelectorAll("#lab-alpha [data-alpha]").forEach(b => b.addEventListener("click", () => draw(+b.dataset.alpha)));
+    draw(0.05);
+  })();
+
+  /* ---------- 위젯 4: 주사위 12개 던지기 (웰던의 실험) ----------
+     횟수 단추는 컴퓨터가 눈마다 1/6의 확률로 흉내 낸 확률 장치 시연이다(실측 자료 아님).
+     "래비의 실제 기록"은 Labby(2009)가 주사위 12개를 26,306번 던져 센 실측값이다(Rundel, 2013, 5쪽의 표). */
+  (() => {
+    const LABBY = { n: 26306, c: [53222, 52118, 52465, 52338, 52244, 53285] };
+    const bars = $("roll-bars"), err = $("roll-err"), tbody = document.querySelector("#roll-table tbody"), hbody = document.querySelector("#roll-hist tbody");
+    const hist = new Map();   /* 키(던진 횟수 또는 "labby") → 그 키의 가장 최근 결과 */
+    let curKey = null;
+    const fmtN = n => n.toLocaleString("ko-KR");
+    /* 정수면 소수점 없이 천 단위 쉼표로, 아니면 소수 둘째 자리까지 */
+    const num = x => Math.abs(x - Math.round(x)) < 1e-9 ? fmtN(Math.round(x)) : x.toFixed(2);
+    const snum = x => (x > 0 ? "+" : x < 0 ? "−" : "") + num(Math.abs(x));
+    const pct = x => (x * 100).toFixed(2) + "%";
+    const pp = x => { const v = Math.round(x * 10000) / 100; return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(2) + "%p"; };   /* 반올림한 값으로 부호를 정한다 (−0.00 방지) */
+    /* 눈금 간격: 1, 2, 5 × 10^k 가운데 대략 네 칸이 되는 값 */
+    const niceStep = m => { const raw = m / 4, p = 10 ** Math.floor(Math.log10(raw)), f = raw / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p; };
+    function summarize(key, n, c) {
+      const dice = 12 * n, e = dice / 6, diff = c.map(v => v - e), sdiff = c.map(v => v / dice - 1 / 6);
+      const chi = diff.reduce((s, d) => s + d * d / e, 0), s56 = (c[4] + c[5]) / dice;
+      return { key, n, dice, c, e, diff, sdiff, chi, p: chiUpper(chi, 5), s56, real: key === "labby",
+        maxD: Math.max(...diff.map(Math.abs)), maxS: Math.max(...sdiff.map(Math.abs)) };
+    }
+    function throwDice(n) {
+      const c = [0, 0, 0, 0, 0, 0], dice = 12 * n;
+      for (let i = 0; i < dice; i++) c[Math.floor(Math.random() * 6)]++;
+      return summarize(n, n, c);
+    }
+    function drawBars(r) {
+      const W = 640, H = 220, L = 44, R = 12, T = 16, B = 30, pw = W - L - R, ph = H - T - B;
+      const shares = r.c.map(v => v / r.dice), ymax = Math.max(0.3, ...shares) * 1.12;
+      const sy = y => T + ph - ph * y / ymax, cw = pw / 6;
+      let s = `<line class="axis" x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}"/>`;
+      for (let t = 0; t <= ymax; t += 0.1) s += `<text class="tick" x="${L - 6}" y="${sy(t) + 4}" text-anchor="end">${Math.round(t * 100)}%</text>`;
+      shares.forEach((v, i) => {
+        const x = L + i * cw + cw * 0.22, w = cw * 0.56;
+        s += `<rect class="rbar${r.real ? " real" : ""}" x="${x.toFixed(1)}" y="${sy(v).toFixed(1)}" width="${w.toFixed(1)}" height="${(T + ph - sy(v)).toFixed(1)}"/>`;
+        s += `<text class="tick" x="${(x + w / 2).toFixed(1)}" y="${(sy(v) - 5).toFixed(1)}" text-anchor="middle">${fmtN(r.c[i])}번</text>`;
+        s += `<text class="lbl" x="${(x + w / 2).toFixed(1)}" y="${T + ph + 18}" text-anchor="middle">${i + 1}</text>`;
+      });
+      s += `<line class="theory" x1="${L}" x2="${W - R}" y1="${sy(1 / 6)}" y2="${sy(1 / 6)}"/>`;
+      s += `<line class="theory" x1="${W - R - 160}" x2="${W - R - 134}" y1="${T + 2}" y2="${T + 2}"/><text class="lbl" x="${W - R}" y="${T + 6}" text-anchor="end">이론 1/6 (16.67%)</text>`;
+      bars.innerHTML = s;
+    }
+    function drawErr() {
+      const rows = [...hist.values()].sort((a, b) => a.n - b.n), sims = rows.filter(r => !r.real), real = rows.find(r => r.real);
+      const W = 640, H = 250, gap = 44, L = 50, R = 26, T = 34, B = 40, pw = (W - L * 2 - R - gap) / 2, ph = H - T - B;
+      const lx0 = Math.log10(20), lx1 = Math.log10(200000);
+      const panels = [{ key: "maxD", title: "가장 큰 개수 차이 (번)", x0: L, k: 1 },
+                      { key: "maxS", title: "가장 큰 비율 차이 (%p)", x0: L * 2 + pw + gap, k: 100 }];
+      let s = "";
+      panels.forEach(pn => {
+        const sx = n => pn.x0 + pw * (Math.log10(n) - lx0) / (lx1 - lx0);
+        const top = Math.max(...rows.map(r => r[pn.key] * pn.k), pn.key === "maxD" ? 2 : 2), step = niceStep(top);
+        const vmax = Math.ceil(top / step) * step, sy = v => T + ph - ph * v * pn.k / vmax;
+        const dec = step < 1 ? Math.ceil(-Math.log10(step)) : 0;
+        s += `<text class="lbl" x="${pn.x0}" y="${T - 14}">${pn.title}</text>`;
+        s += `<line class="axis" x1="${pn.x0}" x2="${pn.x0 + pw}" y1="${T + ph}" y2="${T + ph}"/><line class="axis" x1="${pn.x0}" x2="${pn.x0}" y1="${T}" y2="${T + ph}"/>`;
+        [[20, "20"], [200, "200"], [2000, "2천"], [20000, "2만"], [200000, "20만"]].forEach(([n, t]) => s += `<text class="tick" x="${sx(n).toFixed(1)}" y="${T + ph + 15}" text-anchor="middle">${t}</text>`);
+        for (let v = 0; v <= vmax + 1e-9; v += step) s += `<text class="tick" x="${pn.x0 - 5}" y="${(sy(v / pn.k) + 4).toFixed(1)}" text-anchor="end">${v.toFixed(dec)}</text>`;
+        if (sims.length > 1) s += `<path class="errline" d="${sims.map((r, i) => (i ? "L" : "M") + sx(r.n).toFixed(1) + " " + sy(r[pn.key]).toFixed(1)).join(" ")}"/>`;
+        sims.forEach(r => { s += `<circle class="errpt${r.key === curKey ? " now" : ""}" cx="${sx(r.n).toFixed(1)}" cy="${sy(r[pn.key]).toFixed(1)}" r="${r.key === curKey ? 5 : 3.5}"/>`; });
+        if (real) { const x = sx(real.n), y = sy(real[pn.key]); s += `<rect class="errpt real" x="${(x - 5).toFixed(1)}" y="${(y - 5).toFixed(1)}" width="10" height="10"/>`; }
+        s += `<text class="tick" x="${pn.x0 + pw}" y="${T + ph + 31}" text-anchor="end">던진 횟수</text>`;
+      });
+      if (!rows.length) s += `<text class="lbl" x="${W / 2}" y="${H / 2}" text-anchor="middle">횟수를 고르면 여기에 점이 쌓인다</text>`;
+      err.innerHTML = s;
+    }
+    function render() {
+      const r = curKey !== null ? hist.get(curKey) : null;
+      document.querySelectorAll("#lab-roll [data-roll]").forEach(b => b.setAttribute("aria-pressed", String(String(curKey) === b.dataset.roll)));
+      $("roll-again").disabled = !r || r.real;
+      const note = $("roll-note");
+      note.hidden = !(r && r.real);
+      if (r && r.real) note.textContent = "이 결과는 컴퓨터가 던진 것이 아니라 래비(Labby, 2009)가 기계로 실제 주사위 12개를 26,306번 던져 센 기록이다(Rundel, 2013).";
+      if (!r) {
+        ["roll-n", "roll-dice", "roll-maxd", "roll-maxs", "roll-56", "roll-chi", "roll-p"].forEach(id => { $(id).textContent = "-"; });
+        tbody.innerHTML = "";
+        bars.innerHTML = `<text class="lbl" x="320" y="110" text-anchor="middle">위에서 던질 횟수를 고른다</text>`;
+      } else {
+        $("roll-n").textContent = fmtN(r.n) + "번";
+        $("roll-dice").textContent = fmtN(r.dice) + "개";
+        $("roll-maxd").textContent = num(r.maxD) + "번";
+        $("roll-maxs").textContent = (r.maxS * 100).toFixed(2) + "%p";
+        $("roll-56").textContent = pct(r.s56) + " (" + pp(r.s56 - 1 / 3) + ")";
+        $("roll-chi").textContent = r.chi.toFixed(3);
+        $("roll-p").textContent = fmtP(r.p);
+        tbody.innerHTML = r.c.map((c, i) => `<tr><td>${i + 1}</td><td>${fmtN(c)}</td><td>${num(r.e)}</td><td>${snum(r.diff[i])}</td><td>${pct(c / r.dice)}</td><td>${pp(r.sdiff[i])}</td><td>${(r.diff[i] ** 2 / r.e).toFixed(4)}</td></tr>`).join("") +
+          `<tr><td><strong>합</strong></td><td>${fmtN(r.dice)}</td><td>${fmtN(r.dice)}</td><td>0</td><td>100%</td><td>0</td><td><strong>${r.chi.toFixed(4)}</strong></td></tr>`;
+        drawBars(r);
+      }
+      const rows = [...hist.values()].sort((a, b) => a.n - b.n);
+      hbody.innerHTML = rows.map(h => `<tr class="${h.key === curKey ? "now" : ""}${h.real ? " real" : ""}"><td>${fmtN(h.n)}${h.real ? " (래비, 실제)" : ""}</td><td>${fmtN(h.dice)}</td><td>${num(h.e)}</td><td>${num(h.maxD)}번</td><td>${(h.maxS * 100).toFixed(2)}%p</td><td>${pp(h.s56 - 1 / 3)}</td><td>${h.chi.toFixed(3)}</td><td>${fmtP(h.p)}</td></tr>`).join("") ||
+        `<tr><td colspan="8">아직 던지지 않았다</td></tr>`;
+      drawErr();
+    }
+    const go = key => { curKey = key; hist.set(key, key === "labby" ? summarize("labby", LABBY.n, LABBY.c) : throwDice(key)); render(); };
+    document.querySelectorAll("#lab-roll [data-roll]").forEach(b => b.addEventListener("click", () => go(b.dataset.roll === "labby" ? "labby" : +b.dataset.roll)));
+    $("roll-again").addEventListener("click", () => { if (curKey !== null && curKey !== "labby") go(curKey); });
+    $("roll-clear").addEventListener("click", () => { hist.clear(); curKey = null; render(); });
+    render();
+  })();
+
+  /* ---------- 코드 상자 복사 버튼 ---------- */
+  document.querySelectorAll(".cb.r, .cb.prompt").forEach(box => {
+    const pre = box.querySelector("pre"); if (!pre) return;
+    const b = document.createElement("button"); b.type = "button"; b.className = "copy"; b.textContent = "복사";
+    b.addEventListener("click", () => {
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(pre.textContent).then(() => { b.textContent = "복사됨"; setTimeout(() => { b.textContent = "복사"; }, 1400); }, () => {});
+    });
+    box.appendChild(b);
+  });
+
+  /* ---------- 레일 목차 scroll-spy ---------- */
+  const links = [...document.querySelectorAll("#rail-nav a")];
+  const spy = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (en.isIntersecting) links.forEach(l => l.classList.toggle("on", l.getAttribute("href") === "#" + en.target.id));
+    });
+  }, { rootMargin: "-25% 0px -65% 0px" });
+  links.forEach((l, i) => { const t = document.querySelector(l.getAttribute("href")); if (t) spy.observe(t); if (i === 0) l.classList.add("on"); });
+})();
+</script>
+</body>
+</html>

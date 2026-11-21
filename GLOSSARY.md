@@ -54,3 +54,4 @@
 - `docs/statistics/hypothesis-testing.html`: "영가설(귀무가설, \(H_0\))", "대안가설(대립가설, \(H_1\))"
 - `docs/statistics/mean-test-with-r.html`: "영가설(귀무가설이라고도 한다)과 대안가설(대립가설이라고도 한다)"
 - `docs/statistics/categorical-test-with-r.html`: "영가설(null hypothesis, 귀무가설)", "상대위험률(relative risk, 위험비라고도 한다)"
+- `docs/data-science/mendel-chi-square-intro.html`: "영가설(귀무가설, \(H_0\))"

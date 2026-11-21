@@ -152,6 +152,15 @@ Rscript src/R/prepare_michelson_morley.R   # docs/assets/data/michelson-morley.j
   `docs/downlodable/nd_lm.zip`은 `uv run python src/python/build_skeleton_zip.py nd_lm`으로
   다시 만든다. 뼈대 안의 파일을 고치면 zip도 다시 만든다.
 
+`docs/data-science/mendel-chi-square-intro.html`(멘델의 독립 법칙은 조작일까? - 카이제곱 통계량 소개)의 10절 "컴퓨터로 확인하기"(멘델 검정, 폴더 받는 방법도 이 절에 있다)와 11절 "주사위로 실험하기"(웰던의 주사위 실험 재현)는
+실습 폴더 뼈대 `skeleton/chisq-dice/`를 쓴다. 래비(2009)의 실제 주사위 기록 `dataset/raw/labby_2009_faces.csv`(눈별 개수 6행, Rundel 2013
+Duke STA 102 Lecture 13 5쪽의 표), 빈 `scripts/`·`dataset/working/`·`output/`, `.gitignore`(흉내 낸 결과 `dataset/working/*.rds` 제외),
+안내 README, 코딩 에이전트 규칙 `AGENTS.md`(R·tidyverse·ggplot2·showtext의 Noto Sans KR, 시드를 정하고 흉내 낸 결과를 실측 자료와
+섞지 않는 규칙)와 이를 불러오는 `CLAUDE.md`가 들어 있다. 웰던 본인의 집계는 없어 컴퓨터로 흉내 내어 재현한다.
+페이지의 "주사위 12개 던지기" 위젯은 웰던(1894)의 실험처럼 주사위 12개를 한 번에 던지는 횟수(20~200,000번)를 골라 브라우저에서 1/6 확률로 흉내 내는 시연이며, 비교용 "래비의 실제 기록"은 같은 표의 실측 개수를 쪽 스크립트에 그대로 적은 것이다.
+사이트에서 받을 `docs/downlodable/chisq-dice.zip`은 `uv run python src/python/build_skeleton_zip.py chisq-dice`로 다시 만든다.
+뼈대 안의 파일을 고치면 zip도 다시 만든다. 11절의 참고 R 코드 세 편(`weldon_sim.R`, `labby_compare.R`, `weldon_successes.R`)은 이 뼈대의 사본에서 실행해 확인했다.
+
 `docs/statistics/regression-analysis.html`(회귀분석 - 상관에서 위계적 회귀까지)은 갈턴 자녀
 898명과 Beat the Blues 임상시험(R 패키지 HSAUR3의 `BtheB`) 97명을 읽고, 회귀계수는 쪽의
 스크립트가 직접 계산한다. 본문의 수치는 검산 스크립트로 대조한다.

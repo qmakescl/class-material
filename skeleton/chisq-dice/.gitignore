@@ -1,0 +1,10 @@
+# R 작업 흔적
+.Rhistory
+.RData
+.Rproj.user/
+
+# macOS
+.DS_Store
+
+# 시드로 다시 만들 수 있는 흉내 낸 결과 (크다)
+dataset/working/*.rds
