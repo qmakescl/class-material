@@ -1,0 +1,7 @@
+# R 작업 흔적
+.Rhistory
+.RData
+.Rproj.user/
+
+# macOS
+.DS_Store

@@ -1,0 +1,2371 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>회귀분석 - 상관에서 위계적 회귀까지 | Q의 아카이브</title>
+<link rel="canonical" href="https://qmakescl.github.io/class-material/statistics/regression-analysis.html">
+<meta name="description" content="갈턴의 아버지와 아들 키로 상관계수와 단순회귀를 보고, 잔차로 회귀의 가정을 점검한 뒤, 다중회귀, 더미변수, 로지스틱 회귀, 공분산분석, 위계적 회귀까지 하나의 회귀모형으로 이어 읽는 통계 자료입니다.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Q의 데이터 이야기 자료">
+<meta property="og:title" content="회귀분석 - 상관에서 위계적 회귀까지 | Q의 아카이브">
+<meta property="og:description" content="아버지와 아들의 키에서 출발해 상관, 단순·다중회귀, 잔차 분석, 더미변수, 로지스틱 회귀, 공분산분석, 위계적 회귀를 실측 자료의 그림과 R로 따라갑니다.">
+<meta property="og:url" content="https://qmakescl.github.io/class-material/statistics/regression-analysis.html">
+<meta property="og:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="통계 자료 아이콘">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="회귀분석 - 상관에서 위계적 회귀까지 | Q의 아카이브">
+<meta name="twitter:description" content="아버지와 아들의 키에서 출발해 상관, 단순·다중회귀, 잔차 분석, 더미변수, 로지스틱 회귀, 공분산분석, 위계적 회귀를 실측 자료의 그림과 R로 따라갑니다.">
+<meta name="twitter:image" content="https://qmakescl.github.io/class-material/assets/images/stat.png">
+<meta name="twitter:image:alt" content="통계 자료 아이콘">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<link rel="stylesheet" href="../assets/material.css">
+<style>
+/* 이 자료 고유의 스타일만. 공통 토큰·레이아웃은 ../assets/material.css */
+:root{
+  --line-soft:#e6ebf5;
+  --son:#2f6fed; --dau:#e2662a;            /* 아들·딸, TAU·BtheB (차트 계열색) */
+}
+.skip-link{position:fixed;top:-3rem;left:1rem;z-index:100;padding:.6rem 1rem;color:#fff;background:#1c3fd6;border-radius:4px;font-weight:700;text-decoration:none}
+.skip-link:focus{top:1rem}
+
+/* 머리말 */
+.masthead{display:flex;flex-direction:column;gap:12px;padding-bottom:4px}
+.mast-meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.mast-meta span{display:inline-flex;align-items:center;gap:7px}
+.swatch{width:11px;height:11px;border-radius:2px;display:inline-block}
+
+/* 절 머리 */
+.sec-head{display:flex;gap:16px;align-items:baseline}
+.sec-num{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;flex:none;padding-top:2px}
+.stack{display:flex;flex-direction:column;gap:10px}
+em{font-style:normal;background:var(--accent-soft);padding:1px 5px;border-radius:3px}
+.c-son{color:var(--son);font-weight:700} .c-dau{color:var(--dau);font-weight:700}
+.c-pos{color:var(--pos);font-weight:700} .c-neg{color:var(--neg);font-weight:700}
+
+/* 그림 틀 */
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.fig-bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line-soft);background:var(--accent-soft)}
+.fig-title{font-size:13px;font-weight:600;letter-spacing:.01em;margin-right:auto}
+.fig-plot{padding:10px 8px 4px;min-width:0}
+.fig-note{padding:12px 16px;border-top:1px solid var(--line-soft);font-size:13.5px;color:var(--muted);line-height:1.6;margin:0}
+.fig-read{padding:12px 16px;border-top:1px solid var(--line-soft);font-size:14px;line-height:1.65;margin:0}
+svg.plot{display:block;width:100%;height:auto;overflow:visible}
+svg.plot text{font-family:var(--mono)}
+svg.plot text:not([fill]){fill:var(--muted)}
+
+/* 조작 */
+.ctrl{display:flex;align-items:center;gap:10px;font-size:13px}
+.ctrl label{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+.ctrl output{font-family:var(--mono);font-size:13px;font-weight:600;min-width:5.2em}
+input[type=range]{-webkit-appearance:none;appearance:none;height:22px;background:transparent;width:clamp(110px,22vw,190px);cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--line);border-radius:2px}
+input[type=range]::-moz-range-track{height:3px;background:var(--line);border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--accent);margin-top:-6px;border:2px solid var(--surface)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent);border:2px solid var(--surface)}
+.fig-bar .btn{font-size:12.5px;padding:6px 12px;background:var(--surface);color:var(--ink);border-color:var(--line);transition:background .15s,border-color .15s}
+.fig-bar .btn:hover{border-color:var(--accent);color:var(--accent)}
+.fig-bar .btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.fig-bar .seg .btn{border:none;border-radius:0;border-right:1px solid var(--line)}
+.fig-bar .seg .btn:last-child{border-right:none}
+
+/* 수치 표시 */
+.stat-row{display:flex;flex-wrap:wrap;gap:8px 26px;padding:12px 16px;border-top:1px solid var(--line-soft);margin:0}
+.stat{display:flex;flex-direction:column;gap:1px;margin:0}
+.stat dt{font-size:11.5px;color:var(--muted)}
+.stat dd{margin:0;font-family:var(--mono);font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat dd small{font-size:11.5px;color:var(--muted);font-weight:400;margin-left:3px}
+.stat.hl dd{color:var(--accent)}
+
+/* 표 */
+table.reg td.n,table.reg th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+table.reg caption{caption-side:top;text-align:left;font-size:13.5px;color:var(--muted);padding-bottom:6px}
+table.reg tr.hl td{background:var(--accent-soft)}
+.tablewrap{overflow-x:auto}
+
+/* 네 가정 */
+.assume{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.assume > div{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--soft)}
+.assume b{display:block;font-family:var(--mono);color:var(--accent);font-size:13px;margin-bottom:4px}
+@media (max-width:900px){.assume{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.assume{grid-template-columns:minmax(0,1fr)}}
+
+/* 흐름 */
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.flow .step{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 10px}
+.flow .arr{color:var(--muted)}
+
+/* 절마다의 실습: 데이터 처리 → 분석 → 보고서 */
+.practice{margin-top:8px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:var(--radius);background:var(--soft);padding:16px 18px 18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.practice h4{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:6px}
+.pstep{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;background:var(--accent);border-radius:999px;padding:2px 11px;letter-spacing:.02em}
+.ck-title,.rx-title{margin:0;font-size:13px;font-weight:700;color:var(--muted)}
+ul.ck{margin:0;padding-left:20px;font-size:14px}
+.cb.screen{border-top-color:var(--ok);background:#fbfdfc}
+.cb.screen .lang{color:var(--ok)}
+.cb.screen pre{white-space:pre;overflow-x:auto}
+table.map{font-size:14px;background:var(--surface)}
+table.map td:first-child{width:42%}
+table.map code{white-space:normal;overflow-wrap:anywhere}
+.report-ex{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:0 8px 8px 0;padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.report-ex p{margin:0}
+table.apa{font-size:14px;width:auto;min-width:60%}
+table.apa caption{color:var(--ink)}
+table.apa caption em{background:none;padding:0;font-weight:700;font-style:normal}
+.more{font-size:13px;color:var(--muted)}
+.rules-box ul{margin:0}
+
+/* 상관계수 예시 그림 (위키미디어 공용) */
+.corr-figure{margin:0;display:flex;flex-direction:column;gap:8px}
+.corr-figure img{display:block;width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px}
+.corr-figure figcaption{font-size:13px;color:var(--muted);line-height:1.6}
+
+main > footer{padding-top:8px;color:var(--muted);font-size:13.5px}
+.r-step{margin-top:18px}
+.r-step details{margin:4px 0}
+</style>
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+<script defer src="../assets/annotate.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#content">본문으로 건너뛰기</a>
+<aside class="rail">
+  <a class="rail-back" href="../index.html#statistics">← 처음으로</a>
+  <h1>회귀분석<br>상관에서<br>위계적 회귀까지</h1>
+  <nav id="rail-nav" aria-label="자료 목차">
+    <a href="#setup"><b>00</b><span>실습 준비</span></a>
+    <a href="#correlation"><b>01</b><span>두 변수의 상관</span></a>
+    <a href="#simple"><b>02</b><span>단순선형 회귀분석</span></a>
+    <a href="#residuals"><b>03</b><span>잔차 분석과 회귀의 가정</span></a>
+    <a href="#multiple"><b>04</b><span>다중선형 회귀분석</span></a>
+    <a href="#dummy"><b>05</b><span>범주형 변수와 더미변수</span></a>
+    <a href="#logistic"><b>06</b><span>로지스틱 회귀분석</span></a>
+    <a href="#ancova"><b>07</b><span>공분산분석은 회귀다</span></a>
+    <a href="#hierarchical"><b>08</b><span>위계적 회귀분석</span></a>
+    <a href="#appendix"><b>09</b><span>부록 · R 코드와 출력</span></a>
+    <a href="#wrap"><b>10</b><span>정리</span></a>
+  </nav>
+  <div class="rail-tags" aria-label="태그">
+    <span class="rail-tag">#통계</span>
+    <span class="rail-tag">#개념정리</span>
+    <span class="rail-tag">#회귀분석</span>
+    <span class="rail-tag">#상관계수</span>
+    <span class="rail-tag">#다중회귀</span>
+    <span class="rail-tag">#로지스틱회귀</span>
+    <span class="rail-tag">#공분산분석</span>
+  </div>
+  <footer>버튼과 슬라이더로 모형을 바꾸면 그림과 수치가 바로 다시 계산됩니다. 그림의 점은 모두 실제로 잰 값입니다.</footer>
+  <p class="rail-license">이 자료는 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a> 라이선스를 따릅니다.</p>
+</aside>
+
+<main id="content">
+<header class="masthead">
+  <p class="eyebrow">회귀분석 · 이야기 자료</p>
+  <h1>회귀분석 - 상관에서 위계적 회귀까지</h1>
+  <p class="lede">아버지 키가 큰 집의 아들은 키가 클까? 이 질문 하나로 회귀분석의 거의 모든 도구를 꺼내 볼 수 있다. 두 변수가 함께 움직이는 정도(<strong>상관</strong>)를 재고, 한 변수로 다른 변수의 평균을 말하는 직선(<strong>단순회귀</strong>)을 긋고, 그 직선에서 빗나간 거리(<strong>잔차</strong>)로 직선을 믿어도 되는지 묻는다. 어머니 키를 더하면 <strong>다중회귀</strong>, 딸과 아들을 함께 넣으면 <strong>더미변수</strong>, 거꾸로 키로 성별을 맞혀 보면 <strong>로지스틱 회귀</strong>가 된다. 마지막으로 임상시험 자료에서 본 <strong>공분산분석</strong>과 변수를 차례로 넣는 <strong>위계적 회귀</strong>가 모두 같은 회귀모형이라는 데까지 간다.</p>
+  <div class="mast-meta">
+    <span><i class="swatch" style="background:var(--son)"></i>아들 · TAU</span>
+    <span><i class="swatch" style="background:var(--dau)"></i>딸 · BtheB</span>
+    <span><i class="swatch" style="background:var(--ink)"></i>회귀직선</span>
+  </div>
+  <p class="note">앞서 볼 자료: 관측오차와 정규분포에서 회귀직선까지를 그림으로 여는 <a href="../data-science/normal-error-regression-intro.html">측정의 흔들림에서 회귀직선까지</a>, 최소제곱과 잔차를 직선을 직접 움직이며 보는 <a href="least-squares-residuals.html">회귀분석 조금 깊이 보기 - 최소제곱과 잔차</a>. 이 자료는 두 자료가 다룬 것을 짧게 되짚고 그 다음으로 넘어간다.</p>
+</header>
+
+<!-- ======================= 00 ======================= -->
+<section class="panel" id="setup">
+  <div class="sec-head"><span class="sec-num">00</span><h2>실습 준비 - 데이터 처리, 분석, 보고서</h2></div>
+  <div class="stack">
+    <p>01–08절은 저마다 개념과 그림 뒤에 <strong>프롬프트로 따라 하기</strong>가 붙어 있다. 기본은 <strong>분석 → 보고서</strong>의 두 프롬프트다. 원자료를 들여와 다듬거나 범주의 순서를 정해야 하는 절(01절의 갈턴 원자료, 05절의 성별 factor, 07절의 임상시험 자료)에만 그 앞에 <strong>데이터 처리</strong> 프롬프트를 하나 더 둔다. 나머지 절은 01절이 정리한 자료를 그대로 읽고, 필요한 자료 고르기(아들만, 쓸 변수만)는 분석 프롬프트 첫머리에 한두 줄로 적었다.</p>
+    <div class="flow" aria-label="실습의 세 단계">
+      <span class="step">원자료 <code>dataset/raw/</code></span><span class="arr">→</span>
+      <span class="step"><strong>데이터 처리</strong>(01·05·07절) → <code>dataset/working/</code></span><span class="arr">→</span>
+      <span class="step"><strong>분석</strong> → <code>output/*.csv</code>, <code>*.png</code></span><span class="arr">→</span>
+      <span class="step"><strong>보고서</strong> → <code>output/*_report.md</code></span>
+    </div>
+    <table class="reg">
+      <tbody>
+        <tr><td><strong>데이터 처리</strong><br>(필요할 때만)</td><td>원자료를 들여와 단위와 범주를 정리하고, 결측과 범위를 점검해 <code>dataset/working/</code>에 저장한다. 이 자료에서는 01절(인치 → cm), 05절(성별을 factor로 바꾸고 기준 범주 정하기), 07절(임상시험 자료, 결측 제외)이 해당한다. 고르기와 기술통계 정도라면 따로 단계를 두지 않고 분석에 합친다.</td></tr>
+        <tr><td><strong>분석</strong></td><td>필요한 자료를 골라 모형을 적합하고 결과를 표 파일(CSV)과 그림으로 저장한다. 회귀모형이면 개별 계수와 함께 <strong>모형 전체의 검정(F 검정)과 그 유의성, 설명력(\(R^2\), 수정 \(R^2\))</strong>을 꼭 저장한다. 본문에 실제 <strong>결과 화면</strong>(콘솔 출력)을 실었다. 에이전트가 낸 숫자가 이와 같은지 아래의 <strong>확인할 것</strong>으로 대조한다.</td></tr>
+        <tr><td><strong>보고서 작성</strong></td><td>저장된 표 파일만 읽고 결과 문단과 <strong>표</strong>를 쓴다. 회귀모형이면 첫 표는 언제나 <strong>모형의 유의성 표</strong>(\(F\), 자유도, \(p\), \(R^2\), 수정 \(R^2\))이고, 그다음이 계수표다. 본문의 <strong>결과 화면에서 보고서로</strong> 표가 출력의 어느 값이 보고서의 어느 숫자가 되는지를, <strong>보고서 예시</strong>가 완성된 모습을 보여 준다.</td></tr>
+      </tbody>
+    </table>
+    <p>분석과 보고서를 나누는 까닭은 두 가지다. 보고서의 숫자가 모두 <code>output/</code>의 표 파일에서 왔으므로 어느 숫자든 출처를 되짚을 수 있고, 에이전트가 문장을 쓰면서 숫자를 지어낼 틈이 줄어든다. 그리고 보고서 단계에서 결과 화면을 보고서의 문장으로 옮기는 일을 한 번씩 직접 따라가 보게 된다. 보고서 예시를 보기 전에 결과 화면만 보고 결과 문단을 먼저 써 보면 좋다.</p>
+
+    <h3>작업 폴더</h3>
+    <p>이 자료를 위한 실습 폴더 <code>regression</code>을 준비해 두었다. 갈턴의 원자료 <code>dataset/raw/Galton.tsv</code>, 빈 <code>scripts/</code>·<code>dataset/working/</code>·<code>output/</code> 폴더, 그리고 코딩 에이전트가 먼저 읽는 규칙 파일 <code>AGENTS.md</code>가 들어 있다. 뼈대는 GitHub 저장소의 <a href="https://github.com/qmakescl/class-material/tree/main/skeleton/regression" target="_blank" rel="noopener noreferrer"><code>skeleton/regression</code></a>에 있다. 셋 가운데 편한 방법으로 받고, VS Code로 <code>regression</code> 폴더를 <strong>폴더째</strong> 연다. 그래야 R의 작업 폴더가 <code>regression</code>이 되어 프롬프트의 경로가 그대로 통한다.</p>
+    <p><a class="dl-link" href="../downlodable/regression.zip" download="regression.zip">⬇ regression.zip 다운로드</a></p>
+    <ol>
+      <li><strong>zip 내려받기.</strong> 위 단추로 <code>regression.zip</code>을 받아 원하는 곳에 푼다.</li>
+      <li><strong>degit.</strong> Node.js가 있으면(<a href="../data-science/nvm-node-agent-skills.html">nvm과 Node.js 설치하기</a>) 터미널에서 폴더만 바로 받는다.
+        <div class="cb"><span class="lang">터미널</span><pre>npx degit qmakescl/class-material/skeleton/regression regression</pre></div></li>
+      <li><strong>git sparse checkout.</strong> 저장소에서 이 폴더만 골라 받는다. 폴더는 <code>class-material/skeleton/regression</code>에 생긴다.
+        <div class="cb"><span class="lang">터미널</span><pre>git clone --depth 1 --filter=blob:none --sparse https://github.com/qmakescl/class-material.git
+cd class-material
+git sparse-checkout set skeleton/regression</pre></div></li>
+    </ol>
+<pre class="tree">regression/
+├── AGENTS.md             # 코딩 에이전트가 따를 규칙 (R, 그림, 한글, 패키지, 보고서)
+├── CLAUDE.md             # Claude Code용: AGENTS.md를 불러온다
+├── scripts/              # R 스크립트 (처음엔 비어 있다)
+├── dataset/
+│   ├── raw/              # 원자료. 손대지 않는다
+│   │   └── Galton.tsv    # 갈턴(1886)의 부모와 자녀 키
+│   └── working/          # 데이터 처리 단계가 저장한 분석용 자료 (.rds)
+└── output/               # 표(CSV), 그림(PNG), 보고서(.md)</pre>
+    <p><code>AGENTS.md</code>에는 이 실습에 맞춘 규칙을 모두 적어 두었다. 에이전트가 폴더를 열면 이 파일을 먼저 읽으므로, 프롬프트마다 같은 요구를 되풀이하지 않아도 된다.</p>
+    <ul>
+      <li><strong>R:</strong> tidyverse로 쓰고, 모형 결과는 broom으로 표로 정리해 콘솔에 보이고 <code>output/</code>에 CSV로 저장한다. 회귀모형이면 계수표와 함께 모형 전체의 검정과 설명력을 반드시 저장한다.</li>
+      <li><strong>범주형 변수:</strong> factor로 만들고 범주의 순서(기준 범주)를 직접 정한다.</li>
+      <li><strong>그림과 한글:</strong> ggplot2로만 그리고, 한글은 showtext로 Google Fonts의 Noto Sans KR을 쓴다.</li>
+      <li><strong>파일 이름:</strong> 절 번호로 시작한다(<code>scripts/reg05_prepare.R</code>, <code>output/reg05_coef.csv</code>, <code>output/reg05_report.md</code>). 02–06, 08절은 01절이 만든 <code>dataset/working/galton_cm.rds</code>를 읽으므로 01절부터 차례로 한다.</li>
+      <li><strong>패키지:</strong> tidyverse(ggplot2, broom 포함)와 showtext. 07절만 임상시험 자료가 든 <strong>HSAUR3</strong>가 더 필요하고, 에이전트는 설치하기 전에 먼저 물어본다.</li>
+      <li><strong>보고서:</strong> 아래의 보고서 규칙을 따른다. 그래서 보고서 프롬프트는 "AGENTS.md 의 보고서 규칙을 따른다" 한 줄로 충분하다.</li>
+    </ul>
+    <p>Claude Code는 <code>AGENTS.md</code> 대신 <code>CLAUDE.md</code>를 읽기 때문에, <code>AGENTS.md</code>를 불러오는 한 줄짜리 <code>CLAUDE.md</code>도 함께 넣어 두었다.</p>
+
+    <h3>AGENTS.md의 보고서 규칙</h3>
+    <p>보고서 단계에서 에이전트가 따르는 규칙이다. APA(미국심리학회) 양식의 통계 표기를 따랐다. 실습 폴더의 <code>AGENTS.md</code>에 이미 들어 있으므로 따로 붙여 넣지 않아도 된다.</p>
+    <div class="cb"><span class="lang">regression/AGENTS.md · 보고서 규칙</span><pre>## 보고서 규칙
+
+- 보고서는 output/ 에 Markdown 파일(.md)로 쓴다.
+- 숫자는 분석 단계가 저장한 표 파일(output/*.csv)에서만 가져온다. 표에 없는 통계량을 새로 추정하지 않는다. 표의 수를 더하거나 나누는 간단한 계산은 해도 되고, 그렇게 했다고 밝힌다. 필요한 숫자가 표에 없으면 지어내지 말고 무엇이 더 필요한지 알린다.
+- 통계 기호(r, t, F, p, b, M, SD, R²)는 기울임으로 쓰고 자유도는 기호 뒤 괄호에 넣는다. 예: r(463) = .39, t(463) = 9.15, F(1, 463) = 83.72, χ²(2) = 145.72.
+- 소수는 둘째 자리까지 쓴다. p 는 셋째 자리까지 쓰고 .001 보다 작으면 p &lt; .001 로 쓴다. 셋째 자리로 반올림하면 .05 가 되어 판단이 가려지는 p, 둘째 자리에서 0 이 되는 값은 한 자리 더 쓴다.
+- 1 을 넘을 수 없는 값(r, p, R², β)은 소수점 앞의 0 을 쓰지 않는다(.39). 1 을 넘을 수 있는 값(b, 오즈비, 평균)은 0 을 쓴다(0.45).
+- 신뢰구간은 "95% CI [하한, 상한]" 으로 쓴다.
+- 회귀모형의 결과는 먼저 모형 전체를 보고한다. 선형회귀는 모형 전체의 F 검정과 그 유의성, 결정계수(R²), 수정 결정계수(수정 R²)를 쓴다. 로지스틱 회귀는 설명변수가 없는 모형과 비교한 가능도비 χ² 검정과 그 유의성, 의사 결정계수(McFadden R²)를 쓰고, 수정 R² 대신 AIC로 모형을 견준다.
+- 결과 문단은 무엇을 분석했나 → 모형 전체의 검정과 설명력 → 개별 효과(방향, 크기, 신뢰구간, 검정) → 해석의 순서로 쓰고, 효과의 크기를 단위(cm, 점)와 함께 말로 풀어 쓴다. 모형 전체가 유의하다는 것과 개별 변수의 효과가 유의하다는 것은 구별해 쓴다.
+- 보고서에는 결과 문단과 함께 표를 반드시 넣는다. 문단에 쓴 숫자는 표에도 있어야 한다.
+- 회귀모형의 보고서는 첫 표로 "모형의 유의성" 표를 둔다. 선형회귀는 모형마다 F, 두 자유도, p, R², 수정 R², 잔차 표준오차를, 로지스틱 회귀는 가능도비 χ², 자유도, p, 의사 R², AIC를 적는다. 모형을 여럿 비교하거나 단계를 나누었으면 모형(단계)마다 한 행씩 둔다. 이어서 회귀계수 표(b, SE, 95% CI, t 또는 z, p, 로지스틱은 오즈비)를 둔다.
+- 범주형 설명변수가 있으면 무엇이 기준 범주인지 밝힌다.
+- 표에는 "표 1-1"처럼 번호와 제목을 붙이고, 단위와 약어, 검정의 영가설은 표 아래 "주."에 적는다. 문단에서는 "(표 1-1)"처럼 표를 가리킨다.
+- 유의하지 않은 결과를 "효과가 없다"로 쓰지 않는다. 상관이나 회귀계수를 원인으로 쓰지 않는다.</pre></div>
+  </div>
+</section>
+
+<!-- ======================= 01 ======================= -->
+<section class="panel" id="correlation">
+  <div class="sec-head"><span class="sec-num">01</span><h2>아버지와 아들의 키 - 두 변수의 상관</h2></div>
+  <div class="stack">
+    <p>프랜시스 갈턴(Francis Galton)이 1880년대 런던의 197가족에게서 모은 부모와 자녀의 키 기록이 있다. 자녀는 898명(아들 465명, 딸 433명)이고, 인치로 적힌 값을 센티미터로 바꿔 쓴다. 먼저 <strong>아버지와 아들 465쌍</strong>만 본다. 아버지의 평균 키는 175.7cm(표준편차 5.84cm), 아들은 175.8cm(6.68cm)다.</p>
+    <p>두 변수가 <strong>함께 움직이는지</strong>는 이렇게 잰다. 쌍마다 아버지 키가 평균보다 얼마나 큰지, 아들 키가 평균보다 얼마나 큰지를 구해 <strong>곱한다</strong>. 둘 다 평균보다 크거나 둘 다 작으면 곱은 양수, 한쪽만 크면 음수다. 이 곱을 평균한 것이 <strong>공분산</strong>(covariance)이다. 공분산은 단위(cm²)에 따라 크기가 달라진다. 그래서 먼저 각 값을 <strong>표준화</strong>한다. 평균을 빼고 표준편차로 나누면, 단위와 관계없이 "평균에서 표준편차 몇 개만큼 떨어져 있는가"를 나타내는 z 점수가 된다.</p>
+    <div class="readout math">\[ z_{x,i} = \frac{x_i - \bar{x}}{s_x}, \qquad z_{y,i} = \frac{y_i - \bar{y}}{s_y} \]</div>
+    <p>두 z 점수를 곱해 평균한 것이 단위가 없는 <strong>상관계수</strong>(Pearson의 \(r\))다. 표준편차를 \(n-1\)로 나눠 구했으므로 평균도 \(n-1\)로 나눈다.</p>
+    <div class="readout math">\[ r = \frac{1}{n-1}\sum_{i=1}^{n} z_{x,i}\, z_{y,i} = \frac{\sum_i (x_i-\bar{x})(y_i-\bar{y})}{\sqrt{\sum_i (x_i-\bar{x})^2}\,\sqrt{\sum_i (y_i-\bar{y})^2}} = \frac{s_{xy}}{s_x\,s_y} \]</div>
+    <p>곱이 양수인 쌍이 많으면 \(r\)이 양수, 음수인 쌍이 많으면 \(r\)이 음수가 된다. 한 쌍을 점 하나로 찍어 보면 \(r\)의 값은 점들의 모습으로 이렇게 읽힌다.</p>
+    <div class="tablewrap"><table class="reg">
+      <thead><tr><th>값</th><th>점들의 모습</th><th>뜻</th></tr></thead>
+      <tbody>
+        <tr><td>+1에 가까움</td><td>오른쪽 위로 올라가는 직선 가까이에 모임</td><td>한쪽이 크면 다른 쪽도 큰 경향이 강하다</td></tr>
+        <tr><td>0 근처</td><td>뚜렷한 방향 없이 흩어짐</td><td>한쪽을 알아도 다른 쪽을 짐작하기 어렵다</td></tr>
+        <tr><td>−1에 가까움</td><td>오른쪽 아래로 내려가는 직선 가까이에 모임</td><td>한쪽이 크면 다른 쪽은 작은 경향이 강하다</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">두 변수를 골라 상관을 본다 · 아들 465명</span>
+      <span class="seg" role="group" aria-label="변수 쌍">
+        <button class="btn" type="button" data-pair="fs" aria-pressed="true">아버지–아들</button>
+        <button class="btn" type="button" data-pair="ms" aria-pressed="false">어머니–아들</button>
+        <button class="btn" type="button" data-pair="fm" aria-pressed="false">아버지–어머니</button>
+      </span>
+      <button class="btn" type="button" id="c-sign" aria-pressed="false">곱의 부호로 칠하기</button>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="c-svg" role="img" aria-label="고른 두 변수의 산점도와 평균선"></svg></div>
+    <dl class="stat-row" id="c-stats"></dl>
+    <p class="fig-note">점선은 두 변수의 평균이다. "곱의 부호로 칠하기"를 켜면 평균에서 같은 방향으로 벗어난 쌍(오른쪽 위, 왼쪽 아래)은 <span class="c-pos">빨강</span>, 반대 방향인 쌍은 <span class="c-neg">청록</span>으로 칠한다. 키는 0.1~0.5인치 단위로 기록되어 같은 값이 많아 가로로만 살짝 흩뜨려 그렸다(계산에는 원래 값을 쓴다). 아버지–어머니 쌍은 아들 수만큼 같은 점이 겹친다.</p>
+  </div>
+
+  <div class="stack">
+    <p>아버지–아들은 465쌍 가운데 299쌍이 같은 방향, 166쌍이 반대 방향이라 곱의 평균이 양수로 남고 \(r = 0.391\)이 된다. 어머니–아들은 \(r = 0.334\)로 비슷하고, <strong>아버지–어머니는 \(r = 0.106\)</strong>으로 거의 0이다. 키 큰 남자가 키 큰 여자와 짝을 짓는 경향이 이 자료에서는 약했다는 뜻이고, 04절의 다중회귀에서 이 사실이 다시 쓰인다.</p>
+    <table class="reg">
+      <tbody>
+        <tr><td><strong>범위</strong></td><td>\(-1 \le r \le 1\). 모든 점이 한 직선 위에 있을 때만 \(r = \pm 1\)이고, 0은 직선 관계가 없을 때다.</td></tr>
+        <tr><td><strong>단위가 없다</strong></td><td>키를 인치로 재든 cm로 재든 \(r\)은 같다. z 점수로 바꾼 뒤 계산하기 때문이다.</td></tr>
+        <tr><td><strong>대칭이다</strong></td><td>아버지–아들의 \(r\)과 아들–아버지의 \(r\)은 같다. 어느 쪽이 원인인지 말하지 않는다. 02절의 회귀는 이 대칭이 깨진다.</td></tr>
+        <tr><td><strong>기울기의 크기가 아니다</strong></td><td>점이 직선 위에 있기만 하면 직선이 가파르든 완만하든 \(r = \pm 1\)이다. \(r\)은 점이 직선에 얼마나 <em>가까이</em> 모였는지를 잰다.</td></tr>
+        <tr><td><strong>직선 관계만 잰다</strong></td><td>U자처럼 휘어진 관계는 강해도 \(r\)이 0에 가까울 수 있다. 숫자보다 산점도를 먼저 본다.</td></tr>
+        <tr><td><strong>\(r^2\)의 뜻</strong></td><td>\(y\)의 흩어짐(분산) 가운데 \(x\)에 대한 직선으로 설명되는 비율이다. 아버지–아들 키는 \(r^2 = 0.153\)으로, 약 15%다. 02절의 결정계수 \(R^2\)와 같은 값이다.</td></tr>
+      </tbody>
+    </table>
+    <figure class="corr-figure">
+      <img src="../assets/images/correlation-examples.png" width="1280" height="586" loading="lazy" alt="상관계수 값이 다른 여러 산점도. 첫째 줄은 같은 흩어짐에서 상관이 1, 0.8, 0.4, 0, −0.4, −0.8, −1로 바뀌는 모습, 둘째 줄은 기울기가 달라도 점이 직선 위에 있으면 상관이 1 또는 −1이고 수평선은 정의되지 않는 모습, 셋째 줄은 곡선·원·네 덩어리처럼 뚜렷한 모양이 있어도 상관이 0인 모습입니다.">
+      <figcaption>
+        <strong>상관계수에 따른 자료의 모양.</strong> 각 그림 위의 숫자가 상관계수다. 첫째 줄은 점이 직선 쪽으로 모일수록 숫자가 ±1에 가까워지는 모습이다. 둘째 줄은 <strong>기울기가 크든 작든</strong> 점이 직선 위에 있으면 상관이 1 또는 −1이라는 것을 보여 준다(가운데 수평선은 한쪽 값이 변하지 않아 상관을 정의할 수 없다). 셋째 줄은 <strong>뚜렷한 관계가 있어도 직선 모양이 아니면 상관이 0</strong>일 수 있다는 것을 보여 준다. 이 그림의 점들은 설명을 위해 만든 것이다.<br>
+        출처: DenisBoigelot(원 업로더 Imagecreator), 「<a href="https://commons.wikimedia.org/wiki/File:Correlation_examples2.svg" target="_blank" rel="noopener noreferrer">Correlation examples2.svg</a>」, 위키미디어 공용, <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.ko" target="_blank" rel="noopener noreferrer">CC0 1.0</a>. 원본 SVG를 위키미디어가 변환한 PNG를 사용했다.
+      </figcaption>
+    </figure>
+    <p class="note">"몇 이상이면 강한 상관"이라는 기준은 분야와 목적마다 다르다. 부호(방향)와, 0과 1 가운데 어디에 가까운지를 먼저 읽는다.</p>
+    <h3>상관계수의 검정</h3>
+    <p>465쌍은 표본이다. 모집단의 상관계수 \(\rho\)가 0인데 우연히 0.391이 나왔을 수 있는지는 \(t\) 검정으로 본다. 영가설은 \(H_0: \rho = 0\)이다.</p>
+    <div class="readout math">\[ t = \frac{r\sqrt{n-2}}{\sqrt{1-r^2}} = \frac{0.391\sqrt{463}}{\sqrt{1-0.391^2}} = 9.15, \qquad \mathit{df} = 463,\ p < .001,\ 95\%\ \text{CI}\ [0.311,\ 0.466] \]</div>
+    <div class="callout caution"><p><strong>상관은 인과가 아니다.</strong> 아버지 키와 아들 키의 상관은 유전이라는 원인을 떠올리게 하지만, 같은 집에서 같은 음식을 먹고 자란 환경도 두 키를 함께 움직인다. 상관계수는 "함께 움직인다"까지만 말한다. 그리고 \(r = 0.391\)은 "강하다"보다 "뚜렷하지만 흩어짐이 크다"에 가깝다. 02절에서 보듯 아버지 키로 아들 키의 흩어짐을 15%쯤만 설명한다.</p></div>
+  </div>
+
+  <div class="practice" id="p01">
+    <h3>프롬프트로 따라 하기 · 상관</h3>
+    <p class="note">데이터 처리 → 분석 → 보고서 작성의 순서로 프롬프트 세 개를 차례로 준다. 작업 폴더와 보고서 규칙은 <a href="#setup">00 실습 준비</a>, 만들어진 R 코드와 전체 출력은 <a href="#code-01" class="code-link">부록 01</a>에 있다.</p>
+    <h4><span class="pstep">① 데이터 처리</span>자료를 들여와 다듬는다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 상관 데이터 처리</span><pre>dataset/raw/Galton.tsv 는 갈턴이 1886년에 모은 부모와 자녀의 키 자료이고 단위는 인치다. 원자료는 고치지 않는다. 이 자료를 분석용으로 정리하는 R 스크립트 scripts/reg01_prepare.R 을 써서 실행해 줘.
+
+1. 아버지, 어머니, 자녀의 키를 센티미터로 바꾸고, 성별은 딸과 아들 두 범주로 두되 딸을 기준 범주로 한다.
+2. 행 수와 가족 수, 성별 인원, 키 세 변수의 결측 수, 키 세 변수의 최솟값과 최댓값을 보여 줘.
+3. 정리한 자료는 다음 절들에서도 쓸 수 있게 dataset/working/galton_cm.rds 로 저장해 줘.</pre></div>
+    <p class="ck-title">확인할 것</p><ul class="ck"><li>898행, 197가족, 딸 433명과 아들 465명인가?</li><li>세 키에 결측이 없는가?</li><li>키가 142~201cm 사이인가? 56~79처럼 나오면 인치를 그대로 둔 것이다.</li></ul>
+    <h4><span class="pstep">② 분석</span>모형을 적합하고 결과를 표 파일로 저장한다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 상관 분석</span><pre>dataset/working/galton_cm.rds 에서 아들만 골라 상관분석을 하는 R 스크립트 scripts/reg01_correlation.R 을 써서 실행해 줘.
+
+1. 아버지 키, 어머니 키, 아들 키의 사람 수, 평균, 표준편차와 세 변수의 상관행렬을 한 표로 만들어 output/reg01_table1.csv 로 저장해 줘.
+2. 아버지–아들, 어머니–아들, 아버지–어머니 세 쌍마다 상관계수가 0인지 검정해서 상관계수, t, 자유도, p, 95% 신뢰구간을 한 표로 만들어 output/reg01_cortest.csv 로 저장해 줘.
+3. 아버지 키와 아들 키의 산점도에 두 변수의 평균을 점선으로 그어 output/reg01_scatter.png 로 저장해 줘. 아버지 키는 같은 값이 많으니 가로로만 조금 흩뜨려 줘.</pre></div>
+    <div class="cb screen"><span class="lang">결과 화면 · Rscript scripts/reg01_correlation.R</span><pre># A tibble: 3 × 7
+  변수       n        M       SD    아버지    어머니      아들
+  &lt;fct&gt;  &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+1 아버지   465 175.6872 5.841820 1         0.1063346 0.3913174
+2 어머니   465 162.5731 5.929065 0.1063346 1         0.3341309
+3 아들     465 175.8412 6.684249 0.3913174 0.3341309 1        
+# A tibble: 3 × 7
+  쌍                    r        t    df            p     ci_low   ci_high
+  &lt;chr&gt;             &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;        &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+1 아버지–아들   0.3913174 9.149788   463 1.824016e-18 0.3114667  0.4656805
+2 어머니–아들   0.3341309 7.628049   463 1.367163e-13 0.2508178  0.4125305
+3 아버지–어머니 0.1063346 2.301094   463 2.182968e- 2 0.01555110 0.1953793</pre></div>
+    
+    <h4><span class="pstep">③ 보고서 작성</span>결과 화면의 숫자를 보고서의 문장과 표로 옮긴다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 상관 보고서</span><pre>output/reg01_table1.csv, output/reg01_cortest.csv 와 그림 output/reg01_scatter.png 를 보고 output/reg01_report.md 에 상관분석의 결과 보고를 써 줘. AGENTS.md 의 보고서 규칙을 따른다.
+
+1. 무엇을 분석했는지(누구, 몇 명, 단위)를 한 문장으로 쓴다.
+2. 결과 문단: 아버지–아들의 상관을 중심으로 방향, 크기, 검정, 신뢰구간을 쓰고 나머지 두 쌍을 짧게 덧붙인다.
+3. 표 1-1 기술통계와 상관행렬: 세 변수의 평균, 표준편차, 상관계수. 상관행렬은 대각선 아래만 채우고 유의수준을 별표로 표시한다.
+4. 표 1-2 상관계수의 검정: 세 쌍을 행으로, r, 95% 신뢰구간, t, 자유도, p 를 열로 둔다.
+5. 해석: 상관이 원인을 말해 주지 않는다는 점, 아버지–어머니 쌍은 같은 부모가 아들 수만큼 겹쳐 세어졌다는 점을 한두 문장으로 적는다.</pre></div>
+    <div class="tablewrap"><table class="reg map"><caption>결과 화면에서 보고서로</caption>
+      <thead><tr><th>결과 화면에서 읽은 값</th><th>보고서에 쓰는 꼴</th></tr></thead>
+      <tbody><tr><td><code>r 0.3913174</code></td><td>\(r = .39\). 1을 넘을 수 없는 값이라 소수점 앞의 0을 쓰지 않는다.</td></tr><tr><td><code>df 463</code></td><td>\(r(463)\). 자유도는 기호 바로 뒤 괄호에 넣는다.</td></tr><tr><td><code>p 1.824016e-18</code></td><td>\(p &lt; .001\). <code>e-18</code>은 \(\times 10^{-18}\)이다. .001보다 작으면 등호 대신 부등호로 쓴다.</td></tr><tr><td><code>ci_low 0.3114667</code>, <code>ci_high 0.4656805</code></td><td>95% CI [.31, .47]</td></tr><tr><td><code>p 2.182968e- 2</code> (아버지–어머니)</td><td>\(p = .022\). <code>e- 2</code>는 \(\times 10^{-2}\)이다.</td></tr><tr><td><code>M 175.6872</code>, <code>SD 5.841820</code></td><td>\(M = 175.69\), \(SD = 5.84\) (cm)</td></tr></tbody></table></div>
+    <div class="report-ex"><p class="rx-title">보고서 예시 · output/reg01_report.md</p><p>갈턴(1886)의 자료에서 아들 465명과 그 부모의 키(cm)를 분석하였다(표 1-1). 아버지 키와 아들 키는 정적 상관을 보였다, \(r(463) = .39\), 95% CI [.31, .47], \(p &lt; .001\). 어머니 키와 아들 키의 상관도 비슷하였으나, \(r(463) = .33\), 95% CI [.25, .41], \(p &lt; .001\), 아버지 키와 어머니 키의 상관은 작았다, \(r(463) = .11\), 95% CI [.02, .20], \(p = .022\)(표 1-2). 아버지–어머니 쌍은 같은 부모가 아들 수만큼 반복해 세어진 값이라 이 검정은 실제보다 유의하게 나올 수 있다. 상관은 두 키가 함께 움직인다는 것을 보일 뿐 그 원인(유전, 같은 집의 환경)을 가려 주지는 않는다.</p><div class="tablewrap"><table class="reg apa"><caption><em>표 1-1</em><br>아들 465명과 부모의 키: 평균, 표준편차, 상관계수</caption><thead><tr><th>변수</th><th class="n">\(M\)</th><th class="n">\(SD\)</th><th class="n">1</th><th class="n">2</th></tr></thead><tbody><tr><td>1. 아버지 키</td><td class="n">175.69</td><td class="n">5.84</td><td class="n">—</td><td class="n"></td></tr><tr><td>2. 어머니 키</td><td class="n">162.57</td><td class="n">5.93</td><td class="n">.11*</td><td class="n">—</td></tr><tr><td>3. 아들 키</td><td class="n">175.84</td><td class="n">6.68</td><td class="n">.39***</td><td class="n">.33***</td></tr></tbody></table></div><p class="more">주. 단위는 cm. * \(p &lt; .05\). *** \(p &lt; .001\).</p><div class="tablewrap"><table class="reg apa"><caption><em>표 1-2</em><br>상관계수의 검정 (\(n = 465\))</caption><thead><tr><th>쌍</th><th class="n">\(r\)</th><th class="n">95% CI</th><th class="n">\(t(463)\)</th><th class="n">\(p\)</th></tr></thead><tbody><tr><td>아버지–아들</td><td class="n">.39</td><td class="n">[.31, .47]</td><td class="n">9.15</td><td class="n">&lt; .001</td></tr><tr><td>어머니–아들</td><td class="n">.33</td><td class="n">[.25, .41]</td><td class="n">7.63</td><td class="n">&lt; .001</td></tr><tr><td>아버지–어머니</td><td class="n">.11</td><td class="n">[.02, .20]</td><td class="n">2.30</td><td class="n">.022</td></tr></tbody></table></div><p class="more">주. 영가설은 모집단 상관계수 \(\rho = 0\)이다. 아버지–어머니 쌍은 같은 부모가 아들 수만큼 겹쳐 세어졌다.</p></div>
+    <p class="note">표의 숫자를 그대로 옮기지 않은 것이 하나 있다. 아버지–어머니의 \(p = .022\)가 부풀었다는 문장은 해석이다. 가족 197쌍을 한 번씩만 세어 다시 검정하면 \(r(195) = .10\), \(p = .160\)이다. 이런 확인이 필요하면 보고서 단계가 아니라 분석 단계로 돌아가 표를 하나 더 만들게 한다.</p>
+  </div>
+</section>
+
+<!-- ======================= 02 ======================= -->
+<section class="panel" id="simple">
+  <div class="sec-head"><span class="sec-num">02</span><h2>단순선형 회귀분석 - 아버지 키로 아들 키를 말하기</h2></div>
+  <div class="stack">
+    <p>상관이 "함께 움직이는 정도"라면 회귀는 <strong>방향이 있는 질문</strong>이다. 아버지 키(\(x\), 설명변수)를 알 때 아들 키(\(Y\), 반응변수)가 평균적으로 얼마인가. <a href="../data-science/normal-error-regression-intro.html#model">측정의 흔들림에서 회귀직선까지</a>에서 본 대로 회귀분석은 자료를 "직선 위의 가운데 + 종 모양의 흔들림"으로 본다.</p>
+    <div class="readout math">\[ Y_i = \beta_0 + \beta_1 x_i + \varepsilon_i, \qquad \varepsilon_i \sim N(0,\ \sigma^2) \]</div>
+    <p>\(\beta_0\)(절편)과 \(\beta_1\)(기울기)은 잔차 제곱합을 가장 작게 하는 값으로 추정한다(최소제곱법, <a href="least-squares-residuals.html#why-squares">왜 하필 제곱인가</a>). 그 답은 01절의 상관계수로 바로 쓸 수 있다.</p>
+    <div class="readout math">\[ b_1 = r\,\frac{s_y}{s_x} = 0.391 \times \frac{6.68}{5.84} = 0.448, \qquad b_0 = \bar y - b_1 \bar x = 175.8 - 0.448 \times 175.7 = 97.2 \]</div>
+    <p>기울기는 상관계수에 "두 변수의 흩어짐의 비"를 곱한 것이다. 그래서 \(r\)이 0이면 기울기도 0이고, \(r\)의 부호가 곧 기울기의 부호다. 다른 점은 <strong>방향</strong>이다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">어느 쪽으로 예측하느냐에 따라 직선이 다르다</span>
+      <span class="seg" role="group" aria-label="회귀 방향">
+        <button class="btn" type="button" data-line="yx" aria-pressed="true">아버지로 아들 예측</button>
+        <button class="btn" type="button" data-line="xy" aria-pressed="false">아들로 아버지 예측</button>
+        <button class="btn" type="button" data-line="both" aria-pressed="false">둘 다</button>
+      </span>
+      <button class="btn" type="button" id="s-same" aria-pressed="false">아들 = 아버지 선</button>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="s-svg" role="img" aria-label="아버지–아들 키의 두 회귀직선"></svg></div>
+    <dl class="stat-row" id="s-stats"></dl>
+    <p class="fig-note">검은 실선은 아버지 키로 아들 키의 평균을 예측하는 직선, 주황 실선은 아들 키로 아버지 키의 평균을 예측하는 직선을 같은 축에 그린 것이다. 두 직선은 평균점(◆)에서 만난다. 회색 점선은 "아들 키 = 아버지 키"다.</p>
+  </div>
+
+  <div class="stack">
+    <p>두 직선의 기울기(0.448과 0.342)를 곱하면 \(r^2 = 0.153\)이 된다. 상관은 하나인데 회귀직선은 둘이다. 어느 변수를 예측하느냐는 분석하는 사람이 정하는 질문이고, <strong>회귀는 그 질문을 식에 새겨 넣는다</strong>. 두 직선 모두 "아들 = 아버지" 선보다 평평하다는 것이 갈턴이 "평균으로의 회귀"라고 부른 현상이다.</p>
+    <h3>R의 출력에서 무엇을 읽나</h3>
+    <div class="tablewrap"><table class="reg">
+      <caption>표 2-1. 아버지 키로 아들 키를 설명하는 단순회귀 (\(n = 465\))</caption>
+      <thead><tr><th>항</th><th class="n">추정값</th><th class="n">표준오차</th><th class="n">\(t\)</th><th class="n">\(p\)</th><th class="n">95% 신뢰구간</th></tr></thead>
+      <tbody>
+        <tr><td>절편</td><td class="n">97.18</td><td class="n">8.60</td><td class="n">11.30</td><td class="n">&lt; .001</td><td class="n">[80.27, 114.08]</td></tr>
+        <tr class="hl"><td>아버지 키</td><td class="n">0.448</td><td class="n">0.049</td><td class="n">9.15</td><td class="n">&lt; .001</td><td class="n">[0.352, 0.544]</td></tr>
+      </tbody>
+    </table></div>
+    <table class="reg">
+      <tbody>
+        <tr><td><strong>기울기 0.448</strong></td><td>아버지 키가 1cm 큰 집의 아들은 평균적으로 0.45cm 크다. 신뢰구간 [0.352, 0.544]는 0을 포함하지 않는다.</td></tr>
+        <tr><td><strong>\(t = 9.15\)</strong></td><td>영가설 \(H_0: \beta_1 = 0\)의 검정. 01절 상관계수 검정의 \(t\)와 정확히 같다. 단순회귀에서 "기울기가 0인가"와 "상관이 0인가"는 같은 질문이다.</td></tr>
+        <tr><td><strong>잔차 표준오차 6.16cm</strong></td><td>직선 둘레로 아들 키가 흩어진 정도 \(\hat\sigma\). 자유도는 \(n - 2 = 463\)이다. 아버지 키를 모를 때의 흩어짐(아들 키의 표준편차 6.68cm)보다 조금 줄었다.</td></tr>
+        <tr><td><strong>\(R^2 = 0.153\)</strong><br><strong>수정 \(R^2 = 0.151\)</strong></td><td>아들 키의 변동 가운데 아버지 키로 설명되는 몫(<a href="least-squares-residuals.html#r-squared">\(R^2\)의 정체</a>). 단순회귀에서는 \(r^2\)과 같다(\(0.391^2 = 0.153\)).</td></tr>
+        <tr><td><strong>\(F(1, 463) = 83.7\)</strong><br><strong>\(p &lt; .001\)</strong></td><td>모형 전체의 검정. 영가설은 "모든 기울기가 0", 곧 설명변수가 아들 키를 전혀 설명하지 못한다는 것이고, 이를 기각하므로 모형이 유의하다. 설명변수가 하나뿐이라 \(t^2\)과 같다(\(9.15^2 = 83.7\)). 설명변수가 여럿이면 이 검정과 개별 계수의 \(t\) 검정이 서로 다른 질문이 된다.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="practice" id="p02">
+    <h3>프롬프트로 따라 하기 · 단순회귀</h3>
+    <p class="note">01절에서 정리한 자료를 그대로 쓰므로 데이터 처리 단계를 따로 두지 않았다. 필요한 자료 고르기와 기술통계는 분석 프롬프트 첫머리에 함께 적었다. 분석 → 보고서 작성의 두 프롬프트를 차례로 준다. 작업 폴더와 보고서 규칙은 <a href="#setup">00 실습 준비</a>, 만들어진 R 코드와 전체 출력은 <a href="#code-02" class="code-link">부록 02</a>에 있다.</p>
+    <h4><span class="pstep">① 분석</span>모형을 적합하고 결과를 표 파일로 저장한다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 단순회귀 분석</span><pre>dataset/working/galton_cm.rds(01절에서 정리한 자료)에서 아들만 골라, 아버지 키가 아들 키를 설명하는 단순 회귀분석을 하는 R 스크립트 scripts/reg02_simple.R 을 써서 실행해 줘.
+
+1. 아버지 키와 아들 키 각각의 사람 수, 평균, 표준편차, 최솟값, 최댓값을 표로 만들어 output/reg02_desc.csv 로 저장해 줘.
+2. 계수표(추정값, 표준오차, t, p, 95% 신뢰구간)를 output/reg02_coef.csv 로 저장해 줘.
+3. 모형 전체의 결정계수, 수정 결정계수, 잔차 표준오차, F 검정(통계량, 두 자유도, p), 사람 수를 한 줄 표로 만들어 output/reg02_fit.csv 로 저장해 줘.
+4. 산점도에 회귀직선과 그 95% 신뢰띠를 겹쳐 output/reg02_line.png 로 저장해 줘.</pre></div>
+    <div class="cb screen"><span class="lang">결과 화면 · Rscript scripts/reg02_simple.R</span><pre># A tibble: 2 × 6
+  변수       n        M       SD   최소   최대
+  &lt;chr&gt;  &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+1 father   465 175.6872 5.841820 157.48 199.39
+2 son      465 175.8412 6.684249 152.4  200.66
+# A tibble: 2 × 7
+  term          estimate  std.error statistic      p.value   conf.low   conf.high
+  &lt;chr&gt;            &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;
+1 (Intercept) 97.17764   8.602050   11.29703  2.642076e-26 80.27374   114.0815   
+2 father       0.4477479 0.04893533  9.149788 1.824016e-18  0.3515851   0.5439108
+# A tibble: 1 × 8
+  r.squared adj.r.squared    sigma statistic    df df.residual      p.value  nobs
+      &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;       &lt;int&gt;        &lt;dbl&gt; &lt;int&gt;
+1 0.1531293     0.1513002 6.157859  83.71863     1         463 1.824016e-18   465</pre></div>
+    <p class="ck-title">확인할 것</p><ul class="ck"><li>아들이 465명이고 아버지 키의 범위가 157.5~199.4cm인가? 이 범위가 예측을 믿을 수 있는 구간이다.</li><li>모형 전체의 F가 83.72, 결정계수가 .15인가?</li></ul>
+    <h4><span class="pstep">② 보고서 작성</span>결과 화면의 숫자를 보고서의 문장과 표로 옮긴다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 단순회귀 보고서</span><pre>output/reg02_desc.csv, output/reg02_coef.csv, output/reg02_fit.csv 와 그림 output/reg02_line.png 를 보고 output/reg02_report.md 에 단순회귀의 결과 보고를 써 줘. AGENTS.md 의 보고서 규칙을 따른다.
+
+1. 결과 문단: 모형 전체의 F 검정과 그 유의성, 결정계수, 수정 결정계수를 먼저 쓴다. 결정계수는 "아들 키 분산의 몇 %를 설명하는가"로 풀어 쓴다. 이어서 기울기를 "아버지 키가 1cm 클 때 아들 키가 평균 몇 cm 큰가"로 풀어 쓰고 신뢰구간과 검정을 붙인다. 절편을 해석하지 않는 까닭을 한 문장으로 쓴다.
+2. 표 2-1 모형의 유의성: F, 두 자유도, p, 결정계수, 수정 결정계수, 잔차 표준오차를 한 행으로.
+3. 표 2-2 회귀계수: 절편과 아버지 키의 b, SE, 95% CI, t, p.
+4. 기술통계의 아버지 키 범위를 들어 이 직선으로 예측해도 되는 범위를 적는다.</pre></div>
+    <div class="tablewrap"><table class="reg map"><caption>결과 화면에서 보고서로</caption>
+      <thead><tr><th>결과 화면에서 읽은 값</th><th>보고서에 쓰는 꼴</th></tr></thead>
+      <tbody><tr><td><code>statistic 83.71863</code>, <code>df 1</code>, <code>df.residual 463</code></td><td>\(F(1, 463) = 83.72\). 자유도 두 개를 순서대로 쓴다.</td></tr><tr><td><code>p.value 1.824016e-18</code> (모형 전체)</td><td>\(p &lt; .001\). 모형이 유의하다. "기울기가 모두 0", 곧 설명변수가 아무 쓸모없다는 영가설을 기각한다.</td></tr><tr><td><code>r.squared 0.1531293</code></td><td>\(R^2 = .15\). 아들 키 분산의 15%를 설명한다.</td></tr><tr><td><code>adj.r.squared 0.1513002</code></td><td>수정 \(R^2 = .15\). 설명변수 수만큼 벌점을 준 값이다. 설명변수가 하나이고 표본이 커서 \(R^2\)와 거의 같다.</td></tr><tr><td><code>father estimate 0.4477479</code></td><td>\(b = 0.45\). 1을 넘을 수 있는 값이라 0을 쓴다. 단위는 cm당 cm</td></tr><tr><td><code>conf.low 0.3515851</code>, <code>conf.high 0.5439108</code></td><td>95% CI [0.35, 0.54]</td></tr><tr><td><code>father statistic 9.149788</code></td><td>\(t(463) = 9.15\). \(t\)의 자유도는 잔차의 자유도(<code>df.residual</code>)다.</td></tr><tr><td><code>sigma 6.157859</code></td><td>잔차 표준오차 6.16cm</td></tr><tr><td><code>(Intercept) 97.17764</code></td><td>보고는 하되 해석하지 않는다. 아버지 키 0cm일 때의 값이다.</td></tr></tbody></table></div>
+    <div class="report-ex"><p class="rx-title">보고서 예시 · output/reg02_report.md</p><p>아버지 키로 아들 키를 설명하는 단순회귀모형은 유의하였다, \(F(1, 463) = 83.72\), \(p &lt; .001\), \(R^2 = .15\), 수정 \(R^2 = .15\)(표 2-1). 아들 키 분산의 15%가 아버지 키로 설명되었다. 아버지 키가 1cm 클 때 아들 키는 평균 0.45cm 컸다, \(b = 0.45\), 95% CI [0.35, 0.54], \(t(463) = 9.15\), \(p &lt; .001\)(표 2-2). 회귀직선 둘레의 잔차 표준오차는 6.16cm였다. 절편(97.18)은 아버지 키가 0cm일 때의 값이라 해석하지 않는다. 자료의 아버지 키는 157.5~199.4cm이므로 이 범위 밖의 예측은 자료가 뒷받침하지 않는다.</p><div class="tablewrap"><table class="reg apa"><caption><em>표 2-1</em><br>단순회귀 모형의 유의성 (\(n = 465\))</caption><thead><tr><th>모형</th><th class="n">\(F\)</th><th class="n">\(df\)</th><th class="n">\(p\)</th><th class="n">\(R^2\)</th><th class="n">수정 \(R^2\)</th><th class="n">잔차 표준오차</th></tr></thead><tbody><tr><td>아버지 키 → 아들 키</td><td class="n">83.72</td><td class="n">1, 463</td><td class="n">&lt; .001</td><td class="n">.15</td><td class="n">.15</td><td class="n">6.16</td></tr></tbody></table></div><p class="more">주. 영가설은 "기울기 = 0"(아버지 키가 아들 키를 전혀 설명하지 못한다)이다. 잔차 표준오차의 단위는 cm.</p><div class="tablewrap"><table class="reg apa"><caption><em>표 2-2</em><br>아버지 키로 아들 키를 설명하는 회귀계수</caption><thead><tr><th>변수</th><th class="n">\(b\)</th><th class="n">\(SE\)</th><th class="n">95% CI</th><th class="n">\(t\)</th><th class="n">\(p\)</th></tr></thead><tbody><tr><td>절편</td><td class="n">97.18</td><td class="n">8.60</td><td class="n">[80.27, 114.08]</td><td class="n">11.30</td><td class="n">&lt; .001</td></tr><tr><td>아버지 키</td><td class="n">0.45</td><td class="n">0.05</td><td class="n">[0.35, 0.54]</td><td class="n">9.15</td><td class="n">&lt; .001</td></tr></tbody></table></div><p class="more">주. \(t\)의 자유도는 463이다.</p></div>
+    <p class="note">결과 화면의 숫자는 일곱 자리까지 나오지만 보고서는 둘째 자리면 충분하다. 반올림은 마지막에 한 번만 한다. 0.4477을 0.448로, 다시 0.45로 두 번 반올림하지 않는다.</p>
+  </div>
+</section>
+
+<!-- ======================= 03 ======================= -->
+<section class="panel" id="residuals">
+  <div class="sec-head"><span class="sec-num">03</span><h2>잔차 분석 - 회귀의 가정을 점검한다</h2></div>
+  <div class="stack">
+    <p>02절의 표준오차, \(t\), \(p\), 신뢰구간은 모두 모형의 \(\varepsilon_i \sim N(0, \sigma^2)\)이 맞다는 전제에서 계산된다. 이 전제를 풀어 쓰면 네 가지 가정이 되고, 머리글자를 따서 <strong>LINE</strong>이라 부르기도 한다.</p>
+    <div class="assume">
+      <div><b>L · 선형성</b>\(x\)마다 \(Y\)의 평균이 한 직선 위에 있다.</div>
+      <div><b>I · 독립성</b>한 관측의 오차가 다른 관측의 오차와 무관하다.</div>
+      <div><b>N · 정규성</b>직선 둘레의 흔들림이 정규분포를 이룬다.</div>
+      <div><b>E · 등분산성</b>흔들림의 폭이 \(x\)에 상관없이 같다.</div>
+    </div>
+    <h3>잔차란 무엇인가</h3>
+    <p>가정은 모두 오차 \(\varepsilon_i\)에 대한 것인데, 오차는 볼 수 없다. 그래서 그 추정값인 <strong>잔차</strong>(residual)로 점검한다. 잔차는 한 사람마다 "실제 값 − 직선이 말한 값"이다.</p>
+    <div class="readout math">\[ e_i = y_i - \hat y_i = y_i - (b_0 + b_1 x_i) \]</div>
+    <div class="tablewrap"><table class="reg">
+      <caption>표 3-1. 아버지–아들 회귀에서 세 아들의 잔차 (단위 cm)</caption>
+      <thead><tr><th>아들</th><th class="n">아버지 키 \(x\)</th><th class="n">아들 키 \(y\)</th><th class="n">직선이 말한 키 \(\hat y\)</th><th class="n">잔차 \(e\)</th><th class="n">표준화 잔차</th></tr></thead>
+      <tbody>
+        <tr><td>72번 가족</td><td class="n">177.80</td><td class="n">200.66</td><td class="n">176.79</td><td class="n">+23.87</td><td class="n">+3.88</td></tr>
+        <tr><td>109번 가족</td><td class="n">176.53</td><td class="n">152.40</td><td class="n">176.22</td><td class="n">−23.82</td><td class="n">−3.87</td></tr>
+        <tr><td>1번 가족</td><td class="n">199.39</td><td class="n">185.93</td><td class="n">186.45</td><td class="n">−0.53</td><td class="n">−0.09</td></tr>
+      </tbody>
+    </table></div>
+    <p>72번 가족의 아들은 아버지 키로 보면 176.8cm쯤이어야 하는데 실제로는 200.7cm라서 직선보다 23.9cm 위에 있다. 109번 가족의 아들은 거의 같은 아버지 키인데 직선보다 23.8cm 아래에 있다. 둘은 이 자료에서 직선에서 가장 멀리 벗어난 두 아들이다. 1번 가족의 아들은 직선 바로 옆에 있다. 아래 그림에서 잔차를 네 가지로 보자.</p>
+    <div class="fig">
+      <div class="fig-bar">
+        <span class="fig-title">잔차를 눈으로 보기 · 아들 465명</span>
+        <span class="seg" role="group" aria-label="잔차 보기">
+          <button class="btn" type="button" data-rv="three" aria-pressed="true">세 아들</button>
+          <button class="btn" type="button" data-rv="all" aria-pressed="false">모든 잔차</button>
+          <button class="btn" type="button" data-rv="perp" aria-pressed="false">세로 거리 vs 가장 짧은 거리</button>
+          <button class="btn" type="button" data-rv="flat" aria-pressed="false">직선을 눕히면</button>
+        </span>
+      </div>
+      <div class="fig-plot"><svg class="plot" id="rv-svg" role="img" aria-label="회귀직선과 잔차를 세로 막대로 나타낸 그림"></svg></div>
+      <dl class="stat-row" id="rv-stats"></dl>
+      <p class="fig-read" id="rv-read"></p>
+    </div>
+    <ul>
+      <li><strong>세로로 잰 거리다.</strong> 점에서 직선까지의 가장 짧은 거리가 아니라, 같은 \(x\)에서 위아래로 잰 거리다. 맞히려는 것이 \(y\)이기 때문이다(<a href="least-squares-residuals.html#deviation">편차 하나를 들여다본다</a>). 양수면 점이 직선 위, 음수면 아래에 있다.</li>
+      <li><strong>오차와 잔차는 다르다.</strong> 오차 \(\varepsilon_i = y_i - (\beta_0 + \beta_1 x_i)\)는 모집단의 "참 직선"에서 잰 거리라서 알 수 없다. 잔차는 자료로 추정한 직선에서 잰 거리다. 직선을 바로 이 자료에 맞췄으므로 잔차는 오차보다 조금 덜 흩어지고, 그만큼을 메우려고 \(\hat\sigma\)를 구할 때 \(n\)이 아니라 \(n - 2\)로 나눈다.</li>
+      <li><strong>최소제곱이 미리 정해 두는 것.</strong> 최소제곱 직선의 잔차는 합이 정확히 0이고 \(x\)와의 상관도 0이다. 그러니 잔차의 평균이나 \(x\)와의 직선 관계는 볼 필요가 없다. 진단에서 보는 것은 <strong>모양</strong>, 곧 휘어짐, 폭의 변화, 동떨어진 점, 묶음이다.</li>
+      <li><strong>표준화 잔차.</strong> 잔차를 그 잔차의 표준편차로 나눈 값 \(e_i / (\hat\sigma\sqrt{1 - h_i})\)다. cm 단위가 없어져 "±2를 넘으면 드물고 ±3을 넘으면 아주 드물다"는 정규분포의 기준으로 읽을 수 있다. 72번과 109번 가족의 아들은 ±3.9로, 465명 가운데 이 정도는 정규분포라면 거의 나오지 않는다.</li>
+      <li><strong>지렛값 \(h_i\).</strong> \(x\)가 평균에서 멀수록 커지는 값으로, 그 점이 직선을 자기 쪽으로 끌어당길 수 있는 힘이다. 1번 가족의 아버지(199.4cm)는 자료에서 가장 큰 아버지라 지렛값이 0.038로 평균(0.0043)의 약 9배다. 그래도 아들이 직선 바로 옆에 있어 직선을 움직이지 않는다. 지렛값이 크고 잔차도 클 때 직선을 끌고 가는 <strong>영향점</strong>이 되고, 이를 한 숫자로 잰 것이 아래의 Cook의 거리다.</li>
+    </ul>
+
+    <h3>잔차 그림이 말해 주는 것: 네 가지 모양</h3>
+    <p>가정이 맞다면 잔차에는 <strong>아무 패턴도 남지 않아야</strong> 한다. 직선이 담을 수 있는 것은 직선이 이미 가져갔고, 남은 것은 우연한 흔들림뿐이어야 하기 때문이다. 패턴이 남았다면 모형이 놓친 것이 있다는 뜻이다. <a href="least-squares-residuals.html#residual-diagnostics">회귀분석 조금 깊이 보기의 잔차 진단</a>에서는 네 가지 데이터 A–D로 그 패턴의 전형을 보았다. 네 데이터 모두 \(R^2\)가 0.72~0.95로 높아서 산점도와 \(R^2\)만으로는 어느 쪽이 문제인지 가려내기 어렵지만, 잔차 그림에서는 바로 드러난다.</p>
+    <div class="tablewrap"><table class="reg">
+      <caption>표 3-2. 잔차 대 적합값 그림의 네 가지 모양 (<a href="least-squares-residuals.html#residual-diagnostics">잔차 진단</a>의 A–D)</caption>
+      <thead><tr><th>모양</th><th>그림에서 보이는 것</th><th>어긋난 가정</th><th>그대로 두면</th><th>대응</th></tr></thead>
+      <tbody>
+        <tr><td><strong>A · 기준</strong></td><td>0선 위아래로 고르게 흩어지고 띠가 수평이다</td><td>없음</td><td>—</td><td>—</td></tr>
+        <tr><td><strong>B · 곡선</strong></td><td>가운데가 솟고 양 끝이 내려가는(또는 그 반대) 활 모양</td><td>선형성</td><td>구간마다 예측이 한쪽으로 치우친다. 기울기 하나로 요약한 것 자체가 틀린다</td><td>\(x\)를 \(\log x\), \(\sqrt{x}\)로 바꾸거나 \(x^2\) 항을 더한다</td></tr>
+        <tr><td><strong>C · 부채꼴</strong></td><td>적합값이 커질수록 잔차의 폭이 벌어진다</td><td>등분산성</td><td>계수는 쓸 만하지만 표준오차가 틀려 신뢰구간과 \(p\)가 어긋난다</td><td>\(y\)를 \(\log y\), \(\sqrt{y}\)로 바꾸거나 이분산에 강건한 표준오차를 쓴다</td></tr>
+        <tr><td><strong>D · 이상치</strong></td><td>한두 점이 홀로 멀리 떨어지고, 나머지 잔차가 한쪽으로 밀린다</td><td>정규성(두꺼운 꼬리), 또는 자료 오류</td><td>직선이 그 점에 끌려가고 \(\hat\sigma\)가 부풀어 모든 검정이 무뎌진다</td><td>입력 오류를 먼저 확인하고, 그 점을 넣은 결과와 뺀 결과를 함께 보고한다</td></tr>
+      </tbody>
+    </table></div>
+    <p>여기에 하나가 더 있다. 잔차를 시간 순서나 묶음(가족, 학교, 병원)별로 늘어놓았을 때 이웃한 잔차끼리 닮았다면 <strong>독립성</strong>이 깨진 것이다. 잔차 대 적합값 그림에는 이것이 보이지 않으므로 자료가 모인 방식을 보고 따로 그려야 한다. 갈턴 자료에서는 같은 집 형제가 그런 묶음이다.</p>
+    <p>아래 그림은 갈턴 자료의 잔차를 네 가지로 그린다. <strong>잔차 대 적합값</strong>으로 B와 C를, <strong>정규 Q-Q</strong>로 D와 꼬리의 두께를, <strong>척도–위치</strong>로 C를 한 번 더, <strong>형제끼리</strong>로 독립성을 본다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">아버지–아들 회귀의 잔차 · 465명</span>
+      <span class="seg" role="group" aria-label="잔차 그림">
+        <button class="btn" type="button" data-panel="rf" aria-pressed="true">잔차 대 적합값</button>
+        <button class="btn" type="button" data-panel="qq" aria-pressed="false">정규 Q-Q</button>
+        <button class="btn" type="button" data-panel="sl" aria-pressed="false">척도–위치</button>
+        <button class="btn" type="button" data-panel="sib" aria-pressed="false">형제끼리</button>
+      </span>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="r-svg" role="img" aria-label="잔차 진단 그림"></svg></div>
+    <dl class="stat-row" id="r-stats"></dl>
+    <p class="fig-read" id="r-read"></p>
+  </div>
+
+  <div class="stack">
+    <div class="tablewrap"><table class="reg">
+      <caption>표 3-3. 네 가정의 점검 결과</caption>
+      <thead><tr><th>가정</th><th>무엇을 보나</th><th>이 자료에서</th><th>판단</th></tr></thead>
+      <tbody>
+        <tr><td>선형성</td><td>잔차 대 적합값 그림의 경향선이 0에서 수평인가</td><td>경향선이 0 근처에서 거의 평평하다</td><td>만족</td></tr>
+        <tr><td>등분산성</td><td>잔차의 폭이 적합값에 따라 벌어지거나 좁아지나(척도–위치 그림, Breusch–Pagan 검정)</td><td>폭이 고르다. Breusch–Pagan \(\chi^2(1) = 0.36\), \(p = .548\)</td><td>만족</td></tr>
+        <tr><td>정규성</td><td>Q-Q 그림의 점이 기준선을 따르나(Shapiro–Wilk 검정)</td><td>양 끝 몇 점만 조금 벗어난다. \(W = 0.994\), \(p = .0499\)</td><td>대체로 만족</td></tr>
+        <tr class="hl"><td>독립성</td><td>같은 묶음(가족, 시간 순서) 안의 잔차가 서로 닮았나</td><td>형제의 잔차가 닮았다. 가족에 따른 차이 \(F(132, 292) = 2.18\), \(p &lt; .001\)</td><td>위반</td></tr>
+      </tbody>
+    </table></div>
+    <p><strong>정규성의 \(p = .0499\)를 어떻게 읽나.</strong> 465명쯤 되면 정규성 검정은 아주 작은 어긋남에도 유의하게 나온다. 그래서 검정의 \(p\)보다 Q-Q 그림에서 <em>어디가 얼마나</em> 벗어났는지를 본다. 표준화 잔차가 ±3을 넘는 아들은 4명으로, 정규분포라면 기대되는 1.3명보다 조금 많은 정도다. 직선에서 ±1, ±2 표준편차 안에 든 아들은 68.8%, 95.9%로 정규분포의 68%, 95%와 가깝다. 또 표본이 크면 계수의 표집분포는 오차가 정규분포가 아니어도 정규분포에 가까워진다. 이 정도는 결론을 바꾸지 않는다.</p>
+    <p><strong>이상치와 영향점.</strong> 크게 빗나간 점(이상치)과 직선을 끌어당기는 점(영향점)은 다르다. 한 점을 뺐을 때 계수가 얼마나 움직이는지를 재는 Cook의 거리는 가장 큰 값이 0.05로, 흔히 쓰는 기준 1(엄격하게는 0.5)보다 훨씬 작다. 이 자료에는 직선을 혼자 끌고 가는 점이 없다.</p>
+    <div class="callout warn">
+      <p><strong>독립성은 그림보다 자료가 모인 방식으로 판단한다.</strong> 갈턴의 아들 465명은 173가족에서 왔고, 아들이 둘 이상인 가족이 133가족(425명)이다. 같은 집 형제는 아버지 키로 설명되지 않는 것(어머니, 집안의 다른 유전자, 같은 식탁)을 함께 나눈다. 그래서 형 잔차가 크면 동생 잔차도 큰 경향이 있다. 잔차로 추정한 가족 안 상관은 약 0.27이다.</p>
+      <p>독립성이 깨지면 계수는 크게 틀리지 않아도 <strong>표준오차가 실제보다 작게</strong> 나온다. 465명이 서로 독립인 것처럼 계산했지만, 정보의 양은 그보다 적기 때문이다. 가족마다 아들 키를 평균해 173가족을 관측 하나씩으로 다시 계산하면 기울기는 0.445로 거의 같지만 표준오차는 0.049에서 0.057로 커진다. 묶음이 있는 자료는 가족 단위로 요약하거나, 군집 표준오차(cluster-robust standard error)나 다층모형(혼합효과모형)을 쓴다.</p>
+    </div>
+  </div>
+
+  <div class="practice" id="p03">
+    <h3>프롬프트로 따라 하기 · 잔차 분석</h3>
+    <p class="note">01절에서 정리한 자료를 그대로 쓰므로 데이터 처리 단계를 따로 두지 않았다. 필요한 자료 고르기와 기술통계는 분석 프롬프트 첫머리에 함께 적었다. 분석 → 보고서 작성의 두 프롬프트를 차례로 준다. 작업 폴더와 보고서 규칙은 <a href="#setup">00 실습 준비</a>, 만들어진 R 코드와 전체 출력은 <a href="#code-03" class="code-link">부록 03</a>에 있다.</p>
+    <h4><span class="pstep">① 분석</span>모형을 적합하고 결과를 표 파일로 저장한다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 잔차 분석 분석</span><pre>dataset/working/galton_cm.rds 에서 아들만 골라 아버지 키가 아들 키를 설명하는 단순회귀를 다시 적합하고, 그 잔차로 회귀의 가정을 점검하는 R 스크립트 scripts/reg03_diagnostics.R 을 써서 실행해 줘.
+
+1. 아들마다 적합값, 잔차, 표준화 잔차, 지렛값, Cook의 거리를 구해 둔다.
+2. 가로축이 적합값, 세로축이 잔차인 그림에 0 기준선과 잔차의 경향을 보여 주는 매끄러운 곡선을 겹쳐 output/reg03_resid_fitted.png 로 저장해 줘. 적합값은 같은 값이 많으니 가로로만 조금 흩뜨려 줘.
+3. 표준화 잔차의 정규 Q-Q 그림을 기준선과 함께 output/reg03_qq.png 로 저장해 줘.
+4. 정규성(Shapiro-Wilk 검정), 등분산성(Breusch-Pagan 검정, 추가 패키지 없이), 독립성(아들이 둘 이상인 가족만으로 잔차가 가족에 따라 다른지 보는 일원분산분석) 세 검정의 통계량, 자유도, p를 한 표로 만들어 output/reg03_checks.csv 로 저장해 줘.
+5. 표준화 잔차의 절댓값이 2를 넘는 수와 3을 넘는 수, Cook의 거리 최댓값, 지렛값 최댓값을 output/reg03_extremes.csv 로 저장해 줘.</pre></div>
+    <div class="cb screen"><span class="lang">결과 화면 · Rscript scripts/reg03_diagnostics.R</span><pre># A tibble: 3 × 4
+  점검                             통계량 자유도             p
+  &lt;chr&gt;                             &lt;dbl&gt; &lt;chr&gt;          &lt;dbl&gt;
+1 정규성: Shapiro–Wilk          0.9936929 —        4.990748e-2
+2 등분산성: Breusch–Pagan       0.3604024 1        5.482829e-1
+3 독립성: 가족에 따른 잔차 차이 2.182218  132, 292 2.161843e-8
+# A tibble: 1 × 5
+      n over_2 over_3   max_cook    max_hat
+  &lt;int&gt;  &lt;int&gt;  &lt;int&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+1   465     20      4 0.05014870 0.03763078</pre></div>
+    <p class="ck-title">확인할 것</p><ul class="ck"><li>표준화 잔차의 절댓값이 3을 넘는 아들이 4명, Cook의 거리 최댓값이 0.05 근처인가?</li><li>독립성 검정의 자유도가 132, 292인가? 아들이 둘 이상인 133가족, 425명으로 계산했다는 뜻이다.</li></ul>
+    <h4><span class="pstep">② 보고서 작성</span>결과 화면의 숫자를 보고서의 문장과 표로 옮긴다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 잔차 분석 보고서</span><pre>output/reg03_checks.csv, output/reg03_extremes.csv 와 그림 output/reg03_resid_fitted.png, output/reg03_qq.png 를 보고 output/reg03_report.md 에 회귀 가정의 점검 결과를 써 줘. AGENTS.md 의 보고서 규칙을 따른다.
+
+1. 결과 문단: 선형성, 등분산성, 정규성, 영향점, 독립성마다 무엇으로 보았고 결과가 어떤지 한두 문장씩 쓴다.
+2. 선형성은 검정 없이 그림으로 판단했으므로, 그림에서 무엇을 보았는지 말로 쓰고 그림으로 판단했다고 밝힌다.
+3. 정규성 검정의 p가 .05 근처라면 표본 크기와 Q-Q 그림, 크게 벗어난 점의 수를 함께 들어 판단한다.
+4. 표 3 회귀 가정의 점검: 선형성, 등분산성, 정규성, 영향점, 독립성을 행으로, 점검 방법, 결과(통계량, 자유도, p 또는 그림에서 본 것), 판단을 열로 둔다.
+5. 깨진 가정이 있으면 그것이 단순회귀 결과(특히 표준오차와 p)에 어떤 영향을 주는지, 어떤 대안이 있는지 쓴다.</pre></div>
+    <div class="tablewrap"><table class="reg map"><caption>결과 화면에서 보고서로</caption>
+      <thead><tr><th>결과 화면에서 읽은 값</th><th>보고서에 쓰는 꼴</th></tr></thead>
+      <tbody><tr><td><code>Shapiro–Wilk 0.9936929</code>, <code>p 4.990748e-2</code></td><td>\(W = 0.99\), \(p = .0499\). 셋째 자리로 반올림하면 .050이 되어 .05보다 작다는 사실이 가려지므로 넷째 자리까지 쓴다.</td></tr><tr><td><code>Breusch–Pagan 0.3604024</code>, <code>자유도 1</code></td><td>\(\chi^2(1) = 0.36\), \(p = .548\)</td></tr><tr><td><code>2.182218</code>, <code>132, 292</code>, <code>p 2.161843e-8</code></td><td>\(F(132, 292) = 2.18\), \(p &lt; .001\)</td></tr><tr><td><code>over_3 4</code>, <code>n 465</code></td><td>표준화 잔차의 절댓값이 3을 넘은 아들 4명(0.9%). 비율은 표의 두 수로 계산했다.</td></tr><tr><td><code>max_cook 0.05014870</code></td><td>Cook의 거리 최댓값 0.05</td></tr><tr><td>그림 두 장</td><td>선형성의 근거. 숫자가 없으니 "그림 3-1에서 …"처럼 그림을 가리킨다.</td></tr></tbody></table></div>
+    <div class="report-ex"><p class="rx-title">보고서 예시 · output/reg03_report.md</p><p>잔차 대 적합값 그림에서 잔차는 0을 중심으로 고르게 흩어졌고 뚜렷한 곡선 모양이 없어, 그림으로 판단할 때 선형성 가정은 만족하였다(그림 3-1). 등분산성도 만족하였다, Breusch–Pagan \(\chi^2(1) = 0.36\), \(p = .548\). 잔차의 정규성 검정은 경계에 있었으나, \(W = 0.99\), \(p = .0499\), Q-Q 그림에서 벗어난 점은 양 끝 일부였고(표준화 잔차의 절댓값이 3을 넘은 아들 4명, 0.9%) 표본이 커서(\(n = 465\)) 결론에 영향을 줄 정도는 아닌 것으로 판단하였다. Cook의 거리는 최댓값이 0.05로 직선을 크게 움직이는 관측은 없었다. 그러나 같은 가족 형제의 잔차는 서로 닮아 독립성 가정이 깨졌다, \(F(132, 292) = 2.18\), \(p &lt; .001\)(표 3). 따라서 단순회귀의 표준오차와 \(p\)값은 실제보다 작게 추정되었을 수 있으며, 가족 단위 분석이나 군집 표준오차로 다시 확인할 필요가 있다.</p><div class="tablewrap"><table class="reg apa"><caption><em>표 3</em><br>아버지 키–아들 키 단순회귀의 가정 점검 (\(n = 465\))</caption><thead><tr><th>가정</th><th class="n">점검 방법</th><th class="n">결과</th><th class="n">판단</th></tr></thead><tbody><tr><td>선형성</td><td class="n">잔차 대 적합값 그림</td><td class="n">경향선이 0 근처에서 평평함</td><td class="n">만족</td></tr><tr><td>등분산성</td><td class="n">Breusch–Pagan 검정</td><td class="n">\(\chi^2(1) = 0.36\), \(p = .548\)</td><td class="n">만족</td></tr><tr><td>정규성</td><td class="n">Shapiro–Wilk 검정, Q-Q 그림</td><td class="n">\(W = 0.99\), \(p = .0499\); |표준화 잔차| &gt; 3: 4명(0.9%)</td><td class="n">대체로 만족</td></tr><tr><td>영향점</td><td class="n">Cook의 거리</td><td class="n">최댓값 0.05</td><td class="n">없음</td></tr><tr><td>독립성</td><td class="n">가족별 잔차의 일원분산분석(아들 2명 이상 133가족)</td><td class="n">\(F(132, 292) = 2.18\), \(p &lt; .001\)</td><td class="n">위반</td></tr></tbody></table></div><p class="more">주. 선형성은 그림으로 판단하였다. 0.9%는 4 / 465로 계산하였다.</p></div>
+    <p class="note">가정 점검의 보고는 "모두 만족하였다" 한 줄로 끝내기 쉽다. 결과 화면에서 경계에 걸린 값(정규성)과 깨진 값(독립성)을 찾아, 그것이 앞의 결론을 얼마나 흔드는지까지 쓰는 것이 이 보고의 핵심이다.</p>
+  </div>
+</section>
+
+<!-- ======================= 04 ======================= -->
+<section class="panel" id="multiple">
+  <div class="sec-head"><span class="sec-num">04</span><h2>다중선형 회귀분석 - 어머니 키를 더하면</h2></div>
+  <div class="stack">
+    <p>아들 키는 아버지만 닮지 않는다. 01절에서 어머니–아들의 상관도 0.334였다. 설명변수를 둘 이상 넣은 회귀가 <strong>다중회귀</strong>다.</p>
+    <div class="readout math">\[ Y_i = \beta_0 + \beta_1\,x_{\text{아버지},i} + \beta_2\,x_{\text{어머니},i} + \varepsilon_i \]</div>
+    <p>직선 대신 평면을 맞추는 셈이지만, 계수의 뜻이 중요하게 달라진다. \(\beta_1\)은 이제 <strong>어머니 키가 같을 때</strong> 아버지 키가 1cm 큰 집의 아들이 평균적으로 얼마나 큰가다. 다른 설명변수를 고정(통제)한 뒤의 기울기라서 <strong>편회귀계수</strong>(partial regression coefficient)라 부른다. 아래 그림에서 어머니 키를 하나로 고정해 보자.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">어머니 키를 고정하고 아버지 키의 기울기를 본다</span>
+      <div class="ctrl"><label for="m-x">어머니 키</label><input type="range" id="m-x" min="150" max="178" step="0.5" value="163"><output id="m-xv" for="m-x">163.0 cm</output></div>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="m-svg" role="img" aria-label="어머니 키를 고정했을 때 아버지 키와 아들 키의 관계"></svg></div>
+    <dl class="stat-row" id="m-stats"></dl>
+    <p class="fig-note">파란 점은 어머니 키가 고른 값 ±2.5cm인 아들이다. 검은 실선은 다중회귀의 평면을 그 어머니 키에서 자른 직선, 회색 점선은 02절의 단순회귀 직선이다. 슬라이더를 움직이면 검은 직선은 기울기를 그대로 둔 채 위아래로만 옮겨 간다.</p>
+  </div>
+
+  <div class="stack">
+    <div class="tablewrap"><table class="reg">
+      <caption>표 4-1. 설명변수에 따른 계수와 설명력 (아들 465명)</caption>
+      <thead><tr><th>모형</th><th class="n">아버지 키</th><th class="n">어머니 키</th><th class="n">\(R^2\)</th><th class="n">수정 \(R^2\)</th><th class="n">\(\hat\sigma\) (cm)</th></tr></thead>
+      <tbody>
+        <tr><td>아버지만</td><td class="n">0.448</td><td class="n">—</td><td class="n">.153</td><td class="n">.151</td><td class="n">6.16</td></tr>
+        <tr><td>어머니만</td><td class="n">—</td><td class="n">0.377</td><td class="n">.112</td><td class="n">.110</td><td class="n">6.31</td></tr>
+        <tr class="hl"><td>둘 다</td><td class="n">0.412</td><td class="n">0.334</td><td class="n">.240</td><td class="n">.236</td><td class="n">5.84</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">둘 다 넣은 모형: 아들 키 = 49.28 + 0.412 × 아버지 키 + 0.334 × 어머니 키. 두 계수 모두 \(p &lt; .001\)이고 모형 전체는 \(F(2, 462) = 72.8\), \(p &lt; .001\)이다. 아버지 180cm일 때 예측값은 어머니가 160cm면 176.8cm, 170cm면 180.1cm다.</p>
+    <p><strong>아버지 키의 계수가 0.448에서 0.412로 조금만 줄었다.</strong> 01절에서 아버지와 어머니의 키가 거의 무관했기(\(r = 0.106\)) 때문이다. 만약 키 큰 아버지의 집에 키 큰 어머니가 많았다면, 단순회귀의 0.448에는 "아버지 키와 함께 따라온 어머니 키의 몫"이 섞여 있었을 것이고 어머니 키를 넣는 순간 크게 줄었을 것이다. 다중회귀의 쓸모가 여기에 있다. <strong>함께 움직이는 변수의 몫을 떼어 낸다.</strong></p>
+    <h3>\(R^2\)와 수정 \(R^2\)</h3>
+    <p>두 단순회귀의 \(R^2\)를 더하면 .153 + .112 = .265인데, 둘을 함께 넣은 모형은 .240이다. 아버지 키와 어머니 키가 조금 겹쳐 같은 몫을 두 번 셀 수 없기 때문이다. 또 \(R^2\)는 아무 쓸모없는 변수를 넣어도 줄지 않는다. 그래서 설명변수 수 \(k\)만큼 벌점을 준 <strong>수정 \(R^2\)</strong>도 함께 본다.</p>
+    <div class="readout math">\[ R^2_{\text{adj}} = 1 - (1 - R^2)\,\frac{n-1}{n-k-1} = 1 - (1 - 0.240)\,\frac{464}{462} = 0.236 \]</div>
+    <div class="callout caution"><p><strong>다중공선성.</strong> 설명변수끼리 상관이 높으면 "하나를 고정하고 다른 하나만 바꾸는" 자료가 거의 없어서 편회귀계수가 불안정해지고 표준오차가 커진다. 정도는 분산팽창계수 \(\text{VIF}_j = 1/(1-R_j^2)\)로 잰다(\(R_j^2\)은 \(j\)번째 설명변수를 나머지로 설명한 \(R^2\)). 이 자료는 \(1/(1-0.106^2) = 1.01\)로 문제가 없다. 흔히 5나 10을 넘으면 살펴본다.</p></div>
+  </div>
+
+  <div class="practice" id="p04">
+    <h3>프롬프트로 따라 하기 · 다중회귀</h3>
+    <p class="note">01절에서 정리한 자료를 그대로 쓰므로 데이터 처리 단계를 따로 두지 않았다. 필요한 자료 고르기와 기술통계는 분석 프롬프트 첫머리에 함께 적었다. 분석 → 보고서 작성의 두 프롬프트를 차례로 준다. 작업 폴더와 보고서 규칙은 <a href="#setup">00 실습 준비</a>, 만들어진 R 코드와 전체 출력은 <a href="#code-04" class="code-link">부록 04</a>에 있다.</p>
+    <h4><span class="pstep">① 분석</span>모형을 적합하고 결과를 표 파일로 저장한다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 다중회귀 분석</span><pre>dataset/working/galton_cm.rds 에서 아들만 골라 아버지 키와 어머니 키로 아들 키를 설명하는 다중 회귀분석을 하는 R 스크립트 scripts/reg04_multiple.R 을 써서 실행해 줘.
+
+1. 두 설명변수(아버지 키, 어머니 키)의 상관계수와 분산팽창계수를 output/reg04_predictors.csv 로 저장해 줘. 다중공선성을 미리 보려는 것이다.
+2. 아버지 키만, 어머니 키만, 둘 다 넣은 세 회귀모형의 결정계수, 수정 결정계수, 잔차 표준오차, F 검정(통계량, 두 자유도, p)을 한 표로 만들어 output/reg04_models.csv 로 저장해 줘.
+3. 둘 다 넣은 모형의 계수표(추정값, 표준오차, t, p, 95% 신뢰구간)에 표준화 계수(β)를 더해 output/reg04_coef.csv 로 저장해 줘.</pre></div>
+    <div class="cb screen"><span class="lang">결과 화면 · Rscript scripts/reg04_multiple.R</span><pre># A tibble: 1 × 2
+  r_father_mother      vif
+            &lt;dbl&gt;    &lt;dbl&gt;
+1       0.1063346 1.011436
+# A tibble: 3 × 8
+  모형     r.squared adj.r.squared    sigma statistic    df df.residual      p.value
+  &lt;chr&gt;        &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;       &lt;int&gt;        &lt;dbl&gt;
+1 아버지만 0.1531293     0.1513002 6.157859  83.71863     1         463 1.824016e-18
+2 어머니만 0.1116435     0.1097248 6.306883  58.18714     1         463 1.367163e-13
+3 둘다     0.2396760     0.2363846 5.841038  72.81785     2         462 3.241151e-28
+# A tibble: 3 × 8
+  term          estimate   std.error statistic      p.value   conf.low  conf.high       beta
+  &lt;chr&gt;            &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+1 (Intercept) 49.27569   10.49809     4.693779 3.539800e- 6 28.64577   69.90560   NA        
+2 father       0.4117503  0.04668228  8.820269 2.353196e-17  0.3200144  0.5034862  0.3598566
+3 mother       0.3335500  0.04599536  7.251819 1.744796e-12  0.2431640  0.4239361  0.2958657</pre></div>
+    <p class="ck-title">확인할 것</p><ul class="ck"><li>두 설명변수의 상관이 .11, 분산팽창계수가 1.01인가? 1에 가까우면 두 계수를 따로 떼어 읽기 쉽다.</li><li>둘 다 넣은 모형의 아버지 키 계수가 0.41로, 단순회귀의 0.45보다 조금만 줄었는가?</li></ul>
+    <h4><span class="pstep">② 보고서 작성</span>결과 화면의 숫자를 보고서의 문장과 표로 옮긴다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 다중회귀 보고서</span><pre>output/reg04_predictors.csv, output/reg04_models.csv, output/reg04_coef.csv 와, 비교를 위해 02절의 output/reg02_coef.csv 를 보고 output/reg04_report.md 에 다중회귀의 결과 보고를 써 줘. AGENTS.md 의 보고서 규칙을 따른다.
+
+1. 결과 문단: 둘 다 넣은 모형의 F 검정과 그 유의성, 결정계수, 수정 결정계수를 먼저 쓰고, 수정 결정계수를 한 변수만 넣은 두 모형과 견준다. 이어서 두 설명변수의 계수를 "다른 부모의 키가 같을 때"라는 말을 넣어 풀어 쓴다.
+2. 표 4-1 모형의 유의성: 세 모형(아버지만, 어머니만, 둘 다)을 행으로, F, 두 자유도, p, 결정계수, 수정 결정계수, 잔차 표준오차를 열로 둔다.
+3. 표 4-2 회귀계수: 둘 다 넣은 모형의 b, SE, 95% CI, β, t, p.
+4. 아버지 키만 넣은 모형의 계수와 비교해 얼마나 달라졌는지, 그 까닭을 두 설명변수의 상관(분산팽창계수 포함)으로 설명한다.</pre></div>
+    <div class="tablewrap"><table class="reg map"><caption>결과 화면에서 보고서로</caption>
+      <thead><tr><th>결과 화면에서 읽은 값</th><th>보고서에 쓰는 꼴</th></tr></thead>
+      <tbody><tr><td><code>둘다 statistic 72.81785</code>, <code>df 2</code>, <code>df.residual 462</code>, <code>p.value 3.241151e-28</code></td><td>\(F(2, 462) = 72.82\), \(p &lt; .001\). 두 기울기가 모두 0이라는 영가설을 기각한다. 어느 쪽이 유의한지는 계수표에서 따로 본다.</td></tr><tr><td><code>r.squared 0.2396760</code>, <code>adj.r.squared 0.2363846</code></td><td>\(R^2 = .24\), 수정 \(R^2 = .24\). 설명변수를 하나 더 넣었으니 수정 \(R^2\)도 함께 봐야 늘어난 설명력이 벌점을 넘는지 알 수 있다.</td></tr><tr><td><code>father 0.4117503</code>, <code>beta 0.3598566</code></td><td>\(b = 0.41\), \(\beta = .36\). \(b\)는 cm 단위, \(\beta\)는 표준편차 단위라 두 변수의 크기를 견줄 때 쓴다.</td></tr><tr><td><code>father conf.low 0.3200144</code>, <code>conf.high 0.5034862</code></td><td>95% CI [0.32, 0.50]</td></tr><tr><td><code>아버지만 adj.r.squared 0.1513002</code>, <code>어머니만 0.1097248</code></td><td>한 변수만 넣은 모형의 수정 \(R^2\)는 .15, .11. 둘 다 넣은 모형(.24)이 어느 쪽보다 높다.</td></tr><tr><td><code>r_father_mother 0.1063346</code>, <code>vif 1.011436</code></td><td>\(r = .11\), VIF = 1.01</td></tr></tbody></table></div>
+    <div class="report-ex"><p class="rx-title">보고서 예시 · output/reg04_report.md</p><p>아버지 키와 어머니 키를 함께 넣은 회귀모형은 유의하였다, \(F(2, 462) = 72.82\), \(p &lt; .001\), \(R^2 = .24\), 수정 \(R^2 = .24\)(표 4-1). 수정 \(R^2\)는 아버지 키만 넣은 모형의 .15, 어머니 키만 넣은 모형의 .11보다 높아, 두 부모의 키를 함께 넣은 것이 변수 하나를 더 쓴 벌점을 넘는 설명력을 보탰다. 어머니 키가 같을 때 아버지 키가 1cm 크면 아들 키는 평균 0.41cm 컸고, \(b = 0.41\), 95% CI [0.32, 0.50], \(\beta = .36\), \(p &lt; .001\), 아버지 키가 같을 때 어머니 키가 1cm 크면 아들 키는 평균 0.33cm 컸다, \(b = 0.33\), 95% CI [0.24, 0.42], \(\beta = .30\), \(p &lt; .001\)(표 4-2). 아버지 키의 계수는 아버지 키만 넣은 모형(\(b = 0.45\))과 거의 같았는데, 두 부모 키의 상관이 작았기 때문이다(\(r = .11\), VIF = 1.01).</p><div class="tablewrap"><table class="reg apa"><caption><em>표 4-1</em><br>설명변수에 따른 모형의 유의성 (아들 \(n = 465\))</caption><thead><tr><th>모형</th><th class="n">\(F\)</th><th class="n">\(df\)</th><th class="n">\(p\)</th><th class="n">\(R^2\)</th><th class="n">수정 \(R^2\)</th><th class="n">잔차 표준오차</th></tr></thead><tbody><tr><td>아버지 키</td><td class="n">83.72</td><td class="n">1, 463</td><td class="n">&lt; .001</td><td class="n">.15</td><td class="n">.15</td><td class="n">6.16</td></tr><tr><td>어머니 키</td><td class="n">58.19</td><td class="n">1, 463</td><td class="n">&lt; .001</td><td class="n">.11</td><td class="n">.11</td><td class="n">6.31</td></tr><tr><td>아버지 키 + 어머니 키</td><td class="n">72.82</td><td class="n">2, 462</td><td class="n">&lt; .001</td><td class="n">.24</td><td class="n">.24</td><td class="n">5.84</td></tr></tbody></table></div><p class="more">주. 잔차 표준오차의 단위는 cm.</p><div class="tablewrap"><table class="reg apa"><caption><em>표 4-2</em><br>아버지 키와 어머니 키로 아들 키를 설명하는 회귀계수</caption><thead><tr><th>변수</th><th class="n">\(b\)</th><th class="n">\(SE\)</th><th class="n">95% CI</th><th class="n">\(\beta\)</th><th class="n">\(t\)</th><th class="n">\(p\)</th></tr></thead><tbody><tr><td>절편</td><td class="n">49.28</td><td class="n">10.50</td><td class="n">[28.65, 69.91]</td><td class="n"></td><td class="n">4.69</td><td class="n">&lt; .001</td></tr><tr><td>아버지 키</td><td class="n">0.41</td><td class="n">0.05</td><td class="n">[0.32, 0.50]</td><td class="n">.36</td><td class="n">8.82</td><td class="n">&lt; .001</td></tr><tr><td>어머니 키</td><td class="n">0.33</td><td class="n">0.05</td><td class="n">[0.24, 0.42]</td><td class="n">.30</td><td class="n">7.25</td><td class="n">&lt; .001</td></tr></tbody></table></div><p class="more">주. \(t\)의 자유도는 462다. 두 설명변수의 상관 \(r = .11\), VIF = 1.01.</p></div>
+    <p class="note">아버지만 넣은 모형의 \(b = 0.45\)는 이 절의 표에 없고 02절의 <code>reg02_coef.csv</code>에 있다. 다른 절의 결과를 끌어와 비교할 때는 에이전트에게 그 파일도 함께 읽으라고 프롬프트에 적는다.</p>
+  </div>
+</section>
+
+<!-- ======================= 05 ======================= -->
+<section class="panel" id="dummy">
+  <div class="sec-head"><span class="sec-num">05</span><h2>범주형 변수의 더미변수 처리 - 딸과 아들을 함께</h2></div>
+  <div class="stack">
+    <p>이제 딸 433명까지 898명을 모두 쓴다. 성별은 숫자가 아니라 범주라서 그대로는 식에 넣을 수 없다. 범주를 0과 1로 바꾼 변수, <strong>더미변수</strong>(dummy variable)를 만든다.</p>
+    <div class="readout math">\[ D_i = \begin{cases} 1 & \text{아들} \\ 0 & \text{딸 (기준 범주)} \end{cases} \qquad Y_i = \beta_0 + \beta_1 D_i + \varepsilon_i \]</div>
+    <p>딸이면 \(D = 0\)이라 예측값은 \(\beta_0\), 아들이면 \(\beta_0 + \beta_1\)이다. 그러니 <strong>\(\beta_0\)는 기준 범주(딸)의 평균, \(\beta_1\)은 두 범주의 평균 차이</strong>가 된다. 실제로 적합하면 \(b_0 = 162.84\)(딸의 평균 키), \(b_1 = 13.00\)(아들 평균 175.84 − 딸 평균 162.84)이고, 기울기의 \(t = 30.55\)는 두 집단의 독립표본 \(t\) 검정(등분산 가정)과 같다. <a href="mean-test-with-r.html">평균검정</a>에서 본 \(t\) 검정은 더미변수 하나짜리 회귀다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">아버지 키와 자녀 키 · 딸 433명, 아들 465명</span>
+      <span class="seg" role="group" aria-label="모형">
+        <button class="btn" type="button" data-model="one" aria-pressed="true">성별 무시: 직선 하나</button>
+        <button class="btn" type="button" data-model="par" aria-pressed="false">더미: 평행한 두 직선</button>
+        <button class="btn" type="button" data-model="int" aria-pressed="false">교호작용: 기울기도 따로</button>
+      </span>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="d-svg" role="img" aria-label="아버지 키와 자녀 키의 산점도와 성별에 따른 회귀직선"></svg></div>
+    <dl class="stat-row" id="d-stats"></dl>
+    <p class="fig-read" id="d-read"></p>
+  </div>
+
+  <div class="stack">
+    <p>성별 더미와 아버지 키를 함께 넣은 모형은 \(\hat Y = b_0 + b_1 x + b_2 D\)다. 딸에게는 \(b_0 + b_1 x\), 아들에게는 \((b_0 + b_2) + b_1 x\)이므로 <strong>기울기가 같고 높이만 \(b_2\)만큼 다른 두 직선</strong>이 된다. 더미의 계수는 "아버지 키가 같을 때 아들과 딸의 평균 차이"다. 어머니 키까지 넣으면 다음과 같다.</p>
+    <div class="tablewrap"><table class="reg">
+      <caption>표 5-1. 자녀 키를 부모 키와 성별로 설명하는 회귀 (\(n = 898\))</caption>
+      <thead><tr><th>항</th><th class="n">추정값</th><th class="n">표준오차</th><th class="n">\(t\)</th><th class="n">\(p\)</th></tr></thead>
+      <tbody>
+        <tr><td>절편</td><td class="n">38.98</td><td class="n">6.98</td><td class="n">5.59</td><td class="n">&lt; .001</td></tr>
+        <tr><td>아버지 키</td><td class="n">0.406</td><td class="n">0.029</td><td class="n">13.90</td><td class="n">&lt; .001</td></tr>
+        <tr><td>어머니 키</td><td class="n">0.322</td><td class="n">0.031</td><td class="n">10.28</td><td class="n">&lt; .001</td></tr>
+        <tr class="hl"><td>성별 (아들 = 1)</td><td class="n">13.27</td><td class="n">0.37</td><td class="n">36.29</td><td class="n">&lt; .001</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">\(R^2 = .640\), 수정 \(R^2 = .638\), \(\hat\sigma = 5.47\)cm, \(F(3, 894) = 529.0\). 부모 키가 같으면 아들이 딸보다 평균 13.3cm 크다.</p>
+    <h3>범주가 셋 이상이면</h3>
+    <p>범주가 \(k\)개면 더미변수는 <strong>\(k-1\)개</strong>를 만든다. 예를 들어 혈액형 A, B, O, AB라면 A를 기준 범주로 두고 B, O, AB인지를 나타내는 더미 셋을 넣는다. 더미 넷을 모두 넣으면 넷의 합이 언제나 1이 되어 절편과 완전히 겹치므로(완전한 다중공선성) 계수를 정할 수 없다. 각 더미의 계수는 "기준 범주와의 평균 차이"이고, 기준 범주를 바꾸면 계수의 값과 부호는 바뀌어도 예측값과 \(R^2\)는 그대로다. R은 이 더미를 손으로 만들지 않아도 범주형 변수(factor)에서 자동으로 만든다.</p>
+    <h3>R에서 범주형 변수: factor</h3>
+    <p>R에서 범주형 변수는 <strong>factor</strong>라는 자료형으로 다룬다. factor는 값마다 "어느 범주인가"와 함께 <strong>범주의 목록과 그 순서</strong>(수준, levels)를 저장한다. 회귀분석에 factor를 넣으면 R은 <strong>첫 번째 수준을 기준 범주</strong>로 삼고, 나머지 수준마다 0/1 더미를 하나씩 만든다. 계수 이름이 <code>sex아들</code>처럼 "변수 이름 + 수준 이름"으로 나오는 것이 그 더미다. 그러니 범주의 순서를 정하는 일이 곧 <strong>무엇과 비교할지</strong>를 정하는 일이다.</p>
+    <div class="tablewrap"><table class="reg">
+      <caption>표 5-2. 범주형 변수를 회귀에 넣을 때 R이 하는 일</caption>
+      <thead><tr><th>넣은 변수</th><th>R이 하는 일</th><th>주의</th></tr></thead>
+      <tbody>
+        <tr><td>글자(character), 예: <code>"F"</code>, <code>"M"</code></td><td>안에서 factor로 바꾸고, 수준을 <strong>글자 순서</strong>(알파벳, 가나다)로 정한다. 이 자료는 <code>F</code>가 첫 수준이 되어 딸이 기준 범주다.</td><td>이름표를 바꾸면(예: daughter/son, 여/남) 기준 범주가 의도와 달라질 수 있다. 글자 순서는 컴퓨터의 언어 설정에 따라 다를 수도 있다.</td></tr>
+        <tr><td>순서를 정한 factor<br><code>factor(Gender, levels = c("F", "M"), labels = c("딸", "아들"))</code></td><td><code>levels</code>에 적은 순서대로 수준을 정하고 <code>labels</code>로 이름을 붙인다. 첫 수준(딸)이 기준 범주다.</td><td>권하는 방법이다. 기준 범주를 코드에 드러내 두면 다른 사람이 읽어도, 이름표를 바꿔도 결과가 같다.</td></tr>
+        <tr><td>기준만 바꾸기<br><code>relevel(sex, ref = "아들")</code></td><td>지정한 수준을 첫 수준으로 옮긴다. 계수 이름이 <code>sex딸</code>이 되고 부호가 바뀐다.</td><td>예측값, \(R^2\), 모형의 \(F\)는 그대로다.</td></tr>
+        <tr><td>숫자로 적은 범주, 예: 1 = 딸, 2 = 아들</td><td>범주가 아니라 <strong>연속변수</strong>로 보고 기울기 하나를 추정한다.</td><td>범주가 셋 이상이면 "1에서 2로, 2에서 3으로 같은 만큼 변한다"고 가정한 셈이 된다. 반드시 factor로 바꾼다.</td></tr>
+        <tr><td>순서형 factor (<code>ordered = TRUE</code>)</td><td>더미 대신 <code>.L</code>(선형), <code>.Q</code>(이차) 같은 다항 대비를 만든다.</td><td>계수를 "기준 범주와의 평균 차이"로 읽을 수 없다. 더미로 읽으려면 순서형이 아닌 factor로 둔다.</td></tr>
+      </tbody>
+    </table></div>
+    <p>그래서 범주형 설명변수가 있는 분석은 <strong>데이터 처리 단계에서 factor의 순서를 직접 정해 저장</strong>하고, 분석 단계는 그 자료를 읽어 쓴다. 아래 실습의 데이터 처리 프롬프트가 이 일을 한다. 원자료의 성별 기록(<code>"F"</code>, <code>"M"</code>)에서 출발해, 순서를 정하지 않았을 때와 정했을 때를 견주고, 회귀가 실제로 만드는 더미 열을 확인한다.</p>
+    <h3>교호작용: 기울기가 범주마다 다르다면</h3>
+    <p>더미와 연속변수의 곱 \(x \times D\)를 더 넣으면 범주마다 기울기도 달라질 수 있다. 이 곱의 계수가 <strong>교호작용</strong>(interaction)이다. 그림의 "교호작용" 모형에서 아들의 기울기는 딸보다 0.036 클 뿐이고, 검정하면 \(F(1, 894) = 0.34\), \(p = .560\)이다. 어머니 키까지 넣어 부모 키 둘과 성별의 교호작용을 함께 검정해도 \(F(2, 892) = 0.11\), \(p = .895\)이다. 부모 키가 자녀 키에 주는 효과는 딸과 아들에서 같다고 보아도 된다. 이 "기울기가 같은가"는 07절 공분산분석의 <strong>기울기 동질성</strong>과 같은 검정이다.</p>
+  </div>
+
+  <div class="practice" id="p05">
+    <h3>프롬프트로 따라 하기 · 더미변수</h3>
+    <p class="note">데이터 처리 → 분석 → 보고서 작성의 순서로 프롬프트 세 개를 차례로 준다. 작업 폴더와 보고서 규칙은 <a href="#setup">00 실습 준비</a>, 만들어진 R 코드와 전체 출력은 <a href="#code-05" class="code-link">부록 05</a>에 있다.</p>
+    <h4><span class="pstep">① 데이터 처리</span>자료를 들여와 다듬는다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 더미변수 데이터 처리</span><pre>dataset/working/galton_cm.rds 로 성별을 회귀에 넣을 범주형 변수로 준비하는 R 스크립트 scripts/reg05_prepare.R 을 써서 실행해 줘. 01절에서 만든 성별 변수는 쓰지 않고, 원자료의 성별 기록(Gender)에서 처음부터 다시 만든다.
+
+1. 원자료의 성별 기록이 어떤 자료형으로, 어떤 값으로 들어 있는지와 값마다 몇 명인지 보여 줘.
+2. 순서를 정하지 않고 그대로 범주형(factor)으로 바꾸면 범주의 순서가 어떻게 되는지 보여 줘.
+3. 성별을 범주형(factor)으로 바꾸되 범주의 순서를 딸, 아들로 직접 정하고 이름도 딸, 아들로 붙여 줘. 첫 범주인 딸이 기준 범주가 된다. 범주의 순서와 범주마다의 인원을 보여 줘.
+4. 회귀분석이 이 범주형 변수로 만드는 더미변수가 어떻게 생겼는지 처음 네 명으로 보여 줘.
+5. 기준 범주를 아들로 바꾸면 범주의 순서가 어떻게 되는지 보여 줘. 저장하는 자료의 기준 범주는 딸로 둔다.
+6. 가족 번호, 성별, 아버지 키, 어머니 키, 자녀 키를 dataset/working/kids.rds 로 저장해 줘.</pre></div>
+    <p class="ck-title">확인할 것</p><ul class="ck"><li>원자료의 성별이 글자(character) "F" 433명, "M" 465명인가?</li><li>순서를 정하지 않으면 "F", "M" 순서가 되는가? 글자 순서로 정해지므로 이름표를 다른 말로 바꾸면 기준 범주가 의도와 달라질 수 있다.</li><li>순서를 정한 뒤 범주가 "딸", "아들" 순서이고, 더미 열의 이름이 sex아들이며 딸은 0, 아들은 1인가?</li><li>기준을 아들로 바꾸면 순서가 "아들", "딸"이 되는가?</li></ul>
+    <h4><span class="pstep">② 분석</span>모형을 적합하고 결과를 표 파일로 저장한다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 더미변수 분석</span><pre>dataset/working/kids.rds(데이터 처리에서 성별의 순서를 정한 자료)로 더미변수 회귀를 하는 R 스크립트 scripts/reg05_dummy.R 을 써서 실행해 줘.
+
+1. 성별마다 사람 수, 평균 키, 표준편차를 output/reg05_desc.csv 로 저장해 줘.
+2. 성별 하나로 자녀 키를 설명하는 회귀의 계수표와, 등분산을 가정한 독립표본 t 검정 결과를 나란히 보여 줘.
+3. 아버지 키, 어머니 키, 성별을 함께 넣은 회귀의 계수표(95% 신뢰구간 포함)를 output/reg05_coef.csv 로, 결정계수와 F 검정 등 모형 전체의 값을 output/reg05_fit.csv 로 저장해 줘.
+4. 3의 모형에 성별과 부모 키의 교호작용을 더한 모형을 만들어 두 모형을 F 검정으로 비교하고 output/reg05_interaction.csv 로 저장해 줘.
+5. 기준 범주를 아들로 바꾼 같은 모형의 성별 계수와 결정계수를 보여 줘. 기준 범주가 결과의 무엇을 바꾸고 무엇을 바꾸지 않는지 보려는 것이다.
+6. 성별마다 색을 달리한 아버지 키–자녀 키 산점도에 성별마다 회귀직선을 그어 output/reg05_lines.png 로 저장해 줘.</pre></div>
+    <div class="cb screen"><span class="lang">결과 화면 · Rscript scripts/reg05_dummy.R</span><pre># A tibble: 2 × 4
+  sex       n        M       SD
+  &lt;fct&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1 딸      433 162.8398 6.020612
+2 아들    465 175.8412 6.684249
+# A tibble: 2 × 5
+  term         estimate std.error statistic       p.value
+  &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;
+1 (Intercept) 162.8398  0.3062627 531.6997  0            
+2 sex아들      13.00139 0.4256041  30.54807 5.175573e-141
+# A tibble: 1 × 4
+   estimate statistic parameter       p.value
+      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;
+1 -13.00139 -30.54807       896 5.175573e-141
+# A tibble: 4 × 7
+  term          estimate  std.error statistic       p.value   conf.low  conf.high
+  &lt;chr&gt;            &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+1 (Intercept) 38.97569   6.977281    5.586085 3.082284e-  8 25.28193   52.66945  
+2 father       0.4059780 0.02920696 13.90004  6.525648e- 40  0.3486558  0.4633002
+3 mother       0.3214951 0.03128178 10.27739  1.701771e- 23  0.2601008  0.3828894
+4 sex아들     13.27392   0.3657801  36.28933  5.786616e-178 12.55603   13.99180  
+# A tibble: 1 × 7
+  r.squared adj.r.squared    sigma statistic    df df.residual       p.value
+      &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;       &lt;int&gt;         &lt;dbl&gt;
+1 0.6396752     0.6384661 5.471988  529.0317     3         894 1.328888e-197
+# A tibble: 2 × 7
+  term                             df.residual      rss    df     sumsq  statistic    p.value
+  &lt;chr&gt;                                  &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+1 height ~ father + mother + sex           894 26768.73    NA NA        NA         NA        
+2 height ~ (father + mother) * sex         892 26762.11     2  6.624093  0.1103928  0.8954945
+# A tibble: 1 × 5
+  term   estimate std.error statistic       p.value
+  &lt;chr&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;
+1 sex딸 -13.27392 0.3657801 -36.28933 5.786616e-178
+# A tibble: 1 × 2
+  r.squared adj.r.squared
+      &lt;dbl&gt;         &lt;dbl&gt;
+1 0.6396752     0.6384661</pre></div>
+    <p class="ck-title">확인할 것</p><ul class="ck"><li>성별 하나만 넣은 회귀의 절편(162.84)이 딸의 평균, 계수(13.00)가 두 평균의 차이이고, t 검정의 t와 크기가 같은가(30.55)?</li><li>기준 범주를 아들로 바꾸면 성별 계수가 sex딸 −13.27로 부호만 바뀌고 결정계수는 .64로 같은가?</li></ul>
+    <h4><span class="pstep">③ 보고서 작성</span>결과 화면의 숫자를 보고서의 문장과 표로 옮긴다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 더미변수 보고서</span><pre>output/reg05_desc.csv, output/reg05_coef.csv, output/reg05_fit.csv, output/reg05_interaction.csv 와 그림 output/reg05_lines.png 를 보고 output/reg05_report.md 에 결과 보고를 써 줘. AGENTS.md 의 보고서 규칙을 따른다.
+
+1. 성별을 어떻게 부호화했는지(기준 범주)를 한 문장으로 쓴다.
+2. 결과 문단: 부모 키와 성별을 함께 넣은 모형의 F 검정과 그 유의성, 결정계수, 수정 결정계수를 먼저 쓰고, 성별 계수를 "부모 키가 같을 때 아들과 딸의 평균 차이"로 풀어 쓴다.
+3. 교호작용 검정의 결과와 그것이 뜻하는 것(기울기가 딸과 아들에서 같은가)을 쓰고, 최종 모형으로 무엇을 골랐는지 밝힌다.
+4. 표 5-1 모형의 유의성: 최종 모형의 F, 두 자유도, p, 결정계수, 수정 결정계수, 잔차 표준오차를 첫 행에, 교호작용을 더한 모형과 비교한 F, 두 자유도, p를 둘째 행에 둔다.
+5. 표 5-2 회귀계수: 최종 모형의 b, SE, 95% CI, t, p.</pre></div>
+    <div class="tablewrap"><table class="reg map"><caption>결과 화면에서 보고서로</caption>
+      <thead><tr><th>결과 화면에서 읽은 값</th><th>보고서에 쓰는 꼴</th></tr></thead>
+      <tbody><tr><td><code>sex아들 13.27392</code></td><td>\(b = 13.27\). 이름 끝의 "아들"은 아들 = 1인 더미라는 뜻이다. 기준 범주(딸)는 계수표에 나오지 않는다.</td></tr><tr><td><code>sex아들 conf.low 12.55603</code>, <code>conf.high 13.99180</code></td><td>95% CI [12.56, 13.99]</td></tr><tr><td><code>statistic 36.28933</code>, <code>p 5.786616e-178</code></td><td>\(t(894) = 36.29\), \(p &lt; .001\)</td></tr><tr><td><code>statistic 529.0317</code>, <code>df 3</code>, <code>df.residual 894</code>, <code>p.value 1.328888e-197</code></td><td>모형 전체 \(F(3, 894) = 529.03\), \(p &lt; .001\)</td></tr><tr><td><code>r.squared 0.6396752</code>, <code>adj.r.squared 0.6384661</code></td><td>\(R^2 = .64\), 수정 \(R^2 = .64\). 자녀 키 분산의 64%</td></tr><tr><td>교호작용 <code>statistic 0.1103928</code>, <code>df 2</code>, <code>df.residual 892</code>, <code>p 0.8954945</code></td><td>\(F(2, 892) = 0.11\), \(p = .895\)</td></tr><tr><td>t 검정 <code>estimate -13.00139</code></td><td>부호가 반대인 것은 R이 "딸 − 아들" 순서로 뺐기 때문이다. 보고서에는 "아들이 13.00cm 크다"처럼 방향을 말로 쓴다.</td></tr><tr><td>기준을 아들로 바꾼 모형 <code>sex딸 -13.27392</code>, <code>r.squared 0.6396752</code></td><td>기준 범주는 해석의 기준점일 뿐이다. 보고서에는 "딸을 기준 범주로"처럼 무엇이 0인지 밝히고, 그 기준에 맞는 부호로 쓴다.</td></tr></tbody></table></div>
+    <div class="report-ex"><p class="rx-title">보고서 예시 · output/reg05_report.md</p><p>성별은 딸을 기준 범주(0)로, 아들을 1로 부호화하였다. 아버지 키, 어머니 키, 성별로 자녀 키를 설명한 모형은 유의하였고, \(F(3, 894) = 529.03\), \(p &lt; .001\), \(R^2 = .64\), 수정 \(R^2 = .64\), 자녀 키 분산의 64%를 설명하였다(표 5-1). 부모의 키가 같을 때 아들은 딸보다 평균 13.27cm 컸다, \(b = 13.27\), 95% CI [12.56, 13.99], \(t(894) = 36.29\), \(p &lt; .001\). 아버지 키(\(b = 0.41\))와 어머니 키(\(b = 0.32\))도 모두 유의하였다(모두 \(p &lt; .001\), 표 5-2). 부모 키의 기울기가 성별에 따라 다른지 교호작용 항을 더해 검정한 결과 차이가 없었으므로, \(F(2, 892) = 0.11\), \(p = .895\), 교호작용이 없는 모형을 최종 모형으로 하였다.</p><div class="tablewrap"><table class="reg apa"><caption><em>표 5-1</em><br>부모 키와 성별로 자녀 키를 설명하는 모형의 유의성 (\(N = 898\))</caption><thead><tr><th>모형</th><th class="n">\(F\)</th><th class="n">\(df\)</th><th class="n">\(p\)</th><th class="n">\(R^2\)</th><th class="n">수정 \(R^2\)</th><th class="n">잔차 표준오차</th></tr></thead><tbody><tr><td>부모 키 + 성별 (최종)</td><td class="n">529.03</td><td class="n">3, 894</td><td class="n">&lt; .001</td><td class="n">.64</td><td class="n">.64</td><td class="n">5.47</td></tr><tr><td>+ 성별 × 부모 키 (비교)</td><td class="n">0.11</td><td class="n">2, 892</td><td class="n">.895</td><td class="n"></td><td class="n"></td><td class="n"></td></tr></tbody></table></div><p class="more">주. 둘째 행은 교호작용 두 항을 더한 모형과 최종 모형의 비교 \(F\) 검정이다. 잔차 표준오차의 단위는 cm.</p><div class="tablewrap"><table class="reg apa"><caption><em>표 5-2</em><br>최종 모형의 회귀계수</caption><thead><tr><th>변수</th><th class="n">\(b\)</th><th class="n">\(SE\)</th><th class="n">95% CI</th><th class="n">\(t\)</th><th class="n">\(p\)</th></tr></thead><tbody><tr><td>절편</td><td class="n">38.98</td><td class="n">6.98</td><td class="n">[25.28, 52.67]</td><td class="n">5.59</td><td class="n">&lt; .001</td></tr><tr><td>아버지 키</td><td class="n">0.41</td><td class="n">0.03</td><td class="n">[0.35, 0.46]</td><td class="n">13.90</td><td class="n">&lt; .001</td></tr><tr><td>어머니 키</td><td class="n">0.32</td><td class="n">0.03</td><td class="n">[0.26, 0.38]</td><td class="n">10.28</td><td class="n">&lt; .001</td></tr><tr><td>성별 (아들 = 1)</td><td class="n">13.27</td><td class="n">0.37</td><td class="n">[12.56, 13.99]</td><td class="n">36.29</td><td class="n">&lt; .001</td></tr></tbody></table></div><p class="more">주. 기준 범주는 딸. \(t\)의 자유도는 894다.</p></div>
+    <p class="note">"차이가 없었다"는 "차이가 없다는 것이 증명되었다"가 아니다. 여기서는 교호작용을 넣지 않을 근거로만 쓴다.</p>
+  </div>
+</section>
+
+<!-- ======================= 06 ======================= -->
+<section class="panel" id="logistic">
+  <div class="sec-head"><span class="sec-num">06</span><h2>로지스틱 회귀분석 - 키로 아들인지 딸인지 맞혀 보기</h2></div>
+  <div class="stack">
+    <p>05절에서는 성별이 설명변수였다. 이번에는 질문을 뒤집는다. <strong>키만 보고 그 아이가 아들인지 딸인지 맞힐 수 있을까?</strong> 반응변수가 "아들이면 1, 딸이면 0"인 범주가 된다. 이때 구하고 싶은 것은 키가 \(x\)인 아이가 아들일 <strong>확률</strong> \(p\)다.</p>
+    <p>그냥 0과 1에 직선을 맞추면(선형확률모형) 어떻게 될까. 아래 그림의 "직선으로 맞추면"을 눌러 보자. 직선은 위아래로 끝없이 뻗으므로 키가 아주 작으면 확률이 0보다 작게, 아주 크면 1보다 크게 나온다. 실제로 이 자료의 898명 가운데 56명의 예측 확률이 0 미만, 83명이 1 초과다. 확률은 0과 1 사이에 있어야 하고, 0이나 1 근처에서는 천천히 변해야 자연스럽다. 그래서 확률을 그대로 쓰지 않고 <strong>로그 오즈</strong>로 바꿔 직선을 맞춘다.</p>
+    <div class="readout math">\[ \text{오즈} = \frac{p}{1-p}, \qquad \log\frac{p}{1-p} = \beta_0 + \beta_1 x \quad\Longleftrightarrow\quad p = \frac{1}{1 + e^{-(\beta_0 + \beta_1 x)}} \]</div>
+    <p>오즈는 "될 확률 대 안 될 확률"의 비다. \(p = 0.8\)이면 오즈는 4(4 대 1)다. 로그 오즈는 \(-\infty\)에서 \(\infty\)까지 움직이므로 직선을 맞춰도 어긋나지 않고, 거꾸로 풀면 \(p\)는 언제나 0과 1 사이의 S자 곡선이 된다. 계수는 잔차 제곱합이 아니라 <strong>최대가능도</strong>로 추정한다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">키에 따라 아들일 확률 · 898명</span>
+      <div class="ctrl"><label for="l-x">키</label><input type="range" id="l-x" min="150" max="192" step="0.5" value="170"><output id="l-xv" for="l-x">170.0 cm</output></div>
+      <button class="btn" type="button" id="l-lpm" aria-pressed="false">직선으로 맞추면</button>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="l-svg" role="img" aria-label="키와 아들일 확률의 로지스틱 곡선"></svg></div>
+    <dl class="stat-row" id="l-stats"></dl>
+    <p class="fig-note">위쪽 띠의 <span class="c-son">파란 점</span>은 아들(1), 아래쪽 띠의 <span class="c-dau">주황 점</span>은 딸(0)이다. 띠 안에서 위아래로 흩뜨려 그렸다. 검은 마름모는 키 3cm 칸마다 실제로 아들인 비율, 검은 곡선은 로지스틱 회귀의 예측 확률이다.</p>
+  </div>
+
+  <div class="stack">
+    <div class="tablewrap"><table class="reg">
+      <caption>표 6-1. 자녀 키로 아들일 확률을 설명하는 로지스틱 회귀 (\(n = 898\))</caption>
+      <thead><tr><th>항</th><th class="n">\(b\)</th><th class="n">표준오차</th><th class="n">\(z\)</th><th class="n">\(p\)</th><th class="n">오즈비 \(e^{b}\) [95% CI]</th></tr></thead>
+      <tbody>
+        <tr><td>절편</td><td class="n">−52.98</td><td class="n">3.40</td><td class="n">−15.57</td><td class="n">&lt; .001</td><td class="n">—</td></tr>
+        <tr class="hl"><td>자녀 키 (cm)</td><td class="n">0.314</td><td class="n">0.020</td><td class="n">15.57</td><td class="n">&lt; .001</td><td class="n">1.37 [1.32, 1.43]</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">신뢰구간은 프로파일 가능도 방법. <strong>모형 전체의 검정</strong>: 이탈도(deviance)는 설명변수가 없을 때 1243.8에서 626.2로 줄었고, 이 차이가 가능도비 검정 \(\chi^2(1) = 617.5\), \(p &lt; .001\)이다. 선형회귀의 \(F\) 검정 자리다. 설명력은 줄어든 이탈도의 비율인 McFadden 의사 \(R^2 = .50\)으로 나타낸다. 선형회귀의 \(R^2\)처럼 "분산의 50%"로 읽지 않고, 널리 쓰는 수정 \(R^2\)가 없어 모형 비교에는 AIC(630.2)를 함께 본다.</p>
+    <table class="reg">
+      <tbody>
+        <tr><td><strong>계수 0.314</strong></td><td>키가 1cm 크면 <strong>로그 오즈</strong>가 0.314 커진다. 확률의 변화량은 키에 따라 다르므로 계수를 확률로 바로 읽지 않는다.</td></tr>
+        <tr><td><strong>오즈비 1.37</strong></td><td>\(e^{0.314} = 1.37\). 키가 1cm 크면 아들일 오즈가 1.37배가 된다. 5cm면 \(1.37^5 = 4.8\)배다. 1보다 크면 확률을 높이는 쪽, 1보다 작으면 낮추는 쪽이다.</td></tr>
+        <tr><td><strong>\(p = 0.5\)인 키</strong></td><td>\(-b_0/b_1 = 168.9\)cm. 그보다 크면 아들일 가능성이 더 크다. 160cm에서 0.06, 170cm에서 0.59, 180cm에서 0.97이다.</td></tr>
+        <tr><td><strong>\(z\) 검정</strong></td><td>계수를 표준오차로 나눈 Wald 검정. 선형회귀의 \(t\) 자리다. 모형끼리의 비교는 \(F\) 대신 이탈도의 차이로 하는 <strong>가능도비 검정</strong>(\(\chi^2\))을 쓴다.</td></tr>
+      </tbody>
+    </table>
+    <p>확률 0.5를 기준으로 아들과 딸을 가르면 898명 가운데 758명(84.4%)을 맞힌다. 딸을 아들로 본 경우가 72명, 아들을 딸로 본 경우가 68명이다.</p>
+    <h3>부모 키를 더하면 계수의 부호가 바뀐다</h3>
+    <p>다중 로지스틱 회귀도 04절과 같은 방식으로 읽는다. 자녀 키에 아버지 키와 어머니 키를 더하면 오즈비는 자녀 키 1.54 [1.46, 1.64], 아버지 키 0.83 [0.80, 0.87], 어머니 키 0.86 [0.83, 0.90]이 된다. 부모 키의 오즈비가 <strong>1보다 작다</strong>. "부모가 크면 아들일 가능성이 낮다"는 이상한 말 같지만, 자녀 키가 <em>같을 때</em>의 이야기다. 175cm인 아이가 키 작은 부모에게서 났다면 딸보다 아들일 가능성이 크고, 키 큰 부모에게서 났다면 키 큰 딸일 수도 있다. 부모 키를 알면 "그 집에서 그 키가 얼마나 큰 편인가"를 알 수 있어 맞히는 비율이 88.5%로 올라간다. 두 모형의 가능도비 검정은 \(\chi^2(2) = 145.7\), \(p &lt; .001\)이다.</p>
+    <div class="callout"><p><strong>분할표와의 관계.</strong> 설명변수가 두 범주 하나뿐인 로지스틱 회귀에서 \(e^{b_1}\)은 2 × 2 표의 오즈비와 같다. 그 연결은 <a href="categorical-test-with-r.html#report">범주형 자료의 가설검정</a>의 09절에서 교통사고 자료로 보았다. 로지스틱 회귀는 거기에 연속형 설명변수와 여러 변수의 통제를 더한 것이다. 그리고 이 절의 모형은 "키가 성별을 정한다"는 인과 모형이 아니라 <strong>키로 성별을 가려내는 분류 모형</strong>이다. 회귀식의 왼쪽과 오른쪽은 인과의 방향이 아니라 질문의 방향을 나타낸다.</p></div>
+  </div>
+
+  <div class="practice" id="p06">
+    <h3>프롬프트로 따라 하기 · 로지스틱 회귀</h3>
+    <p class="note">01절에서 정리한 자료를 그대로 쓰므로 데이터 처리 단계를 따로 두지 않았다. 필요한 자료 고르기와 기술통계는 분석 프롬프트 첫머리에 함께 적었다. 분석 → 보고서 작성의 두 프롬프트를 차례로 준다. 작업 폴더와 보고서 규칙은 <a href="#setup">00 실습 준비</a>, 만들어진 R 코드와 전체 출력은 <a href="#code-06" class="code-link">부록 06</a>에 있다.</p>
+    <h4><span class="pstep">① 분석</span>모형을 적합하고 결과를 표 파일로 저장한다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 로지스틱 회귀 분석</span><pre>dataset/working/galton_cm.rds 의 딸과 아들 898명으로, 자녀 키가 아들일 확률을 설명하는 로지스틱 회귀분석을 하는 R 스크립트 scripts/reg06_logistic.R 을 써서 실행해 줘. 반응은 아들이면 1, 딸이면 0이다.
+
+1. 자녀 키를 3cm 구간으로 나누어 구간마다 사람 수, 아들 수, 아들의 비율을 output/reg06_bins.csv 로 저장해 줘.
+2. 계수(로그 오즈), 오즈비, 오즈비의 95% 신뢰구간을 표로 만들어 output/reg06_or.csv 로 저장하고, 신뢰구간을 어떤 방법으로 구했는지 알려 줘. 설명변수가 없을 때와 있을 때의 이탈도도 보여 줘.
+3. 키가 160, 165, 170, 175, 180cm일 때 아들일 확률을 output/reg06_probs.csv 로 저장해 줘.
+4. 확률 0.5를 기준으로 가른 결과와 실제 성별의 교차표를 output/reg06_class.csv 로 저장해 줘.
+5. 아버지 키와 어머니 키를 더한 모형의 오즈비와 신뢰구간을 output/reg06_or2.csv 로, 두 모형의 가능도비 검정을 output/reg06_lrtest.csv 로 저장해 줘.
+6. 모형 전체의 검정과 설명력: 1의 모형과 4의 모형을 각각 설명변수가 없는 모형과 가능도비 카이제곱 검정으로 비교한 통계량, 자유도, p와 McFadden 의사 결정계수, AIC를 한 표로 만들어 output/reg06_model.csv 로 저장해 줘. 선형회귀의 F 검정과 결정계수 자리에 오는 값이다.
+7. 자녀 키에 따른 0과 1의 점 위에 로지스틱 곡선을 그어 output/reg06_curve.png 로 저장해 줘.</pre></div>
+    <div class="cb screen"><span class="lang">결과 화면 · Rscript scripts/reg06_logistic.R</span><pre># A tibble: 2 × 8
+  term          odds_ratio  std.error statistic      p.value     conf.low    conf.high    log_odds
+  &lt;chr&gt;              &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;
+1 (Intercept) 9.755371e-24 3.402400   -15.57260 1.117617e-54 9.003664e-27 5.699093e-21 -52.98422  
+2 height      1.368494e+ 0 0.02014643  15.57154 1.136417e-54 1.317844e+ 0 1.426315e+ 0   0.3137109
+# A tibble: 5 × 2
+  height          p
+   &lt;dbl&gt;      &lt;dbl&gt;
+1    160 0.05784117
+2    165 0.2275990 
+3    170 0.5858017 
+4    175 0.8716012 
+5    180 0.9702217 
+# A tibble: 4 × 3
+  실제  예측      n
+  &lt;chr&gt; &lt;chr&gt; &lt;int&gt;
+1 딸    딸      361
+2 딸    아들     72
+3 아들  딸       68
+4 아들  아들    397
+# A tibble: 4 × 7
+  term           estimate  std.error statistic      p.value     conf.low    conf.high
+  &lt;chr&gt;             &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;
+1 (Intercept) 2.075698e-8 4.628393   -3.822144 1.322965e- 4 2.059552e-12 0.0001608497
+2 height      1.544683e+0 0.02914159 14.92091  2.409733e-50 1.463489e+ 0 1.641015    
+3 father      8.334854e-1 0.02169728 -8.394558 4.676487e-17 7.975841e- 1 0.8685137   
+4 mother      8.643980e-1 0.02165769 -6.728415 1.715210e-11 8.274367e- 1 0.9009178   
+# A tibble: 2 × 6
+  term                           df.residual residual.deviance    df deviance       p.value
+  &lt;chr&gt;                                &lt;dbl&gt;             &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;         &lt;dbl&gt;
+1 son ~ height                           896          626.2235    NA  NA      NA           
+2 son ~ height + father + mother         894          480.5053     2 145.7182  2.278715e-32
+# A tibble: 2 × 9
+  모형      null.deviance deviance    chisq    df             p mcfadden_r2      AIC  nobs
+  &lt;chr&gt;             &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;         &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;
+1 키만           1243.752 626.2235 617.5283     1 2.578368e-136   0.4965045 630.2235   898
+2 키와_부모      1243.752 480.5053 763.2465     3 4.045425e-165   0.6136647 488.5053   898</pre></div>
+    <p class="ck-title">확인할 것</p><ul class="ck"><li>output/reg06_bins.csv 에서 아들 비율이 .5를 넘는 첫 구간이 168~171cm인가? 로지스틱 곡선이 .5를 지나는 자리(165~170cm 사이)와 맞는가?</li><li>모형 전체의 가능도비 검정이 χ²(1) = 617.53, 키의 오즈비가 1.37인가?</li></ul>
+    <h4><span class="pstep">② 보고서 작성</span>결과 화면의 숫자를 보고서의 문장과 표로 옮긴다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 로지스틱 회귀 보고서</span><pre>output/reg06_model.csv, output/reg06_or.csv, output/reg06_probs.csv, output/reg06_class.csv, output/reg06_or2.csv, output/reg06_lrtest.csv 와 그림 output/reg06_curve.png 를 보고 output/reg06_report.md 에 로지스틱 회귀의 결과 보고를 써 줘. AGENTS.md 의 보고서 규칙을 따른다.
+
+1. 반응을 어떻게 정의했는지(무엇이 1인가)를 먼저 쓴다.
+2. 결과 문단: 모형 전체의 가능도비 검정과 그 유의성, McFadden 의사 결정계수를 먼저 쓴다. 의사 결정계수는 "분산의 몇 %"로 읽지 않는다고 밝힌다. 이어서 키의 효과를 "키가 1cm 클 때 아들일 오즈가 몇 배"처럼 오즈비로 풀어 쓰고, 확률의 예를 두세 개 들어 몇 cm 사이에서 .5를 넘는지 쓰고, 교차표에서 정분류율을 계산해 쓴다.
+3. 부모 키를 더한 모형의 전체 검정, 의사 결정계수, AIC, 두 모형의 가능도비 검정을 쓰고, 부모 키의 오즈비가 1보다 작은 까닭을 쓴다.
+4. 표 6-1 모형의 유의성: 두 모형을 행으로, 가능도비 카이제곱, 자유도, p, McFadden 의사 결정계수, AIC를 열로 두고, 마지막 행에 두 모형의 비교(가능도비 검정)를 둔다.
+5. 표 6-2 오즈비: 두 모형의 설명변수별 오즈비와 95% 신뢰구간을 나란히 두고, 표 아래 주에 z 검정의 결과를 적는다.
+6. 이 모형이 키로 성별을 가려내는 분류 모형이며 인과가 아니라는 점을 밝힌다.</pre></div>
+    <div class="tablewrap"><table class="reg map"><caption>결과 화면에서 보고서로</caption>
+      <thead><tr><th>결과 화면에서 읽은 값</th><th>보고서에 쓰는 꼴</th></tr></thead>
+      <tbody><tr><td><code>키만 chisq 617.5283</code>, <code>df 1</code>, <code>p 2.578368e-136</code></td><td>모형 전체 \(\chi^2(1) = 617.53\), \(p &lt; .001\). 설명변수가 없는 모형과의 이탈도 차이(1243.75 − 626.22)로, 선형회귀의 \(F\) 검정 자리다.</td></tr><tr><td><code>mcfadden_r2 0.4965045</code></td><td>McFadden \(R^2 = .50\). 이탈도가 줄어든 비율이라 "분산의 50%"로 읽지 않는다. 같은 자료의 모형끼리 견줄 때 쓴다.</td></tr><tr><td>수정 \(R^2\)는?</td><td>로지스틱 회귀에는 널리 쓰는 수정 \(R^2\)가 없다. 설명변수 수에 벌점을 주는 비교는 AIC로 한다(630.22 → 488.51, 작을수록 좋다).</td></tr><tr><td><code>height odds_ratio 1.368494</code></td><td>\(\mathrm{OR} = 1.37\). 오즈비는 1을 넘을 수 있어 0을 쓴다(0.83처럼).</td></tr><tr><td><code>conf.low 1.317844</code>, <code>conf.high 1.426315</code></td><td>95% CI [1.32, 1.43]. 1을 포함하지 않는다.</td></tr><tr><td><code>log_odds 0.3137109</code>, <code>statistic 15.57154</code></td><td>\(b = 0.31\), \(z = 15.57\). 로지스틱 회귀의 계수 검정은 \(t\)가 아니라 \(z\)다.</td></tr><tr><td><code>std.error 0.02014643</code></td><td>오즈비 줄에 있어도 로그 오즈의 표준오차다. 오즈비의 표준오차로 쓰지 않는다.</td></tr><tr><td><code>361</code>, <code>397</code> (교차표)</td><td>정분류율 (361 + 397) / 898 = 84.4%</td></tr><tr><td><code>deviance 145.7182</code>, <code>df 2</code>, <code>p 2.278715e-32</code></td><td>\(\chi^2(2) = 145.72\), \(p &lt; .001\)</td></tr></tbody></table></div>
+    <div class="report-ex"><p class="rx-title">보고서 예시 · output/reg06_report.md</p><p>아들이면 1, 딸이면 0인 반응을 자녀 키로 설명하는 로지스틱 회귀를 적합하였다(\(N = 898\)). 모형은 설명변수가 없는 모형보다 유의하게 좋았다, \(\chi^2(1) = 617.53\), \(p &lt; .001\), McFadden \(R^2 = .50\)(표 6-1). 의사 \(R^2\)는 이탈도가 줄어든 비율로, 분산의 50%를 설명했다는 뜻은 아니다. 키가 1cm 클 때 아들일 오즈는 1.37배였다, \(\mathrm{OR} = 1.37\), 95% CI [1.32, 1.43], \(z = 15.57\), \(p &lt; .001\)(표 6-2). 예측 확률은 160cm에서 .06, 170cm에서 .59, 180cm에서 .97로, 165cm와 170cm 사이에서 .5를 넘었다. 확률 .5를 기준으로 분류하면 898명 가운데 758명(84.4%)을 맞혔다. 부모의 키를 더한 모형도 유의하였고(\(\chi^2(3) = 763.25\), \(p &lt; .001\), McFadden \(R^2 = .61\)), 키만 넣은 모형보다 유의하게 좋았으며, \(\chi^2(2) = 145.72\), \(p &lt; .001\), AIC도 630.22에서 488.51로 낮아졌다. 자녀 키가 같을 때 아버지 키와 어머니 키가 클수록 아들일 오즈는 낮았는데, 부모가 크면 같은 키의 자녀라도 키 큰 딸일 가능성이 크기 때문이다. 이 모형은 키로 성별을 가려내는 분류 모형이며 인과 관계를 뜻하지 않는다.</p><div class="tablewrap"><table class="reg apa"><caption><em>표 6-1</em><br>로지스틱 회귀 모형의 유의성 (\(N = 898\))</caption><thead><tr><th>모형</th><th class="n">\(\chi^2\)</th><th class="n">\(df\)</th><th class="n">\(p\)</th><th class="n">McFadden \(R^2\)</th><th class="n">AIC</th></tr></thead><tbody><tr><td>자녀 키</td><td class="n">617.53</td><td class="n">1</td><td class="n">&lt; .001</td><td class="n">.50</td><td class="n">630.22</td></tr><tr><td>자녀 키 + 부모 키</td><td class="n">763.25</td><td class="n">3</td><td class="n">&lt; .001</td><td class="n">.61</td><td class="n">488.51</td></tr><tr><td>두 모형의 비교</td><td class="n">145.72</td><td class="n">2</td><td class="n">&lt; .001</td><td class="n"></td><td class="n"></td></tr></tbody></table></div><p class="more">주. \(\chi^2\)는 설명변수가 없는 모형(이탈도 1243.75)과 비교한 가능도비 검정이고, 마지막 행은 두 모형의 이탈도 차이(626.22 − 480.51)다. AIC는 작을수록 좋다.</p><div class="tablewrap"><table class="reg apa"><caption><em>표 6-2</em><br>아들일 오즈비와 95% 신뢰구간</caption><thead><tr><th>변수</th><th class="n">자녀 키 모형</th><th class="n">자녀 키 + 부모 키 모형</th></tr></thead><tbody><tr><td>자녀 키 (cm)</td><td class="n">1.37 [1.32, 1.43]</td><td class="n">1.54 [1.46, 1.64]</td></tr><tr><td>아버지 키 (cm)</td><td class="n">—</td><td class="n">0.83 [0.80, 0.87]</td></tr><tr><td>어머니 키 (cm)</td><td class="n">—</td><td class="n">0.86 [0.83, 0.90]</td></tr></tbody></table></div><p class="more">주. 신뢰구간은 프로파일 가능도 방법. 모든 오즈비가 \(z\) 검정에서 \(p &lt; .001\)이다(\(z\) = 15.57; 14.92, −8.39, −6.73).</p></div>
+    <p class="note">오즈비 1.37을 "아들일 확률이 37% 높아진다"로 쓰는 것이 가장 흔한 실수다. 확률의 변화는 키에 따라 다르다(160cm 근처에서는 몇 %p, 170cm 근처에서는 훨씬 크게). 확률로 말하고 싶으면 2번 표처럼 특정 키에서의 확률을 직접 쓴다.</p>
+  </div>
+</section>
+
+<!-- ======================= 07 ======================= -->
+<section class="panel" id="ancova">
+  <div class="sec-head"><span class="sec-num">07</span><h2>공분산분석은 회귀다 - 더미변수 + 공변량</h2></div>
+  <div class="stack">
+    <p><a href="categorical-test-with-r.html#homogeneity">범주형 자료의 가설검정 05절</a>에서 우울증 환자 100명을 일반 치료(TAU)와 컴퓨터 인지행동치료(BtheB)에 무작위배정한 Beat the Blues 임상시험을 보았다. 두 집단의 2개월 뒤 우울 점수(BDI, 높을수록 우울)를 비교하되, 치료 전 점수라는 출발선을 맞춘 뒤에 비교하는 <strong>공분산분석</strong>(ANCOVA)을 했다. 그 절의 펼침 상자에 미뤄 둔 모형식을 이제 읽을 수 있다. 05절의 "더미변수 + 연속변수" 모형 그대로다.</p>
+    <div class="readout math">\[ \text{BDI}_{2\text{m},i} = \beta_0 + \beta_1\,\text{BDI}_{\text{pre},i} + \tau\,D_{\text{BtheB},i} + \varepsilon_i, \qquad H_0: \tau = 0 \]</div>
+    <p>\(D_{\text{BtheB}}\)는 BtheB면 1, TAU면 0인 더미다. 그러면 TAU와 BtheB는 <strong>기울기 \(\beta_1\)이 같고 높이가 \(\tau\)만큼 다른 평행한 두 직선</strong>이 되고, \(\tau\)는 "치료 전 점수가 같은 사람끼리 견준 집단 차이"다. 05절에서 아버지 키가 같을 때의 아들–딸 차이를 읽은 것과 같다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">치료 전 BDI와 2개월 BDI · 2개월 점수가 있는 97명</span>
+      <span class="seg" role="group" aria-label="분석">
+        <button class="btn" type="button" data-am="mean" aria-pressed="true">평균만 비교</button>
+        <button class="btn" type="button" data-am="anc" aria-pressed="false">공분산분석: 평행한 두 직선</button>
+        <button class="btn" type="button" data-am="int" aria-pressed="false">기울기도 따로</button>
+      </span>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="a-svg" role="img" aria-label="두 치료 집단의 치료 전과 2개월 우울 점수"></svg></div>
+    <dl class="stat-row" id="a-stats"></dl>
+    <p class="fig-read" id="a-read"></p>
+  </div>
+
+  <div class="stack">
+    <div class="tablewrap"><table class="reg">
+      <caption>표 7-1. 공분산분석을 회귀로 (\(n = 97\): TAU 45, BtheB 52)</caption>
+      <thead><tr><th>분석</th><th>모형</th><th class="n">BtheB 더미의 계수 [95% CI]</th><th class="n">검정</th><th class="n">\(p\)</th></tr></thead>
+      <tbody>
+        <tr><td>평균 비교</td><td>2개월 ~ 집단</td><td class="n">−4.76</td><td class="n">\(t(95) = −2.21\)</td><td class="n">.030</td></tr>
+        <tr><td>ANCOVA 1</td><td>2개월 ~ 치료 전 + 집단</td><td class="n">−3.95 [−7.34, −0.57]</td><td class="n">\(F(1, 94) = 5.37\)</td><td class="n">.023</td></tr>
+        <tr class="hl"><td>ANCOVA 2</td><td>2개월 ~ 치료 전 + 항우울제 + 집단</td><td class="n">−2.98 [−6.54, 0.57]</td><td class="n">\(F(1, 93) = 2.78\)</td><td class="n">.099</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">세 모형 전체의 검정은 모두 유의하였다. 평균 비교 \(F(1, 95) = 4.88\), \(p = .030\), \(R^2 = .05\), 수정 \(R^2 = .04\). ANCOVA 1 \(F(2, 94) = 32.78\), \(p &lt; .001\), \(R^2 = .41\), 수정 \(R^2 = .40\). ANCOVA 2 \(F(3, 93) = 23.18\), \(p &lt; .001\), \(R^2 = .43\), 수정 \(R^2 = .41\). 치료 전 점수만 넣은 모형도 \(R^2 = .38\)이라, 모형 전체가 유의한 것은 주로 공변량 덕분이다. 그러니 모형 전체의 \(F\)와 표의 집단 검정을 구별해 읽는다.</p>
+    <p>더미의 계수는 BtheB − TAU이므로 <a href="categorical-test-with-r.html#homogeneity">범주형 자료의 가설검정</a> 표 5-3의 "TAU − BtheB"와 부호만 반대이고 값은 같다. 거기서 <strong>보정 평균의 차이</strong>라고 부른 것이 바로 이 계수다. 보정 평균은 공변량을 전체 평균(치료 전 BDI 23.2점)에 맞췄을 때 두 직선의 높이로, ANCOVA 1에서 TAU 19.0점, BtheB 15.1점이다. 검정의 \(F(1, 94) = 5.37\)도 계수의 \(t = -2.317\)을 제곱한 값이다.</p>
+    <p>ANCOVA 2는 사전 동질성이 깨졌던 항우울제 복용을 더미로 하나 더 넣은 모형이다. 설명변수가 늘었을 뿐 읽는 법은 같다. 복용 여부와 치료 전 점수가 같을 때 BtheB가 2.98점 낮고, 이 차이는 유의하지 않다. 범주형 변수(복용)도 공변량이 될 수 있다는 것이 회귀로 보면 자연스럽다.</p>
+    <table class="reg">
+      <tbody>
+        <tr><td><strong>기울기 동질성</strong></td><td>"치료 전–2개월 관계가 두 집단에서 같은 모양인가"는 05절의 교호작용 검정이다. 치료 전 BDI × 집단의 교호작용을 더하면 \(F(1, 93) = 0.95\), \(p = .332\)로, 평행한 두 직선으로 요약해도 된다.</td></tr>
+        <tr><td><strong>나머지 가정</strong></td><td>잔차의 정규성과 등분산성, 관측의 독립성은 03절의 회귀 가정과 같다. 공분산분석의 가정 목록이 따로 있는 것이 아니라 회귀의 가정에 기울기 동질성이 더해진 것이다.</td></tr>
+        <tr><td><strong>공변량은 처치 전에</strong></td><td>회귀는 넣은 변수를 고정한 뒤의 차이를 말한다. 처치의 영향을 받은 변수(예: 3개월 BDI)를 넣으면 처치 효과의 일부를 지워 버린다.</td></tr>
+      </tbody>
+    </table>
+    <p>마지막으로, 공분산분석의 \(F\)는 "공변량만 넣은 모형"에 집단 더미를 더했을 때 \(R^2\)가 얼마나 늘었는지의 검정이기도 하다. ANCOVA 2에서 공변량 둘만으로 \(R^2 = .411\), 집단을 더하면 .428로 .017 늘었고, 그 증가의 \(F\)가 2.78이다. 변수를 블록으로 나누어 차례로 넣는 이 방식이 08절의 위계적 회귀다.</p>
+  </div>
+
+  <div class="practice" id="p07">
+    <h3>프롬프트로 따라 하기 · 공분산분석</h3>
+    <p class="note">데이터 처리 → 분석 → 보고서 작성의 순서로 프롬프트 세 개를 차례로 준다. 작업 폴더와 보고서 규칙은 <a href="#setup">00 실습 준비</a>, 만들어진 R 코드와 전체 출력은 <a href="#code-07" class="code-link">부록 07</a>에 있다.</p>
+    <h4><span class="pstep">① 데이터 처리</span>자료를 들여와 다듬는다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 공분산분석 데이터 처리</span><pre>R 패키지 HSAUR3 에 들어 있는 Beat the Blues 임상시험 자료(BtheB)를 분석용으로 정리하는 R 스크립트 scripts/reg07_prepare.R 을 써서 실행해 줘. 패키지가 없으면 설치하기 전에 내게 물어봐 줘.
+
+1. 자료를 dataset/raw/btheb.csv 로 저장한 뒤 다시 읽어 쓴다.
+2. 전체 사람 수와 2개월 우울 점수(bdi.2m)가 없는 사람 수를 보여 줘.
+3. 2개월 점수가 있는 사람만 남기고, 집단(treatment)은 TAU, BtheB 순서로, 항우울제 복용(drug)은 No, Yes 순서로 둔다. dataset/working/btheb_97.rds 로 저장해 줘.
+4. 집단마다 사람 수, 치료 전과 2개월 우울 점수의 평균과 표준편차, 항우울제 복용 비율을 표로 만들어 output/reg07_desc.csv 로 저장해 줘.</pre></div>
+    <p class="ck-title">확인할 것</p><ul class="ck"><li>전체 100명 가운데 2개월 점수가 없는 사람이 3명인가?</li><li>TAU 45명, BtheB 52명인가?</li><li>항우울제 복용 비율이 TAU .27, BtheB .58로 차이가 나는가? 공변량으로 넣을 근거다.</li></ul>
+    <h4><span class="pstep">② 분석</span>모형을 적합하고 결과를 표 파일로 저장한다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 공분산분석 분석</span><pre>dataset/working/btheb_97.rds 로 공분산분석을 회귀로 하는 R 스크립트 scripts/reg07_ancova.R 을 써서 실행해 줘.
+
+1. 세 회귀모형을 적합한다. 집단만, 치료 전 우울 점수와 집단, 치료 전 우울 점수와 항우울제 복용과 집단. 모형마다 집단 더미의 계수(BtheB − TAU), 표준오차, 95% 신뢰구간, t, p를 한 표로 만든다. 뒤의 두 모형(공분산분석)은 공변량만 넣은 모형과 F 검정으로 비교한 F, 두 자유도, p도 같은 표에 붙인다. output/reg07_group.csv 로 저장해 줘.
+2. 보정 평균: 치료 전 우울 점수를 전체 평균에 맞추고, 항우울제 복용은 두 수준을 고르게 평균해 집단마다 예측값을 구해 output/reg07_adjmeans.csv 로 저장해 줘.
+3. 기울기 동질성: 치료 전 점수와 2개월 점수의 관계가 두 집단에서 같은지 교호작용을 더한 모형과 비교해 output/reg07_slope.csv 로 저장해 줘.
+4. 세 모형 각각의 모형 전체 F 검정(통계량, 두 자유도, p), 결정계수, 수정 결정계수, 잔차 표준오차를 한 표로 만들어 output/reg07_models.csv 로 저장해 줘.</pre></div>
+    <div class="cb screen"><span class="lang">결과 화면 · Rscript scripts/reg07_ancova.R</span><pre># A tibble: 3 × 11
+  분석      estimate std.error  conf.low  conf.high         t    p.value         F   df1   df2         p_F
+  &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;
+1 평균비교 -4.755128  2.153067 -9.029507 -0.4807495 -2.208537 0.02961192 NA           NA    NA NA         
+2 ANCOVA1  -3.954361  1.706660 -7.342975 -0.5657466 -2.317017 0.02267424  5.368567     1    94  0.02267424
+3 ANCOVA2  -2.982594  1.789257 -6.535703  0.5705144 -1.666946 0.09888953  2.778710     1    93  0.09888953
+# A tibble: 3 × 8
+  분석      r.squared adj.r.squared     sigma         F   df1   df2            p
+  &lt;chr&gt;         &lt;dbl&gt;         &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;        &lt;dbl&gt;
+1 평균비교 0.04883611    0.03882386 10.57498   4.877635     1    95 2.961192e- 2
+2 ANCOVA1  0.4109113     0.3983775   8.366430 32.78425      2    94 1.579399e-11
+3 ANCOVA2  0.4278849     0.4094295   8.289226 23.18490      3    93 2.718266e-11
+# A tibble: 2 × 3
+  treatment  ANCOVA1  ANCOVA2
+  &lt;fct&gt;        &lt;dbl&gt;    &lt;dbl&gt;
+1 TAU       19.03739 18.31377
+2 BtheB     15.08303 15.33117
+# A tibble: 2 × 7
+  term                         df.residual      rss    df    sumsq  statistic    p.value
+  &lt;chr&gt;                              &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+1 bdi.2m ~ bdi.pre + treatment          94 6579.732    NA NA       NA         NA        
+2 bdi.2m ~ bdi.pre * treatment          93 6513.157     1 66.57479  0.9506075  0.3320940</pre></div>
+    
+    <h4><span class="pstep">③ 보고서 작성</span>결과 화면의 숫자를 보고서의 문장과 표로 옮긴다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 공분산분석 보고서</span><pre>output/reg07_desc.csv, output/reg07_models.csv, output/reg07_group.csv, output/reg07_adjmeans.csv, output/reg07_slope.csv 를 보고 output/reg07_report.md 에 공분산분석의 결과 보고를 써 줘. AGENTS.md 의 보고서 규칙을 따른다.
+
+1. 공변량을 넣은 까닭(집단 사이의 사전 차이)을 기술통계의 숫자를 들어 한 문장으로 쓴다.
+2. 결과 문단: 주 분석(치료 전 점수와 항우울제 복용을 함께 맞춘 모형)의 모형 전체 F 검정과 그 유의성, 결정계수, 수정 결정계수를 먼저 쓰고, 이어서 집단 효과(보정 평균, 차이와 신뢰구간, 집단의 F 검정)를 쓴다. 모형 전체가 유의한 것과 집단 효과가 유의한 것을 구별해 쓴다.
+3. 표 7-1 모형의 유의성: 세 분석(평균 비교, ANCOVA 1, ANCOVA 2)을 행으로, F, 두 자유도, p, 결정계수, 수정 결정계수, 잔차 표준오차를 열로 둔다.
+4. 표 7-2 집단 효과: 세 분석을 행으로, 공변량, 집단 계수(BtheB − TAU)와 95% 신뢰구간, 검정(평균 비교는 t, 공분산분석은 집단의 F), p를 열로 두고, 표 아래 주에 주 분석의 보정 평균을 적는다.
+5. 기울기 동질성 검정의 결과를 쓴다.
+6. 유의하지 않은 결과를 "효과가 없다"로 쓰지 않는다.</pre></div>
+    <div class="tablewrap"><table class="reg map"><caption>결과 화면에서 보고서로</caption>
+      <thead><tr><th>결과 화면에서 읽은 값</th><th>보고서에 쓰는 꼴</th></tr></thead>
+      <tbody><tr><td><code>ANCOVA2 F 23.18490</code>, <code>df1 3</code>, <code>df2 93</code>, <code>p 2.718266e-11</code> (reg07_models)</td><td>모형 전체 \(F(3, 93) = 23.18\), \(p &lt; .001\). 공변량과 집단을 합친 모형이 유의하다는 뜻이지, 집단 효과가 유의하다는 뜻이 아니다.</td></tr><tr><td><code>r.squared 0.4278849</code>, <code>adj.r.squared 0.4094295</code></td><td>\(R^2 = .43\), 수정 \(R^2 = .41\). 설명변수가 셋이고 표본이 97명이라 두 값의 차이가 02절보다 크다.</td></tr><tr><td><code>ANCOVA2 estimate -2.982594</code></td><td>BtheB가 2.98점 낮다. 더미가 BtheB = 1이라 계수는 BtheB − TAU다.</td></tr><tr><td><code>conf.low -6.535703</code>, <code>conf.high 0.5705144</code></td><td>95% CI [−6.54, 0.57]. 0을 포함한다.</td></tr><tr><td><code>F 2.778710</code>, <code>df1 1</code>, <code>df2 93</code>, <code>p_F 0.09888953</code> (reg07_group)</td><td>집단 효과 \(F(1, 93) = 2.78\), \(p = .099\). 위의 모형 전체 \(F\)와 다른 검정이다. 계수의 \(t\)를 제곱한 값과 같아 둘 중 하나만 쓴다.</td></tr><tr><td><code>TAU 18.31377</code>, <code>BtheB 15.33117</code> (ANCOVA2)</td><td>보정 평균 18.31점, 15.33점</td></tr><tr><td>기울기 동질성 <code>statistic 0.9506075</code>, <code>df 1</code>, <code>p 0.3320940</code></td><td>\(F(1, 93) = 0.95\), \(p = .332\)</td></tr><tr><td><code>drug_yes 0.2666667</code>, <code>0.5769231</code></td><td>항우울제 복용 27%, 58%</td></tr></tbody></table></div>
+    <div class="report-ex"><p class="rx-title">보고서 예시 · output/reg07_report.md</p><p>항우울제 복용 비율이 BtheB 집단(58%)에서 TAU 집단(27%)보다 높아, 치료 전 BDI와 항우울제 복용을 공변량으로 한 공분산분석을 주 분석으로 하였다(\(n = 97\)). 이 모형은 유의하였고, \(F(3, 93) = 23.18\), \(p &lt; .001\), \(R^2 = .43\), 수정 \(R^2 = .41\), 2개월 BDI 분산의 43%를 설명하였다(표 7-1). 그러나 모형 전체가 유의하다는 것이 집단 효과가 유의하다는 뜻은 아니다. 공변량을 맞춘 2개월 BDI의 보정 평균은 TAU 18.31점, BtheB 15.33점으로 BtheB가 2.98점 낮았으나 유의하지 않았다, \(b = -2.98\), 95% CI [−6.54, 0.57], \(F(1, 93) = 2.78\), \(p = .099\). 치료 전 BDI만 공변량으로 하면 차이가 3.95점으로 유의하였다, 95% CI [−7.34, −0.57], \(F(1, 94) = 5.37\), \(p = .023\)(표 7-2). 치료 전 BDI와 2개월 BDI의 관계는 두 집단에서 같은 모양이었다, \(F(1, 93) = 0.95\), \(p = .332\). 보정하는 공변량에 따라 결론이 달라지므로, 이 표본으로는 치료 효과의 크기를 좁히지 못했다고 해석한다.</p><div class="tablewrap"><table class="reg apa"><caption><em>표 7-1</em><br>2개월 BDI를 설명하는 세 모형의 유의성 (\(n = 97\))</caption><thead><tr><th>모형</th><th class="n">\(F\)</th><th class="n">\(df\)</th><th class="n">\(p\)</th><th class="n">\(R^2\)</th><th class="n">수정 \(R^2\)</th><th class="n">잔차 표준오차</th></tr></thead><tbody><tr><td>평균 비교 (집단)</td><td class="n">4.88</td><td class="n">1, 95</td><td class="n">.030</td><td class="n">.05</td><td class="n">.04</td><td class="n">10.57</td></tr><tr><td>ANCOVA 1 (치료 전 BDI + 집단)</td><td class="n">32.78</td><td class="n">2, 94</td><td class="n">&lt; .001</td><td class="n">.41</td><td class="n">.40</td><td class="n">8.37</td></tr><tr><td>ANCOVA 2 (치료 전 BDI + 항우울제 + 집단)</td><td class="n">23.18</td><td class="n">3, 93</td><td class="n">&lt; .001</td><td class="n">.43</td><td class="n">.41</td><td class="n">8.29</td></tr></tbody></table></div><p class="more">주. 잔차 표준오차의 단위는 BDI 점수.</p><div class="tablewrap"><table class="reg apa"><caption><em>표 7-2</em><br>공변량에 따른 집단 효과 (BtheB − TAU)</caption><thead><tr><th>분석</th><th class="n">공변량</th><th class="n">\(b\) [95% CI]</th><th class="n">검정</th><th class="n">\(p\)</th></tr></thead><tbody><tr><td>평균 비교</td><td class="n">없음</td><td class="n">−4.76 [−9.03, −0.48]</td><td class="n">\(t(95) = -2.21\)</td><td class="n">.030</td></tr><tr><td>ANCOVA 1</td><td class="n">치료 전 BDI</td><td class="n">−3.95 [−7.34, −0.57]</td><td class="n">\(F(1, 94) = 5.37\)</td><td class="n">.023</td></tr><tr><td>ANCOVA 2</td><td class="n">치료 전 BDI, 항우울제</td><td class="n">−2.98 [−6.54, 0.57]</td><td class="n">\(F(1, 93) = 2.78\)</td><td class="n">.099</td></tr></tbody></table></div><p class="more">주. ANCOVA 2의 보정 평균은 TAU 18.31, BtheB 15.33(치료 전 BDI는 전체 평균, 항우울제 복용은 두 수준을 고르게 평균). 기울기 동질성 \(F(1, 93) = 0.95\), \(p = .332\).</p></div>
+    <p class="note">같은 자료를 사전 동질성 검정에서 출발해 보고하는 방법은 <a href="categorical-test-with-r.html#homogeneity">범주형 자료의 가설검정 05절</a>에 있다. 거기서는 공변량을 정하기 전에 동질성 표를 먼저 둔다.</p>
+  </div>
+</section>
+
+<!-- ======================= 08 ======================= -->
+<section class="panel" id="hierarchical">
+  <div class="sec-head"><span class="sec-num">08</span><h2>위계적 회귀분석 - 변수를 블록으로 차례로 넣는다</h2></div>
+  <div class="stack">
+    <p>위계적 회귀분석(hierarchical regression)은 설명변수를 몇 개의 <strong>블록</strong>으로 묶고, 연구자가 정한 순서대로 하나씩 더하며 모형을 여러 번 적합하는 방법이다. 묻는 것은 하나다. <strong>앞 블록을 통제한 뒤에도 이 블록이 설명력을 더하는가.</strong> 답은 \(R^2\)의 증가량 \(\Delta R^2\)와 그 \(F\) 검정으로 한다.</p>
+    <div class="readout math">\[ F_{\text{변화}} = \frac{(R^2_{\text{큰 모형}} - R^2_{\text{작은 모형}})\,/\,q}{(1 - R^2_{\text{큰 모형}})\,/\,(n - k - 1)} \]</div>
+    <p class="note">\(q\)는 더한 변수의 수, \(k\)는 큰 모형의 설명변수 수다.</p>
+    <p>갈턴 자료의 898명으로 세 블록을 정해 보자. 1블록은 성별, 2블록은 부모 키(아버지, 어머니), 3블록은 그 집의 자녀 수다. 성별이 키를 가르는 가장 뚜렷한 요인이니 먼저 넣고, "성별을 통제하고도 부모 키가 설명하는 몫"과 "그다음에도 형제가 많은 집이 키가 다른가"를 차례로 묻는 설계다.</p>
+  </div>
+
+  <div class="fig">
+    <div class="fig-bar">
+      <span class="fig-title">블록마다 늘어나는 \(R^2\) · 898명</span>
+      <span class="seg" role="group" aria-label="넣는 순서">
+        <button class="btn" type="button" data-order="sex" aria-pressed="true">성별 → 부모 키 → 자녀 수</button>
+        <button class="btn" type="button" data-order="par" aria-pressed="false">부모 키 → 성별 → 자녀 수</button>
+      </span>
+    </div>
+    <div class="fig-plot"><svg class="plot" id="h-svg" role="img" aria-label="블록마다 늘어나는 결정계수 막대"></svg></div>
+    <div class="tablewrap" style="padding:0 16px 12px"><table class="reg" id="h-table">
+      <thead><tr><th>단계</th><th>더한 블록</th><th class="n">\(R^2\)</th><th class="n">\(\Delta R^2\)</th><th class="n">\(F_{\text{변화}}\)</th><th class="n">자유도</th><th class="n">\(p\)</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p class="fig-note">막대와 표는 쪽의 스크립트가 898명의 자료로 모형을 차례로 적합해 계산한다. 회색은 어느 블록으로도 설명되지 않은 몫(\(1 - R^2\))이다.</p>
+  </div>
+
+  <div class="stack">
+    <p>성별을 먼저 넣으면 \(R^2 = .510\)이다. 부모 키 블록이 \(\Delta R^2 = .130\)을 더하고(\(F(2, 894) = 160.7\), \(p &lt; .001\)), 자녀 수는 \(\Delta R^2 = .001\)로 거의 보태지 못한다(\(F(1, 893) = 2.60\), \(p = .107\)). <strong>성별과 부모 키를 알면 형제가 몇인지는 키를 설명하는 데 더 쓸모가 없다.</strong></p>
+    <p>순서를 바꿔 부모 키를 먼저 넣으면 부모 키의 몫은 .109, 그다음 성별의 몫은 .531이 된다. 마지막 \(R^2\)(.640)는 순서와 상관없이 같지만, <strong>각 블록에 돌아가는 몫은 넣는 순서에 따라 달라진다</strong>. 이 자료는 성별과 부모 키가 거의 무관해서(상관 −0.03) 차이가 작은 편이다. 서로 상관이 높은 블록이라면 겹치는 몫을 먼저 들어간 블록이 모두 가져가므로 차이가 훨씬 커진다. 그래서 순서는 자료를 보고 정하지 않고, <strong>연구 질문과 이론으로 미리 정한다</strong>. 통제해야 할 변수(인구학적 특성, 사전 점수)를 앞에, 관심 있는 변수를 뒤에 두는 것이 흔한 설계다.</p>
+    <div class="callout"><p><strong>07절의 공분산분석이 바로 이 설계다.</strong> 1블록에 공변량(치료 전 BDI, 항우울제 복용), 2블록에 집단을 넣으면 2블록의 \(\Delta R^2 = .017\), \(F_{\text{변화}}(1, 93) = 2.78\), \(p = .099\)가 ANCOVA 2의 집단 검정과 같다. 분산분석, \(t\) 검정, 공분산분석, 위계적 회귀는 서로 다른 도구처럼 배우지만 모두 <strong>"어떤 변수를 넣은 모형과 뺀 모형을 비교한다"</strong>는 같은 일을 한다.</p></div>
+    <div class="callout caution"><p><strong>단계적 선택(stepwise)과는 다르다.</strong> 단계적 선택은 \(p\)값이나 정보기준을 보고 컴퓨터가 변수를 넣고 뺄 순서를 정한다. 위계적 회귀는 사람이 미리 정한 순서를 따른다. 자료가 순서를 정하면 우연히 잘 맞은 변수가 뽑히기 쉽고, 그 \(p\)값은 액면대로 믿기 어렵다.</p></div>
+  </div>
+
+  <div class="practice" id="p08">
+    <h3>프롬프트로 따라 하기 · 위계적 회귀</h3>
+    <p class="note">01절에서 정리한 자료를 그대로 쓰므로 데이터 처리 단계를 따로 두지 않았다. 필요한 자료 고르기와 기술통계는 분석 프롬프트 첫머리에 함께 적었다. 분석 → 보고서 작성의 두 프롬프트를 차례로 준다. 작업 폴더와 보고서 규칙은 <a href="#setup">00 실습 준비</a>, 만들어진 R 코드와 전체 출력은 <a href="#code-08" class="code-link">부록 08</a>에 있다.</p>
+    <h4><span class="pstep">① 분석</span>모형을 적합하고 결과를 표 파일로 저장한다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 위계적 회귀 분석</span><pre>dataset/working/galton_cm.rds 의 딸과 아들 898명으로 위계적 회귀분석을 하는 R 스크립트 scripts/reg08_hierarchical.R 을 써서 실행해 줘. 1블록은 성별, 2블록은 아버지 키와 어머니 키, 3블록은 그 집의 자녀 수(Kids)다.
+
+1. 설명변수(아들이면 1인 변수, 아버지 키, 어머니 키, 자녀 수)끼리의 상관행렬을 output/reg08_predcor.csv 로 저장해 줘. 블록 사이의 상관이 크면 넣는 순서가 결과를 크게 바꾼다.
+2. 블록마다 앞 블록의 변수를 모두 포함한 모형을 적합하고, 단계마다 결정계수, 수정 결정계수, 결정계수의 증가량, 바로 앞 단계와 비교한 F 검정(F, 두 자유도, p), 그리고 그 단계 모형 전체의 F 검정(F, 두 자유도, p)을 표로 만들어 output/reg08_steps.csv 로 저장해 줘.
+3. 마지막 단계 모형의 계수표(95% 신뢰구간 포함)를 output/reg08_coef.csv 로 저장해 줘.</pre></div>
+    <div class="cb screen"><span class="lang">결과 화면 · Rscript scripts/reg08_hierarchical.R</span><pre># A tibble: 4 × 5
+  변수           son      father      mother        Kids
+  &lt;chr&gt;        &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;
+1 son     1          -0.02714839 -0.03561748 -0.06325680
+2 father -0.02714839  1           0.07366461 -0.1600229 
+3 mother -0.03561748  0.07366461  1          -0.02002964
+4 Kids   -0.06325680 -0.1600229  -0.02002964  1         
+# A tibble: 3 × 13
+   단계 블록           r2    adj_r2    delta_r2   F_change   df1   df2      p_change  model_F model_df1 model_df2       model_p
+  &lt;int&gt; &lt;chr&gt;       &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;
+1     1 성별    0.5101643 0.5096176 0.5101643    NA           NA    NA NA            933.1846         1       896 5.175573e-141
+2     2 부모 키 0.6396752 0.6384661 0.1295110   160.6645       2   894  2.453024e-60 529.0317         3       894 1.328888e-197
+3     3 자녀 수 0.6407210 0.6391117 0.001045727   2.599190     1   893  1.072717e- 1 398.1333         4       893 9.085207e-197
+# A tibble: 5 × 7
+  term          estimate  std.error statistic       p.value   conf.low   conf.high
+  &lt;chr&gt;            &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;
+1 (Intercept) 41.11679   7.096427    5.794013 9.521525e-  9 27.18917   55.04441   
+2 sex아들     13.23326   0.3663222  36.12466  7.583858e-177 12.51431   13.95222   
+3 father       0.3983053 0.02956642 13.47154  8.607806e- 38  0.3402775  0.4563330 
+4 mother       0.3209553 0.03125564 10.26872  1.849975e- 23  0.2596122  0.3822983 
+5 Kids        -0.1112986 0.06903524 -1.612200 1.072717e-  1 -0.2467889  0.02419159</pre></div>
+    <p class="ck-title">확인할 것</p><ul class="ck"><li>설명변수끼리의 상관이 모두 작은가(절댓값이 가장 큰 것이 아버지 키–자녀 수 −.16)?</li><li>결정계수가 .51, .64, .64로 늘고 2단계의 F 변화가 160.66인가?</li></ul>
+    <h4><span class="pstep">② 보고서 작성</span>결과 화면의 숫자를 보고서의 문장과 표로 옮긴다</h4>
+    <div class="cb prompt"><span class="lang">프롬프트 · 위계적 회귀 보고서</span><pre>output/reg08_predcor.csv, output/reg08_steps.csv, output/reg08_coef.csv 를 보고 output/reg08_report.md 에 위계적 회귀의 결과 보고를 써 줘. AGENTS.md 의 보고서 규칙을 따른다.
+
+1. 블록의 순서와 그렇게 정한 까닭(먼저 통제할 것, 뒤에 더해 보고 싶은 것)을 먼저 쓴다.
+2. 결과 문단: 단계마다 모형 전체의 F 검정과 그 유의성, 결정계수, 수정 결정계수를 쓰고, 이어서 결정계수의 증가와 그 F 검정을 쓴다. 모형 전체의 검정과 증가량의 검정을 구별한다.
+3. 표 8-1 모형의 유의성과 설명력의 변화: 단계를 행으로, 결정계수, 수정 결정계수, 결정계수의 증가량, F 변화와 자유도, 그 p, 모형 전체의 F와 자유도, 그 p를 열로 둔다.
+4. 표 8-2 회귀계수: 마지막 단계 모형의 b, SE, 95% CI, t, p.
+5. 설명변수끼리의 상관을 들어, 블록의 순서를 바꾸면 몫이 달라질 수 있는지 한 문장으로 쓴다.</pre></div>
+    <div class="tablewrap"><table class="reg map"><caption>결과 화면에서 보고서로</caption>
+      <thead><tr><th>결과 화면에서 읽은 값</th><th>보고서에 쓰는 꼴</th></tr></thead>
+      <tbody><tr><td><code>단계 2 delta_r2 0.1295110</code></td><td>\(\Delta R^2 = .13\)</td></tr><tr><td><code>F_change 160.6645</code>, <code>df1 2</code>, <code>df2 894</code>, <code>p_change 2.453024e-60</code></td><td>증가량의 검정 \(F(2, 894) = 160.66\), \(p &lt; .001\)</td></tr><tr><td><code>model_F 529.0317</code>, <code>model_df1 3</code>, <code>model_df2 894</code>, <code>model_p 1.328888e-197</code></td><td>2단계 모형 전체 \(F(3, 894) = 529.03\), \(p &lt; .001\). "모형이 유의한가"와 "더한 블록이 유의하게 보탰나"는 다른 검정이다.</td></tr><tr><td><code>단계 3 delta_r2 0.001045727</code></td><td>\(\Delta R^2 = .001\). 둘째 자리에서 0이 되는 값은 셋째 자리까지 쓴다.</td></tr><tr><td><code>F_change 2.599190</code>, <code>df1 1</code>, <code>df2 893</code>, <code>p_change 1.072717e- 1</code></td><td>\(F(1, 893) = 2.60\), \(p = .107\). 3단계 모형 전체는 \(F(4, 893) = 398.13\), \(p &lt; .001\)로 유의하지만, 앞 단계의 변수 덕분이다.</td></tr><tr><td><code>adj_r2 0.6384661</code> → <code>0.6391117</code></td><td>수정 \(R^2\)는 2단계 .638에서 3단계 .639로 거의 그대로다. 자녀 수를 더해 얻은 설명력이 변수 하나의 벌점과 비슷하다는 뜻이다.</td></tr><tr><td><code>단계 1 r2 0.5101643</code>, <code>model_F 933.1846</code></td><td>\(R^2 = .51\), \(F(1, 896) = 933.18\). 첫 단계는 비교할 앞 단계가 없어 F 변화가 비어 있고(<code>NA</code>), 모형 전체의 \(F\)가 곧 첫 블록의 검정이다.</td></tr><tr><td><code>Kids -0.1112986</code>, <code>conf.low -0.2467889</code>, <code>conf.high 0.02419159</code></td><td>\(b = -0.11\), 95% CI [−0.25, 0.02]</td></tr></tbody></table></div>
+    <div class="report-ex"><p class="rx-title">보고서 예시 · output/reg08_report.md</p><p>자녀 키를 설명하는 변수를 세 블록으로 나누어 위계적 회귀분석을 하였다(\(N = 898\)). 키의 가장 뚜렷한 차이인 성별을 1단계에, 성별을 통제한 뒤 보고자 한 부모의 키를 2단계에, 그 집의 자녀 수를 3단계에 넣었다. 1단계 모형은 유의하였고 성별은 자녀 키 분산의 51%를 설명하였다, \(F(1, 896) = 933.18\), \(p &lt; .001\), \(R^2 = .51\), 수정 \(R^2 = .51\). 부모의 키를 더한 2단계 모형도 유의하였고, \(F(3, 894) = 529.03\), \(p &lt; .001\), \(R^2 = .64\), 수정 \(R^2 = .64\), 성별을 통제한 뒤 부모의 키는 설명력을 유의하게 높였다, \(\Delta R^2 = .13\), \(F(2, 894) = 160.66\), \(p &lt; .001\). 자녀 수를 더한 3단계 모형은 전체로는 유의하였으나, \(F(4, 893) = 398.13\), \(p &lt; .001\), 설명력은 거의 늘지 않았고, \(\Delta R^2 = .001\), \(F(1, 893) = 2.60\), \(p = .107\), 수정 \(R^2\)도 .64로 그대로였다(표 8-1, 표 8-2). 성별과 부모 키를 알면 형제의 수는 자녀 키를 더 설명하지 못하였다. 설명변수 사이의 상관이 작아(절댓값 .16 이하) 블록의 순서를 바꾸어도 각 블록의 몫은 크게 달라지지 않을 것으로 본다.</p><div class="tablewrap"><table class="reg apa"><caption><em>표 8-1</em><br>단계별 모형의 유의성과 설명력의 변화 (\(N = 898\))</caption><thead><tr><th>단계</th><th class="n">\(R^2\)</th><th class="n">수정 \(R^2\)</th><th class="n">\(\Delta R^2\)</th><th class="n">\(F_{\text{변화}}\) (\(df\))</th><th class="n">\(p\)</th><th class="n">모형 \(F\) (\(df\))</th><th class="n">\(p\)</th></tr></thead><tbody><tr><td>1. 성별</td><td class="n">.51</td><td class="n">.51</td><td class="n">.51</td><td class="n">—</td><td class="n">—</td><td class="n">933.18 (1, 896)</td><td class="n">&lt; .001</td></tr><tr><td>2. + 부모 키</td><td class="n">.64</td><td class="n">.64</td><td class="n">.13</td><td class="n">160.66 (2, 894)</td><td class="n">&lt; .001</td><td class="n">529.03 (3, 894)</td><td class="n">&lt; .001</td></tr><tr><td>3. + 자녀 수</td><td class="n">.64</td><td class="n">.64</td><td class="n">.001</td><td class="n">2.60 (1, 893)</td><td class="n">.107</td><td class="n">398.13 (4, 893)</td><td class="n">&lt; .001</td></tr></tbody></table></div><p class="more">주. \(F_{\text{변화}}\)는 바로 앞 단계와 비교한 \(R^2\) 증가의 검정이다. 1단계는 비교할 앞 단계가 없어 모형 \(F\)가 곧 그 블록의 검정이다.</p><div class="tablewrap"><table class="reg apa"><caption><em>표 8-2</em><br>3단계 모형의 회귀계수</caption><thead><tr><th>변수</th><th class="n">\(b\)</th><th class="n">\(SE\)</th><th class="n">95% CI</th><th class="n">\(t\)</th><th class="n">\(p\)</th></tr></thead><tbody><tr><td>절편</td><td class="n">41.12</td><td class="n">7.10</td><td class="n">[27.19, 55.04]</td><td class="n">5.79</td><td class="n">&lt; .001</td></tr><tr><td>성별 (아들 = 1)</td><td class="n">13.23</td><td class="n">0.37</td><td class="n">[12.51, 13.95]</td><td class="n">36.12</td><td class="n">&lt; .001</td></tr><tr><td>아버지 키</td><td class="n">0.40</td><td class="n">0.03</td><td class="n">[0.34, 0.46]</td><td class="n">13.47</td><td class="n">&lt; .001</td></tr><tr><td>어머니 키</td><td class="n">0.32</td><td class="n">0.03</td><td class="n">[0.26, 0.38]</td><td class="n">10.27</td><td class="n">&lt; .001</td></tr><tr><td>자녀 수</td><td class="n">−0.11</td><td class="n">0.07</td><td class="n">[−0.25, 0.02]</td><td class="n">−1.61</td><td class="n">.107</td></tr></tbody></table></div><p class="more">주. \(t\)의 자유도는 893이다.</p></div>
+    <p class="note">위계적 회귀 보고의 중심은 마지막 모형의 계수가 아니라 단계마다의 \(\Delta R^2\)다. 계수표는 표의 아래쪽에 두고, 문장은 "무엇을 통제한 뒤 무엇이 얼마나 더 설명했나"로 쓴다.</p>
+  </div>
+</section>
+
+<!-- ======================= 09 ======================= -->
+<section class="panel" id="appendix">
+  <div class="sec-head"><span class="sec-num">09</span><h2>부록 · R 코드와 출력</h2></div>
+  <div class="stack">
+    <p>01–08절의 프롬프트로 코딩 에이전트가 만들 법한 R 코드와, 그 코드를 <code>regression</code> 실습 폴더에서 실제로 실행한 출력이다. 에이전트가 만든 코드와 견주어 보거나, 직접 코드를 써 볼 때 쓴다. 01·05·07절은 데이터 처리 스크립트와 분석 스크립트 한 쌍, 나머지 절은 분석 스크립트 하나다. 02–06, 08절은 01절이 만든 <code>dataset/working/galton_cm.rds</code>를 읽으므로 01절부터 실행한다.</p>
+  </div>
+
+  <details class="fold" id="code-01">
+    <summary>01 상관 · scripts/reg01_prepare.R, scripts/reg01_correlation.R</summary>
+    <div class="cb r"><span class="lang">R · scripts/reg01_prepare.R</span><pre># 01 데이터 처리: 갈턴 원자료를 cm로 바꾸고 분석용 파일로 저장한다
+library(tidyverse)
+options(pillar.sigfig = 7, width = 150)
+
+galton &lt;- read_tsv("dataset/raw/Galton.tsv", show_col_types = FALSE) %&gt;%
+  mutate(father = Father * 2.54,            # 인치 → cm
+         mother = Mother * 2.54,
+         height = Height * 2.54,
+         sex    = factor(if_else(Gender == "M", "아들", "딸"),
+                         levels = c("딸", "아들")))    # 첫 수준(딸)이 기준 범주
+
+# 점검: 행 수와 가족 수, 성별 인원, 결측
+galton %&gt;% summarise(rows = n(), families = n_distinct(Family))
+galton %&gt;% count(sex)
+galton %&gt;% summarise(across(c(father, mother, height), ~ sum(is.na(.x))))
+
+# 점검: 키의 범위 (cm). 인치를 잘못 바꾸면 여기서 드러난다
+galton %&gt;% summarise(across(c(father, mother, height), list(min = min, max = max)))
+
+write_rds(galton, "dataset/working/galton_cm.rds")     # 다음 절들이 다시 읽는다</pre></div>
+    <div class="cb"><span class="lang">출력 · reg01_prepare.R</span><pre># A tibble: 1 × 2
+   rows families
+  &lt;int&gt;    &lt;int&gt;
+1   898      197
+# A tibble: 2 × 2
+  sex       n
+  &lt;fct&gt; &lt;int&gt;
+1 딸      433
+2 아들    465
+# A tibble: 1 × 3
+  father mother height
+   &lt;int&gt;  &lt;int&gt;  &lt;int&gt;
+1      0      0      0
+# A tibble: 1 × 6
+  father_min father_max mother_min mother_max height_min height_max
+       &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+1     157.48     199.39     147.32     179.07     142.24     200.66</pre></div>
+    <div class="cb r"><span class="lang">R · scripts/reg01_correlation.R</span><pre># 01 분석: 아버지·어머니·아들 키의 평균, 표준편차, 상관계수와 상관계수의 검정
+library(tidyverse)
+options(pillar.sigfig = 7, width = 150)
+library(broom)
+library(showtext)
+font_add_google("Noto Sans KR", "notosanskr")
+showtext_auto()
+showtext_opts(dpi = 300)
+
+sons &lt;- read_rds("dataset/working/galton_cm.rds") %&gt;%
+  filter(sex == "아들") %&gt;%
+  select(아버지 = father, 어머니 = mother, 아들 = height)
+
+# 표 1: 평균, 표준편차와 상관행렬
+desc &lt;- sons %&gt;%
+  pivot_longer(everything(), names_to = "변수", values_to = "키") %&gt;%
+  group_by(변수 = factor(변수, levels = names(sons))) %&gt;%
+  summarise(n = n(), M = mean(키), SD = sd(키))
+cor_tab &lt;- cor(sons) %&gt;% as_tibble(rownames = "변수") %&gt;% mutate(변수 = factor(변수, levels = names(sons)))
+table1 &lt;- left_join(desc, cor_tab, by = "변수")
+table1
+write_csv(table1, "output/reg01_table1.csv")
+
+# 세 쌍의 상관계수 검정 (영가설: 모집단 상관계수 = 0)
+tests &lt;- tibble(쌍 = c("아버지–아들", "어머니–아들", "아버지–어머니"),
+                x  = c("아버지", "어머니", "아버지"),
+                y  = c("아들", "아들", "어머니")) %&gt;%
+  mutate(res = map2(x, y, ~ tidy(cor.test(sons[[.x]], sons[[.y]])))) %&gt;%
+  unnest(res) %&gt;%
+  select(쌍, r = estimate, t = statistic, df = parameter, p = p.value,
+         ci_low = conf.low, ci_high = conf.high)
+tests
+write_csv(tests, "output/reg01_cortest.csv")
+
+# 그림 1: 아버지–아들 산점도와 두 평균선
+ggplot(sons, aes(아버지, 아들)) +
+  geom_jitter(width = 0.6, height = 0, alpha = 0.4, colour = "#2f6fed") +
+  geom_vline(xintercept = mean(sons$아버지), linetype = "dashed", colour = "#0b1220") +
+  geom_hline(yintercept = mean(sons$아들), linetype = "dashed", colour = "#0b1220") +
+  labs(x = "아버지 키 (cm)", y = "아들 키 (cm)", title = "아버지 키와 아들 키 (아들 465명)") +
+  theme_minimal(base_family = "notosanskr")
+ggsave("output/reg01_scatter.png", width = 6, height = 4.5)</pre></div>
+    <div class="cb"><span class="lang">출력 · reg01_correlation.R</span><pre># A tibble: 3 × 7
+  변수       n        M       SD    아버지    어머니      아들
+  &lt;fct&gt;  &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+1 아버지   465 175.6872 5.841820 1         0.1063346 0.3913174
+2 어머니   465 162.5731 5.929065 0.1063346 1         0.3341309
+3 아들     465 175.8412 6.684249 0.3913174 0.3341309 1        
+# A tibble: 3 × 7
+  쌍                    r        t    df            p     ci_low   ci_high
+  &lt;chr&gt;             &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;        &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+1 아버지–아들   0.3913174 9.149788   463 1.824016e-18 0.3114667  0.4656805
+2 어머니–아들   0.3341309 7.628049   463 1.367163e-13 0.2508178  0.4125305
+3 아버지–어머니 0.1063346 2.301094   463 2.182968e- 2 0.01555110 0.1953793</pre></div>
+    <p class="note">본문으로 돌아가기: <a href="#p01">01 프롬프트로 따라 하기</a></p>
+  </details>
+
+  <details class="fold" id="code-02">
+    <summary>02 단순회귀 · scripts/reg02_simple.R</summary>
+    <div class="cb r"><span class="lang">R · scripts/reg02_simple.R</span><pre># 02 분석: 아버지 키로 아들 키를 설명하는 단순회귀
+library(tidyverse)
+options(pillar.sigfig = 7, width = 150)
+library(broom)
+library(showtext)
+font_add_google("Noto Sans KR", "notosanskr")
+showtext_auto()
+showtext_opts(dpi = 300)
+
+sons &lt;- read_rds("dataset/working/galton_cm.rds") %&gt;%   # 01절이 정리한 자료
+  filter(sex == "아들") %&gt;%
+  select(Family, father, son = height)
+
+# 기술통계: 아버지 키의 범위는 예측을 어디까지 믿을지(외삽)의 기준이 된다
+desc &lt;- sons %&gt;%
+  pivot_longer(c(father, son), names_to = "변수", values_to = "키") %&gt;%
+  group_by(변수) %&gt;%
+  summarise(n = n(), M = mean(키), SD = sd(키), 최소 = min(키), 최대 = max(키))
+desc
+write_csv(desc, "output/reg02_desc.csv")
+
+fit &lt;- lm(son ~ father, data = sons)        # 아들 키 = b0 + b1 × 아버지 키 + 오차
+
+coefs &lt;- tidy(fit, conf.int = TRUE)         # 계수, 표준오차, t, p, 95% 신뢰구간
+coefs
+write_csv(coefs, "output/reg02_coef.csv")
+
+fitstat &lt;- glance(fit) %&gt;%                  # 모형 전체: R², 수정 R², 잔차 표준오차, F 검정
+  select(r.squared, adj.r.squared, sigma, statistic, df, df.residual, p.value, nobs)
+fitstat
+write_csv(fitstat, "output/reg02_fit.csv")
+
+# 그림 2: 산점도와 회귀직선
+ggplot(sons, aes(father, son)) +
+  geom_jitter(width = 0.6, height = 0, alpha = 0.4, colour = "#2f6fed") +
+  geom_smooth(method = "lm", formula = y ~ x, se = TRUE, colour = "#0b1220") +
+  labs(x = "아버지 키 (cm)", y = "아들 키 (cm)", title = "아버지 키로 본 아들 키의 회귀직선") +
+  theme_minimal(base_family = "notosanskr")
+ggsave("output/reg02_line.png", width = 6, height = 4.5)</pre></div>
+    <div class="cb"><span class="lang">출력 · reg02_simple.R</span><pre># A tibble: 2 × 6
+  변수       n        M       SD   최소   최대
+  &lt;chr&gt;  &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+1 father   465 175.6872 5.841820 157.48 199.39
+2 son      465 175.8412 6.684249 152.4  200.66
+# A tibble: 2 × 7
+  term          estimate  std.error statistic      p.value   conf.low   conf.high
+  &lt;chr&gt;            &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;
+1 (Intercept) 97.17764   8.602050   11.29703  2.642076e-26 80.27374   114.0815   
+2 father       0.4477479 0.04893533  9.149788 1.824016e-18  0.3515851   0.5439108
+# A tibble: 1 × 8
+  r.squared adj.r.squared    sigma statistic    df df.residual      p.value  nobs
+      &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;       &lt;int&gt;        &lt;dbl&gt; &lt;int&gt;
+1 0.1531293     0.1513002 6.157859  83.71863     1         463 1.824016e-18   465</pre></div>
+    <p class="note">본문으로 돌아가기: <a href="#p02">02 프롬프트로 따라 하기</a></p>
+  </details>
+
+  <details class="fold" id="code-03">
+    <summary>03 잔차 분석 · scripts/reg03_diagnostics.R</summary>
+    <div class="cb r"><span class="lang">R · scripts/reg03_diagnostics.R</span><pre># 03 분석: 잔차로 선형성, 등분산성, 정규성, 독립성을 점검한다
+library(tidyverse)
+options(pillar.sigfig = 7, width = 150)
+library(broom)
+library(showtext)
+font_add_google("Noto Sans KR", "notosanskr")
+showtext_auto()
+showtext_opts(dpi = 300)
+
+sons &lt;- read_rds("dataset/working/galton_cm.rds") %&gt;%   # 01절이 정리한 자료
+  filter(sex == "아들") %&gt;%
+  select(Family, father, son = height)
+fit &lt;- lm(son ~ father, data = sons)
+
+# 아들마다 적합값, 잔차, 표준화 잔차, 지렛값, Cook의 거리
+r &lt;- augment(fit, data = sons) %&gt;%
+  select(Family, father, son, fitted = .fitted, resid = .resid,
+         std_resid = .std.resid, hat = .hat, cook = .cooksd)
+
+# 그림 3-1: 잔차 대 적합값 (선형성, 등분산성)
+ggplot(r, aes(fitted, resid)) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.4, colour = "#2f6fed") +
+  geom_hline(yintercept = 0, colour = "#0b1220") +
+  geom_smooth(method = "loess", formula = y ~ x, se = FALSE, colour = "#e2662a") +
+  labs(x = "적합값 (cm)", y = "잔차 (cm)", title = "잔차 대 적합값") +
+  theme_minimal(base_family = "notosanskr")
+ggsave("output/reg03_resid_fitted.png", width = 6, height = 4)
+
+# 그림 3-2: 표준화 잔차의 정규 Q-Q 그림 (정규성)
+ggplot(r, aes(sample = std_resid)) +
+  geom_qq(colour = "#2f6fed", alpha = 0.6) +
+  geom_qq_line(colour = "#e2662a", linewidth = 1) +
+  labs(x = "표준정규분포에서 기대하는 값", y = "표준화 잔차", title = "잔차의 정규 Q-Q 그림") +
+  theme_minimal(base_family = "notosanskr")
+ggsave("output/reg03_qq.png", width = 5, height = 5)
+
+# 검정 세 가지
+sw  &lt;- shapiro.test(r$resid)                              # 정규성
+bp  &lt;- nrow(r) * summary(lm(resid^2 ~ father, data = r))$r.squared   # 등분산: Breusch–Pagan (n × R²)
+fam &lt;- r %&gt;% group_by(Family) %&gt;% filter(n() &gt;= 2) %&gt;% ungroup()
+fa  &lt;- anova(lm(resid ~ factor(Family), data = fam))       # 독립성: 형제의 잔차가 가족마다 다른가
+
+checks &lt;- tibble(
+  점검   = c("정규성: Shapiro–Wilk", "등분산성: Breusch–Pagan", "독립성: 가족에 따른 잔차 차이"),
+  통계량 = c(unname(sw$statistic), bp, fa$`F value`[1]),
+  자유도 = c("—", "1", paste(fa$Df[1], fa$Df[2], sep = ", ")),
+  p      = c(sw$p.value, pchisq(bp, df = 1, lower.tail = FALSE), fa$`Pr(&gt;F)`[1]))
+checks
+write_csv(checks, "output/reg03_checks.csv")
+
+# 크게 벗어난 점과 영향점
+extremes &lt;- r %&gt;%
+  summarise(n = n(), over_2 = sum(abs(std_resid) &gt; 2), over_3 = sum(abs(std_resid) &gt; 3),
+            max_cook = max(cook), max_hat = max(hat))
+extremes
+write_csv(extremes, "output/reg03_extremes.csv")</pre></div>
+    <div class="cb"><span class="lang">출력 · reg03_diagnostics.R</span><pre># A tibble: 3 × 4
+  점검                             통계량 자유도             p
+  &lt;chr&gt;                             &lt;dbl&gt; &lt;chr&gt;          &lt;dbl&gt;
+1 정규성: Shapiro–Wilk          0.9936929 —        4.990748e-2
+2 등분산성: Breusch–Pagan       0.3604024 1        5.482829e-1
+3 독립성: 가족에 따른 잔차 차이 2.182218  132, 292 2.161843e-8
+# A tibble: 1 × 5
+      n over_2 over_3   max_cook    max_hat
+  &lt;int&gt;  &lt;int&gt;  &lt;int&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+1   465     20      4 0.05014870 0.03763078</pre></div>
+    <p class="note">본문으로 돌아가기: <a href="#p03">03 프롬프트로 따라 하기</a></p>
+  </details>
+
+  <details class="fold" id="code-04">
+    <summary>04 다중회귀 · scripts/reg04_multiple.R</summary>
+    <div class="cb r"><span class="lang">R · scripts/reg04_multiple.R</span><pre># 04 분석: 아버지만, 어머니만, 둘 다 넣은 회귀를 비교한다
+library(tidyverse)
+options(pillar.sigfig = 7, width = 150)
+library(broom)
+
+sons &lt;- read_rds("dataset/working/galton_cm.rds") %&gt;%   # 01절이 정리한 자료
+  filter(sex == "아들") %&gt;%
+  select(Family, father, mother, son = height)
+
+# 다중공선성 점검: 두 설명변수의 상관과 분산팽창계수
+predictors &lt;- sons %&gt;%
+  summarise(r_father_mother = cor(father, mother),
+            vif = 1 / (1 - r_father_mother^2))
+predictors
+write_csv(predictors, "output/reg04_predictors.csv")
+
+fit_f  &lt;- lm(son ~ father, data = sons)
+fit_m  &lt;- lm(son ~ mother, data = sons)
+fit_fm &lt;- lm(son ~ father + mother, data = sons)
+
+# 표 4-1: 세 모형의 설명력
+models &lt;- bind_rows(아버지만 = glance(fit_f), 어머니만 = glance(fit_m), 둘다 = glance(fit_fm), .id = "모형") %&gt;%
+  select(모형, r.squared, adj.r.squared, sigma, statistic, df, df.residual, p.value)
+models
+write_csv(models, "output/reg04_models.csv")
+
+# 표 4-2: 둘 다 넣은 모형의 계수와 표준화 계수(β)
+coefs &lt;- tidy(fit_fm, conf.int = TRUE) %&gt;%
+  mutate(beta = case_when(term == "father" ~ estimate * sd(sons$father) / sd(sons$son),
+                          term == "mother" ~ estimate * sd(sons$mother) / sd(sons$son)))
+coefs
+write_csv(coefs, "output/reg04_coef.csv")</pre></div>
+    <div class="cb"><span class="lang">출력 · reg04_multiple.R</span><pre># A tibble: 1 × 2
+  r_father_mother      vif
+            &lt;dbl&gt;    &lt;dbl&gt;
+1       0.1063346 1.011436
+# A tibble: 3 × 8
+  모형     r.squared adj.r.squared    sigma statistic    df df.residual      p.value
+  &lt;chr&gt;        &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;       &lt;int&gt;        &lt;dbl&gt;
+1 아버지만 0.1531293     0.1513002 6.157859  83.71863     1         463 1.824016e-18
+2 어머니만 0.1116435     0.1097248 6.306883  58.18714     1         463 1.367163e-13
+3 둘다     0.2396760     0.2363846 5.841038  72.81785     2         462 3.241151e-28
+# A tibble: 3 × 8
+  term          estimate   std.error statistic      p.value   conf.low  conf.high       beta
+  &lt;chr&gt;            &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+1 (Intercept) 49.27569   10.49809     4.693779 3.539800e- 6 28.64577   69.90560   NA        
+2 father       0.4117503  0.04668228  8.820269 2.353196e-17  0.3200144  0.5034862  0.3598566
+3 mother       0.3335500  0.04599536  7.251819 1.744796e-12  0.2431640  0.4239361  0.2958657</pre></div>
+    <p class="note">본문으로 돌아가기: <a href="#p04">04 프롬프트로 따라 하기</a></p>
+  </details>
+
+  <details class="fold" id="code-05">
+    <summary>05 더미변수 · scripts/reg05_prepare.R, scripts/reg05_dummy.R</summary>
+    <div class="cb r"><span class="lang">R · scripts/reg05_prepare.R</span><pre># 05 데이터 처리: 성별을 factor 로 만들고 범주의 순서(기준 범주)를 정한다
+library(tidyverse)
+options(pillar.sigfig = 7, width = 150)
+
+galton &lt;- read_rds("dataset/working/galton_cm.rds")
+
+# 1) 원자료의 성별 기록: 글자 "F", "M"
+class(galton$Gender)
+galton %&gt;% count(Gender)
+
+# 2) 순서를 정하지 않고 factor 로 바꾸면 글자 순서(알파벳)로 정해진다
+levels(factor(galton$Gender))
+
+# 3) 순서와 이름을 직접 정한다. 첫 수준(딸)이 회귀의 기준 범주가 된다
+kids &lt;- galton %&gt;%
+  mutate(sex = factor(Gender, levels = c("F", "M"), labels = c("딸", "아들"))) %&gt;%
+  select(Family, sex, father, mother, height)
+levels(kids$sex)
+kids %&gt;% count(sex)
+
+# 4) 회귀가 만드는 더미: 기준 범주(딸)는 열이 없고, 아들이면 sex아들 = 1
+head(kids, 4) %&gt;%
+  select(Family, sex) %&gt;%
+  bind_cols(as_tibble(model.matrix(~ sex, data = head(kids, 4))))
+
+# 5) 기준 범주를 아들로 바꾸려면 relevel(). 저장하는 자료는 딸을 기준으로 둔다
+levels(relevel(kids$sex, ref = "아들"))
+
+write_rds(kids, "dataset/working/kids.rds")</pre></div>
+    <div class="cb"><span class="lang">출력 · reg05_prepare.R</span><pre>[1] "character"
+# A tibble: 2 × 2
+  Gender     n
+  &lt;chr&gt;  &lt;int&gt;
+1 F        433
+2 M        465
+[1] "F" "M"
+[1] "딸"   "아들"
+# A tibble: 2 × 2
+  sex       n
+  &lt;fct&gt; &lt;int&gt;
+1 딸      433
+2 아들    465
+# A tibble: 4 × 4
+  Family sex   `(Intercept)` sex아들
+  &lt;chr&gt;  &lt;fct&gt;         &lt;dbl&gt;   &lt;dbl&gt;
+1 1      아들              1       1
+2 1      딸                1       0
+3 1      딸                1       0
+4 1      딸                1       0
+[1] "아들" "딸"</pre></div>
+    <div class="cb r"><span class="lang">R · scripts/reg05_dummy.R</span><pre># 05 분석: 성별 더미의 회귀, t 검정과의 비교, 부모 키를 함께 넣은 모형, 교호작용
+library(tidyverse)
+options(pillar.sigfig = 7, width = 150)
+library(broom)
+library(showtext)
+font_add_google("Noto Sans KR", "notosanskr")
+showtext_auto()
+showtext_opts(dpi = 300)
+
+kids &lt;- read_rds("dataset/working/kids.rds")    # 데이터 처리에서 성별의 순서(딸, 아들)를 정한 자료
+
+desc &lt;- kids %&gt;% group_by(sex) %&gt;% summarise(n = n(), M = mean(height), SD = sd(height))
+desc
+write_csv(desc, "output/reg05_desc.csv")
+
+
+fit_sex &lt;- lm(height ~ sex, data = kids)    # 더미 하나: 절편 = 딸 평균, 계수 = 평균 차이
+tidy(fit_sex)
+tidy(t.test(height ~ sex, data = kids, var.equal = TRUE)) %&gt;%
+  select(estimate, statistic, parameter, p.value)
+
+fit_full &lt;- lm(height ~ father + mother + sex, data = kids)
+coefs &lt;- tidy(fit_full, conf.int = TRUE)
+coefs
+write_csv(coefs, "output/reg05_coef.csv")
+fitstat &lt;- glance(fit_full) %&gt;% select(r.squared, adj.r.squared, sigma, statistic, df, df.residual, p.value)
+fitstat
+write_csv(fitstat, "output/reg05_fit.csv")
+
+# 교호작용: 부모 키의 기울기가 딸과 아들에서 같은가
+fit_int &lt;- lm(height ~ (father + mother) * sex, data = kids)
+inter &lt;- tidy(anova(fit_full, fit_int))
+inter
+write_csv(inter, "output/reg05_interaction.csv")
+
+# 기준 범주를 아들로 바꾸면: 성별 계수는 부호만 바뀌고 R² 는 그대로다
+kids_ref &lt;- kids %&gt;% mutate(sex = relevel(sex, ref = "아들"))
+fit_ref  &lt;- lm(height ~ father + mother + sex, data = kids_ref)
+tidy(fit_ref) %&gt;% filter(str_starts(term, "sex"))
+glance(fit_ref) %&gt;% select(r.squared, adj.r.squared)
+
+# 그림 5: 성별마다 아버지 키와 자녀 키의 직선
+ggplot(kids, aes(father, height, colour = sex)) +
+  geom_jitter(width = 0.6, height = 0, alpha = 0.35) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE) +
+  scale_colour_manual(values = c(딸 = "#e2662a", 아들 = "#2f6fed")) +
+  labs(x = "아버지 키 (cm)", y = "자녀 키 (cm)", colour = "성별", title = "성별에 따른 아버지 키와 자녀 키") +
+  theme_minimal(base_family = "notosanskr")
+ggsave("output/reg05_lines.png", width = 6, height = 4.5)</pre></div>
+    <div class="cb"><span class="lang">출력 · reg05_dummy.R</span><pre># A tibble: 2 × 4
+  sex       n        M       SD
+  &lt;fct&gt; &lt;int&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1 딸      433 162.8398 6.020612
+2 아들    465 175.8412 6.684249
+# A tibble: 2 × 5
+  term         estimate std.error statistic       p.value
+  &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;
+1 (Intercept) 162.8398  0.3062627 531.6997  0            
+2 sex아들      13.00139 0.4256041  30.54807 5.175573e-141
+# A tibble: 1 × 4
+   estimate statistic parameter       p.value
+      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;
+1 -13.00139 -30.54807       896 5.175573e-141
+# A tibble: 4 × 7
+  term          estimate  std.error statistic       p.value   conf.low  conf.high
+  &lt;chr&gt;            &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+1 (Intercept) 38.97569   6.977281    5.586085 3.082284e-  8 25.28193   52.66945  
+2 father       0.4059780 0.02920696 13.90004  6.525648e- 40  0.3486558  0.4633002
+3 mother       0.3214951 0.03128178 10.27739  1.701771e- 23  0.2601008  0.3828894
+4 sex아들     13.27392   0.3657801  36.28933  5.786616e-178 12.55603   13.99180  
+# A tibble: 1 × 7
+  r.squared adj.r.squared    sigma statistic    df df.residual       p.value
+      &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;       &lt;int&gt;         &lt;dbl&gt;
+1 0.6396752     0.6384661 5.471988  529.0317     3         894 1.328888e-197
+# A tibble: 2 × 7
+  term                             df.residual      rss    df     sumsq  statistic    p.value
+  &lt;chr&gt;                                  &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+1 height ~ father + mother + sex           894 26768.73    NA NA        NA         NA        
+2 height ~ (father + mother) * sex         892 26762.11     2  6.624093  0.1103928  0.8954945
+# A tibble: 1 × 5
+  term   estimate std.error statistic       p.value
+  &lt;chr&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;
+1 sex딸 -13.27392 0.3657801 -36.28933 5.786616e-178
+# A tibble: 1 × 2
+  r.squared adj.r.squared
+      &lt;dbl&gt;         &lt;dbl&gt;
+1 0.6396752     0.6384661</pre></div>
+    <p class="note">본문으로 돌아가기: <a href="#p05">05 프롬프트로 따라 하기</a></p>
+  </details>
+
+  <details class="fold" id="code-06">
+    <summary>06 로지스틱 회귀 · scripts/reg06_logistic.R</summary>
+    <div class="cb r"><span class="lang">R · scripts/reg06_logistic.R</span><pre># 06 분석: 키로 아들일 확률을 설명하는 로지스틱 회귀
+library(tidyverse)
+options(pillar.sigfig = 7, width = 150)
+library(broom)
+library(showtext)
+font_add_google("Noto Sans KR", "notosanskr")
+showtext_auto()
+showtext_opts(dpi = 300)
+
+kids &lt;- read_rds("dataset/working/galton_cm.rds") %&gt;%   # 01절이 정리한 자료
+  mutate(son = as.integer(sex == "아들")) %&gt;%           # 반응: 아들이면 1, 딸이면 0
+  select(Family, son, height, father, mother)
+
+# 키 3cm 구간마다 아들의 비율: 로지스틱 곡선이 지나야 할 자리
+bins &lt;- kids %&gt;%
+  mutate(구간 = cut(height, breaks = seq(141, 204, by = 3), right = FALSE)) %&gt;%
+  group_by(구간) %&gt;%
+  summarise(n = n(), 아들 = sum(son), 비율 = mean(son))
+write_csv(bins, "output/reg06_bins.csv")
+
+fit1 &lt;- glm(son ~ height, family = binomial, data = kids)
+
+# 표 6-1: 계수(로그 오즈)와 오즈비, 오즈비의 95% 신뢰구간(프로파일 가능도)
+or1 &lt;- tidy(fit1, conf.int = TRUE, exponentiate = TRUE) %&gt;%
+  rename(odds_ratio = estimate) %&gt;%
+  mutate(log_odds = coef(fit1))
+or1
+write_csv(or1, "output/reg06_or.csv")
+
+# 키에 따른 아들일 확률
+probs &lt;- tibble(height = c(160, 165, 170, 175, 180)) %&gt;%
+  mutate(p = predict(fit1, newdata = ., type = "response"))
+probs
+write_csv(probs, "output/reg06_probs.csv")
+
+# 확률 0.5로 가른 결과
+class_tab &lt;- kids %&gt;%
+  mutate(예측 = if_else(fitted(fit1) &gt; 0.5, "아들", "딸"),
+         실제 = if_else(son == 1, "아들", "딸")) %&gt;%
+  count(실제, 예측)
+class_tab
+write_csv(class_tab, "output/reg06_class.csv")
+
+# 부모 키를 더한 모형과 가능도비 검정
+fit2 &lt;- glm(son ~ height + father + mother, family = binomial, data = kids)
+or2 &lt;- tidy(fit2, conf.int = TRUE, exponentiate = TRUE)
+or2
+write_csv(or2, "output/reg06_or2.csv")
+lr &lt;- tidy(anova(fit1, fit2, test = "Chisq"))
+lr
+write_csv(lr, "output/reg06_lrtest.csv")
+
+# 표 6-0: 모형 전체의 검정과 설명력 (선형회귀의 F 검정과 R² 자리)
+# 가능도비 χ² = 설명변수가 없는 모형과의 이탈도 차이, McFadden 의사 R² = 1 − 이탈도 / 영모형 이탈도
+model_fit &lt;- bind_rows(키만 = glance(fit1), 키와_부모 = glance(fit2), .id = "모형") %&gt;%
+  mutate(chisq = null.deviance - deviance,
+         df = df.null - df.residual,
+         p = pchisq(chisq, df, lower.tail = FALSE),
+         mcfadden_r2 = 1 - deviance / null.deviance) %&gt;%
+  select(모형, null.deviance, deviance, chisq, df, p, mcfadden_r2, AIC, nobs)
+model_fit
+write_csv(model_fit, "output/reg06_model.csv")
+
+# 그림 6: 구간별 아들 비율과 로지스틱 곡선
+ggplot(kids, aes(height, son)) +
+  geom_jitter(width = 0, height = 0.04, alpha = 0.25, colour = "#2f6fed") +
+  geom_smooth(method = "glm", method.args = list(family = binomial), formula = y ~ x,
+              se = FALSE, colour = "#0b1220") +
+  labs(x = "자녀 키 (cm)", y = "아들일 확률", title = "키에 따른 아들일 확률") +
+  theme_minimal(base_family = "notosanskr")
+ggsave("output/reg06_curve.png", width = 6, height = 4.5)</pre></div>
+    <div class="cb"><span class="lang">출력 · reg06_logistic.R</span><pre># A tibble: 2 × 8
+  term          odds_ratio  std.error statistic      p.value     conf.low    conf.high    log_odds
+  &lt;chr&gt;              &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;
+1 (Intercept) 9.755371e-24 3.402400   -15.57260 1.117617e-54 9.003664e-27 5.699093e-21 -52.98422  
+2 height      1.368494e+ 0 0.02014643  15.57154 1.136417e-54 1.317844e+ 0 1.426315e+ 0   0.3137109
+# A tibble: 5 × 2
+  height          p
+   &lt;dbl&gt;      &lt;dbl&gt;
+1    160 0.05784117
+2    165 0.2275990 
+3    170 0.5858017 
+4    175 0.8716012 
+5    180 0.9702217 
+# A tibble: 4 × 3
+  실제  예측      n
+  &lt;chr&gt; &lt;chr&gt; &lt;int&gt;
+1 딸    딸      361
+2 딸    아들     72
+3 아들  딸       68
+4 아들  아들    397
+# A tibble: 4 × 7
+  term           estimate  std.error statistic      p.value     conf.low    conf.high
+  &lt;chr&gt;             &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;
+1 (Intercept) 2.075698e-8 4.628393   -3.822144 1.322965e- 4 2.059552e-12 0.0001608497
+2 height      1.544683e+0 0.02914159 14.92091  2.409733e-50 1.463489e+ 0 1.641015    
+3 father      8.334854e-1 0.02169728 -8.394558 4.676487e-17 7.975841e- 1 0.8685137   
+4 mother      8.643980e-1 0.02165769 -6.728415 1.715210e-11 8.274367e- 1 0.9009178   
+# A tibble: 2 × 6
+  term                           df.residual residual.deviance    df deviance       p.value
+  &lt;chr&gt;                                &lt;dbl&gt;             &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;         &lt;dbl&gt;
+1 son ~ height                           896          626.2235    NA  NA      NA           
+2 son ~ height + father + mother         894          480.5053     2 145.7182  2.278715e-32
+# A tibble: 2 × 9
+  모형      null.deviance deviance    chisq    df             p mcfadden_r2      AIC  nobs
+  &lt;chr&gt;             &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;         &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;
+1 키만           1243.752 626.2235 617.5283     1 2.578368e-136   0.4965045 630.2235   898
+2 키와_부모      1243.752 480.5053 763.2465     3 4.045425e-165   0.6136647 488.5053   898</pre></div>
+    <p class="note">본문으로 돌아가기: <a href="#p06">06 프롬프트로 따라 하기</a></p>
+  </details>
+
+  <details class="fold" id="code-07">
+    <summary>07 공분산분석 · scripts/reg07_prepare.R, scripts/reg07_ancova.R</summary>
+    <div class="cb r"><span class="lang">R · scripts/reg07_prepare.R</span><pre># 07 데이터 처리: Beat the Blues 임상시험 자료를 받아 분석용으로 정리한다
+library(tidyverse)
+options(pillar.sigfig = 7, width = 150)
+
+data("BtheB", package = "HSAUR3")
+write_csv(BtheB, "dataset/raw/btheb.csv")   # 패키지의 원자료를 사본으로 남긴다
+
+bt_raw &lt;- read_csv("dataset/raw/btheb.csv", show_col_types = FALSE)
+bt_raw %&gt;% summarise(n = n(), na_bdi_2m = sum(is.na(bdi.2m)))
+
+bt &lt;- bt_raw %&gt;%
+  filter(!is.na(bdi.2m)) %&gt;%                               # 2개월 점수가 있는 사람만
+  mutate(treatment = factor(treatment, levels = c("TAU", "BtheB")),
+         drug      = factor(drug, levels = c("No", "Yes")))
+write_rds(bt, "dataset/working/btheb_97.rds")
+
+desc &lt;- bt %&gt;%
+  group_by(treatment) %&gt;%
+  summarise(n = n(), pre_M = mean(bdi.pre), pre_SD = sd(bdi.pre),
+            post_M = mean(bdi.2m), post_SD = sd(bdi.2m), drug_yes = mean(drug == "Yes"))
+desc
+write_csv(desc, "output/reg07_desc.csv")</pre></div>
+    <div class="cb"><span class="lang">출력 · reg07_prepare.R</span><pre># A tibble: 1 × 2
+      n na_bdi_2m
+  &lt;int&gt;     &lt;int&gt;
+1   100         3
+# A tibble: 2 × 7
+  treatment     n    pre_M    pre_SD   post_M  post_SD  drug_yes
+  &lt;fct&gt;     &lt;int&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 TAU          45 23.86667  9.645065 19.46667 11.07536 0.2666667
+2 BtheB        52 22.53846 11.74310  14.71154 10.12343 0.5769231</pre></div>
+    <div class="cb r"><span class="lang">R · scripts/reg07_ancova.R</span><pre># 07 분석: 평균 비교, 공분산분석 두 가지를 회귀로 하고 보정 평균을 구한다
+library(tidyverse)
+options(pillar.sigfig = 7, width = 150)
+library(broom)
+
+bt &lt;- read_rds("dataset/working/btheb_97.rds")
+
+m0 &lt;- lm(bdi.2m ~ treatment, data = bt)                    # 평균만 비교
+m1 &lt;- lm(bdi.2m ~ bdi.pre + treatment, data = bt)          # ANCOVA 1
+m2 &lt;- lm(bdi.2m ~ bdi.pre + drug + treatment, data = bt)   # ANCOVA 2
+c1 &lt;- lm(bdi.2m ~ bdi.pre, data = bt)                      # 공변량만
+c2 &lt;- lm(bdi.2m ~ bdi.pre + drug, data = bt)
+
+# 표 7-1: 집단 더미의 계수(BtheB − TAU)와 모형 비교의 F
+group_eff &lt;- bind_rows(평균비교 = tidy(m0, conf.int = TRUE), ANCOVA1 = tidy(m1, conf.int = TRUE),
+                       ANCOVA2 = tidy(m2, conf.int = TRUE), .id = "분석") %&gt;%
+  filter(term == "treatmentBtheB") %&gt;%
+  select(분석, estimate, std.error, conf.low, conf.high, t = statistic, p.value)
+f_tests &lt;- bind_rows(ANCOVA1 = tidy(anova(c1, m1)), ANCOVA2 = tidy(anova(c2, m2)), .id = "분석") %&gt;%
+  filter(!is.na(statistic)) %&gt;%
+  select(분석, F = statistic, df1 = df, df2 = df.residual, p_F = p.value)
+table7 &lt;- group_eff %&gt;% left_join(f_tests, by = "분석")
+table7
+write_csv(table7, "output/reg07_group.csv")
+
+# 표 7-0: 모형 전체의 검정과 설명력
+models &lt;- bind_rows(평균비교 = glance(m0), ANCOVA1 = glance(m1), ANCOVA2 = glance(m2), .id = "분석") %&gt;%
+  select(분석, r.squared, adj.r.squared, sigma, F = statistic, df1 = df, df2 = df.residual, p = p.value)
+models
+write_csv(models, "output/reg07_models.csv")
+
+# 보정 평균: 치료 전 BDI를 전체 평균에 맞춘 예측값 (ANCOVA 2는 복용 여부 두 수준을 고르게 평균)
+pre_mean &lt;- mean(bt$bdi.pre)
+adj &lt;- expand_grid(bdi.pre = pre_mean,
+                   drug = factor(c("No", "Yes"), levels = c("No", "Yes")),
+                   treatment = factor(c("TAU", "BtheB"), levels = c("TAU", "BtheB"))) %&gt;%
+  mutate(ANCOVA1 = predict(m1, newdata = .), ANCOVA2 = predict(m2, newdata = .)) %&gt;%
+  group_by(treatment) %&gt;%
+  summarise(ANCOVA1 = mean(ANCOVA1), ANCOVA2 = mean(ANCOVA2))
+adj
+write_csv(adj, "output/reg07_adjmeans.csv")
+
+# 기울기 동질성: 치료 전 BDI × 집단의 교호작용
+slope &lt;- tidy(anova(m1, lm(bdi.2m ~ bdi.pre * treatment, data = bt)))
+slope
+write_csv(slope, "output/reg07_slope.csv")</pre></div>
+    <div class="cb"><span class="lang">출력 · reg07_ancova.R</span><pre># A tibble: 3 × 11
+  분석      estimate std.error  conf.low  conf.high         t    p.value         F   df1   df2         p_F
+  &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;
+1 평균비교 -4.755128  2.153067 -9.029507 -0.4807495 -2.208537 0.02961192 NA           NA    NA NA         
+2 ANCOVA1  -3.954361  1.706660 -7.342975 -0.5657466 -2.317017 0.02267424  5.368567     1    94  0.02267424
+3 ANCOVA2  -2.982594  1.789257 -6.535703  0.5705144 -1.666946 0.09888953  2.778710     1    93  0.09888953
+# A tibble: 3 × 8
+  분석      r.squared adj.r.squared     sigma         F   df1   df2            p
+  &lt;chr&gt;         &lt;dbl&gt;         &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;        &lt;dbl&gt;
+1 평균비교 0.04883611    0.03882386 10.57498   4.877635     1    95 2.961192e- 2
+2 ANCOVA1  0.4109113     0.3983775   8.366430 32.78425      2    94 1.579399e-11
+3 ANCOVA2  0.4278849     0.4094295   8.289226 23.18490      3    93 2.718266e-11
+# A tibble: 2 × 3
+  treatment  ANCOVA1  ANCOVA2
+  &lt;fct&gt;        &lt;dbl&gt;    &lt;dbl&gt;
+1 TAU       19.03739 18.31377
+2 BtheB     15.08303 15.33117
+# A tibble: 2 × 7
+  term                         df.residual      rss    df    sumsq  statistic    p.value
+  &lt;chr&gt;                              &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+1 bdi.2m ~ bdi.pre + treatment          94 6579.732    NA NA       NA         NA        
+2 bdi.2m ~ bdi.pre * treatment          93 6513.157     1 66.57479  0.9506075  0.3320940</pre></div>
+    <p class="note">본문으로 돌아가기: <a href="#p07">07 프롬프트로 따라 하기</a></p>
+  </details>
+
+  <details class="fold" id="code-08">
+    <summary>08 위계적 회귀 · scripts/reg08_hierarchical.R</summary>
+    <div class="cb r"><span class="lang">R · scripts/reg08_hierarchical.R</span><pre># 08 분석: 블록을 차례로 넣으며 R² 의 증가와 그 F 검정을 구한다
+library(tidyverse)
+options(pillar.sigfig = 7, width = 150)
+library(broom)
+
+kids &lt;- read_rds("dataset/working/galton_cm.rds") %&gt;%   # 01절이 정리한 자료
+  mutate(son = as.integer(sex == "아들")) %&gt;%
+  select(Family, sex, son, father, mother, Kids, height)
+
+# 블록 사이 설명변수의 상관: 높을수록 넣는 순서가 몫을 크게 바꾼다
+pred_cor &lt;- cor(select(kids, son, father, mother, Kids)) %&gt;% as_tibble(rownames = "변수")
+pred_cor
+write_csv(pred_cor, "output/reg08_predcor.csv")
+
+step1 &lt;- lm(height ~ sex, data = kids)                             # 1블록: 성별
+step2 &lt;- lm(height ~ sex + father + mother, data = kids)           # 2블록: + 부모 키
+step3 &lt;- lm(height ~ sex + father + mother + Kids, data = kids)    # 3블록: + 자녀 수
+
+# 표 8-1: 단계별 R², 수정 R², ΔR², F 변화(바로 앞 단계와 비교), 모형 전체의 F 검정
+change &lt;- bind_rows(tibble(df = NA, df.residual = NA, statistic = NA, p.value = NA),
+                    tidy(anova(step1, step2))[2, ], tidy(anova(step2, step3))[2, ])
+steps &lt;- tibble(단계 = 1:3, 블록 = c("성별", "부모 키", "자녀 수")) %&gt;%
+  mutate(r2      = map_dbl(list(step1, step2, step3), ~ glance(.x)$r.squared),
+         adj_r2  = map_dbl(list(step1, step2, step3), ~ glance(.x)$adj.r.squared),
+         delta_r2 = r2 - lag(r2, default = 0),
+         F_change = change$statistic, df1 = change$df, df2 = change$df.residual, p_change = change$p.value,
+         model_F   = map_dbl(list(step1, step2, step3), ~ glance(.x)$statistic),
+         model_df1 = map_dbl(list(step1, step2, step3), ~ glance(.x)$df),
+         model_df2 = map_dbl(list(step1, step2, step3), ~ glance(.x)$df.residual),
+         model_p   = map_dbl(list(step1, step2, step3), ~ glance(.x)$p.value))
+steps
+write_csv(steps, "output/reg08_steps.csv")
+
+# 표 8-2: 마지막 모형의 계수
+coefs &lt;- tidy(step3, conf.int = TRUE)
+coefs
+write_csv(coefs, "output/reg08_coef.csv")</pre></div>
+    <div class="cb"><span class="lang">출력 · reg08_hierarchical.R</span><pre># A tibble: 4 × 5
+  변수           son      father      mother        Kids
+  &lt;chr&gt;        &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;
+1 son     1          -0.02714839 -0.03561748 -0.06325680
+2 father -0.02714839  1           0.07366461 -0.1600229 
+3 mother -0.03561748  0.07366461  1          -0.02002964
+4 Kids   -0.06325680 -0.1600229  -0.02002964  1         
+# A tibble: 3 × 13
+   단계 블록           r2    adj_r2    delta_r2   F_change   df1   df2      p_change  model_F model_df1 model_df2       model_p
+  &lt;int&gt; &lt;chr&gt;       &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;
+1     1 성별    0.5101643 0.5096176 0.5101643    NA           NA    NA NA            933.1846         1       896 5.175573e-141
+2     2 부모 키 0.6396752 0.6384661 0.1295110   160.6645       2   894  2.453024e-60 529.0317         3       894 1.328888e-197
+3     3 자녀 수 0.6407210 0.6391117 0.001045727   2.599190     1   893  1.072717e- 1 398.1333         4       893 9.085207e-197
+# A tibble: 5 × 7
+  term          estimate  std.error statistic       p.value   conf.low   conf.high
+  &lt;chr&gt;            &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;
+1 (Intercept) 41.11679   7.096427    5.794013 9.521525e-  9 27.18917   55.04441   
+2 sex아들     13.23326   0.3663222  36.12466  7.583858e-177 12.51431   13.95222   
+3 father       0.3983053 0.02956642 13.47154  8.607806e- 38  0.3402775  0.4563330 
+4 mother       0.3209553 0.03125564 10.26872  1.849975e- 23  0.2596122  0.3822983 
+5 Kids        -0.1112986 0.06903524 -1.612200 1.072717e-  1 -0.2467889  0.02419159</pre></div>
+    <p class="note">본문으로 돌아가기: <a href="#p08">08 프롬프트로 따라 하기</a></p>
+  </details>
+</section>
+
+<!-- ======================= 10 ======================= -->
+<section class="panel" id="wrap">
+  <div class="sec-head"><span class="sec-num">10</span><h2>정리</h2></div>
+  <div class="recap">
+    <p><strong>상관계수</strong> — 두 변수가 평균에서 같은 방향으로 벗어나는 정도. 단위가 없고 대칭이며 직선 관계만 잰다. 아버지–아들 \(r = 0.391\).</p>
+    <p><strong>단순회귀</strong> — \(x\)가 정해졌을 때 \(Y\)의 평균을 잇는 직선. 기울기는 \(r \cdot s_y/s_x\)이고 방향이 있다. \(R^2 = r^2\).</p>
+    <p><strong>잔차 분석</strong> — 선형성, 독립성, 정규성, 등분산성을 잔차로 점검한다. 형제가 섞인 자료처럼 묶음이 있으면 독립성이 깨지고 표준오차가 작게 나온다.</p>
+    <p><strong>다중회귀</strong> — 다른 설명변수를 고정했을 때의 기울기(편회귀계수). 함께 움직이는 변수의 몫을 떼어 낸다. 수정 \(R^2\)와 다중공선성을 함께 본다.</p>
+    <p><strong>더미변수</strong> — 범주 \(k\)개를 0/1 변수 \(k-1\)개로. 계수는 기준 범주와의 평균 차이이고, 연속변수와 함께 넣으면 평행한 직선, 곱을 넣으면 기울기도 다른 직선이 된다.</p>
+    <p><strong>로지스틱 회귀</strong> — 반응이 두 범주일 때 로그 오즈에 직선을 맞춘다. 계수는 \(e^{b}\)로 바꿔 오즈비로 읽는다.</p>
+    <p><strong>공분산분석</strong> — 집단 더미 + 공변량의 회귀. 집단의 계수가 보정 평균의 차이이고, 기울기 동질성은 교호작용 검정이다.</p>
+    <p><strong>위계적 회귀</strong> — 미리 정한 순서로 블록을 넣으며 \(\Delta R^2\)를 검정한다. 몫은 순서에 따라 달라진다.</p>
+  </div>
+  <div class="stack" style="margin-top:14px">
+    <p>여덟 가지가 모두 한 문장으로 모인다. <strong>반응 = 설명변수의 직선 결합 + 흔들림.</strong> 설명변수 자리에 무엇을(연속변수, 더미, 그 곱) 넣고, 반응을 어떻게 바꾸고(그대로, 로그 오즈), 어떤 모형끼리 비교하느냐가 달라질 뿐이다.</p>
+    <ul>
+      <li><a href="../data-science/normal-error-regression-intro.html">측정의 흔들림에서 회귀직선까지</a> — 회귀모형의 "흔들림"이 왜 정규분포인지.</li>
+      <li><a href="least-squares-residuals.html">회귀분석 조금 깊이 보기 - 최소제곱과 잔차</a> — 왜 하필 제곱인가, \(R^2\)의 정체, 잔차 그림의 네 가지 모양.</li>
+      <li><a href="categorical-test-with-r.html#homogeneity">범주형 자료의 가설검정</a> — 사전 동질성 검정과 공분산분석을 연구 보고의 흐름 속에서.</li>
+      <li><a href="anova-with-r.html">분산분석: 일원배치에서 혼합 설계까지</a> — 집단을 나타내는 더미만 넣은 회귀가 분산분석이다.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <p>자료: Galton, F. (1886), <em style="background:none;padding:0">Regression towards mediocrity in hereditary stature</em>, Journal of the Anthropological Institute 15 (원자료 <code>Galton.tsv</code>, randomservices.org, 자녀 898명). Proudfoot, J. 외 (2003), Psychological Medicine 33(2), 217–227의 Beat the Blues 임상시험 (R 패키지 HSAUR3의 <code>BtheB</code>, Everitt &amp; Hothorn, 2014, 12장). 위젯 그림의 점은 모두 이 실측 자료에서 나왔다. 01절의 상관계수 예시 그림만 예외로, 위키미디어 공용 「Correlation examples2.svg」(DenisBoigelot, CC0 1.0)의 설명용 그림이다.</p>
+  <p>참고: James, G. 외 (2013), <em style="background:none;padding:0">An Introduction to Statistical Learning</em> 3장(선형회귀)과 4.3절(로지스틱 회귀). Navarro, D. J. (2019), <em style="background:none;padding:0">Learning Statistics with R</em> 15장(선형회귀)과 16장(요인 분산분석을 선형모형으로 읽는 절). 본문의 수치는 R 4.6으로 다시 계산해 같음을 확인했다(저장소의 <code>src/R/regression_check.R</code>). 결과 화면과 부록의 출력은 부록의 R 코드 11편을 <code>regression</code> 실습 폴더(<code>skeleton/regression</code>)에서 실제로 실행한 그대로이고, 보고서 예시는 그 출력의 숫자로 썼다. 그림 안의 계수와 \(R^2\)는 쪽의 스크립트가 같은 자료로 직접 계산한다.</p>
+</footer>
+</main>
+
+<script src="../assets/data/regression-galton-btheb.js"></script>
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg";
+var C={son:"#2f6fed",dau:"#e2662a",ink:"#0b1220",muted:"#45506b",grid:"#e6ebf5",dim:"#c3cbdc",pos:"#d1264f",neg:"#0b8a8f",band:"rgba(47,111,237,.10)"};
+
+/* ---------------- 자료 ---------------- */
+var KIDS=window.GALTON_ALL.rows.map(function(r){return {fam:r[0],f:r[1],m:r[2],son:r[3],h:r[4],k:r[5]};});
+var SONS=KIDS.filter(function(d){return d.son===1;});
+var BT=window.BTHEB.rows.map(function(r){return {g:r[0],drug:r[1],pre:r[2],post:r[3]};});
+
+/* ---------------- 공통 도우미 ---------------- */
+function el(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function txt(parent,x,y,s,attrs){var a={x:x,y:y,"font-size":11.5};for(var k in attrs)a[k]=attrs[k];var e=el("text",a,parent);e.textContent=s;return e;}
+function clear(n){while(n.firstChild)n.removeChild(n.firstChild);}
+function lin(d0,d1,r0,r1){return function(v){return r0+(v-d0)/(d1-d0)*(r1-r0);};}
+function mean(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i];return s/a.length;}
+function sd(a){var m=mean(a),s=0;for(var i=0;i<a.length;i++)s+=(a[i]-m)*(a[i]-m);return Math.sqrt(s/(a.length-1));}
+function cor(x,y){var mx=mean(x),my=mean(y),sxy=0,sxx=0,syy=0;for(var i=0;i<x.length;i++){sxy+=(x[i]-mx)*(y[i]-my);sxx+=(x[i]-mx)*(x[i]-mx);syy+=(y[i]-my)*(y[i]-my);}return sxy/Math.sqrt(sxx*syy);}
+function fmt(v,d){var s=Math.abs(v).toFixed(d);return (v<0&&+s!==0?"−":"")+s;}
+function pv(p){return p<.001?"< .001":p.toFixed(3).replace(/^0/,"");}
+/* 겹친 점을 가로로 흩뜨리는 값: 난수가 아니라 순번으로 정한 고정된 간격 */
+function jit(i,w){return (((i*0.6180339887)%1)-0.5)*2*w;}
+function frame(svg,o){svg.setAttribute("viewBox","0 0 "+o.W+" "+o.H);return {o:o,X:lin(o.x[0],o.x[1],o.l,o.W-o.r),Y:lin(o.y[0],o.y[1],o.H-o.b,o.t)};}
+function axes(g,P,a){
+  var o=P.o,x1=o.W-o.r,yb=o.H-o.b;
+  (a.yt||[]).forEach(function(v){var y=P.Y(v);el("line",{x1:o.l,x2:x1,y1:y,y2:y,stroke:C.grid},g);txt(g,o.l-8,y+4,a.yf?a.yf(v):String(v),{"text-anchor":"end","font-size":11});});
+  (a.xt||[]).forEach(function(v){var x=P.X(v);el("line",{x1:x,x2:x,y1:o.t,y2:yb,stroke:C.grid},g);txt(g,x,yb+16,a.xf?a.xf(v):String(v),{"text-anchor":"middle","font-size":11});});
+  el("line",{x1:o.l,x2:x1,y1:yb,y2:yb,stroke:C.muted},g);
+  if(a.xl)txt(g,(o.l+x1)/2,o.H-6,a.xl,{"text-anchor":"middle","font-size":12});
+  if(a.yl){var cy=(o.t+yb)/2;txt(g,14,cy,a.yl,{"text-anchor":"middle","font-size":12,transform:"rotate(-90 14 "+cy+")"});}
+}
+function range(a,b,s){var r=[];for(var v=a;v<=b+1e-9;v+=s)r.push(Math.round(v*1000)/1000);return r;}
+function clip(svg,P,id){var o=P.o,d=el("defs",{},svg),c=el("clipPath",{id:id},d);el("rect",{x:o.l,y:o.t,width:o.W-o.l-o.r,height:o.H-o.t-o.b},c);return "url(#"+id+")";}
+function seg(g,P,x0,x1,f,attrs){var a={x1:P.X(x0),x2:P.X(x1),y1:P.Y(f(x0)),y2:P.Y(f(x1))};for(var k in attrs)a[k]=attrs[k];return el("line",a,g);}
+function stats(id,items){
+  var dl=document.getElementById(id);dl.innerHTML="";
+  items.forEach(function(it){
+    var d=document.createElement("div");d.className="stat"+(it.hl?" hl":"");
+    var dt=document.createElement("dt");dt.textContent=it.k;
+    var dd=document.createElement("dd");dd.textContent=it.v;
+    if(it.u){var sm=document.createElement("small");sm.textContent=it.u;dd.appendChild(sm);}
+    d.appendChild(dt);d.appendChild(dd);dl.appendChild(d);
+  });
+}
+function segButtons(attr,fn){
+  var btns=Array.prototype.slice.call(document.querySelectorAll("["+attr+"]"));
+  btns.forEach(function(b){b.addEventListener("click",function(){btns.forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});fn(b.getAttribute(attr));});});
+}
+function toggle(btn,fn){btn.addEventListener("click",function(){var v=btn.getAttribute("aria-pressed")!=="true";btn.setAttribute("aria-pressed",v?"true":"false");fn(v);});}
+
+/* ---------------- 계산 ---------------- */
+/* 연립방정식 A b = y (가우스 소거, 부분 피벗) */
+function solve(A,y){
+  var n=y.length,M=A.map(function(r,i){return r.concat([y[i]]);}),i,j,k;
+  for(i=0;i<n;i++){
+    var p=i;for(k=i+1;k<n;k++)if(Math.abs(M[k][i])>Math.abs(M[p][i]))p=k;
+    var t=M[i];M[i]=M[p];M[p]=t;
+    for(k=i+1;k<n;k++){var f=M[k][i]/M[i][i];for(j=i;j<=n;j++)M[k][j]-=f*M[i][j];}
+  }
+  var b=new Array(n);
+  for(i=n-1;i>=0;i--){var s=M[i][n];for(j=i+1;j<n;j++)s-=M[i][j]*b[j];b[i]=s/M[i][i];}
+  return b;
+}
+/* 최소제곱: X 의 각 행은 [1, x1, x2, ...] */
+function ols(X,y){
+  var p=X[0].length,n=y.length,A=[],v=[],i,j,k;
+  for(i=0;i<p;i++){A.push(new Array(p).fill(0));v.push(0);}
+  for(k=0;k<n;k++){for(i=0;i<p;i++){v[i]+=X[k][i]*y[k];for(j=0;j<p;j++)A[i][j]+=X[k][i]*X[k][j];}}
+  var b=solve(A,v),my=mean(y),rss=0,tss=0,fit=[],res=[];
+  for(k=0;k<n;k++){var f=0;for(i=0;i<p;i++)f+=b[i]*X[k][i];fit.push(f);res.push(y[k]-f);rss+=(y[k]-f)*(y[k]-f);tss+=(y[k]-my)*(y[k]-my);}
+  /* (X'X)^-1 의 대각: 표준오차와 지렛값 계산용 */
+  var inv=[];for(i=0;i<p;i++){var e=new Array(p).fill(0);e[i]=1;inv.push(solve(A,e));}
+  return {b:b,fit:fit,res:res,rss:rss,tss:tss,r2:1-rss/tss,n:n,p:p,sigma:Math.sqrt(rss/(n-p)),inv:inv};
+}
+/* 로지스틱 회귀: 뉴턴–랩슨 */
+function logit(X,y){
+  var p=X[0].length,n=y.length,b=new Array(p).fill(0),it,i,j,k;
+  for(it=0;it<30;it++){
+    var A=[],g=new Array(p).fill(0);for(i=0;i<p;i++)A.push(new Array(p).fill(0));
+    for(k=0;k<n;k++){var eta=0;for(i=0;i<p;i++)eta+=b[i]*X[k][i];var mu=1/(1+Math.exp(-eta)),w=mu*(1-mu);
+      for(i=0;i<p;i++){g[i]+=X[k][i]*(y[k]-mu);for(j=0;j<p;j++)A[i][j]+=w*X[k][i]*X[k][j];}}
+    var d=solve(A,g),mx=0;for(i=0;i<p;i++){b[i]+=d[i];mx=Math.max(mx,Math.abs(d[i]));}
+    if(mx<1e-10)break;
+  }
+  return b;
+}
+function sigm(z){return 1/(1+Math.exp(-z));}
+/* 표준정규분포의 분위수 (Acklam 근사) */
+function qnorm(p){
+  var a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],
+      b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
+      c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
+      d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416],q,r;
+  if(p<0.02425){q=Math.sqrt(-2*Math.log(p));return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  if(p>1-0.02425){q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  q=p-0.5;r=q*q;return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+}
+/* F 분포의 윗꼬리 확률: 정칙화 불완전 베타함수 (Numerical Recipes 의 연분수) */
+function lgamma(x){var c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5],y=x,t=x+5.5,s=1.000000000190015;t-=(x+0.5)*Math.log(t);for(var j=0;j<6;j++)s+=c[j]/++y;return -t+Math.log(2.5066282746310005*s/x);}
+function betacf(a,b,x){var qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap,m,m2,aa,del,h;if(Math.abs(d)<1e-30)d=1e-30;d=1/d;h=d;
+  for(m=1;m<=300;m++){m2=2*m;aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;del=d*c;h*=del;if(Math.abs(del-1)<3e-12)break;}
+  return h;}
+function ibeta(x,a,b){if(x<=0)return 0;if(x>=1)return 1;var bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));
+  return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+function pF(F,d1,d2){return ibeta(d2/(d2+d1*F),d2/2,d1/2);}
+
+/* ================= 01 상관 ================= */
+(function(){
+  var svg=document.getElementById("c-svg"),pair="fs",sign=false;
+  var V={f:{lab:"아버지 키 (cm)",get:function(d){return d.f;},dom:[155,203],t:range(160,200,10)},
+         m:{lab:"어머니 키 (cm)",get:function(d){return d.m;},dom:[145,183],t:range(150,180,10)},
+         s:{lab:"아들 키 (cm)",get:function(d){return d.h;},dom:[148,205],t:range(150,200,10)}};
+  var P2={fs:["f","s"],ms:["m","s"],fm:["f","m"]};
+  function draw(){
+    clear(svg);
+    var vx=V[P2[pair][0]],vy=V[P2[pair][1]];
+    var xs=SONS.map(vx.get),ys=SONS.map(vy.get),mx=mean(xs),my=mean(ys),sx=sd(xs),sy=sd(ys);
+    var P=frame(svg,{W:640,H:400,l:52,r:16,t:14,b:42,x:vx.dom,y:vy.dom}),g=el("g",{},svg);
+    axes(g,P,{xt:vx.t,yt:vy.t,xl:vx.lab,yl:vy.lab});
+    if(sign){
+      var o=P.o;
+      el("rect",{x:P.X(mx),y:o.t,width:o.W-o.r-P.X(mx),height:P.Y(my)-o.t,fill:C.pos,"fill-opacity":.06},g);
+      el("rect",{x:o.l,y:P.Y(my),width:P.X(mx)-o.l,height:o.H-o.b-P.Y(my),fill:C.pos,"fill-opacity":.06},g);
+      el("rect",{x:o.l,y:o.t,width:P.X(mx)-o.l,height:P.Y(my)-o.t,fill:C.neg,"fill-opacity":.06},g);
+      el("rect",{x:P.X(mx),y:P.Y(my),width:o.W-o.r-P.X(mx),height:o.H-o.b-P.Y(my),fill:C.neg,"fill-opacity":.06},g);
+    }
+    var same=0,opp=0,sxy=0;
+    xs.forEach(function(x,i){
+      var pr=(x-mx)*(ys[i]-my);sxy+=pr;if(pr>0)same++;else if(pr<0)opp++;
+      var col=sign?(pr>0?C.pos:C.neg):C.son;
+      el("circle",{cx:P.X(x+jit(i,0.6)),cy:P.Y(ys[i]),r:3,fill:col,"fill-opacity":.45},g);
+    });
+    el("line",{x1:P.X(mx),x2:P.X(mx),y1:P.o.t,y2:P.o.H-P.o.b,stroke:C.ink,"stroke-dasharray":"4 4"},g);
+    el("line",{x1:P.o.l,x2:P.o.W-P.o.r,y1:P.Y(my),y2:P.Y(my),stroke:C.ink,"stroke-dasharray":"4 4"},g);
+    var r=cor(xs,ys);
+    stats("c-stats",[{k:"쌍의 수",v:String(xs.length)},{k:"공분산",v:fmt(sxy/(xs.length-1),2),u:"cm²"},
+      {k:"같은 방향 / 반대 방향",v:same+" / "+opp},{k:"상관계수 r",v:fmt(r,3),hl:true},{k:"r²",v:fmt(r*r,3)}]);
+  }
+  segButtons("data-pair",function(v){pair=v;draw();});
+  toggle(document.getElementById("c-sign"),function(v){sign=v;draw();});
+  draw();
+})();
+
+/* ================= 02 단순회귀: 두 방향의 직선 ================= */
+(function(){
+  var svg=document.getElementById("s-svg"),mode="yx",same=false;
+  var xs=SONS.map(function(d){return d.f;}),ys=SONS.map(function(d){return d.h;});
+  var a=ols(xs.map(function(x){return [1,x];}),ys).b;                 /* 아들 = a0 + a1 아버지 */
+  var c=ols(ys.map(function(y){return [1,y];}),xs).b;                 /* 아버지 = c0 + c1 아들 */
+  var mx=mean(xs),my=mean(ys),r=cor(xs,ys);
+  function draw(){
+    clear(svg);
+    var P=frame(svg,{W:640,H:400,l:52,r:16,t:14,b:42,x:[155,203],y:[148,205]}),g=el("g",{},svg),cp=clip(svg,P,"s-clip");
+    axes(g,P,{xt:range(160,200,10),yt:range(150,200,10),xl:"아버지 키 (cm)",yl:"아들 키 (cm)"});
+    xs.forEach(function(x,i){el("circle",{cx:P.X(x+jit(i,0.6)),cy:P.Y(ys[i]),r:3,fill:C.son,"fill-opacity":.3},g);});
+    var gl=el("g",{"clip-path":cp},svg);
+    if(same)seg(gl,P,150,210,function(x){return x;},{stroke:C.muted,"stroke-width":1.5,"stroke-dasharray":"6 5"});
+    if(mode!=="xy")seg(gl,P,150,210,function(x){return a[0]+a[1]*x;},{stroke:C.ink,"stroke-width":2.5});
+    if(mode!=="yx")seg(gl,P,150,210,function(x){return (x-c[0])/c[1];},{stroke:C.dau,"stroke-width":2.5});
+    el("path",{d:"M"+P.X(mx)+","+(P.Y(my)-7)+" l7,7 l-7,7 l-7,-7 Z",fill:C.ink},svg);
+    var items=[];
+    if(mode!=="xy")items.push({k:"아들 = b₀ + b₁ × 아버지",v:fmt(a[0],1)+" + "+fmt(a[1],3)+"x",hl:mode==="yx"});
+    if(mode!=="yx")items.push({k:"아버지 = c₀ + c₁ × 아들",v:fmt(c[0],1)+" + "+fmt(c[1],3)+"y",hl:mode==="xy"});
+    if(mode==="both")items.push({k:"두 기울기의 곱",v:fmt(a[1]*c[1],3)});
+    items.push({k:"r",v:fmt(r,3)},{k:"r²",v:fmt(r*r,3)});
+    stats("s-stats",items);
+  }
+  segButtons("data-line",function(v){mode=v;draw();});
+  toggle(document.getElementById("s-same"),function(v){same=v;draw();});
+  draw();
+})();
+
+/* ================= 03 잔차 분석 ================= */
+(function(){
+  var svg=document.getElementById("r-svg"),read=document.getElementById("r-read"),panel="rf";
+  var X=SONS.map(function(d){return [1,d.f];}),y=SONS.map(function(d){return d.h;}),M=ols(X,y);
+  var n=M.n,s=M.sigma;
+  /* 표준화 잔차: e / (σ √(1 − h)) */
+  var std=SONS.map(function(d,i){var x=[1,d.f],h=0;for(var a=0;a<2;a++)for(var b=0;b<2;b++)h+=x[a]*M.inv[a][b]*x[b];return M.res[i]/(s*Math.sqrt(1-h));});
+  /* 형제 쌍: 아들이 둘 이상인 가족에서 두 아들의 잔차를 짝짓는다(순서를 바꿔 두 번) */
+  var byFam={};SONS.forEach(function(d,i){(byFam[d.fam]=byFam[d.fam]||[]).push(M.res[i]);});
+  var px=[],py=[],nf=0,nk=0;
+  Object.keys(byFam).forEach(function(k){var e=byFam[k];if(e.length<2)return;nf++;nk+=e.length;
+    for(var i=0;i<e.length;i++)for(var j=0;j<e.length;j++)if(i!==j){px.push(e[i]);py.push(e[j]);}});
+  /* 적합값 칸마다 평균 (경향선 대용) */
+  function binMeans(xv,yv,edges){var out=[];for(var b=0;b<edges.length-1;b++){var s2=0,c=0;xv.forEach(function(x,i){if(x>=edges[b]&&x<edges[b+1]){s2+=yv[i];c++;}});if(c>=8)out.push([(edges[b]+edges[b+1])/2,s2/c]);}return out;}
+  function poly(g,P,pts,attrs){if(pts.length<2)return;var d=pts.map(function(p,i){return (i?"L":"M")+P.X(p[0])+","+P.Y(p[1]);}).join(" ");var a={d:d,fill:"none"};for(var k in attrs)a[k]=attrs[k];el("path",a,g);}
+  var edges=range(167,188,2);
+  var TEXT={
+    rf:"<strong>선형성과 등분산성.</strong> 잔차가 0선 위아래로 고르게 흩어지고, 주황 선(적합값 2cm 칸마다 잔차의 평균)이 0 근처에서 거의 평평하다. 휘어진 관계를 직선으로 맞췄다면 이 선이 U자나 ∩자로 휜다. 점선은 ±2σ(±12.3cm)다.",
+    qq:"<strong>정규성.</strong> 표준화 잔차를 작은 것부터 늘어놓고, 465개를 표준정규분포에서 뽑았다면 그 순서에 기대되는 값과 짝지어 찍었다. 가운데는 대각선을 잘 따르고 양 끝의 몇 점이 대각선보다 바깥에 있다. 꼬리가 정규분포보다 조금 두껍다는 뜻이다.",
+    sl:"<strong>등분산성.</strong> 표준화 잔차의 절댓값에 제곱근을 씌워 적합값에 대해 그렸다. 폭이 적합값에 따라 커지면 이 점들이 오른쪽 위로 올라간다. 주황 선이 수평에 가까워 폭이 고르다(Breusch–Pagan p = .548).",
+    sib:"<strong>독립성.</strong> 아들이 둘 이상인 가족에서 한 아들의 잔차(가로)와 같은 가족의 다른 아들의 잔차(세로)를 짝지어 찍었다. 형제의 잔차가 서로 무관하다면 점은 둥글게 흩어져야 한다. 오른쪽 위로 기운 구름은 아버지 키로 설명되지 않는 키를 형제가 함께 나눈다는 뜻이다."
+  };
+  function draw(){
+    clear(svg);read.innerHTML=TEXT[panel];
+    var g=el("g",{},svg),P;
+    if(panel==="rf"){
+      P=frame(svg,{W:640,H:380,l:52,r:16,t:14,b:42,x:[166,188],y:[-27,27]});
+      axes(g,P,{xt:range(168,188,4),yt:range(-20,20,10),xl:"적합값: 직선이 말하는 아들 키 (cm)",yl:"잔차 (cm)"});
+      el("rect",{x:P.o.l,y:P.Y(2*s),width:P.o.W-P.o.l-P.o.r,height:P.Y(-2*s)-P.Y(2*s),fill:C.band},g);
+      [2*s,-2*s].forEach(function(v){el("line",{x1:P.o.l,x2:P.o.W-P.o.r,y1:P.Y(v),y2:P.Y(v),stroke:C.son,"stroke-dasharray":"4 4","stroke-opacity":.6},g);});
+      el("line",{x1:P.o.l,x2:P.o.W-P.o.r,y1:P.Y(0),y2:P.Y(0),stroke:C.ink},g);
+      M.fit.forEach(function(f,i){el("circle",{cx:P.X(f+jit(i,0.15)),cy:P.Y(M.res[i]),r:3,fill:C.son,"fill-opacity":.4},g);});
+      poly(g,P,binMeans(M.fit,M.res,edges),{stroke:C.dau,"stroke-width":2.5});
+      var in2=M.res.filter(function(e){return Math.abs(e)<=2*s;}).length;
+      stats("r-stats",[{k:"잔차 표준오차 σ̂",v:fmt(s,2),u:"cm"},{k:"±2σ 안",v:(in2/n*100).toFixed(1)+"%"},{k:"잔차의 합",v:fmt(mean(M.res)*n,2)}]);
+    }else if(panel==="qq"){
+      var sorted=std.slice().sort(function(a,b){return a-b;}),th=sorted.map(function(v,i){return qnorm((i+0.5)/n);});
+      P=frame(svg,{W:640,H:380,l:52,r:16,t:14,b:42,x:[-3.5,3.5],y:[-4.3,4.3]});
+      axes(g,P,{xt:range(-3,3,1),yt:range(-4,4,2),xl:"표준정규분포에서 기대하는 값",yl:"표준화 잔차"});
+      seg(g,P,-3.5,3.5,function(x){return x;},{stroke:C.dau,"stroke-width":2});
+      sorted.forEach(function(v,i){el("circle",{cx:P.X(th[i]),cy:P.Y(v),r:3,fill:Math.abs(v)>3?C.pos:C.son,"fill-opacity":Math.abs(v)>3?.9:.45},g);});
+      var o3=std.filter(function(v){return Math.abs(v)>3;}).length,o2=std.filter(function(v){return Math.abs(v)>2;}).length;
+      stats("r-stats",[{k:"|표준화 잔차| > 2",v:o2+"명",u:"정규라면 약 21명"},{k:"|표준화 잔차| > 3",v:o3+"명",u:"정규라면 약 1.3명"},{k:"Shapiro–Wilk",v:"W = 0.994, p = .0499"}]);
+    }else if(panel==="sl"){
+      var sq=std.map(function(v){return Math.sqrt(Math.abs(v));});
+      P=frame(svg,{W:640,H:380,l:52,r:16,t:14,b:42,x:[166,188],y:[0,2.1]});
+      axes(g,P,{xt:range(168,188,4),yt:[0,0.5,1,1.5,2],xl:"적합값 (cm)",yl:"√|표준화 잔차|"});
+      M.fit.forEach(function(f,i){el("circle",{cx:P.X(f+jit(i,0.15)),cy:P.Y(sq[i]),r:3,fill:C.son,"fill-opacity":.4},g);});
+      poly(g,P,binMeans(M.fit,sq,edges),{stroke:C.dau,"stroke-width":2.5});
+      var lo=[],hi=[];M.fit.forEach(function(f,i){(f<mean(M.fit)?lo:hi).push(Math.abs(M.res[i]));});
+      stats("r-stats",[{k:"적합값 아래 절반의 |잔차| 평균",v:fmt(mean(lo),2),u:"cm"},{k:"위 절반",v:fmt(mean(hi),2),u:"cm"}]);
+    }else{
+      P=frame(svg,{W:640,H:380,l:52,r:16,t:14,b:42,x:[-27,27],y:[-27,27]});
+      axes(g,P,{xt:range(-20,20,10),yt:range(-20,20,10),xl:"한 아들의 잔차 (cm)",yl:"같은 가족 다른 아들의 잔차 (cm)"});
+      el("line",{x1:P.X(0),x2:P.X(0),y1:P.o.t,y2:P.o.H-P.o.b,stroke:C.muted,"stroke-dasharray":"4 4"},g);
+      el("line",{x1:P.o.l,x2:P.o.W-P.o.r,y1:P.Y(0),y2:P.Y(0),stroke:C.muted,"stroke-dasharray":"4 4"},g);
+      px.forEach(function(x,i){el("circle",{cx:P.X(x),cy:P.Y(py[i]),r:2.6,fill:C.son,"fill-opacity":.25},g);});
+      var rr=cor(px,py);
+      seg(g,P,-25,25,function(x){return rr*x;},{stroke:C.dau,"stroke-width":2.5});
+      stats("r-stats",[{k:"가족 / 아들",v:nf+" / "+nk},{k:"형제 쌍 (순서 바꿔 두 번)",v:String(px.length)},{k:"형제 잔차의 상관",v:fmt(rr,3),hl:true}]);
+    }
+  }
+  segButtons("data-panel",function(v){panel=v;draw();});
+  draw();
+})();
+
+/* ================= 03 잔차를 눈으로 보기 ================= */
+(function(){
+  var svg=document.getElementById("rv-svg"),read=document.getElementById("rv-read"),mode="three";
+  var M=ols(SONS.map(function(d){return [1,d.f];}),SONS.map(function(d){return d.h;})),a=M.b[0],b=M.b[1];
+  var line=function(x){return a+b*x;};
+  var xbar=mean(SONS.map(function(d){return d.f;}));
+  /* 표 3-1의 세 아들: 가족 번호와 아들 키로 찾는다 */
+  function find(fam,h){for(var i=0;i<SONS.length;i++)if(SONS[i].fam===fam&&Math.abs(SONS[i].h-h)<0.01)return i;return -1;}
+  var EX=[{i:find("72",200.66),lab:"72번 가족"},{i:find("109",152.40),lab:"109번 가족"},{i:find("1",185.93),lab:"1번 가족"}];
+  function col(e){return e>=0?C.pos:C.neg;}
+  function sgn(v,d){return (v>=0?"+":"−")+Math.abs(v).toFixed(d);}
+  var TEXT={
+    three:"<strong>잔차는 점에서 직선까지 세로로 잰 막대다.</strong> 같은 아버지 키에서 직선이 말한 아들 키(◇)와 실제 아들 키(●)의 차이다. <span class=\"c-pos\">빨강</span>은 실제가 직선보다 위(+), <span class=\"c-neg\">청록</span>은 아래(−)다. 72번과 109번 가족의 아버지 키는 1.3cm밖에 차이 나지 않아 직선이 말한 값이 거의 같은데(176.8, 176.2), 실제 아들 키는 48cm 넘게 벌어진다. 오른쪽 끝의 1번 가족 아들은 직선 바로 옆이라 막대가 거의 보이지 않는다.",
+    all:"<strong>465명의 잔차를 모두 막대로 그렸다.</strong> 직선 위의 빨간 막대와 아래의 청록 막대가 섞여 있고, 최소제곱 직선은 이 막대 길이의 제곱합(RSS)을 가장 작게 하는 직선이다. 그 결과 위아래 막대의 길이를 부호째 더하면 정확히 0이 된다. 그래서 잔차의 합이나 평균으로는 직선이 잘 맞았는지 알 수 없고, 진단에서는 막대들이 어떤 <em>모양</em>으로 늘어서 있는지를 본다.",
+    perp:"<strong>왜 가장 짧은 거리가 아니라 세로 거리인가.</strong> 72번 가족 아들에서 직선까지 세로로 잰 거리(실선)는 \"아들 키를 23.9cm 잘못 맞혔다\"는 뜻이 분명하다. 점에서 직선에 수직으로 내린 가장 짧은 거리(점선)는 가로 성분(아버지 키)과 세로 성분(아들 키)이 섞여 단위가 없고, 축의 눈금을 어떻게 잡느냐에 따라 길이와 방향이 달라진다. 회귀가 맞히려는 것은 아들 키 하나이므로, 같은 아버지 키에서 아들 키만으로 잰 세로 거리를 쓴다.",
+    flat:"<strong>직선을 수평으로 눕히면</strong> 막대들이 0을 기준으로 위아래로 선다. 점마다 높이가 곧 잔차다. 이것이 아래 진단 그림의 \"잔차 대 적합값\"과 같은 그림이다(단순회귀에서는 가로축이 아버지 키든 적합값이든 모양이 같다). 직선이 담을 것을 다 담았다면 이 그림에는 아무 패턴도 없어야 하고, 파란 띠(±2σ̂) 안에 약 95%가 들어야 한다."
+  };
+  function draw(){
+    clear(svg);read.innerHTML=TEXT[mode];
+    var g=el("g",{},svg),P,cp;
+    if(mode==="flat"){
+      P=frame(svg,{W:640,H:380,l:52,r:16,t:14,b:42,x:[155,203],y:[-27,27]});
+      axes(g,P,{xt:range(160,200,10),yt:range(-20,20,10),xl:"아버지 키 (cm)",yl:"잔차 = 실제 − 직선 (cm)"});
+      var s=M.sigma;
+      el("rect",{x:P.o.l,y:P.Y(2*s),width:P.o.W-P.o.l-P.o.r,height:P.Y(-2*s)-P.Y(2*s),fill:C.band},g);
+      el("line",{x1:P.o.l,x2:P.o.W-P.o.r,y1:P.Y(0),y2:P.Y(0),stroke:C.ink,"stroke-width":2},g);
+      SONS.forEach(function(d,i){var x=P.X(d.f+jit(i,0.6)),e=M.res[i];
+        el("line",{x1:x,x2:x,y1:P.Y(0),y2:P.Y(e),stroke:col(e),"stroke-opacity":.35,"stroke-width":1.2},g);
+        el("circle",{cx:x,cy:P.Y(e),r:2.4,fill:col(e),"fill-opacity":.6},g);});
+      EX.slice(0,2).forEach(function(ex){var d=SONS[ex.i],e=M.res[ex.i];
+        txt(g,P.X(d.f)+8,P.Y(e)+(e>0?4:4),ex.lab+" "+sgn(e,1),{fill:col(e),"font-weight":700});});
+      var in2=M.res.filter(function(e){return Math.abs(e)<=2*s;}).length;
+      stats("rv-stats",[{k:"잔차의 합",v:fmt(mean(M.res)*M.n,2),u:"cm"},{k:"잔차 표준오차 σ̂",v:fmt(s,2),u:"cm"},{k:"±2σ̂ 안",v:(in2/M.n*100).toFixed(1)+"%",hl:true}]);
+      return;
+    }
+    P=frame(svg,{W:640,H:400,l:52,r:16,t:14,b:42,x:[155,203],y:[148,205]});cp=clip(svg,P,"rv-clip");
+    axes(g,P,{xt:range(160,200,10),yt:range(150,200,10),xl:"아버지 키 (cm)",yl:"아들 키 (cm)"});
+    var focus=mode==="perp"?[EX[0]]:(mode==="three"?EX:[]);
+    var isFocus={};focus.forEach(function(ex){isFocus[ex.i]=true;});
+    SONS.forEach(function(d,i){
+      var x=P.X(d.f+(isFocus[i]?0:jit(i,0.6))),e=M.res[i];
+      if(mode==="all")el("line",{x1:x,x2:x,y1:P.Y(line(d.f)),y2:P.Y(d.h),stroke:col(e),"stroke-opacity":.35,"stroke-width":1.2},g);
+      if(!isFocus[i])el("circle",{cx:x,cy:P.Y(d.h),r:2.6,fill:mode==="all"?col(e):C.dim,"fill-opacity":mode==="all"?.6:.5},g);
+    });
+    var gl=el("g",{"clip-path":cp},svg);
+    seg(gl,P,150,210,line,{stroke:C.ink,"stroke-width":2.4});
+    el("path",{d:"M"+P.X(xbar)+","+(P.Y(line(xbar))-6)+" l6,6 l-6,6 l-6,-6 Z",fill:C.ink},svg);
+    focus.forEach(function(ex,k){
+      var d=SONS[ex.i],e=M.res[ex.i],x=P.X(d.f),yv=P.Y(d.h),yl=P.Y(line(d.f));
+      el("line",{x1:x,x2:x,y1:yl,y2:yv,stroke:col(e),"stroke-width":3},svg);
+      el("path",{d:"M"+x+","+(yl-5)+" l5,5 l-5,5 l-5,-5 Z",fill:"#fff",stroke:C.ink,"stroke-width":1.5},svg);
+      el("circle",{cx:x,cy:yv,r:5.5,fill:col(e),stroke:"#fff","stroke-width":1.5},svg);
+      if(mode==="three"){
+        var right=d.f<190,ax=right?x+10:x-10,anchor=right?"start":"end";
+        var ty=Math.abs(e)>3?(yl+yv)/2+4:yv-14;
+        txt(svg,ax,ty,ex.lab+"  e = "+sgn(e,2),{"text-anchor":anchor,fill:col(e),"font-weight":700,"font-size":12.5});
+      }
+      if(mode==="perp"){
+        /* 화면에서 직선에 수직으로 내린 발 (가로·세로 눈금이 달라 화면 기준으로 그린다) */
+        var x1=P.X(150),y1=P.Y(line(150)),x2=P.X(210),y2=P.Y(line(210)),dx=x2-x1,dy=y2-y1,t=((x-x1)*dx+(yv-y1)*dy)/(dx*dx+dy*dy);
+        var fx=x1+t*dx,fy=y1+t*dy;
+        el("line",{x1:x,y1:yv,x2:fx,y2:fy,stroke:C.muted,"stroke-width":2,"stroke-dasharray":"5 4"},svg);
+        el("circle",{cx:fx,cy:fy,r:3,fill:C.muted},svg);
+        txt(svg,x+10,(yl+yv)/2+4,"세로 거리 = 잔차 "+sgn(e,2)+"cm",{fill:col(e),"font-weight":700,"font-size":12.5});
+        txt(svg,fx-10,fy-10,"가장 짧은 거리 (단위가 섞인다)",{"text-anchor":"end",fill:C.muted,"font-size":12});
+      }
+    });
+    if(mode==="three"){
+      stats("rv-stats",EX.map(function(ex){var d=SONS[ex.i];return {k:ex.lab+": 실제 "+d.h.toFixed(2)+" − 직선 "+line(d.f).toFixed(2),v:sgn(M.res[ex.i],2),u:"cm",hl:true};}));
+    }else if(mode==="all"){
+      var pos=M.res.filter(function(e){return e>0;}),neg=M.res.filter(function(e){return e<0;});
+      var sp=pos.reduce(function(s,v){return s+v;},0),sn=neg.reduce(function(s,v){return s+v;},0);
+      stats("rv-stats",[{k:"+ 잔차 (빨강)",v:pos.length+"명",u:"합 "+sgn(sp,1)},{k:"− 잔차 (청록)",v:neg.length+"명",u:"합 "+sgn(sn,1)},{k:"잔차의 합",v:fmt(sp+sn,2),u:"cm",hl:true},{k:"잔차 제곱합 RSS",v:fmt(M.rss,0),u:"cm²"}]);
+    }else{
+      var e0=M.res[EX[0].i];
+      stats("rv-stats",[{k:"세로 거리 (잔차)",v:sgn(e0,2),u:"cm",hl:true},{k:"직선이 말한 아들 키",v:line(SONS[EX[0].i].f).toFixed(2),u:"cm"},{k:"실제 아들 키",v:SONS[EX[0].i].h.toFixed(2),u:"cm"}]);
+    }
+  }
+  segButtons("data-rv",function(v){mode=v;draw();});
+  draw();
+})();
+
+/* ================= 04 다중회귀: 어머니 키를 고정 ================= */
+(function(){
+  var svg=document.getElementById("m-svg"),sl=document.getElementById("m-x"),out=document.getElementById("m-xv");
+  var M=ols(SONS.map(function(d){return [1,d.f,d.m];}),SONS.map(function(d){return d.h;})).b;
+  var S=ols(SONS.map(function(d){return [1,d.f];}),SONS.map(function(d){return d.h;})).b;
+  var mm=mean(SONS.map(function(d){return d.m;}));
+  sl.value=String(Math.round(mm*2)/2);
+  function draw(){
+    var m=+sl.value;out.textContent=m.toFixed(1)+" cm";
+    clear(svg);
+    var P=frame(svg,{W:640,H:400,l:52,r:16,t:14,b:42,x:[155,203],y:[148,205]}),g=el("g",{},svg),cp=clip(svg,P,"m-clip");
+    axes(g,P,{xt:range(160,200,10),yt:range(150,200,10),xl:"아버지 키 (cm)",yl:"아들 키 (cm)"});
+    var near=0;
+    SONS.forEach(function(d,i){var on=Math.abs(d.m-m)<=2.5;if(on)near++;
+      el("circle",{cx:P.X(d.f+jit(i,0.6)),cy:P.Y(d.h),r:on?3.6:2.6,fill:on?C.son:C.dim,"fill-opacity":on?.75:.35},g);});
+    var gl=el("g",{"clip-path":cp},svg);
+    seg(gl,P,150,210,function(x){return S[0]+S[1]*x;},{stroke:C.muted,"stroke-width":1.6,"stroke-dasharray":"6 5"});
+    var b0=M[0]+M[2]*m;
+    seg(gl,P,150,210,function(x){return b0+M[1]*x;},{stroke:C.ink,"stroke-width":2.6});
+    stats("m-stats",[{k:"어머니 키 "+m.toFixed(1)+"cm에서의 직선",v:fmt(b0,1)+" + "+fmt(M[1],3)+" × 아버지",hl:true},
+      {k:"아버지 키의 기울기",v:fmt(M[1],3),u:"단순회귀 "+fmt(S[1],3)},{k:"아버지 180cm일 때",v:fmt(b0+M[1]*180,1),u:"cm"},{k:"파란 점",v:near+"명"}]);
+  }
+  sl.addEventListener("input",draw);
+  draw();
+})();
+
+/* ================= 05 더미변수 ================= */
+(function(){
+  var svg=document.getElementById("d-svg"),read=document.getElementById("d-read"),model="one";
+  var y=KIDS.map(function(d){return d.h;});
+  var F={one:ols(KIDS.map(function(d){return [1,d.f];}),y),
+         par:ols(KIDS.map(function(d){return [1,d.f,d.son];}),y),
+         int:ols(KIDS.map(function(d){return [1,d.f,d.son,d.f*d.son];}),y)};
+  /* 교호작용 하나의 F 검정 */
+  var Fi=(F.par.rss-F.int.rss)/(F.int.rss/(F.int.n-4)),pi=pF(Fi,1,F.int.n-4);
+  function draw(){
+    clear(svg);
+    var M=F[model],b=M.b;
+    var P=frame(svg,{W:640,H:400,l:52,r:16,t:14,b:42,x:[155,203],y:[140,205]}),g=el("g",{},svg),cp=clip(svg,P,"d-clip");
+    axes(g,P,{xt:range(160,200,10),yt:range(140,200,10),xl:"아버지 키 (cm)",yl:"자녀 키 (cm)"});
+    KIDS.forEach(function(d,i){el("circle",{cx:P.X(d.f+jit(i,0.6)),cy:P.Y(d.h),r:2.8,fill:d.son?C.son:C.dau,"fill-opacity":.35},g);});
+    var gl=el("g",{"clip-path":cp},svg),txtv;
+    if(model==="one"){
+      seg(gl,P,150,210,function(x){return b[0]+b[1]*x;},{stroke:C.ink,"stroke-width":2.6});
+      txtv="자녀 키 = "+fmt(b[0],1)+" + "+fmt(b[1],3)+" × 아버지";
+      read.innerHTML="<strong>성별을 무시하면</strong> 딸과 아들이 한 직선을 나눠 쓴다. 직선은 두 무리의 가운데를 지나 아들에게는 너무 낮고 딸에게는 너무 높다. 그래서 잔차가 크고 \\(R^2\\)가 낮다.";
+    }else if(model==="par"){
+      seg(gl,P,150,210,function(x){return b[0]+b[1]*x;},{stroke:C.dau,"stroke-width":2.6});
+      seg(gl,P,150,210,function(x){return b[0]+b[2]+b[1]*x;},{stroke:C.son,"stroke-width":2.6});
+      var xm=196,ya=P.Y(b[0]+b[1]*xm),yb=P.Y(b[0]+b[2]+b[1]*xm);
+      el("line",{x1:P.X(xm),x2:P.X(xm),y1:ya,y2:yb,stroke:C.ink,"stroke-width":1.5},g);
+      txt(g,P.X(xm)-6,(ya+yb)/2+4,"b₂ = "+fmt(b[2],2)+"cm",{"text-anchor":"end",fill:C.ink,"font-weight":700});
+      txtv=fmt(b[0],1)+" + "+fmt(b[1],3)+" × 아버지 + "+fmt(b[2],2)+" × D";
+      read.innerHTML="<strong>더미변수 \\(D\\)(아들 = 1)를 더하면</strong> 기울기는 하나, 높이는 둘인 평행한 두 직선이 된다. 아들의 직선은 딸의 직선보다 \\(b_2\\)만큼 위에 있다. 아버지 키가 같을 때의 아들–딸 차이다.";
+    }else{
+      seg(gl,P,150,210,function(x){return b[0]+b[1]*x;},{stroke:C.dau,"stroke-width":2.6});
+      seg(gl,P,150,210,function(x){return b[0]+b[2]+(b[1]+b[3])*x;},{stroke:C.son,"stroke-width":2.6});
+      txtv="딸 기울기 "+fmt(b[1],3)+", 아들 기울기 "+fmt(b[1]+b[3],3);
+      read.innerHTML="<strong>아버지 키 × \\(D\\)를 더하면</strong> 기울기도 따로 정해진다. 그런데 두 기울기가 거의 같아서 교호작용의 검정은 \\(F(1, "+(F.int.n-4)+") = "+fmt(Fi,2)+"\\), \\(p = "+pv(pi)+"\\)다. 평행한 두 직선으로 충분하다.";
+    }
+    stats("d-stats",[{k:"모형",v:txtv,hl:true},{k:"R²",v:fmt(M.r2,3)},{k:"잔차 표준오차",v:fmt(M.sigma,2),u:"cm"}]);
+  }
+  segButtons("data-model",function(v){model=v;draw();});
+  draw();
+})();
+
+/* ================= 06 로지스틱 ================= */
+(function(){
+  var svg=document.getElementById("l-svg"),sl=document.getElementById("l-x"),out=document.getElementById("l-xv"),lpm=false;
+  var X=KIDS.map(function(d){return [1,d.h];}),y=KIDS.map(function(d){return d.son;});
+  var b=logit(X,y),L=ols(X,y).b;
+  var edges=range(147,201,3);
+  var bins=[];for(var i=0;i<edges.length-1;i++){var c=0,s=0;KIDS.forEach(function(d){if(d.h>=edges[i]&&d.h<edges[i+1]){c++;s+=d.son;}});if(c>=5)bins.push([(edges[i]+edges[i+1])/2,s/c]);}
+  function draw(){
+    var h=+sl.value;out.textContent=h.toFixed(1)+" cm";
+    clear(svg);
+    var P=frame(svg,{W:640,H:400,l:52,r:16,t:14,b:42,x:[145,203],y:[-0.32,1.32]}),g=el("g",{},svg),cp=clip(svg,P,"l-clip");
+    axes(g,P,{xt:range(150,200,10),yt:[0,0.25,0.5,0.75,1],xl:"자녀 키 (cm)",yl:"아들일 확률"});
+    [0,1].forEach(function(v){el("line",{x1:P.o.l,x2:P.o.W-P.o.r,y1:P.Y(v),y2:P.Y(v),stroke:C.muted},g);});
+    KIDS.forEach(function(d,i){var yy=d.son?1.13+jit(i,0.1):-0.13+jit(i,0.1);
+      el("circle",{cx:P.X(d.h),cy:P.Y(yy),r:2.4,fill:d.son?C.son:C.dau,"fill-opacity":.35},g);});
+    var gl=el("g",{"clip-path":cp},svg);
+    if(lpm)seg(gl,P,140,210,function(x){return L[0]+L[1]*x;},{stroke:C.pos,"stroke-width":2.2,"stroke-dasharray":"7 5"});
+    var d="";for(var x=145;x<=203;x+=0.5)d+=(x===145?"M":"L")+P.X(x)+","+P.Y(sigm(b[0]+b[1]*x));
+    el("path",{d:d,fill:"none",stroke:C.ink,"stroke-width":2.6},gl);
+    bins.forEach(function(p){el("path",{d:"M"+P.X(p[0])+","+(P.Y(p[1])-5)+" l5,5 l-5,5 l-5,-5 Z",fill:C.ink,"fill-opacity":.75},g);});
+    var p=sigm(b[0]+b[1]*h);
+    el("line",{x1:P.X(h),x2:P.X(h),y1:P.Y(0),y2:P.Y(p),stroke:C.muted,"stroke-dasharray":"4 4"},g);
+    el("line",{x1:P.o.l,x2:P.X(h),y1:P.Y(p),y2:P.Y(p),stroke:C.muted,"stroke-dasharray":"4 4"},g);
+    el("circle",{cx:P.X(h),cy:P.Y(p),r:6,fill:"#fff",stroke:C.ink,"stroke-width":2.5},g);
+    var items=[{k:"아들일 확률 p",v:fmt(p,3),hl:true},{k:"오즈 p/(1−p)",v:fmt(p/(1-p),2)},{k:"로그 오즈",v:fmt(b[0]+b[1]*h,2)},
+      {k:"1cm 클 때 오즈",v:"× "+fmt(Math.exp(b[1]),3)}];
+    if(lpm)items.push({k:"직선이 말하는 값",v:fmt(L[0]+L[1]*h,3)});
+    stats("l-stats",items);
+  }
+  sl.addEventListener("input",draw);
+  toggle(document.getElementById("l-lpm"),function(v){lpm=v;draw();});
+  draw();
+})();
+
+/* ================= 07 공분산분석 ================= */
+(function(){
+  var svg=document.getElementById("a-svg"),read=document.getElementById("a-read"),mode="mean";
+  var y=BT.map(function(d){return d.post;}),xbar=mean(BT.map(function(d){return d.pre;}));
+  var A0=ols(BT.map(function(d){return [1,d.g];}),y),A1=ols(BT.map(function(d){return [1,d.pre,d.g];}),y),
+      A3=ols(BT.map(function(d){return [1,d.pre,d.g,d.pre*d.g];}),y),C0=ols(BT.map(function(d){return [1,d.pre];}),y);
+  var F1=(C0.rss-A1.rss)/(A1.rss/(A1.n-3)),p1=pF(F1,1,A1.n-3),Fi=(A1.rss-A3.rss)/(A3.rss/(A3.n-4)),pi=pF(Fi,1,A3.n-4);
+  function grp(g){return BT.filter(function(d){return d.g===g;});}
+  function draw(){
+    clear(svg);
+    var P=frame(svg,{W:640,H:400,l:52,r:16,t:14,b:42,x:[0,52],y:[-2,52]}),g=el("g",{},svg),cp=clip(svg,P,"a-clip");
+    axes(g,P,{xt:range(0,50,10),yt:range(0,50,10),xl:"치료 전 BDI (점)",yl:"2개월 BDI (점)"});
+    BT.forEach(function(d,i){var col=d.g?C.dau:C.son;
+      el("circle",d.g?{cx:P.X(d.pre+jit(i,0.3)),cy:P.Y(d.post),r:3.6,fill:col,"fill-opacity":.6}:{cx:P.X(d.pre+jit(i,0.3)),cy:P.Y(d.post),r:3.6,fill:"#fff",stroke:col,"stroke-width":1.6},g);});
+    var gl=el("g",{"clip-path":cp},svg),b,items;
+    if(mode==="mean"){
+      b=A0.b;
+      [0,1].forEach(function(k){var xs=grp(k).map(function(d){return d.pre;});
+        seg(gl,P,Math.min.apply(null,xs),Math.max.apply(null,xs),function(){return b[0]+b[1]*k;},{stroke:k?C.dau:C.son,"stroke-width":2.6});});
+      items=[{k:"TAU 평균",v:fmt(b[0],2)},{k:"BtheB 평균",v:fmt(b[0]+b[1],2)},{k:"BtheB − TAU",v:fmt(b[1],2),u:"점",hl:true}];
+      read.innerHTML="<strong>평균만 비교하면</strong> 치료 전 점수를 보지 않고 두 집단의 2개월 평균을 견준다. 더미 하나짜리 회귀이고, 계수가 곧 평균 차이다(독립표본 \\(t\\) 검정). TAU의 치료 전 평균(23.9점)이 BtheB(22.5점)보다 조금 높았던 출발선의 차이가 이 비교에 섞여 있다.";
+    }else if(mode==="anc"){
+      b=A1.b;
+      seg(gl,P,0,55,function(x){return b[0]+b[1]*x;},{stroke:C.son,"stroke-width":2.6});
+      seg(gl,P,0,55,function(x){return b[0]+b[2]+b[1]*x;},{stroke:C.dau,"stroke-width":2.6});
+      el("line",{x1:P.X(xbar),x2:P.X(xbar),y1:P.o.t,y2:P.o.H-P.o.b,stroke:C.muted,"stroke-dasharray":"4 4"},g);
+      var yt=b[0]+b[1]*xbar,yb=yt+b[2];
+      [[yt,C.son],[yb,C.dau]].forEach(function(q){el("circle",{cx:P.X(xbar),cy:P.Y(q[0]),r:6,fill:"#fff",stroke:q[1],"stroke-width":2.5},g);});
+      txt(g,P.X(xbar)+10,P.Y(yt)-6,"TAU "+fmt(yt,1),{fill:C.son,"font-weight":700});
+      txt(g,P.X(xbar)+10,P.Y(yb)+16,"BtheB "+fmt(yb,1),{fill:C.dau,"font-weight":700});
+      txt(g,P.X(xbar)+4,P.o.t+12,"치료 전 평균 "+fmt(xbar,1),{fill:C.muted});
+      items=[{k:"공통 기울기",v:fmt(b[1],3)},{k:"보정 평균 TAU / BtheB",v:fmt(yt,1)+" / "+fmt(yb,1)},{k:"τ (BtheB 더미)",v:fmt(b[2],2),u:"점",hl:true},
+        {k:"F(1, "+(A1.n-3)+")",v:fmt(F1,2)},{k:"p",v:pv(p1)}];
+      read.innerHTML="<strong>공분산분석은</strong> 공통 기울기를 가진 두 직선을 맞추고, 그 간격 \\(\\tau\\)를 집단 차이로 읽는다. 치료 전 점수의 평균(점선)에서 잰 두 직선의 높이가 <strong>보정 평균</strong>이다. 치료 전 점수가 같은 사람끼리 견주니 평균만 비교할 때보다 차이가 줄었다.";
+    }else{
+      b=A3.b;
+      seg(gl,P,0,55,function(x){return b[0]+b[1]*x;},{stroke:C.son,"stroke-width":2.6});
+      seg(gl,P,0,55,function(x){return b[0]+b[2]+(b[1]+b[3])*x;},{stroke:C.dau,"stroke-width":2.6});
+      items=[{k:"TAU 기울기",v:fmt(b[1],3)},{k:"BtheB 기울기",v:fmt(b[1]+b[3],3)},{k:"교호작용 F(1, "+(A3.n-4)+")",v:fmt(Fi,2)},{k:"p",v:pv(pi),hl:true}];
+      read.innerHTML="<strong>기울기를 따로 두면</strong> 두 직선이 조금 다른 기울기를 갖지만, 교호작용의 검정에서 그 차이는 우연으로 볼 만한 크기다. 이것이 공분산분석의 <strong>기울기 동질성</strong> 점검이고, 05절에서 아버지 키 × 성별을 검정한 것과 같다. 두 직선이 크게 엇갈린다면 치료 효과가 치료 전 점수에 따라 다르다는 뜻이라 보정 평균 하나로 요약하지 않는다.";
+    }
+    stats("a-stats",items);
+  }
+  segButtons("data-am",function(v){mode=v;draw();});
+  draw();
+})();
+
+/* ================= 08 위계적 회귀 ================= */
+(function(){
+  var svg=document.getElementById("h-svg"),tb=document.querySelector("#h-table tbody"),order="sex";
+  var y=KIDS.map(function(d){return d.h;}),n=y.length;
+  var BL={sex:{lab:"성별",cols:function(d){return [d.son];},col:C.son},
+          par:{lab:"부모 키",cols:function(d){return [d.f,d.m];},col:C.dau},
+          kid:{lab:"자녀 수",cols:function(d){return [d.k];},col:"#7a4fd6"}};
+  function draw(){
+    var seq=order==="sex"?["sex","par","kid"]:["par","sex","kid"];
+    var rows=[],prev=0,k=0,used=[];
+    seq.forEach(function(key,s){
+      used.push(key);
+      var X=KIDS.map(function(d){var r=[1];used.forEach(function(u){r=r.concat(BL[u].cols(d));});return r;});
+      var M=ols(X,y),q=BL[key].cols(KIDS[0]).length;k+=q;
+      var dR=M.r2-prev,F=(dR/q)/((1-M.r2)/(n-k-1)),p=pF(F,q,n-k-1);
+      rows.push({key:key,r2:M.r2,dR:dR,F:F,df:q+", "+(n-k-1),p:p});prev=M.r2;
+    });
+    clear(svg);
+    var W=640,H=150,l=20,r=20,top=34,bh=44;svg.setAttribute("viewBox","0 0 "+W+" "+H);
+    var X=lin(0,1,l,W-r),x0=0;
+    rows.forEach(function(rw){
+      var w=Math.max(0,rw.dR);
+      el("rect",{x:X(x0),y:top,width:X(x0+w)-X(x0),height:bh,fill:BL[rw.key].col,"fill-opacity":.8},svg);
+      if(w>0.04)txt(svg,(X(x0)+X(x0+w))/2,top+bh/2+5,BL[rw.key].lab+" +"+rw.dR.toFixed(3),{"text-anchor":"middle",fill:"#fff","font-weight":700,"font-size":12.5});
+      else txt(svg,X(x0+w)+4,top-6,BL[rw.key].lab+" +"+rw.dR.toFixed(3),{fill:BL[rw.key].col,"font-weight":700});
+      x0+=w;
+    });
+    el("rect",{x:X(x0),y:top,width:X(1)-X(x0),height:bh,fill:C.grid},svg);
+    txt(svg,(X(x0)+X(1))/2,top+bh/2+5,"설명되지 않은 몫 "+(1-x0).toFixed(3),{"text-anchor":"middle",fill:C.muted,"font-size":12.5});
+    [0,0.25,0.5,0.75,1].forEach(function(v){el("line",{x1:X(v),x2:X(v),y1:top+bh,y2:top+bh+5,stroke:C.muted},svg);txt(svg,X(v),top+bh+19,v.toFixed(2),{"text-anchor":"middle","font-size":11});});
+    txt(svg,l,top+bh+38,"R²",{"font-size":12});
+    tb.innerHTML=rows.map(function(rw,i){
+      return "<tr><td>"+(i+1)+"</td><td>"+BL[rw.key].lab+"</td><td class=\"n\">"+rw.r2.toFixed(3)+"</td><td class=\"n\">"+rw.dR.toFixed(3)+
+        "</td><td class=\"n\">"+(i===0?"—":rw.F.toFixed(2))+"</td><td class=\"n\">"+(i===0?"—":rw.df)+"</td><td class=\"n\">"+(i===0?"—":pv(rw.p).replace("<","&lt;"))+"</td></tr>";
+    }).join("");
+  }
+  segButtons("data-order",function(v){order=v;draw();});
+  draw();
+})();
+
+/* ---------------- 코드 상자 복사 버튼 ---------------- */
+Array.prototype.forEach.call(document.querySelectorAll(".cb.r, .cb.prompt"),function(box){
+  var pre=box.querySelector("pre");if(!pre)return;
+  var b=document.createElement("button");b.type="button";b.className="copy";b.textContent="복사";
+  b.addEventListener("click",function(){
+    var done=function(){b.textContent="복사됨";setTimeout(function(){b.textContent="복사";},1400);};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(pre.textContent).then(done,function(){});}
+  });
+  box.appendChild(b);
+});
+
+/* ---------------- 부록 링크: 가리키는 펼침 상자를 연다 ---------------- */
+function openTarget(hash){if(!hash||hash.indexOf("#code-")!==0)return;var d=document.querySelector(hash);if(d&&d.tagName==="DETAILS")d.open=true;}
+Array.prototype.forEach.call(document.querySelectorAll('a[href^="#code-"]'),function(a){a.addEventListener("click",function(){openTarget(a.getAttribute("href"));});});
+openTarget(location.hash);
+window.addEventListener("hashchange",function(){openTarget(location.hash);});
+
+/* ---------------- 레일 목차 scroll-spy ---------------- */
+var railLinks=Array.prototype.slice.call(document.querySelectorAll("#rail-nav a"));
+var railObserver=new IntersectionObserver(function(entries){
+  entries.forEach(function(entry){
+    if(entry.isIntersecting){
+      railLinks.forEach(function(link){link.classList.toggle("on",link.getAttribute("href")==="#"+entry.target.id);});
+    }
+  });
+},{rootMargin:"-25% 0px -65% 0px"});
+railLinks.forEach(function(link,index){
+  var target=document.querySelector(link.getAttribute("href"));
+  if(target)railObserver.observe(target);
+  if(index===0)link.classList.add("on");
+});
+})();
+</script>
+</body>
+</html>

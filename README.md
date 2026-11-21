@@ -152,6 +152,17 @@ Rscript src/R/prepare_michelson_morley.R   # docs/assets/data/michelson-morley.j
   `docs/downlodable/nd_lm.zip`은 `uv run python src/python/build_skeleton_zip.py nd_lm`으로
   다시 만든다. 뼈대 안의 파일을 고치면 zip도 다시 만든다.
 
+`docs/statistics/regression-analysis.html`(회귀분석 - 상관에서 위계적 회귀까지)은 갈턴 자녀
+898명과 Beat the Blues 임상시험(R 패키지 HSAUR3의 `BtheB`) 97명을 읽고, 회귀계수는 쪽의
+스크립트가 직접 계산한다. 본문의 수치는 검산 스크립트로 대조한다.
+
+```sh
+Rscript src/R/prepare_regression_data.R   # docs/assets/data/regression-galton-btheb.js (HSAUR3 필요)
+Rscript src/R/regression_check.R          # 본문 수치 검산 (HSAUR3, car, emmeans, lmtest가 없으면 그 부분만 건너뜀)
+```
+
+같은 자료의 01–08절 끝 "프롬프트로 따라 하기"(분석 → 보고서, 원자료를 다듬거나 factor 순서를 정하는 01·05·07절만 그 앞에 데이터 처리)는 이 자료 전용 실습 폴더 뼈대 `skeleton/regression/`을 쓴다. 갈턴 원자료 `dataset/raw/Galton.tsv` 사본, 빈 `scripts/`·`dataset/working/`·`output/`, `.gitignore`, 안내 README, 코딩 에이전트 규칙 `AGENTS.md`(R·그림·한글·패키지·factor·보고서 규칙)와 이를 불러오는 `CLAUDE.md`가 들어 있다. 페이지 00절의 보고서 규칙은 이 `AGENTS.md`의 "보고서 규칙" 절을 그대로 옮긴 것이므로, 한쪽을 고치면 다른 쪽도 고친다. 사이트에서 받을 `docs/downlodable/regression.zip`은 `uv run python src/python/build_skeleton_zip.py regression`으로 다시 만든다. 09절 부록의 R 코드 11편과 출력은 이 뼈대의 사본에서 실행한 그대로다(07절만 HSAUR3가 더 필요).
+
 「숫자로 읽는 세상」 레포트 과제 "금쪽같은 휴일, 우리는 어떻게 움직이나?"(2025년 서울
 지하철·기상 자료, R 전용, 마감 2026-11-28)의 작업 폴더 뼈대는 `skeleton/report-sno/`다.
 질문과 제공 수치는 뼈대에 넣지 않고 수업 노션의 과제 안내 페이지에만 둔다(에이전트가 과제를 대신 풀지 않게). `AGENTS.md`가 에이전트에게 요청마다
