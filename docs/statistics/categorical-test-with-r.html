@@ -138,6 +138,13 @@
   ol.fnotes li { scroll-margin-top: 80px; }
   ol.fnotes li:target { background: var(--accent-soft); border-radius: 4px; }
   .fnote-back { text-decoration: none; margin-left: 4px; }
+  /* 00 독립의 법칙: 3/4 × 3/4 넓이 그림 */
+  .indep-wrap { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: center; }
+  .indep-area { display: grid; grid-template-columns: 52px 3fr 1fr; grid-template-rows: 26px 3fr 1fr; width: min(100%, 340px); aspect-ratio: 1 / 0.92; gap: 3px; font-size: 13px; }
+  .indep-area .ia-col, .indep-area .ia-row { display: flex; align-items: center; justify-content: center; text-align: center; color: var(--muted); font-weight: 700; font-size: 12.5px; line-height: 1.3; }
+  .indep-area .ia-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-radius: 4px; font-family: var(--mono); font-size: 12px; line-height: 1.4; }
+  .indep-area .ia-cell b { font-size: 15px; }
+  .indep-cap { flex: 1 1 260px; margin: 0; font-size: 13.5px; color: var(--muted); }
   @media (max-width: 640px) { .lab-body { padding: 12px; } .grid22 .numin { width: 64px; } }
 </style>
 <script defer src="../assets/katex/katex.min.js"></script>
@@ -192,7 +199,33 @@
 <!-- ===================== 00 ===================== -->
 <section class="panel" id="mendel">
 <div class="section-head"><span class="section-num">00</span><h2>들어가며: 멘델의 9:3:3:1</h2></div>
-<p>범주형 자료 분석의 오래된 출발점은 완두콩이다. 멘델(Mendel, 1866)은 씨 모양(둥근 R, 주름진 r)과 씨 색(노랑 Y, 초록 y)이 모두 이형접합인 완두(RrYy)끼리 교배했다. 두 형질이 독립적으로 유전된다면 자손의 표현형은 <strong>9 : 3 : 3 : 1</strong>로 나뉜다. 둥근 R과 노랑 Y가 우성이라, 대문자가 하나라도 있으면 그 형질이 겉으로 나타나기 때문이다.</p>
+<p>범주형 자료 분석의 오래된 출발점은 완두콩이다. 멘델의 실험은 개체를 "둥근가 주름졌는가"처럼 범주로 나누어 세고, 그 개수가 이론이 말하는 비율과 맞는지 따진 연구다. 이 쪽에서 다룰 질문(관측이 이론 비율과 맞는가, 두 특성은 서로 독립인가)이 모두 여기에 들어 있다.</p>
+
+<h3>멘델은 무엇을 했나</h3>
+<p>그레고어 멘델(Gregor Mendel, 1822–1884)은 지금의 체코 브르노(당시 오스트리아 제국의 브륀)에 있던 성 토마스 수도원의 수도사였다. 1856년부터 1863년까지 수도원 뜰에서 완두(<em>Pisum sativum</em>)를 길러 교배했다. 완두를 고른 데는 이유가 있다. 스스로 꽃가루받이를 해서 순종을 유지하기 쉽고, 꽃가루를 사람이 옮겨 원하는 교배를 할 수 있으며, 씨 모양·떡잎 색·꽃 색·꼬투리 모양·꼬투리 색·꽃이 피는 자리·줄기 길이처럼 <strong>둘 중 하나로 또렷이 갈리는 형질</strong>이 7가지나 있었다. 결과는 1865년 브륀 자연과학회에서 발표하고 이듬해 논문으로 냈지만(Mendel, 1866), 30여 년 동안 거의 주목받지 못하다가 1900년에 여러 학자가 따로따로 다시 발견했다.</p>
+
+<h3>분리의 법칙: 한 형질은 3 : 1</h3>
+<p>멘델은 먼저 형질 하나만 보았다. 둥근 씨 순종과 주름진 씨 순종을 교배하면 자손(1대)은 모두 둥글었다. 그 1대끼리 교배한 2대에서는 주름진 씨가 다시 나타났고, 둥근 것과 주름진 것이 대략 <strong>3 : 1</strong>이었다. 멘델은 이것을 이렇게 설명했다. 형질마다 한 쌍의 인자(지금의 유전자)가 있고, 1대는 둥근 인자 R과 주름 인자 r을 하나씩 가진 Rr이다. 생식세포(배우자)를 만들 때 이 쌍이 <strong>둘로 나뉘어</strong> R 또는 r 하나만 들어간다. 그래서 Rr × Rr의 자손은 RR : Rr : rr = 1 : 2 : 1이 되고, R이 r을 가리는 우성이라 겉모습은 둥근 것(RR, Rr) 3 : 주름진 것(rr) 1이 된다. 이것이 <strong>분리의 법칙</strong>이다.</p>
+<div class="scroll"><table class="stat">
+<caption>표 0-1. 한 형질만 본 교배의 2대 (Mendel, 1866)</caption>
+<thead><tr><th>형질</th><th>우성</th><th>열성</th><th>비</th></tr></thead>
+<tbody>
+<tr><td>씨 모양</td><td>둥근 5,474</td><td>주름진 1,850</td><td>2.96 : 1</td></tr>
+<tr><td>떡잎 색</td><td>노랑 6,022</td><td>초록 2,001</td><td>3.01 : 1</td></tr>
+</tbody></table></div>
+
+<h3>독립의 법칙: 두 형질을 함께 보면 9 : 3 : 3 : 1</h3>
+<p>다음으로 멘델은 두 형질을 함께 보았다. 둥글고 노란 순종(RRYY)과 주름지고 초록인 순종(rryy)을 교배하면 1대는 모두 RrYy이고 겉모습은 둥글고 노랗다. 질문은 2대에서 두 형질이 <strong>함께 붙어 다니는가, 따로 움직이는가</strong>였다. 붙어 다닌다면 1대가 받은 조합(RY, ry)만 다시 나와 둥글고 노랑 : 주름지고 초록 = 3 : 1이 될 것이다. 따로 움직인다면 부모에게 없던 조합(둥글고 초록, 주름지고 노랑)도 나와야 한다.</p>
+<p>2대에서는 네 가지가 모두 나왔다. 멘델은 배우자를 만들 때 씨 모양의 인자 쌍과 떡잎 색의 인자 쌍이 <strong>서로 상관없이 따로 나뉜다</strong>고 설명했다. 그러면 RrYy는 RY, Ry, rY, ry 네 가지 배우자를 같은 비율(각 1/4)로 만든다. 이것이 <strong>독립의 법칙</strong>이다. 따로 나뉜다는 것은 확률로 말하면 두 형질이 <strong>독립</strong>이라는 뜻이고, 독립이면 "둥글고 노랑"일 확률은 "둥글" 확률과 "노랑" 확률의 <strong>곱</strong>이 된다.</p>
+<div class="indep-wrap">
+<div class="indep-area" role="img" aria-label="씨 모양 3/4, 1/4과 떡잎 색 3/4, 1/4을 곱해 9/16, 3/16, 3/16, 1/16이 되는 넓이 그림">
+  <span class="ia-corner"></span><span class="ia-col">노랑 3/4</span><span class="ia-col">초록 1/4</span>
+  <span class="ia-row">둥근<br>3/4</span><span class="ia-cell ph-a">3/4 × 3/4<br><b>9/16</b></span><span class="ia-cell ph-b">3/4 × 1/4<br><b>3/16</b></span>
+  <span class="ia-row">주름<br>1/4</span><span class="ia-cell ph-c">1/4 × 3/4<br><b>3/16</b></span><span class="ia-cell ph-d"><b>1/16</b></span>
+</div>
+<p class="indep-cap">한 변을 씨 모양(둥근 3/4, 주름 1/4)으로, 다른 변을 떡잎 색(노랑 3/4, 초록 1/4)으로 나눈 정사각형이다. 두 형질이 독립이면 각 조각의 넓이가 그 조합의 확률이고, 넓이를 1/16 단위로 세면 9 : 3 : 3 : 1이다. 아래 퍼넷 사각형은 같은 결과를 배우자 16쌍으로 하나씩 센 것이다. 주름지고 초록(1/4 × 1/4)은 칸이 작아 식을 줄였다.</p>
+</div>
+<p>독립의 법칙이 언제나 성립하는 것은 아니다. 같은 염색체 위에 가까이 붙어 있는 유전자들은 함께 물려지는 경향이 있어(연관) 9 : 3 : 3 : 1에서 벗어난다. 멘델이 고른 형질들은 이 비율을 따랐다.</p>
 
 <div class="mendel-wrap">
 <figure class="punnett-fig">
@@ -223,7 +256,7 @@
     <div class="rb-bar"><span class="ph-a" style="width:56.65%">56.7%</span><span class="ph-b" style="width:19.42%">19.4%</span><span class="ph-c" style="width:18.17%">18.2%</span><span class="ph-d" style="width:5.76%">5.8%</span></div></div>
 </div>
 <div class="scroll"><table class="stat">
-<caption>표 0-1. 양성잡종 교배의 표현형 (Mendel, 1866)</caption>
+<caption>표 0-2. 두 형질을 함께 본 교배의 2대 (Mendel, 1866)</caption>
 <thead><tr><th>표현형</th><th>이론 비율</th><th>관측 개수</th><th>관측 비율</th><th>이론대로라면 (556 × 비율)</th></tr></thead>
 <tbody>
 <tr><td>둥글고 노랑</td><td>9/16</td><td>315</td><td>56.7%</td><td>312.75</td></tr>
@@ -232,6 +265,18 @@
 <tr><td>주름지고 초록</td><td>1/16</td><td>32</td><td>5.8%</td><td>34.75</td></tr>
 <tr><td><strong>합</strong></td><td>1</td><td>556</td><td>100%</td><td>556</td></tr>
 </tbody></table></div>
+<p>이 556개를 형질 하나씩 따로 세면 분리의 법칙도 그대로 보인다. 씨 모양은 둥근 423 : 주름진 133(3.18 : 1), 떡잎 색은 노랑 416 : 초록 140(2.97 : 1)으로 둘 다 3 : 1에 가깝다. 그리고 독립의 법칙대로 두 형질의 비율을 곱해 보면 실제 조합의 비율과 거의 같다.</p>
+<div class="scroll"><table class="stat">
+<caption>표 0-3. 두 형질의 비율을 곱한 값과 실제 조합의 비율 (556개)</caption>
+<thead><tr><th>조합</th><th>씨 모양 비율 × 떡잎 색 비율</th><th>곱</th><th>실제 비율</th></tr></thead>
+<tbody>
+<tr><td>둥글고 노랑</td><td>.761 × .748</td><td>.569</td><td>.567</td></tr>
+<tr><td>둥글고 초록</td><td>.761 × .252</td><td>.192</td><td>.194</td></tr>
+<tr><td>주름지고 노랑</td><td>.239 × .748</td><td>.179</td><td>.182</td></tr>
+<tr><td>주름지고 초록</td><td>.239 × .252</td><td>.060</td><td>.058</td></tr>
+</tbody></table></div>
+<p class="more">주. 씨 모양 비율은 둥근 423/556 = .761, 주름진 133/556 = .239이고, 떡잎 색 비율은 노랑 416/556 = .748, 초록 140/556 = .252다.</p>
+<p>"따로 센 비율을 곱하면 함께 센 비율이 되는가"는 <a href="#independence">04</a>의 <strong>독립성 검정</strong>이 묻는 질문 그대로다. 멘델의 9 : 3 : 3 : 1은 두 형질의 독립을 숫자로 쓴 것이고, 이 쪽에서는 그 숫자를 <a href="#gof">03</a>의 적합도 검정으로 확인한다.</p>
 
 <div class="callout"><p><strong>이 자료에서 무엇을 할 것인가.</strong> 두 막대는 거의 겹치지만 똑같지는 않다. 둥글고 초록은 이론보다 3.75개 많고, 주름지고 초록은 2.75개 적다. 이 쪽은 다음 세 질문을 따라간다.</p>
 <ol>
