@@ -81,6 +81,13 @@
   .rb-lab { font-size: 14px; font-weight: 700; }
   .rb-bar { display: flex; height: 34px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
   .rb-bar span { display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; border-right: 1px solid rgb(255 255 255 / 70%); }
+  /* 02 독립의 법칙: 3/4 × 3/4 넓이 그림 */
+  .indep-wrap { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: center; }
+  .indep-area { display: grid; grid-template-columns: 52px 3fr 1fr; grid-template-rows: 26px 3fr 1fr; width: min(100%, 340px); aspect-ratio: 1 / 0.92; gap: 3px; font-size: 13px; }
+  .indep-area .ia-col, .indep-area .ia-row { display: flex; align-items: center; justify-content: center; text-align: center; color: var(--muted); font-weight: 700; font-size: 12.5px; line-height: 1.3; }
+  .indep-area .ia-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-radius: 4px; font-family: var(--mono); font-size: 12px; line-height: 1.4; }
+  .indep-area .ia-cell b { font-size: 15px; }
+  .indep-cap { flex: 1 1 260px; margin: 0; font-size: 13.5px; color: var(--muted); }
   @media (max-width: 640px) { .rb-row { grid-template-columns: minmax(0, 1fr); gap: 4px; } table.punnett td { width: 62px; height: 52px; font-size: 11.5px; } }
 
   /* 표의 숫자 */
@@ -258,16 +265,28 @@
 <section class="panel" id="mendel">
   <div class="sec-head"><span class="sec-num">02</span><h2>멘델의 완두와 9:3:3:1</h2></div>
   <div class="callout"><p><strong>생물을 몰라도 괜찮습니다.</strong> 이 절에서 가져갈 것은 "이론이 네 종류의 비율을 미리 정해 준다"는 사실 하나입니다. 비율이 어디서 왔는지 궁금한 사람을 위해 짧게 풀어 둡니다.</p></div>
+  <h3>멘델은 무엇을 했나</h3>
+  <p>그레고어 멘델(Gregor Mendel, 1822–1884)은 지금의 체코 브르노(당시 오스트리아 제국의 브륀)에 있던 수도원의 수도사였습니다. 1856년부터 1863년까지 수도원 뜰에서 완두를 길러 서로 교배했습니다. 완두를 고른 데는 이유가 있습니다. 스스로 꽃가루받이를 해서 같은 성질이 대를 이어 유지되고, 사람이 꽃가루를 옮겨 원하는 짝을 지어 줄 수 있으며, 씨 모양·씨 색·꽃 색·꼬투리 모양처럼 <strong>둘 중 하나로 또렷이 갈리는 특징</strong>이 7가지나 있었습니다. 멘델은 자손을 이런 특징에 따라 <strong>범주로 나누어 세었고</strong>, 그 개수의 비율에서 규칙을 찾았습니다. 결과는 1866년 논문으로 나왔지만 30여 년 동안 거의 주목받지 못하다가, 1900년에 여러 학자가 따로따로 다시 발견했습니다.</p>
   <h3>한 가지 형질: 3 : 1</h3>
   <p>멘델이 본 형질 가운데 둘은 씨의 <strong>모양</strong>(둥근가, 주름졌는가)과 씨의 <strong>색</strong>(노란가, 초록인가)입니다. 완두는 모양을 정하는 유전 정보를 두 개씩, 부모에게서 하나씩 받습니다. 둥글게 만드는 것을 R, 주름지게 만드는 것을 r이라 쓰면 완두는 RR, Rr, rr 가운데 하나를 갖습니다. 그런데 R이 하나라도 있으면 씨는 둥급니다(이런 성질을 <strong>우성</strong>이라 합니다). 주름진 씨는 rr일 때만 나옵니다.</p>
   <p>부모가 모두 Rr이면 자식은 엄마에게서 R이나 r을 반반의 확률로, 아빠에게서도 반반의 확률로 받습니다. 가능한 경우는 RR, Rr, rR, rr 네 가지이고 확률이 모두 1/4입니다. 이 가운데 셋이 둥글고 하나가 주름졌으니 <strong>둥근 씨 : 주름진 씨 = 3 : 1</strong>입니다. 색도 마찬가지로 노랑(Y)이 초록(y)보다 우성이라 <strong>노랑 : 초록 = 3 : 1</strong>입니다.</p>
+  <p>멘델은 실제로 둥근 씨만 내는 완두와 주름진 씨만 내는 완두를 교배했습니다. 자식(1대)은 모두 둥글었습니다. 주름진 성질이 사라진 것처럼 보였지만, 그 1대끼리 다시 교배하자 손자(2대)에서 주름진 씨가 다시 나타났고, 둥근 것과 주름진 것이 대략 3 : 1이 되었습니다. 1대는 모두 Rr이었고, Rr이 자식에게 정보를 넘길 때 두 개가 <strong>나뉘어 하나만</strong> 넘어간다고 보면 설명됩니다. 이 규칙을 <strong>분리의 법칙</strong>이라 합니다. 멘델이 실제로 센 개수는 09절 "직접 해 보기"에서 직접 따져 봅니다.</p>
   <h3>두 가지 형질을 함께 보면: 9 : 3 : 3 : 1</h3>
-  <p>멘델은 모양과 색이 서로 영향을 주지 않고 따로따로 유전된다고 보았습니다. 서로 영향을 주지 않는 두 일이 함께 일어날 확률은 <strong>두 확률을 곱한 값</strong>입니다. 그래서 네 종류의 비율은 이렇게 나옵니다.</p>
+  <p>다음으로 멘델은 두 형질을 함께 보았습니다. 둥글고 노란 씨만 내는 완두(RRYY)와 주름지고 초록인 씨만 내는 완두(rryy)를 교배하면 1대는 모두 RrYy이고, 겉모습은 둥글고 노랗습니다. 궁금한 것은 2대였습니다. 모양과 색이 <strong>함께 붙어 다닌다면</strong> 1대가 물려받은 조합만 다시 나와 "둥글고 노랑"과 "주름지고 초록" 두 종류만 생길 것입니다. <strong>따로따로 움직인다면</strong> 부모에게 없던 조합, 곧 "둥글고 초록"과 "주름지고 노랑"도 나와야 합니다.</p>
+  <p>2대에서는 네 종류가 모두 나왔습니다. 멘델은 모양을 정하는 정보와 색을 정하는 정보가 자식에게 넘어갈 때 <strong>서로 상관없이 따로 나뉜다</strong>고 설명했습니다. 그러면 RrYy는 RY, Ry, rY, ry 네 가지 조합을 같은 비율(각 1/4)로 넘겨줍니다. 이것을 <strong>독립의 법칙</strong>이라 합니다. 확률의 말로 하면 두 형질이 <strong>독립</strong>이라는 뜻이고, 서로 영향을 주지 않는 두 일이 함께 일어날 확률은 <strong>두 확률을 곱한 값</strong>입니다. 그래서 네 종류의 비율은 이렇게 나옵니다.</p>
   <div class="mult">
     <div class="ph-a"><b>둥글고 노랑</b><span class="eq">3/4 × 3/4 = 9/16</span></div>
     <div class="ph-b"><b>둥글고 초록</b><span class="eq">3/4 × 1/4 = 3/16</span></div>
     <div class="ph-c"><b>주름지고 노랑</b><span class="eq">1/4 × 3/4 = 3/16</span></div>
     <div class="ph-d"><b>주름지고 초록</b><span class="eq">1/4 × 1/4 = 1/16</span></div>
+  </div>
+  <div class="indep-wrap">
+    <div class="indep-area" role="img" aria-label="씨 모양 3/4, 1/4과 씨 색 3/4, 1/4을 곱해 9/16, 3/16, 3/16, 1/16이 되는 넓이 그림">
+      <span class="ia-corner"></span><span class="ia-col">노랑 3/4</span><span class="ia-col">초록 1/4</span>
+      <span class="ia-row">둥근<br>3/4</span><span class="ia-cell ph-a">3/4 × 3/4<br><b>9/16</b></span><span class="ia-cell ph-b">3/4 × 1/4<br><b>3/16</b></span>
+      <span class="ia-row">주름<br>1/4</span><span class="ia-cell ph-c">1/4 × 3/4<br><b>3/16</b></span><span class="ia-cell ph-d"><b>1/16</b></span>
+    </div>
+    <p class="indep-cap">같은 곱셈을 넓이로 그린 것입니다. 정사각형의 한 변을 모양(둥근 3/4, 주름 1/4)으로, 다른 변을 색(노랑 3/4, 초록 1/4)으로 나누면 네 조각의 넓이가 곧 네 종류의 확률입니다. 1/16짜리 작은 칸으로 세면 9칸, 3칸, 3칸, 1칸입니다.</p>
   </div>
   <p>분모 16을 떼고 분자만 읽으면 <strong>9 : 3 : 3 : 1</strong>입니다. 아래 그림(퍼넷 사각형)은 같은 계산을 16칸으로 펼친 것입니다. 가로와 세로는 부모가 자식에게 넘겨줄 수 있는 네 가지 조합이고, 16칸은 모두 같은 확률 1/16을 갖습니다. 같은 색의 칸을 세어 보세요.</p>
   <div class="mendel-wrap">
@@ -290,6 +309,7 @@
       <li class="ph-d"><i class="pea"></i><span><b>주름지고 초록</b> · 1칸</span></li>
     </ul>
   </div>
+  <p>독립의 법칙이 언제나 성립하는 것은 아닙니다. 유전 정보가 같은 염색체 위에 가까이 붙어 있으면 함께 넘어가는 경향이 있어(이를 <strong>연관</strong>이라 합니다) 9 : 3 : 3 : 1에서 벗어납니다. 멘델이 고른 형질들은 이 비율을 따랐습니다.</p>
   <p>정리하면, 멘델의 이론은 <strong>자료를 보기 전에</strong> 네 범주의 비율을 정해 주었습니다. 이것이 중요합니다. 비교의 기준이 자료 밖에서 왔기 때문에, 그 기준에 자료가 맞는지를 따져 볼 수 있습니다.</p>
 </section>
 
@@ -317,6 +337,16 @@
     <tfoot><tr><td>합</td><td>1</td><td>556</td><td>100%</td><td>556</td></tr></tfoot>
   </table></div>
   <p>완두를 0.75개 셀 수는 없는데 기대 개수가 312.75처럼 소수여도 될까요? 괜찮습니다. 기대 개수는 "같은 실험을 아주 여러 번 되풀이하면 <strong>평균적으로</strong> 이쯤 나온다"는 뜻이기 때문입니다. 주사위를 10번 던지면 6이 평균 1.67번 나온다고 말하는 것과 같습니다.</p>
+  <h3>모양과 색을 따로 세어 보면</h3>
+  <p>같은 556개를 모양만 보고 세면 둥근 것이 423개(315 + 108), 주름진 것이 133개로 약 3.2 : 1입니다. 색만 보고 세면 노란 것이 416개(315 + 101), 초록인 것이 140개로 약 3.0 : 1입니다. 형질 하나씩 보면 분리의 법칙대로 3 : 1에 가깝습니다. 그리고 독립의 법칙대로 두 비율을 <strong>곱해 보면</strong>, 실제로 센 네 종류의 비율과 거의 같습니다.</p>
+  <div class="mult">
+    <div class="ph-a"><b>둥글고 노랑</b><span class="eq">.761 × .748 = .569</span><span>실제 .567</span></div>
+    <div class="ph-b"><b>둥글고 초록</b><span class="eq">.761 × .252 = .192</span><span>실제 .194</span></div>
+    <div class="ph-c"><b>주름지고 노랑</b><span class="eq">.239 × .748 = .179</span><span>실제 .182</span></div>
+    <div class="ph-d"><b>주름지고 초록</b><span class="eq">.239 × .252 = .060</span><span>실제 .058</span></div>
+  </div>
+  <p class="note">.761 = 423/556(둥근 비율), .748 = 416/556(노란 비율)이고, .239와 .252는 그 나머지다.</p>
+  <p>"따로 센 비율을 곱하면 함께 센 비율이 되는가"라는 질문은 두 범주형 변수가 서로 독립인지 묻는 <strong>독립성 검정</strong>으로 이어집니다(<a href="../statistics/categorical-test-with-r.html#independence">범주형 자료의 가설검정 04절</a>). 이 자료에서는 그보다 먼저, 9 : 3 : 3 : 1이라는 이론 비율에 자료가 맞는지를 다음 절의 \(\chi^2\)로 확인합니다.</p>
   <div class="callout"><p><strong>여기까지의 관찰.</strong> 둥글고 초록은 기대보다 3.75개 많고, 주름지고 노랑은 3.25개 적습니다. 네 칸 모두 몇 개씩 어긋나 있습니다. 이 어긋남들을 어떻게 한 숫자로 모을까요?</p></div>
 </section>
 
