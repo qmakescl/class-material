@@ -145,6 +145,43 @@
   .indep-area .ia-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-radius: 4px; font-family: var(--mono); font-size: 12px; line-height: 1.4; }
   .indep-area .ia-cell b { font-size: 15px; }
   .indep-cap { flex: 1 1 260px; margin: 0; font-size: 13.5px; color: var(--muted); }
+  /* 01 빈도표의 막대, 04 분할표의 가장자리(행합·열합) */
+  .fbar { display: block; height: 12px; min-width: 2px; background: var(--accent); border-radius: 2px; }
+  table.ctab th { text-align: left; }
+  table.ctab .mg { background: var(--soft); font-weight: 700; }
+  table.ctab .tot { background: var(--accent-soft); }
+  table.ctab td.hit { outline: 2px solid var(--accent); outline-offset: -2px; font-weight: 700; }
+  /* 02 전처리 정리 표 */
+  table.prep td b { color: var(--accent); }
+  table.prep.after td { background: var(--accent-soft); }
+  .prep-arrow { text-align: center; font-weight: 700; color: var(--accent); margin: 4px 0; }
+  /* 05 같은 분할표를 두 시선으로: 기대도수 비교 */
+  .eqpair { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; }
+  .eqpair figcaption { grid-column: 1 / -1; font-size: 13.5px; color: var(--muted); }
+  .eqside { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; background: var(--surface); display: grid; gap: 8px; align-content: start; }
+  .eqhead { margin: 0; display: grid; gap: 2px; }
+  .eqhead b { font-size: 15px; color: var(--accent); }
+  .eqhead span { font-size: 13px; color: var(--muted); }
+  table.etab td.ecell { text-align: center; }
+  table.etab .ef { display: block; font-family: var(--mono); font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+  table.etab td.ecell b { font-family: var(--mono); font-size: 15px; background: var(--accent-soft); border-radius: 4px; padding: 0 6px; }
+  table.etab tr.efoot td, table.etab tr.efoot th { font-size: 12px; color: var(--muted); font-weight: 400; }
+  @media (max-width: 760px) { .eqpair { grid-template-columns: minmax(0, 1fr); } }
+  /* 04 연속성 수정 그림: 정확한 분포 막대와 근사 곡선 */
+  .ccfig { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 18px; }
+  .ccfig figcaption { grid-column: 1 / -1; font-size: 13.5px; color: var(--muted); display: grid; gap: 4px; }
+  .ccside { border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; background: var(--surface); display: grid; gap: 6px; align-content: start; }
+  .ccplot .cc-bar { fill: #e7eaf1; }
+  .ccplot .cc-bar.tail { fill: #aab2c4; }
+  .ccplot .cc-area { fill: var(--tail); opacity: .45; }
+  .ccplot .cc-curve { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .ccplot .cc-mean { stroke: var(--muted); stroke-dasharray: 2 3; }
+  .ccplot .cc-cut { stroke: var(--pos); stroke-width: 1.5; stroke-dasharray: 4 3; }
+  .ccplot .cc-cutlab { fill: var(--pos); font-family: var(--mono); font-size: 11px; font-weight: 700; }
+  .cc-key i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .cc-key .k-bar { background: #aab2c4; }
+  .cc-key .k-area { background: var(--tail); opacity: .55; }
+  @media (max-width: 760px) { .ccfig { grid-template-columns: minmax(0, 1fr); } }
   @media (max-width: 640px) { .lab-body { padding: 12px; } .grid22 .numin { width: 64px; } }
 </style>
 <script defer src="../assets/katex/katex.min.js"></script>
@@ -159,10 +196,10 @@
   <h1>범주형 자료의<br>가설검정</h1>
   <nav id="rail-nav" aria-label="자료 목차">
     <a href="#mendel"><b>00</b><span>멘델의 9:3:3:1</span></a>
-    <a href="#tables"><b>01</b><span>범주형 자료와 분할표</span></a>
+    <a href="#categorical"><b>01</b><span>범주형 자료</span></a>
     <a href="#data"><b>02</b><span>데이터 준비</span></a>
     <a href="#gof"><b>03</b><span>단일 비율과 적합도</span></a>
-    <a href="#independence"><b>04</b><span>독립성 검정</span></a>
+    <a href="#independence"><b>04</b><span>분할표와 독립성 검정</span></a>
     <a href="#homogeneity"><b>05</b><span>동질성과 공분산분석</span></a>
     <a href="#fisher"><b>06</b><span>가정 점검과 Fisher</span></a>
     <a href="#residuals"><b>07</b><span>표준화 잔차</span></a>
@@ -280,22 +317,44 @@
 
 <div class="callout"><p><strong>이 자료에서 무엇을 할 것인가.</strong> 두 막대는 거의 겹치지만 똑같지는 않다. 둥글고 초록은 이론보다 3.75개 많고, 주름지고 초록은 2.75개 적다. 이 쪽은 다음 세 질문을 따라간다.</p>
 <ol>
-<li><strong>이 정도 차이는 우연으로 생길 만한가?</strong> 관측을 칸으로 세어 표를 만들고(<a href="#tables">01</a>), 이론 비율과 얼마나 벗어났는지 숫자 하나(\(\chi^2\))로 모아 판단한다(<a href="#gof">03</a>, 적합도 검정).</li>
+<li><strong>이 정도 차이는 우연으로 생길 만한가?</strong> 관측을 범주별로 세어 빈도표를 만들고(<a href="#categorical">01</a>), 이론 비율과 얼마나 벗어났는지 숫자 하나(\(\chi^2\))로 모아 판단한다(<a href="#gof">03</a>, 적합도 검정).</li>
 <li><strong>너무 잘 맞는 것도 문제인가?</strong> 통계학자 Fisher(1936)는 멘델의 실험들을 모아 보면 결과가 이론에 지나치게 잘 맞는다고 의심했다. 우연이라면 이보다 더 들쭉날쭉해야 한다는 것이다. 이 주장에는 반론도 있다(Weiling, 1986, <a href="https://pubmed.ncbi.nlm.nih.gov/3531317/" target="_blank" rel="noopener">PubMed</a>). 03절에서 \(\chi^2\)의 왼쪽 꼬리로 이 논쟁을 읽는다.</li>
 <li><strong>우리 자료에는 멘델의 법칙 같은 이론 비율이 있는가?</strong> 적합도 검정은 자료 밖에서 온 이론 비율이 있어야 할 수 있다. 서울 사망사고 자료에서는 무엇을 그 이론으로 삼을 수 있는지 03절에서 따져 본다.</li>
 </ol></div>
 </section>
 
 <!-- ===================== 01 ===================== -->
-<section class="panel" id="tables">
-<div class="section-head"><span class="section-num">01</span><h2>범주형 자료와 분할표</h2></div>
+<section class="panel" id="categorical">
+<div class="section-head"><span class="section-num">01</span><h2>범주형 자료</h2></div>
 <p>범주형 변수는 값이 "어느 칸에 속하는가"만 알려 준다. 순서가 없는 <strong>명목척도</strong>(사고유형, 차종)와 순서가 있는 <strong>서열척도</strong>(체형인식 5단계, 연령대)로 나뉜다. 이 자료의 검정은 모두 명목척도를 가정한다. 서열 정보를 쓰는 방법(선형 추세 검정 등)은 다루지 않는다.</p>
-<p>범주형 자료 분석의 출발점은 <strong>빈도</strong>다. 평균 비교에서 개별 관측값을 그대로 썼다면, 여기서는 관측을 칸별로 세어 만든 표가 분석 대상이다.</p>
+<p>범주형 자료 분석의 출발점은 <strong>빈도</strong>다. 평균 비교에서 개별 관측값을 그대로 썼다면, 여기서는 관측을 범주별로 세어 만든 표가 분석 대상이다.</p>
 <div class="flow" aria-label="자료 형태 변환 흐름">
   <span class="step">원자료 (한 행 = 사고 1건)</span><span class="arr">→</span>
-  <span class="step">빈도표 (변수 1개)</span><span class="arr">→</span>
-  <span class="step">분할표 (변수 2개, \(r \times c\))</span>
+  <span class="step">빈도표 (변수 1개, 이 절)</span><span class="arr">→</span>
+  <span class="step">분할표 (변수 2개, <a href="#contingency">04</a>)</span>
 </div>
+
+<h3>범주형 자료의 요약</h3>
+<p>숫자형 자료는 평균과 표준편차로 요약했다. 범주형 자료에는 평균을 낼 수 없다. "차대사람"과 "차량단독"의 가운데 값은 없기 때문이다. 범주를 1, 2, 3 같은 코드로 입력했더라도 그 숫자의 평균은 아무 뜻이 없다. 범주형 자료는 <strong>범주마다 몇 개인가</strong>로 요약한다.</p>
+<ul>
+<li><strong>빈도</strong>(도수, frequency): 범주마다 센 개수. 모든 범주의 빈도를 더하면 전체 개수 \(N\)이 된다.</li>
+<li><strong>상대빈도</strong>(비율, %): 빈도를 \(N\)으로 나눈 값. 전체 크기가 다른 자료끼리 견줄 수 있게 해 준다. 비율을 적을 때는 분모(\(N\))를 함께 밝힌다.</li>
+<li><strong>빈도표</strong>: 범주, 빈도, 비율을 나란히 적은 표. 변수 하나를 요약하는 기본 표다.</li>
+<li><strong>최빈값</strong>(mode): 빈도가 가장 큰 범주. 범주형 자료에서 "가장 대표적인 값"으로 쓴다.</li>
+</ul>
+<div class="scroll"><table class="stat">
+<caption>표 1-1. 2025년 서울 사망 교통사고의 사고유형 빈도표 (\(N = 211\))</caption>
+<thead><tr><th>사고유형</th><th>빈도</th><th>비율</th><th>막대</th></tr></thead>
+<tbody>
+<tr><td>차대사람</td><td>119</td><td>56.4%</td><td><span class="fbar" style="width:56.4%"></span></td></tr>
+<tr><td>차대차</td><td>70</td><td>33.2%</td><td><span class="fbar" style="width:33.2%"></span></td></tr>
+<tr><td>차량단독</td><td>22</td><td>10.4%</td><td><span class="fbar" style="width:10.4%"></span></td></tr>
+<tr><td><strong>합</strong></td><td>211</td><td>100%</td><td></td></tr>
+</tbody></table></div>
+<p>최빈값은 차대사람이다. 사망사고의 절반 이상(56.4%)이 보행자가 숨진 사고였다. 그림으로 나타낼 때는 범주마다 막대 하나를 세우는 <strong>막대그래프</strong>를 쓴다. 막대 사이에 순서나 간격의 뜻이 없으므로, 명목척도라면 막대를 빈도 순으로 놓아도 된다. 원그래프는 비슷한 크기의 조각을 견주기 어려워 막대그래프보다 덜 쓴다.</p>
+<h4>서열척도라면 순서도 쓴다</h4>
+<p>범주에 순서가 있으면 <strong>누적 비율</strong>을 함께 볼 수 있다. 가해운전자 연령대는 19세 이하부터 65세 이상까지 7개 범주인데, 누적 비율은 40–49세까지 40.8%, 50–59세까지 64.0%다. 211건을 나이 순으로 세웠을 때 가운데(106번째)가 50–59세 범주에 들어가므로 이 범주가 <strong>중앙값</strong>이다. 한편 빈도가 가장 큰 범주(최빈값)는 65세 이상(50건)이다. 순서가 있는 범주에서는 최빈값과 중앙값이 다를 수 있으므로, 무엇으로 요약했는지 밝힌다. 막대도 범주의 순서대로 놓는다.</p>
+<p>이 쪽의 검정은 모두 이렇게 센 빈도에서 출발한다. 변수 하나의 빈도가 이론 비율과 맞는지는 <a href="#gof">03</a>의 적합도 검정으로, 두 변수를 함께 센 표는 <a href="#contingency">04</a>의 분할표로 다룬다.</p>
 
 <h3>평균 비교와의 대응</h3>
 <div class="scroll"><table>
@@ -306,10 +365,16 @@
 <tr><td>대응표본 \(t\)</td><td>McNemar 검정 (<a href="#mcnemar">08</a>)</td><td><code>mcnemar.test()</code></td><td>Cohen's \(g\), 대응 오즈비</td></tr>
 </tbody></table></div>
 
-<h3>같은 표를 만드는 세 가지 방법</h3>
-<p>같은 표를 만드는 방법이 여럿인 이유는 결과 객체의 <strong>형태</strong>가 다르기 때문이다. tidyverse의 <code>count()</code>는 데이터프레임을 돌려주어 그림과 가공에 편하고, base R의 <code>table()</code>·<code>xtabs()</code>는 검정 함수가 바로 받는 table 객체를 돌려준다. janitor의 <code>tabyl()</code>은 행 비율과 빈도를 함께 보는 교차표를 만든다. 프롬프트에는 이 함수들을 적지 않는다. "주야별로 비율과 건수를 함께 보여 주는 교차표"처럼 보고 싶은 모양을 말로 적으면 에이전트가 고른다.</p>
-<div class="callout"><p><strong>요점.</strong> <code>chisq.test()</code>는 받은 객체의 모양으로 검정을 고른다. 1차원 빈도표를 주면 적합도 검정, 2차원 분할표를 주면 독립성 검정을 한다(LSR 12.6). 그래서 에이전트가 만든 코드에서는 "지금 어떤 모양의 표를 넘기는가"를 항상 확인한다.</p></div>
 
+
+
+
+<div class="callout"><p><strong>이 자료의 뼈대.</strong> 개념 설명의 순서는 Navarro의 <em>Learning Statistics with R</em>(LSR) 12장(Categorical data analysis)을 따른다. 절 끝의 "더 읽기"에 대응 절 번호를 적었다. LSR이 다루지 않는 단일 비율 정확검정, 상대위험률·오즈비, 표준화 잔차는 Agresti(2019)로 보완했다.</p></div>
+</section>
+
+<!-- ===================== 02 ===================== -->
+<section class="panel" id="data">
+<div class="section-head"><span class="section-num">02</span><h2>데이터 준비</h2></div>
 <h3>사용 데이터</h3>
 <div class="scroll"><table>
 <thead><tr><th>절</th><th>데이터</th><th>단위</th><th>구하는 방법</th></tr></thead>
@@ -317,12 +382,6 @@
 <tr><td>02–04, 06–07, 09</td><td>2025년 서울 사망 교통사고 211건 (도로교통공단 TAAS)</td><td>사망사고 1건 = 1행</td><td>이 쪽에서 <a href="../downlodable/서울-사망교통사고-2025.csv" download>실습용 CSV</a>를 내려받는다. TAAS에서 받은 원자료 22개 열 가운데 실습에 쓰는 15개 열만 남겼고 값은 고치지 않았다</td></tr>
 <tr><td>08</td><td>국민건강영양조사(KNHANES) 2024 원시자료 기본 DB</td><td>조사 대상자 1명 = 1행</td><td><a href="https://knhanes.kdca.go.kr/knhanes/main.do" target="_blank" rel="noopener noreferrer">국민건강영양조사 누리집</a>의 "원시자료 다운로드"에서 이용자 등록·요청 후 각자 내려받는다. <strong>재배포 불가</strong></td></tr>
 </tbody></table></div>
-<div class="callout"><p><strong>이 자료의 뼈대.</strong> 개념 설명의 순서는 Navarro의 <em>Learning Statistics with R</em>(LSR) 12장(Categorical data analysis)을 따른다. 절 끝의 "더 읽기"에 대응 절 번호를 적었다. LSR이 다루지 않는 단일 비율 정확검정, 상대위험률·오즈비, 표준화 잔차는 Agresti(2019)로 보완했다.</p></div>
-</section>
-
-<!-- ===================== 02 ===================== -->
-<section class="panel" id="data">
-<div class="section-head"><span class="section-num">02</span><h2>데이터 준비</h2></div>
 <h3>폴더 구조</h3>
 <p>폴더 구조는 <a href="prepare-for-ttest.html#s1">\(t\) 검정을 위한 데이터 준비</a>와 같다. 원자료는 <code>dataset/raw/</code>, 가공 자료는 <code>dataset/working/</code>, 표와 그림은 <code>output/</code>, 에이전트가 만든 스크립트는 <code>scripts/</code>에 둔다.</p>
 <pre class="tree">categorical-tests/
@@ -378,6 +437,68 @@ git sparse-checkout set skeleton/categorical-tests</pre></div>
 <tr><td>끝의 <code>-</code> 규칙</td><td><code>AGENTS.md</code>를 따르라는 한 줄, 패키지 설치 허락, 코드 주석</td><td>모든 항목에 공통인 규칙을 한곳에 둔다. tidyverse, 한글 글꼴, 그림과 표의 APA 형식, 숫자 자릿수, 그리고 핵심인 "숫자는 코드로 계산한 값을 쓰고 원래 출력을 함께 보여 준다"는 폴더의 <code>AGENTS.md</code>에 한 번 적어 두고 프롬프트에서는 그 파일을 가리킨다</td></tr>
 </tbody></table></div>
 
+<h3 id="prep-summary">무엇을 어떻게 정리하나</h3>
+<p>원자료는 고치지 않고, 분석에 쓸 변수를 <strong>새로 만든다</strong>. 사고 자료는 15개 열 가운데 4개 열에서 분석용 변수 8개를 만들고, 나머지 열(시군구, 법규위반, 노면상태 등)은 이 쪽에서 쓰지 않는다. 아래 표들이 정리의 전부이고, 프롬프트는 에이전트가 같은 내용을 출력으로 보여 주게 해서 이 표와 맞춰 보게 한다.</p>
+<div class="scroll"><table class="prep">
+<caption>표 2-1. 사고 자료: 원자료 열에서 분석용 변수로</caption>
+<thead><tr><th>원자료 열</th><th>원래 값</th><th>정리 규칙</th><th>분석용 변수 (범주와 순서)</th><th>쓰는 절</th></tr></thead>
+<tbody>
+<tr><td>발생년월</td><td>"2025년 7월" 같은 글자</td><td>월 숫자만 꺼낸다</td><td><b>월</b> (1, 2, …, 12)</td><td>03</td></tr>
+<tr><td>주야</td><td>주간, 야간</td><td>값은 그대로, 순서만 정한다</td><td><b>주야</b> (주간, 야간)</td><td>03, 04</td></tr>
+<tr><td rowspan="2">사고유형</td><td rowspan="2">"차대사람 - 횡단중" 같은 10종</td><td>" - "를 기준으로 둘로 나눈다</td><td><b>사고유형</b> (차대사람, 차대차, 차량단독), <b>사고세부</b></td><td>04, 07</td></tr>
+<tr><td>나눈 대분류가 차대사람이면 '차대사람', 아니면 '그 외'</td><td><b>보행자사고</b> (차대사람, 그 외)</td><td>04, 06, 09</td></tr>
+<tr><td rowspan="3">가해운전자 차종</td><td rowspan="3">승용, 화물 등 9종</td><td>그대로 둔다</td><td><b>가해차종</b> (9종)</td><td>06</td></tr>
+<tr><td>세 묶음으로 묶는다</td><td><b>차종묶음</b> (승용, 승합·화물, 이륜·자전거)</td><td>06, 07</td></tr>
+<tr><td>건설기계인지 아닌지</td><td><b>건설기계</b> (건설기계, 그 외 차종)</td><td>06</td></tr>
+</tbody></table></div>
+
+<p>실제 행으로 보면 이렇다. 위는 원자료의 네 행이고, 아래는 같은 네 행을 정리한 결과다.</p>
+<div class="scroll"><table class="prep">
+<caption>표 2-2. 원자료 네 행이 정리 뒤에 어떻게 바뀌나</caption>
+<thead><tr><th>구분번호</th><th>발생년월</th><th>주야</th><th>사고유형</th><th>가해운전자 차종</th></tr></thead>
+<tbody>
+<tr><td>2025000027</td><td>2025년 1월</td><td>야간</td><td>차대사람 - 기타</td><td>승용</td></tr>
+<tr><td>2025000091</td><td>2025년 1월</td><td>주간</td><td>차량단독 - 기타</td><td>이륜</td></tr>
+<tr><td>2025001532</td><td>2025년 1월</td><td>주간</td><td>차대차 - 충돌</td><td>화물</td></tr>
+<tr><td>2025021687</td><td>2025년 2월</td><td>주간</td><td>차대사람 - 횡단중</td><td>건설기계</td></tr>
+</tbody></table></div>
+<p class="prep-arrow" aria-hidden="true">↓ 정리</p>
+<div class="scroll"><table class="prep after">
+<thead><tr><th>월</th><th>주야</th><th>사고유형</th><th>사고세부</th><th>보행자사고</th><th>가해차종</th><th>차종묶음</th><th>건설기계</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>야간</td><td>차대사람</td><td>기타</td><td>차대사람</td><td>승용</td><td>승용</td><td>그 외 차종</td></tr>
+<tr><td>1</td><td>주간</td><td>차량단독</td><td>기타</td><td>그 외</td><td>이륜</td><td>이륜·자전거</td><td>그 외 차종</td></tr>
+<tr><td>1</td><td>주간</td><td>차대차</td><td>충돌</td><td>그 외</td><td>화물</td><td>승합·화물</td><td>그 외 차종</td></tr>
+<tr><td>2</td><td>주간</td><td>차대사람</td><td>횡단중</td><td>차대사람</td><td>건설기계</td><td>승합·화물</td><td>건설기계</td></tr>
+</tbody></table></div>
+
+<p>다시 묶은 범주는 원래 값이 어디로 갔는지 건수와 함께 확인한다. 묶기 전과 후의 건수 합은 모두 211이어야 한다.</p>
+<div class="scroll"><table class="prep">
+<caption>표 2-3. 다시 묶은 범주의 대응 (괄호는 건수)</caption>
+<thead><tr><th>변수</th><th>원래 값</th><th>새 범주</th></tr></thead>
+<tbody>
+<tr><td rowspan="3">사고유형 → 대분류 → 보행자사고</td><td>차대사람 - 횡단중(55), 기타(46), 차도통행중(14), 보도통행중(4)</td><td>차대사람(119) → 보행자사고 "차대사람"</td></tr>
+<tr><td>차대차 - 충돌(30), 기타(26), 추돌(14)</td><td>차대차(70) → 보행자사고 "그 외"</td></tr>
+<tr><td>차량단독 - 충돌(10), 기타(9), 전도전복(3)</td><td>차량단독(22) → 보행자사고 "그 외"</td></tr>
+<tr><td rowspan="3">가해운전자 차종 → 차종묶음</td><td>승용(82)</td><td>승용(82)</td></tr>
+<tr><td>화물(42), 승합(33), 건설기계(8), 특수(1)</td><td>승합·화물(84)</td></tr>
+<tr><td>이륜(28), 자전거(13), 개인형이동수단(3), 원동기(1)</td><td>이륜·자전거(45)</td></tr>
+</tbody></table></div>
+
+<p>국민건강영양조사는 행을 보여 주지 않는다(개인 단위 자료라 다시 나눠 줄 수 없다). 대신 걸러 내기 단계마다 남는 사람 수와 판정 규칙으로 확인한다.</p>
+<div class="scroll"><table class="prep">
+<caption>표 2-4. 국민건강영양조사 2024: 걸러 내기와 판정</caption>
+<thead><tr><th>단계</th><th>규칙</th><th>남는 사람</th></tr></thead>
+<tbody>
+<tr><td>① 열 고르기</td><td>아이디, 성별, 나이, 체형인식(BO1), 체질량지수(HE_BMI), 가중치 6개 열만 읽는다</td><td></td></tr>
+<tr><td>② 성인</td><td>19세 이상</td><td>6,033명</td></tr>
+<tr><td>③ 체형인식 응답</td><td>BO1이 1~5인 사람만(9 모름·무응답 213명, 응답 없음 2명 제외)</td><td>5,818명</td></tr>
+<tr><td>④ 체질량지수</td><td>HE_BMI가 있는 사람만</td><td>5,727명</td></tr>
+<tr><td>⑤ 인식비만</td><td>BO1 4(약간 비만)·5(매우 비만) → "비만", 1~3 → "비만 아님"</td><td>비만 2,684 (2,087 + 597), 비만 아님 3,043</td></tr>
+<tr><td>⑥ 측정비만</td><td>HE_BMI 25 이상 → "비만", 아니면 "비만 아님"</td><td>비만 2,107, 비만 아님 3,620</td></tr>
+</tbody></table></div>
+<p>아래 흐름도는 이 정리를 프롬프트의 항목 순서대로 놓은 것이다.</p>
+
 <h3>프롬프트가 하는 일: 순서로 보기</h3>
 <p>아래 프롬프트를 붙여 넣으면 에이전트는 두 자료를 차례로 정리한다. 칸 위의 번호는 프롬프트의 항목 번호이고, 색은 그 단계가 하는 일의 종류다. 한 곳에서는 에이전트가 <strong>멈추고 내게 확인을 받는다</strong>. 그 자리에서 답할 내용은 아래 "무엇을 확인하나" 표에 있다.</p>
 <figure class="flowmap" aria-label="데이터 준비 프롬프트의 처리 순서">
@@ -392,7 +513,7 @@ git sparse-checkout set skeleton/categorical-tests</pre></div>
       <li class="k-make"><span class="fm-no">2</span><b>월·주야·사고유형</b><span class="fm-ex">2025년 7월 → 7</span><span class="fm-ex">차대사람 - 횡단중 → 차대사람 | 횡단중</span><span class="fm-ex">차대사람 → 보행자사고 "차대사람"</span></li>
       <li class="k-make"><span class="fm-no">3</span><b>차종 묶기</b><span class="fm-ex">9종 → 승용 · 승합·화물 · 이륜·자전거</span><span class="fm-ex">건설기계 → "건설기계" / 그 외</span></li>
       <li class="k-save"><span class="fm-no">3</span><b>저장</b><code class="fm-file">acc_clean.rds</code><span>working 폴더에, 범주 순서가 남는 형식으로</span></li>
-      <li class="k-check"><span class="fm-no">4–5</span><b>점검 출력</b><span>사고유형별 건수, 차종 × 묶음 교차표, 열마다 결측 수, 주야 × 보행자사고 비율과 건수</span></li>
+      <li class="k-check"><span class="fm-no">4–5</span><b>전처리 확인</b><span>같은 네 행의 정리 전후(표 2-2), 대응표(표 2-3), 열마다 결측 수, 주야 × 보행자사고 비율과 건수</span></li>
     </ol>
   </div>
   <div class="fm-lane">
@@ -401,7 +522,7 @@ git sparse-checkout set skeleton/categorical-tests</pre></div>
       <li class="k-read"><span class="fm-no">6</span><b>필요한 열만 읽기</b><span>아이디, 성별, 나이, 체형인식(BO1), 체질량지수(HE_BMI), 가중치 6개 열</span></li>
       <li class="k-make"><span class="fm-no">6</span><b>걸러 내기</b><span class="fm-ex">19세 이상 6,033명</span><span class="fm-ex">BO1 1~5, BMI 있음 → 5,727명</span></li>
       <li class="k-make"><span class="fm-no">6</span><b>판정 변수</b><span class="fm-ex">BO1 4·5 → 인식비만 "비만"</span><span class="fm-ex">BMI 25 이상 → 측정비만 "비만"</span></li>
-      <li class="k-check"><span class="fm-no">6</span><b>점검 출력</b><span>걸러 내기 전후의 사람 수, 체형인식 응답별 사람 수</span></li>
+      <li class="k-check"><span class="fm-no">6</span><b>전처리 확인</b><span>단계마다 남는 사람 수, 응답 1~5 → 인식비만 대응표(표 2-4)</span></li>
       <li class="k-save"><span class="fm-no">6</span><b>저장</b><code class="fm-file">kn_body.rds</code><span>working 폴더에. 공유하지 않는다</span></li>
     </ol>
   </div>
@@ -415,9 +536,9 @@ git sparse-checkout set skeleton/categorical-tests</pre></div>
 1. 사망 교통사고: dataset/raw/서울-사망교통사고-2025.csv 는 도로교통공단 교통사고분석시스템에서 받은 2025년 서울 사망 교통사고로, 사고 한 건이 한 행이다. 한글이 깨지지 않게 읽고, 열 이름과 앞쪽 값을 먼저 보여 준 뒤 발생년월, 주야, 사고유형, 가해운전자 차종에 해당하는 열이 무엇인지 나에게 확인받은 다음 진행한다.
 2. 분석용 자료를 만든다. 발생년월에서 월 숫자만 꺼내 1월부터 12월 순서의 범주로 둔다. 주야는 주간, 야간 순서로 둔다. 사고유형은 "차대사람 - 횡단중"처럼 대분류와 세부 유형이 " - "로 붙어 있으니 둘로 나누고, 대분류는 차대사람, 차대차, 차량단독 순서로 둔다. 대분류가 차대사람이면 '차대사람', 아니면 '그 외'인 보행자사고 변수를 만들고 '차대사람'을 앞에 둔다.
 3. 가해운전자 차종은 원래 값을 그대로 두는 변수 하나와, 세 묶음으로 나눈 변수 하나를 만든다. 묶음은 '승용'(승용), '승합·화물'(승합, 화물, 건설기계, 특수), '이륜·자전거'(이륜, 원동기, 자전거, 개인형이동수단)이고 이 순서로 둔다. 가해 차종이 건설기계면 '건설기계', 아니면 '그 외 차종'인 변수도 만든다. dataset/working/acc_clean.rds 로 저장한다.
-4. 사고유형 대분류별 건수, 원래 차종과 묶은 차종의 교차표(어느 차종이 어느 묶음에 들어갔는지)를 보여 준다. 열마다 결측 수를 보여 주고, 정해 둔 순서에 없는 값이 있어서 결측으로 바뀐 것이 있으면 알려 준다.
+4. 전처리 확인: 정리가 맞게 되었는지 내가 대조할 수 있게 다음을 보여 준다. ① 구분번호가 2025000027, 2025000091, 2025001532, 2025021687 인 네 행을 원래 값(발생년월, 주야, 사고유형, 가해운전자 차종)과 정리한 값(월, 주야, 사고유형, 사고세부, 보행자사고, 가해차종, 차종묶음, 건설기계)으로 나란히. ② 다시 나누거나 묶은 변수마다 원래 값과 새 값의 대응표를 건수와 함께: 원래 사고유형 → 대분류와 세부 유형, 대분류 → 보행자사고, 가해 차종 → 차종묶음과 건설기계. ③ 열마다 결측 수. 정해 둔 순서에 없는 값이 있어서 결측으로 바뀐 것이 있으면 알려 준다.
 5. 주야별로 보행자사고의 비율과 건수를 함께 보여 주는 교차표를 출력한다.
-6. 국민건강영양조사: dataset/raw/knhanes/hn24_all.sas7bdat 는 질병관리청에서 내려받은 2024년 기본 DB다. 파일이 크니 아이디, 성별, 나이, 주관적 체형인식(BO1), 체질량지수(HE_BMI), 검진조사 가중치(wt_itvex) 열만 읽는다. 19세 이상이고, 체형인식 응답이 1~5 이고, 체질량지수가 있는 사람만 남긴다. 체형인식 4(약간 비만)와 5(매우 비만)를 '비만', 나머지를 '비만 아님'으로 하는 인식비만 변수와, 체질량지수 25 이상을 '비만'으로 하는 측정비만 변수를 만든다. 두 변수 모두 '비만'을 앞에 둔다. 걸러 내기 전과 후의 사람 수, 체형인식 응답별 사람 수를 보여 주고 dataset/working/kn_body.rds 로 저장한다.
+6. 국민건강영양조사: dataset/raw/knhanes/hn24_all.sas7bdat 는 질병관리청에서 내려받은 2024년 기본 DB다. 파일이 크니 아이디, 성별, 나이, 주관적 체형인식(BO1), 체질량지수(HE_BMI), 검진조사 가중치(wt_itvex) 열만 읽는다. 19세 이상이고, 체형인식 응답이 1~5 이고, 체질량지수가 있는 사람만 남긴다. 체형인식 4(약간 비만)와 5(매우 비만)를 '비만', 나머지를 '비만 아님'으로 하는 인식비만 변수와, 체질량지수 25 이상을 '비만'으로 하는 측정비만 변수를 만든다. 두 변수 모두 '비만'을 앞에 둔다. 19세 이상, 체형인식 응답 1~5, 체질량지수 있음의 단계마다 남는 사람 수와, 체형인식 응답(1~5)별로 인식비만이 어떻게 정해졌는지 대응표를 보여 주고 dataset/working/kn_body.rds 로 저장한다.
 - 변수 이름과 응답 코드는 해당 연도 원시자료 이용지침서에서 확인해야 한다고 나에게 알려 준다. 국민건강영양조사 파일과 정리한 파일은 다른 곳에 올리거나 공유하지 않는다.
 - 코드, 그림, 표는 이 폴더의 AGENTS.md 규칙(tidyverse, showtext 의 한글, APA 스타일, 계산한 숫자와 원래 출력)을 따른다. 다른 패키지가 필요하면 무엇에 쓰는지 말하고 설치 전에 내 허락을 받는다.
 - 어떤 처리를 했는지, 각 단계가 무엇을 하는지 스크립트에 주석으로 쉽게 설명해 준다.</pre></div>
@@ -443,6 +564,7 @@ acc &lt;- acc_raw %&gt;%
   # "차대사람 - 횡단중" → 사고유형 "차대사람", 사고세부 "횡단중"
   separate_wider_delim(사고유형, delim = " - ", names = c("사고유형", "사고세부")) %&gt;%
   transmute(
+    구분번호,                                    # 행을 찾아 대조할 때 쓴다
     월 = factor(as.integer(str_extract(발생년월, "\\d+(?=월)")), levels = 1:12),
     주야 = factor(주야, levels = c("주간", "야간")),
     사고유형 = factor(사고유형, levels = c("차대사람", "차대차", "차량단독")),
@@ -458,9 +580,19 @@ acc &lt;- acc_raw %&gt;%
     건설기계 = factor(if_else(가해차종 == "건설기계", "건설기계", "그 외 차종"),
                       levels = c("건설기계", "그 외 차종"))
   )
-count(acc, 사고유형)
-table(acc$가해차종, acc$차종묶음)        # 어느 차종이 어느 묶음에 들어갔나
-colSums(is.na(acc))                      # 정해 둔 수준에 없는 값은 factor()에서 NA가 된다
+# 전처리 확인 ① 같은 네 행을 원래 값과 정리한 값으로
+rows &lt;- c(2025000027, 2025000091, 2025001532, 2025021687)
+acc_raw %&gt;% filter(구분번호 %in% rows) %&gt;%
+  select(구분번호, 발생년월, 주야, 사고유형, `가해운전자 차종`)
+acc %&gt;% filter(구분번호 %in% rows)
+
+# 전처리 확인 ② 대응표: 원래 값 → 새 값 (건수)
+count(acc, 사고유형, 사고세부)           # 원래 사고유형 10종 → 대분류 3종
+count(acc, 사고유형, 보행자사고)         # 대분류 → 보행자사고
+count(acc, 가해차종, 차종묶음, 건설기계) # 차종 9종 → 세 묶음, 건설기계 여부
+
+# 전처리 확인 ③ 결측: 정해 둔 수준에 없는 값은 factor()에서 NA가 된다
+colSums(is.na(acc))
 
 # 보기 좋은 교차표: 행 비율 + 빈도
 acc %&gt;%
@@ -474,20 +606,22 @@ write_rds(acc, "dataset/working/acc_clean.rds")   # factor 순서가 그대로 �
 # 2) 국민건강영양조사 2024 기본 DB: 각자 신청해 받은 파일. 공유하지 않는다 ----
 kn_raw &lt;- read_sas("dataset/raw/knhanes/hn24_all.sas7bdat",
                    col_select = c(ID, sex, age, BO1, HE_BMI, wt_itvex))   # 필요한 열만
-kn_adult &lt;- filter(kn_raw, age &gt;= 19)
-count(kn_adult, BO1)                     # 1~5 응답과 9(모름·무응답)
+kn_adult &lt;- filter(kn_raw, age &gt;= 19)              # ② 성인
+count(kn_adult, BO1)                                   # 1~5 응답과 9(모름·무응답)
+kn_bo1 &lt;- filter(kn_adult, BO1 %in% 1:5)             # ③ 체형인식 응답 1~5만
+kn_bmi &lt;- filter(kn_bo1, !is.na(HE_BMI))             # ④ BMI 있는 사람만
+c(성인 = nrow(kn_adult), 응답1_5 = nrow(kn_bo1), BMI있음 = nrow(kn_bmi))   # 단계마다 남는 사람
 
-kn &lt;- kn_adult %&gt;%
-  filter(BO1 %in% 1:5, !is.na(HE_BMI)) %&gt;%            # 응답 1~5만, BMI 있는 사람만
-  transmute(
-    인식비만 = factor(if_else(BO1 &gt;= 4, "비만", "비만 아님"),       # 4 약간 비만, 5 매우 비만
+kn &lt;- kn_bmi %&gt;%
+  mutate(
+    인식비만 = factor(if_else(BO1 &gt;= 4, "비만", "비만 아님"),       # ⑤ 4 약간 비만, 5 매우 비만
                       levels = c("비만", "비만 아님")),
-    측정비만 = factor(if_else(HE_BMI &gt;= 25, "비만", "비만 아님"),   # 대한비만학회 기준 BMI 25
-                      levels = c("비만", "비만 아님")),
-    sex, age, wt_itvex
+    측정비만 = factor(if_else(HE_BMI &gt;= 25, "비만", "비만 아님"),   # ⑥ 대한비만학회 기준 BMI 25
+                      levels = c("비만", "비만 아님"))
   )
-nrow(kn_adult)                           # 걸러 내기 전 (19세 이상)
-nrow(kn)                                 # 걸러 낸 뒤
+count(kn, BO1, 인식비만)                 # 대응표: 응답 1~5 → 인식비만
+count(kn, 측정비만)
+kn &lt;- select(kn, 인식비만, 측정비만, sex, age, wt_itvex)
 write_rds(kn, "dataset/working/kn_body.rds")      # 개인 작업용. 공유 금지</pre></div>
 </details>
 <h4>무엇을 확인하나</h4>
@@ -496,6 +630,7 @@ write_rds(kn, "dataset/working/kn_body.rds")      # 개인 작업용. 공유 금
 <tbody>
 <tr><td>행 수와 한글</td><td>사고 자료가 211행이고 열 이름과 값(주간, 야간, 차대사람 …)의 한글이 깨지지 않았는가.</td></tr>
 <tr><td>열 확인</td><td>에이전트가 열 이름을 보여 주고 확인을 받았는가. 없는 열 이름을 지어내 오류를 피해 가지 않았는가.</td></tr>
+<tr><td>전처리 대조</td><td>프롬프트 4번에 따라 받은 네 행이 표 2-2의 정리 결과와 같은가. 대응표의 건수가 표 2-3과 같은가(원래 사고유형 10종의 건수가 대분류 119, 70, 22로 모이고, 차종 9종이 82, 84, 45로 모이는가). 국민건강영양조사의 단계별 인원이 표 2-4처럼 6,033 → 5,818 → 5,727이고, 인식비만이 응답 4·5만 "비만"인가.</td></tr>
 <tr><td>사고유형 나누기</td><td>대분류별 건수가 차대사람 119, 차대차 70, 차량단독 22(합 211)인가. 대분류에 "차대사람 - 횡단중" 같은 원래 글자가 남아 있지 않은가.</td></tr>
 <tr><td>월</td><td>월이 1~12의 순서로 되어 있고 결측이 없는가. "10월"이 "1"로 잘리지 않았는가(10월 22건, 1월 16건).</td></tr>
 <tr><td>차종 묶음</td><td>원래 차종과 묶은 차종의 교차표에서 9종이 모두 한 묶음에만 들어갔는가. 묶음별 건수가 승용 82, 승합·화물 84, 이륜·자전거 45인가.</td></tr>
@@ -753,8 +888,38 @@ ggsave("output/gof_month.png", p_month, width = 6, height = 4, dpi = 300)</pre><
 
 <!-- ===================== 04 ===================== -->
 <section class="panel" id="independence">
-<div class="section-head"><span class="section-num">04</span><h2>독립성 검정</h2></div>
-<h3>독립성 검정과 동질성 검정은 무엇이 다른가</h3>
+<div class="section-head"><span class="section-num">04</span><h2>분할표와 독립성 검정</h2></div>
+<h3 id="contingency">분할표 (contingency table)</h3>
+<p>01의 빈도표는 변수 하나를 셌다. 두 범주형 변수의 관계를 보려면 두 변수를 <strong>함께</strong> 세어야 한다. 한 변수의 범주를 행에, 다른 변수의 범주를 열에 놓고, 각 관측을 행 범주와 열 범주가 만나는 칸에 하나씩 넣어 센 표가 <strong>분할표</strong>다. 행 범주가 \(r\)개, 열 범주가 \(c\)개이면 \(r \times c\) 분할표이고 칸은 \(rc\)개다. 아래는 사망사고 211건을 주야(행 2개)와 사고유형(열 3개)으로 함께 센 2 × 3 분할표다.</p>
+<div class="scroll"><table class="stat ctab">
+<caption>표 4-1. 주야 × 사고유형 분할표 (\(N = 211\))</caption>
+<thead><tr><th></th><th>차대사람</th><th>차대차</th><th>차량단독</th><th class="mg">행합</th></tr></thead>
+<tbody>
+<tr><th>주간</th><td class="hit">68</td><td>35</td><td>12</td><td class="mg">115</td></tr>
+<tr><th>야간</th><td>51</td><td>35</td><td>10</td><td class="mg">96</td></tr>
+<tr><th class="mg">열합</th><td class="mg">119</td><td class="mg">70</td><td class="mg">22</td><td class="mg tot">211</td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>칸(셀)</strong>: 두 범주의 <strong>결합</strong>. \(i\)행 \(j\)열의 칸에는 두 범주를 함께 가진 관측의 수 \(n_{ij}\)가 들어간다. 예: 주간이면서 차대사람인 사망사고 \(n_{11} = 68\)건.</li>
+<li><strong>행합</strong> \(n_{i\cdot}\): 한 행의 칸을 모두 더한 값. 열 변수를 따지지 않고 행 범주만 센 수다. 주간 115건, 야간 96건.</li>
+<li><strong>열합</strong> \(n_{\cdot j}\): 한 열의 칸을 모두 더한 값. 차대사람 119건, 차대차 70건, 차량단독 22건.</li>
+<li><strong>총합</strong> \(N\): 모든 칸의 합이자, 행합의 합이자, 열합의 합이다. 211건.</li>
+</ul>
+<div class="readout math">\[n_{i\cdot} = \sum_{j=1}^{c} n_{ij}, \qquad n_{\cdot j} = \sum_{i=1}^{r} n_{ij}, \qquad N = \sum_{i=1}^{r}\sum_{j=1}^{c} n_{ij} = \sum_i n_{i\cdot} = \sum_j n_{\cdot j}\]</div>
+<p>행합과 열합은 표의 가장자리에 적혀서 <strong>주변합</strong>(marginal total)이라고도 한다. 열합 119, 70, 22는 01의 사고유형 빈도표(표 1-1)와 같고, 행합 115, 96은 주야의 빈도표와 같다. 곧 분할표의 가장자리에는 두 변수 각각의 빈도표가 들어 있고, 안쪽의 칸에는 두 변수가 <strong>어떻게 함께 나타나는지</strong>가 들어 있다. 검정은 이 안쪽의 칸이 가장자리만으로 예상한 것과 다른지를 본다.</p>
+<p>칸의 빈도를 비율로 바꾸는 방법은 분모에 따라 세 가지다. 같은 68건이라도 무엇으로 나누느냐에 따라 뜻이 다르다.</p>
+<div class="scroll"><table>
+<thead><tr><th>비율</th><th>분모</th><th>주간 · 차대사람 (68건)</th><th>읽는 법</th></tr></thead>
+<tbody>
+<tr><td>결합 비율</td><td>총합 \(N\)</td><td>68 / 211 = 32.2%</td><td>사망사고 전체 가운데 주간이면서 차대사람인 사고</td></tr>
+<tr><td>행 비율</td><td>행합 \(n_{i\cdot}\)</td><td>68 / 115 = 59.1%</td><td>주간 사망사고 가운데 차대사람인 사고</td></tr>
+<tr><td>열 비율</td><td>열합 \(n_{\cdot j}\)</td><td>68 / 119 = 57.1%</td><td>차대사람 사고 가운데 주간에 난 사고</td></tr>
+</tbody></table></div>
+<p>어느 비율을 보고할지는 연구 질문과 자료를 모은 방식이 정한다. 아래에서 다룰 독립성 검정과 동질성 검정이 바로 이 선택에서 갈린다.</p>
+<div class="callout"><p><strong>요점.</strong> <code>chisq.test()</code>는 받은 객체의 모양으로 검정을 고른다. 1차원 빈도표를 주면 적합도 검정, 2차원 분할표를 주면 독립성 검정을 한다(LSR 12.6). 그래서 에이전트가 만든 코드에서는 "지금 어떤 모양의 표를 넘기는가"를 항상 확인한다.</p></div>
+
+<details class="fold" id="ind-vs-hom">
+<summary>펼쳐 보기: 독립성 검정과 동질성 검정은 무엇이 다른가</summary>
 <p>두 검정은 모두 \(r \times c\) 분할표에 \(\chi^2\) 통계량을 쓰지만 출발점이 다르다. 다른 것은 <strong>자료를 어떻게 모았는가</strong>이고, 그에 따라 영가설, 기대도수를 구하는 논리, 기술할 비율, 결론의 문장이 달라진다. 이 절에서는 독립성 검정의 통계량을 칸마다 계산해 보고, 동질성 검정의 통계량은 <a href="#homogeneity">05</a>에서 계산한다. 출발점이 다른 두 계산이 결국 같은 \(\chi^2\)가 되는 이유도 05에서 확인한다.</p>
 <div class="scroll"><table>
 <thead><tr><th></th><th>독립성 검정 (test of independence)</th><th>동질성 검정 (test of homogeneity)</th></tr></thead>
@@ -771,11 +936,12 @@ ggsave("output/gof_month.png", p_month, width = 6, height = 4, dpi = 300)</pre><
 </tbody></table></div>
 <div class="callout"><p><strong>구별하는 질문 하나: 행의 합계를 설계가 정했는가?</strong> 정했다면 동질성 검정이고, 세어 보고 나서야 알았다면 독립성 검정이다. 서울 사망사고는 211건을 모두 모은 뒤에 주간 115건, 야간 96건으로 나뉘었다. 행 합을 아무도 정하지 않았으므로 독립성 검정이다. 반면 05절의 임상시험은 환자를 두 치료에 배정해 집단 크기(48명, 52명)를 설계가 정했으므로 동질성 검정이다. 표의 어느 쪽을 집단으로 볼지는 연구 질문이 아니라 <strong>표집 설계</strong>가 정한다.</p></div>
 <p>2 × 2 표에서 "주간과 야간의 비율이 같은가"(두 비율 비교)는 동질성의 말투이고, "주야와 보행자사고가 관련 있는가"는 독립성의 말투다. 05에서 보듯 두 검정의 \(\chi^2\)는 같은 값이 되므로 이 절에서도 두 비율 검정 함수를 쓸 수 있다. 다만 사망사고 자료는 한 무리를 세어 나눈 것이라 결론은 독립성 검정으로 쓰고, 주간·야간의 비율은 관련의 모양을 보여 주는 기술로 쓴다.</p>
+</details>
 
 <h3>2 × 2: 야간에 보행자 사망사고 비율이 다른가</h3>
 <p>2025년 서울 사망사고 211건을 주야(행)와 보행자사고(열)로 나눈 표다. 211건을 모은 뒤에 나눈 것이라 행 합(115, 96)과 열 합(119, 92)은 모두 세어 보고서야 알게 된 값이다. 그래서 독립성 검정이다.</p>
 <div class="scroll"><table class="stat">
-<caption>표 4-1. 주야 × 보행자사고 (건수, 행 비율)</caption>
+<caption>표 4-2. 주야 × 보행자사고 (건수, 행 비율)</caption>
 <thead><tr><th></th><th>차대사람</th><th>그 외</th><th>합</th></tr></thead>
 <tbody>
 <tr><td>주간</td><td>68 (59.1%)</td><td>47 (40.9%)</td><td>115</td></tr>
@@ -796,7 +962,7 @@ ggsave("output/gof_month.png", p_month, width = 6, height = 4, dpi = 300)</pre><
 \[\mathit{df} = (rc - 1) - (r - 1) - (c - 1) = (r-1)(c-1)\]</div>
 <p class="more">\(n_{i\cdot}\)는 \(i\)행의 합, \(n_{\cdot j}\)는 \(j\)열의 합이다. 자유도 식의 \(rc - 1\)은 총합이 정해진 칸의 수, \(r - 1\)과 \(c - 1\)은 자료로 추정한 행 비율과 열 비율의 수다.</p>
 <div class="scroll"><table class="stat">
-<caption>표 4-2. 주야 × 보행자사고의 \(\chi^2\) 계산 (\(N = 211\))</caption>
+<caption>표 4-3. 주야 × 보행자사고의 \(\chi^2\) 계산 (\(N = 211\))</caption>
 <thead><tr><th>칸</th><th>\(O\)</th><th>\(E\) = (행 합)(열 합)/\(N\)</th><th>\(O - E\)</th><th>\((O - E)^2 / E\)</th></tr></thead>
 <tbody>
 <tr><td>주간 · 차대사람</td><td>68</td><td>115 × 119 / 211 = 64.86</td><td>3.14</td><td>0.152</td></tr>
@@ -805,7 +971,118 @@ ggsave("output/gof_month.png", p_month, width = 6, height = 4, dpi = 300)</pre><
 <tr><td>야간 · 그 외</td><td>45</td><td>96 × 92 / 211 = 41.86</td><td>3.14</td><td>0.236</td></tr>
 <tr><td><strong>합</strong></td><td>211</td><td>211</td><td>0</td><td><strong>0.767</strong></td></tr>
 </tbody></table></div>
-<p>2 × 2 표에서는 네 칸의 \(O - E\)가 모두 크기가 같고(3.14) 부호만 엇갈린다. 가장자리 합이 정해져 있어 한 칸이 정해지면 나머지가 따라 정해지기 때문이고, 자유도가 1인 이유이기도 하다. 같은 3.14라도 기대도수가 작은 칸(야간 · 그 외)의 몫이 가장 크다. 보정 없는 \(\chi^2(1) = 0.77\)이고, R의 기본값인 Yates 보정(아래 상자)을 하면 0.54가 된다.</p>
+<p>2 × 2 표에서는 네 칸의 \(O - E\)가 모두 크기가 같고(3.14) 부호만 엇갈린다. 가장자리 합이 정해져 있어 한 칸이 정해지면 나머지가 따라 정해지기 때문이고, 자유도가 1인 이유이기도 하다. 같은 3.14라도 기대도수가 작은 칸(야간 · 그 외)의 몫이 가장 크다. 보정 없는 \(\chi^2(1) = 0.77\)이고, R의 기본값인 Yates 보정(바로 아래 펼침)을 하면 0.54가 된다.</p>
+<details class="fold" id="yates">
+<summary>펼쳐 보기: 연속성 수정(Yates 보정)은 왜, 어떻게 하나</summary>
+<p><strong>왜 하나.</strong> 칸의 개수는 0, 1, 2, …처럼 정수로만 움직인다. 그래서 가장자리 합을 고정했을 때 한 칸이 가질 수 있는 값의 실제 분포는 아래 그림의 막대처럼 <strong>계단</strong> 모양이다. 그런데 \(\chi^2\) 검정은 이 계단을 <strong>매끄러운 곡선</strong>으로 근사해 \(p\)값을 구한다. 정수 68은 막대 하나, 곧 67.5부터 68.5까지의 폭을 차지하는데, 곡선의 넓이를 68에서부터 재면 그 막대의 왼쪽 절반을 빠뜨린다. 그래서 표본이 작을수록 \(p\)값이 실제보다 작게 나와, 차이가 없는데도 있다고 할 위험이 커진다. 이항분포를 정규분포로 근사할 때 막대 폭의 절반(0.5)을 보정하는 것과 같은 생각이다(Yates, 1934; LSR 12.3).</p>
+<figure class="ccfig" aria-label="연속성 수정의 원리: 정확한 분포의 막대와 근사 곡선">
+<div class="ccside"><p class="eqhead"><b>보정 없음</b><span>관측값 68에서 넓이를 재기 시작한다. 68의 막대(67.5~68.5) 가운데 왼쪽 절반을 빠뜨린다</span></p>
+<svg class="plot ccplot" viewBox="0 0 560 230" role="img" aria-label="보정 없는 카이제곱: 68부터 잰 곡선의 꼬리">
+<rect class="cc-bar tail" x="14.6" y="195.8" width="18.7" height="0.2"/>
+<rect class="cc-bar tail" x="34.5" y="195.4" width="18.7" height="0.6"/>
+<rect class="cc-bar tail" x="54.3" y="194.5" width="18.7" height="1.5"/>
+<rect class="cc-bar tail" x="74.2" y="192.5" width="18.7" height="3.5"/>
+<rect class="cc-bar tail" x="94.0" y="188.8" width="18.7" height="7.2"/>
+<rect class="cc-bar tail" x="113.9" y="182.2" width="18.7" height="13.8"/>
+<rect class="cc-bar tail" x="133.7" y="171.5" width="18.7" height="24.5"/>
+<rect class="cc-bar tail" x="153.6" y="155.9" width="18.7" height="40.1"/>
+<rect class="cc-bar tail" x="173.4" y="135.3" width="18.7" height="60.7"/>
+<rect class="cc-bar tail" x="193.3" y="111.0" width="18.7" height="85.0"/>
+<rect class="cc-bar" x="213.1" y="85.8" width="18.7" height="110.2"/>
+<rect class="cc-bar" x="233.0" y="63.9" width="18.7" height="132.1"/>
+<rect class="cc-bar" x="252.8" y="49.4" width="18.7" height="146.6"/>
+<rect class="cc-bar" x="272.7" y="45.4" width="18.7" height="150.6"/>
+<rect class="cc-bar" x="292.5" y="52.7" width="18.7" height="143.3"/>
+<rect class="cc-bar" x="312.4" y="69.8" width="18.7" height="126.2"/>
+<rect class="cc-bar tail" x="332.2" y="93.1" width="18.7" height="102.9"/>
+<rect class="cc-bar tail" x="352.1" y="118.3" width="18.7" height="77.7"/>
+<rect class="cc-bar tail" x="371.9" y="141.7" width="18.7" height="54.3"/>
+<rect class="cc-bar tail" x="391.8" y="160.8" width="18.7" height="35.2"/>
+<rect class="cc-bar tail" x="411.6" y="175.0" width="18.7" height="21.0"/>
+<rect class="cc-bar tail" x="431.5" y="184.3" width="18.7" height="11.7"/>
+<rect class="cc-bar tail" x="451.3" y="190.0" width="18.7" height="6.0"/>
+<rect class="cc-bar tail" x="471.2" y="193.2" width="18.7" height="2.8"/>
+<rect class="cc-bar tail" x="491.0" y="194.8" width="18.7" height="1.2"/>
+<rect class="cc-bar tail" x="510.9" y="195.5" width="18.7" height="0.5"/>
+<rect class="cc-bar tail" x="530.7" y="195.8" width="18.7" height="0.2"/>
+<path class="cc-area" d="M341.6 196.0 L341.6 92.9 L345.0 97.4 L348.5 101.8 L352.0 106.3 L355.5 110.8 L358.9 115.2 L362.4 119.6 L365.9 123.9 L369.3 128.2 L372.8 132.3 L376.3 136.3 L379.8 140.2 L383.2 144.0 L386.7 147.6 L390.2 151.1 L393.7 154.5 L397.1 157.6 L400.6 160.7 L404.1 163.5 L407.6 166.2 L411.0 168.8 L414.5 171.1 L418.0 173.4 L421.5 175.5 L424.9 177.4 L428.4 179.2 L431.9 180.8 L435.4 182.3 L438.8 183.7 L442.3 185.0 L445.8 186.2 L449.3 187.3 L452.7 188.2 L456.2 189.1 L459.7 189.9 L463.1 190.6 L466.6 191.3 L470.1 191.8 L473.6 192.4 L477.0 192.8 L480.5 193.2 L484.0 193.6 L487.5 193.9 L490.9 194.2 L494.4 194.4 L497.9 194.6 L501.4 194.8 L504.8 195.0 L508.3 195.1 L511.8 195.3 L515.3 195.4 L518.7 195.5 L522.2 195.6 L525.7 195.6 L529.2 195.7 L532.6 195.7 L536.1 195.8 L539.6 195.8 L543.1 195.8 L546.5 195.9 L550.0 195.9 L550.0 196.0 Z"/>
+<path class="cc-area" d="M14.0 196.0 L14.0 195.9 L17.4 195.8 L20.8 195.8 L24.1 195.8 L27.5 195.7 L30.9 195.7 L34.3 195.6 L37.7 195.5 L41.0 195.4 L44.4 195.3 L47.8 195.2 L51.2 195.1 L54.6 195.0 L57.9 194.8 L61.3 194.6 L64.7 194.4 L68.1 194.1 L71.5 193.9 L74.8 193.5 L78.2 193.2 L81.6 192.8 L85.0 192.3 L88.4 191.8 L91.7 191.3 L95.1 190.6 L98.5 190.0 L101.9 189.2 L105.3 188.3 L108.6 187.4 L112.0 186.4 L115.4 185.3 L118.8 184.0 L122.2 182.7 L125.5 181.2 L128.9 179.7 L132.3 178.0 L135.7 176.1 L139.1 174.2 L142.4 172.1 L145.8 169.8 L149.2 167.4 L152.6 164.9 L156.0 162.2 L159.3 159.3 L162.7 156.3 L166.1 153.1 L169.5 149.8 L172.9 146.4 L176.2 142.8 L179.6 139.1 L183.0 135.2 L186.4 131.3 L189.8 127.2 L193.1 123.1 L196.5 118.9 L199.9 114.6 L203.3 110.3 L206.7 105.9 L210.0 101.6 L213.4 97.2 L216.8 92.9 L216.8 196.0 Z"/>
+<path class="cc-curve" d="M14.0 195.9 L16.7 195.8 L19.4 195.8 L22.0 195.8 L24.7 195.7 L27.4 195.7 L30.1 195.7 L32.8 195.6 L35.4 195.6 L38.1 195.5 L40.8 195.4 L43.5 195.4 L46.2 195.3 L48.8 195.2 L51.5 195.1 L54.2 195.0 L56.9 194.8 L59.6 194.7 L62.2 194.5 L64.9 194.4 L67.6 194.2 L70.3 194.0 L73.0 193.7 L75.6 193.5 L78.3 193.2 L81.0 192.9 L83.7 192.5 L86.4 192.1 L89.0 191.7 L91.7 191.3 L94.4 190.8 L97.1 190.2 L99.8 189.7 L102.4 189.0 L105.1 188.4 L107.8 187.6 L110.5 186.9 L113.2 186.0 L115.8 185.1 L118.5 184.1 L121.2 183.1 L123.9 182.0 L126.6 180.8 L129.2 179.5 L131.9 178.2 L134.6 176.7 L137.3 175.2 L140.0 173.6 L142.6 171.9 L145.3 170.2 L148.0 168.3 L150.7 166.3 L153.4 164.2 L156.0 162.1 L158.7 159.8 L161.4 157.5 L164.1 155.0 L166.8 152.5 L169.4 149.9 L172.1 147.1 L174.8 144.3 L177.5 141.4 L180.2 138.5 L182.8 135.4 L185.5 132.3 L188.2 129.1 L190.9 125.9 L193.6 122.6 L196.2 119.2 L198.9 115.9 L201.6 112.4 L204.3 109.0 L207.0 105.6 L209.6 102.1 L212.3 98.7 L215.0 95.2 L217.7 91.8 L220.4 88.5 L223.0 85.1 L225.7 81.9 L228.4 78.7 L231.1 75.6 L233.8 72.6 L236.4 69.7 L239.1 66.9 L241.8 64.2 L244.5 61.7 L247.2 59.3 L249.8 57.0 L252.5 55.0 L255.2 53.1 L257.9 51.4 L260.6 49.8 L263.2 48.5 L265.9 47.3 L268.6 46.4 L271.3 45.7 L274.0 45.1 L276.6 44.8 L279.3 44.7 L282.0 44.9 L284.7 45.2 L287.4 45.7 L290.0 46.5 L292.7 47.5 L295.4 48.6 L298.1 50.0 L300.8 51.5 L303.4 53.3 L306.1 55.2 L308.8 57.3 L311.5 59.5 L314.2 61.9 L316.8 64.5 L319.5 67.2 L322.2 70.0 L324.9 72.9 L327.6 75.9 L330.2 79.0 L332.9 82.2 L335.6 85.5 L338.3 88.8 L341.0 92.2 L343.6 95.6 L346.3 99.0 L349.0 102.5 L351.7 105.9 L354.4 109.4 L357.0 112.8 L359.7 116.2 L362.4 119.6 L365.1 122.9 L367.8 126.2 L370.4 129.5 L373.1 132.6 L375.8 135.8 L378.5 138.8 L381.2 141.8 L383.8 144.6 L386.5 147.4 L389.2 150.2 L391.9 152.8 L394.6 155.3 L397.2 157.7 L399.9 160.1 L402.6 162.3 L405.3 164.5 L408.0 166.5 L410.6 168.5 L413.3 170.3 L416.0 172.1 L418.7 173.8 L421.4 175.4 L424.0 176.9 L426.7 178.3 L429.4 179.7 L432.1 180.9 L434.8 182.1 L437.4 183.2 L440.1 184.2 L442.8 185.2 L445.5 186.1 L448.2 186.9 L450.8 187.7 L453.5 188.4 L456.2 189.1 L458.9 189.7 L461.6 190.3 L464.2 190.8 L466.9 191.3 L469.6 191.8 L472.3 192.2 L475.0 192.5 L477.6 192.9 L480.3 193.2 L483.0 193.5 L485.7 193.7 L488.4 194.0 L491.0 194.2 L493.7 194.4 L496.4 194.6 L499.1 194.7 L501.8 194.9 L504.4 195.0 L507.1 195.1 L509.8 195.2 L512.5 195.3 L515.2 195.4 L517.8 195.4 L520.5 195.5 L523.2 195.6 L525.9 195.6 L528.6 195.7 L531.2 195.7 L533.9 195.7 L536.6 195.8 L539.3 195.8 L542.0 195.8 L544.6 195.9 L547.3 195.9 L550.0 195.9"/>
+<line class="axis" x1="14" x2="550" y1="196.0" y2="196.0"/>
+<text class="tick" x="83.5" y="210.0" text-anchor="middle">55</text>
+<text class="tick" x="182.7" y="210.0" text-anchor="middle">60</text>
+<text class="tick" x="282.0" y="210.0" text-anchor="middle">65</text>
+<text class="tick" x="381.3" y="210.0" text-anchor="middle">70</text>
+<text class="tick" x="480.5" y="210.0" text-anchor="middle">75</text>
+<line class="cc-mean" x1="279.2" x2="279.2" y1="26" y2="196.0"/>
+<text class="tick" x="279.2" y="20" text-anchor="middle">E = 64.86</text>
+<line class="cc-cut" x1="341.6" x2="341.6" y1="36" y2="196.0"/>
+<text class="cc-cutlab" x="341.6" y="223.0" text-anchor="middle">68</text>
+<line class="cc-cut" x1="216.8" x2="216.8" y1="36" y2="196.0"/>
+<text class="cc-cutlab" x="216.8" y="223.0" text-anchor="middle">61.72</text>
+<text class="lbl" x="550" y="34" text-anchor="end">곡선의 꼬리 넓이 p = .381</text>
+</svg></div>
+<div class="ccside"><p class="eqhead"><b>Yates 보정</b><span>0.5를 당겨 67.5부터 잰다. 68의 막대가 통째로 들어간다</span></p>
+<svg class="plot ccplot" viewBox="0 0 560 230" role="img" aria-label="Yates 보정 카이제곱: 67.5부터 잰 곡선의 꼬리">
+<rect class="cc-bar tail" x="14.6" y="195.8" width="18.7" height="0.2"/>
+<rect class="cc-bar tail" x="34.5" y="195.4" width="18.7" height="0.6"/>
+<rect class="cc-bar tail" x="54.3" y="194.5" width="18.7" height="1.5"/>
+<rect class="cc-bar tail" x="74.2" y="192.5" width="18.7" height="3.5"/>
+<rect class="cc-bar tail" x="94.0" y="188.8" width="18.7" height="7.2"/>
+<rect class="cc-bar tail" x="113.9" y="182.2" width="18.7" height="13.8"/>
+<rect class="cc-bar tail" x="133.7" y="171.5" width="18.7" height="24.5"/>
+<rect class="cc-bar tail" x="153.6" y="155.9" width="18.7" height="40.1"/>
+<rect class="cc-bar tail" x="173.4" y="135.3" width="18.7" height="60.7"/>
+<rect class="cc-bar tail" x="193.3" y="111.0" width="18.7" height="85.0"/>
+<rect class="cc-bar" x="213.1" y="85.8" width="18.7" height="110.2"/>
+<rect class="cc-bar" x="233.0" y="63.9" width="18.7" height="132.1"/>
+<rect class="cc-bar" x="252.8" y="49.4" width="18.7" height="146.6"/>
+<rect class="cc-bar" x="272.7" y="45.4" width="18.7" height="150.6"/>
+<rect class="cc-bar" x="292.5" y="52.7" width="18.7" height="143.3"/>
+<rect class="cc-bar" x="312.4" y="69.8" width="18.7" height="126.2"/>
+<rect class="cc-bar tail" x="332.2" y="93.1" width="18.7" height="102.9"/>
+<rect class="cc-bar tail" x="352.1" y="118.3" width="18.7" height="77.7"/>
+<rect class="cc-bar tail" x="371.9" y="141.7" width="18.7" height="54.3"/>
+<rect class="cc-bar tail" x="391.8" y="160.8" width="18.7" height="35.2"/>
+<rect class="cc-bar tail" x="411.6" y="175.0" width="18.7" height="21.0"/>
+<rect class="cc-bar tail" x="431.5" y="184.3" width="18.7" height="11.7"/>
+<rect class="cc-bar tail" x="451.3" y="190.0" width="18.7" height="6.0"/>
+<rect class="cc-bar tail" x="471.2" y="193.2" width="18.7" height="2.8"/>
+<rect class="cc-bar tail" x="491.0" y="194.8" width="18.7" height="1.2"/>
+<rect class="cc-bar tail" x="510.9" y="195.5" width="18.7" height="0.5"/>
+<rect class="cc-bar tail" x="530.7" y="195.8" width="18.7" height="0.2"/>
+<path class="cc-area" d="M331.6 196.0 L331.6 80.7 L335.3 85.1 L338.9 89.6 L342.5 94.2 L346.2 98.9 L349.8 103.5 L353.5 108.2 L357.1 112.9 L360.7 117.5 L364.4 122.1 L368.0 126.6 L371.7 130.9 L375.3 135.2 L378.9 139.3 L382.6 143.3 L386.2 147.1 L389.9 150.8 L393.5 154.3 L397.1 157.6 L400.8 160.8 L404.4 163.8 L408.1 166.6 L411.7 169.2 L415.3 171.7 L419.0 174.0 L422.6 176.1 L426.3 178.1 L429.9 179.9 L433.5 181.6 L437.2 183.1 L440.8 184.5 L444.5 185.8 L448.1 186.9 L451.7 188.0 L455.4 188.9 L459.0 189.8 L462.7 190.5 L466.3 191.2 L469.9 191.8 L473.6 192.4 L477.2 192.8 L480.8 193.3 L484.5 193.6 L488.1 194.0 L491.8 194.2 L495.4 194.5 L499.0 194.7 L502.7 194.9 L506.3 195.1 L510.0 195.2 L513.6 195.3 L517.2 195.4 L520.9 195.5 L524.5 195.6 L528.2 195.7 L531.8 195.7 L535.4 195.8 L539.1 195.8 L542.7 195.8 L546.4 195.9 L550.0 195.9 L550.0 196.0 Z"/>
+<path class="cc-area" d="M14.0 196.0 L14.0 195.9 L17.5 195.8 L21.1 195.8 L24.6 195.7 L28.2 195.7 L31.7 195.6 L35.3 195.6 L38.8 195.5 L42.4 195.4 L45.9 195.3 L49.5 195.2 L53.0 195.0 L56.5 194.9 L60.1 194.7 L63.6 194.5 L67.2 194.2 L70.7 193.9 L74.3 193.6 L77.8 193.2 L81.4 192.8 L84.9 192.3 L88.5 191.8 L92.0 191.2 L95.5 190.6 L99.1 189.8 L102.6 189.0 L106.2 188.1 L109.7 187.1 L113.3 186.0 L116.8 184.8 L120.4 183.4 L123.9 182.0 L127.5 180.4 L131.0 178.6 L134.5 176.8 L138.1 174.8 L141.6 172.6 L145.2 170.2 L148.7 167.8 L152.3 165.1 L155.8 162.3 L159.4 159.3 L162.9 156.1 L166.5 152.8 L170.0 149.3 L173.5 145.7 L177.1 141.9 L180.6 137.9 L184.2 133.9 L187.7 129.7 L191.3 125.4 L194.8 121.0 L198.4 116.6 L201.9 112.0 L205.5 107.5 L209.0 102.9 L212.5 98.4 L216.1 93.8 L219.6 89.4 L223.2 85.0 L226.7 80.7 L226.7 196.0 Z"/>
+<path class="cc-curve" d="M14.0 195.9 L16.7 195.8 L19.4 195.8 L22.0 195.8 L24.7 195.7 L27.4 195.7 L30.1 195.7 L32.8 195.6 L35.4 195.6 L38.1 195.5 L40.8 195.4 L43.5 195.4 L46.2 195.3 L48.8 195.2 L51.5 195.1 L54.2 195.0 L56.9 194.8 L59.6 194.7 L62.2 194.5 L64.9 194.4 L67.6 194.2 L70.3 194.0 L73.0 193.7 L75.6 193.5 L78.3 193.2 L81.0 192.9 L83.7 192.5 L86.4 192.1 L89.0 191.7 L91.7 191.3 L94.4 190.8 L97.1 190.2 L99.8 189.7 L102.4 189.0 L105.1 188.4 L107.8 187.6 L110.5 186.9 L113.2 186.0 L115.8 185.1 L118.5 184.1 L121.2 183.1 L123.9 182.0 L126.6 180.8 L129.2 179.5 L131.9 178.2 L134.6 176.7 L137.3 175.2 L140.0 173.6 L142.6 171.9 L145.3 170.2 L148.0 168.3 L150.7 166.3 L153.4 164.2 L156.0 162.1 L158.7 159.8 L161.4 157.5 L164.1 155.0 L166.8 152.5 L169.4 149.9 L172.1 147.1 L174.8 144.3 L177.5 141.4 L180.2 138.5 L182.8 135.4 L185.5 132.3 L188.2 129.1 L190.9 125.9 L193.6 122.6 L196.2 119.2 L198.9 115.9 L201.6 112.4 L204.3 109.0 L207.0 105.6 L209.6 102.1 L212.3 98.7 L215.0 95.2 L217.7 91.8 L220.4 88.5 L223.0 85.1 L225.7 81.9 L228.4 78.7 L231.1 75.6 L233.8 72.6 L236.4 69.7 L239.1 66.9 L241.8 64.2 L244.5 61.7 L247.2 59.3 L249.8 57.0 L252.5 55.0 L255.2 53.1 L257.9 51.4 L260.6 49.8 L263.2 48.5 L265.9 47.3 L268.6 46.4 L271.3 45.7 L274.0 45.1 L276.6 44.8 L279.3 44.7 L282.0 44.9 L284.7 45.2 L287.4 45.7 L290.0 46.5 L292.7 47.5 L295.4 48.6 L298.1 50.0 L300.8 51.5 L303.4 53.3 L306.1 55.2 L308.8 57.3 L311.5 59.5 L314.2 61.9 L316.8 64.5 L319.5 67.2 L322.2 70.0 L324.9 72.9 L327.6 75.9 L330.2 79.0 L332.9 82.2 L335.6 85.5 L338.3 88.8 L341.0 92.2 L343.6 95.6 L346.3 99.0 L349.0 102.5 L351.7 105.9 L354.4 109.4 L357.0 112.8 L359.7 116.2 L362.4 119.6 L365.1 122.9 L367.8 126.2 L370.4 129.5 L373.1 132.6 L375.8 135.8 L378.5 138.8 L381.2 141.8 L383.8 144.6 L386.5 147.4 L389.2 150.2 L391.9 152.8 L394.6 155.3 L397.2 157.7 L399.9 160.1 L402.6 162.3 L405.3 164.5 L408.0 166.5 L410.6 168.5 L413.3 170.3 L416.0 172.1 L418.7 173.8 L421.4 175.4 L424.0 176.9 L426.7 178.3 L429.4 179.7 L432.1 180.9 L434.8 182.1 L437.4 183.2 L440.1 184.2 L442.8 185.2 L445.5 186.1 L448.2 186.9 L450.8 187.7 L453.5 188.4 L456.2 189.1 L458.9 189.7 L461.6 190.3 L464.2 190.8 L466.9 191.3 L469.6 191.8 L472.3 192.2 L475.0 192.5 L477.6 192.9 L480.3 193.2 L483.0 193.5 L485.7 193.7 L488.4 194.0 L491.0 194.2 L493.7 194.4 L496.4 194.6 L499.1 194.7 L501.8 194.9 L504.4 195.0 L507.1 195.1 L509.8 195.2 L512.5 195.3 L515.2 195.4 L517.8 195.4 L520.5 195.5 L523.2 195.6 L525.9 195.6 L528.6 195.7 L531.2 195.7 L533.9 195.7 L536.6 195.8 L539.3 195.8 L542.0 195.8 L544.6 195.9 L547.3 195.9 L550.0 195.9"/>
+<line class="axis" x1="14" x2="550" y1="196.0" y2="196.0"/>
+<text class="tick" x="83.5" y="210.0" text-anchor="middle">55</text>
+<text class="tick" x="182.7" y="210.0" text-anchor="middle">60</text>
+<text class="tick" x="282.0" y="210.0" text-anchor="middle">65</text>
+<text class="tick" x="381.3" y="210.0" text-anchor="middle">70</text>
+<text class="tick" x="480.5" y="210.0" text-anchor="middle">75</text>
+<line class="cc-mean" x1="279.2" x2="279.2" y1="26" y2="196.0"/>
+<text class="tick" x="279.2" y="20" text-anchor="middle">E = 64.86</text>
+<line class="cc-cut" x1="331.6" x2="331.6" y1="36" y2="196.0"/>
+<text class="cc-cutlab" x="331.6" y="223.0" text-anchor="middle">67.5</text>
+<line class="cc-cut" x1="226.7" x2="226.7" y1="36" y2="196.0"/>
+<text class="cc-cutlab" x="226.7" y="223.0" text-anchor="middle">62.22</text>
+<text class="lbl" x="550" y="34" text-anchor="end">곡선의 꼬리 넓이 p = .461</text>
+</svg></div>
+<figcaption><span class="cc-key"><i class="k-bar"></i>회색 막대: 가장자리 합(115, 96, 119, 92)을 고정했을 때 "주간 · 차대사람" 칸이 가질 수 있는 값과 그 정확한 확률. 진한 막대는 관측(68)만큼 또는 더 극단인 값이고, 그 합이 정확한 \(p = .405\)(Fisher 정확검정과 같다)다.</span>
+<span class="cc-key"><i class="k-area"></i>파란 곡선과 주황 넓이: \(\chi^2\) 검정이 쓰는 매끄러운 근사. 주황으로 칠한 넓이가 \(\chi^2\)의 \(p\)값이다. 점선은 기대값 64.86에서 같은 거리만큼 떨어진 양쪽 경계다.</span></figcaption>
+</figure>
+<p><strong>어떻게 하나.</strong> 칸마다 \(|O - E|\)에서 막대 폭의 절반인 0.5를 뺀 뒤 제곱한다. 2 × 2 표에서는 가장자리 합이 정해져 있어 한 칸이 1 움직이면 네 칸이 모두 1씩 함께 움직이므로, 네 칸에서 똑같이 0.5를 뺀다.</p>
+<div class="readout math">\[X^2_{\text{Yates}} = \sum \frac{(|O - E| - 0.5)^2}{E} = \frac{N\,(|ad - bc| - N/2)^2}{(a+b)(c+d)(a+c)(b+d)}\]</div>
+<div class="scroll"><table class="stat">
+<caption>표 4-4. 주야 × 보행자사고: 연속성 수정 전후</caption>
+<thead><tr><th></th><th>칸마다 \(|O - E|\)</th><th>\(\chi^2(1)\)</th><th>\(p\)</th></tr></thead>
+<tbody>
+<tr><td>보정 없음</td><td>3.14</td><td>0.77</td><td>.381</td></tr>
+<tr><td>Yates 보정</td><td>3.14 − 0.5 = 2.64</td><td>0.54</td><td>.461</td></tr>
+<tr><td>정확한 분포 (막대의 합, Fisher)</td><td></td><td></td><td>.405</td></tr>
+</tbody></table></div>
+<p><strong>효과와 주의.</strong> 이 표에서 정확한 \(p\)는 .405다. 보정 없는 값(.381)은 조금 작고, Yates 보정값(.461)은 조금 크다. 보정은 \(\chi^2\)를 줄이고 \(p\)를 키우는 쪽으로만 작용해 검정을 <strong>보수적</strong>으로 만든다. 그래서 지나치게 보수적이라는 비판도 있다(Campbell, 2007). 표본이 크면 두 값의 차이가 거의 없고, 기대도수가 작은 칸이 있으면 보정보다 Fisher 정확검정(<a href="#fisher">06</a>)을 쓴다. R의 <code>chisq.test()</code>는 2 × 2 표에만 기본으로 보정하고(<code>correct = FALSE</code>로 끈다), \(|O - E|\)가 0.5보다 작으면 그만큼만 빼서 차이의 부호가 뒤집히지 않게 한다. 그래서 프롬프트는 보정한 결과와 하지 않은 결과를 모두 받게 하고, 보고할 때 어느 쪽인지 밝힌다.</p>
+</details>
 <p>보행자 사고의 비율은 주간이 6.0%p 높지만, Yates 보정 \(\chi^2(1,\ N = 211) = 0.54\), \(p = .461\)(보정 없이 0.77, \(p = .381\))로 유의하지 않다. 두 비율 차이의 95% 신뢰구간은 [−.084, .204]로, 야간이 8%p 높은 경우부터 주간이 20%p 높은 경우까지를 모두 품는다. "차이가 없다"가 아니라 "이 표본 크기로는 차이를 가려낼 수 없다"로 읽는다. </p>
 
 <h4>상대위험률: 통계 분석 의견에 쓰는 비율의 비</h4>
@@ -826,8 +1103,6 @@ ggsave("output/gof_month.png", p_month, width = 6, height = 4, dpi = 300)</pre><
 <p>이 표에서는 상대위험률 1.11 [0.87, 1.42], 오즈비 1.28 [0.74, 2.21], \(\varphi = .06\)이다(대괄호는 95% 신뢰구간). \(\varphi^2 \times 211\)이 보정 없는 \(\chi^2\) 0.77과 같다. 상대위험률의 신뢰구간은 로그 척도에서 구해 되돌린다.</p>
 <div class="readout math">\[\exp\!\left(\ln RR \pm 1.96\sqrt{\tfrac{1}{a} - \tfrac{1}{a+b} + \tfrac{1}{c} - \tfrac{1}{c+d}}\right) = [0.87,\ 1.42]\]</div>
 </details>
-<div class="callout"><p><strong>연속성 보정 (LSR 12.3).</strong> 2 × 2 표에서 R은 기본으로 Yates 보정을 적용해 각 칸의 \(|O-E|\)에서 0.5를 뺀다. 이산분포를 연속 \(\chi^2\)로 근사할 때 생기는 차이를 줄이려는 것이지만, 대체로 검정을 보수적으로 만든다. 그래서 프롬프트는 보정한 결과와 하지 않은 결과를 모두 받게 하고, 보고할 때 어느 쪽인지 밝힌다.</p></div>
-
 <div class="lab" id="lab-22">
   <div class="lab-head"><strong>2 × 2 분할표 계산기</strong><span>칸 값을 바꾸면 기대도수 · \(\chi^2\) · Fisher \(p\) · 효과크기가 다시 계산된다</span></div>
   <div class="lab-body">
@@ -952,15 +1227,6 @@ ggsave("output/ind_type_bar.png", p_type, width = 6, height = 4, dpi = 300)</pre
 <div class="section-head"><span class="section-num">05</span><h2>동질성 검정: 사전 동질성과 공분산분석</h2></div>
 <h3>연구에서 동질성 검정을 쓰는 자리</h3>
 <p>실험·유사실험 연구의 논문은 결과를 보기 전에 "대상자의 일반적 특성과 사전 동질성"이라는 표를 먼저 둔다. 처치 전의 실험군과 대조군이 비슷했는지 보여, 뒤에 나올 집단 차이를 처치 덕분으로 읽어도 되는지 판단하게 하는 표다. 집단 크기는 설계가 정했으므로 범주형 특성(성별, 학력, 복용 여부 등)은 <strong>동질성 \(\chi^2\) 검정</strong>으로 본다. 기대도수가 5 미만인 칸이 많으면 Fisher 정확검정을 쓴다. 연속형 특성과 사전 점수는 독립표본 \(t\) 검정(집단이 셋 이상이면 분산분석)으로 본다.</p>
-<div class="flow" aria-label="사전 동질성 분석 흐름">
-  <span class="step">일반적 특성 · 사전 점수</span><span class="arr">→</span>
-  <span class="step">사전 동질성 검정</span><span class="arr">→</span>
-  <span class="step">동질함: 사후 점수 비교 (\(t\) 검정, 분산분석)</span>
-  <span class="arr">/</span>
-  <span class="step">동질하지 않음: 그 특성을 맞춘 뒤 비교 (공분산분석, ANCOVA)</span>
-</div>
-<div class="callout"><p><strong>공변량(covariate)이란.</strong> 연구에서 알고 싶은 것은 집단(처치)의 효과다. 그런데 결과에는 처치 말고도 영향을 주는 변수가 있다. 그 가운데 <strong>처치 전에 이미 정해져 있고 결과와 관련이 있는 변수</strong>를 공변량이라 한다. 이 절의 예에서는 치료 전 우울 점수와 항우울제 복용 여부가 공변량이다.</p>
-<p>공변량은 효과를 알고 싶은 변수가 아니라, 집단을 <strong>공정하게 비교하려고 맞춰 주는</strong> 변수다. 공변량이 두 집단에서 다르면, 결과의 차이 가운데 일부는 처치가 아니라 그 출발선의 차이 때문일 수 있다. 사전 점수는 두 집단이 비슷하더라도 공변량으로 넣는 경우가 많다. 사후 점수의 상당 부분이 사전 점수로 설명되어, 그만큼 우연에 의한 흔들림이 줄고 처치의 차이가 더 잘 보이기 때문이다.</p></div>
 
 <h3>예제: 우울증 컴퓨터 인지행동치료 임상시험</h3>
 <p>Beat the Blues(BtheB) 시험은 영국 일반의원의 우울증 환자 100명을 일반 치료(TAU)와, 일반 치료에 컴퓨터 대화형 인지행동치료를 더한 집단(BtheB)에 무작위배정한 실제 임상시험이다(Proudfoot 외, 2003). 결과변수는 Beck 우울척도(BDI, 높을수록 우울)다. R 패키지 HSAUR3에 들어 있다.</p>
@@ -969,13 +1235,72 @@ ggsave("output/ind_type_bar.png", p_type, width = 6, height = 4, dpi = 300)</pre
 <tbody>
 <tr><td><code>treatment</code></td><td>배정된 집단: TAU, BtheB</td><td>집단(설계)</td></tr>
 <tr><td><code>drug</code></td><td>항우울제 복용: No, Yes</td><td>일반적 특성 (범주형)</td></tr>
-<tr><td><code>length</code></td><td>현재 우울 삽화의 기간: &lt;6m, &gt;6m</td><td>일반적 특성 (범주형)</td></tr>
+<tr><td><code>length</code></td><td>현재 우울 삽화(depressive episode, 우울 증상이 이어지는 한 시기)의 기간. 지금 겪고 있는 우울 시기가 시작된 지 6개월 미만(&lt;6m)인가, 6개월 이상(&gt;6m)인가</td><td>일반적 특성 (범주형)</td></tr>
 <tr><td><code>bdi.pre</code></td><td>치료 전 BDI</td><td>사전 점수 (연속형)</td></tr>
 <tr><td><code>bdi.2m</code></td><td>2개월 뒤 BDI. TAU 3명 결측</td><td>결과</td></tr>
 </tbody></table></div>
 
+<h3>동질성 검정의 검정통계량: 공통 비율에서 출발한다</h3>
+<p>항우울제 복용으로 동질성 검정의 \(\chi^2\)를 칸마다 계산해 본다. 독립성 검정(<a href="#independence">04</a>)은 두 변수의 비율을 <em>곱해서</em> 기대도수를 만들었다. 동질성 검정은 "두 집단의 비율이 같다"는 영가설에서 출발하므로 <em>공통 비율</em>을 먼저 추정한다.</p>
+<ol class="steps-plain">
+<li><strong>영가설을 비율로 쓴다.</strong> TAU와 BtheB의 복용 비율이 같다: \(p_{\text{TAU}} = p_{\text{BtheB}} = p\).</li>
+<li><strong>공통 비율을 추정한다.</strong> 영가설이 맞다면 두 집단은 같은 비율을 가지므로, 두 집단을 합쳐 추정한다. \(\hat p = 44/100 = .44\)(복용하지 않음 .56).</li>
+<li><strong>집단마다 기대도수를 구한다.</strong> 공통 비율을 각 집단의 크기에 곱한다. TAU의 복용 \(48 \times .44 = 21.12\), BtheB의 복용 \(52 \times .44 = 22.88\).</li>
+<li><strong>칸마다 벗어난 정도를 재고 모두 더한다.</strong> \((O - E)^2 / E\)를 네 칸에서 구해 더한다.</li>
+<li><strong>자유도를 정한다.</strong> 집단마다 크기가 정해져 있어 각 집단에서 \(c - 1 = 1\)개의 비율이 자유롭다(두 집단이면 2). 여기서 자료로 추정한 공통 비율 1개만큼 줄어 \(2 - 1 = 1\)이다.</li>
+</ol>
 <div class="scroll"><table class="stat">
-<caption>표 5-1. 대상자의 일반적 특성과 사전 동질성 (\(N = 100\))</caption>
+<caption>표 5-1. 항우울제 복용의 동질성 \(\chi^2\) 계산 (\(N = 100\))</caption>
+<thead><tr><th>칸</th><th>\(O\)</th><th>\(E\) = 집단 크기 × 공통 비율</th><th>\(O - E\)</th><th>\((O - E)^2 / E\)</th></tr></thead>
+<tbody>
+<tr><td>TAU · 복용</td><td>14</td><td>48 × .44 = 21.12</td><td>−7.12</td><td>2.400</td></tr>
+<tr><td>TAU · 복용 안 함</td><td>34</td><td>48 × .56 = 26.88</td><td>7.12</td><td>1.886</td></tr>
+<tr><td>BtheB · 복용</td><td>30</td><td>52 × .44 = 22.88</td><td>7.12</td><td>2.216</td></tr>
+<tr><td>BtheB · 복용 안 함</td><td>22</td><td>52 × .56 = 29.12</td><td>−7.12</td><td>1.741</td></tr>
+<tr><td><strong>합</strong></td><td>100</td><td>100</td><td>0</td><td><strong>8.243</strong></td></tr>
+</tbody></table></div>
+<p>보정 없는 \(\chi^2(1) = 8.24\), Yates 보정을 하면 7.13이 된다. 이 값이 다음 표 5-2의 사전 동질성 표에 들어간다.</p>
+<div class="readout math">\[E_{ij} = n_{i\cdot} \times \hat p_j = n_{i\cdot} \times \frac{n_{\cdot j}}{N}, \qquad \mathit{df} = r(c - 1) - (c - 1) = (r-1)(c-1)\]</div>
+<figure class="eqpair" aria-label="같은 분할표를 독립성과 동질성 두 시선으로 계산한 기대도수">
+<div class="eqside">
+<p class="eqhead"><b>독립성의 시선</b><span>두 변수의 비율을 <em>곱해</em> 칸의 확률을 만든다</span></p>
+<div class="readout math">\[E_{ij} = N \times \frac{n_{i\cdot}}{N} \times \frac{n_{\cdot j}}{N}\]</div>
+<div class="scroll"><table class="stat ctab etab"><caption>기대도수 = 총합 × 행 비율 × 열 비율</caption>
+<thead><tr><th></th><th>복용</th><th>복용 안 함</th><th class="mg">행 합</th></tr></thead>
+<tbody>
+<tr><th>TAU</th><td class="ecell"><span class="ef">100 × .48 × .44</span><b>21.12</b></td><td class="ecell"><span class="ef">100 × .48 × .56</span><b>26.88</b></td><td class="mg">48</td></tr>
+<tr><th>BtheB</th><td class="ecell"><span class="ef">100 × .52 × .44</span><b>22.88</b></td><td class="ecell"><span class="ef">100 × .52 × .56</span><b>29.12</b></td><td class="mg">52</td></tr>
+<tr><th class="mg">열 합</th><td class="mg">44</td><td class="mg">56</td><td class="mg tot">100</td></tr>
+<tr class="efoot"><th>쓰는 비율</th><td colspan="3">행 비율 .48(48/100), .52(52/100) · 열 비율 .44(44/100), .56(56/100)</td></tr>
+</tbody></table></div>
+</div>
+<div class="eqside">
+<p class="eqhead"><b>동질성의 시선</b><span>두 집단에 <em>공통인</em> 비율을 집단 크기에 곱한다</span></p>
+<div class="readout math">\[E_{ij} = n_{i\cdot} \times \hat p_j, \qquad \hat p_j = \frac{n_{\cdot j}}{N}\]</div>
+<div class="scroll"><table class="stat ctab etab"><caption>기대도수 = 집단 크기 × 공통 비율</caption>
+<thead><tr><th></th><th>복용</th><th>복용 안 함</th><th class="mg">행 합</th></tr></thead>
+<tbody>
+<tr><th>TAU</th><td class="ecell"><span class="ef">48 × .44</span><b>21.12</b></td><td class="ecell"><span class="ef">48 × .56</span><b>26.88</b></td><td class="mg">48</td></tr>
+<tr><th>BtheB</th><td class="ecell"><span class="ef">52 × .44</span><b>22.88</b></td><td class="ecell"><span class="ef">52 × .56</span><b>29.12</b></td><td class="mg">52</td></tr>
+<tr><th class="mg">열 합</th><td class="mg">44</td><td class="mg">56</td><td class="mg tot">100</td></tr>
+<tr class="efoot"><th>쓰는 비율</th><td colspan="3">공통 비율 복용 .44(44/100), 복용 안 함 .56(56/100)</td></tr>
+</tbody></table></div>
+</div>
+<figcaption>같은 분할표(BtheB 시험의 치료 집단 × 항우울제 복용)를 두 시선으로 계산했다. 출발한 식은 다르지만 네 칸의 기대도수가 21.12, 26.88, 22.88, 29.12로 <strong>칸마다 같다</strong>. 두 식을 정리하면 모두 \(E_{ij} = n_{i\cdot}\, n_{\cdot j} / N\), 곧 (행 합)(열 합)/\(N\)이기 때문이다. 예: \(100 \times \frac{48}{100} \times \frac{44}{100} = 48 \times \frac{44}{100} = \frac{48 \times 44}{100} = 21.12\).</figcaption>
+</figure>
+<div class="flow" aria-label="기대도수가 같으면 카이제곱이 같다">
+  <span class="step">관측 \(O_{ij}\)는 같은 표</span><span class="arr">+</span>
+  <span class="step">기대 \(E_{ij}\)가 칸마다 같다</span><span class="arr">→</span>
+  <span class="step">칸마다 \((O - E)^2/E\)가 같다</span><span class="arr">→</span>
+  <span class="step">합 \(\chi^2 = 8.24\)로 같다</span>
+</div>
+<div class="callout"><p><strong>독립성 검정과 같은 \(\chi^2\)가 되는 이유.</strong> 공통 비율 \(\hat p_j\)는 \(j\)열의 합을 전체로 나눈 것(\(n_{\cdot j}/N\))이다. 그래서 집단 크기 × 공통 비율은 \(n_{i\cdot} \times n_{\cdot j} / N\), 곧 (행 합)(열 합)/\(N\)이 되어 04의 독립성 검정과 <strong>같은 기대도수</strong>가 나온다(위 두 표). 기대도수가 같으니 칸마다의 몫도, 그 합인 \(\chi^2\)도 같다. 자유도도 출발은 다르지만(\(r(c-1) - (c-1)\) 대 \((rc-1) - (r-1) - (c-1)\)) 둘 다 \((r-1)(c-1)\)이다.</p>
+<p>그래서 R은 두 검정을 같은 함수(<code>chisq.test()</code>, <code>prop.test()</code>)로 계산하고 출력도 같다. 두 검정을 가르는 것은 계산이 아니라 <strong>표집 설계</strong>이고, 그에 따른 영가설과 결론의 문장이다(<a href="#ind-vs-hom">04의 비교표</a>).</p></div>
+
+<h3>사전 동질성 표 읽기</h3>
+<p>같은 방법으로 일반적 특성마다 동질성을 검정해 한 표로 모은 것이 논문의 "대상자의 일반적 특성과 사전 동질성" 표다. 범주형 특성은 동질성 \(\chi^2\) 검정으로, 연속형 사전 점수는 독립표본 \(t\) 검정으로 본다.</p>
+<div class="scroll"><table class="stat">
+<caption>표 5-2. 대상자의 일반적 특성과 사전 동질성 (\(N = 100\))</caption>
 <thead><tr><th>특성</th><th>구분</th><th>TAU (\(n = 48\))</th><th>BtheB (\(n = 52\))</th><th>검정 통계량</th><th>\(p\)</th></tr></thead>
 <tbody>
 <tr class="sig"><td rowspan="2">항우울제 복용</td><td>예</td><td>14 (29.2%)</td><td>30 (57.7%)</td><td rowspan="2">\(\chi^2(1) = 7.13\)ᵃ</td><td rowspan="2">.008</td></tr>
@@ -988,32 +1313,18 @@ ggsave("output/ind_type_bar.png", p_type, width = 6, height = 4, dpi = 300)</pre
 <p>우울 삽화 기간과 사전 BDI는 두 집단이 비슷했지만, <strong>항우울제 복용은 동질하지 않았다</strong>. BtheB 집단의 복용 비율(57.7%)이 TAU(29.2%)의 두 배에 가깝다. 무작위배정을 해도 100명쯤이면 이런 우연한 불균형이 생긴다. 복용자는 사전 BDI가 더 높았고(25.6 대 21.6) 2개월 BDI는 더 낮았다(15.9 대 17.7). 복용이 결과와 관련 있는 변수라면, 보정하지 않은 집단 차이에는 치료의 효과와 복용의 차이가 섞인다.</p>
 <p>이 표는 동질성 검정의 표 읽기도 보여 준다. 비율은 집단(행) 안에서 내고, 결론은 "두 집단의 복용 비율이 다르다"로 쓴다. "복용 여부와 집단은 관련이 있다"는 독립성의 말투이고, "복용자 가운데 BtheB의 비율이 68%다"(30/44)는 집단 크기를 설계가 정한 표에서는 뜻이 없는 비율이다.</p>
 
-<h3>동질성 검정의 검정통계량: 공통 비율에서 출발한다</h3>
-<p>항우울제 복용으로 동질성 검정의 \(\chi^2\)를 칸마다 계산해 본다. 독립성 검정(<a href="#independence">04</a>)은 두 변수의 비율을 <em>곱해서</em> 기대도수를 만들었다. 동질성 검정은 "두 집단의 비율이 같다"는 영가설에서 출발하므로 <em>공통 비율</em>을 먼저 추정한다.</p>
-<ol class="steps-plain">
-<li><strong>영가설을 비율로 쓴다.</strong> TAU와 BtheB의 복용 비율이 같다: \(p_{\text{TAU}} = p_{\text{BtheB}} = p\).</li>
-<li><strong>공통 비율을 추정한다.</strong> 영가설이 맞다면 두 집단은 같은 비율을 가지므로, 두 집단을 합쳐 추정한다. \(\hat p = 44/100 = .44\)(복용하지 않음 .56).</li>
-<li><strong>집단마다 기대도수를 구한다.</strong> 공통 비율을 각 집단의 크기에 곱한다. TAU의 복용 \(48 \times .44 = 21.12\), BtheB의 복용 \(52 \times .44 = 22.88\).</li>
-<li><strong>칸마다 벗어난 정도를 재고 모두 더한다.</strong> \((O - E)^2 / E\)를 네 칸에서 구해 더한다.</li>
-<li><strong>자유도를 정한다.</strong> 집단마다 크기가 정해져 있어 각 집단에서 \(c - 1 = 1\)개의 비율이 자유롭다(두 집단이면 2). 여기서 자료로 추정한 공통 비율 1개만큼 줄어 \(2 - 1 = 1\)이다.</li>
-</ol>
-<div class="scroll"><table class="stat">
-<caption>표 5-2. 항우울제 복용의 동질성 \(\chi^2\) 계산 (\(N = 100\))</caption>
-<thead><tr><th>칸</th><th>\(O\)</th><th>\(E\) = 집단 크기 × 공통 비율</th><th>\(O - E\)</th><th>\((O - E)^2 / E\)</th></tr></thead>
-<tbody>
-<tr><td>TAU · 복용</td><td>14</td><td>48 × .44 = 21.12</td><td>−7.12</td><td>2.400</td></tr>
-<tr><td>TAU · 복용 안 함</td><td>34</td><td>48 × .56 = 26.88</td><td>7.12</td><td>1.886</td></tr>
-<tr><td>BtheB · 복용</td><td>30</td><td>52 × .44 = 22.88</td><td>7.12</td><td>2.216</td></tr>
-<tr><td>BtheB · 복용 안 함</td><td>22</td><td>52 × .56 = 29.12</td><td>−7.12</td><td>1.741</td></tr>
-<tr><td><strong>합</strong></td><td>100</td><td>100</td><td>0</td><td><strong>8.243</strong></td></tr>
-</tbody></table></div>
-<p>보정 없는 \(\chi^2(1) = 8.24\), Yates 보정을 하면 표 5-1의 7.13이 된다.</p>
-<div class="readout math">\[E_{ij} = n_{i\cdot} \times \hat p_j = n_{i\cdot} \times \frac{n_{\cdot j}}{N}, \qquad \mathit{df} = r(c - 1) - (c - 1) = (r-1)(c-1)\]</div>
-<div class="callout"><p><strong>독립성 검정과 같은 \(\chi^2\)가 되는 이유.</strong> 공통 비율 \(\hat p_j\)는 \(j\)열의 합을 전체로 나눈 것(\(n_{\cdot j}/N\))이다. 그래서 집단 크기 × 공통 비율은 \(n_{i\cdot} \times n_{\cdot j} / N\), 곧 (행 합)(열 합)/\(N\)이 되어 04의 독립성 검정과 <strong>같은 기대도수</strong>가 나온다. 예: \(48 \times 44/100 = 21.12\). 기대도수가 같으니 칸마다의 몫도, 그 합인 \(\chi^2\)도 같다. 자유도도 출발은 다르지만(\(r(c-1) - (c-1)\) 대 \((rc-1) - (r-1) - (c-1)\)) 둘 다 \((r-1)(c-1)\)이다.</p>
-<p>그래서 R은 두 검정을 같은 함수(<code>chisq.test()</code>, <code>prop.test()</code>)로 계산하고 출력도 같다. 두 검정을 가르는 것은 계산이 아니라 <strong>표집 설계</strong>이고, 그에 따른 영가설과 결론의 문장이다(<a href="#independence">04</a>의 비교표).</p></div>
-
 <h3>동질성을 통과하지 못하면: 공분산분석(ANCOVA)</h3>
+<p>표 5-2에서 항우울제 복용은 두 집단이 동질하지 않았다. 사전 동질성 검정의 결과에 따라 다음 분석이 갈린다.</p>
+<div class="flow" aria-label="사전 동질성 분석 흐름">
+  <span class="step">일반적 특성 · 사전 점수</span><span class="arr">→</span>
+  <span class="step">사전 동질성 검정</span><span class="arr">→</span>
+  <span class="step">동질함: 사후 점수 비교 (\(t\) 검정, 분산분석)</span>
+  <span class="arr">/</span>
+  <span class="step">동질하지 않음: 그 특성을 맞춘 뒤 비교 (공분산분석, ANCOVA)</span>
+</div>
 <p>두 반의 기말고사 평균을 비교한다고 하자. 한 반에 원래 공부를 잘하던 학생이 더 많았다면, 기말 점수의 차이를 그대로 수업 방법의 효과라고 할 수 없다. 이럴 때는 "중간고사 점수가 같은 학생끼리 견주면 차이가 얼마인가"를 묻는 것이 공정하다. 공분산분석이 하는 일이 이것이다.</p>
+<div class="callout"><p><strong>공변량(covariate)이란.</strong> 연구에서 알고 싶은 것은 집단(처치)의 효과다. 그런데 결과에는 처치 말고도 영향을 주는 변수가 있다. 그 가운데 <strong>처치 전에 이미 정해져 있고 결과와 관련이 있는 변수</strong>를 공변량이라 한다. 위 예의 중간고사 점수가 그렇고, BtheB 시험에서는 치료 전 우울 점수와 동질하지 않았던 항우울제 복용 여부가 공변량이다.</p>
+<p>공변량은 효과를 알고 싶은 변수가 아니라, 집단을 <strong>공정하게 비교하려고 맞춰 주는</strong> 변수다. 공변량이 두 집단에서 다르면, 결과의 차이 가운데 일부는 처치가 아니라 그 출발선의 차이 때문일 수 있다. 사전 점수는 두 집단이 비슷하더라도 공변량으로 넣는 경우가 많다. 사후 점수의 상당 부분이 사전 점수로 설명되어, 그만큼 우연에 의한 흔들림이 줄고 처치의 차이가 더 잘 보이기 때문이다.</p></div>
 <div class="flow" aria-label="공분산분석이 하는 일">
   <span class="step">관측한 평균 차이</span><span class="arr">=</span>
   <span class="step">처치의 효과</span><span class="arr">+</span>
@@ -1514,6 +1825,7 @@ chisq.test(tab22, correct = FALSE)   # 비교: Pearson χ² (보정 없음)</pre
 <li>Proudfoot, J., Goldberg, D., Mann, A., Everitt, B., Marks, I., &amp; Gray, J. A. (2003). Computerized, interactive, multimedia cognitive-behavioural program for anxiety and depression in general practice. <em>Psychological Medicine, 33</em>(2), 217–227.</li>
 <li>Senn, S. (1994). Testing for baseline balance in clinical trials. <em>Statistics in Medicine, 13</em>(17), 1715–1726.</li>
 <li>Weiling, F. (1986). What about R. A. Fisher's statement of the "too good" data of J. G. Mendel's Pisum paper? <em>Journal of Heredity, 77</em>(4), 281–283. https://doi.org/10.1093/oxfordjournals.jhered.a110239</li>
+<li>Yates, F. (1934). Contingency tables involving small numbers and the χ² test. <em>Supplement to the Journal of the Royal Statistical Society, 1</em>(2), 217–235.</li>
 </ol>
 <h3>데이터 출처</h3>
 <ul>
